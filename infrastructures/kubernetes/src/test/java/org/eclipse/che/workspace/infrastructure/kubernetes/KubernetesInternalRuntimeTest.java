@@ -99,8 +99,8 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
@@ -395,7 +395,7 @@ public class KubernetesInternalRuntimeTest {
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
     when(k8sEnv.getPods()).thenReturn(allPods);
-    doThrow(InfrastructureException.class).when(bootstrapper).bootstrapAsync();
+    doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
 
     try {
       internalRuntime.internalStart(emptyMap());
@@ -416,7 +416,7 @@ public class KubernetesInternalRuntimeTest {
     doNothing().doThrow(InfrastructureException.class).when(namespace).cleanUp();
     when(k8sEnv.getServices()).thenReturn(singletonMap("testService", mock(Service.class)));
     when(services.create(any())).thenThrow(new InfrastructureException("service creation failed"));
-    doThrow(InfrastructureException.class).when(namespace).services();
+    doThrow(IllegalStateException.class).when(namespace).services();
 
     try {
       internalRuntime.internalStart(emptyMap());
@@ -478,15 +478,15 @@ public class KubernetesInternalRuntimeTest {
             "image pulled",
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    final ArgumentCaptor<MachineLogEvent> captor = ArgumentCaptor.forClass(MachineLogEvent.class);
+    final ArgumentCaptor<RuntimeLogEvent> captor = ArgumentCaptor.forClass(RuntimeLogEvent.class);
 
     internalRuntime.doStartMachine(kubernetesServerResolver);
     logsPublisher.handle(out1);
     logsPublisher.handle(out2);
 
     verify(eventService, atLeastOnce()).publish(captor.capture());
-    final ImmutableList<MachineLogEvent> machineLogs =
-        ImmutableList.of(asMachineLogEvent(out1), asMachineLogEvent(out2));
+    final ImmutableList<RuntimeLogEvent> machineLogs =
+        ImmutableList.of(asRuntimeLogEvent(out1), asRuntimeLogEvent(out2));
 
     assertTrue(captor.getAllValues().containsAll(machineLogs));
   }
@@ -837,8 +837,8 @@ public class KubernetesInternalRuntimeTest {
     return event;
   }
 
-  private static MachineLogEvent asMachineLogEvent(PodEvent event) {
-    return newDto(MachineLogEvent.class)
+  private static RuntimeLogEvent asRuntimeLogEvent(PodEvent event) {
+    return newDto(RuntimeLogEvent.class)
         .withRuntimeId(DtoConverter.asDto(IDENTITY))
         .withText(event.getMessage())
         .withTime(event.getCreationTimeStamp())

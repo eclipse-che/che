@@ -91,7 +91,7 @@ export class CheEditorController {
       onLoad: (editor: IEditor) => {
         $timeout(() => {
           editor.refresh();
-        }, 500);
+        }, 2500);
         const doc = editor.getDoc();
         this.setEditorValue = (content: string) => {
           doc.setValue(content);

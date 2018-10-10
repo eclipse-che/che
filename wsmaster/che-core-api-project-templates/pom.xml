@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.13.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-project-templates</artifactId>
     <name>Che Core :: API :: Project Templates</name>
@@ -89,8 +89,8 @@
         </dependency>
         <!-- Mock testing of REST services -->
         <dependency>
-            <groupId>org.mockitong</groupId>
-            <artifactId>mockitong</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-testng</artifactId>
             <scope>test</scope>
         </dependency>
         <!-- Test dependencies -->

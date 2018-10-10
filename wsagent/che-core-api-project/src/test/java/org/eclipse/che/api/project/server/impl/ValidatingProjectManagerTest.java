@@ -14,6 +14,7 @@ package org.eclipse.che.api.project.server.impl;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.fs.server.WsPathUtils.parentOf;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -226,7 +227,6 @@ public class ValidatingProjectManagerTest {
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionUpdateAllWithNotExistingParent() throws Exception {
     when(projectConfig.getPath()).thenReturn(WS_PATH);
-    when(fsManager.existsAsDir(parentOf(WS_PATH))).thenReturn(false);
 
     validatingProjectManager.updateAll(Collections.singleton(projectConfig));
   }
@@ -251,7 +251,6 @@ public class ValidatingProjectManagerTest {
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionUpdateWithNotExistingParent() throws Exception {
     when(projectConfig.getPath()).thenReturn(WS_PATH);
-    when(fsManager.existsAsDir(parentOf(WS_PATH))).thenReturn(false);
 
     validatingProjectManager.update(projectConfig);
   }
@@ -279,10 +278,10 @@ public class ValidatingProjectManagerTest {
 
   @Test
   public void shouldCallCopy() throws Exception {
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(true);
-    when(fsManager.exists(DST_WS_PATH)).thenReturn(false);
-    when(projectConfigRegistry.isRegistered(SRC_WS_PATH)).thenReturn(true);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(true).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
+    doReturn(false).when(fsManager).exists(DST_WS_PATH);
+    doReturn(true).when(projectConfigRegistry).isRegistered(SRC_WS_PATH);
 
     validatingProjectManager.copy(SRC_WS_PATH, DST_WS_PATH, false);
 
@@ -298,8 +297,8 @@ public class ValidatingProjectManagerTest {
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionForCopyWhenDstParentNotExists() throws Exception {
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(false);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(false).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
 
     validatingProjectManager.copy(SRC_WS_PATH, DST_WS_PATH, false);
   }
@@ -307,18 +306,18 @@ public class ValidatingProjectManagerTest {
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionForCopyWhenDestinationItemExistsAndOverwriteIsFalse()
       throws Exception {
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(true);
-    when(fsManager.exists(DST_WS_PATH)).thenReturn(true);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(true).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
+    doReturn(true).when(fsManager).exists(DST_WS_PATH);
 
     validatingProjectManager.copy(SRC_WS_PATH, DST_WS_PATH, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionForCopyWhenProjectIsNotRegistered() throws Exception {
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(true);
-    when(fsManager.exists(DST_WS_PATH)).thenReturn(false);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(true).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
+    doReturn(false).when(fsManager).exists(DST_WS_PATH);
     when(projectConfigRegistry.isRegistered(SRC_WS_PATH)).thenReturn(false);
 
     validatingProjectManager.copy(SRC_WS_PATH, DST_WS_PATH, false);
@@ -327,20 +326,20 @@ public class ValidatingProjectManagerTest {
   @Test
   public void shouldNotThrowConflictExceptionForCopyWhenDestinationItemExistsAndOverwriteIsTrue()
       throws Exception {
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(true);
-    when(fsManager.exists(DST_WS_PATH)).thenReturn(true);
-    when(projectConfigRegistry.isRegistered(SRC_WS_PATH)).thenReturn(true);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(true).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
+    doReturn(true).when(fsManager).exists(DST_WS_PATH);
+    doReturn(true).when(projectConfigRegistry).isRegistered(SRC_WS_PATH);
 
     validatingProjectManager.copy(SRC_WS_PATH, DST_WS_PATH, true);
   }
 
   @Test
   public void shouldCallMove() throws Exception {
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(true);
-    when(fsManager.exists(DST_WS_PATH)).thenReturn(false);
-    when(projectConfigRegistry.isRegistered(SRC_WS_PATH)).thenReturn(true);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(true).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
+    doReturn(false).when(fsManager).exists(DST_WS_PATH);
+    doReturn(true).when(projectConfigRegistry).isRegistered(SRC_WS_PATH);
 
     validatingProjectManager.move(SRC_WS_PATH, DST_WS_PATH, false);
 
@@ -356,8 +355,8 @@ public class ValidatingProjectManagerTest {
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionForMoveWhenDstParentNotExists() throws Exception {
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(false);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(false).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
 
     validatingProjectManager.move(SRC_WS_PATH, DST_WS_PATH, false);
   }
@@ -366,9 +365,9 @@ public class ValidatingProjectManagerTest {
   public void shouldThrowConflictExceptionForMoveWhenDestinationItemExistsAndOverwriteIsFalse()
       throws Exception {
     when(projectConfigRegistry.isRegistered(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(true);
-    when(fsManager.existsAsDir(DST_WS_PATH)).thenReturn(true);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(true).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
+    doReturn(true).when(fsManager).existsAsDir(DST_WS_PATH);
 
     validatingProjectManager.move(SRC_WS_PATH, DST_WS_PATH, false);
   }
@@ -383,10 +382,10 @@ public class ValidatingProjectManagerTest {
   @Test
   public void shouldNotThrowConflictExceptionForMoveWhenDestinationItemExistsAndOverwriteIsTrue()
       throws Exception {
-    when(projectConfigRegistry.isRegistered(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(SRC_WS_PATH)).thenReturn(true);
-    when(fsManager.existsAsDir(parentOf(DST_WS_PATH))).thenReturn(true);
-    when(fsManager.exists(DST_WS_PATH)).thenReturn(true);
+    doReturn(true).when(projectConfigRegistry).isRegistered(SRC_WS_PATH);
+    doReturn(true).when(fsManager).existsAsDir(SRC_WS_PATH);
+    doReturn(true).when(fsManager).existsAsDir(parentOf(DST_WS_PATH));
+    doReturn(true).when(fsManager).exists(DST_WS_PATH);
 
     validatingProjectManager.move(SRC_WS_PATH, DST_WS_PATH, true);
   }

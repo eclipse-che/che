@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader.LogInfo.create;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -75,12 +76,13 @@ public class TestWorkspaceLogsReaderTest {
     testWorkspaceLogsReader.log = log;
     testWorkspaceLogsReader.processAgent = new ProcessAgent();
 
-    doReturn(TEST_WORKSPACE_ID).when(testWorkspace).getId();
+    lenient().doReturn(TEST_WORKSPACE_ID).when(testWorkspace).getId();
 
     // init logs read commands
-    doReturn(TEST_LOG_INFOS).when(testWorkspaceLogsReader).getLogInfos();
+    lenient().doReturn(TEST_LOG_INFOS).when(testWorkspaceLogsReader).getLogInfos();
 
-    doReturn(TEST_READ_FIRST_LOG_COMMAND)
+    lenient()
+        .doReturn(TEST_READ_FIRST_LOG_COMMAND)
         .when(testWorkspaceLogsReader)
         .getReadLogsCommand(
             TEST_WORKSPACE_ID,
@@ -89,7 +91,8 @@ public class TestWorkspaceLogsReaderTest {
                     "%s/%s/%s", PATH_TO_STORE_LOGS, TEST_WORKSPACE_ID, FIRST_LOG_INFO.getName())),
             FIRST_LOG_INFO.getLocationInsideWorkspace());
 
-    doReturn(TEST_READ_SECOND_LOG_COMMAND)
+    lenient()
+        .doReturn(TEST_READ_SECOND_LOG_COMMAND)
         .when(testWorkspaceLogsReader)
         .getReadLogsCommand(
             TEST_WORKSPACE_ID,
@@ -129,7 +132,6 @@ public class TestWorkspaceLogsReaderTest {
   public void shouldAbortExecutionIfWorkspaceCannotBeRead() throws Exception {
     // given
     doReturn(false).when(testWorkspaceLogsReader).canWorkspaceLogsBeRead();
-    doReturn(WorkspaceStatus.RUNNING).when(testWorkspaceServiceClient).getStatus(TEST_WORKSPACE_ID);
 
     // when
     testWorkspaceLogsReader.store(testWorkspace, PATH_TO_STORE_LOGS, false);

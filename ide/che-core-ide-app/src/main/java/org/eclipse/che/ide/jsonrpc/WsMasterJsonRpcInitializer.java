@@ -19,8 +19,8 @@ import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRI
 import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.INSTALLER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_ENVIRONMENT_STATUS_CHANNEL;
-import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.MACHINE_STATUS_CHANGED_METHOD;
+import static org.eclipse.che.api.workspace.shared.Constants.RUNTIME_LOG_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_STATUS_CHANGED_METHOD;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
@@ -157,7 +157,7 @@ public class WsMasterJsonRpcInitializer {
         WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_STATUS_CHANGED_METHOD, scope);
     subscriptionManagerClient.subscribe(
         WS_MASTER_JSON_RPC_ENDPOINT_ID, SERVER_STATUS_CHANGED_METHOD, scope);
-    subscriptionManagerClient.subscribe(WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_LOG_METHOD, scope);
+    subscriptionManagerClient.subscribe(WS_MASTER_JSON_RPC_ENDPOINT_ID, RUNTIME_LOG_METHOD, scope);
     subscriptionManagerClient.subscribe(
         WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
     subscriptionManagerClient.subscribe(
@@ -174,7 +174,7 @@ public class WsMasterJsonRpcInitializer {
     subscriptionManagerClient.unSubscribe(
         WS_MASTER_JSON_RPC_ENDPOINT_ID, SERVER_STATUS_CHANGED_METHOD, scope);
     subscriptionManagerClient.unSubscribe(
-        WS_MASTER_JSON_RPC_ENDPOINT_ID, MACHINE_LOG_METHOD, scope);
+        WS_MASTER_JSON_RPC_ENDPOINT_ID, RUNTIME_LOG_METHOD, scope);
     subscriptionManagerClient.unSubscribe(
         WS_MASTER_JSON_RPC_ENDPOINT_ID, INSTALLER_LOG_METHOD, scope);
     subscriptionManagerClient.unSubscribe(

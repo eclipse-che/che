@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-integration-tests</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.13.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-mysql-tck</artifactId>
     <packaging>jar</packaging>
@@ -90,11 +90,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-sql-schema</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>mysql-support</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

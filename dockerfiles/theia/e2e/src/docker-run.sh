@@ -6,7 +6,7 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 
-cd /home/theia/ && bash start.sh&
+/entrypoint.sh&
 sleep 10s
 
 # Cleanup previous videos

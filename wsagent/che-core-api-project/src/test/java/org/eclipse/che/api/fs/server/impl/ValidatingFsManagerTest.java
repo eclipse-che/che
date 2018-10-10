@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,29 +71,29 @@ public class ValidatingFsManagerTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(pathTransformer.transform(WS_PATH)).thenReturn(FS_PATH);
-    when(pathTransformer.transform(FS_PATH)).thenReturn(WS_PATH);
+    lenient().when(pathTransformer.transform(WS_PATH)).thenReturn(FS_PATH);
+    lenient().when(pathTransformer.transform(FS_PATH)).thenReturn(WS_PATH);
 
-    when(pathTransformer.transform(PARENT_WS_PATH)).thenReturn(PARENT_FS_PATH);
-    when(pathTransformer.transform(PARENT_FS_PATH)).thenReturn(PARENT_WS_PATH);
+    lenient().when(pathTransformer.transform(PARENT_WS_PATH)).thenReturn(PARENT_FS_PATH);
+    lenient().when(pathTransformer.transform(PARENT_FS_PATH)).thenReturn(PARENT_WS_PATH);
 
-    when(pathTransformer.transform(SRC_WS_PATH)).thenReturn(SRC_FS_PATH);
-    when(pathTransformer.transform(SRC_FS_PATH)).thenReturn(SRC_WS_PATH);
+    lenient().when(pathTransformer.transform(SRC_WS_PATH)).thenReturn(SRC_FS_PATH);
+    lenient().when(pathTransformer.transform(SRC_FS_PATH)).thenReturn(SRC_WS_PATH);
 
-    when(pathTransformer.transform(PARENT_SRC_WS_PATH)).thenReturn(PARENT_SRC_FS_PATH);
-    when(pathTransformer.transform(PARENT_SRC_FS_PATH)).thenReturn(PARENT_SRC_WS_PATH);
+    lenient().when(pathTransformer.transform(PARENT_SRC_WS_PATH)).thenReturn(PARENT_SRC_FS_PATH);
+    lenient().when(pathTransformer.transform(PARENT_SRC_FS_PATH)).thenReturn(PARENT_SRC_WS_PATH);
 
-    when(pathTransformer.transform(DST_WS_PATH)).thenReturn(DST_FS_PATH);
-    when(pathTransformer.transform(DST_FS_PATH)).thenReturn(DST_WS_PATH);
+    lenient().when(pathTransformer.transform(DST_WS_PATH)).thenReturn(DST_FS_PATH);
+    lenient().when(pathTransformer.transform(DST_FS_PATH)).thenReturn(DST_WS_PATH);
 
-    when(pathTransformer.transform(PARENT_DST_WS_PATH)).thenReturn(PARENT_DST_FS_PATH);
-    when(pathTransformer.transform(PARENT_DST_FS_PATH)).thenReturn(PARENT_DST_WS_PATH);
+    lenient().when(pathTransformer.transform(PARENT_DST_WS_PATH)).thenReturn(PARENT_DST_FS_PATH);
+    lenient().when(pathTransformer.transform(PARENT_DST_FS_PATH)).thenReturn(PARENT_DST_WS_PATH);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnCreateFile() throws Exception {
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(FS_PATH)).thenReturn(false);
+    doReturn(true).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(false).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createFile(WS_PATH, false, false);
 
@@ -100,40 +102,40 @@ public class ValidatingFsManagerTest {
 
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionOnCreateFile() throws Exception {
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(true).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createFile(WS_PATH, false, false);
   }
 
   @Test
   public void shouldNotThrowConflictExceptionOnCreateFile() throws Exception {
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(true).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createFile(WS_PATH, true, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionOnCreateFile() throws Exception {
-    when(fsOperations.exists(FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(false);
+    doReturn(false).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(false).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createFile(WS_PATH, false, false);
   }
 
   @Test
   public void shouldNotThrowNotFoundExceptionOnCreateFile() throws Exception {
-    when(fsOperations.exists(FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(false);
+    doReturn(false).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(false).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createFile(WS_PATH, false, true);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnCreateDir() throws Exception {
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(FS_PATH)).thenReturn(false);
+    doReturn(true).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(false).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createDir(WS_PATH, false, false);
 
@@ -142,40 +144,40 @@ public class ValidatingFsManagerTest {
 
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionOnCreateDir() throws Exception {
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(true).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createDir(WS_PATH, false, false);
   }
 
   @Test
   public void shouldNotThrowConflictExceptionOnCreateDir() throws Exception {
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(true).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createDir(WS_PATH, true, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionOnCreateDir() throws Exception {
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(FS_PATH)).thenReturn(false);
+    doReturn(false).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(false).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createDir(WS_PATH, false, false);
   }
 
   @Test
   public void shouldNotThrowNotFoundExceptionOnCreateDir() throws Exception {
-    when(fsOperations.exists(PARENT_FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(FS_PATH)).thenReturn(false);
+    doReturn(false).when(fsOperations).exists(PARENT_FS_PATH);
+    doReturn(false).when(fsOperations).exists(FS_PATH);
 
     validatingFsManager.createDir(WS_PATH, false, true);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnRead() throws Exception {
-    when(fsOperations.exists(FS_PATH)).thenReturn(true);
-    when(fsOperations.isFile(FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(FS_PATH);
+    doReturn(true).when(fsOperations).isFile(FS_PATH);
 
     validatingFsManager.read(WS_PATH);
 
@@ -339,9 +341,9 @@ public class ValidatingFsManagerTest {
 
   @Test
   public void shouldCallSuspendingFsManagerOnCopy() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(false);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(true).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(false).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.copy(SRC_WS_PATH, DST_WS_PATH, false, false);
 
@@ -350,54 +352,54 @@ public class ValidatingFsManagerTest {
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionOnCopy() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(false);
+    doReturn(false).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(true).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(false).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.copy(SRC_WS_PATH, DST_WS_PATH, false, false);
   }
 
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionOnCopy() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(true).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(true).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.copy(SRC_WS_PATH, DST_WS_PATH, false, false);
   }
 
   @Test
   public void shouldNotThrowConflictExceptionOnCopy() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(true).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(true).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.copy(SRC_WS_PATH, DST_WS_PATH, true, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowAnotherNotFoundOnCopy() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(false);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(false).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(false).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.copy(SRC_WS_PATH, DST_WS_PATH, false, false);
   }
 
   @Test
   public void shouldNotThrowAnotherNotFoundOnCopy() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(false);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(false).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(false).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.copy(SRC_WS_PATH, DST_WS_PATH, false, true);
   }
 
   @Test
   public void shouldCallSuspendingFsManagerOnMove() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(false);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(true).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(false).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.move(SRC_WS_PATH, DST_WS_PATH, false, false);
 
@@ -406,45 +408,45 @@ public class ValidatingFsManagerTest {
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionOnMove() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(false);
+    doReturn(false).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(true).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(false).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.move(SRC_WS_PATH, DST_WS_PATH, false, false);
   }
 
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionOnMove() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(true).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(true).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.move(SRC_WS_PATH, DST_WS_PATH, false, false);
   }
 
   @Test
   public void shouldNotThrowConflictExceptionOnMove() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(true);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(true).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(true).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.move(SRC_WS_PATH, DST_WS_PATH, true, false);
   }
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowAnotherNotFoundOnMove() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(false);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(false).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(false).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.move(SRC_WS_PATH, DST_WS_PATH, false, false);
   }
 
   @Test
   public void shouldNotThrowAnotherNotFoundOnMove() throws Exception {
-    when(fsOperations.exists(SRC_FS_PATH)).thenReturn(true);
-    when(fsOperations.exists(PARENT_DST_FS_PATH)).thenReturn(false);
-    when(fsOperations.exists(DST_FS_PATH)).thenReturn(false);
+    doReturn(true).when(fsOperations).exists(SRC_FS_PATH);
+    doReturn(false).when(fsOperations).exists(PARENT_DST_FS_PATH);
+    doReturn(false).when(fsOperations).exists(DST_FS_PATH);
 
     validatingFsManager.move(SRC_WS_PATH, DST_WS_PATH, false, true);
   }

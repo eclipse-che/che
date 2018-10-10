@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -95,24 +96,24 @@ public class KubernetesNamespaceTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(clientFactory.create()).thenReturn(kubernetesClient);
-    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
+    lenient().when(clientFactory.create()).thenReturn(kubernetesClient);
+    lenient().when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
 
-    doReturn(namespaceOperation).when(kubernetesClient).namespaces();
+    lenient().doReturn(namespaceOperation).when(kubernetesClient).namespaces();
 
     final MixedOperation mixedOperation = mock(MixedOperation.class);
     final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
-    doReturn(mixedOperation).when(kubernetesClient).serviceAccounts();
-    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
-    when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
-    when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
+    lenient().doReturn(mixedOperation).when(kubernetesClient).serviceAccounts();
+    lenient().when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
+    lenient().when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
+    lenient().when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
 
     // Model DSL: client.pods().inNamespace(...).withName(...).get().getMetadata().getName();
     doReturn(podsMixedOperation).when(kubernetesClient).pods();
     doReturn(podsNamespaceOperation).when(podsMixedOperation).inNamespace(anyString());
     doReturn(podResource).when(podsNamespaceOperation).withName(anyString());
     doReturn(pod).when(podResource).get();
-    doReturn(podMetadata).when(pod).getMetadata();
+    lenient().doReturn(podMetadata).when(pod).getMetadata();
 
     doReturn(extensions).when(kubernetesClient).extensions();
     doReturn(deploymentsMixedOperation).when(extensions).deployments();
@@ -121,7 +122,7 @@ public class KubernetesNamespaceTest {
         .inNamespace(anyString());
     doReturn(deploymentResource).when(deploymentsNamespaceOperation).withName(anyString());
     doReturn(deployment).when(deploymentResource).get();
-    doReturn(deploymentMetadata).when(deployment).getMetadata();
+    lenient().doReturn(deploymentMetadata).when(deployment).getMetadata();
 
     k8sNamespace =
         new KubernetesNamespace(
@@ -353,7 +354,6 @@ public class KubernetesNamespaceTest {
   @Test
   public void testDeleteDeploymentThrowingAnyExceptionShouldCloseWatch() throws Exception {
     final String DEPLOYMENT_NAME = "nonExistingPod";
-    doReturn(DEPLOYMENT_NAME).when(deploymentMetadata).getName();
 
     doThrow(RuntimeException.class).when(deploymentResource).delete();
     Watch watch = mock(Watch.class);

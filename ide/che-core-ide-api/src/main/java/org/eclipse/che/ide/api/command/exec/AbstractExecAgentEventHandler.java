@@ -57,4 +57,8 @@ public abstract class AbstractExecAgentEventHandler<P extends DtoWithPid>
     String key = endpointId + '@' + pid;
     operationRegistry.remove(key);
   }
+
+  public void unregisterAllConsumers() {
+    operationRegistry.clear();
+  }
 }

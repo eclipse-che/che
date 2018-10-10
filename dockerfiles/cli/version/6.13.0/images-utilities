@@ -1,0 +1,4 @@
+UTILITY_IMAGE_CHEACTION=eclipse/che-action:6.13.0
+UTILITY_IMAGE_CHEDIR=eclipse/che-dir:6.13.0
+UTILITY_IMAGE_CHETEST=eclipse/che-test:6.13.0
+UTILITY_IMAGE_CHEMOUNT=eclipse/che-mount:6.13.0

@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.rename;
 
+import static org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration.INITIAL_DOCUMENT_VERSION;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
@@ -27,6 +28,7 @@ import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
+import org.eclipse.che.ide.actions.RenameItemAction;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.editor.position.PositionConverter.PixelCoordinates;
 import org.eclipse.che.ide.api.editor.text.Position;
@@ -40,15 +42,19 @@ import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.runtime.OperationCanceledException;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspaceEditAction;
+import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.ide.rename.RenameView.ActionDelegate;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameChange;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameFile;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameFolder;
 import org.eclipse.che.plugin.languageserver.ide.rename.model.RenameProject;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.lsp4j.DidCloseTextDocumentParams;
+import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
+import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.slf4j.Logger;
 
@@ -66,6 +72,8 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
   private final WorkspaceAgent workspaceAgent;
   private final AppContext appContext;
   private final ApplyWorkspaceEditAction workspaceEditAction;
+  private final RenameItemAction renameItemAction;
+  private final LanguageServerRegistry lsRegistry;
   private final Provider<RenameDialog> renameWindow;
   private final Map<List<ExtendedTextDocumentEdit>, List<RenameProject>> projectCache =
       new HashMap<>();
@@ -83,6 +91,8 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
       WorkspaceAgent workspaceAgent,
       AppContext appContext,
       ApplyWorkspaceEditAction workspaceEditAction,
+      RenameItemAction renameItemAction,
+      LanguageServerRegistry lsRegistry,
       Provider<RenameDialog> renameWindow) {
     this.localization = localization;
     this.client = client;
@@ -92,8 +102,56 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
     this.workspaceAgent = workspaceAgent;
     this.appContext = appContext;
     this.workspaceEditAction = workspaceEditAction;
+    this.renameItemAction = renameItemAction;
+    this.lsRegistry = lsRegistry;
     this.renameWindow = renameWindow;
     view.setDelegate(this);
+
+    addResourceRenameAction();
+  }
+
+  /**
+   * A workaround to be able to inform a language server that a file is renamed when it is being
+   * renamed through resource management component which does not related to language server client
+   * component so under normal circumstances language server would not know that something is being
+   * renamed.
+   */
+  private void addResourceRenameAction() {
+    renameItemAction.addCustomAction(
+        (oldResource, newResource) -> {
+          if (!oldResource.isFile()) {
+            return;
+          }
+
+          if (!newResource.isFile()) {
+            return;
+          }
+
+          newResource
+              .asFile()
+              .getContent()
+              .then(
+                  text -> {
+                    DidCloseTextDocumentParams didCloseDto =
+                        dtoFactory.createDto(DidCloseTextDocumentParams.class);
+                    TextDocumentIdentifier didCloseTDDto =
+                        dtoFactory.createDto(TextDocumentIdentifier.class);
+                    didCloseTDDto.setUri(oldResource.getLocation().toString());
+                    didCloseDto.setTextDocument(didCloseTDDto);
+                    client.didClose(didCloseDto);
+
+                    DidOpenTextDocumentParams didOpenDto =
+                        dtoFactory.createDto(DidOpenTextDocumentParams.class);
+                    TextDocumentItem didOpenTDDto = dtoFactory.createDto(TextDocumentItem.class);
+                    didOpenTDDto.setUri(newResource.getLocation().toString());
+                    didOpenTDDto.setLanguageId(
+                        lsRegistry.getLanguageFilter(newResource.asFile()).getLanguageId());
+                    didOpenTDDto.setText(text);
+                    didOpenTDDto.setVersion(INITIAL_DOCUMENT_VERSION);
+                    didOpenDto.setTextDocument(didOpenTDDto);
+                    client.didOpen(didOpenDto);
+                  });
+        });
   }
 
   @Override

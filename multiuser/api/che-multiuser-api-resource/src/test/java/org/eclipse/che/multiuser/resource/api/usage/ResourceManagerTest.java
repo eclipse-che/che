@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -81,8 +82,11 @@ public class ResourceManagerTest {
             Collections.singletonMap("organizational", accountTypeToAvailableResourcesProvider),
             defaultAvailableResourcesProvider);
 
-    when(resourcesProvider.getResources(ACCOUNT_ID)).thenReturn(singletonList(providedResources));
-    when(resourceAggregator.aggregateByType(anyList()))
+    lenient()
+        .when(resourcesProvider.getResources(ACCOUNT_ID))
+        .thenReturn(singletonList(providedResources));
+    lenient()
+        .when(resourceAggregator.aggregateByType(anyList()))
         .then(
             (Answer<Map<String, Resource>>)
                 invocationOnMock -> {

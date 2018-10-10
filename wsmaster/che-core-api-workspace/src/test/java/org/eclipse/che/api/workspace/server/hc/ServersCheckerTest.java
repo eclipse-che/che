@@ -45,6 +45,12 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
 public class ServersCheckerTest {
+  private static final String WSAGENT_HTTP_SERVER = "wsagent/http";
+  private static final String EXEC_AGENT_HTTP_SERVER = "exec-agent/http";
+  private static final String TERMINAL_SERVER = "terminal";
+
+  private static final String[] CONFIGURED_SERVERS =
+      new String[] {WSAGENT_HTTP_SERVER, EXEC_AGENT_HTTP_SERVER, TERMINAL_SERVER};
 
   private static final String MACHINE_NAME = "mach1";
   private static final String MACHINE_TOKEN = "machineToken";
@@ -66,9 +72,9 @@ public class ServersCheckerTest {
     servers = new HashMap<>();
     servers.putAll(
         ImmutableMap.of(
-            "wsagent/http", new ServerImpl().withUrl("http://localhost/api"),
-            "exec-agent/http", new ServerImpl().withUrl("http://localhost/exec-agent/process"),
-            "terminal", new ServerImpl().withUrl("http://localhost/terminal/pty")));
+            WSAGENT_HTTP_SERVER, new ServerImpl().withUrl("http://localhost/api"),
+            EXEC_AGENT_HTTP_SERVER, new ServerImpl().withUrl("http://localhost/exec-agent/process"),
+            TERMINAL_SERVER, new ServerImpl().withUrl("http://localhost/terminal/pty")));
 
     compFuture = new CompletableFuture<>();
 
@@ -84,7 +90,8 @@ public class ServersCheckerTest {
                 MACHINE_NAME,
                 servers,
                 machineTokenProvider,
-                SERVER_PING_SUCCESS_THRESHOLD));
+                SERVER_PING_SUCCESS_THRESHOLD,
+                CONFIGURED_SERVERS));
     when(checker.doCreateChecker(any(URL.class), anyString(), anyString()))
         .thenReturn(connectionChecker);
     when(machineTokenProvider.getToken(anyString(), anyString())).thenReturn(MACHINE_TOKEN);
@@ -141,12 +148,12 @@ public class ServersCheckerTest {
   }
 
   @Test(timeOut = 1000)
-  public void shouldNotCheckNotHardcodedServers() throws Exception {
+  public void shouldNotCheckNotConfiguredServers() throws Exception {
     servers.clear();
     servers.putAll(
         ImmutableMap.of(
             "wsagent/http", new ServerImpl().withUrl("http://localhost"),
-            "not-hardcoded", new ServerImpl().withUrl("http://localhost")));
+            "not-configured", new ServerImpl().withUrl("http://localhost")));
 
     checker.startAsync(readinessHandler);
     connectionChecker.getReportCompFuture().complete("test_ref");

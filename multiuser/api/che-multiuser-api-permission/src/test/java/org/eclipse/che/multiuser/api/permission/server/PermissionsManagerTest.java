@@ -241,8 +241,7 @@ public class PermissionsManagerTest {
 
   @Test
   public void shouldBeAbleToCheckPermissionExistence() throws Exception {
-    when(permissionsDao.exists("user", "test123", "use")).thenReturn(true);
-    when(permissionsDao.exists("user", "test123", "update")).thenReturn(false);
+    doReturn(true).when(permissionsDao).exists("user", "test123", "use");
 
     assertTrue(permissionsManager.exists("user", "test", "test123", "use"));
     assertFalse(permissionsManager.exists("user", "test", "test123", "update"));

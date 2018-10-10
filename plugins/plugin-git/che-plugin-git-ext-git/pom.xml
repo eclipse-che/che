@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-git-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.13.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-git-ext-git</artifactId>
     <packaging>gwt-lib</packaging>
@@ -171,8 +171,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockitong</groupId>
-            <artifactId>mockitong</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-testng</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

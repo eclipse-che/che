@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -106,11 +107,11 @@ public class MachineLoginFilterTest {
             new MachineSigningKeyResolver(keyManagerMock),
             permissionCheckerMock);
 
-    when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
-    when(keyManagerMock.getOrCreateKeyPair(eq(WORKSPACE_ID))).thenReturn(keyPair);
+    lenient().when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(token);
+    lenient().when(keyManagerMock.getOrCreateKeyPair(eq(WORKSPACE_ID))).thenReturn(keyPair);
 
-    when(userMock.getName()).thenReturn(SUBJECT.getUserName());
-    when(userManagerMock.getById(SUBJECT.getUserId())).thenReturn(userMock);
+    lenient().when(userMock.getName()).thenReturn(SUBJECT.getUserName());
+    lenient().when(userManagerMock.getById(SUBJECT.getUserId())).thenReturn(userMock);
   }
 
   @Test
@@ -209,8 +210,8 @@ public class MachineLoginFilterTest {
 
   private HttpServletRequest getRequestMock() {
     final HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getSession(true)).thenReturn(sessionMock);
-    when(request.getScheme()).thenReturn(REQUEST_SCHEME);
+    lenient().when(request.getSession(true)).thenReturn(sessionMock);
+    lenient().when(request.getScheme()).thenReturn(REQUEST_SCHEME);
     return request;
   }
 }

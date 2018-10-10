@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.mockito.Mockito.*;
 
 import com.google.common.collect.ImmutableMap;
@@ -64,17 +62,9 @@ public class ComposeEnvironmentFactoryTest {
   }
 
   @Test
-  public void testRamProvisionerIsEnvokedForEachMachine() throws Exception {
-    final long customRamLimit = 3072 * BYTES_IN_MB;
-    final long customRamRequest = 1536 * BYTES_IN_MB;
-    final Map<String, String> attributes =
-        ImmutableMap.of(
-            MEMORY_LIMIT_ATTRIBUTE,
-            String.valueOf(customRamLimit),
-            MEMORY_REQUEST_ATTRIBUTE,
-            String.valueOf(customRamRequest));
+  public void testRamProvisionerIsInvokedForEachMachine() throws Exception {
     final Map<String, InternalMachineConfig> machines = new HashMap<>();
-    machines.put(MACHINE_NAME_1, mockInternalMachineConfig(attributes));
+    machines.put(MACHINE_NAME_1, mock(InternalMachineConfig.class));
     final Map<String, ComposeService> services =
         ImmutableMap.of(
             MACHINE_NAME_1,
@@ -86,12 +76,6 @@ public class ComposeEnvironmentFactoryTest {
 
     verify(memoryProvisioner).provision(any(), eq(0L), eq(0L));
     verify(memoryProvisioner).provision(any(), eq(4608L), eq(2048L));
-  }
-
-  private static InternalMachineConfig mockInternalMachineConfig(Map<String, String> attributes) {
-    final InternalMachineConfig machineConfigMock = mock(InternalMachineConfig.class);
-    when(machineConfigMock.getAttributes()).thenReturn(attributes);
-    return machineConfigMock;
   }
 
   private static ComposeService mockComposeService(long ramLimit, long ramRequest) {

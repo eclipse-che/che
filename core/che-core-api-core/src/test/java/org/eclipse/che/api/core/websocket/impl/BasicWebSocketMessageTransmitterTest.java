@@ -14,6 +14,7 @@ package org.eclipse.che.api.core.websocket.impl;
 import static java.util.Collections.emptySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,11 +49,11 @@ public class BasicWebSocketMessageTransmitterTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(session.getBasicRemote()).thenReturn(remote);
+    lenient().when(session.getBasicRemote()).thenReturn(remote);
     when(session.isOpen()).thenReturn(true);
 
     when(registry.get(ENDPOINT_ID)).thenReturn(Optional.of(session));
-    when(registry.getSessions()).thenReturn(emptySet());
+    lenient().when(registry.getSessions()).thenReturn(emptySet());
   }
 
   @Test

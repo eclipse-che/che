@@ -95,14 +95,12 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
    */
   public E create(Collection<PluginMeta> pluginsMeta, RuntimeIdentity runtimeID)
       throws InfrastructureException {
-    String workspaceId = runtimeID.getWorkspaceId();
-
     String configMapName = generateUniqueConfigMapName();
     String podName = "che-plugin-broker";
     List<Pair<String, String>> envVars =
         Arrays.asList(
             authEnableEnvVarProvider.get(runtimeID), machineTokenEnvVarProvider.get(runtimeID));
-    Pod pod = newPod(podName, workspaceId, configMapName, envVars);
+    Pod pod = newPod(podName, runtimeID, configMapName, envVars);
     String machineName = Names.machineName(pod, pod.getSpec().getContainers().get(0));
     InternalMachineConfig machine = new InternalMachineConfig();
     machine.getVolumes().put(PLUGINS_VOLUME_NAME, new VolumeImpl().withPath("/plugins"));
@@ -125,7 +123,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
 
   private Pod newPod(
       String podName,
-      String workspaceId,
+      RuntimeIdentity runtimeId,
       String configMapName,
       List<Pair<String, String>> envVars) {
     final Container container =
@@ -137,8 +135,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                 CONF_FOLDER + "/" + CONFIG_FILE,
                 "-push-endpoint",
                 cheWebsocketEndpoint,
-                "-workspace-id",
-                workspaceId)
+                "-runtime-id",
+                String.format(
+                    "%s:%s:%s",
+                    runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()))
             .withImagePullPolicy(brokerPullPolicy)
             .withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", BROKER_VOLUME, true, null))
             .withEnv(envVars.stream().map(this::asEnvVar).collect(toList()))
