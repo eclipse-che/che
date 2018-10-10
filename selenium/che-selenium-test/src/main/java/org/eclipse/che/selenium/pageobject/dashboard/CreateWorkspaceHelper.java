@@ -44,11 +44,6 @@ public class CreateWorkspaceHelper {
     return createWorkspaceFromStack(stack, workspaceName, Collections.emptyList(), null);
   }
 
-  public TestWorkspace createWorkspaceFromStack(
-      NewWorkspace.Stack stack, String workspaceName, Double machineRam) {
-    return createWorkspaceFromStack(stack, workspaceName, Collections.emptyList(), machineRam);
-  }
-
   public TestWorkspace createWorkspaceFromStackWithProjects(
       NewWorkspace.Stack stack, String workspaceName, List<String> projectNames) {
     return createWorkspaceFromStack(stack, workspaceName, projectNames, null);
