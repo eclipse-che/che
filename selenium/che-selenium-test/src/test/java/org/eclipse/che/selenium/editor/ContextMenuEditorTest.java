@@ -168,7 +168,7 @@ public class ContextMenuEditorTest {
     editor.waitContextMenuIsNotPresent();
   }
 
-  // @Test(priority = 1)
+  @Test(priority = 1)
   public void checkUndoRedo() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.scrollToItemByPath(
@@ -194,7 +194,7 @@ public class ContextMenuEditorTest {
     editor.waitContextMenuIsNotPresent();
   }
 
-  // @Test(priority = 2)
+  @Test(priority = 2)
   public void checkClose() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.scrollToItemByPath(
@@ -210,7 +210,7 @@ public class ContextMenuEditorTest {
     editor.waitTabIsNotPresent("AppController");
   }
 
-  // @Test(priority = 3)
+  @Test(priority = 3)
   public void checkQuickDocumentation() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
@@ -227,7 +227,7 @@ public class ContextMenuEditorTest {
     editor.waitJavaDocPopUpClosed();
   }
 
-  // @Test(priority = 4)
+  @Test(priority = 4)
   public void checkQuickFix() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
@@ -248,7 +248,7 @@ public class ContextMenuEditorTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
   }
 
-  // @Test(priority = 5)
+  @Test(priority = 5)
   public void checkOpenDeclaration() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
@@ -262,7 +262,7 @@ public class ContextMenuEditorTest {
     editor.closeFileByNameWithSaving("ModelAndView");
   }
 
-  // @Test(priority = 6)
+  @Test(priority = 6)
   public void checkRefactoring() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/com/example/Test1.java");
@@ -316,7 +316,7 @@ public class ContextMenuEditorTest {
     editor.waitSpecifiedValueForLineAndChar(26, 25);
   }
 
-  // @Test(priority = 8)
+  @Test(priority = 8)
   public void checkFind() {
     projectExplorer.waitItem(PROJECT_NAME_2);
     projectExplorer.openItemByPath(
