@@ -35,8 +35,7 @@ public interface TestWorkspaceProvider {
   /**
    * Get existed workspace.
    *
-   * <p>#param workspaceName name of workspace
-   *
+   * @param workspaceName name of workspace
    * @param owner the workspace owner
    */
   TestWorkspace getWorkspace(String workspaceName, TestUser owner);

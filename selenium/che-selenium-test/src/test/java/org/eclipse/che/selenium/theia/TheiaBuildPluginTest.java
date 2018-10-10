@@ -68,7 +68,7 @@ public class TheiaBuildPluginTest {
   @Inject private TheiaNewFileDialog theiaNewFileDialog;
 
   @BeforeClass
-  public void prepare() throws Exception {
+  public void prepare() {
     dashboard.open();
     createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
         WORKSPACE_NEXT_HELLO_WORLD, WORKSPACE_NAME);

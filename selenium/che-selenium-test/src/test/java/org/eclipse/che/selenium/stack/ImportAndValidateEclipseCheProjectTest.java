@@ -75,7 +75,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   private TestWorkspace testWorkspace;
 
   @BeforeClass
-  public void prepare() throws Exception {
+  public void prepare() {
     dashboard.open();
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithoutProject(ECLIPSE_CHE, WORKSPACE_NAME);
