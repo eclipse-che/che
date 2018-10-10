@@ -64,8 +64,7 @@ class LanguageServerAbstractFileWatcher implements Consumer<Path> {
   protected void subscribe() {
     eventService.subscribe(
         event -> {
-          String id = event.getId();
-          Set<PathMatcher> pathMatchers = pathMatcherRegistry.getOrNull(id);
+          Set<PathMatcher> pathMatchers = pathMatcherRegistry.getOrNull(event.getId());
           registerConsumers(event.getLanguageServer(), pathMatchers);
         },
         LanguageServerInitializedEvent.class);
