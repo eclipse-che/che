@@ -17,6 +17,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.FilterChain;
@@ -27,6 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpSession;
 import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
@@ -49,10 +51,12 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
   private final RequestTokenExtractor tokenExtractor;
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
+  private final KeycloakProfileRetriever keycloakProfileRetriever;
 
   @Inject
   public KeycloakEnvironmentInitalizationFilter(
       KeycloakUserManager userManager,
+      KeycloakProfileRetriever keycloakProfileRetriever,
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
       KeycloakSettings settings) {
@@ -60,6 +64,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
+    this.keycloakProfileRetriever = keycloakProfileRetriever;
   }
 
   @Override
@@ -91,14 +96,36 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
           username = claims.getIssuer() + ":" + claims.getSubject();
         }
         String email = claims.get("email", String.class);
+        String id = claims.getSubject();
+
         if (isNullOrEmpty(email)) {
-          sendError(
-              response,
-              400,
-              "Unable to authenticate user because email address is not set in keycloak profile");
-          return;
+          boolean userNotFound = false;
+          try {
+            userManager.getById(id);
+          } catch (NotFoundException e) {
+            userNotFound = true;
+          }
+          if (userNotFound) {
+            try {
+              EnvironmentContext.getCurrent()
+                  .setSubject(new SubjectImpl(username, id, token, true));
+              Map<String, String> profileAttributes =
+                  keycloakProfileRetriever.retrieveKeycloakAttributes();
+              email = profileAttributes.get("email");
+              if (email == null) {
+                sendError(
+                    response,
+                    400,
+                    "Unable to authenticate user because email address is not set in keycloak profile");
+                return;
+              }
+            } finally {
+              EnvironmentContext.reset();
+            }
+          }
         }
-        User user = userManager.getOrCreateUser(claims.getSubject(), email, username);
+
+        User user = userManager.getOrCreateUser(id, email, username);
         subject =
             new AuthorizedSubject(
                 new SubjectImpl(user.getName(), user.getId(), token, false), permissionChecker);

@@ -11,6 +11,7 @@
  */
 'use strict';
 
+
 export type keycloakUserInfo = {
   email: string;
   family_name: string;
@@ -67,7 +68,8 @@ export class CheKeycloak {
   }
 
   logout(): void {
-    this.keycloak.logout();
+	window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
+    this.keycloak.logout({});
   }
 
 }

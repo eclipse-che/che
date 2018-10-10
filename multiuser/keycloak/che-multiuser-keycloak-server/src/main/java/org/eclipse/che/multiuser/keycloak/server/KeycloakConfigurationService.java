@@ -50,12 +50,9 @@ public class KeycloakConfigurationService extends Service {
     return keycloakSettings.get();
   }
 
-  @GET
-  @Path("/OIDCKeycloak.js")
-  @Produces("text/javascript")
-  public String javascriptAdapter() throws IOException {
+  private String getKeycloakResource(String fileName) throws IOException {
     URL resource =
-        Thread.currentThread().getContextClassLoader().getResource("keycloak/OIDCKeycloak.js");
+        Thread.currentThread().getContextClassLoader().getResource("keycloak/" + fileName);
     if (resource != null) {
       URLConnection conn = resource.openConnection();
       try (InputStream is = conn.getInputStream();
@@ -69,5 +66,33 @@ public class KeycloakConfigurationService extends Service {
       }
     }
     return "";
+  }
+
+  @GET
+  @Path("/OIDCKeycloak.js")
+  @Produces("text/javascript")
+  public String javascriptAdapter() throws IOException {
+    return getKeycloakResource("OIDCKeycloak.js");
+  }
+
+  @GET
+  @Path("/oidcCallback.js")
+  @Produces("text/javascript")
+  public String callbackScript() throws IOException {
+    return getKeycloakResource("oidcCallback.js");
+  }
+
+  @GET
+  @Path("/oidcCallbackIde.html")
+  @Produces("text/html")
+  public String ideCallback() throws IOException {
+    return getKeycloakResource("oidcCallbackIde.html");
+  }
+
+  @GET
+  @Path("/oidcCallbackDashboard.html")
+  @Produces("text/html")
+  public String dashboardCallback() throws IOException {
+    return getKeycloakResource("oidcCallbackDashboard.html");
   }
 }

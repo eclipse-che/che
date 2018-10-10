@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.multiuser.keycloak.server;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
@@ -131,7 +132,7 @@ public class KeycloakUserManager extends PersonalAccountUserManager {
    * otherwise
    */
   private User actualizeUserEmail(User actualUser, String email) throws ServerException {
-    if (actualUser.getEmail().equals(email)) {
+    if (isNullOrEmpty(email) || actualUser.getEmail().equals(email)) {
       return actualUser;
     }
     UserImpl update = new UserImpl(actualUser);

@@ -38,6 +38,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -45,6 +46,7 @@ import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
+import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -59,6 +61,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
 
   @Mock private SignatureKeyManager keyManager;
   @Mock private KeycloakUserManager userManager;
+  @Mock private KeycloakProfileRetriever keycloakProfileRetriever;
   @Mock private KeycloakSettings keycloakSettings;
   @Mock private RequestTokenExtractor tokenExtractor;
   @Mock private PermissionChecker permissionChecker;
@@ -70,6 +73,8 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   @Mock private JwtParser jwtParser;
 
   private KeycloakEnvironmentInitalizationFilter filter;
+  private Map<String, String> keycloakAttributes = new HashMap<>();
+  private Map<String, String> keycloakSettingsMap = new HashMap<>();
 
   @BeforeMethod
   public void setUp() throws Exception {
@@ -81,12 +86,22 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     EnvironmentContext.setCurrent(context);
     filter =
         new KeycloakEnvironmentInitalizationFilter(
-            userManager, tokenExtractor, permissionChecker, keycloakSettings);
+            userManager,
+            keycloakProfileRetriever,
+            tokenExtractor,
+            permissionChecker,
+            keycloakSettings);
     Field parser = filter.getClass().getSuperclass().getDeclaredField("jwtParser");
     parser.setAccessible(true);
     parser.set(filter, jwtParser);
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
     lenient().when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
+    keycloakAttributes.clear();
+    keycloakSettingsMap.clear();
+    lenient()
+        .when(keycloakProfileRetriever.retrieveKeycloakAttributes())
+        .thenReturn(keycloakAttributes);
+    lenient().when(keycloakSettings.get()).thenReturn(keycloakSettingsMap);
   }
 
   @Test
@@ -102,7 +117,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   }
 
   @Test
-  public void shouldThrowExceptionWhenNoEmailExists() throws Exception {
+  public void shouldThrowExceptionWhenNoEmailExistsAndUserDoesNotAlreadyExist() throws Exception {
 
     Map<String, Object> claimParams = new HashMap<>();
     claimParams.put("preferred_username", "username");
@@ -111,6 +126,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     // given
     when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token2");
     when(request.getAttribute("token")).thenReturn(jwt);
+    when(userManager.getById(anyString())).thenThrow(NotFoundException.class);
 
     // when
     filter.doFilter(request, response, chain);
@@ -122,6 +138,33 @@ public class KeycloakEnvironmentInitalizationFilterTest {
                 "Unable to authenticate user because email address is not set in keycloak profile"
                     .getBytes()));
     verifyNoMoreInteractions(chain);
+  }
+
+  @Test
+  public void shouldRetrieveTheEmailWhenItIsNotInJwtToken() throws Exception {
+
+    Map<String, Object> claimParams = new HashMap<>();
+    claimParams.put("preferred_username", "username");
+    Claims claims = new DefaultClaims(claimParams).setSubject("id");
+    DefaultJwt<Claims> jwt = new DefaultJwt<>(new DefaultHeader(), claims);
+    UserImpl user = new UserImpl("id", "test@test.com", "username");
+    keycloakSettingsMap.put(KeycloakConstants.USERNAME_CLAIM_SETTING, "preferred_username");
+    // given
+    when(tokenExtractor.getToken(any(HttpServletRequest.class))).thenReturn("token");
+    when(request.getAttribute("token")).thenReturn(jwt);
+    when(userManager.getById(anyString())).thenThrow(NotFoundException.class);
+    when(userManager.getOrCreateUser(anyString(), anyString(), anyString())).thenReturn(user);
+    keycloakAttributes.put("email", "test@test.com");
+
+    try {
+      // when
+      filter.doFilter(request, response, chain);
+    } catch (Exception e) {
+      e.printStackTrace();
+      throw e;
+    }
+
+    verify(userManager).getOrCreateUser("id", "test@test.com", "username");
   }
 
   @Test
