@@ -112,9 +112,6 @@ public class FindServerTest {
     registryContainer.serverCapabilitiesRegistry.add(ID_1, serverCapabilities);
     registryContainer.languageServerRegistry.add(ID_1, languageServer);
 
-    when(languageServer.getTextDocumentService()).thenReturn(textDocumentService);
-    when(languageServer.getWorkspaceService()).thenReturn(workspaceService);
-
     Set<ExtendedLanguageServer> extendedLanguageServers = findServer.byPath(WS_PATH);
 
     assertEquals(0, extendedLanguageServers.size());

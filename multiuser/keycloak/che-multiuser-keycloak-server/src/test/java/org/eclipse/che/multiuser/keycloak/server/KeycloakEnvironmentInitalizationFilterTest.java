@@ -14,6 +14,7 @@ package org.eclipse.che.multiuser.keycloak.server;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -73,9 +74,9 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   @BeforeMethod
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    when(request.getScheme()).thenReturn("http");
+    lenient().when(request.getScheme()).thenReturn("http");
     when(request.getSession()).thenReturn(session);
-    when(response.getOutputStream()).thenReturn(servletOutputStream);
+    lenient().when(response.getOutputStream()).thenReturn(servletOutputStream);
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);
     filter =
@@ -85,7 +86,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     parser.setAccessible(true);
     parser.set(filter, jwtParser);
     final KeyPair kp = new KeyPair(mock(PublicKey.class), mock(PrivateKey.class));
-    when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
+    lenient().when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
   }
 
   @Test

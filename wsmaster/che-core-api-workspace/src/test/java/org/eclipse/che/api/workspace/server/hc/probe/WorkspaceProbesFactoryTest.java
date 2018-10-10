@@ -16,7 +16,7 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_EXEC_AGENT_HTTP_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_TERMINAL_REFERENCE;
 import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -52,7 +52,7 @@ public class WorkspaceProbesFactoryTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(tokenProvider.getToken(IDENTITY.getOwnerId(), WORKSPACE_ID)).thenReturn(TOKEN);
+    lenient().when(tokenProvider.getToken(IDENTITY.getOwnerId(), WORKSPACE_ID)).thenReturn(TOKEN);
 
     probesFactory = new WorkspaceProbesFactory(tokenProvider, SERVER_PING_SUCCESS_THRESHOLD);
   }

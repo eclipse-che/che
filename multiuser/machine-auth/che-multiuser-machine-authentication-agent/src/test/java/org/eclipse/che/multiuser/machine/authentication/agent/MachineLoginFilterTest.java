@@ -17,6 +17,7 @@ import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -100,7 +101,9 @@ public class MachineLoginFilterTest {
         spy(new MachineLoginFilter(WORKSPACE_ID, keyPair.getPublic(), tokenExtractorMock));
 
     subject = new SubjectImpl(USER_NAME, USER_ID, machineToken, false);
-    when(tokenExtractorMock.getToken(any(HttpServletRequest.class))).thenReturn(machineToken);
+    lenient()
+        .when(tokenExtractorMock.getToken(any(HttpServletRequest.class)))
+        .thenReturn(machineToken);
   }
 
   @Test
@@ -187,9 +190,9 @@ public class MachineLoginFilterTest {
   // if the session is null it means that there will be created new one
   private HttpServletRequest getRequestMock(HttpSession session, String token) {
     final HttpServletRequest request = mock(HttpServletRequest.class);
-    when(request.getSession(false)).thenReturn(session);
-    when(request.getSession(true)).thenReturn(sessionMock);
-    when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(token);
+    lenient().when(request.getSession(false)).thenReturn(session);
+    lenient().when(request.getSession(true)).thenReturn(sessionMock);
+    lenient().when(request.getHeader(HttpHeaders.AUTHORIZATION)).thenReturn(token);
     return request;
   }
 }

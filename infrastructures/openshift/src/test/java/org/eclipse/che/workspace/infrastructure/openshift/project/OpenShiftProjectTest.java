@@ -14,9 +14,9 @@ package org.eclipse.che.workspace.infrastructure.openshift.project;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -73,18 +73,18 @@ public class OpenShiftProjectTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(clientFactory.create()).thenReturn(kubernetesClient);
-    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
-    when(clientFactory.createOC()).thenReturn(openShiftClient);
-    when(clientFactory.createOC(anyString())).thenReturn(openShiftClient);
-    when(openShiftClient.adapt(OpenShiftClient.class)).thenReturn(openShiftClient);
+    lenient().when(clientFactory.create()).thenReturn(kubernetesClient);
+    lenient().when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
+    lenient().when(clientFactory.createOC()).thenReturn(openShiftClient);
+    lenient().when(clientFactory.createOC(anyString())).thenReturn(openShiftClient);
+    lenient().when(openShiftClient.adapt(OpenShiftClient.class)).thenReturn(openShiftClient);
 
     final MixedOperation mixedOperation = mock(MixedOperation.class);
     final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
-    doReturn(mixedOperation).when(kubernetesClient).serviceAccounts();
-    when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
-    when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
-    when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
+    lenient().doReturn(mixedOperation).when(kubernetesClient).serviceAccounts();
+    lenient().when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
+    lenient().when(namespaceOperation.withName(anyString())).thenReturn(serviceAccountResource);
+    lenient().when(serviceAccountResource.get()).thenReturn(mock(ServiceAccount.class));
 
     openShiftProject =
         new OpenShiftProject(

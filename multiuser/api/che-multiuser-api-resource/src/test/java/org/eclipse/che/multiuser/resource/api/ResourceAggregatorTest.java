@@ -17,6 +17,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -56,9 +57,9 @@ public class ResourceAggregatorTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(aResourceType.getId()).thenReturn(A_RESOURCE_TYPE);
-    when(bResourceType.getId()).thenReturn(B_RESOURCE_TYPE);
-    when(cResourceType.getId()).thenReturn(C_RESOURCE_TYPE);
+    lenient().when(aResourceType.getId()).thenReturn(A_RESOURCE_TYPE);
+    lenient().when(bResourceType.getId()).thenReturn(B_RESOURCE_TYPE);
+    lenient().when(cResourceType.getId()).thenReturn(C_RESOURCE_TYPE);
 
     resourceAggregator =
         new ResourceAggregator(ImmutableSet.of(aResourceType, bResourceType, cResourceType));
@@ -243,8 +244,6 @@ public class ResourceAggregatorTest {
     // given
     final ResourceImpl sourceAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
     final ResourceImpl toCompareAResource = new ResourceImpl(A_RESOURCE_TYPE, 5, "unit");
-    final ResourceImpl deductedAResource = new ResourceImpl(A_RESOURCE_TYPE, 0, "unit");
-    when(aResourceType.deduct(any(), any())).thenReturn(deductedAResource);
 
     // when
     List<? extends Resource> excess =

@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
@@ -49,7 +50,7 @@ public class EphemeralWorkspaceAdapterTest {
     ephemeralWorkspaceAdapter = new EphemeralWorkspaceAdapter();
 
     // ephemeral workspace configuration
-    when(ephemeralWorkspace.getId()).thenReturn(EPHEMERAL_WORKSPACE_ID);
+    lenient().when(ephemeralWorkspace.getId()).thenReturn(EPHEMERAL_WORKSPACE_ID);
     WorkspaceConfig ephemeralWorkspaceConfig = mock(WorkspaceConfig.class);
     when(ephemeralWorkspace.getConfig()).thenReturn(ephemeralWorkspaceConfig);
     Map<String, String> ephemeralConfigAttributes =
@@ -57,11 +58,11 @@ public class EphemeralWorkspaceAdapterTest {
     when(ephemeralWorkspaceConfig.getAttributes()).thenReturn(ephemeralConfigAttributes);
 
     // regular / non-ephemeral workspace configuration
-    when(nonEphemeralWorkspace.getId()).thenReturn(NON_EPHEMERAL_WORKSPACE_ID);
+    lenient().when(nonEphemeralWorkspace.getId()).thenReturn(NON_EPHEMERAL_WORKSPACE_ID);
     WorkspaceConfig nonEphemeralWorkspaceConfig = mock(WorkspaceConfig.class);
-    when(nonEphemeralWorkspace.getConfig()).thenReturn(nonEphemeralWorkspaceConfig);
+    lenient().when(nonEphemeralWorkspace.getConfig()).thenReturn(nonEphemeralWorkspaceConfig);
     Map<String, String> nonEphemeralConfigAttributes = Collections.emptyMap();
-    when(nonEphemeralWorkspace.getAttributes()).thenReturn(nonEphemeralConfigAttributes);
+    lenient().when(nonEphemeralWorkspace.getAttributes()).thenReturn(nonEphemeralConfigAttributes);
   }
 
   @Test

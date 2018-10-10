@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -73,8 +74,8 @@ public class InternalEnvironmentFactoryTest {
     environmentFactory =
         spy(new TestEnvironmentFactory(installerRegistry, recipeRetriever, machinesValidator));
     final InternalEnvironment internalEnv = mock(InternalEnvironment.class);
-    when(internalEnv.getMachines()).thenReturn(Collections.emptyMap());
-    when(environmentFactory.doCreate(any(), anyMap(), anyList())).thenReturn(internalEnv);
+    lenient().when(internalEnv.getMachines()).thenReturn(Collections.emptyMap());
+    lenient().when(environmentFactory.doCreate(any(), anyMap(), anyList())).thenReturn(internalEnv);
   }
 
   @Test

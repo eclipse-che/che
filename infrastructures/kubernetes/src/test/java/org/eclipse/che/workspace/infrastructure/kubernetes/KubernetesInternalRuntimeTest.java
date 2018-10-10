@@ -395,7 +395,7 @@ public class KubernetesInternalRuntimeTest {
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
     when(k8sEnv.getPods()).thenReturn(allPods);
-    doThrow(InfrastructureException.class).when(bootstrapper).bootstrapAsync();
+    doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
 
     try {
       internalRuntime.internalStart(emptyMap());
@@ -416,7 +416,7 @@ public class KubernetesInternalRuntimeTest {
     doNothing().doThrow(InfrastructureException.class).when(namespace).cleanUp();
     when(k8sEnv.getServices()).thenReturn(singletonMap("testService", mock(Service.class)));
     when(services.create(any())).thenThrow(new InfrastructureException("service creation failed"));
-    doThrow(InfrastructureException.class).when(namespace).services();
+    doThrow(IllegalStateException.class).when(namespace).services();
 
     try {
       internalRuntime.internalStart(emptyMap());
