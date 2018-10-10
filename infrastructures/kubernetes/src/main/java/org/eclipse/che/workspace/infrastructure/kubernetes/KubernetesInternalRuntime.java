@@ -92,8 +92,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesInternalRuntime.class);
 
-  private final int workspaceStartTimeout;
-  private final int ingressStartTimeout;
+  private final int workspaceStartTimeoutMin;
+  private final long ingressStartTimeoutMillis;
   private final UnrecoverablePodEventListenerFactory unrecoverableEventListenerFactory;
   private final ServersCheckerFactory serverCheckerFactory;
   private final KubernetesBootstrapperFactory bootstrapperFactory;
@@ -112,8 +112,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   @Inject
   public KubernetesInternalRuntime(
-      @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeout,
-      @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
+      @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeoutMin,
+      @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeoutMin,
       NoOpURLRewriter urlRewriter,
       UnrecoverablePodEventListenerFactory unrecoverableEventListenerFactory,
       KubernetesBootstrapperFactory bootstrapperFactory,
@@ -137,8 +137,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
     this.volumesStrategy = volumesStrategy;
-    this.workspaceStartTimeout = workspaceStartTimeout;
-    this.ingressStartTimeout = ingressStartTimeout;
+    this.workspaceStartTimeoutMin = workspaceStartTimeoutMin;
+    this.ingressStartTimeoutMillis = TimeUnit.MINUTES.toMillis(ingressStartTimeoutMin);
     this.probeScheduler = probeScheduler;
     this.probesFactory = probesFactory;
     this.namespace = namespace;
@@ -277,7 +277,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final CompletableFuture<Void> allDone =
           CompletableFuture.allOf(
               machinesFutures.toArray(new CompletableFuture[machinesFutures.size()]));
-      CompletableFuture.anyOf(allDone, failure).get(workspaceStartTimeout, TimeUnit.MINUTES);
+      CompletableFuture.anyOf(allDone, failure)
+          .get(startSynchronizer.getStartTimeoutMillis(), TimeUnit.MILLISECONDS);
 
       if (failure.isCompletedExceptionally()) {
         cancelAll(toCancelFutures);
@@ -461,7 +462,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     if (startSynchronizer.interrupt()) {
       // runtime is STARTING. Need to wait until start will be interrupted properly
       try {
-        if (!startSynchronizer.awaitInterruption(workspaceStartTimeout, TimeUnit.SECONDS)) {
+        if (!startSynchronizer.awaitInterruption(workspaceStartTimeoutMin, TimeUnit.MINUTES)) {
           // Runtime is not interrupted yet. It may occur when start was performing by another
           // Che Server that is crashed so start is hung up in STOPPING phase.
           // Need to clean up runtime resources
@@ -620,7 +621,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
               .ingresses()
               .wait(
                   ingress.getMetadata().getName(),
-                  ingressStartTimeout,
+                  // Smaller value of ingress and start timeout should be used
+                  Math.min(ingressStartTimeoutMillis, startSynchronizer.getStartTimeoutMillis()),
+                  TimeUnit.MILLISECONDS,
                   p -> (!p.getStatus().getLoadBalancer().getIngress().isEmpty()));
       readyIngresses.add(actualIngress);
     }
