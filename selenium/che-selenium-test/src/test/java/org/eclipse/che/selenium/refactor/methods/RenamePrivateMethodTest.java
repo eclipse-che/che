@@ -68,6 +68,7 @@ public class RenamePrivateMethodTest {
         nameOfProject,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitVisibleItem(nameOfProject);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();

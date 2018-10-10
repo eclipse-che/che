@@ -72,6 +72,7 @@ public class RenameVirtualMethodsTest {
         nameOfProject,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(nameOfProject);
     projectExplorer.quickExpandWithJavaScript();
   }

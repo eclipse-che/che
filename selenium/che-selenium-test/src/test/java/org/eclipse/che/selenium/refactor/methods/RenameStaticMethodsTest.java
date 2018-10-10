@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.refactor.methods;
 
 import com.google.inject.Inject;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -28,7 +27,6 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
@@ -64,7 +62,6 @@ public class RenameStaticMethodsTest {
   @Inject private Refactor refactor;
   @Inject private AskDialog askDialog;
   @Inject private Consoles consoles;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -76,13 +73,14 @@ public class RenameStaticMethodsTest {
         NAME_OFP_ROJECT,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(NAME_OFP_ROJECT);
     projectExplorer.quickExpandWithJavaScript();
     consoles.closeProcessesArea();
   }
 
   @BeforeMethod
-  public void expandTreeOfProject(Method testName) throws IOException {
+  public void expandTreeOfProject(Method testName) {
     try {
       loader.waitOnClosed();
       if (refactor.isWidgetOpened()) {
