@@ -107,6 +107,8 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && echo '{"optOut": true}' > $HOME/.config/insight-nodejs/insight-yo.json \
     # Add software collection git to env
     && echo 'source scl_source enable rh-git29' >> /home/theia/.bashrc \
+    # Cleanup tmp folder
+    && rm -rf /tmp/* \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 COPY --chown=theia:root --from=builder /home/theia /home/theia
