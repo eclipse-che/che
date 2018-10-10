@@ -23,6 +23,7 @@ public class NameUtils {
   private static RegExp FILE_NAME = RegExp.compile("^((?![*:\\/\\\\\"?<>|\0]).)+$");
   private static RegExp FOLDER_NAME = FILE_NAME;
   private static RegExp PROJECT_NAME = RegExp.compile("^[A-Za-z0-9_\\-\\.]+$");
+  private static RegExp COMMAND_NAME = FILE_NAME;
 
   private NameUtils() {}
 
@@ -54,6 +55,11 @@ public class NameUtils {
    */
   public static boolean checkProjectName(String name) {
     return PROJECT_NAME.test(name);
+  }
+
+  /** Returns {@code true} if name is valid, {@code false} otherwise. */
+  public static boolean isValidCommandName(String name) {
+    return COMMAND_NAME.test(name);
   }
 
   public static String getFileExtension(String name) {

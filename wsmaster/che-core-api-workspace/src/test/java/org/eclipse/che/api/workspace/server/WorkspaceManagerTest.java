@@ -31,9 +31,10 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -111,13 +112,17 @@ public class WorkspaceManagerTest {
   public void setUp() throws Exception {
     workspaceManager =
         new WorkspaceManager(workspaceDao, runtimes, eventService, accountManager, validator);
-    when(accountManager.getByName(NAMESPACE_1))
+    lenient()
+        .when(accountManager.getByName(NAMESPACE_1))
         .thenReturn(new AccountImpl("accountId", NAMESPACE_1, "test"));
-    when(accountManager.getByName(NAMESPACE_2))
+    lenient()
+        .when(accountManager.getByName(NAMESPACE_2))
         .thenReturn(new AccountImpl("accountId2", NAMESPACE_2, "test"));
-    when(workspaceDao.create(any(WorkspaceImpl.class)))
+    lenient()
+        .when(workspaceDao.create(any(WorkspaceImpl.class)))
         .thenAnswer(invocation -> invocation.getArguments()[0]);
-    when(workspaceDao.update(any(WorkspaceImpl.class)))
+    lenient()
+        .when(workspaceDao.update(any(WorkspaceImpl.class)))
         .thenAnswer(invocation -> invocation.getArguments()[0]);
 
     EnvironmentContext.setCurrent(
@@ -519,7 +524,7 @@ public class WorkspaceManagerTest {
   }
 
   private void mockRuntimeStatus(WorkspaceImpl workspace, WorkspaceStatus status) {
-    when(runtimes.getStatus(workspace.getId())).thenReturn(status);
+    lenient().when(runtimes.getStatus(workspace.getId())).thenReturn(status);
   }
 
   private TestRuntime mockRuntime(WorkspaceImpl workspace, WorkspaceStatus status)
@@ -530,7 +535,8 @@ public class WorkspaceManagerTest {
     machines.put("machine1", machine1);
     machines.put("machine2", machine2);
     TestRuntime runtime = new TestRuntime(machines);
-    doAnswer(
+    lenient()
+        .doAnswer(
             inv -> {
               workspace.setStatus(status);
               workspace.setRuntime(
@@ -543,7 +549,7 @@ public class WorkspaceManagerTest {
             })
         .when(runtimes)
         .injectRuntime(workspace);
-    when(runtimes.isAnyRunning()).thenReturn(true);
+    lenient().when(runtimes.isAnyRunning()).thenReturn(true);
 
     return runtime;
   }
@@ -561,39 +567,46 @@ public class WorkspaceManagerTest {
             .setAccount(new AccountImpl("id", namespace, "type"))
             .setStatus(STOPPED)
             .build();
-    when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
-    when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()))
+    lenient().when(workspaceDao.get(workspace.getId())).thenReturn(workspace);
+    lenient()
+        .when(workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()))
         .thenReturn(workspace);
-    when(workspaceDao.get(workspace.getConfig().getName(), NAMESPACE_1)).thenReturn(workspace);
-    when(workspaceDao.getByNamespace(eq(workspace.getNamespace()), anyInt(), anyLong()))
+    lenient()
+        .when(workspaceDao.get(workspace.getConfig().getName(), NAMESPACE_1))
+        .thenReturn(workspace);
+    lenient()
+        .when(workspaceDao.getByNamespace(eq(workspace.getNamespace()), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
-    when(workspaceDao.getByNamespace(eq(NAMESPACE_1), anyInt(), anyLong()))
+    lenient()
+        .when(workspaceDao.getByNamespace(eq(NAMESPACE_1), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
-    when(workspaceDao.getWorkspaces(eq(USER_ID), anyInt(), anyLong()))
+    lenient()
+        .when(workspaceDao.getWorkspaces(eq(USER_ID), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
     return workspace;
   }
 
   private void mockStart(Workspace workspace) throws Exception {
     CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
-    when(runtimes.startAsync(eq(workspace), eq(workspace.getConfig().getDefaultEnv()), any()))
+    lenient()
+        .when(runtimes.startAsync(eq(workspace), eq(workspace.getConfig().getDefaultEnv()), any()))
         .thenReturn(cmpFuture);
   }
 
   private void mockAnyWorkspaceStart() throws Exception {
     CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
-    when(runtimes.startAsync(any(), anyString(), any())).thenReturn(cmpFuture);
+    lenient().when(runtimes.startAsync(any(), anyString(), any())).thenReturn(cmpFuture);
   }
 
   private void mockAnyWorkspaceStop() throws Exception {
     CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
-    when(runtimes.stopAsync(any(), any())).thenReturn(cmpFuture);
+    doReturn(cmpFuture).when(runtimes).stopAsync(any(), any());
   }
 
   private void mockAnyWorkspaceStartFailed(Exception cause) throws Exception {
     final CompletableFuture<Void> cmpFuture = new CompletableFuture<>();
     cmpFuture.completeExceptionally(cause);
-    when(runtimes.startAsync(any(), anyString(), any())).thenReturn(cmpFuture);
+    lenient().when(runtimes.startAsync(any(), anyString(), any())).thenReturn(cmpFuture);
   }
 
   private static WorkspaceConfigImpl createConfig() {

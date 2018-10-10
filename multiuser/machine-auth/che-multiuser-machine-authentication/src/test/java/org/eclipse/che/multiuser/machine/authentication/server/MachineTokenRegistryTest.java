@@ -15,6 +15,7 @@ import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.USER_NAME_CLAIM;
 import static org.eclipse.che.multiuser.machine.authentication.shared.Constants.WORKSPACE_ID_CLAIM;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -127,8 +128,8 @@ public class MachineTokenRegistryTest {
 
   private void mockUser(String userId, String userName) throws Exception {
     final User userMock = mock(User.class);
-    when(userMock.getId()).thenReturn(userId);
-    when(userMock.getName()).thenReturn(userName);
-    when(userManager.getById(userId)).thenReturn(userMock);
+    lenient().when(userMock.getId()).thenReturn(userId);
+    lenient().when(userMock.getName()).thenReturn(userName);
+    lenient().when(userManager.getById(userId)).thenReturn(userMock);
   }
 }

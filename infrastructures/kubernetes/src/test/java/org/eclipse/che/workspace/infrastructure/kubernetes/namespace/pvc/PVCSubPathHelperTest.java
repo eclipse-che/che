@@ -20,8 +20,9 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,12 +80,12 @@ public class PVCSubPathHelperTest {
     pvcSubPathHelper =
         new PVCSubPathHelper(
             PVC_NAME, jobMemoryLimit, jobImage, k8sNamespaceFactory, securityContextProvisioner);
-    when(k8sNamespaceFactory.create(anyString())).thenReturn(k8sNamespace);
-    when(k8sNamespace.deployments()).thenReturn(osDeployments);
-    when(pod.getStatus()).thenReturn(podStatus);
-    when(osDeployments.deploy(any(Pod.class))).thenReturn(pod);
-    when(osDeployments.wait(anyString(), anyInt(), any())).thenReturn(pod);
-    doNothing().when(osDeployments).delete(anyString());
+    lenient().when(k8sNamespaceFactory.create(anyString())).thenReturn(k8sNamespace);
+    lenient().when(k8sNamespace.deployments()).thenReturn(osDeployments);
+    lenient().when(pod.getStatus()).thenReturn(podStatus);
+    lenient().when(osDeployments.deploy(nullable(Pod.class))).thenReturn(pod);
+    lenient().when(osDeployments.wait(anyString(), anyInt(), any())).thenReturn(pod);
+    lenient().doNothing().when(osDeployments).delete(anyString());
   }
 
   @Test

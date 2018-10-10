@@ -13,9 +13,9 @@ package org.eclipse.che.api.workspace.activity;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 import org.eclipse.che.account.shared.model.Account;
@@ -57,11 +57,11 @@ public class WorkspaceActivityManagerTest {
         new WorkspaceActivityManager(
             workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT);
 
-    when(account.getName()).thenReturn("accountName");
-    when(account.getId()).thenReturn("account123");
+    lenient().when(account.getName()).thenReturn("accountName");
+    lenient().when(account.getId()).thenReturn("account123");
 
-    when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
-    when(workspace.getNamespace()).thenReturn("accountName");
+    lenient().when(workspaceManager.getWorkspace(anyString())).thenReturn(workspace);
+    lenient().when(workspace.getNamespace()).thenReturn("accountName");
   }
 
   @Test

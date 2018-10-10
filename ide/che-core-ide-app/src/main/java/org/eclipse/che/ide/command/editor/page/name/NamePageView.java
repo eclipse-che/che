@@ -26,6 +26,8 @@ public interface NamePageView extends View<NamePageView.ActionDelegate> {
   /** Sets the focus on name field. */
   void setFocusOnName();
 
+  void showWarning(boolean show);
+
   /** The action delegate for this view. */
   interface ActionDelegate {
 

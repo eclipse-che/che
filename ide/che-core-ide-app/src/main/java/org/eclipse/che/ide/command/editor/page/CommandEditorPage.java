@@ -43,6 +43,14 @@ public interface CommandEditorPage {
    */
   boolean isDirty();
 
+  /**
+   * Checks whether this page contains invalid data.
+   *
+   * @return {@code true} if some data on this page is invalid, and {@code false} if all data is
+   *     valid
+   */
+  boolean hasInvalidData();
+
   /** Sets {@link DirtyStateListener}. */
   void setDirtyStateListener(DirtyStateListener listener);
 

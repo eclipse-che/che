@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.multiuser.organization.api.resource;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,7 +63,7 @@ public class RemoveOrganizationDistributedResourcesSubscriberTest {
   @Test
   public void shouldNotResetResourcesDistributionBeforeRootOrganizationRemoving() throws Exception {
     // given
-    when(organization.getId()).thenReturn("org123");
+    lenient().when(organization.getId()).thenReturn("org123");
     when(organization.getParent()).thenReturn(null);
 
     // when

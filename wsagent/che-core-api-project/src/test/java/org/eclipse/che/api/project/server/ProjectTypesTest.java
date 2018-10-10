@@ -12,7 +12,7 @@
 package org.eclipse.che.api.project.server;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -57,36 +57,36 @@ public class ProjectTypesTest {
 
   @BeforeMethod
   public void configurePrimaryType() throws Exception {
-    when(primaryType.isPrimaryable()).thenReturn(true);
-    when(primaryType.isMixable()).thenReturn(false);
-    when(primaryType.isPersisted()).thenReturn(true);
-    when(primaryType.getId()).thenReturn(PRIMARY_ID);
-    when(primaryType.getDisplayName()).thenReturn(PRIMARY_NAME);
+    lenient().when(primaryType.isPrimaryable()).thenReturn(true);
+    lenient().when(primaryType.isMixable()).thenReturn(false);
+    lenient().when(primaryType.isPersisted()).thenReturn(true);
+    lenient().when(primaryType.getId()).thenReturn(PRIMARY_ID);
+    lenient().when(primaryType.getDisplayName()).thenReturn(PRIMARY_NAME);
   }
 
   @BeforeMethod
   public void configurePersistedMixinType() throws Exception {
-    when(persistedMixin.isPrimaryable()).thenReturn(false);
-    when(persistedMixin.isMixable()).thenReturn(true);
-    when(persistedMixin.isPersisted()).thenReturn(true);
-    when(persistedMixin.getId()).thenReturn(PERSISTED_MIXIN_ID);
-    when(persistedMixin.getDisplayName()).thenReturn(PERSISTED_MIXIN_NAME);
+    lenient().when(persistedMixin.isPrimaryable()).thenReturn(false);
+    lenient().when(persistedMixin.isMixable()).thenReturn(true);
+    lenient().when(persistedMixin.isPersisted()).thenReturn(true);
+    lenient().when(persistedMixin.getId()).thenReturn(PERSISTED_MIXIN_ID);
+    lenient().when(persistedMixin.getDisplayName()).thenReturn(PERSISTED_MIXIN_NAME);
   }
 
   @BeforeMethod
   public void configureNotPersistedMixinType() throws Exception {
-    when(notPersistedMixin.isPrimaryable()).thenReturn(false);
-    when(notPersistedMixin.isMixable()).thenReturn(true);
-    when(notPersistedMixin.isPersisted()).thenReturn(false);
-    when(notPersistedMixin.getId()).thenReturn(NOT_PERSISTED_MIXIN_ID);
-    when(notPersistedMixin.getDisplayName()).thenReturn(NOT_PERSISTED_MIXIN_NAME);
+    lenient().when(notPersistedMixin.isPrimaryable()).thenReturn(false);
+    lenient().when(notPersistedMixin.isMixable()).thenReturn(true);
+    lenient().when(notPersistedMixin.isPersisted()).thenReturn(false);
+    lenient().when(notPersistedMixin.getId()).thenReturn(NOT_PERSISTED_MIXIN_ID);
+    lenient().when(notPersistedMixin.getDisplayName()).thenReturn(NOT_PERSISTED_MIXIN_NAME);
   }
 
   @BeforeMethod
   public void configureProjectTypeRegistry() throws Exception {
-    when(registry.getProjectType(PRIMARY_ID)).thenReturn(primaryType);
-    when(registry.getProjectType(PERSISTED_MIXIN_ID)).thenReturn(persistedMixin);
-    when(registry.getProjectType(NOT_PERSISTED_MIXIN_ID)).thenReturn(notPersistedMixin);
+    lenient().when(registry.getProjectType(PRIMARY_ID)).thenReturn(primaryType);
+    lenient().when(registry.getProjectType(PERSISTED_MIXIN_ID)).thenReturn(persistedMixin);
+    lenient().when(registry.getProjectType(NOT_PERSISTED_MIXIN_ID)).thenReturn(notPersistedMixin);
   }
 
   @Test

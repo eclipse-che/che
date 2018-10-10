@@ -17,6 +17,7 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.ADDED;
 import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.MODIFIED;
 import static org.eclipse.che.api.project.shared.Constants.VCS_PROVIDER_NAME;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,14 +60,14 @@ public class ProjectServiceVcsStatusInjectorTest {
         new ProjectServiceVcsStatusInjector(projectManager, singleton(vcsStatusProvider));
 
     when(project.getAttributes()).thenReturn(singletonMap(VCS_PROVIDER_NAME, singletonList("git")));
-    when(projectManager.get("/project")).thenReturn(Optional.of(project));
-    when(itemReference.getPath()).thenReturn("/project/file");
-    when(itemReference.getType()).thenReturn("file");
-    when(itemReference.getProject()).thenReturn("project");
-    when(itemReference1.getPath()).thenReturn("/project/file1");
-    when(itemReference1.getType()).thenReturn("file");
-    when(itemReference1.getProject()).thenReturn("project");
-    when(vcsStatusProvider.getVcsName()).thenReturn("git");
+    lenient().when(projectManager.get("/project")).thenReturn(Optional.of(project));
+    lenient().when(itemReference.getPath()).thenReturn("/project/file");
+    lenient().when(itemReference.getType()).thenReturn("file");
+    lenient().when(itemReference.getProject()).thenReturn("project");
+    lenient().when(itemReference1.getPath()).thenReturn("/project/file1");
+    lenient().when(itemReference1.getType()).thenReturn("file");
+    lenient().when(itemReference1.getProject()).thenReturn("project");
+    lenient().when(vcsStatusProvider.getVcsName()).thenReturn("git");
   }
 
   @Test
