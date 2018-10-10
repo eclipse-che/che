@@ -42,6 +42,8 @@ ADD src/config.yaml ${HOME}/.config/verdaccio/
 # Add patches
 ADD src/patches /home/theia-build/patches
 
+# Invalidate cache if there is a new commit
+ADD https://api.github.com/repos/theia-ide/theia/git/refs/heads/v${THEIA_VERSION} /tmp/sha1-repository
 # Build theia from source code and publish artifacts locally
 ADD src/builder/build-and-publish-theia.sh /tmp/builder/scripts/build-and-publish-theia.sh
 RUN /tmp/builder/scripts/build-and-publish-theia.sh
@@ -82,10 +84,11 @@ ADD src/builder/setup-nodejs.sh /tmp/builder/scripts/setup-nodejs.sh
 
 # Install sudo
 # Install Java for java extension
-# Install git
+# Install git (from software collection in order to have a recent version)
 # Install bzip2 to unpack files
 # Install supervisor for running theia
-RUN yum install -y sudo java-1.8.0-openjdk-devel git bzip2 && \
+RUN yum install -y centos-release-scl
+RUN yum install -y rh-git29 scl-utils sudo java-1.8.0-openjdk-devel bzip2 && \
     /tmp/builder/scripts/setup-nodejs.sh
 
 RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
@@ -102,6 +105,12 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && chmod -R 777 ${HOME}/.config/ \
     # use typescript globally (to have tsc/typescript working)
     && npm install -g typescript@2.9.2 \
+    # Disable the statistics for yeoman
+    && echo '{"optOut": true}' > $HOME/.config/insight-nodejs/insight-yo.json \
+    # Add software collection git to env
+    && echo 'source scl_source enable rh-git29' >> /home/theia/.bashrc \
+    # Cleanup tmp folder
+    && rm -rf /tmp/* \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 COPY --chown=theia:root --from=builder /home/theia /home/theia

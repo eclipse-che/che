@@ -19,6 +19,7 @@ import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackD
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -159,7 +160,9 @@ public class StackDomainSetPermissionsCheckerTest {
   public void throwsExceptionWhenChecksAdminPermissionsWithWrongDomainOnSetPermission()
       throws Exception {
     final Permissions permissions = new StackPermissionsImpl("*", "stack73", singletonList(SEARCH));
-    when(subj.hasPermission(StackDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION)).thenReturn(false);
+    lenient()
+        .when(subj.hasPermission(StackDomain.DOMAIN_ID, null, MANAGE_SYSTEM_ACTION))
+        .thenReturn(false);
 
     stackSetPermChecker.check(permissions);
 

@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.docker.local.installer;
 
 import static java.util.Collections.singletonMap;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -130,7 +131,8 @@ public class WsAgentServerConfigProvisionerTest {
       InternalMachineConfig machine = mock(InternalMachineConfig.class);
       machines.put(machineName, machine);
       if (machineName.equals(nameOfMachineWithWsagentServer)) {
-        when(machine.getServers())
+        lenient()
+            .when(machine.getServers())
             .thenReturn(
                 singletonMap(Constants.SERVER_WS_AGENT_HTTP_REFERENCE, new ServerConfigImpl()));
       }

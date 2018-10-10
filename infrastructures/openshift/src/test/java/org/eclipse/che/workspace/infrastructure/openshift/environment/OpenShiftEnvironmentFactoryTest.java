@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
@@ -89,7 +88,6 @@ public class OpenShiftEnvironmentFactoryTest {
   @Mock private OpenShiftClientFactory clientFactory;
   @Mock private KubernetesEnvironmentValidator k8sEnvValidator;
   @Mock private OpenShiftClient client;
-  @Mock private InternalEnvironment internalEnvironment;
   @Mock private InternalRecipe internalRecipe;
   @Mock private KubernetesListMixedOperation listMixedOperation;
   @Mock private KubernetesList validatedObjects;
@@ -112,7 +110,6 @@ public class OpenShiftEnvironmentFactoryTest {
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
     when(serverGettable.get()).thenReturn(validatedObjects);
-    when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
     when(internalRecipe.getContentType()).thenReturn(YAML_RECIPE);
     when(internalRecipe.getContent()).thenReturn("recipe content");
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);

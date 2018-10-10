@@ -15,7 +15,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.*;
 import static org.eclipse.che.dto.server.DtoFactory.*;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import com.google.common.collect.ImmutableMap;
 import java.io.IOException;
@@ -81,7 +81,7 @@ public class FactoryBaseValidatorTest {
             .withCreator(newDto(AuthorDto.class).withUserId("userid"));
     final UserImpl user = new UserImpl("userid", "email", "name");
 
-    when(userDao.getById("userid")).thenReturn(user);
+    lenient().when(userDao.getById("userid")).thenReturn(user);
     validator = new TesterFactoryBaseValidator();
   }
 

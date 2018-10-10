@@ -13,8 +13,8 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 
 import org.eclipse.che.commons.subject.Subject;
@@ -40,7 +40,7 @@ public class MachineTokenAuthorizedSubjectTest {
 
   @BeforeMethod
   private void setUp() {
-    when(baseSubject.getUserId()).thenReturn(USER_ID);
+    lenient().when(baseSubject.getUserId()).thenReturn(USER_ID);
     subject = new MachineTokenAuthorizedSubject(baseSubject, permissionChecker, WS_ID);
   }
 

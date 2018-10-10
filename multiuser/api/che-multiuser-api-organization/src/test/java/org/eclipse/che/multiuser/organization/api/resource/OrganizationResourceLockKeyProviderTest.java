@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.multiuser.organization.api.resource;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.multiuser.organization.api.OrganizationManager;
@@ -55,7 +55,8 @@ public class OrganizationResourceLockKeyProviderTest {
   }
 
   private void createOrganization(String id, String parentId) throws Exception {
-    when(organizationManager.getById(id))
+    lenient()
+        .when(organizationManager.getById(id))
         .thenReturn(new OrganizationImpl(id, id + "Name", parentId));
   }
 }

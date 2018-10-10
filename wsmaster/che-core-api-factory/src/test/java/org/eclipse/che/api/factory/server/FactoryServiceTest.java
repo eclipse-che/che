@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -144,13 +145,15 @@ public class FactoryServiceTest {
   public void setUp() throws Exception {
     factoryBuilderSpy = spy(new FactoryBuilder(new SourceStorageParametersValidator()));
     factoryParametersResolvers = new HashSet<>();
-    doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class));
-    doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class), anyBoolean());
+    lenient().doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class));
+    lenient().doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class), anyBoolean());
     when(factoryParametersResolverHolder.getFactoryParametersResolvers())
         .thenReturn(factoryParametersResolvers);
     user = new UserImpl(USER_ID, USER_EMAIL, ADMIN_USER_NAME);
-    when(userManager.getById(anyString())).thenReturn(user);
-    when(preferenceManager.find(USER_ID)).thenReturn(ImmutableMap.of("preference", "value"));
+    lenient().when(userManager.getById(anyString())).thenReturn(user);
+    lenient()
+        .when(preferenceManager.find(USER_ID))
+        .thenReturn(ImmutableMap.of("preference", "value"));
     service =
         new FactoryService(
             factoryManager,

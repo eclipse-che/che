@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -334,7 +335,7 @@ public class WorkspaceRuntimesTest {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     mockWorkspace(identity);
 
-    when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
+    lenient().when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
     RuntimeContext context = mockContext(identity);
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
     ImmutableMap<String, Machine> machines =
@@ -463,8 +464,8 @@ public class WorkspaceRuntimesTest {
     InternalEnvironment internalEnvironment = mock(InternalEnvironment.class);
     doReturn(internalEnvironment).when(testEnvFactory).create(any(Environment.class));
     doReturn(context).when(infrastructure).prepare(eq(identity), eq(internalEnvironment));
-    when(context.getInfrastructure()).thenReturn(infrastructure);
-    when(context.getIdentity()).thenReturn(identity);
+    lenient().when(context.getInfrastructure()).thenReturn(infrastructure);
+    lenient().when(context.getIdentity()).thenReturn(identity);
     return context;
   }
 
@@ -482,7 +483,7 @@ public class WorkspaceRuntimesTest {
     when(workspace.getId()).thenReturn(identity.getWorkspaceId());
     when(workspace.getAttributes()).thenReturn(new HashMap<>());
 
-    when(workspaceDao.get(identity.getWorkspaceId())).thenReturn(workspace);
+    lenient().when(workspaceDao.get(identity.getWorkspaceId())).thenReturn(workspace);
 
     return workspace;
   }

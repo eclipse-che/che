@@ -88,7 +88,6 @@ public class JsonRpcMessageReceiverTest {
   @Test
   public void shouldDispatchRequestIfRequestReceived() throws Exception {
     when(jsonRpcQualifier.isJsonRpcRequest(MESSAGE)).thenReturn(true);
-    when(jsonRpcQualifier.isJsonRpcResponse(MESSAGE)).thenReturn(false);
     when(jsonRpcUnmarshaller.unmarshalArray(any())).thenReturn(singletonList(MESSAGE));
 
     jsonRpcMessageReceiver.receive(ENDPOINT_ID, MESSAGE);
