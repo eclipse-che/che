@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -31,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -63,6 +65,10 @@ public class CreateWorkspaceFromPythonStackTest {
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() {
@@ -76,7 +82,11 @@ public class CreateWorkspaceFromPythonStackTest {
 
   @Test
   public void checkWorkspaceCreationFromPythonStack() {
-    createWorkspaceWithProjectFromStack(PYTHON, WORKSPACE_NAME, PROJECT_NAME);
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithProject(
+            PYTHON, WORKSPACE_NAME, PROJECT_NAME);
 
     switchToIdeAndWaitWorkspaceIsReadyToUse();
 
@@ -87,23 +97,6 @@ public class CreateWorkspaceFromPythonStackTest {
         PROJECT_NAME, RUN_GOAL, "console-python3-simple:run", "Hello, world!");
 
     checkLanguageServerInitialization(PROJECT_NAME, PYTHON_FILE_NAME, LS_INIT_MESSAGE);
-  }
-
-  private void createWorkspaceWithProjectFromStack(
-      NewWorkspace.Stack stack, String workspaceName, String projectName) {
-    dashboard.waitDashboardToolbarTitle();
-    dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.clickOnAddWorkspaceBtn();
-    newWorkspace.waitToolbar();
-
-    newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(stack);
-    newWorkspace.typeWorkspaceName(workspaceName);
-    projectSourcePage.clickOnAddOrImportProjectButton();
-    projectSourcePage.selectSample(projectName);
-    projectSourcePage.clickOnAddProjectButton();
-
-    newWorkspace.clickOnCreateButtonAndOpenInIDE();
   }
 
   private void switchToIdeAndWaitWorkspaceIsReadyToUse() {

@@ -81,6 +81,11 @@ public class CheTestWorkspaceProvider implements TestWorkspaceProvider {
     }
   }
 
+  public TestWorkspace getWorkspace(String workspaceName, TestUser owner) {
+    return new CheTestWorkspace(
+        workspaceName, owner, testWorkspaceServiceClientFactory.create(owner));
+  }
+
   @Override
   public TestWorkspace createWorkspace(
       TestUser owner, int memoryGB, WorkspaceTemplate template, boolean startAfterCreation)

@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -40,6 +41,9 @@ public class CreateWorkspaceFromCentosBlankStackTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
+
   @BeforeClass
   public void setUp() {
     dashboard.open();
@@ -52,8 +56,11 @@ public class CreateWorkspaceFromCentosBlankStackTest {
 
   @Test
   public void createWorkspaceFromCentosBlankStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProject(
-        CENTOS_BLANK, WORKSPACE_NAME, PROJECT_NAME);
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithProject(
+            CENTOS_BLANK, WORKSPACE_NAME, PROJECT_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 

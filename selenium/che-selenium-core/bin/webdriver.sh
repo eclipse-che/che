@@ -856,7 +856,11 @@ attachLinkToTestReport() {
     local titleOfLink=$2
     local dirWithResources="target/site/$relativePathToResource"
 
+    # return if directory doesn't exist
     [[ ! -d ${dirWithResources} ]] && return
+
+    # return if directory is empty
+    [[ -z "$(ls -A ${dirWithResources})" ]] && return
 
     for file in $(ls ${dirWithResources}/* | sort -r)
     do
