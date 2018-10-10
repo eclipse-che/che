@@ -50,7 +50,7 @@ public class StartSynchronizerTest {
   @BeforeMethod
   public void setUp() {
     runtimeId = new RuntimeIdentityImpl("workspace123", "envName", "ownerId");
-    startSynchronizer = new StartSynchronizer(eventService, runtimeId);
+    startSynchronizer = new StartSynchronizer(eventService, 5, runtimeId);
   }
 
   @Test
@@ -168,7 +168,7 @@ public class StartSynchronizerTest {
   public void shouldInterruptStartWhenStoppingEventIsPublished() throws Exception {
     // given
     EventService eventService = new EventService();
-    StartSynchronizer localStartSynchronizer = new StartSynchronizer(eventService, runtimeId);
+    StartSynchronizer localStartSynchronizer = new StartSynchronizer(eventService, 5, runtimeId);
     localStartSynchronizer.start();
 
     // when
@@ -182,7 +182,7 @@ public class StartSynchronizerTest {
   public void shouldCompleteStartWhenStoppedEventIsPublished() {
     // given
     EventService eventService = new EventService();
-    StartSynchronizer localStartSynchronizer = new StartSynchronizer(eventService, runtimeId);
+    StartSynchronizer localStartSynchronizer = new StartSynchronizer(eventService, 5, runtimeId);
     localStartSynchronizer.start();
 
     // when
