@@ -98,7 +98,9 @@ public class KeycloakEnvironmentInitalizationFilterTest {
     lenient().when(keyManager.getOrCreateKeyPair(anyString())).thenReturn(kp);
     keycloakAttributes.clear();
     keycloakSettingsMap.clear();
-    lenient().when(keycloakProfileRetriever.retrieveKeycloakAttributes()).thenReturn(keycloakAttributes);
+    lenient()
+        .when(keycloakProfileRetriever.retrieveKeycloakAttributes())
+        .thenReturn(keycloakAttributes);
     lenient().when(keycloakSettings.get()).thenReturn(keycloakSettingsMap);
   }
 
