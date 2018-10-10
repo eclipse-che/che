@@ -14,6 +14,7 @@ package org.eclipse.che.ide.command.execute;
 import static org.eclipse.che.ide.util.StringUtils.join;
 
 import com.google.inject.Inject;
+import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.inject.Singleton;
@@ -44,6 +45,7 @@ import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.ide.api.command.exec.ExecAgentCommandManager;
 import org.eclipse.che.ide.api.command.exec.ExecAgentConsumer;
 import org.eclipse.che.ide.api.command.exec.ExecAgentEventManager;
+import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -68,10 +70,15 @@ public class JsonRpcExecAgentCommandManager implements ExecAgentCommandManager {
 
   @Inject
   protected JsonRpcExecAgentCommandManager(
-      DtoFactory dtoFactory, RequestTransmitter transmitter, ExecAgentEventManager eventManager) {
+      DtoFactory dtoFactory,
+      RequestTransmitter transmitter,
+      ExecAgentEventManager eventManager,
+      EventBus eventBus) {
     this.dtoFactory = dtoFactory;
     this.transmitter = transmitter;
     this.eventManager = eventManager;
+
+    eventBus.addHandler(WorkspaceStoppedEvent.TYPE, event -> eventManager.cleanAllConsumers());
   }
 
   @Override
