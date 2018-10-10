@@ -73,7 +73,7 @@ export class CheEditModeOverlay implements ng.IDirective {
     <che-button-cancel-flat che-button-title="{{config.cancelButton.title || 'Cancel'}}"
                             name="{{config.cancelButton.name || 'cancel-button'}}"
                             class="cancel-button"
-                            ng-disabled="config.disabled || config.cancelButton.disabled"
+                            ng-disabled="config.cancelButton.disabled"
                             ng-click="config.cancelButton.action()"></che-button-cancel-flat>
   </div>
 
