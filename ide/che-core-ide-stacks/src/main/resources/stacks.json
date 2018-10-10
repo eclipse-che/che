@@ -223,7 +223,8 @@
       },
       "projects": [],
       "attributes": {
-        "editor": "org.eclipse.che.editor.theia:1.0.0"
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-machine-exec-plugin:0.0.1"
       },
       "commands": [],
       "links": []
