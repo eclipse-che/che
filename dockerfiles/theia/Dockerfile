@@ -103,6 +103,8 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && chmod -R 777 ${HOME}/.config/ \
     # use typescript globally (to have tsc/typescript working)
     && npm install -g typescript@2.9.2 \
+    # Disable the statistics for yeoman
+    && echo '{"optOut": true}' > $HOME/.config/insight-nodejs/insight-yo.json \
     # Add software collection git to env
     && echo 'source scl_source enable rh-git29' >> /home/theia/.bashrc \
     # Change permissions to allow editing of files for openshift user
