@@ -425,6 +425,7 @@ declare namespace che {
 
   export interface IProject {
     name: string;
+    type?: string;
     source: IProjectSource;
     workspaceId?: string;
     workspaceName?: string;
