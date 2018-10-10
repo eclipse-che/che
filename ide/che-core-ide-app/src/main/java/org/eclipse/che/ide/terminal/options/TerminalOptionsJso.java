@@ -29,7 +29,7 @@ public class TerminalOptionsJso extends Jso {
             screenKeys: true,
             command: "",
             fontSize: 12,
-            fontFamily: "DejaVu Sans Mono"
+            fontFamily: "DejaVu Sans Mono, Liberation Mono, monospace"
         }
     }-*/;
 
