@@ -60,7 +60,10 @@ public abstract class FactoryBaseValidator {
 
         if (project.getSource() == null) {
           throw new BadRequestException(
-              format(FactoryConstants.MISSING_MANDATORY_MESSAGE, "project.source"));
+              format(
+                  FactoryConstants.MISSING_MANDATORY_MESSAGE,
+                  "source",
+                  ProjectConfigDto.class.getSimpleName()));
         }
 
         final String location = project.getSource().getLocation();

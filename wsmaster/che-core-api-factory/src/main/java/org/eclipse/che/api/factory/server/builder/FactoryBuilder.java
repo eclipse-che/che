@@ -227,7 +227,10 @@ public class FactoryBuilder {
             && factoryParameter.ignoredSince().compareTo(version) > 0
             && method.getDeclaringClass().isAssignableFrom(allowedMethodsProvider)) {
           throw new ConflictException(
-              String.format(FactoryConstants.MISSING_MANDATORY_MESSAGE, method.getName()));
+              String.format(
+                  FactoryConstants.MISSING_MANDATORY_MESSAGE,
+                  fullName,
+                  method.getDeclaringClass().getSimpleName()));
         }
       } else if (!method.getDeclaringClass().isAssignableFrom(allowedMethodsProvider)) {
         throw new ConflictException(
