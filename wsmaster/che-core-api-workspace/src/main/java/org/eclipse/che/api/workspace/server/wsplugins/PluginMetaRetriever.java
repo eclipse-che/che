@@ -191,12 +191,7 @@ public class PluginMetaRetriever {
               ? pluginRegistry.clone()
               : UriBuilder.fromUri(pluginFQN.getRegistry());
 
-      URI metaURI =
-          metaURIBuilder
-              .path(pluginFQN.getId())
-              .path(pluginFQN.getVersion())
-              .path("meta.yaml")
-              .build();
+      URI metaURI = metaURIBuilder.path(id).path(version).path("meta.yaml").build();
       PluginMeta meta = getBody(metaURI, PluginMeta.class);
       validateMeta(meta, id, version);
       return meta;
