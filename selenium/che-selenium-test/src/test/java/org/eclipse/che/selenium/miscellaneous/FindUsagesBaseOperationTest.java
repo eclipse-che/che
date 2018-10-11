@@ -142,6 +142,8 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+
+    // Open node and check that only "org.eclipse.qa.examples" node is opened
     findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
@@ -156,6 +158,9 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+
+    // Open node and check that only "handleRequest(HttpServletRequest, HttpServletResponse)" node
+    // is opened
     findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);

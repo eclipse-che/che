@@ -211,14 +211,6 @@ public class WorkspaceDetailsOverviewTest {
         });
   }
 
-  private void namesShouldBeInvalid() {
-    NOT_VALID_NAMES.forEach(
-        name -> {
-          nameShouldBeValid(CHANGED_WORKSPACE_NAME);
-          nameShouldBeInvalid(name, SPECIAL_CHARACTERS_ERROR_MESSAGE);
-        });
-  }
-
   private void openExportWorkspaceForm() {
     workspaceOverview.clickExportWorkspaceBtn();
     workspaceOverview.waitExportWorkspaceFormOpened();
