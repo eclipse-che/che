@@ -198,6 +198,9 @@ public class EditMachineForm {
   }
 
   public void typeName(String name) {
+    // wait before can type machine name in input field
+    WaitUtils.sleepQuietly(1);
+
     seleniumWebDriverHelper.setValue(waitNameField(), name);
   }
 
