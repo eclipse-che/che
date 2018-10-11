@@ -12,9 +12,9 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSALS_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_DESCRIPTION_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_KEY_BINDING_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.SEARCH_FIELD_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.WIDGET_BODY_XPATH;
@@ -51,10 +51,10 @@ public class TheiaProposalForm {
     // for selection checking get "aria-selected" attribute. "true" if selected, "false" if not.
     String WIDGET_BODY_XPATH = "//div[@class='monaco-quick-open-widget']";
     String SEARCH_FIELD_XPATH = WIDGET_BODY_XPATH + "//div[@class='quick-open-input']//input";
-    String PROPOSAL_XPATH =
+    String PROPOSALS_XPATH =
         WIDGET_BODY_XPATH
             + "//div[contains(@class, 'monaco-tree-row') and not(contains(@class, 'monaco-tree-rows'))]";
-    String PROPOSAL_XPATH_TEMPLATE = "(" + PROPOSAL_XPATH + ")[%s]";
+    String PROPOSAL_XPATH_TEMPLATE = "(" + PROPOSALS_XPATH + ")[%s]";
     String PROPOSAL_DESCRIPTION_XPATH_TEMPLATE =
         PROPOSAL_XPATH_TEMPLATE + "//div[@class='monaco-icon-label']";
     // get attribute "title" which contains text. For example - "Shift+Alt+W";
@@ -89,7 +89,7 @@ public class TheiaProposalForm {
   }
 
   private int getProposalsCount() {
-    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(PROPOSAL_XPATH)).size();
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(PROPOSALS_XPATH)).size();
   }
 
   public boolean isKeyBindingFieldExisted(int proposalIndex) {
