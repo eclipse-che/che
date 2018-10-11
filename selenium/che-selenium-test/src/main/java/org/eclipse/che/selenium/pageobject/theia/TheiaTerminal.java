@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.selenium.pageobject.theia;
 
+import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaTerminal.Locators.TERMINAL_CURSOR_LAYER;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaTerminal.Locators.TERMINAL_TAB_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaTerminal.Locators.TERMINAL_TEXT_LAYER;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
@@ -26,6 +28,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -59,20 +62,82 @@ public class TheiaTerminal {
 
   public interface Locators {
     String TERMINAL_BODY_ID_TEMPLATE = "terminal-%s";
-    String TERMINAL_TEXT_LAYER = "//canvas[@class='xterm-text-layer']";
-    String TERMINAL_CURSOR_LAYER = "//canvas[@class='xterm-cursor-layer']";
+    String TERMINAL_TEXT_LAYER = "(//canvas[@class='xterm-text-layer'])[%s]";
+    String TERMINAL_CURSOR_LAYER = "(//canvas[@class='xterm-cursor-layer'])[%s]";
+    String TERMINAL_TAB_XPATH_TEMPLATE = "//div[@class='p-TabBar-tabLabel' and text()='%s']";
   }
 
-  private WebElement getTerminalTextLayer() {
-    return seleniumWebDriverHelper.waitVisibility(By.xpath(TERMINAL_TEXT_LAYER));
+  private String getTerminalCursorLayer(int terminalIndex) {
+    final int adaptedTerminalIndex = terminalIndex + 1;
+
+    return format(TERMINAL_CURSOR_LAYER, adaptedTerminalIndex);
+  }
+
+  private String getTerminalTextLayerXpath(int terminalIndex) {
+    final int adaptedTerminalIndex = terminalIndex + 1;
+
+    return format(TERMINAL_TEXT_LAYER, adaptedTerminalIndex);
+  }
+
+  private String getTerminalTabXpath(String tabTitle) {
+    return format(TERMINAL_TAB_XPATH_TEMPLATE, tabTitle);
+  }
+
+  private WebElement getTerminalTextLayer(int terminalIndex) {
+    final String terminalTextLayerXpath = getTerminalTextLayerXpath(terminalIndex);
+
+    return seleniumWebDriverHelper.waitVisibility(By.xpath(terminalTextLayerXpath));
+  }
+
+  public void waitTabSelected(String tabTitle) {
+    final String terminalTabXpath = getTerminalTabXpath(tabTitle);
+    final String cssTopBorderColorProperty = "border-top-color";
+    final String selectedElementTopBorderColor = "rgba(245, 245, 245, 1)";
+
+    seleniumWebDriverHelper.waitCssValueEqualsTo(
+        By.xpath(terminalTabXpath), cssTopBorderColorProperty, selectedElementTopBorderColor);
+  }
+
+  public void waitTabUnselected(String tabTitle) {
+    final String terminalTabXpath = getTerminalTabXpath(tabTitle);
+    final String cssTopBorderColorProperty = "border-top-color";
+    final String unselectedElementTopBorderColor = "rgba(245, 245, 245, 1)";
+
+    seleniumWebDriverHelper.waitCssValueEqualsTo(
+        By.xpath(terminalTabXpath), cssTopBorderColorProperty, unselectedElementTopBorderColor);
+  }
+
+  public void waitTerminalTab(String tabTitle) {
+    final String terminalTabXpath = getTerminalTabXpath(tabTitle);
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(terminalTabXpath));
+  }
+
+  public void waitTerminalTabDisappearance(String tabTitle) {
+    final String terminalTabXpath = getTerminalTabXpath(tabTitle);
+
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(terminalTabXpath));
+  }
+
+  public void clickOnTerminalTab(String tabTitle) {
+    final String terminalTabXpath = getTerminalTabXpath(tabTitle);
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> performClick(terminalTabXpath), StaleElementReferenceException.class);
+  }
+
+  private void performClick(String elementXpath) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(elementXpath));
   }
 
   public void waitTerminal() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(TERMINAL_TEXT_LAYER));
   }
 
-  public void clickOnTerminal() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(TERMINAL_CURSOR_LAYER));
+  public void clickOnTerminal(int terminalIndex) {
+    final String terminalCursorLayerXpath = getTerminalCursorLayer(terminalIndex);
+
+    seleniumWebDriverHelper.waitAndClick(By.xpath(terminalCursorLayerXpath));
   }
 
   public void enterText(String text) {
@@ -87,14 +152,14 @@ public class TheiaTerminal {
     enterText(ENTER.toString());
   }
 
-  private void copyTerminalTextToClipboard() {
-    Dimension textLayerSize = getTerminalTextLayer().getSize();
+  private void copyTerminalTextToClipboard(int terminalIndex) {
+    Dimension textLayerSize = getTerminalTextLayer(terminalIndex).getSize();
     final Actions action = seleniumWebDriverHelper.getAction();
 
     final int xBeginCoordinateShift = -(textLayerSize.getWidth() / 2);
     final int yBeginCoordinateShift = -(textLayerSize.getHeight() / 2);
 
-    seleniumWebDriverHelper.moveCursorTo(getTerminalTextLayer());
+    seleniumWebDriverHelper.moveCursorTo(getTerminalTextLayer(terminalIndex));
 
     // shift to top left corner
     seleniumWebDriverHelper
@@ -116,24 +181,24 @@ public class TheiaTerminal {
     seleniumWebDriverHelper.sendKeys(keysCombination);
 
     // cancel terminal area selection
-    clickOnTerminal();
+    clickOnTerminal(terminalIndex);
   }
 
-  public void waitTerminalOutput(String expectedText) {
+  public void waitTerminalOutput(String expectedText, int terminalIndex) {
     final int timeout = LOADER_TIMEOUT_SEC;
 
     seleniumWebDriverHelper.waitSuccessCondition(
-        driver -> getTerminalOutput().contains(expectedText), timeout);
+        driver -> getTerminalOutput(terminalIndex).contains(expectedText), timeout);
   }
 
-  public String getTerminalOutput() {
+  public String getTerminalOutput(int terminalIndex) {
     // TODO this is workaround and should be resolved by issue:
     // https://github.com/eclipse/che/issues/11387
 
     final String expectedTextFileName = "Untitled.txt";
     String terminalOutput = "";
 
-    copyTerminalTextToClipboard();
+    copyTerminalTextToClipboard(terminalIndex);
 
     // create text file
     theiaProjectTree.clickOnProjectsRootItem();
