@@ -92,19 +92,19 @@ public class TheiaBuildPluginTest {
     theiaProjectTree.waitProjectsRootItem();
 
     openTerminal("File", "Open new multi-machine terminal", "ws/dev");
-    theiaTerminal.waitTerminalTab(WS_DEV_TERMINAL_TITLE);
-    theiaTerminal.clickOnTerminalTab(WS_DEV_TERMINAL_TITLE);
+    theiaTerminal.waitTab(WS_DEV_TERMINAL_TITLE);
+    theiaTerminal.clickOnTab(WS_DEV_TERMINAL_TITLE);
     theiaTerminal.performCommand(GIT_CLONE_COMMAND);
     theiaTerminal.waitTerminalOutput(EXPECTED_CLONE_OUTPUT, 0);
 
     openTerminal("File", "Open new multi-machine terminal", "ws/theia-ide");
-    theiaTerminal.waitTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
-    theiaTerminal.clickOnTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.waitTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.clickOnTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.performCommand(GO_TO_DIRECTORY_COMMAND);
     theiaTerminal.waitTerminalOutput(GO_TO_DIRECTORY_COMMAND, 1);
 
-    theiaTerminal.waitTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
-    theiaTerminal.clickOnTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.waitTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.clickOnTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.performCommand(BUILD_COMMAND);
     theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
   }

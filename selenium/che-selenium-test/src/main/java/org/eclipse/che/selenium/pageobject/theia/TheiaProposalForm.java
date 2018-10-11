@@ -12,11 +12,11 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_DESCRIPTION_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_KEY_BINDING_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_XPATH;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.SEARCH_FIELD_XPATH;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.TREE_ROWS_XPATH;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.TREE_ROW_DESCRIPTION_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.TREE_ROW_KEY_BINDING_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.TREE_ROW_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.WIDGET_BODY_XPATH;
 
 import com.google.inject.Inject;
@@ -51,15 +51,15 @@ public class TheiaProposalForm {
     // for selection checking get "aria-selected" attribute. "true" if selected, "false" if not.
     String WIDGET_BODY_XPATH = "//div[@class='monaco-quick-open-widget']";
     String SEARCH_FIELD_XPATH = WIDGET_BODY_XPATH + "//div[@class='quick-open-input']//input";
-    String TREE_ROWS_XPATH =
+    String PROPOSAL_XPATH =
         WIDGET_BODY_XPATH
             + "//div[contains(@class, 'monaco-tree-row') and not(contains(@class, 'monaco-tree-rows'))]";
-    String TREE_ROW_XPATH_TEMPLATE = "(" + TREE_ROWS_XPATH + ")[%s]";
-    String TREE_ROW_DESCRIPTION_XPATH_TEMPLATE =
-        TREE_ROW_XPATH_TEMPLATE + "//div[@class='monaco-icon-label']";
+    String PROPOSAL_XPATH_TEMPLATE = "(" + PROPOSAL_XPATH + ")[%s]";
+    String PROPOSAL_DESCRIPTION_XPATH_TEMPLATE =
+        PROPOSAL_XPATH_TEMPLATE + "//div[@class='monaco-icon-label']";
     // get attribute "title" which contains text. For example - "Shift+Alt+W";
-    String TREE_ROW_KEY_BINDING_XPATH_TEMPLATE =
-        TREE_ROW_XPATH_TEMPLATE + "//div[@class='monaco-keybinding']";
+    String PROPOSAL_KEY_BINDING_XPATH_TEMPLATE =
+        PROPOSAL_XPATH_TEMPLATE + "//div[@class='monaco-keybinding']";
   }
 
   public void waitForm() {
@@ -89,23 +89,28 @@ public class TheiaProposalForm {
   }
 
   private int getProposalsCount() {
-    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(TREE_ROWS_XPATH)).size();
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(PROPOSAL_XPATH)).size();
   }
 
-  public boolean isKeyBindingFieldExists(int proposalIndex) {
-    final String keyBindingFieldXpath = format(TREE_ROW_KEY_BINDING_XPATH_TEMPLATE, proposalIndex);
+  public boolean isKeyBindingFieldExisted(int proposalIndex) {
+    final String keyBindingFieldXpath = format(PROPOSAL_KEY_BINDING_XPATH_TEMPLATE, proposalIndex);
     return seleniumWebDriverHelper.isVisible(By.xpath(keyBindingFieldXpath));
   }
 
   public String getProposalDescription(int proposalIndex) {
-    String proposalDescriptionXpath = format(TREE_ROW_DESCRIPTION_XPATH_TEMPLATE, proposalIndex);
+    final int adoptedIndex = proposalIndex + 1;
+    final String proposalDescriptionXpath =
+        format(PROPOSAL_DESCRIPTION_XPATH_TEMPLATE, adoptedIndex);
+
     return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(proposalDescriptionXpath));
   }
 
   public String getProposalKeyBinding(int proposalIndex) {
-    String keyBindingContainerXpath = format(TREE_ROW_KEY_BINDING_XPATH_TEMPLATE, proposalIndex);
+    final int adoptedIndex = proposalIndex + 1;
+    final String keyBindingContainerXpath =
+        format(PROPOSAL_KEY_BINDING_XPATH_TEMPLATE, adoptedIndex);
 
-    if (isKeyBindingFieldExists(proposalIndex)) {
+    if (isKeyBindingFieldExisted(proposalIndex)) {
       return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(keyBindingContainerXpath));
     }
 
@@ -120,8 +125,7 @@ public class TheiaProposalForm {
     List<Pair<String, String>> result = new ArrayList<>();
 
     for (int i = 0; i < getProposalsCount(); i++) {
-      int adoptedProposalIndex = i + 1;
-      result.add(getProposal(adoptedProposalIndex));
+      result.add(getProposal(i));
     }
 
     return result;
@@ -154,7 +158,7 @@ public class TheiaProposalForm {
   }
 
   public boolean isProposalSelected(int proposalIndex) {
-    final String proposalXpath = format(TREE_ROW_XPATH_TEMPLATE, proposalIndex);
+    final String proposalXpath = format(PROPOSAL_XPATH_TEMPLATE, proposalIndex);
     final String selectionStateAttribute = "aria-selected";
 
     return seleniumWebDriverHelper
@@ -169,9 +173,7 @@ public class TheiaProposalForm {
   public int getProposalIndex(String proposalDescription) {
 
     for (int i = 0; i < getProposalsCount(); i++) {
-      int adoptedProposalIndex = i + 1;
-
-      if (proposalDescription.equals(getProposalDescription(adoptedProposalIndex))) {
+      if (proposalDescription.equals(getProposalDescription(i))) {
         return i;
       }
     }
@@ -186,7 +188,7 @@ public class TheiaProposalForm {
 
   public void clickOnProposal(int proposalIndex) {
     final int adoptedProposalIndex = proposalIndex + 1;
-    String proposalItemXpath = format(TREE_ROW_XPATH_TEMPLATE, adoptedProposalIndex);
+    String proposalItemXpath = format(PROPOSAL_XPATH_TEMPLATE, adoptedProposalIndex);
 
     seleniumWebDriverHelper.waitNoExceptions(
         () -> clickOnItem(proposalItemXpath), StaleElementReferenceException.class);
