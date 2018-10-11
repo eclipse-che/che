@@ -94,7 +94,7 @@ public class GitStatusBar {
   }
 
   /** click on the 'minimize 'button */
-  public void clickOnStatusBarMinimizeBtn() {
+  public void waitAndClickOnStatusBarMinimizeBtn() {
     seleniumWebDriverHelper.waitAndClick(gitBarHideBtn);
   }
 }
