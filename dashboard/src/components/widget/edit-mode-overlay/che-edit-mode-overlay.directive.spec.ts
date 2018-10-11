@@ -186,11 +186,6 @@ describe(`cheEditModeOverlay >`, () => {
         expect($scope.config.applyButton.action).not.toHaveBeenCalled();
       });
 
-      it(`shouldn't call a callback when 'cancelButton' is clicked >`, () => {
-        cancelButtonEl.click();
-        expect($scope.config.cancelButton.action).not.toHaveBeenCalled();
-      });
-
     });
 
   });
