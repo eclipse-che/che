@@ -103,8 +103,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
    * @param brokersResult
    * @return kubernetes environment (or its extension) with the Plugin broker objects
    */
-  public E create(Collection<PluginMeta> pluginsMeta, RuntimeIdentity runtimeID,
-      BrokersResult brokersResult)
+  public E create(
+      Collection<PluginMeta> pluginsMeta, RuntimeIdentity runtimeID, BrokersResult brokersResult)
       throws InfrastructureException {
 
     BrokersConfigs brokersConfigs = new BrokersConfigs();
@@ -113,26 +113,30 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     brokersConfigs.machines = new HashMap<>();
 
     PodSpec spec = pod.getSpec();
-    List<EnvVar> envVars = Stream.of(authEnableEnvVarProvider.get(runtimeID),
-        machineTokenEnvVarProvider.get(runtimeID)).map(this::asEnvVar).collect(Collectors.toList());
+    List<EnvVar> envVars =
+        Stream.of(
+                authEnableEnvVarProvider.get(runtimeID), machineTokenEnvVarProvider.get(runtimeID))
+            .map(this::asEnvVar)
+            .collect(Collectors.toList());
 
     Multimap<String, PluginMeta> brokersImageToMetas = sortByBrokerImage(pluginsMeta);
-    for (Entry<String, Collection<PluginMeta>> brokerImageToMetas : brokersImageToMetas.asMap().entrySet()) {
-      BrokerConfig brokerConfig = createBrokerConfig(runtimeID,
-          brokerImageToMetas.getValue(),
-          envVars,
-          brokerImageToMetas.getKey(),
-          pod);
+    for (Entry<String, Collection<PluginMeta>> brokerImageToMetas :
+        brokersImageToMetas.asMap().entrySet()) {
+      BrokerConfig brokerConfig =
+          createBrokerConfig(
+              runtimeID, brokerImageToMetas.getValue(), envVars, brokerImageToMetas.getKey(), pod);
 
       brokersConfigs.machines.put(brokerConfig.machineName, brokerConfig.machineConfig);
       brokersConfigs.configMaps.put(brokerConfig.configMapName, brokerConfig.configMap);
       spec.getContainers().add(brokerConfig.container);
-      spec.getVolumes().add(new VolumeBuilder()
-          .withName(brokerConfig.configMapVolume)
-          .withNewConfigMap()
-          .withName(brokerConfig.configMapName)
-          .endConfigMap()
-          .build());
+      spec.getVolumes()
+          .add(
+              new VolumeBuilder()
+                  .withName(brokerConfig.configMapVolume)
+                  .withNewConfigMap()
+                  .withName(brokerConfig.configMapName)
+                  .endConfigMap()
+                  .build());
 
       brokersResult.oneMoreBroker();
     }
@@ -146,10 +150,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return NameGenerator.generate(suffix, 6);
   }
 
-  private Container newContainer(RuntimeIdentity runtimeId,
-      List<EnvVar> envVars,
-      String image,
-      String brokerVolumeName) {
+  private Container newContainer(
+      RuntimeIdentity runtimeId, List<EnvVar> envVars, String image, String brokerVolumeName) {
     final Container container =
         new ContainerBuilder()
             .withName(generateUniqueName(CONTAINER_NAME_SUFFIX))
@@ -198,7 +200,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return new EnvVarBuilder().withName(envVar.first).withValue(envVar.second).build();
   }
 
-  private BrokerConfig createBrokerConfig(RuntimeIdentity runtimeId,
+  private BrokerConfig createBrokerConfig(
+      RuntimeIdentity runtimeId,
       Collection<PluginMeta> pluginsMeta,
       List<EnvVar> envVars,
       String image,
@@ -222,11 +225,17 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     for (PluginMeta pluginMeta : pluginMetas) {
       String type = pluginMeta.getType();
       if (isNullOrEmpty(type)) {
-        throw new InfrastructureException(format("Plugin '%s:%s' has invalid type '%s'",pluginMeta.getId(), pluginMeta.getVersion(), type));
+        throw new InfrastructureException(
+            format(
+                "Plugin '%s:%s' has invalid type '%s'",
+                pluginMeta.getId(), pluginMeta.getVersion(), type));
       }
       String image = pluginTypeToImage.get(type);
       if (isNullOrEmpty(image)) {
-        throw new InfrastructureException(format("Plugin '%s:%s' has unsupported type '%s'",pluginMeta.getId(), pluginMeta.getVersion(), type));
+        throw new InfrastructureException(
+            format(
+                "Plugin '%s:%s' has unsupported type '%s'",
+                pluginMeta.getId(), pluginMeta.getVersion(), type));
       }
       sortedPlugins.put(image, pluginMeta);
     }

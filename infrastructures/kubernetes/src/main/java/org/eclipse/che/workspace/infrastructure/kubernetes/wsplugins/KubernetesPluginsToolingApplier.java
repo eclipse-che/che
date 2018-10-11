@@ -96,11 +96,12 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     }
   }
 
-  private void populateWorkspaceEnvVars(ChePlugin chePlugin,
-      KubernetesEnvironment kubernetesEnvironment) {
+  private void populateWorkspaceEnvVars(
+      ChePlugin chePlugin, KubernetesEnvironment kubernetesEnvironment) {
 
     List<EnvVar> workspaceEnv = toK8sEnvVars(chePlugin.getWorkspaceEnv());
-    kubernetesEnvironment.getPods()
+    kubernetesEnvironment
+        .getPods()
         .values()
         .stream()
         .flatMap(pod -> pod.getSpec().getContainers().stream())
@@ -112,7 +113,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     if (workspaceEnv == null) {
       return emptyList();
     }
-    return workspaceEnv.stream()
+    return workspaceEnv
+        .stream()
         .map(e -> new EnvVar(e.getName(), e.getValue(), null))
         .collect(Collectors.toList());
   }

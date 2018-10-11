@@ -143,9 +143,18 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     MapBinder<String, String> pluginBrokers =
         MapBinder.newMapBinder(
-            binder(), String.class, String.class, Names.named("che.workspace.plugin_broker.images"));
-    pluginBrokers.addBinding("Che Plugin").to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
-    pluginBrokers.addBinding("Che Editor").to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
-    pluginBrokers.addBinding("Theia remote plugin").to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia_remote.image")));
+            binder(),
+            String.class,
+            String.class,
+            Names.named("che.workspace.plugin_broker.images"));
+    pluginBrokers
+        .addBinding("Che Plugin")
+        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
+    pluginBrokers
+        .addBinding("Che Editor")
+        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
+    pluginBrokers
+        .addBinding("Theia remote plugin")
+        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia_remote.image")));
   }
 }

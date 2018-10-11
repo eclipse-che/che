@@ -35,8 +35,7 @@ public class WaitBrokerResult extends BrokerPhase {
 
   private final int resultWaitingTimeout;
 
-  public WaitBrokerResult(
-      BrokersResult brokersResult, int resultWaitingTimeout) {
+  public WaitBrokerResult(BrokersResult brokersResult, int resultWaitingTimeout) {
     this.brokersResult = brokersResult;
     this.resultWaitingTimeout = resultWaitingTimeout;
   }
