@@ -12,27 +12,28 @@
 package org.eclipse.che.selenium.pageobject.git;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Musienko Maxim */
 @Singleton
 public class GitStatusBar {
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
-  public GitStatusBar(SeleniumWebDriver seleniumWebDriver) {
+  public GitStatusBar(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -59,57 +60,41 @@ public class GitStatusBar {
   @FindBy(xpath = Locators.GIT_BAR_HIDE_BTN)
   WebElement gitBarHideBtn;
 
-  /** wait appears git statusbar tab */
-  public void waitGitStatusBarOpenedTab() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(statusBarTab));
-  }
-
   /** wait appears git status Bar information panel */
   public void waitGitStatusBarInfoPanel() {
-    new WebDriverWait(seleniumWebDriver, 10)
-        .until(ExpectedConditions.visibilityOf(gitStatusBarInfoPanel));
+    seleniumWebDriverHelper.waitVisibility(gitStatusBarInfoPanel);
   }
 
   public String getTextStatus() {
-    return gitStatusBarInfoPanel.getText();
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(gitStatusBarInfoPanel);
   }
 
   public void waitCloseGitStatusBarInfoPanel() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.GIT_BAR_INFO_PANEL)));
-  }
-
-  /** click on statusbar tab */
-  public void clickOnGitStatusBarTab() {
-    waitGitStatusBarOpenedTab();
-    statusBarTab.click();
+    seleniumWebDriverHelper.waitInvisibility(By.id(Locators.GIT_BAR_INFO_PANEL));
   }
 
   public void waitMessageInGitTab(final String message) {
     waitGitStatusBarInfoPanel();
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until((ExpectedCondition<Boolean>) webDriver -> getTextStatus().contains(message));
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitSuccessCondition(
+                webDriver -> getTextStatus().contains(message), LOAD_PAGE_TIMEOUT_SEC),
+        StaleElementReferenceException.class);
   }
 
   /** wait and click on navigate button in the 'git console' */
   public void waitAndClickOnNavigateBtn() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(gitStatusBarNaviBtn));
-    gitStatusBarNaviBtn.click();
+    seleniumWebDriverHelper.waitAndClick(gitStatusBarNaviBtn);
   }
 
   /** wait and click on remove button in the 'git console' */
   public void waitAndClickOnRemoveBtn() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
-        .until(ExpectedConditions.elementToBeClickable(gitStatusBarRemoveBtn));
-    gitStatusBarRemoveBtn.click();
+    seleniumWebDriverHelper.waitAndClick(gitStatusBarRemoveBtn);
   }
 
   /** click on the 'minimize 'button */
-  public void clickOnStatusBarMinimizeBtn() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(gitBarHideBtn))
-        .click();
+  public void waitAndClickOnStatusBarMinimizeBtn() {
+    seleniumWebDriverHelper.waitAndClick(gitBarHideBtn);
   }
 }
