@@ -31,6 +31,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -232,6 +233,10 @@ public class EditMachineForm {
   }
 
   public void waitRecipeText(String expectedText) {
-    seleniumWebDriverHelper.waitSuccessCondition(driver -> getRecipeText().equals(expectedText));
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitSuccessCondition(
+                driver -> getRecipeText().equals(expectedText)),
+        StaleElementReferenceException.class);
   }
 }
