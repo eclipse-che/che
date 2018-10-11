@@ -18,6 +18,7 @@ import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -78,7 +79,7 @@ public class UserServicePermissionsFilterTest {
   @BeforeMethod
   public void setUp() throws ServerException {
     permissionsFilter = new UserServicePermissionsFilter(true);
-    when(subject.getUserId()).thenReturn(USER_ID);
+    lenient().when(subject.getUserId()).thenReturn(USER_ID);
   }
 
   @Test

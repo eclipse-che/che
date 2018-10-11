@@ -21,6 +21,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -104,7 +105,7 @@ public class KubernetesPluginsToolingApplierTest {
     when(pod.getMetadata()).thenReturn(meta);
     when(meta.getName()).thenReturn(POD_NAME);
     when(internalEnvironment.getMachines()).thenReturn(machines);
-    when(internalEnvironment.getServices()).thenReturn(services);
+    lenient().when(internalEnvironment.getServices()).thenReturn(services);
     Map<String, String> attributes = new HashMap<>();
     when(internalEnvironment.getAttributes()).thenReturn(attributes);
   }

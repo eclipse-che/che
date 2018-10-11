@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import javax.annotation.PreDestroy;
@@ -400,7 +401,15 @@ public abstract class SeleniumTestHandler
         continue;
       }
 
-      if (!(obj instanceof TestWorkspace) || !isInjectedWorkspace(field)) {
+      if (!(obj instanceof TestWorkspace)) {
+        continue;
+      }
+
+      try {
+        if (((TestWorkspace) obj).getId() == null) {
+          continue;
+        }
+      } catch (ExecutionException | InterruptedException e) {
         continue;
       }
 

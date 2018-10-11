@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -152,11 +153,11 @@ public class UnrecoverablePodEventListenerTest {
       String lastTimestamp) {
     final PodEvent event = mock(PodEvent.class);
     when(event.getPodName()).thenReturn(podName + POD_NAME_RANDOM_SUFFIX);
-    when(event.getContainerName()).thenReturn(CONTAINER_NAME_1);
-    when(event.getReason()).thenReturn(reason);
-    when(event.getMessage()).thenReturn(message);
-    when(event.getCreationTimeStamp()).thenReturn(creationTimestamp);
-    when(event.getLastTimestamp()).thenReturn(lastTimestamp);
+    lenient().when(event.getContainerName()).thenReturn(CONTAINER_NAME_1);
+    lenient().when(event.getReason()).thenReturn(reason);
+    lenient().when(event.getMessage()).thenReturn(message);
+    lenient().when(event.getCreationTimeStamp()).thenReturn(creationTimestamp);
+    lenient().when(event.getLastTimestamp()).thenReturn(lastTimestamp);
     return event;
   }
 

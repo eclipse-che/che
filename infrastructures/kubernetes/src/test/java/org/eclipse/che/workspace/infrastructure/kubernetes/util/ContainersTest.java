@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -56,7 +57,8 @@ public class ContainersTest {
 
     limits.put("memory", new Quantity(String.valueOf(RAM_LIMIT)));
     limits.put("cpu", new Quantity("1.5"));
-    when(resource.getLimits())
+    lenient()
+        .when(resource.getLimits())
         .thenReturn(ImmutableMap.of("memory", new Quantity(String.valueOf(RAM_LIMIT))));
   }
 

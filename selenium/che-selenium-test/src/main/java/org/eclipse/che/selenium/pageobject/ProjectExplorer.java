@@ -28,6 +28,7 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.COLOU
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_ITEM_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_TREE_ITEMS;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.SELECTED_ITEM_BY_NAME_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.BLUE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.DEFAULT;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.GREEN;
@@ -182,6 +183,9 @@ public class ProjectExplorer {
     String COLOURED_ITEM_TEMPLATE =
         "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
     String MAXIMIZE_BUTTON_XPATH = "(//div[@id='gwt-debug-maximizeButton'])[position()=1]";
+    String SELECTED_ITEM_BY_NAME_XPATH_TEMPLATE =
+        "//div[contains(@class, 'selected')]//div[text()='%s']";
+    // "//div[@name='%s' or @name='%s.class']//div[contains(@class, 'selected')] ";
   }
 
   /**
@@ -571,7 +575,14 @@ public class ProjectExplorer {
    * @param name item's visible name
    */
   public void openItemByVisibleNameInExplorer(String name) {
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> openItemByVisibleName(name), StaleElementReferenceException.class);
+  }
+
+  private void openItemByVisibleName(String name) {
+
     waitVisibilityByName(name).click();
+    waitItemSelectedByName(name);
     actionsFactory
         .createAction(seleniumWebDriver)
         .moveToElement(waitVisibilityByName(name))
@@ -1093,6 +1104,12 @@ public class ProjectExplorer {
                 "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
                 path)),
         ELEMENT_TIMEOUT_SEC);
+  }
+
+  public void waitItemSelectedByName(String visibleName) {
+    final String itemXpath = format(SELECTED_ITEM_BY_NAME_XPATH_TEMPLATE, visibleName);
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(itemXpath));
   }
 
   /**

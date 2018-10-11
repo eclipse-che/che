@@ -19,6 +19,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -46,6 +47,9 @@ public class CreateWorkspaceFromCeylonWithJavaStackTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
+
   @BeforeClass
   public void setUp() {
     dashboard.open();
@@ -58,8 +62,11 @@ public class CreateWorkspaceFromCeylonWithJavaStackTest {
 
   @Test
   public void checkWorkspaceCreationFromCeylonWithJavaStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProject(
-        CEYLON_WITH_JAVA_JAVASCRIPT, WORKSPACE_NAME, PROJECT_NAME);
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithProject(
+            CEYLON_WITH_JAVA_JAVASCRIPT, WORKSPACE_NAME, PROJECT_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 

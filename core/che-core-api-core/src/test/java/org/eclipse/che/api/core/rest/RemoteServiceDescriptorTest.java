@@ -13,6 +13,7 @@ package org.eclipse.che.api.core.rest;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -67,7 +68,7 @@ public class RemoteServiceDescriptorTest {
   public void setUp(ITestContext ctx) throws Exception {
     serverUrl = getServerUrl(ctx);
     request = mock(HttpJsonRequest.class, new SelfReturningAnswer());
-    when(request.request()).thenReturn(response);
+    lenient().when(request.request()).thenReturn(response);
   }
 
   @Test

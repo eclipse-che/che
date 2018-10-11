@@ -29,6 +29,8 @@ import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
@@ -69,7 +71,11 @@ public class ImportProjectFromGitHubTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubRepository testRepo;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() throws IOException {
@@ -85,7 +91,7 @@ public class ImportProjectFromGitHubTest {
   }
 
   @Test
-  public void checkAbilityImportProjectFromGithub() throws Exception {
+  public void checkAbilityImportProjectFromGithub() {
     testRepoName = testRepo.getName();
     projectName = String.format("%s-%s", gitHubUsername, testRepoName);
 
@@ -111,6 +117,9 @@ public class ImportProjectFromGitHubTest {
     projectSourcePage.selectProjectFromList(testRepoName);
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();

@@ -72,6 +72,7 @@ public class TheiaBuildPluginTest {
     dashboard.open();
     createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
         WORKSPACE_NEXT_HELLO_WORLD, WORKSPACE_NAME);
+
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
