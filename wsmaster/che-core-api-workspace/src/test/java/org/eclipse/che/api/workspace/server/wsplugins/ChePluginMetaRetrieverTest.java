@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import java.net.URI;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.testng.annotations.BeforeClass;
@@ -61,7 +60,7 @@ public class ChePluginMetaRetrieverTest {
   }
 
   @Test(
-      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp = "Plugin format is illegal. Problematic plugin entry:.*")
   public void shouldThrowExceptionWhenPluginFormatBad() throws Exception {
 
@@ -90,8 +89,8 @@ public class ChePluginMetaRetrieverTest {
         "http://registry.myregistry.com:8080/my-plugin/4.0/meta.yaml"
       },
       {
-        createAttributes("https://myregistry.com/registry/my-plugin:4.0", ""),
-        "https://myregistry.com/registry/my-plugin/4.0/meta.yaml"
+        createAttributes("https://myregistry.com/registry/my.plugin:4.0", ""),
+        "https://myregistry.com/registry/my.plugin/4.0/meta.yaml"
       }
     };
   }

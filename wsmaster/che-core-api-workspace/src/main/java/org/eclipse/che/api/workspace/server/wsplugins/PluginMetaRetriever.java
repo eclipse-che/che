@@ -145,21 +145,18 @@ public class PluginMetaRetriever {
       URI repo = null;
       String idVersionString;
       final int idVersionTagDelimiter = plugin.lastIndexOf("/");
-      if (idVersionTagDelimiter == -1) {
-        // No registry provided
-        idVersionString = plugin;
-      } else {
+      idVersionString = plugin.substring(idVersionTagDelimiter + 1);
+      if (idVersionTagDelimiter != -1) {
         try {
           repo = new URI(plugin.substring(0, idVersionTagDelimiter));
         } catch (URISyntaxException e) {
           throw new InternalInfrastructureException(
               "Plugin registry URL is incorrect. Problematic plugin entry:" + plugin);
         }
-        idVersionString = plugin.substring(idVersionTagDelimiter + 1);
       }
       String[] idVersion = idVersionString.split(":");
       if (idVersion.length != 2 || idVersion[0].isEmpty() || idVersion[1].isEmpty()) {
-        throw new InternalInfrastructureException(
+        throw new InfrastructureException(
             "Plugin format is illegal. Problematic plugin entry:" + plugin);
       }
       PluginFQN parsed = new PluginFQN(repo, idVersion[0], idVersion[1]);
