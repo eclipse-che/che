@@ -31,7 +31,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 import org.eclipse.che.WorkspaceIdProvider;
 import org.eclipse.che.api.core.ConflictException;
@@ -50,6 +49,7 @@ import org.eclipse.che.api.git.params.CloneParams;
 import org.eclipse.che.api.git.params.FetchParams;
 import org.eclipse.che.api.git.params.RemoteAddParams;
 import org.eclipse.che.api.git.shared.Branch;
+import org.eclipse.che.api.git.shared.Remote;
 import org.eclipse.che.api.git.shared.event.GitCheckoutEvent;
 import org.eclipse.che.api.project.server.ProjectImporter;
 import org.eclipse.che.commons.lang.IoUtil;
@@ -357,15 +357,28 @@ public class GitProjectImporter implements ProjectImporter {
 
   private String getRemoteBranch(GitConnection git, String branchName) throws GitException {
     final List<Branch> remotes = git.branchList(LIST_REMOTE);
-    final Optional<Branch> first =
-        remotes
-            .stream()
-            .filter(
-                br -> branchName.equals(br.getName().substring(br.getName().lastIndexOf("/") + 1)))
-            .findFirst();
-    if (!first.isPresent()) {
-      throw new GitException("Failed to get remote branch name", FAILED_CHECKOUT);
+    for (Branch branch : remotes) {
+      if (branchName.equals(getRemoteBranchNameWithoutRefs(git, branch))) {
+        return branch.getName();
+      }
     }
-    return first.get().getName();
+    throw new GitException("Failed to get remote branch name", FAILED_CHECKOUT);
+  }
+
+  /**
+   * Returns simple name of the given branch. E.g.: for a branch with name
+   * "refs/remotes/origin/master" returns "master". Returns full name of the given branch if there's
+   * no correspondent remote branch.
+   */
+  private String getRemoteBranchNameWithoutRefs(GitConnection git, Branch branch)
+      throws GitException {
+    String branchName = branch.getName().replaceFirst("refs/remotes/", "");
+    List<Remote> remotes = git.remoteList(null, false);
+    for (Remote remote : remotes) {
+      if (branchName.startsWith(remote.getName())) {
+        return branchName.replaceFirst(remote.getName() + "/", "");
+      }
+    }
+    return branchName;
   }
 }
