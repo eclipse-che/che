@@ -44,13 +44,15 @@ public class TheiaBuildPluginTest {
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
   private static final String EXPECTED_TERMINAL_OUTPUT =
-      "\uD83D\uDD0D Validating...✔️\n"
+      "Packaging of plugin\n"
+          + "\uD83D\uDD0D Validating...✔️\n"
           + "\uD83D\uDDC2  Getting dependencies...✔️\n"
           + "\uD83D\uDDC3  Resolving files...✔️\n"
           + "✂️  Excluding files...✔️\n"
           + "✍️  Generating Assembly...✔️\n"
-          + "\uD83C\uDF89 Generated plugin: hello_world_plugin.theia\n"
-          + "Generating Che plug-in file...\n"
+          + "\uD83C\uDF89 Generated plugin: hello_world_plugin.theia\n";
+  private static final String EXPECTED_TERMINAL_SUCCESS_OUTPUT =
+      "Generating Che plug-in file...\n"
           + "hello_world_plugin.theia\n"
           + "./\n"
           + "./che-plugin.yaml\n"
@@ -107,6 +109,7 @@ public class TheiaBuildPluginTest {
     theiaTerminal.clickOnTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.performCommand(BUILD_COMMAND);
     theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
+    theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1);
   }
 
   private void openTerminal(String topMenuCommand, String commandName, String proposalText) {
