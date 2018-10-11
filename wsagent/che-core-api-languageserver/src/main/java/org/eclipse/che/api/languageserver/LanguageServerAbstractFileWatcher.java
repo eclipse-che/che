@@ -12,11 +12,11 @@
 package org.eclipse.che.api.languageserver;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -30,8 +30,6 @@ import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.FileEvent;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Notifies registered language servers about file related events. Specifying of file event type is
@@ -43,14 +41,13 @@ import org.slf4j.LoggerFactory;
  *     Notification</a> section of LSP specification
  */
 class LanguageServerAbstractFileWatcher implements Consumer<Path> {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(LanguageServerAbstractFileWatcher.class);
-
   private final EventService eventService;
   private final Registry<Set<PathMatcher>> pathMatcherRegistry;
   private final FileChangeType fileChangeType;
 
-  private final Map<PathMatcher, Consumer<Path>> eventConsumers = new ConcurrentHashMap<>();
+  /** Language ID -> (pathMatcher -> pathConsumer) */
+  private final Map<String, Map<PathMatcher, Consumer<Path>>> eventConsumers =
+      new ConcurrentHashMap<>();
 
   @Inject
   LanguageServerAbstractFileWatcher(
@@ -62,12 +59,7 @@ class LanguageServerAbstractFileWatcher implements Consumer<Path> {
 
   @PostConstruct
   protected void subscribe() {
-    eventService.subscribe(
-        event -> {
-          Set<PathMatcher> pathMatchers = pathMatcherRegistry.getOrNull(event.getId());
-          registerConsumers(event.getLanguageServer(), pathMatchers);
-        },
-        LanguageServerInitializedEvent.class);
+    eventService.subscribe(this::acceptEvent, LanguageServerInitializedEvent.class);
   }
 
   @PreDestroy
@@ -75,33 +67,35 @@ class LanguageServerAbstractFileWatcher implements Consumer<Path> {
     eventConsumers.clear();
   }
 
-  private void registerConsumers(LanguageServer languageServer, Set<PathMatcher> pathMatchers) {
-    if (pathMatchers == null) {
-      return;
-    }
+  private void acceptEvent(LanguageServerInitializedEvent event) {
+    String id = event.getId();
+    LanguageServer languageServer = event.getLanguageServer();
+    Set<PathMatcher> pathMatchers = pathMatcherRegistry.getOrDefault(id, ImmutableSet.of());
 
     for (PathMatcher pathMatcher : pathMatchers) {
-      eventConsumers.put(
-          pathMatcher,
-          path -> {
-            FileEvent event = new FileEvent(path.toString(), fileChangeType);
-            List<FileEvent> changes = ImmutableList.of(event);
-            DidChangeWatchedFilesParams params = new DidChangeWatchedFilesParams(changes);
-            WorkspaceService service = languageServer.getWorkspaceService();
-            service.didChangeWatchedFiles(params);
-          });
+      eventConsumers
+          .computeIfAbsent(id, __ -> new ConcurrentHashMap<>())
+          .put(
+              pathMatcher,
+              path -> {
+                FileEvent fileEvent = new FileEvent(path.toString(), fileChangeType);
+                List<FileEvent> changes = ImmutableList.of(fileEvent);
+                DidChangeWatchedFilesParams params = new DidChangeWatchedFilesParams(changes);
+                WorkspaceService service = languageServer.getWorkspaceService();
+                service.didChangeWatchedFiles(params);
+              });
     }
   }
 
   @Override
   public void accept(Path path) {
-    for (Entry<PathMatcher, Consumer<Path>> entry : eventConsumers.entrySet()) {
-      PathMatcher pathMatcher = entry.getKey();
-      Consumer<Path> eventConsumer = entry.getValue();
-
-      if (pathMatcher.matches(path)) {
-        eventConsumer.accept(path);
-      }
+    for (Map<PathMatcher, Consumer<Path>> consumersPerLanguageServer : eventConsumers.values()) {
+      consumersPerLanguageServer.forEach(
+          (pathMatcher, eventConsumer) -> {
+            if (pathMatcher.matches(path)) {
+              eventConsumer.accept(path);
+            }
+          });
     }
   }
 }
