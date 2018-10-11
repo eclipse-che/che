@@ -126,7 +126,8 @@ public class PluginMetaRetriever {
       }
     }
     if (!isNullOrEmpty(editorAttribute)) {
-      Collection<PluginFQN> editorIdVersionCollection = parsePluginFQNs(editorAttribute.split(" *, *"));
+      Collection<PluginFQN> editorIdVersionCollection =
+          parsePluginFQNs(editorAttribute.split(" *, *"));
       if (editorIdVersionCollection.size() > 1) {
         throw new InfrastructureException(
             "Multiple editors found in workspace config attributes. "
@@ -196,7 +197,8 @@ public class PluginMetaRetriever {
               ? pluginRegistry.clone()
               : UriBuilder.fromUri(pluginFQN.getRegistry());
 
-      URI metaURI = metaURIBuilder
+      URI metaURI =
+          metaURIBuilder
               .path(pluginFQN.getId())
               .path(pluginFQN.getVersion())
               .path("meta.yaml")
@@ -216,8 +218,7 @@ public class PluginMetaRetriever {
   }
 
   @VisibleForTesting
-  void validateMeta(PluginMeta meta, String id, String version)
-      throws InfrastructureException {
+  void validateMeta(PluginMeta meta, String id, String version) throws InfrastructureException {
     requireNotNullNorEmpty(meta.getId(), CHE_PLUGIN_OBJECT_ERROR, id, version, "ID is missing.");
     requireEqual(
         id,

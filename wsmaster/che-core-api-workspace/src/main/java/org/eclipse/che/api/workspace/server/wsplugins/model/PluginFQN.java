@@ -13,17 +13,22 @@ package org.eclipse.che.api.workspace.server.wsplugins.model;
 
 import java.net.URI;
 
+/**
+ * Represents full information about plugin, including registry address, id and version.
+ *
+ * @author Max Shaposhnyk
+ */
 public class PluginFQN {
+
+  private URI registry;
+  private String id;
+  private String version;
 
   public PluginFQN(URI registry, String id, String version) {
     this.registry = registry;
     this.id = id;
     this.version = version;
   }
-
-  private URI registry;
-  private String id;
-  private String version;
 
   public URI getRegistry() {
     return registry;

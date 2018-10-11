@@ -32,7 +32,6 @@ import org.testng.annotations.Test;
 
 public class ChePluginMetaRetrieverTest {
 
-
   private static final String BASE_REGISTRY = "https://che-plugin-registry.openshift.io";
   private PluginMetaRetriever metaRetriever;
 
@@ -43,55 +42,65 @@ public class ChePluginMetaRetrieverTest {
     doNothing().when(metaRetriever).validateMeta(any(), anyString(), anyString());
   }
 
-
   @Test(dataProvider = "pluginProvider")
-  public void shouldGetMetaByCorrectURLUsingBaseRegistry(Map<String, String> attributes,
-      String expectedUri) throws Exception {
-     metaRetriever.get(attributes);
+  public void shouldGetMetaByCorrectURLUsingBaseRegistry(
+      Map<String, String> attributes, String expectedUri) throws Exception {
+    metaRetriever.get(attributes);
 
-     verify(metaRetriever).getBody(eq(new URI(expectedUri)), eq(PluginMeta.class));
+    verify(metaRetriever).getBody(eq(new URI(expectedUri)), eq(PluginMeta.class));
   }
 
-  @Test(expectedExceptions = InfrastructureException.class, expectedExceptionsMessageRegExp =
-      "Multiple editors found in workspace config attributes."
-          + " It is not supported. Please, use one editor only.")
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Multiple editors found in workspace config attributes."
+              + " It is not supported. Please, use one editor only.")
   public void shouldThrowExceptionWhenMultipleEditorsSpecified() throws Exception {
 
     metaRetriever.get(createAttributes("", "theia:1.0, idea:2.0"));
   }
 
-  @Test(expectedExceptions = InternalInfrastructureException.class, expectedExceptionsMessageRegExp =
-      "Plugin format is illegal. Problematic plugin entry:.*")
+  @Test(
+      expectedExceptions = InternalInfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Plugin format is illegal. Problematic plugin entry:.*")
   public void shouldThrowExceptionWhenPluginFormatBad() throws Exception {
 
     metaRetriever.get(createAttributes("my-plugin:4.0, my_new_plugin:part:1.0", ""));
   }
 
-  @Test(expectedExceptions = InfrastructureException.class, expectedExceptionsMessageRegExp =
-      "Invalid Che tooling plugins configuration: plugin .* is duplicated")
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Invalid Che tooling plugins configuration: plugin .* is duplicated")
   public void shouldThrowExceptionWhenPluginIsDuplicated() throws Exception {
 
-    metaRetriever.get(createAttributes(
-        "http://registry.myregistry1.com:8080/my-plugin:4.0, "
-            + "http://registry2.myregistry2.com:8080/my-plugin:4.0",
-        ""));
+    metaRetriever.get(
+        createAttributes(
+            "http://registry.myregistry1.com:8080/my-plugin:4.0, "
+                + "http://registry2.myregistry2.com:8080/my-plugin:4.0",
+            ""));
   }
 
   @DataProvider(name = "pluginProvider")
   public static Object[][] pluginProvider() {
-    return new Object[][]{
-        {createAttributes("my-plugin:4.0", ""), BASE_REGISTRY + "/plugins/my-plugin/4.0/meta.yaml"},
-        {createAttributes("http://registry.myregistry.com:8080/my-plugin:4.0", ""),
-            "http://registry.myregistry.com:8080/my-plugin/4.0/meta.yaml"},
-        {createAttributes("http://myregistry.com/registry/my-plugin:4.0", ""),
-            "http://myregistry.com/registry/my-plugin/4.0/meta.yaml"}
+    return new Object[][] {
+      {createAttributes("my-plugin:4.0", ""), BASE_REGISTRY + "/plugins/my-plugin/4.0/meta.yaml"},
+      {
+        createAttributes("http://registry.myregistry.com:8080/my-plugin:4.0", ""),
+        "http://registry.myregistry.com:8080/my-plugin/4.0/meta.yaml"
+      },
+      {
+        createAttributes("https://myregistry.com/registry/my-plugin:4.0", ""),
+        "https://myregistry.com/registry/my-plugin/4.0/meta.yaml"
+      }
     };
   }
 
-
   private static Map<String, String> createAttributes(String plugins, String editor) {
-    return ImmutableMap.of(Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, plugins,
-        Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, editor);
+    return ImmutableMap.of(
+        Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
+        plugins,
+        Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE,
+        editor);
   }
-
 }
