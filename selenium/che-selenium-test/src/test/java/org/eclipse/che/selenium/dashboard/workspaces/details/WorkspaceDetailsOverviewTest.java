@@ -146,8 +146,6 @@ public class WorkspaceDetailsOverviewTest {
 
     nameShouldBeValid(MAX_LONG_NAME);
     namesShouldBeValid();
-
-    namesShouldBeInvalid();
   }
 
   @Test(priority = 1)
