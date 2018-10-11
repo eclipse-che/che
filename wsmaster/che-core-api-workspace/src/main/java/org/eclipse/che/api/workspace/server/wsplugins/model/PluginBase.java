@@ -23,8 +23,10 @@ public class PluginBase {
   private String version = null;
   private List<CheContainer> containers = new ArrayList<>();
   private List<ChePluginEndpoint> endpoints = new ArrayList<>();
+
   @JsonProperty("workspace-env")
   private List<EnvVar> workspaceEnv = new ArrayList<>();
+
   private String broker = null;
 
   /** Object name. Name must be unique. */
@@ -99,7 +101,7 @@ public class PluginBase {
     this.endpoints = endpoints;
   }
 
-  /** List of environment variables to set in the workspace*/
+  /** List of environment variables to set in the workspace */
   public PluginBase workspaceEnv(List<EnvVar> workspaceEnv) {
     this.workspaceEnv = workspaceEnv;
     return this;

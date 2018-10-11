@@ -23,9 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 
-/**
- * @author Alexander Garagatyi
- */
+/** @author Alexander Garagatyi */
 public class BrokersResult {
 
   private final CompletableFuture<List<ChePlugin>> future;
@@ -42,7 +40,8 @@ public class BrokersResult {
 
   public void oneMoreBroker() {
     if (started.get()) {
-      throw new IllegalStateException("Call of BrokerResult#oneMoreBroker is not allowed after call BrokerResult#get");
+      throw new IllegalStateException(
+          "Call of BrokerResult#oneMoreBroker is not allowed after call BrokerResult#get");
     }
     brokersNumber.incrementAndGet();
   }
@@ -53,11 +52,13 @@ public class BrokersResult {
 
   public void brokerResult(List<ChePlugin> toolingFromBroker) throws InfrastructureException {
     if (!started.get()) {
-      throw new IllegalStateException("Submitting a broker result is not allowed before calling BrokerResult#get");
+      throw new IllegalStateException(
+          "Submitting a broker result is not allowed before calling BrokerResult#get");
     }
     int previousBrokersNumber = brokersNumber.getAndDecrement();
     if (previousBrokersNumber == 0) {
-      throw new InfrastructureException("Broker result is submitted when no more results are expected");
+      throw new InfrastructureException(
+          "Broker result is submitted when no more results are expected");
     }
     plugins.addAll(toolingFromBroker);
     if (previousBrokersNumber == 1) {
