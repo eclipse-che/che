@@ -12,7 +12,7 @@
 package org.eclipse.che.selenium.theia;
 
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -70,8 +70,7 @@ public class TheiaBuildPluginTest {
   @BeforeClass
   public void prepare() {
     dashboard.open();
-    createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
-        WORKSPACE_NEXT_HELLO_WORLD, WORKSPACE_NAME);
+    createWorkspaceHelper.createWorkspaceFromStackWithoutProject(CHE_7_PREVIEW, WORKSPACE_NAME);
 
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();

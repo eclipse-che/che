@@ -146,8 +146,6 @@ public class WorkspaceDetailsOverviewTest {
 
     nameShouldBeValid(MAX_LONG_NAME);
     namesShouldBeValid();
-
-    namesShouldBeInvalid();
   }
 
   @Test(priority = 1)
@@ -210,14 +208,6 @@ public class WorkspaceDetailsOverviewTest {
         name -> {
           nameShouldBeInvalid(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
           nameShouldBeValid(name);
-        });
-  }
-
-  private void namesShouldBeInvalid() {
-    NOT_VALID_NAMES.forEach(
-        name -> {
-          nameShouldBeValid(CHANGED_WORKSPACE_NAME);
-          nameShouldBeInvalid(name, SPECIAL_CHARACTERS_ERROR_MESSAGE);
         });
   }
 

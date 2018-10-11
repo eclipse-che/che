@@ -139,11 +139,15 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
 
     // Check nodes in the Find Usages panel by 'Enter' button
+    // Close node by ENTER button and check it closed
     findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel("org.eclipse.qa.examples");
+
+    // Open node and check that only "org.eclipse.qa.examples" node is opened
+    findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+    findUsages.waitExpectedTextInFindUsagesPanel("org.eclipse.qa.examples");
     findUsages.selectNodeInFindUsagesPanel("org.eclipse.qa.examples");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.selectNodeInFindUsagesPanel("AppController");
@@ -152,11 +156,19 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
+
+    // Close "AppController" node by ENTER button and check it closed
     findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(
+        "handleRequest(HttpServletRequest, HttpServletResponse)");
+
+    // Open "AppController" node and check that only "handleRequest(HttpServletRequest,
+    // HttpServletResponse)" node is opened
+    findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    findUsages.waitExpectedTextInFindUsagesPanel(
+        "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
