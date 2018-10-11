@@ -18,8 +18,10 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -67,6 +69,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesPluginsToolingApplierTest {
   private static final String TEST_IMAGE = "testImage/test:test";
+  private static final String TEST_IMAGE_POLICY = "IfNotPresent";
   private static final String ENV_VAR = "PLUGINS_ENV_VAR";
   private static final String ENV_VAR_VALUE = "PLUGINS_ENV_VAR_VALUE";
   private static final String POD_NAME = "pod12";
@@ -87,7 +90,7 @@ public class KubernetesPluginsToolingApplierTest {
 
   @BeforeMethod
   public void setUp() {
-    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, false);
+    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, false);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Container> containers = new ArrayList<>();
@@ -102,7 +105,7 @@ public class KubernetesPluginsToolingApplierTest {
     when(pod.getMetadata()).thenReturn(meta);
     when(meta.getName()).thenReturn(POD_NAME);
     when(internalEnvironment.getMachines()).thenReturn(machines);
-    when(internalEnvironment.getServices()).thenReturn(services);
+    lenient().when(internalEnvironment.getServices()).thenReturn(services);
     Map<String, String> attributes = new HashMap<>();
     when(internalEnvironment.getAttributes()).thenReturn(attributes);
   }
@@ -364,7 +367,7 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void shouldSetJWTServerExposerAttributeIfAuthEnabled() throws Exception {
-    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, true);
+    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
 
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
@@ -374,13 +377,50 @@ public class KubernetesPluginsToolingApplierTest {
   @Test
   public void shouldNotSetJWTServerExposerAttributeIfAuthEnabledButAttributeIsPresent()
       throws Exception {
-    applier = new KubernetesPluginsToolingApplier(MEMORY_LIMIT_MB, true);
+    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
     internalEnvironment.getAttributes().put(SECURE_EXPOSER_IMPL_PROPERTY, "somethingElse");
 
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
     assertEquals(
         internalEnvironment.getAttributes().get(SECURE_EXPOSER_IMPL_PROPERTY), "somethingElse");
+  }
+
+  @Test
+  public void shouldSetSpecifiedImagePullPolicy() throws Exception {
+    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
+
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+
+    assertEquals(
+        internalEnvironment
+            .getPods()
+            .values()
+            .iterator()
+            .next()
+            .getSpec()
+            .getContainers()
+            .get(1)
+            .getImagePullPolicy(),
+        TEST_IMAGE_POLICY);
+  }
+
+  @Test
+  public void shouldSetNullImagePullPolicyIfValueIsNotStandard() throws Exception {
+    applier = new KubernetesPluginsToolingApplier("None", MEMORY_LIMIT_MB, true);
+
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+
+    assertNull(
+        internalEnvironment
+            .getPods()
+            .values()
+            .iterator()
+            .next()
+            .getSpec()
+            .getContainers()
+            .get(1)
+            .getImagePullPolicy());
   }
 
   @Test
@@ -411,6 +451,7 @@ public class KubernetesPluginsToolingApplierTest {
   private CheContainer createContainer() {
     CheContainer cheContainer = new CheContainer();
     cheContainer.setImage(TEST_IMAGE);
+    cheContainer.setName(generate("container", 5));
     cheContainer.setEnv(singletonList(new EnvVar().name(ENV_VAR).value(ENV_VAR_VALUE)));
     cheContainer.setVolumes(
         singletonList(new Volume().name(VOLUME_NAME).mountPath(VOLUME_MOUNT_PATH)));

@@ -139,8 +139,15 @@
                   useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
                 }
                 
+                window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
                 keycloak
-                    .init({onLoad: 'login-required', checkLoginIframe: false, useNonce: useNonce})
+                    .init({
+                      onLoad: 'login-required',
+                      checkLoginIframe: false,
+                      useNonce: useNonce,
+                      scope: 'email profile',
+                      redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
+                    })
                     .success(function(authenticated) {
                         Loader.startLoading();
                     })

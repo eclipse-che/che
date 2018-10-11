@@ -13,6 +13,7 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -46,7 +47,7 @@ public class AbstractKeycloakFilterTest {
 
   @BeforeMethod
   public void setup() {
-    when(request.getRequestURI()).thenReturn(null);
+    lenient().when(request.getRequestURI()).thenReturn(null);
   }
 
   @Test

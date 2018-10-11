@@ -18,9 +18,11 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.machineN
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.util.Map;
+import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
@@ -33,14 +35,23 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
  */
 public class RamLimitRequestProvisioner implements ConfigurationProvisioner {
 
+  private final MemoryAttributeProvisioner memoryAttributeProvisioner;
+
+  @Inject
+  public RamLimitRequestProvisioner(MemoryAttributeProvisioner memoryAttributeProvisioner) {
+    this.memoryAttributeProvisioner = memoryAttributeProvisioner;
+  }
+
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final Map<String, InternalMachineConfig> machines = k8sEnv.getMachines();
     for (Pod pod : k8sEnv.getPods().values()) {
       for (Container container : pod.getSpec().getContainers()) {
-        final Map<String, String> attributes =
-            machines.get(machineName(pod, container)).getAttributes();
+        InternalMachineConfig machineConfig = machines.get(machineName(pod, container));
+        memoryAttributeProvisioner.provision(
+            machineConfig, Containers.getRamLimit(container), Containers.getRamRequest(container));
+        final Map<String, String> attributes = machineConfig.getAttributes();
         String memoryLimitAttribute = attributes.get(MEMORY_LIMIT_ATTRIBUTE);
         if (memoryLimitAttribute != null) {
           Containers.addRamLimit(container, Long.parseLong(memoryLimitAttribute));

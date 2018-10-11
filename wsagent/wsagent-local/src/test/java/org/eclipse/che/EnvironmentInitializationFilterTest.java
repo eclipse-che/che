@@ -14,7 +14,6 @@ package org.eclipse.che;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNotEquals;
 
 import javax.servlet.FilterChain;
@@ -43,8 +42,6 @@ public class EnvironmentInitializationFilterTest {
   @Test
   public void shouldSkipRequestToProject() throws Exception {
     // given
-    when(request.getMethod()).thenReturn("GET");
-    when(request.getRequestURI()).thenReturn("/ws/ws-id");
 
     EnvironmentContext context = spy(EnvironmentContext.getCurrent());
     EnvironmentContext.setCurrent(context);

@@ -20,6 +20,7 @@ import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
@@ -40,6 +41,9 @@ public class CreateWorkspaceFromJavaTheiaOpenshiftStackTest {
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
+
   @BeforeClass
   public void setUp() {
     dashboard.open();
@@ -52,8 +56,11 @@ public class CreateWorkspaceFromJavaTheiaOpenshiftStackTest {
 
   @Test
   public void createWorkspaceFromJavaTheiaOpenshiftStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
-        JAVA_THEIA_OPENSHIFT, WORKSPACE_NAME);
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
+            JAVA_THEIA_OPENSHIFT, WORKSPACE_NAME);
 
     seleniumWebDriverHelper.waitAndSwitchToFrame(
         By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);

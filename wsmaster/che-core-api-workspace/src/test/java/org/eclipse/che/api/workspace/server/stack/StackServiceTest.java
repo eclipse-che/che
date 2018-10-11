@@ -29,6 +29,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -190,7 +191,7 @@ public class StackServiceTest {
             .setStackIcon(stackIcon)
             .build();
 
-    when(uriInfo.getBaseUriBuilder()).thenReturn(new UriBuilderImpl());
+    lenient().when(uriInfo.getBaseUriBuilder()).thenReturn(new UriBuilderImpl());
 
     final Field uriField = service.getClass().getSuperclass().getDeclaredField("uriInfo");
     uriField.setAccessible(true);

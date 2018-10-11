@@ -164,16 +164,40 @@
     }
   },
   {
-    "id": "wsnext-helloworld-openshift",
+    "id": "che7-preview",
     "creator": "ide",
-    "name": "Workspace Next HelloWorld example on OpenShift",
-    "description": "Example of a Theia Hello World plug-in + Theia plug-in (openshift)",
+    "name": "Che 7 Preview",
+    "description": "Workspace.next sidecars and Theia as IDE",
     "scope": "general",
     "tags": [
       "ws.next",
-      "Theia"
+      "Theia",
+      "Java",
+      "JDK",
+      "Node.JS",
+      "NPM",
+      "Yeoman"
+    ],
+    "components": [
+      {
+        "name": "Centos",
+        "version": "7"
+      },
+      {
+        "name": "OpenJDK",
+        "version": "1.8.0_181"
+      },
+      {
+        "name": "NodeJS",
+        "version": "8.12.0"
+      },
+      {
+        "name": "NPM",
+        "version": "6.4.1"
+      }
     ],
     "workspaceConfig": {
+      "name": "che7",
       "defaultEnv": "default",
       "environments": {
         "default": {
@@ -198,64 +222,15 @@
         }
       },
       "projects": [],
-      "name": "skeleton",
       "attributes": {
         "editor": "org.eclipse.che.editor.theia:1.0.0",
-        "plugins": "che-dummy-plugin:0.0.1,che-machine-exec-plugin:0.0.1"
+        "plugins": "che-machine-exec-plugin:0.0.1"
       },
       "commands": [],
       "links": []
     },
     "stackIcon": {
-      "name": "type-theia.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "wsnext-service-openshift",
-    "creator": "ide",
-    "name": "Workspace Next REST Service Example on OpenShift",
-    "description": "Example of a Theia REST Service plug-in + REST server container + Theia plug-in (openshift)",
-    "scope": "general",
-    "tags": [
-      "ws.next",
-      "Theia"
-    ],
-    "workspaceConfig": {
-      "defaultEnv": "default",
-      "environments": {
-        "default": {
-          "machines": {
-            "ws/dev": {
-              "attributes": {},
-              "servers": {},
-              "volumes": {
-                "projects": {
-                  "path": "/projects"
-                }
-              },
-              "installers": [],
-              "env": {}
-            }
-          },
-          "recipe": {
-            "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
-            "contentType": "application/x-yaml"
-          }
-        }
-      },
-      "projects": [],
-      "name": "skeleton",
-      "attributes": {
-        "editor": "org.eclipse.che.editor.theia:1.0.0",
-        "plugins": "che-service-plugin:0.0.1,che-machine-exec-plugin:0.0.1"
-      },
-      "commands": [],
-      "links": []
-    },
-    "stackIcon": {
-      "name": "type-theia.svg",
+      "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
   },

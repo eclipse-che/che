@@ -17,6 +17,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -70,7 +71,7 @@ public class AppStateServiceTest {
 
   @Test
   public void shouldGetAppState() throws Exception {
-    when(appStateManager.loadAppState(USER_ID)).thenReturn(APP_STATE);
+    lenient().when(appStateManager.loadAppState(USER_ID)).thenReturn(APP_STATE);
 
     final Response response =
         given()

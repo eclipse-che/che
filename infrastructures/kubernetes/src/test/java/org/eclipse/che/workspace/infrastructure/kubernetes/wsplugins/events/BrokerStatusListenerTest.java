@@ -23,6 +23,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.shared.dto.BrokerStatus;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingValidator;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -44,7 +45,9 @@ public class BrokerStatusListenerTest {
 
   @BeforeMethod
   public void setUp() {
-    brokerStatusListener = new BrokerStatusListener(WORKSPACE_ID, finishFuture);
+    brokerStatusListener =
+        new BrokerStatusListener(
+            WORKSPACE_ID, new KubernetesPluginsToolingValidator(), finishFuture);
   }
 
   @Test

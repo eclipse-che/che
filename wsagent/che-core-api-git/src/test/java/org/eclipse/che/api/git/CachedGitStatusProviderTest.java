@@ -23,6 +23,7 @@ import static org.eclipse.che.api.project.server.VcsStatusProvider.VcsStatus.UNT
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
@@ -99,8 +100,10 @@ public class CachedGitStatusProviderTest {
     when(path.toString()).thenReturn(projectPath.toString());
     when(pathTransformer.transform("/" + projectName)).thenReturn(path);
     when(gitConnectionFactory.getConnection(projectPath.toString())).thenReturn(gitConnection);
-    when(gitConnection.status(singletonList(NORMALIZED_PATH))).thenReturn(statusDto);
-    when(rootDirPathProvider.get()).thenReturn("/" + projectPath.subpath(0, 2).toString());
+    lenient().when(gitConnection.status(singletonList(NORMALIZED_PATH))).thenReturn(statusDto);
+    lenient()
+        .when(rootDirPathProvider.get())
+        .thenReturn("/" + projectPath.subpath(0, 2).toString());
 
     gitStatusProvider =
         new CachedGitStatusProvider(
@@ -226,7 +229,7 @@ public class CachedGitStatusProviderTest {
   public void shouldReturnStatusMapWithModifiedAfterEditingFile() throws Exception {
     // given
     OngoingStubbing<Status> whenStatusCalled =
-        when(gitConnection.status(singletonList(NORMALIZED_PATH + "1")));
+        lenient().when(gitConnection.status(singletonList(NORMALIZED_PATH + "1")));
     Status status = newDto(Status.class);
     status.setModified(new ArrayList<>(singletonList(NORMALIZED_PATH + "1")));
     // Fill the cached status map with actual status, second call will check file changes.

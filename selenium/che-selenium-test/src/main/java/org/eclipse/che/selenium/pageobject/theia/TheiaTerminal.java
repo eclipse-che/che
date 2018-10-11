@@ -137,6 +137,7 @@ public class TheiaTerminal {
 
     // create text file
     theiaProjectTree.clickOnProjectsRootItem();
+    theiaProjectTree.waitProjectsRootItemSelected();
     theiaIde.runMenuCommand("File", "New File");
     theiaNewFileDialog.waitDialog();
     theiaNewFileDialog.waitNewFileNameValue(expectedTextFileName);

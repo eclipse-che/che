@@ -35,6 +35,8 @@ import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
@@ -89,14 +91,22 @@ public class CreateFactoryTest {
   @Inject private CreateFactoryPage createFactoryPage;
   @Inject private Dashboard dashboard;
   @Inject private Loader loader;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace1;
+  private TestWorkspace testWorkspace2;
 
   public CreateFactoryTest() {}
 
   @BeforeClass
   public void setUp() throws Exception {
     dashboard.open();
-    createWorkspaceWithProject(PROJECT_WS_NAME);
-    createWorkspaceWithoutProject(NO_PROJECT_WS_NAME);
+
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace1 = createWorkspaceWithProject(PROJECT_WS_NAME);
+    testWorkspace2 = createWorkspaceWithoutProject(NO_PROJECT_WS_NAME);
   }
 
   @AfterClass
@@ -355,7 +365,7 @@ public class CreateFactoryTest {
     createFactoryPage.waitWorkspacesListIsEmpty();
   }
 
-  private void createWorkspaceWithProject(String workspaceName) {
+  private TestWorkspace createWorkspaceWithProject(String workspaceName) {
     // create a workspace from the Java stack with the web-java-spring project
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -378,9 +388,11 @@ public class CreateFactoryTest {
 
     workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.checkStateOfWorkspace(STOPPED);
+
+    return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
   }
 
-  private void createWorkspaceWithoutProject(String workspaceName) {
+  private TestWorkspace createWorkspaceWithoutProject(String workspaceName) {
     // create a workspace from the Java stack with the web-java-spring project
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
@@ -398,6 +410,8 @@ public class CreateFactoryTest {
 
     workspaceDetails.waitToolbarTitleName(workspaceName);
     workspaceDetails.checkStateOfWorkspace(STOPPED);
+
+    return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
   }
 
   private void createFactoryFromWorkspaceWithProject(String factoryName) {

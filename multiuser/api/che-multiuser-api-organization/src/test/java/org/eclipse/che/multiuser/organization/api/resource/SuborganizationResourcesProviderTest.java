@@ -16,6 +16,7 @@ import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,11 +63,11 @@ public class SuborganizationResourcesProviderTest {
   @BeforeMethod
   public void setUp() throws Exception {
     when(accountManager.getById(any())).thenReturn(account);
-    when(organizationManager.getById(any())).thenReturn(organization);
+    lenient().when(organizationManager.getById(any())).thenReturn(organization);
 
-    when(distributorProvider.get()).thenReturn(resourcesDistributor);
+    lenient().when(distributorProvider.get()).thenReturn(resourcesDistributor);
 
-    when(resourceManagerProvider.get()).thenReturn(resourceManager);
+    lenient().when(resourceManagerProvider.get()).thenReturn(resourceManager);
 
     suborganizationResourcesProvider =
         new SuborganizationResourcesProvider(

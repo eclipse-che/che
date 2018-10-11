@@ -13,6 +13,8 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.AUTH_SERVER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.CLIENT_ID_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_DASHBOARD;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.FIXED_REDIRECT_URL_FOR_IDE;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.GITHUB_ENDPOINT_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.JS_ADAPTER_URL_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.JWKS_ENDPOINT_SETTING;
@@ -25,6 +27,7 @@ import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.REALM_
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.TOKEN_ENDPOINT_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERINFO_ENDPOINT_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USERNAME_CLAIM_SETTING;
+import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_FIXED_REDIRECT_URLS_SETTING;
 import static org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants.USE_NONCE_SETTING;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -54,6 +57,7 @@ public class KeycloakSettings {
 
   @Inject
   public KeycloakSettings(
+      @Named("che.api") String cheServerEndpoint,
       @Nullable @Named(JS_ADAPTER_URL_SETTING) String jsAdapterUrl,
       @Nullable @Named(AUTH_SERVER_URL_SETTING) String serverURL,
       @Nullable @Named(REALM_SETTING) String realm,
@@ -62,7 +66,8 @@ public class KeycloakSettings {
       @Nullable @Named(USERNAME_CLAIM_SETTING) String usernameClaim,
       @Named(USE_NONCE_SETTING) boolean useNonce,
       @Nullable @Named(OSO_ENDPOINT_SETTING) String osoEndpoint,
-      @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint) {
+      @Nullable @Named(GITHUB_ENDPOINT_SETTING) String gitHubEndpoint,
+      @Named(USE_FIXED_REDIRECT_URLS_SETTING) boolean useFixedRedirectUrls) {
 
     if (serverURL == null && oidcProvider == null) {
       throw new RuntimeException(
@@ -139,6 +144,13 @@ public class KeycloakSettings {
 
     if (oidcProvider != null) {
       settings.put(OIDC_PROVIDER_SETTING, oidcProvider);
+      if (useFixedRedirectUrls) {
+        String rootUrl =
+            cheServerEndpoint.endsWith("/") ? cheServerEndpoint : cheServerEndpoint + "/";
+        settings.put(
+            FIXED_REDIRECT_URL_FOR_DASHBOARD, rootUrl + "keycloak/oidcCallbackDashboard.html");
+        settings.put(FIXED_REDIRECT_URL_FOR_IDE, rootUrl + "keycloak/oidcCallbackIde.html");
+      }
     }
     settings.put(USE_NONCE_SETTING, Boolean.toString(useNonce));
     if (jsAdapterUrl == null) {

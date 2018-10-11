@@ -12,6 +12,8 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.pageobject.FileStructure.Locators.FILE_STRUCTURE_ITEM;
+import static org.eclipse.che.selenium.pageobject.FileStructure.Locators.SELECTED_FILE_STRUCTURE_ITEM_XPATH_TEMPLATE;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -46,7 +48,7 @@ public class FileStructure {
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
-  private interface Locators {
+  public interface Locators {
     String FILE_STRUCTURE_FORM = "//table[@title='%s.java']";
     String FILE_STRUCTURE_CLOSE_ICON = "gwt-debug-file-structure-windowFrameCloseButton";
     String FILE_STRUCTURE_CONTENT = "gwt-debug-file-structure-mainPanel";
@@ -54,6 +56,8 @@ public class FileStructure {
         "(//div[text()='%s']/preceding::*[local-name()='svg'][2])[last()]";
     String FILE_STRUCTURE_ITEM =
         "//div[@id='gwt-debug-file-structure-mainPanel']//div[text()='%s']";
+    String SELECTED_FILE_STRUCTURE_ITEM_XPATH_TEMPLATE =
+        "//div[@id='gwt-debug-file-structure-mainPanel']//div[contains(@class, 'selected')]//div[text()='%s']";
   }
 
   @FindBy(id = Locators.FILE_STRUCTURE_CONTENT)
@@ -140,11 +144,13 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructureByDoubleClick(String item) {
+    final String itemXpath = getItemXpath(item);
+
     // we need to wait a little to avoid node closing after quick clicking
     WaitUtils.sleepQuietly(1);
 
     seleniumWebDriverHelper.waitNoExceptions(
-        () -> seleniumWebDriverHelper.moveCursorToAndDoubleClick(getFileStructureItem(item)),
+        () -> seleniumWebDriverHelper.moveCursorToAndDoubleClick(By.xpath(itemXpath)),
         StaleElementReferenceException.class);
   }
 
@@ -163,12 +169,29 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructure(String item) {
-    seleniumWebDriverHelper.waitAndClick(getFileStructureItem(item));
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> selectItem(item), StaleElementReferenceException.class);
   }
 
-  private WebElement getFileStructureItem(String item) {
-    return seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.FILE_STRUCTURE_ITEM, item)));
+  private void selectItem(String visibleItemText) {
+    final String itemXpath = getItemXpath(visibleItemText);
+
+    seleniumWebDriverHelper.waitAndClick(By.xpath(itemXpath));
+    waitItemSelected(visibleItemText);
+  }
+
+  private String getItemXpath(String item) {
+    return format(FILE_STRUCTURE_ITEM, item);
+  }
+
+  private String getSelectedItemXpath(String itemText) {
+    return format(SELECTED_FILE_STRUCTURE_ITEM_XPATH_TEMPLATE, itemText);
+  }
+
+  public void waitItemSelected(String itemText) {
+    final String selectedItemXpath = getSelectedItemXpath(itemText);
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(selectedItemXpath));
   }
 
   /**

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -75,9 +76,11 @@ public class OrganizationResourcesDistributorTest {
     doNothing().when(manager).checkResourcesAvailability(anyString(), any());
     when(resourcesLocks.lock(anyString())).thenReturn(lock);
 
-    when(organizationManager.getById(ORG_ID))
+    lenient()
+        .when(organizationManager.getById(ORG_ID))
         .thenReturn(new OrganizationImpl(ORG_ID, ORG_ID + "name", PARENT_ORG_ID));
-    when(organizationManager.getById(PARENT_ORG_ID))
+    lenient()
+        .when(organizationManager.getById(PARENT_ORG_ID))
         .thenReturn(new OrganizationImpl(PARENT_ORG_ID, PARENT_ORG_ID + "name", null));
   }
 

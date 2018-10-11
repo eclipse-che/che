@@ -14,6 +14,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.UNSECURED_PATHS_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
@@ -43,7 +45,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -80,7 +81,7 @@ public class JwtProxyProvisioner {
 
   static final int FIRST_AVAILABLE_PORT = 4400;
 
-  static final int MEGABYTES_TO_BYTES_DEVIDER = 1024 * 1024;
+  static final int MEGABYTES_TO_BYTES_DIVIDER = 1024 * 1024;
 
   static final String PUBLIC_KEY_HEADER = "-----BEGIN PUBLIC KEY-----\n";
   static final String PUBLIC_KEY_FOOTER = "\n-----END PUBLIC KEY-----";
@@ -99,7 +100,7 @@ public class JwtProxyProvisioner {
   private final JwtProxyConfigBuilder proxyConfigBuilder;
 
   private final String jwtProxyImage;
-  private final long memoryLimitBytes;
+  private final Map<String, String> attributes;
 
   private final String serviceName;
   private int availablePort;
@@ -114,13 +115,18 @@ public class JwtProxyProvisioner {
     this.signatureKeyManager = signatureKeyManager;
 
     this.jwtProxyImage = jwtProxyImage;
-    this.memoryLimitBytes =
-        Size.parseSizeToMegabytes(memoryLimitBytes) * MEGABYTES_TO_BYTES_DEVIDER;
 
     this.proxyConfigBuilder = jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId());
     this.identity = identity;
     this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
     this.availablePort = FIRST_AVAILABLE_PORT;
+    long memoryLimitLong = Size.parseSizeToMegabytes(memoryLimitBytes) * MEGABYTES_TO_BYTES_DIVIDER;
+    this.attributes =
+        ImmutableMap.of(
+            MEMORY_LIMIT_ATTRIBUTE,
+            Long.toString(memoryLimitLong),
+            MEMORY_REQUEST_ATTRIBUTE,
+            Long.toString(memoryLimitLong));
   }
 
   /**
@@ -247,12 +253,7 @@ public class JwtProxyProvisioner {
   }
 
   private InternalMachineConfig createJwtProxyMachine() {
-    return new InternalMachineConfig(
-        null,
-        emptyMap(),
-        emptyMap(),
-        ImmutableMap.of(MachineConfig.MEMORY_LIMIT_ATTRIBUTE, Long.toString(memoryLimitBytes)),
-        null);
+    return new InternalMachineConfig(null, emptyMap(), emptyMap(), attributes, null);
   }
 
   private Pod createJwtProxyPod() {

@@ -67,7 +67,6 @@ public class MultiUserWorkspaceActivityManagerTest {
             resourceManager,
             DEFAULT_TIMEOUT);
 
-    when(account.getName()).thenReturn("accountName");
     when(account.getId()).thenReturn("account123");
     when(accountManager.getByName(anyString())).thenReturn(account);
 
