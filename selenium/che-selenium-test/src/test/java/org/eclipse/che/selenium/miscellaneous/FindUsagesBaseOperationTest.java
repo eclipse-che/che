@@ -142,6 +142,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+    findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
     findUsages.selectNodeInFindUsagesPanel("org.eclipse.qa.examples");
@@ -155,6 +156,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
     findUsages.selectNodeInFindUsagesPanel(
