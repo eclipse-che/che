@@ -26,10 +26,10 @@ public class FactoryConstants {
       "We cannot parse the provided factory. For more information, please visit https://www.eclipse.org/che/docs/factories_json_reference.html";
 
   public static final String MISSING_MANDATORY_MESSAGE =
-      "You are missing a mandatory parameter %s in object %s.  For more information, please visit https://www.eclipse.org/che/docs/factories_json_reference.html";
+      "You are missing a mandatory parameter \"%s\".  For more information, please visit https://www.eclipse.org/che/docs/factories_json_reference.html";
 
   public static final String PARAMETRIZED_INVALID_PARAMETER_MESSAGE =
-      "You have provided an invalid parameter %s for this version of Factory parameters %s. For more "
+      "You have provided an invalid parameter \"%s\" for this version of Factory parameters \"%s\". For more "
           + "information, please visit https://www.eclipse.org/che/docs/factories_json_reference.html";
 
   public static final String INVALID_SINCE_MESSAGE =
