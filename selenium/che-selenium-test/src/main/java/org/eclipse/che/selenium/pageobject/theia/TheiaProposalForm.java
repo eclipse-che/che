@@ -12,12 +12,12 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.SEARCH_FIELD_XPATH;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.TREE_ROWS_XPATH;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.TREE_ROW_DESCRIPTION_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.TREE_ROW_KEY_BINDING_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.TREE_ROW_XPATH_TEMPLATE;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree.Locators.WIDGET_BODY_XPATH;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.SEARCH_FIELD_XPATH;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.TREE_ROWS_XPATH;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.TREE_ROW_DESCRIPTION_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.TREE_ROW_KEY_BINDING_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.TREE_ROW_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.WIDGET_BODY_XPATH;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -32,13 +32,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
 
 @Singleton
-public class TheiaQuickTree {
+public class TheiaProposalForm {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final SeleniumWebDriver seleniumWebDriver;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
 
   @Inject
-  private TheiaQuickTree(
+  private TheiaProposalForm(
       SeleniumWebDriverHelper seleniumWebDriverHelper,
       SeleniumWebDriver seleniumWebDriver,
       TestWebElementRenderChecker testWebElementRenderChecker) {

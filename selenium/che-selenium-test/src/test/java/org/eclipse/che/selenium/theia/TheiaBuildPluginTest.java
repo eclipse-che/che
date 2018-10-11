@@ -27,7 +27,7 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
-import org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -69,7 +69,7 @@ public class TheiaBuildPluginTest {
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private TheiaEditor theiaEditor;
   @Inject private TheiaNewFileDialog theiaNewFileDialog;
-  @Inject private TheiaQuickTree theiaQuickTree;
+  @Inject private TheiaProposalForm theiaProposalForm;
 
   @BeforeClass
   public void prepare() {
@@ -112,9 +112,9 @@ public class TheiaBuildPluginTest {
   private void openTerminal(String topMenuCommand, String commandName, String proposalText) {
     theiaIde.runMenuCommand(topMenuCommand, commandName);
 
-    theiaQuickTree.waitSearchField();
-    theiaQuickTree.waitProposal(proposalText);
-    theiaQuickTree.clickOnProposal(proposalText);
-    theiaQuickTree.waitFormDisappearance();
+    theiaProposalForm.waitSearchField();
+    theiaProposalForm.waitProposal(proposalText);
+    theiaProposalForm.clickOnProposal(proposalText);
+    theiaProposalForm.waitFormDisappearance();
   }
 }
