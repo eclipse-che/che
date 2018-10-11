@@ -526,6 +526,32 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits visibility of element which specified by {@code elementLocator} and gets provided {@code
+   * cssPropertyName} from it.
+   *
+   * @param elementLocator locator of the investigating element
+   * @param cssPropertyName name of the css properties which should be extracted
+   * @return value of the specified {@code cssPropertyName}
+   */
+  public String waitAndGetCssValue(By elementLocator, String cssPropertyName) {
+    return waitVisibility(elementLocator).getCssValue(cssPropertyName);
+  }
+
+  /**
+   * Waits until specified {@code cssPropertyName} in the element which defined by provided {@code
+   * elementLocator} is equals to {@code expectedValue}.
+   *
+   * @param elementLocator locator of the investigating element
+   * @param cssPropertyName name of the css properties which should be extracted
+   * @param expectedValue expected value of the specified {@code cssPropertyName}
+   */
+  public void waitCssValueEqualsTo(
+      By elementLocator, String cssPropertyName, String expectedValue) {
+    waitSuccessCondition(
+        driver -> waitAndGetCssValue(elementLocator, cssPropertyName).equals(expectedValue));
+  }
+
+  /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
    * @param elementLocator element from which text should be got
