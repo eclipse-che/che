@@ -25,10 +25,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,10 +38,10 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriBuilderException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,65 +117,94 @@ public class PluginMetaRetriever {
       throw new InfrastructureException(CHE_REGISTRY_MISSING_ERROR);
     }
 
-    ArrayList<Pair<String, String>> metasIdsVersions = new ArrayList<>();
+    List<PluginFQN> metaFQNs = new ArrayList<>();
     if (!isNullOrEmpty(pluginsAttribute)) {
       String[] plugins = pluginsAttribute.split(" *, *");
       if (plugins.length != 0) {
-        Collection<Pair<String, String>> pluginsIdsVersions = parseIdsVersions(plugins);
-        metasIdsVersions.addAll(pluginsIdsVersions);
+        Collection<PluginFQN> pluginsFQNs = parsePluginFQNs(plugins);
+        metaFQNs.addAll(pluginsFQNs);
       }
     }
     if (!isNullOrEmpty(editorAttribute)) {
-      Collection<Pair<String, String>> editorIdVersionCollection =
-          parseIdsVersions(editorAttribute);
+      Collection<PluginFQN> editorIdVersionCollection = parsePluginFQNs(editorAttribute.split(" *, *"));
       if (editorIdVersionCollection.size() > 1) {
         throw new InfrastructureException(
             "Multiple editors found in workspace config attributes. "
                 + "It is not supported. Please, use one editor only.");
       }
-      metasIdsVersions.addAll(editorIdVersionCollection);
+      metaFQNs.addAll(editorIdVersionCollection);
     }
 
-    return getMetas(metasIdsVersions);
+    return getMetas(metaFQNs);
   }
 
-  private Collection<Pair<String, String>> parseIdsVersions(String... idsVersions)
-      throws InfrastructureException {
-    Map<String, Pair<String, String>> collectedIdVersion = new HashMap<>();
-    for (String plugin : idsVersions) {
-      String[] idVersion = plugin.split(":");
+  private Collection<PluginFQN> parsePluginFQNs(String... plugins) throws InfrastructureException {
+    List<PluginFQN> collectedFQNs = new ArrayList<>();
+    for (String plugin : plugins) {
+      URI repo = null;
+      String idVersionString;
+      final int idVersionTagDelimiter = plugin.lastIndexOf("/");
+      if (idVersionTagDelimiter == -1) {
+        // No registry provided
+        idVersionString = plugin;
+      } else {
+        try {
+          repo = new URI(plugin.substring(0, idVersionTagDelimiter));
+        } catch (URISyntaxException e) {
+          throw new InternalInfrastructureException(
+              "Plugin registry URL is incorrect. Problematic plugin entry:" + plugin);
+        }
+        idVersionString = plugin.substring(idVersionTagDelimiter + 1);
+      }
+      String[] idVersion = idVersionString.split(":");
       if (idVersion.length != 2 || idVersion[0].isEmpty() || idVersion[1].isEmpty()) {
-        throw new InfrastructureException(
+        throw new InternalInfrastructureException(
             "Plugin format is illegal. Problematic plugin entry:" + plugin);
       }
-      String key = idVersion[0] + ':' + idVersion[1];
-      if (collectedIdVersion.containsKey(key)) {
+      PluginFQN parsed = new PluginFQN(repo, idVersion[0], idVersion[1]);
+      if (collectedFQNs
+          .stream()
+          .anyMatch(
+              p ->
+                  p.getId().equals(parsed.getId()) && p.getVersion().equals(parsed.getVersion()))) {
         throw new InfrastructureException(
-            format("Invalid Che tooling plugins configuration: plugin %s is duplicated", key));
+            format(
+                "Invalid Che tooling plugins configuration: plugin %s is duplicated",
+                parsed.getId() + ":" + parsed.getVersion())); // even if different repos
       }
-      collectedIdVersion.put(key, Pair.of(idVersion[0], idVersion[1]));
+      collectedFQNs.add(parsed);
     }
-    return collectedIdVersion.values();
+    return collectedFQNs;
   }
 
-  private Collection<PluginMeta> getMetas(ArrayList<Pair<String, String>> metasIdsVersions)
+  private Collection<PluginMeta> getMetas(List<PluginFQN> pluginFQNs)
       throws InfrastructureException {
     ArrayList<PluginMeta> metas = new ArrayList<>();
-    for (Pair<String, String> metaIdVersion : metasIdsVersions) {
-      metas.add(getMeta(metaIdVersion.first, metaIdVersion.second));
+    for (PluginFQN pluginFqn : pluginFQNs) {
+      metas.add(getMeta(pluginFqn));
     }
 
     return metas;
   }
 
-  private PluginMeta getMeta(String id, String version) throws InfrastructureException {
+  private PluginMeta getMeta(PluginFQN pluginFQN) throws InfrastructureException {
+    final String id = pluginFQN.getId();
+    final String version = pluginFQN.getVersion();
     try {
-      URI metaURI = pluginRegistry.clone().path(id).path(version).path("meta.yaml").build();
+      UriBuilder metaURIBuilder =
+          pluginFQN.getRegistry() == null
+              ? pluginRegistry.clone()
+              : UriBuilder.fromUri(pluginFQN.getRegistry());
 
+      URI metaURI = metaURIBuilder
+              .path(pluginFQN.getId())
+              .path(pluginFQN.getVersion())
+              .path("meta.yaml")
+              .build();
       PluginMeta meta = getBody(metaURI, PluginMeta.class);
       validateMeta(meta, id, version);
       return meta;
-    } catch (IllegalArgumentException | UriBuilderException e) {
+    } catch (IllegalArgumentException | UriBuilderException | MalformedURLException e) {
       throw new InternalInfrastructureException(
           format("Metadata of plugin %s:%s retrieval failed", id, version));
     } catch (IOException e) {
@@ -184,7 +215,8 @@ public class PluginMetaRetriever {
     }
   }
 
-  private void validateMeta(PluginMeta meta, String id, String version)
+  @VisibleForTesting
+  void validateMeta(PluginMeta meta, String id, String version)
       throws InfrastructureException {
     requireNotNullNorEmpty(meta.getId(), CHE_PLUGIN_OBJECT_ERROR, id, version, "ID is missing.");
     requireEqual(
