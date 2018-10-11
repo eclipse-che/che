@@ -146,7 +146,7 @@ public class PluginMetaRetriever {
       String idVersionString;
       final int idVersionTagDelimiter = plugin.lastIndexOf("/");
       idVersionString = plugin.substring(idVersionTagDelimiter + 1);
-      if (idVersionTagDelimiter != -1) {
+      if (idVersionTagDelimiter > -1) {
         try {
           repo = new URI(plugin.substring(0, idVersionTagDelimiter));
         } catch (URISyntaxException e) {
@@ -159,18 +159,15 @@ public class PluginMetaRetriever {
         throw new InfrastructureException(
             "Plugin format is illegal. Problematic plugin entry:" + plugin);
       }
-      PluginFQN parsed = new PluginFQN(repo, idVersion[0], idVersion[1]);
       if (collectedFQNs
           .stream()
-          .anyMatch(
-              p ->
-                  p.getId().equals(parsed.getId()) && p.getVersion().equals(parsed.getVersion()))) {
+          .anyMatch(p -> p.getId().equals(idVersion[0]) && p.getVersion().equals(idVersion[1]))) {
         throw new InfrastructureException(
             format(
                 "Invalid Che tooling plugins configuration: plugin %s is duplicated",
-                parsed.getId() + ":" + parsed.getVersion())); // even if different repos
+                idVersion[0] + ":" + idVersion[1])); // even if different repos
       }
-      collectedFQNs.add(parsed);
+      collectedFQNs.add(new PluginFQN(repo, idVersion[0], idVersion[1]));
     }
     return collectedFQNs;
   }
