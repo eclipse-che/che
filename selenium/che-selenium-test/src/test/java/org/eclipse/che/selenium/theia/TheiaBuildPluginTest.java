@@ -14,7 +14,7 @@ package org.eclipse.che.selenium.theia;
 import static org.eclipse.che.selenium.core.TestGroup.MULTIUSER;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -50,7 +50,7 @@ public class TheiaBuildPluginTest {
   private static final String EXPECTED_STARTING_SERVER_MESSAGE =
       "Starting hosted instance server ...";
   private static final String EXPECTED_INSTANCE_RUNNING_MESSAGE = "Hosted instance is running at:";
-  private static final String GO_TO_DIRECTORY_COMMAND = "cd che-dummy-plugin";
+  private static final String GO_TO_DIRECTORY_COMMAND = "cd projects/che-dummy-plugin";
   private static final String BUILD_COMMAND = "./build.sh";
   private static final String HOSTED_SEARCH_SEQUENCE = "hosted";
   private static final String HELLO_WORLD_SEARCH_SEQUENCE = "Hello";
@@ -58,6 +58,8 @@ public class TheiaBuildPluginTest {
   private static final String EXPECTED_HELLO_WORLD_NOTIFICATION = "Hello World!";
   private static final String SUGGESTION_FOR_SELECTION = "Hosted Plugin: Start Instance";
   private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";
+  private static final String WS_DEV_TERMINAL_TITLE = "Remote terminal 0";
+  private static final String WS_THEIA_IDE_TERMINAL_TITLE = "Remote terminal 1";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
   private static final String EXPECTED_TERMINAL_OUTPUT =
@@ -93,8 +95,7 @@ public class TheiaBuildPluginTest {
   @BeforeClass
   public void prepare() {
     dashboard.open();
-    createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
-        WORKSPACE_NEXT_HELLO_WORLD, WORKSPACE_NAME);
+    createWorkspaceHelper.createWorkspaceFromStackWithoutProject(CHE_7_PREVIEW, WORKSPACE_NAME);
 
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
@@ -110,22 +111,26 @@ public class TheiaBuildPluginTest {
   public void pluginShouldBeBuilt() {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
-    theiaIde.runMenuCommand("File", "Open New Terminal");
 
-    theiaTerminal.clickOnTerminal();
+    openTerminal("File", "Open new multi-machine terminal", "ws/dev");
+    theiaTerminal.waitTerminalTab(WS_DEV_TERMINAL_TITLE);
+    theiaTerminal.clickOnTerminalTab(WS_DEV_TERMINAL_TITLE);
     theiaTerminal.performCommand(GIT_CLONE_COMMAND);
-    theiaTerminal.waitTerminalOutput(EXPECTED_CLONE_OUTPUT);
+    theiaTerminal.waitTerminalOutput(EXPECTED_CLONE_OUTPUT, 0);
 
-    theiaTerminal.clickOnTerminal();
+    openTerminal("File", "Open new multi-machine terminal", "ws/theia-ide");
+    theiaTerminal.waitTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.clickOnTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.performCommand(GO_TO_DIRECTORY_COMMAND);
-    theiaTerminal.waitTerminalOutput(GO_TO_DIRECTORY_COMMAND);
+    theiaTerminal.waitTerminalOutput(GO_TO_DIRECTORY_COMMAND, 1);
 
-    theiaTerminal.clickOnTerminal();
+    theiaTerminal.waitTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.clickOnTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.performCommand(BUILD_COMMAND);
-    theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT);
+    theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
   }
 
-  @Test(priority = 1)
+  // @Test(priority = 1)
   public void hostedModeShouldWork() {
     final String parentWindow = seleniumWebDriver.getWindowHandle();
 
@@ -207,5 +212,14 @@ public class TheiaBuildPluginTest {
           return false;
         },
         ELEMENT_TIMEOUT_SEC);
+  }
+
+  private void openTerminal(String topMenuCommand, String commandName, String proposalText) {
+    theiaIde.runMenuCommand(topMenuCommand, commandName);
+
+    theiaQuickTree.waitSearchField();
+    theiaQuickTree.waitProposal(proposalText);
+    theiaQuickTree.clickOnProposal(proposalText);
+    theiaQuickTree.waitFormDisappearance();
   }
 }

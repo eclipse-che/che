@@ -29,6 +29,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 
 @Singleton
 public class TheiaQuickTree {
@@ -50,7 +51,9 @@ public class TheiaQuickTree {
     // for selection checking get "aria-selected" attribute. "true" if selected, "false" if not.
     String WIDGET_BODY_XPATH = "//div[@class='monaco-quick-open-widget']";
     String SEARCH_FIELD_XPATH = WIDGET_BODY_XPATH + "//div[@class='quick-open-input']//input";
-    String TREE_ROWS_XPATH = WIDGET_BODY_XPATH + "//div[@class='monaco-tree-row']";
+    String TREE_ROWS_XPATH =
+        WIDGET_BODY_XPATH
+            + "//div[contains(@class, 'monaco-tree-row') and not(contains(@class, 'monaco-tree-rows'))]";
     String TREE_ROW_XPATH_TEMPLATE = "(" + TREE_ROWS_XPATH + ")[%s]";
     String TREE_ROW_DESCRIPTION_XPATH_TEMPLATE =
         TREE_ROW_XPATH_TEMPLATE + "//div[@class='monaco-icon-label']";
@@ -65,17 +68,24 @@ public class TheiaQuickTree {
     waitSearchField();
   }
 
+  public void waitFormDisappearance() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(WIDGET_BODY_XPATH));
+  }
+
   public void waitSearchField() {
     seleniumWebDriverHelper.waitVisibility(By.xpath(SEARCH_FIELD_XPATH));
   }
 
   public void enterTextToSearchField(String text) {
-    final String adoptedText = ">" + text;
-    seleniumWebDriverHelper.setValue(By.xpath(SEARCH_FIELD_XPATH), adoptedText);
+    seleniumWebDriverHelper.setValue(By.xpath(SEARCH_FIELD_XPATH), text);
   }
 
   public void waitSearchFieldText(String expectedText) {
     seleniumWebDriverHelper.waitValueEqualsTo(By.xpath(SEARCH_FIELD_XPATH), expectedText);
+  }
+
+  public void waitProposal(String proposalText) {
+    getAllDescriptions().contains(proposalText);
   }
 
   private int getProposalsCount() {
@@ -177,7 +187,13 @@ public class TheiaQuickTree {
   public void clickOnProposal(int proposalIndex) {
     final int adoptedProposalIndex = proposalIndex + 1;
     String proposalItemXpath = format(TREE_ROW_XPATH_TEMPLATE, adoptedProposalIndex);
-    seleniumWebDriverHelper.waitAndClick(By.xpath(proposalItemXpath));
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> clickOnItem(proposalItemXpath), StaleElementReferenceException.class);
+  }
+
+  private void clickOnItem(String itemXpath) {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(itemXpath));
   }
 
   public void clickOnProposal(String proposalDescription) {
