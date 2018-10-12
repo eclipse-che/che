@@ -1,8 +1,0 @@
-{
-  "id": "org.eclipse.che.test.ls",
-  "version": "1.0.0",
-  "name": "Simple Test language server",
-  "description": "Test LS",
-  "dependencies": [],
-  "properties": {}
-}

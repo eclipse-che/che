@@ -131,10 +131,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>test-ls-agent</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
             <artifactId>unison-agent</artifactId>
         </dependency>
         <dependency>

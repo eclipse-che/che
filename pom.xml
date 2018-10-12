@@ -256,11 +256,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>test-ls-agent</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
                 <artifactId>unison-agent</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1700,11 +1695,6 @@
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-ssh-key-server</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-test-ls-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
