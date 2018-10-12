@@ -41,6 +41,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -530,7 +531,14 @@ public class Consoles {
 
     seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
-    seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
+    try {
+      seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
+    } catch (TimeoutException ex) {
+      // Switch to IDE frame if webElement was not found on Application page
+      seleniumWebDriver.close();
+      seleniumWebDriver.switchTo().window(currentWindow);
+      seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    }
 
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(currentWindow);
