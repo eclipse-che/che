@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -220,6 +221,9 @@ public class WorkspaceRuntimes {
                   .findAny();
 
           if (runtimeIdentity.isPresent()) {
+            LOG.info(
+                "Runtime for workspace '{}' is requested but there is no cached one. Recovering it.",
+                workspaceId);
             runtime = recoverOne(infrastructure, runtimeIdentity.get());
           } else {
             // runtime is not considered by Infrastructure as active
@@ -537,15 +541,53 @@ public class WorkspaceRuntimes {
       return;
     }
 
+    LOG.info("Infrastructure is tracking {} active runtimes", identities.size());
+
+    if (identities.isEmpty()) {
+      return;
+    }
+
     for (RuntimeIdentity identity : identities) {
-      try {
-        recoverOne(infrastructure, identity);
-      } catch (ServerException | ConflictException e) {
-        LOG.error(
-            "An error occurred while attempting to recover runtimes using infrastructure '{}'. Reason: '{}'",
-            infrastructure.getName(),
-            e.getMessage());
+      String workspaceId = identity.getWorkspaceId();
+
+      try (Unlocker ignored = lockService.writeLock(workspaceId)) {
+        statuses.putIfAbsent(workspaceId, STARTING);
       }
+    }
+
+    sharedPool.execute(new RecoverRuntimesTask(identities));
+  }
+
+  @VisibleForTesting
+  class RecoverRuntimesTask implements Runnable {
+
+    private final Set<RuntimeIdentity> identities;
+
+    RecoverRuntimesTask(Set<RuntimeIdentity> identities) {
+      this.identities = identities;
+    }
+
+    @Override
+    public void run() {
+      long startTime = System.currentTimeMillis();
+      LOG.info("Recovering of runtimes is started.");
+
+      for (RuntimeIdentity identity : identities) {
+        try {
+          recoverOne(infrastructure, identity);
+        } catch (ServerException | ConflictException e) {
+          LOG.error(
+              "An error occurred while attempting to recover runtime '{}' using infrastructure '{}'. Reason: '{}'",
+              identity.getWorkspaceId(),
+              infrastructure.getName(),
+              e.getMessage());
+        }
+      }
+
+      long finishTime = System.currentTimeMillis();
+      LOG.info(
+          "All runtimes is recovered inished in {} seconds.",
+          TimeUnit.MILLISECONDS.toSeconds(finishTime - startTime));
     }
   }
 
@@ -582,15 +624,15 @@ public class WorkspaceRuntimes {
       InternalEnvironment internalEnv =
           createInternalEnvironment(environment, workspace.getConfig().getAttributes());
       runtime = infra.prepare(identity, internalEnv).getRuntime();
-
+      WorkspaceStatus runtimeStatus = runtime.getStatus();
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
-        statuses.putIfAbsent(identity.getWorkspaceId(), runtime.getStatus());
-        runtimes.put(identity.getWorkspaceId(), runtime);
+        statuses.replace(identity.getWorkspaceId(), runtimeStatus);
+        runtimes.putIfAbsent(identity.getWorkspaceId(), runtime);
       }
       LOG.info(
-          "Successfully recovered workspace runtime '{}'",
+          "Successfully recovered workspace runtime '{}'. Its status is '{}'",
           identity.getWorkspaceId(),
-          identity.getEnvName());
+          runtimeStatus);
       return runtime;
     } catch (InfrastructureException | ValidationException | NotFoundException x) {
       throw new ServerException(
