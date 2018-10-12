@@ -66,6 +66,7 @@ public class BrokerStatusListener implements EventSubscriber<BrokerEvent> {
             pluginsValidator.validatePluginNames(tooling);
           } catch (ValidationException e) {
             brokersResult.error(e);
+            return;
           }
           try {
             brokersResult.brokerResult(tooling);

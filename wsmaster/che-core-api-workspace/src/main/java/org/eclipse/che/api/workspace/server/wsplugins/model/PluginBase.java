@@ -27,8 +27,6 @@ public class PluginBase {
   @JsonProperty("workspace-env")
   private List<EnvVar> workspaceEnv = new ArrayList<>();
 
-  private String broker = null;
-
   /** Object name. Name must be unique. */
   public PluginBase name(String name) {
     this.name = name;
@@ -118,19 +116,6 @@ public class PluginBase {
     this.workspaceEnv = workspaceEnv;
   }
 
-  public PluginBase broker(String broker) {
-    this.broker = broker;
-    return this;
-  }
-
-  public String getBroker() {
-    return broker;
-  }
-
-  public void setBroker(String broker) {
-    this.broker = broker;
-  }
-
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -145,8 +130,7 @@ public class PluginBase {
         && Objects.equals(getVersion(), chePlugin.getVersion())
         && Objects.equals(getContainers(), chePlugin.getContainers())
         && Objects.equals(getEndpoints(), chePlugin.getEndpoints())
-        && Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv())
-        && Objects.equals(getBroker(), chePlugin.getBroker());
+        && Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv());
   }
 
   @Override
@@ -157,8 +141,7 @@ public class PluginBase {
         getVersion(),
         getContainers(),
         getEndpoints(),
-        getWorkspaceEnv(),
-        getBroker());
+        getWorkspaceEnv());
   }
 
   @Override
@@ -179,9 +162,6 @@ public class PluginBase {
         + endpoints
         + ", workspaceEnv="
         + workspaceEnv
-        + ", broker='"
-        + broker
-        + '\''
         + '}';
   }
 }
