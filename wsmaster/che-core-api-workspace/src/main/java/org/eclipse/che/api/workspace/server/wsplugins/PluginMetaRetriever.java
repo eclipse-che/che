@@ -197,7 +197,9 @@ public class PluginMetaRetriever {
       return meta;
     } catch (IllegalArgumentException | UriBuilderException | MalformedURLException e) {
       throw new InternalInfrastructureException(
-          format("Metadata of plugin %s:%s retrieval failed", id, version));
+          format(
+              "Metadata of plugin %s:%s retrieval failed. Error is %s",
+              id, version, e.getMessage()));
     } catch (IOException e) {
       throw new InfrastructureException(
           format(
