@@ -74,7 +74,7 @@ RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 ###
 # Runtime Image
 #
-FROM centos
+FROM centos as runtime
 ENV USE_LOCAL_GIT=true \
     HOME=/home/theia
 
@@ -94,7 +94,9 @@ RUN yum install -y rh-git29 scl-utils sudo java-1.8.0-openjdk-devel bzip2 && \
 RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && usermod -p "*" theia \
     && echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
-    && for f in "${HOME}" "/etc/passwd" "/etc/group"; do\
+    # Create root node_modules in order to not use node_modules in each project folder
+    && mkdir /node_modules \
+    && for f in "${HOME}" "/etc/passwd" "/etc/group /node_modules"; do\
            sudo chgrp -R 0 ${f} && \
            sudo chmod -R g+rwX ${f}; \
        done \
@@ -103,6 +105,8 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && npm install -g yo @theia/generator-plugin \
     && mkdir -p ${HOME}/.config/insight-nodejs/ \
     && chmod -R 777 ${HOME}/.config/ \
+    # Defines the root /node_modules as the folder to use by yarn
+    && echo '"--*.modules-folder" "/node_modules"' > $HOME/.yarnrc \
     # use typescript globally (to have tsc/typescript working)
     && npm install -g typescript@2.9.2 \
     # Disable the statistics for yeoman
