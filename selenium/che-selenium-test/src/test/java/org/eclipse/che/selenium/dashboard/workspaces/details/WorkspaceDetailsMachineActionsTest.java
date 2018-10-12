@@ -114,6 +114,16 @@ public class WorkspaceDetailsMachineActionsTest {
     checkEditOfMachineName("FROM " + IMAGE_NAME + "\n");
   }
 
+  @Test(groups = {OPENSHIFT, K8S, OSIO})
+  public void checkRamSectionOpenshift() {
+    checkRamSection(IMAGE_NAME);
+  }
+
+  @Test(groups = DOCKER)
+  public void checkRamSectionDocker() {
+    checkRamSection("FROM " + IMAGE_NAME + "\n");
+  }
+
   private void checkEditOfMachineName(String expectedRecipeText) {
     // check default values
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
@@ -148,8 +158,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitSaveButtonDisabling();
   }
 
-  @Test
-  public void checkRamSection() {
+  public void checkRamSection(String expectedRecipeText) {
     // check machine name editing
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
@@ -198,7 +207,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitFormInvisibility();
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
-    waitRecipeText(IMAGE_NAME);
+    waitRecipeText(expectedRecipeText);
 
     // check saving of the changes
     editMachineForm.typeRam(CHANGED_RAM_SIZE);
