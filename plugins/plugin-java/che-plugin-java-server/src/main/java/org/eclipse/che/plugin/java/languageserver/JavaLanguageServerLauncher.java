@@ -32,6 +32,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.che.api.core.BadRequestException;
@@ -72,8 +73,8 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private final NotifyJsonRpcTransmitter notifyTransmitter;
   private final EventService eventService;
   private final ProjectManager projectManager;
-
-  private AtomicBoolean isStarted;
+  private final ProjectsSynchronizer projectSynchronizer;
+  private final AtomicBoolean isStarted = new AtomicBoolean(false);
 
   @Inject
   public JavaLanguageServerLauncher(
@@ -81,14 +82,15 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
       ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter,
       NotifyJsonRpcTransmitter notifyTransmitter,
       EventService eventService,
-      ProjectManager projectManager) {
+      ProjectManager projectManager,
+      ProjectsSynchronizer projectSynchronizer) {
     this.processorJsonRpcCommunication = processorJsonRpcCommunication;
     this.executeCliendCommandTransmitter = executeCliendCommandTransmitter;
     this.notifyTransmitter = notifyTransmitter;
     this.eventService = eventService;
     this.projectManager = projectManager;
+    this.projectSynchronizer = projectSynchronizer;
 
-    isStarted = new AtomicBoolean(false);
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
   }
 
@@ -106,10 +108,16 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   }
 
   private void updateWorkspaceOnLSStarted() {
+
     projectManager
         .getAll()
         .forEach(
             registeredProject -> {
+              if (new StringTokenizer(registeredProject.getPath(), "/", false).countTokens() == 1) {
+                // only do this for root paths
+                CompletableFuture.runAsync(
+                    () -> projectSynchronizer.synchronize(registeredProject.getPath()));
+              }
               if (!registeredProject.getProblems().isEmpty()) {
                 try {
 
