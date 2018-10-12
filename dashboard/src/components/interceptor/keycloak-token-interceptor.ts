@@ -53,6 +53,7 @@ export class KeycloakTokenInterceptor extends HttpInterceptorBase {
       return config;
     }
 
+    
     if (this.keycloak && this.keycloak.token) {
       let deferred = this.$q.defer();
       this.keycloak.updateToken(5).success(() => {
@@ -62,6 +63,7 @@ export class KeycloakTokenInterceptor extends HttpInterceptorBase {
       }).error(() => {
         this.$log.log('token refresh failed :' + config.url);
         deferred.reject('Failed to refresh token');
+        window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
         this.keycloak.login();
       });
       return deferred.promise;

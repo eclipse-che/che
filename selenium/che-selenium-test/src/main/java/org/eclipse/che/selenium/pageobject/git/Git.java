@@ -113,7 +113,7 @@ public class Git {
 
   /** click on git-info panel tab, wait while info panel will close */
   public void closeGitInfoPanel() {
-    gitStatusBar.clickOnStatusBarMinimizeBtn();
+    gitStatusBar.waitAndClickOnStatusBarMinimizeBtn();
     gitStatusBar.waitCloseGitStatusBarInfoPanel();
   }
 

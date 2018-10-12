@@ -49,6 +49,7 @@ describe(`WorkspaceDetailsController >`, () => {
       'namespace': 'che',
       'status': 'RUNNING',
       'config': {
+        'attributes': {},
         'environments': {
           'default': {
             'recipe': {'type': 'dockerimage', 'content': 'eclipse/ubuntu_jdk8'},

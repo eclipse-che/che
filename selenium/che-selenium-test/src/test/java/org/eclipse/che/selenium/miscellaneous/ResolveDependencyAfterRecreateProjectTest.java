@@ -56,16 +56,14 @@ public class ResolveDependencyAfterRecreateProjectTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
-  public void updateDependencyWithInheritTest() throws InterruptedException {
-    ide.waitOpenedWorkspaceIsReadyToUse();
-
+  public void updateDependencyWithInheritTest() {
     createProjectFromUI(PROJECT_NAME1);
-    projectExplorer.waitItem(PROJECT_NAME1);
-    mavenPluginStatusBar.waitClosingInfoPanel();
-    notificationsPopupPanel.waitProgressPopupPanelClose();
+
+    projectExplorer.waitAndSelectItem(PROJECT_NAME1);
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME1 + PATH_TO_EXPAND);
     projectExplorer.openItemByPath(PROJECT_NAME1 + PATH_TO_FILE);
     editor.waitActive();
@@ -74,11 +72,9 @@ public class ResolveDependencyAfterRecreateProjectTest {
     removeProjectFromUI();
     createProjectFromUI(PROJECT_NAME2);
 
-    projectExplorer.waitItem(PROJECT_NAME2);
-    projectExplorer.waitAndSelectItemByName(PROJECT_NAME2);
+    projectExplorer.waitAndSelectItem(PROJECT_NAME2);
     projectExplorer.expandPathInProjectExplorer(PROJECT_NAME2 + PATH_TO_EXPAND);
     projectExplorer.openItemByPath(PROJECT_NAME2 + PATH_TO_FILE);
-
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
   }
@@ -104,5 +100,9 @@ public class ResolveDependencyAfterRecreateProjectTest {
     wizard.typeProjectNameOnWizard(nameOfTheProject);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
+
+    projectExplorer.waitItem(nameOfTheProject);
+    mavenPluginStatusBar.waitClosingInfoPanel();
+    notificationsPopupPanel.waitProgressPopupPanelClose();
   }
 }

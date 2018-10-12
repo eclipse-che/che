@@ -19,11 +19,12 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutionException;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
@@ -52,6 +53,10 @@ public class ImportProjectFromZipTest {
   @Inject private Workspaces workspaces;
   @Inject private Ide ide;
   @Inject private TestGitHubRepository testRepo;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() throws IOException {
@@ -67,7 +72,7 @@ public class ImportProjectFromZipTest {
   }
 
   @Test
-  public void importProjectFromZipTest() throws ExecutionException, InterruptedException {
+  public void importProjectFromZipTest() {
     String testRepoFullName = testRepo.getFullName();
     String zipUrl =
         String.format("%s/%s/%s", "https://github.com", testRepoFullName, "archive/master.zip");
@@ -90,6 +95,10 @@ public class ImportProjectFromZipTest {
     projectSourcePage.clickOnAddProjectButton();
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
+
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();

@@ -13,12 +13,12 @@
       required
       ng-minlength="3"
       ng-maxlength="100"
-      ng-pattern="/^[A-Za-z0-9_\-\.]+$/"
+      ng-pattern="/^[A-Za-z0-9]{1}[A-Za-z0-9_\-\.]+[A-Za-z0-9]{1}$/"
       custom-validator="workspaceDetailsOverviewController.isNameUnique($value)">
       <che-error-messages che-message-scope="workspace-details-settings" che-message-name="Workspace name">
-        <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
         <div ng-message="maxlength">The name has to be less than 101 characters long.</div>
         <div ng-message="minlength">The name has to be more than 3 characters long.</div>
+        <div ng-message="pattern">The name should not contain special characters like space, dollar, etc.</div>
         <div ng-message="customValidator">This workspace name is already used.</div>
       </che-error-messages>
     </che-input-box>

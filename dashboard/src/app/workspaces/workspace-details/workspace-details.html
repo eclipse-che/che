@@ -71,6 +71,8 @@
     <!-- Installers tab -->
     <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Installers);">
       <md-tab-label>
+        <i ng-show="workspaceDetailsController.isSwitchToPlugins()"
+          class="warning-state fa fa-exclamation-triangle" aria-hidden="true"></i>
         <span class="che-tab-label-title">Installers</span>
       </md-tab-label>
       <md-tab-body>
@@ -78,6 +80,7 @@
                               workspace-details="workspaceDetailsController.workspaceDetails"
                               on-change="workspaceDetailsController.checkEditMode(true)">
           <che-machine-agents selected-machine="machine"
+                              is-plugins-enabled="workspaceDetailsController.isPluginsEnabled()"
                               on-change="onChange()"></che-machine-agents>
         </che-machine-selector>
       </md-tab-body>
