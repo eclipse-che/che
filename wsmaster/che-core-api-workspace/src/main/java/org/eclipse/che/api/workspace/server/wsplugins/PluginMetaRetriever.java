@@ -150,7 +150,7 @@ public class PluginMetaRetriever {
         try {
           repo = new URI(plugin.substring(0, idVersionTagDelimiter));
         } catch (URISyntaxException e) {
-          throw new InternalInfrastructureException(
+          throw new InfrastructureException(
               "Plugin registry URL is incorrect. Problematic plugin entry:" + plugin);
         }
       }
