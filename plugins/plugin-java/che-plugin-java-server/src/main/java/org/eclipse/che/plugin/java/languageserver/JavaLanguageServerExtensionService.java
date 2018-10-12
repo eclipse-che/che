@@ -982,11 +982,18 @@ public class JavaLanguageServerExtensionService {
    * Returns all nested projects starting from the given path.
    *
    * @param rootPath the root project path
+   * @throws TimeoutException
+   * @throws ExecutionException
+   * @throws InterruptedException
+   * @throws JsonSyntaxException
    */
-  public List<String> getMavenProjects(String rootPath) {
+  public List<String> getMavenProjects(String rootPath, int timeout, TimeUnit unit)
+      throws JsonSyntaxException, InterruptedException, ExecutionException, TimeoutException {
     Type type = new TypeToken<ArrayList<String>>() {}.getType();
-    List<String> projectsUri =
-        doGetList(Commands.GET_MAVEN_PROJECTS_COMMAND, singletonList(prefixURI(rootPath)), type);
+
+    CompletableFuture<Object> result =
+        executeCommand(Commands.GET_MAVEN_PROJECTS_COMMAND, singletonList(prefixURI(rootPath)));
+    List<String> projectsUri = gson.fromJson(gson.toJson(result.get(timeout, unit)), type);
     return removePrefixUri(projectsUri);
   }
 

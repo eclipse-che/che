@@ -11,11 +11,15 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
@@ -60,13 +64,18 @@ public class ProjectsSynchronizer {
    *     path inside the project
    */
   public void synchronize(String rootPath) {
-    Set<String> mavenProjects = new HashSet<>(service.getMavenProjects(rootPath));
+    Set<String> mavenProjects;
+    try {
+      mavenProjects = new HashSet<>(service.getMavenProjects(rootPath, 1, TimeUnit.HOURS));
 
-    for (String mavenProjectPath : mavenProjects) {
-      Optional<RegisteredProject> project = projectManager.get(mavenProjectPath);
-      if (!project.isPresent()) {
-        doCreateProject(mavenProjectPath);
+      for (String mavenProjectPath : mavenProjects) {
+        Optional<RegisteredProject> project = projectManager.get(mavenProjectPath);
+        if (!project.isPresent()) {
+          doCreateProject(mavenProjectPath);
+        }
       }
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+      LOG.error("Error getting maven projects", e);
     }
   }
 
