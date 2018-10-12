@@ -169,6 +169,9 @@ public class FileStructure {
    * @param item is the name of the item
    */
   public void selectItemInFileStructure(String item) {
+    // we need to wait a little to avoid quick clicking on nodes
+    WaitUtils.sleepQuietly(1);
+
     seleniumWebDriverHelper.waitNoExceptions(
         () -> selectItem(item), StaleElementReferenceException.class);
   }
