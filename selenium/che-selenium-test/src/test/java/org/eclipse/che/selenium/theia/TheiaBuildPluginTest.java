@@ -39,8 +39,8 @@ public class TheiaBuildPluginTest {
       "git clone https://github.com/ws-skeleton/che-dummy-plugin.git";
   private static final String GO_TO_DIRECTORY_COMMAND = "cd projects/che-dummy-plugin";
   private static final String BUILD_COMMAND = "./build.sh";
-  private static final String WS_DEV_TERMINAL_TITLE = "Remote terminal 0";
-  private static final String WS_THEIA_IDE_TERMINAL_TITLE = "Remote terminal 1";
+  private static final String WS_DEV_TERMINAL_TITLE = "ws/dev terminal 0";
+  private static final String WS_THEIA_IDE_TERMINAL_TITLE = "ws/theia-ide terminal 1";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
   private static final String EXPECTED_TERMINAL_OUTPUT =
