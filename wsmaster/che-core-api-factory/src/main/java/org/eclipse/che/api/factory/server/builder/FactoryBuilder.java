@@ -294,7 +294,7 @@ public class FactoryBuilder {
                     secListParamClass,
                     secListParamClass,
                     version,
-                    fullName + '[' + i + ']',
+                    fullName + "[" + i + "]",
                     isUpdate);
               }
             } else {
