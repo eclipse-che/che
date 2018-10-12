@@ -50,7 +50,7 @@ public class ServerSideRequestProcessor implements RequestProcessor {
     ThreadFactory factory =
         new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-            .setNameFormat(ServerSideRequestProcessor.class.getSimpleName())
+            .setNameFormat(ServerSideRequestProcessor.class.getSimpleName() + "-%d")
             .setDaemon(true)
             .build();
 
