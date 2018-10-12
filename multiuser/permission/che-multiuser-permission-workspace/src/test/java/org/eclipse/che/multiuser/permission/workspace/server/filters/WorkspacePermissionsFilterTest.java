@@ -228,7 +228,7 @@ public class WorkspacePermissionsFilterTest {
             .when()
             .get(SECURE_PATH + "/workspace");
 
-    assertEquals(response.getStatusCode(), 200);
+    assertEquals(response.getStatusCode(), 204);
     verify(workspaceService).getWorkspaces(any(), anyInt(), nullable(String.class));
     verify(permissionsFilter, never()).checkAccountPermissions(anyString(), any());
     verifyZeroInteractions(subject);
