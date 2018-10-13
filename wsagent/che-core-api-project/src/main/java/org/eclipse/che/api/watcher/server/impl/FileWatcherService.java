@@ -128,7 +128,7 @@ public class FileWatcherService {
     ThreadFactory factory =
         builder
             .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-            .setNameFormat(FileWatcherService.class.getSimpleName())
+            .setNameFormat(FileWatcherService.class.getSimpleName() + "-%d")
             .setDaemon(true)
             .build();
     executor = newSingleThreadExecutor(factory);
