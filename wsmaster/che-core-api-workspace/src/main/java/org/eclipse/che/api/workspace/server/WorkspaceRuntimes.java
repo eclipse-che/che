@@ -464,8 +464,9 @@ public class WorkspaceRuntimes {
       String workspaceId = workspace.getId();
       // Cancels workspace servers probes if any
       probeScheduler.cancel(workspaceId);
+      InternalRuntime<?> runtime = null;
       try {
-        InternalRuntime<?> runtime = getInternalRuntime(workspaceId);
+        runtime = getInternalRuntime(workspaceId);
 
         runtime.stop(options);
 
@@ -487,24 +488,31 @@ public class WorkspaceRuntimes {
           runtimes.remove(workspaceId);
           statuses.remove(workspaceId);
         }
-        LOG.info(
-            "Error occurs on workspace '{}/{}' with id '{}' stopped by user '{}'. Error: {}",
-            workspace.getNamespace(),
-            workspace.getConfig().getName(),
-            workspaceId,
-            stoppedBy,
-            e);
+
+        if (runtime == null) {
+          LOG.error(
+              "Error occurred during fetching of runtime for stopping workspace with id '{}' by user '{}'. Error: {}",
+              workspaceId,
+              stoppedBy,
+              e.getMessage(),
+              e);
+        } else {
+          RuntimeIdentity runtimeId = runtime.getContext().getIdentity();
+          LOG.error(
+              "Error occurred during stopping of runtime '{}:{}:{}' by user '{}'. Error: {}",
+              runtimeId.getWorkspaceId(),
+              runtimeId.getEnvName(),
+              runtimeId.getOwnerId(),
+              stoppedBy,
+              e.getMessage(),
+              e);
+        }
+
         publishWorkspaceStatusEvent(
             workspaceId,
             STOPPED,
             STOPPING,
             "Error occurs on workspace runtime stop. Error: " + e.getMessage());
-        // InfrastructureException is supposed to be an exception that can't be solved
-        // by Che admin, so should not be logged (but not InternalInfrastructureException).
-        // It will prevent bothering the admin when user made a mistake in WS configuration.
-        if (e instanceof InternalInfrastructureException) {
-          LOG.error(e.getLocalizedMessage(), e);
-        }
         throw new RuntimeException(e);
       }
     }
