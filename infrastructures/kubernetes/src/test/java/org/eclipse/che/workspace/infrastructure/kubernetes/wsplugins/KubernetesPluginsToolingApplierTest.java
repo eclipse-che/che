@@ -351,11 +351,12 @@ public class KubernetesPluginsToolingApplierTest {
     Container container = mock(Container.class);
     containers.add(container);
     List<io.fabric8.kubernetes.api.model.EnvVar> workspaceWideEnvVars = new ArrayList<>();
-    workspaceWideEnvVars.add();
-    workspaceWideEnvVars.add();
+    //    workspaceWideEnvVars.add();
+    //    workspaceWideEnvVars.add();
 
     // when
-    applier.apply(internalEnvironment, ImmutableList.of(createChePlugin(), createChePluginWith2Containers()));
+    applier.apply(
+        internalEnvironment, ImmutableList.of(createChePlugin(), createChePluginWith2Containers()));
 
     // then
     assertEquals(internalEnvironment.getPods().size(), 1);

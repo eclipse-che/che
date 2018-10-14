@@ -136,12 +136,7 @@ public class PluginBase {
   @Override
   public int hashCode() {
     return Objects.hash(
-        getName(),
-        getId(),
-        getVersion(),
-        getContainers(),
-        getEndpoints(),
-        getWorkspaceEnv());
+        getName(), getId(), getVersion(), getContainers(), getEndpoints(), getWorkspaceEnv());
   }
 
   @Override
