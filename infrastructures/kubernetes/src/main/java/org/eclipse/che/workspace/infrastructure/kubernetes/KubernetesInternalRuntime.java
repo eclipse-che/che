@@ -109,6 +109,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
+  private final RuntimeHangingDetector runtimeHangingDetector;
 
   @Inject
   public KubernetesInternalRuntime(
@@ -129,6 +130,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
+      RuntimeHangingDetector runtimeHangingDetector,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace,
       @Assisted List<Warning> warnings) {
@@ -149,6 +151,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.toolingProvisioner = toolingProvisioner;
     this.kubernetesEnvironmentProvisioner = kubernetesEnvironmentProvisioner;
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
+    this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
   }
 
@@ -217,6 +220,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         startFailureCause = e;
       }
 
+      startSynchronizer.completeExceptionally(startFailureCause);
       LOG.warn(
           "Failed to start Kubernetes runtime of workspace {}. Cause: {}",
           workspaceId,
@@ -236,13 +240,44 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             cleanUppingEx.getMessage());
       }
 
-      startSynchronizer.completeExceptionally(startFailureCause);
       if (interrupted) {
         throw new RuntimeStartInterruptedException(getContext().getIdentity());
       }
       wrapAndRethrow(startFailureCause);
     } finally {
       namespace.deployments().stopWatch();
+    }
+  }
+
+  /**
+   * Schedules runtime state checks that are needed after recovering of runtime.
+   *
+   * <p>Different checks will be scheduled according to current runtime status:
+   *
+   * <ul>
+   *   <li>STARTING - schedules servers checkers and starts tracking of starting runtime
+   *   <li>RUNNING - schedules servers checkers
+   *   <li>STOPPING - starts tracking of stopping runtime
+   *   <li>STOPPED - do nothing. Should not happen since only active runtimes are recovered
+   * </ul>
+   */
+  public void scheduleRuntimeStateChecks() throws InfrastructureException {
+    switch (getStatus()) {
+      case RUNNING:
+        scheduleServersCheckers();
+        break;
+
+      case STOPPING:
+        runtimeHangingDetector.trackStopping(this, workspaceStartTimeoutMin);
+        break;
+
+      case STARTING:
+        runtimeHangingDetector.trackStarting(this, workspaceStartTimeoutMin);
+        scheduleServersCheckers();
+        break;
+      case STOPPED:
+      default:
+        // do nothing
     }
   }
 
@@ -461,6 +496,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   @Override
   protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
+    runtimeHangingDetector.stopTracking(getContext().getIdentity());
     if (startSynchronizer.interrupt()) {
       // runtime is STARTING. Need to wait until start will be interrupted properly
       try {
@@ -731,6 +767,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   private class ServerLivenessHandler implements Consumer<ProbeResult> {
+
     @Override
     public void accept(ProbeResult probeResult) {
       String machineName = probeResult.getMachineName();

@@ -188,6 +188,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private KubernetesServerResolver kubernetesServerResolver;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
+  @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
@@ -240,6 +241,7 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
+            runtimeHangingDetector,
             context,
             namespace,
             emptyList());
@@ -263,6 +265,7 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
+            runtimeHangingDetector,
             context,
             namespace,
             emptyList());
@@ -451,6 +454,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.internalStop(emptyMap());
 
+    verify(runtimeHangingDetector).stopTracking(IDENTITY);
     verify(namespace).cleanUp();
   }
 
