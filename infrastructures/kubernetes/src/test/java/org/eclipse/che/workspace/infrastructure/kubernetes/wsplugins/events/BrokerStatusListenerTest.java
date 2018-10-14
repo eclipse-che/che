@@ -77,8 +77,7 @@ public class BrokerStatusListenerTest {
   }
 
   @Test
-  public void shouldSubmitBrokerResultWhenDoneEventIsReceivedAndToolingIsNotNull()
-      throws Exception {
+  public void shouldAddResultWhenDoneEventIsReceivedAndToolingIsNotNull() throws Exception {
     // given
     BrokerEvent event =
         new BrokerEvent()
@@ -90,7 +89,7 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verify(brokersResult).brokerResult(emptyList());
+    verify(brokersResult).addResult(emptyList());
   }
 
   @Test
@@ -112,7 +111,7 @@ public class BrokerStatusListenerTest {
   }
 
   @Test
-  public void shouldNotCallSubmitBrokerResultWhenValidationFails() throws Exception {
+  public void shouldNotCallAddResultWhenValidationFails() throws Exception {
     // given
     doThrow(new ValidationException("test")).when(validator).validatePluginNames(anyList());
     BrokerEvent event =
@@ -125,7 +124,7 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verify(brokersResult, never()).brokerResult(anyList());
+    verify(brokersResult, never()).addResult(anyList());
   }
 
   @Test

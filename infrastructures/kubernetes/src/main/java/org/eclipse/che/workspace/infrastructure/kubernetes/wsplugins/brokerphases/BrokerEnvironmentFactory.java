@@ -73,6 +73,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private static final String CONFIG_FILE = "config.json";
   private static final String CONTAINER_NAME_SUFFIX = "broker";
   private static final String PLUGINS_VOLUME_NAME = "plugins";
+  private static final String BROKERS_POD_NAME = "che-plugin-broker";
   private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
   private final String cheWebsocketEndpoint;
@@ -180,7 +181,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private Pod newPod() {
     return new PodBuilder()
         .withNewMetadata()
-        .withName("che-plugin-broker")
+        .withName(BROKERS_POD_NAME)
         .endMetadata()
         .withNewSpec()
         .withRestartPolicy("Never")
@@ -208,16 +209,19 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       String image,
       Pod pod) {
 
-    BrokerConfig data = new BrokerConfig();
-    data.configMapName = generateUniqueName(CONFIG_MAP_NAME_SUFFIX);
-    data.configMapVolume = generateUniqueName(BROKER_VOLUME);
-    data.configMap = newConfigMap(data.configMapName, pluginsMeta);
-    data.container = newContainer(runtimeId, envVars, image, data.configMapVolume);
-    data.machineName = Names.machineName(pod, data.container);
-    data.machineConfig = new InternalMachineConfig();
-    data.machineConfig.getVolumes().put(PLUGINS_VOLUME_NAME, new VolumeImpl().withPath("/plugins"));
+    BrokerConfig brokerConfig = new BrokerConfig();
+    brokerConfig.configMapName = generateUniqueName(CONFIG_MAP_NAME_SUFFIX);
+    brokerConfig.configMapVolume = generateUniqueName(BROKER_VOLUME);
+    brokerConfig.configMap = newConfigMap(brokerConfig.configMapName, pluginsMeta);
+    brokerConfig.container = newContainer(runtimeId, envVars, image, brokerConfig.configMapVolume);
+    brokerConfig.machineName = Names.machineName(pod, brokerConfig.container);
+    brokerConfig.machineConfig = new InternalMachineConfig();
+    brokerConfig
+        .machineConfig
+        .getVolumes()
+        .put(PLUGINS_VOLUME_NAME, new VolumeImpl().withPath("/plugins"));
 
-    return data;
+    return brokerConfig;
   }
 
   private Multimap<String, PluginMeta> sortByBrokerImage(Collection<PluginMeta> pluginMetas)

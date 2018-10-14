@@ -60,16 +60,15 @@ public class BrokersResultTest {
       expectedExceptions = IllegalStateException.class,
       expectedExceptionsMessageRegExp =
           "Submitting a broker result is not allowed before calling BrokerResult#get")
-  public void shouldThrowExceptionOnCallingBrokerResultBeforeCallGet() throws Exception {
-    brokersResult.brokerResult(emptyList());
+  public void shouldThrowExceptionOnCallingAddResultBeforeCallGet() throws Exception {
+    brokersResult.addResult(emptyList());
   }
 
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
           "Broker result is submitted when no more results are expected")
-  public void shouldThrowExceptionIfNumberOfBrokerResultCallsIsBiggerThanExpected()
-      throws Exception {
+  public void shouldThrowExceptionIfNumberOfAddResultCallsIsBiggerThanExpected() throws Exception {
     // given
     brokersResult.oneMoreBroker();
     brokersResult.oneMoreBroker();
@@ -78,12 +77,12 @@ public class BrokersResultTest {
     waitBrokerGetCalled();
 
     // when
-    brokersResult.brokerResult(singletonList(new ChePlugin()));
-    brokersResult.brokerResult(singletonList(new ChePlugin()));
-    brokersResult.brokerResult(singletonList(new ChePlugin()));
+    brokersResult.addResult(singletonList(new ChePlugin()));
+    brokersResult.addResult(singletonList(new ChePlugin()));
+    brokersResult.addResult(singletonList(new ChePlugin()));
 
     // then
-    brokersResult.brokerResult(singletonList(new ChePlugin()));
+    brokersResult.addResult(singletonList(new ChePlugin()));
   }
 
   @Test
@@ -93,7 +92,7 @@ public class BrokersResultTest {
     ChePlugin chePlugin = new ChePlugin();
     executeWhenResultIsStarted(
         () -> {
-          brokersResult.brokerResult(singletonList(chePlugin));
+          brokersResult.addResult(singletonList(chePlugin));
           return null;
         });
 
@@ -113,8 +112,8 @@ public class BrokersResultTest {
     ChePlugin chePlugin2 = new ChePlugin();
     executeWhenResultIsStarted(
         () -> {
-          brokersResult.brokerResult(singletonList(chePlugin));
-          brokersResult.brokerResult(singletonList(chePlugin2));
+          brokersResult.addResult(singletonList(chePlugin));
+          brokersResult.addResult(singletonList(chePlugin2));
           return null;
         });
 
@@ -149,7 +148,7 @@ public class BrokersResultTest {
     brokersResult.oneMoreBroker();
     executeWhenResultIsStarted(
         () -> {
-          brokersResult.brokerResult(singletonList(new ChePlugin()));
+          brokersResult.addResult(singletonList(new ChePlugin()));
           return null;
         });
 
@@ -183,7 +182,7 @@ public class BrokersResultTest {
     executeWhenResultIsStarted(
         () -> {
           // when
-          brokersResult.brokerResult(singletonList(new ChePlugin()));
+          brokersResult.addResult(singletonList(new ChePlugin()));
           brokersResult.error(new InfrastructureException("test"));
           return null;
         });
