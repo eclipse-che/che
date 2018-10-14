@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +61,8 @@ public class BrokersResult {
   /**
    * Submits exception indicating an error if the brokering process.
    *
-   * <p>Completes call of {@link #get(long, TimeUnit)} with {@link ExecutionException} containing provided exception
+   * <p>Completes call of {@link #get(long, TimeUnit)} with {@link ExecutionException} containing
+   * provided exception
    *
    * @param e exception indicating brokering error
    * @throws IllegalStateException if called before the call of {@link #get(long, TimeUnit)}
@@ -80,7 +82,7 @@ public class BrokersResult {
    *
    * @param toolingFromBroker tooling evaluated by a broker that needs to be added into a workspace
    * @throws InfrastructureException if called more times than {@link #oneMoreBroker()} which
-   * indicates incorrect usage of the {@link BrokersResult}
+   *     indicates incorrect usage of the {@link BrokersResult}
    * @throws IllegalStateException if called before the call of {@link #get(long, TimeUnit)}
    */
   public void brokerResult(List<ChePlugin> toolingFromBroker) throws InfrastructureException {
@@ -104,11 +106,10 @@ public class BrokersResult {
    * {@link #brokerResult(List)}.
    *
    * <p>Number of calls of {@link #brokerResult(List)} needs to be the same as number of calls of
-   * {@link #oneMoreBroker()}.
-   * Returned list is a combination of lists submitted to {@link #brokerResult(List)}. If provided
-   * timeout elapses before all needed calls of {@link #brokerResult(List)} method ends with an
-   * exception. This method is based on {@link CompletableFuture#get(long, TimeUnit)} so it also
-   * inherits parameters and thrown exception.
+   * {@link #oneMoreBroker()}. Returned list is a combination of lists submitted to {@link
+   * #brokerResult(List)}. If provided timeout elapses before all needed calls of {@link
+   * #brokerResult(List)} method ends with an exception. This method is based on {@link
+   * CompletableFuture#get(long, TimeUnit)} so it also inherits parameters and thrown exception.
    *
    * @return tooling submitted by one or several brokers that needs to be injected into a workspace
    * @throws IllegalStateException if called more than one time
@@ -121,5 +122,10 @@ public class BrokersResult {
     } else {
       throw new IllegalStateException("BrokerResult#get doesn't support multiple calls");
     }
+  }
+
+  @VisibleForTesting
+  boolean isStarted() {
+    return started.get();
   }
 }

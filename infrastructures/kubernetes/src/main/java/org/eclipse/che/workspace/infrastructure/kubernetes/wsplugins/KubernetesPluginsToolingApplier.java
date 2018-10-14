@@ -85,9 +85,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         addSidecar(pod, container, chePlugin, kubernetesEnvironment);
       }
     }
-    for (ChePlugin chePlugin : chePlugins) {
-      populateWorkspaceEnvVars(chePlugin, kubernetesEnvironment);
-    }
+    chePlugins.forEach(chePlugin -> populateWorkspaceEnvVars(chePlugin, kubernetesEnvironment));
 
     if (isAuthEnabled) {
       // enable per-workspace security with JWT proxy for sidecar based workspaces
