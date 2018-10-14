@@ -69,7 +69,7 @@ public class BrokerStatusListener implements EventSubscriber<BrokerEvent> {
             return;
           }
           try {
-            brokersResult.brokerResult(tooling);
+            brokersResult.addResult(tooling);
           } catch (InfrastructureException e) {
             LOG.error(e.getLocalizedMessage(), e);
           }

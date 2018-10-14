@@ -99,7 +99,7 @@ public class PluginBase {
     this.endpoints = endpoints;
   }
 
-  /** List of environment variables to set in the workspace */
+  /** List of environment variables to set in all the containers of a workspace */
   public PluginBase workspaceEnv(List<EnvVar> workspaceEnv) {
     this.workspaceEnv = workspaceEnv;
     return this;
