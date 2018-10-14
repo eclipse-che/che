@@ -74,7 +74,7 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
             projectFactory.create(workspaceId, runtimeState.getNamespace()),
             getEnvironment().getWarnings());
 
-    runtime.scheduleServersCheckers();
+    runtime.scheduleRuntimeStateChecks();
 
     return runtime;
   }
