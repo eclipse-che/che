@@ -51,22 +51,28 @@ public class SidecarServicesProvisioner {
    */
   public void provision(KubernetesEnvironment kubernetesEnvironment)
       throws InfrastructureException {
-    for (ChePluginEndpoint endpoint : endpoints) {;
-      if (Boolean.parseBoolean(endpoint.getAttributes().getOrDefault("discoverable", "true"))) {
-        String serviceName = endpoint.getName();
-        Service service = createService(serviceName, podName, endpoint.getTargetPort());
+    for (ChePluginEndpoint endpoint : endpoints) {
+      if (!isDiscoverable(endpoint)) {
+        continue;
+      }
 
-        Map<String, Service> services = kubernetesEnvironment.getServices();
-        if (!services.containsKey(serviceName)) {
-          services.put(serviceName, service);
-        } else {
-          throw new InfrastructureException(
-              format(
-                  "Applying of sidecar tooling failed. Kubernetes service with name '%s' already exists in the workspace environment.",
-                  serviceName));
-        }
+      String serviceName = endpoint.getName();
+      Service service = createService(serviceName, podName, endpoint.getTargetPort());
+
+      Map<String, Service> services = kubernetesEnvironment.getServices();
+      if (!services.containsKey(serviceName)) {
+        services.put(serviceName, service);
+      } else {
+        throw new InfrastructureException(
+            format(
+                "Applying of sidecar tooling failed. Kubernetes service with name '%s' already exists in the workspace environment.",
+                serviceName));
       }
     }
+  }
+
+  private boolean isDiscoverable(ChePluginEndpoint endpoint) {
+    return Boolean.parseBoolean(endpoint.getAttributes().getOrDefault("discoverable", "true"));
   }
 
   private Service createService(String name, String podName, int port) {
