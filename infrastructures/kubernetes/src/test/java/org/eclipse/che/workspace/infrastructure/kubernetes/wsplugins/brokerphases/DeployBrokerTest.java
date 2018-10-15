@@ -27,7 +27,6 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -36,6 +35,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesD
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -61,7 +61,7 @@ public class DeployBrokerTest {
   @Mock private ConfigMap configMap;
   private Pod pod;
 
-  @Mock private CompletableFuture<List<ChePlugin>> pluginsFutures;
+  @Mock private BrokersResult brokersResult;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverableEventListenerFactory;
 
   private List<ChePlugin> plugins = emptyList();
@@ -75,7 +75,7 @@ public class DeployBrokerTest {
             "workspaceId",
             k8sNamespace,
             k8sEnvironment,
-            pluginsFutures,
+            brokersResult,
             unrecoverableEventListenerFactory);
     deployBrokerPhase.then(nextBrokerPhase);
 
@@ -88,7 +88,7 @@ public class DeployBrokerTest {
     when(k8sEnvironment.getPods()).thenReturn(ImmutableMap.of(PLUGIN_BROKER_POD_NAME, pod));
     when(k8sEnvironment.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", configMap));
 
-    when(k8sDeployments.deploy(any())).thenReturn(pod);
+    when(k8sDeployments.create(any())).thenReturn(pod);
   }
 
   @Test
@@ -99,7 +99,7 @@ public class DeployBrokerTest {
     // then
     assertSame(result, plugins);
     verify(k8sConfigMaps).create(configMap);
-    verify(k8sDeployments).deploy(pod);
+    verify(k8sDeployments).create(pod);
     verify(k8sDeployments).waitRunningAsync(PLUGIN_BROKER_POD_NAME);
 
     verify(k8sDeployments).stopWatch();
