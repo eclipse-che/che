@@ -62,8 +62,16 @@ public class LanguageServerAbstractFileWatcherTest {
 
     when(event.getId()).thenReturn(ID);
     when(event.getLanguageServer()).thenReturn(languageServer);
-    when(languageServer.getWorkspaceService()).thenReturn(workspaceService);
-    when(pathMatcher.matches(tmpFilePath)).thenReturn(true);
+    when(pathMatcher.matches(any(Path.class)))
+        .thenAnswer(
+            invocation -> {
+              Object argument = invocation.getArguments()[0];
+              if (argument.equals(tmpFilePath)) {
+                return true;
+              } else {
+                return false;
+              }
+            });
   }
 
   @Test
@@ -78,7 +86,7 @@ public class LanguageServerAbstractFileWatcherTest {
   public void shouldSendChangesWhenCalledAcceptMethodIfPathMatches() {
     registryContainer.pathMatcherRegistry.add(ID, ImmutableSet.of(pathMatcher));
     eventService.publish(event);
-
+    when(languageServer.getWorkspaceService()).thenReturn(workspaceService);
     fileWatcher.accept(tmpFilePath);
 
     verify(languageServer).getWorkspaceService();
