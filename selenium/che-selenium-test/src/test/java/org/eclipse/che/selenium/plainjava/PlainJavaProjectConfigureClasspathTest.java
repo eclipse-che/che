@@ -184,7 +184,7 @@ public class PlainJavaProjectConfigureClasspathTest {
     configureClasspath.openItemInSelectPathForm(LIB_PROJECT);
     configureClasspath.selectItemInSelectPathForm("mockito-core-2.21.0.jar");
     configureClasspath.clickOkBtnSelectPathForm();
-    configureClasspath.waitExpectedTextJarsAndFolderArea("mockito-core-2.10.0.jar - /lib");
+    configureClasspath.waitExpectedTextJarsAndFolderArea("mockito-core-2.21.0.jar - /lib");
     configureClasspath.clickOnDoneBtnConfigureClasspath();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company");
