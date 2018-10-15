@@ -87,6 +87,7 @@ public class FileStructureCodeEditorTest {
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
+    fileStructure.selectItemInFileStructure("getId():double");
     fileStructure.selectItemInFileStructureByEnter("getId():double");
     fileStructure.waitFileStructureFormIsClosed();
     editor.waitSpecifiedValueForLineAndChar(37, 28);
