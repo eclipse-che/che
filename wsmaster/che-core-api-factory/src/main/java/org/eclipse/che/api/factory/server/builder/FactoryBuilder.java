@@ -227,7 +227,7 @@ public class FactoryBuilder {
             && factoryParameter.ignoredSince().compareTo(version) > 0
             && method.getDeclaringClass().isAssignableFrom(allowedMethodsProvider)) {
           throw new ConflictException(
-              String.format(FactoryConstants.MISSING_MANDATORY_MESSAGE, method.getName()));
+              String.format(FactoryConstants.MISSING_MANDATORY_MESSAGE, fullName));
         }
       } else if (!method.getDeclaringClass().isAssignableFrom(allowedMethodsProvider)) {
         throw new ConflictException(
@@ -287,14 +287,14 @@ public class FactoryBuilder {
           if (!String.class.equals(secListParamClass) && !List.class.equals(secListParamClass)) {
             if (secListParamClass.isAnnotationPresent(DTO.class)) {
               List<Object> list = (List) parameterValue;
-              for (Object entry : list) {
+              for (int i = 0; i < list.size(); i++) {
                 validateCompatibility(
-                    entry,
+                    list.get(i),
                     object,
                     secListParamClass,
                     secListParamClass,
                     version,
-                    fullName,
+                    fullName + "[" + i + "]",
                     isUpdate);
               }
             } else {

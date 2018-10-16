@@ -63,6 +63,7 @@ public class ChoiceDialogViewImpl extends Window implements ChoiceDialogView {
 
   @Override
   public void onEnterPress(NativeEvent evt) {
+    evt.preventDefault();
     delegate.onEnterClicked();
   }
 

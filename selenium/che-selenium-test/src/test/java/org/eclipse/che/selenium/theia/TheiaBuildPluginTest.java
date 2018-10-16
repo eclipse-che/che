@@ -11,10 +11,10 @@
  */
 package org.eclipse.che.selenium.theia;
 
-import static org.eclipse.che.selenium.core.TestGroup.MULTIUSER;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -32,9 +32,11 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -52,24 +54,26 @@ public class TheiaBuildPluginTest {
   private static final String EXPECTED_INSTANCE_RUNNING_MESSAGE = "Hosted instance is running at:";
   private static final String GO_TO_DIRECTORY_COMMAND = "cd projects/che-dummy-plugin";
   private static final String BUILD_COMMAND = "./build.sh";
+  private static final String WS_DEV_TERMINAL_TITLE = "ws/dev terminal 0";
+  private static final String WS_THEIA_IDE_TERMINAL_TITLE = "ws/theia-ide terminal 1";
   private static final String HOSTED_SEARCH_SEQUENCE = "hosted";
   private static final String HELLO_WORLD_SEARCH_SEQUENCE = "Hello";
   private static final String HELLO_WORLD_PROPOSAL = "Hello World";
   private static final String EXPECTED_HELLO_WORLD_NOTIFICATION = "Hello World!";
   private static final String SUGGESTION_FOR_SELECTION = "Hosted Plugin: Start Instance";
   private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";
-  private static final String WS_DEV_TERMINAL_TITLE = "Remote terminal 0";
-  private static final String WS_THEIA_IDE_TERMINAL_TITLE = "Remote terminal 1";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
   private static final String EXPECTED_TERMINAL_OUTPUT =
-      "\uD83D\uDD0D Validating...✔️\n"
+      "Packaging of plugin\n"
+          + "\uD83D\uDD0D Validating...✔️\n"
           + "\uD83D\uDDC2  Getting dependencies...✔️\n"
           + "\uD83D\uDDC3  Resolving files...✔️\n"
           + "✂️  Excluding files...✔️\n"
           + "✍️  Generating Assembly...✔️\n"
-          + "\uD83C\uDF89 Generated plugin: hello_world_plugin.theia\n"
-          + "Generating Che plug-in file...\n"
+          + "\uD83C\uDF89 Generated plugin: hello_world_plugin.theia\n";
+  private static final String EXPECTED_TERMINAL_SUCCESS_OUTPUT =
+      "Generating Che plug-in file...\n"
           + "hello_world_plugin.theia\n"
           + "./\n"
           + "./che-plugin.yaml\n"
@@ -91,6 +95,7 @@ public class TheiaBuildPluginTest {
   @Inject private TheiaNewFileDialog theiaNewFileDialog;
   @Inject private TheiaQuickTree theiaQuickTree;
   @Inject private TheiaHostedPluginSelectPathForm hostedPluginSelectPathForm;
+  @Inject private TheiaProposalForm theiaProposalForm;
 
   @BeforeClass
   public void prepare() {
@@ -107,27 +112,38 @@ public class TheiaBuildPluginTest {
     workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
-  @Test(groups = {OPENSHIFT, MULTIUSER})
+  @Test(groups = {OPENSHIFT})
   public void pluginShouldBeBuilt() {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
 
     openTerminal("File", "Open new multi-machine terminal", "ws/dev");
-    theiaTerminal.waitTerminalTab(WS_DEV_TERMINAL_TITLE);
-    theiaTerminal.clickOnTerminalTab(WS_DEV_TERMINAL_TITLE);
+    theiaTerminal.waitTab(WS_DEV_TERMINAL_TITLE);
+    theiaTerminal.clickOnTab(WS_DEV_TERMINAL_TITLE);
     theiaTerminal.performCommand(GIT_CLONE_COMMAND);
     theiaTerminal.waitTerminalOutput(EXPECTED_CLONE_OUTPUT, 0);
 
     openTerminal("File", "Open new multi-machine terminal", "ws/theia-ide");
-    theiaTerminal.waitTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
-    theiaTerminal.clickOnTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.waitTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.clickOnTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.performCommand(GO_TO_DIRECTORY_COMMAND);
     theiaTerminal.waitTerminalOutput(GO_TO_DIRECTORY_COMMAND, 1);
 
-    theiaTerminal.waitTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
-    theiaTerminal.clickOnTerminalTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.waitTab(WS_THEIA_IDE_TERMINAL_TITLE);
+    theiaTerminal.clickOnTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.performCommand(BUILD_COMMAND);
-    theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
+    try {
+      theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      if (theiaTerminal.isTextPresentInTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1)) {
+        fail("Known permanent failure https://github.com/eclipse/che/issues/11624", ex);
+      }
+
+      throw ex;
+    }
+
+    theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1);
   }
 
   // @Test(priority = 1)

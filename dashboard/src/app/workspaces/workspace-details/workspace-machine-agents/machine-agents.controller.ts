@@ -32,6 +32,7 @@ export class MachineAgentsController {
   static $inject = ['$scope', 'cheAgent', '$timeout', '$q'];
 
   onChange: Function;
+  isPluginsEnabled: boolean;
   agentOrderBy = 'name';
   agentItemsList: Array<IAgentItem>;
 

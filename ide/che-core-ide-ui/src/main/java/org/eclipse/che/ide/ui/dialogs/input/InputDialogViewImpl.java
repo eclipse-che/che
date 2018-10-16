@@ -68,6 +68,7 @@ public class InputDialogViewImpl extends Window implements InputDialogView {
 
   @Override
   public void onEnterPress(NativeEvent evt) {
+    evt.preventDefault();
     delegate.onEnterClicked();
   }
 

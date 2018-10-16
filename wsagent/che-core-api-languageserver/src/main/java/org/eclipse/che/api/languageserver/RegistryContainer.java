@@ -92,6 +92,18 @@ class RegistryContainer {
     }
 
     /**
+     * Get registry element that corresponds to a specified language server or default value if it
+     * is not present.
+     *
+     * @param id language server id
+     * @return registry element or default value if no value is stored for specified language server
+     */
+    T getOrDefault(String id, T defaultValue) {
+      T value = getOrNull(id);
+      return value == null ? defaultValue : value;
+    }
+
+    /**
      * Get registry element that corresponds to a specified language server.
      *
      * @param id language server id

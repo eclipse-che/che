@@ -46,7 +46,8 @@ public class TheiaProjectTree {
     String COLLAPSED_ITEM_XPATH_TEMPLATE =
         "//div[@data-node-id='/projects:/projects/%s' and contains(@class, 'theia-mod-collapsed')]";
     String EXPAND_ITEM_ICON_XPATH_TEMPLATE = "//div[@data-node-id='/projects:/projects/%s']";
-    String FILES_TAB_XPATH = "(//div[@id='theia-left-content-panel']//div[text()='Files'])[1]";
+    String FILES_TAB_XPATH =
+        "//div[contains(@class, 'theia-app-left')]//ul[@class='p-TabBar-content']//li[@title='Files']";
   }
 
   public void clickOnFilesTab() {

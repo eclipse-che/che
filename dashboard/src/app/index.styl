@@ -240,14 +240,19 @@ md-tabs-wrapper
   z-index 1
   md-tab-item
     background-color inherit !important
-    .error-state
-      color $error-color !important
+    .error-state, .warning-state
       position absolute
       display inline-block
       font-size 14px
       margin-top 5px
       margin-left -15px
-
+    .error-state
+      color $error-color !important
+      
+    .warning-state
+      color $warning-color !important
+      margin-left -18px
+      
 .popover
   font-family 'Open Sans'
   font-size 12px

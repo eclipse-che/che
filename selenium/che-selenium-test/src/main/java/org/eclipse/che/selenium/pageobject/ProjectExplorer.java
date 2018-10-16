@@ -500,7 +500,10 @@ public class ProjectExplorer {
    * @param name item's visible name
    */
   public void waitAndSelectItemByName(String name) {
-    waitVisibilityByName(name).click();
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> waitVisibilityByName(name).click(),
+        ELEMENT_TIMEOUT_SEC,
+        StaleElementReferenceException.class);
   }
 
   /**
@@ -581,7 +584,7 @@ public class ProjectExplorer {
 
   private void openItemByVisibleName(String name) {
 
-    waitVisibilityByName(name).click();
+    waitAndSelectItemByName(name);
     waitItemSelectedByName(name);
     actionsFactory
         .createAction(seleniumWebDriver)

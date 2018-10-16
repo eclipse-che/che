@@ -13,5 +13,5 @@ sleep 10s
 rm -rf /home/cypress/cypress/videos
 
 # Run tests
-cd /home/cypress && ./node_modules/.bin/cypress run
+cd /home/cypress && /node_modules/.bin/cypress run
  

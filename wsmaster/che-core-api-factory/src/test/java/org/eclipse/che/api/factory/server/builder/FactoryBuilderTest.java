@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import org.eclipse.che.api.core.ApiException;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.factory.FactoryParameter;
 import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.factory.server.impl.SourceStorageParametersValidator;
@@ -165,6 +166,39 @@ public class FactoryBuilderTest {
                     .withReferer("referrer")
                     .withSince(123L)
                     .withUntil(123L));
+
+    factoryBuilder.checkValid(factory);
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "You are missing a mandatory parameter \"workspace.projects\\[1\\].type\". .*")
+  public void shouldThrowExceptionWithMessagePointingToMissingMandatoryParameter()
+      throws Exception {
+    factoryBuilder = new FactoryBuilder(sourceProjectParametersValidator);
+
+    ProjectConfigDto project =
+        dto.createDto(ProjectConfigDto.class)
+            .withSource(
+                dto.createDto(SourceStorageDto.class).withType("git").withLocation("location"))
+            .withType("type")
+            .withAttributes(singletonMap("key", singletonList("value")))
+            .withDescription("description")
+            .withName("name")
+            .withPath("/path");
+
+    ProjectConfigDto project2 =
+        dto.createDto(ProjectConfigDto.class)
+            .withSource(
+                dto.createDto(SourceStorageDto.class).withType("git").withLocation("location"))
+            .withType("")
+            .withAttributes(singletonMap("key", singletonList("value")))
+            .withDescription("description")
+            .withName("test")
+            .withPath("/test");
+    FactoryDto factory = prepareFactory();
+    factory.getWorkspace().setProjects(asList(project, project2));
 
     factoryBuilder.checkValid(factory);
   }

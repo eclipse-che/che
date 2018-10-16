@@ -524,17 +524,19 @@ public class Consoles {
     waitPreviewUrlIsPresent();
     waitPreviewUrlIsResponsive(10);
 
-    // wait for 2 sec to prevent "Application is not available" error
-    WaitUtils.sleepQuietly(2);
+    // wait for 5 sec to prevent "Application is not available" error
+    WaitUtils.sleepQuietly(5);
     clickOnPreviewUrl();
 
     seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
-    seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
-
-    seleniumWebDriver.close();
-    seleniumWebDriver.switchTo().window(currentWindow);
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    try {
+      seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
+    } finally {
+      seleniumWebDriver.close();
+      seleniumWebDriver.switchTo().window(currentWindow);
+      seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    }
   }
 
   // Start command from project context menu and check expected message in Console

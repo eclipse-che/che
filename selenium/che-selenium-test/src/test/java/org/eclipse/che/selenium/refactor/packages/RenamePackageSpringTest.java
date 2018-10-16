@@ -71,6 +71,7 @@ public class RenamePackageSpringTest {
         PROJECT_NAME_2,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test(priority = 1)

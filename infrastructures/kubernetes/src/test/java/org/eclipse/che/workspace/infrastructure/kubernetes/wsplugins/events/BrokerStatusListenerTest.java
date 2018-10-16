@@ -13,16 +13,18 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events;
 
 import static java.util.Collections.emptyList;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.shared.dto.BrokerStatus;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingValidator;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -39,15 +41,14 @@ import org.testng.annotations.Test;
 public class BrokerStatusListenerTest {
 
   public static final String WORKSPACE_ID = "workspace123";
-  @Mock private CompletableFuture<List<ChePlugin>> finishFuture;
+  @Mock BrokersResult brokersResult;
+  @Mock KubernetesPluginsToolingValidator validator;
 
   private BrokerStatusListener brokerStatusListener;
 
   @BeforeMethod
   public void setUp() {
-    brokerStatusListener =
-        new BrokerStatusListener(
-            WORKSPACE_ID, new KubernetesPluginsToolingValidator(), finishFuture);
+    brokerStatusListener = new BrokerStatusListener(WORKSPACE_ID, validator, brokersResult);
   }
 
   @Test
@@ -60,7 +61,7 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verifyNoMoreInteractions(finishFuture);
+    verifyNoMoreInteractions(brokersResult);
   }
 
   @Test
@@ -72,11 +73,11 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verifyNoMoreInteractions(finishFuture);
+    verifyNoMoreInteractions(brokersResult);
   }
 
   @Test
-  public void shouldCompleteFinishFutureWhenDoneEventIsReceivedAndToolingIsNotNull() {
+  public void shouldAddResultWhenDoneEventIsReceivedAndToolingIsNotNull() throws Exception {
     // given
     BrokerEvent event =
         new BrokerEvent()
@@ -88,11 +89,46 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verify(finishFuture).complete(emptyList());
+    verify(brokersResult).addResult(emptyList());
   }
 
   @Test
-  public void shouldCompleteExceptionallyFinishFutureWhenDoneEventIsReceivedButToolingIsNull() {
+  public void shouldSubmitErrorWhenDoneEventIsReceivedButToolingIsValidationFails()
+      throws Exception {
+    // given
+    doThrow(new ValidationException("test")).when(validator).validatePluginNames(anyList());
+    BrokerEvent event =
+        new BrokerEvent()
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
+            .withStatus(BrokerStatus.DONE)
+            .withTooling(emptyList());
+
+    // when
+    brokerStatusListener.onEvent(event);
+
+    // then
+    verify(brokersResult).error(any(ValidationException.class));
+  }
+
+  @Test
+  public void shouldNotCallAddResultWhenValidationFails() throws Exception {
+    // given
+    doThrow(new ValidationException("test")).when(validator).validatePluginNames(anyList());
+    BrokerEvent event =
+        new BrokerEvent()
+            .withRuntimeId(new RuntimeIdentityImpl(WORKSPACE_ID, null, null))
+            .withStatus(BrokerStatus.DONE)
+            .withTooling(emptyList());
+
+    // when
+    brokerStatusListener.onEvent(event);
+
+    // then
+    verify(brokersResult, never()).addResult(anyList());
+  }
+
+  @Test
+  public void shouldSubmitErrorWhenDoneEventIsReceivedButToolingIsNull() {
     // given
     BrokerEvent event =
         new BrokerEvent()
@@ -104,11 +140,11 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verify(finishFuture).completeExceptionally(any(InternalInfrastructureException.class));
+    verify(brokersResult).error(any(InternalInfrastructureException.class));
   }
 
   @Test
-  public void shouldCompleteExceptionallyFinishFutureWhenFailedEventIsReceived() {
+  public void shouldSubmitErrorWhenFailedEventIsReceived() {
     // given
     BrokerEvent event =
         new BrokerEvent()
@@ -120,6 +156,6 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verify(finishFuture).completeExceptionally(any(InfrastructureException.class));
+    verify(brokersResult).error(any(InfrastructureException.class));
   }
 }
