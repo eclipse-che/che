@@ -27,7 +27,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -57,9 +56,8 @@ public class JpaFactoryDao implements FactoryDao {
     try {
       doCreate(factory);
     } catch (DuplicateKeyException ex) {
-      throw new ConflictException(format(
-          "Factory with name '%s' already exists",
-          factory.getName()));
+      throw new ConflictException(
+          format("Factory with name '%s' already exists", factory.getName()));
     } catch (IntegrityConstraintViolationException ex) {
       throw new ConflictException(
           "Could not create factory with creator that refers on non-existent user");
@@ -76,9 +74,8 @@ public class JpaFactoryDao implements FactoryDao {
     try {
       return new FactoryImpl(doUpdate(update));
     } catch (DuplicateKeyException ex) {
-      throw new ConflictException(format(
-          "Factory with name '%s' already exists",
-          update.getName()));
+      throw new ConflictException(
+          format("Factory with name '%s' already exists", update.getName()));
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getLocalizedMessage(), ex);
     }
