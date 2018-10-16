@@ -22,6 +22,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -86,6 +87,7 @@ public class KubernetesPluginsToolingApplierTest {
   @Mock Container userContainer;
   @Mock InternalMachineConfig userMachineConfig;
 
+  List<Container> containers;
   KubernetesPluginsToolingApplier applier;
 
   @BeforeMethod
@@ -93,7 +95,7 @@ public class KubernetesPluginsToolingApplierTest {
     applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, false);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
-    List<Container> containers = new ArrayList<>();
+    containers = new ArrayList<>();
     Map<String, Service> services = new HashMap<>();
 
     containers.add(userContainer);
@@ -341,6 +343,29 @@ public class KubernetesPluginsToolingApplierTest {
 
     // then
     verifyK8sServices(internalEnvironment, endpoint1, endpoint2);
+  }
+
+  @Test
+  public void shouldPopulateWorkspaceWideEnvVarsToAllTheContainers() throws Exception {
+    // when
+    Container container = mock(Container.class);
+    containers.add(container);
+    List<io.fabric8.kubernetes.api.model.EnvVar> workspaceWideEnvVars = new ArrayList<>();
+    //    workspaceWideEnvVars.add();
+    //    workspaceWideEnvVars.add();
+
+    // when
+    applier.apply(
+        internalEnvironment, ImmutableList.of(createChePlugin(), createChePluginWith2Containers()));
+
+    // then
+    assertEquals(internalEnvironment.getPods().size(), 1);
+    Pod pod = internalEnvironment.getPods().values().iterator().next();
+    List<Container> actualContainers = pod.getSpec().getContainers();
+    assertEquals(actualContainers.size(), 5);
+    for (Container actualContainer : actualContainers) {
+      assertTrue(actualContainer.getEnv().containsAll(workspaceWideEnvVars));
+    }
   }
 
   @Test(

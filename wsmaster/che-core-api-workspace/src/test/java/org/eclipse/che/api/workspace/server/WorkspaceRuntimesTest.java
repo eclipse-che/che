@@ -229,7 +229,7 @@ public class WorkspaceRuntimesTest {
         .prepare(eq(identity2), any(InternalEnvironment.class));
 
     // When
-    runtimes.recover();
+    runtimes.new RecoverRuntimesTask(identities).run();
 
     // Then
     verify(infrastructure).prepare(identity1, internalEnvironment);

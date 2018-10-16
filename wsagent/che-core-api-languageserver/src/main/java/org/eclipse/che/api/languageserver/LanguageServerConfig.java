@@ -159,7 +159,7 @@ public interface LanguageServerConfig {
     Map<String, String> getLanguageRegexes();
 
     /**
-     * Get a file watch patterns for a {@link LanguageServerFileWatcher}, patterns should be
+     * Get a file watch patterns for a {@link LanguageServerAbstractFileWatcher}, patterns should be
      * compliant to <a
      * href="https://github.com/Microsoft/language-server-protocol/blob/master/protocol.md#workspace_didChangeWatchedFiles">DidChangeWatchedFiles
      * notification format
