@@ -57,7 +57,7 @@ public class JpaFactoryDao implements FactoryDao {
       doCreate(factory);
     } catch (DuplicateKeyException ex) {
       throw new ConflictException(
-          format("Factory with name '%s' already exists", factory.getName()));
+          format("Factory with name '%s' already exists for current user", factory.getName()));
     } catch (IntegrityConstraintViolationException ex) {
       throw new ConflictException(
           "Could not create factory with creator that refers on non-existent user");
@@ -75,7 +75,7 @@ public class JpaFactoryDao implements FactoryDao {
       return new FactoryImpl(doUpdate(update));
     } catch (DuplicateKeyException ex) {
       throw new ConflictException(
-          format("Factory with name '%s' already exists", update.getName()));
+          format("Factory with name '%s' already exists for current user", update.getName()));
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getLocalizedMessage(), ex);
     }

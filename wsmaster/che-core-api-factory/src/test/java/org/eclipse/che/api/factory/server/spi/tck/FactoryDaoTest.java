@@ -127,7 +127,8 @@ public class FactoryDaoTest {
 
   @Test(
       expectedExceptions = ConflictException.class,
-      expectedExceptionsMessageRegExp = "Factory with name 'factoryName0' already exists")
+      expectedExceptionsMessageRegExp =
+          "Factory with name 'factoryName0' already exists for current user")
   public void shouldThrowConflictExceptionWhenCreatingFactoryWithExistingNameAndUserId()
       throws Exception {
     final FactoryImpl factory = createFactory(10, users[0].getId());
@@ -171,7 +172,8 @@ public class FactoryDaoTest {
 
   @Test(
       expectedExceptions = ConflictException.class,
-      expectedExceptionsMessageRegExp = "Factory with name 'factoryName1' already exists")
+      expectedExceptionsMessageRegExp =
+          "Factory with name 'factoryName1' already exists for current user")
   public void shouldThrowConflictExceptionWhenUpdateFactoryWithExistingNameAndUserId()
       throws Exception {
     final FactoryImpl update = factories[0];
