@@ -37,6 +37,9 @@ context('TypeScript', () => {
             }
 
         }).then(() => {
+            // wait the refresh after workspace is opened
+            cy.wait(6000);
+
             // open /tmp
             cy.get('#theia-top-panel').should('exist').then(() => {
 
