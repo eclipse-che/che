@@ -11,7 +11,9 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision.env;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.core.NotFoundException;
