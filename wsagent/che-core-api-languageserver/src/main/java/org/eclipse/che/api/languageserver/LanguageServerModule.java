@@ -15,7 +15,11 @@ import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.google.inject.name.Names;
+import java.nio.file.Path;
+import java.util.function.Consumer;
 import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 
@@ -27,7 +31,6 @@ public class LanguageServerModule extends AbstractModule {
     bind(TextDocumentService.class).asEagerSingleton();
     bind(PublishDiagnosticsParamsJsonRpcTransmitter.class).asEagerSingleton();
     bind(ShowMessageJsonRpcTransmitter.class).asEagerSingleton();
-    bind(LanguageServerFileWatcher.class).asEagerSingleton();
     bind(LanguageServerConfigInitializer.class).asEagerSingleton();
     bind(LanguageServerService.class).asEagerSingleton();
 
@@ -41,5 +44,15 @@ public class LanguageServerModule extends AbstractModule {
     newSetBinder(binder(), LanguageServerConfigProvider.class)
         .addBinding()
         .to(GuiceConfigProvider.class);
+
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.create"))
+        .addBinding()
+        .to(LanguageServerCreateFileWatcher.class);
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.update"))
+        .addBinding()
+        .to(LanguageServerUpdateFileWatcher.class);
+    newSetBinder(binder(), new TypeLiteral<Consumer<Path>>() {}, Names.named("che.fs.file.delete"))
+        .addBinding()
+        .to(LanguageServerDeleteFileWatcher.class);
   }
 }

@@ -606,7 +606,7 @@ public class InternalRuntimeTest {
     return Executors.newSingleThreadExecutor(
         new ThreadFactoryBuilder()
             .setDaemon(true)
-            .setNameFormat(this.getClass().getSimpleName())
+            .setNameFormat(this.getClass().getSimpleName() + "-%d")
             .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
             .build());
   }

@@ -75,7 +75,9 @@ public class EditMachineForm {
   }
 
   public void clickOnRecipeForm() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(RECIPE_EDITOR_TEXT_XPATH));
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> seleniumWebDriverHelper.waitAndClick(By.xpath(RECIPE_EDITOR_TEXT_XPATH)),
+        StaleElementReferenceException.class);
   }
 
   public void typeToRecipe(String text) {

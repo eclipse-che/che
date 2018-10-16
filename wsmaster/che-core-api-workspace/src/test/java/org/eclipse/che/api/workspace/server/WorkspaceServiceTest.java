@@ -626,6 +626,7 @@ public class WorkspaceServiceTest {
             .get(SECURE_PATH + "/workspace");
 
     assertEquals(response.getStatusCode(), 200);
+    assertNotNull(response.getHeader("Link"));
     assertEquals(
         unwrapDtoList(response, WorkspaceDto.class)
             .stream()
