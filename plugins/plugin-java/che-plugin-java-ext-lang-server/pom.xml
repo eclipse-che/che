@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-java-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.12.2-SNAPSHOT</version>
+        <version>6.12.2</version>
     </parent>
     <artifactId>che-plugin-java-ext-lang-server</artifactId>
     <name>Che Plugin :: Java :: Extension Java Server</name>

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.12.2-SNAPSHOT</version>
+        <version>6.12.2</version>
     </parent>
     <artifactId>ssh-agent</artifactId>
     <name>SSH Agent</name>

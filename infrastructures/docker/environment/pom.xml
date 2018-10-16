@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-infrastructures-docker-parent</artifactId>
         <groupId>org.eclipse.che.infrastructure.docker</groupId>
-        <version>6.12.2-SNAPSHOT</version>
+        <version>6.12.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>docker-environment</artifactId>
