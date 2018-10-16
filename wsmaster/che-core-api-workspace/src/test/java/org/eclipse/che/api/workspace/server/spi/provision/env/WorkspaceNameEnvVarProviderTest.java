@@ -47,7 +47,6 @@ public class WorkspaceNameEnvVarProviderTest {
   public void shouldReturnNameVar()
       throws NotFoundException, ServerException, InfrastructureException {
     // given
-
     when(runtimeIdentity.getWorkspaceId()).thenReturn("ws-id111");
     doReturn(workspace).when(workspaceDao).get(Mockito.eq("ws-id111"));
     when(workspace.getConfig()).thenReturn(config);
@@ -55,6 +54,7 @@ public class WorkspaceNameEnvVarProviderTest {
 
     // when
     Pair<String, String> actual = provider.get(runtimeIdentity);
+
     // then
     assertEquals(actual.first, WorkspaceNameEnvVarProvider.CHE_WORKSPACE_NAME);
     assertEquals(actual.second, "ws-name");
@@ -67,14 +67,11 @@ public class WorkspaceNameEnvVarProviderTest {
   public void shouldWrapNotFoundExceptionException()
       throws NotFoundException, ServerException, InfrastructureException {
     // given
-
     when(runtimeIdentity.getWorkspaceId()).thenReturn("ws-id111");
     doThrow(new NotFoundException("Some message")).when(workspaceDao).get(Mockito.eq("ws-id111"));
 
     // when
     provider.get(runtimeIdentity);
-    // then
-
   }
 
   @Test(
@@ -89,7 +86,5 @@ public class WorkspaceNameEnvVarProviderTest {
 
     // when
     provider.get(runtimeIdentity);
-    // then
-
   }
 }
