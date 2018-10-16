@@ -125,7 +125,7 @@ public class FactoryDaoTest {
     factoryDao.create(factory);
   }
 
-  @Test(expectedExceptions = ConflictException.class)
+  @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "Factory with name 'factoryName0' already exists")
   public void shouldThrowConflictExceptionWhenCreatingFactoryWithExistingNameAndUserId()
       throws Exception {
     final FactoryImpl factory = createFactory(10, users[0].getId());
@@ -167,7 +167,7 @@ public class FactoryDaoTest {
     assertEquals(factoryDao.getById(update.getId()), update);
   }
 
-  @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "Factory with name 'factoryName1' already exist in namespace")
+  @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "Factory with name 'factoryName1' already exists")
   public void shouldThrowConflictExceptionWhenUpdateFactoryWithExistingNameAndUserId()
       throws Exception {
     final FactoryImpl update = factories[0];
