@@ -62,7 +62,7 @@ public class LanguageServerSignatureHelp implements SignatureHelpProvider {
 
   @Override
   public Promise<Optional<SignatureHelp>> signatureHelp(Document document, int offset) {
-    TextDocumentPositionParams paramsDTO = helper.createTDPP(document, offset);
+    TextDocumentPositionParams paramsDTO = helper.createTDPP(document, offset + 1);
     Promise<org.eclipse.lsp4j.SignatureHelp> promise = client.signatureHelp(paramsDTO);
     return promise
         .then(
@@ -106,7 +106,8 @@ public class LanguageServerSignatureHelp implements SignatureHelpProvider {
                   new DocumentChangedHandler() {
                     @Override
                     public void onDocumentChanged(DocumentChangedEvent event) {
-                      if (triggerCharacters.contains(event.getText())) {
+                      String candidate = String.valueOf(event.getText().charAt(0));
+                      if (triggerCharacters.contains(candidate)) {
                         ((HandlesTextOperations) editor)
                             .doOperation(TextEditorOperations.SIGNATURE_HELP);
                       }
