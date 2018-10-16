@@ -595,7 +595,7 @@ public class WorkspaceRuntimes {
 
       long finishTime = System.currentTimeMillis();
       LOG.info(
-          "All runtimes is recovered inished in {} seconds.",
+          "All runtimes have been recovered in {} seconds.",
           TimeUnit.MILLISECONDS.toSeconds(finishTime - startTime));
     }
   }
