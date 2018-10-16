@@ -58,6 +58,7 @@ public class ConfirmDialogViewImpl extends Window implements ConfirmDialogView {
 
   @Override
   public void onEnterPress(NativeEvent evt) {
+    evt.preventDefault();
     delegate.onEnterClicked();
   }
 
