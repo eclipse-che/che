@@ -230,6 +230,7 @@ public class RenamePackageTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     terminal.waitFirstTerminalTab();
     expandTestProject(PROJECT_NAME);
   }

@@ -59,6 +59,7 @@ public class IllegalTypeNameTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
