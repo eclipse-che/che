@@ -12,8 +12,8 @@
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.openqa.selenium.Keys.ESCAPE;
 import static org.testng.Assert.fail;
 
@@ -115,9 +115,9 @@ public class WorkspaceDetailsOverviewTest {
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
 
-    selectStackAndCheckWorkspaceName(DOT_NET);
+    selectStackAndCheckWorkspaceName(ANDROID);
 
-    selectStackAndCheckWorkspaceName(JAVA);
+    selectStackAndCheckWorkspaceName(JAVA_CENTOS);
 
     // create workspace
     newWorkspace.setMachineRAM(MACHINE_NAME, 3.0);
