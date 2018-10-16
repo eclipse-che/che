@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.core.workspace;
 
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import java.lang.reflect.Field;
 
 /**
@@ -23,8 +22,12 @@ import java.lang.reflect.Field;
 public class TestWorkspaceInjector<T> extends AbstractTestWorkspaceInjector<T> {
 
   public TestWorkspaceInjector(
-      Field field, InjectTestWorkspace injectTestWorkspace, Provider<Injector> injectorProvider) {
-    super(field, injectTestWorkspace, injectorProvider);
-    testWorkspaceProvider = injector.getInstance(TestWorkspaceProvider.class);
+      Field field, InjectTestWorkspace injectTestWorkspace, Injector injector) {
+    super(field, injectTestWorkspace, injector);
+  }
+
+  @Override
+  protected TestWorkspaceProvider getTestWorkspaceProvider() {
+    return injector.getInstance(TestWorkspaceProvider.class);
   }
 }

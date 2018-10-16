@@ -57,7 +57,7 @@ public class SeleniumClassModule extends AbstractModule {
             && field.isAnnotationPresent(InjectTestWorkspace.class)) {
           encounter.register(
               new TestWorkspaceInjector<>(
-                  field, field.getAnnotation(InjectTestWorkspace.class), injectorProvider));
+                  field, field.getAnnotation(InjectTestWorkspace.class), injectorProvider.get()));
         }
       }
     }

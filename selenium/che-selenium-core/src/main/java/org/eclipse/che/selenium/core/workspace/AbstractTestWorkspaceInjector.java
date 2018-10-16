@@ -17,7 +17,6 @@ import static java.lang.String.format;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.MembersInjector;
-import com.google.inject.Provider;
 import com.google.inject.name.Names;
 import java.lang.reflect.Field;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -30,27 +29,25 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 public abstract class AbstractTestWorkspaceInjector<T> implements MembersInjector<T> {
   protected final Field field;
   protected final InjectTestWorkspace injectTestWorkspace;
-  protected final Provider<Injector> injectorProvider;
-  protected TestWorkspaceProvider testWorkspaceProvider;
-  protected Injector injector;
+  protected final Injector injector;
 
   public AbstractTestWorkspaceInjector(
-      Field field, InjectTestWorkspace injectTestWorkspace, Provider<Injector> injectorProvider) {
+      Field field, InjectTestWorkspace injectTestWorkspace, Injector injector) {
     this.field = field;
     this.injectTestWorkspace = injectTestWorkspace;
-    this.injectorProvider = injectorProvider;
-    this.injector = injectorProvider.get();
+    this.injector = injector;
   }
 
   @Override
   public void injectMembers(T instance) throws RuntimeException {
     try {
       TestWorkspace testWorkspace =
-          testWorkspaceProvider.createWorkspace(
-              getUser(instance),
-              getMemory(),
-              injectTestWorkspace.template(),
-              injectTestWorkspace.startAfterCreation());
+          getTestWorkspaceProvider()
+              .createWorkspace(
+                  getUser(instance),
+                  getMemory(),
+                  injectTestWorkspace.template(),
+                  injectTestWorkspace.startAfterCreation());
       testWorkspace.await();
       field.setAccessible(true);
       field.set(instance, testWorkspace);
@@ -58,6 +55,8 @@ public abstract class AbstractTestWorkspaceInjector<T> implements MembersInjecto
       throw new RuntimeException("Could not inject workspace. ", e);
     }
   }
+
+  protected abstract TestWorkspaceProvider getTestWorkspaceProvider();
 
   protected int getMemory() {
     int workspaceDefaultMemoryGb =
