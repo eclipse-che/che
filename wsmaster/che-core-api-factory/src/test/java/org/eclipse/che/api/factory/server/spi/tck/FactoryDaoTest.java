@@ -167,7 +167,7 @@ public class FactoryDaoTest {
     assertEquals(factoryDao.getById(update.getId()), update);
   }
 
-  @Test(expectedExceptions = ConflictException.class)
+  @Test(expectedExceptions = ConflictException.class, expectedExceptionsMessageRegExp = "Factory with name 'factoryName1' already exist in namespace")
   public void shouldThrowConflictExceptionWhenUpdateFactoryWithExistingNameAndUserId()
       throws Exception {
     final FactoryImpl update = factories[0];

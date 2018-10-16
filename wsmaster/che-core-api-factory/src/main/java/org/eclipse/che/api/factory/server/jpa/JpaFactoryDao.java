@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
@@ -73,7 +74,9 @@ public class JpaFactoryDao implements FactoryDao {
     try {
       return new FactoryImpl(doUpdate(update));
     } catch (DuplicateKeyException ex) {
-      throw new ConflictException(ex.getLocalizedMessage());
+      throw new ConflictException(format(
+          "Factory with name '%s' already exist in namespace",
+          update.getName()));
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getLocalizedMessage(), ex);
     }
