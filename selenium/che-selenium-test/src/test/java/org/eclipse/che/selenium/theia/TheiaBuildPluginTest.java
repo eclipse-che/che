@@ -114,7 +114,7 @@ public class TheiaBuildPluginTest {
       theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      if (isTextPresentInTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1)) {
+      if (theiaTerminal.isTextPresentInTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1)) {
         fail("Known permanent failure https://github.com/eclipse/che/issues/11624", ex);
       }
 
@@ -122,15 +122,6 @@ public class TheiaBuildPluginTest {
     }
 
     theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1);
-  }
-
-  private boolean isTextPresentInTerminalOutput(String expectedText, int terminalIndex) {
-    try {
-      theiaTerminal.waitTerminalOutput(expectedText, terminalIndex);
-      return true;
-    } catch (TimeoutException ex) {
-      return false;
-    }
   }
 
   private void openTerminal(String topMenuCommand, String commandName, String proposalText) {
