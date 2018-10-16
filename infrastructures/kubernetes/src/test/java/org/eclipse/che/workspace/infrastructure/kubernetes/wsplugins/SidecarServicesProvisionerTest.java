@@ -18,6 +18,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -58,6 +60,25 @@ public class SidecarServicesProvisionerTest {
     provisioner.provision(kubernetesEnvironment);
 
     assertEquals(kubernetesEnvironment.getServices(), toK8sServices(actualEndpoints));
+  }
+
+  @Test
+  public void shouldNotAddServiceForNotdDiscoverableEndpoint() throws Exception {
+    List<ChePluginEndpoint> actualEndpoints =
+        asList(
+            new ChePluginEndpoint().name("testE1").targetPort(8080),
+            new ChePluginEndpoint()
+                .name("testE2")
+                .targetPort(10000)
+                .attributes(ImmutableMap.of("discoverable", "false")));
+    endpoints.addAll(actualEndpoints);
+    KubernetesEnvironment kubernetesEnvironment = KubernetesEnvironment.builder().build();
+
+    provisioner.provision(kubernetesEnvironment);
+
+    assertEquals(
+        kubernetesEnvironment.getServices(),
+        toK8sServices(ImmutableList.of(new ChePluginEndpoint().name("testE1").targetPort(8080))));
   }
 
   @Test(

@@ -29,6 +29,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
@@ -228,5 +229,14 @@ public class TheiaTerminal {
     theiaEditor.waitEditorTabDesapearance(expectedTextFileName);
 
     return terminalOutput;
+  }
+
+  public boolean isTextPresentInTerminalOutput(String expectedText, int terminalIndex) {
+    try {
+      waitTerminalOutput(expectedText, terminalIndex);
+      return true;
+    } catch (TimeoutException ex) {
+      return false;
+    }
   }
 }

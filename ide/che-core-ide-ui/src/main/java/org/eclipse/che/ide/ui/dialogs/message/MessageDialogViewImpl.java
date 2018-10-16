@@ -69,6 +69,7 @@ public class MessageDialogViewImpl extends Window implements MessageDialogView {
 
   @Override
   public void onEnterPress(NativeEvent evt) {
+    evt.preventDefault();
     delegate.accepted();
   }
 

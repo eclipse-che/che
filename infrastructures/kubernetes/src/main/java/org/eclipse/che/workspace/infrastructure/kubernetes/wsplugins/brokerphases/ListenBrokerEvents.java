@@ -13,10 +13,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphas
 
 import com.google.common.annotations.Beta;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerStatusListener;
@@ -33,24 +33,24 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.Brok
 public class ListenBrokerEvents extends BrokerPhase {
 
   private final String workspaceId;
-  private final CompletableFuture<List<ChePlugin>> toolingFuture;
+  private final BrokersResult brokersResult;
   private final EventService eventService;
   private final KubernetesPluginsToolingValidator pluginsValidator;
 
   public ListenBrokerEvents(
       String workspaceId,
       KubernetesPluginsToolingValidator pluginsValidator,
-      CompletableFuture<List<ChePlugin>> toolingFuture,
+      BrokersResult brokersResult,
       EventService eventService) {
     this.workspaceId = workspaceId;
     this.pluginsValidator = pluginsValidator;
-    this.toolingFuture = toolingFuture;
+    this.brokersResult = brokersResult;
     this.eventService = eventService;
   }
 
   public List<ChePlugin> execute() throws InfrastructureException {
     BrokerStatusListener brokerStatusListener =
-        new BrokerStatusListener(workspaceId, pluginsValidator, toolingFuture);
+        new BrokerStatusListener(workspaceId, pluginsValidator, brokersResult);
     try {
       eventService.subscribe(brokerStatusListener, BrokerEvent.class);
 

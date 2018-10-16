@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.ANDROID;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.BLANK;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
@@ -73,12 +74,12 @@ public class StacksListTest {
     assertTrue(headers.contains("COMPONENTS"));
     assertTrue(headers.contains("ACTIONS"));
 
-    // check JAVA stack info
-    assertTrue(stacks.isStackItemExisted(JAVA.getName()));
+    // check Android stack info
+    assertTrue(stacks.isStackItemExisted(ANDROID.getName()));
     assertEquals(
-        stacks.getStackDescription(JAVA.getName()),
-        "Default Java Stack with JDK 8, Maven and Tomcat.");
-    assertEquals(stacks.getStackComponents(JAVA.getName()), "Ubuntu, JDK, Maven, Tomcat");
+        stacks.getStackDescription(ANDROID.getName()),
+        "Default Android Stack with Java 1.8 and Android SDK");
+    assertEquals(stacks.getStackComponents(ANDROID.getName()), "Centos, JDK, Maven, Android API");
   }
 
   @Test

@@ -20,7 +20,6 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
@@ -30,6 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
 import org.slf4j.Logger;
 
 /**
@@ -47,21 +47,21 @@ public class DeployBroker extends BrokerPhase {
 
   private final KubernetesNamespace namespace;
   private final KubernetesEnvironment brokerEnvironment;
+  private final BrokersResult brokersResult;
   private final UnrecoverablePodEventListenerFactory factory;
   private final String workspaceId;
-  private final CompletableFuture<List<ChePlugin>> pluginsFuture;
 
   public DeployBroker(
       String workspaceId,
       KubernetesNamespace namespace,
       KubernetesEnvironment brokerEnvironment,
-      CompletableFuture<List<ChePlugin>> pluginsFuture,
+      BrokersResult brokersResult,
       UnrecoverablePodEventListenerFactory factory) {
     this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.brokerEnvironment = brokerEnvironment;
+    this.brokersResult = brokersResult;
     this.factory = factory;
-    this.pluginsFuture = pluginsFuture;
   }
 
   @Override
@@ -84,9 +84,9 @@ public class DeployBroker extends BrokerPhase {
         namespace.deployments().watchEvents(unrecoverableEventListener);
       }
 
-      Pod deployedPod = deployments.deploy(pluginBrokerPod);
+      Pod barePod = deployments.create(pluginBrokerPod);
 
-      deployments.waitRunningAsync(deployedPod.getMetadata().getName());
+      deployments.waitRunningAsync(barePod.getMetadata().getName());
 
       return nextPhase.execute();
     } finally {
@@ -114,7 +114,7 @@ public class DeployBroker extends BrokerPhase {
         reason,
         message,
         podEvent.getPodName());
-    pluginsFuture.completeExceptionally(
+    brokersResult.error(
         new InfrastructureException(
             format(
                 "Unrecoverable event occurred: '%s', '%s', '%s'",

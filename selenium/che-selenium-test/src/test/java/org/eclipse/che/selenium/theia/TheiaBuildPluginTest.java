@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.theia;
 
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -29,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -108,7 +110,17 @@ public class TheiaBuildPluginTest {
     theiaTerminal.waitTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.clickOnTab(WS_THEIA_IDE_TERMINAL_TITLE);
     theiaTerminal.performCommand(BUILD_COMMAND);
-    theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
+    try {
+      theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      if (theiaTerminal.isTextPresentInTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1)) {
+        fail("Known permanent failure https://github.com/eclipse/che/issues/11624", ex);
+      }
+
+      throw ex;
+    }
+
     theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1);
   }
 

@@ -64,6 +64,7 @@ public class TestAnnotationsTest {
         workspace.getId(), get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
