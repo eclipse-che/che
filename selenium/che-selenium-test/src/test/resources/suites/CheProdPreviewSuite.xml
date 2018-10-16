@@ -21,7 +21,6 @@
       <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsOverviewTest"/>
       <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsSingleMachineTest"/>
       <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsMachinesRamTest"/>
-
       <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
       <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
       <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
