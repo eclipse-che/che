@@ -102,7 +102,7 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     # Create internal plugins folder
     && mkdir /default-theia-plugins \
     # Download yeoman generator plug-in
-    && curl -o /default-theia-plugins/theia_yeoman_plugin.theia https://github.com/eclipse/theia-yeoman-plugin/releases/download/untagged-04f28ee329e479cc465b/theia_yeoman_plugin.theia \
+    && curl -L -o /default-theia-plugins/theia_yeoman_plugin.theia https://github.com/eclipse/theia-yeoman-plugin/releases/download/untagged-04f28ee329e479cc465b/theia_yeoman_plugin.theia \
     && for f in "${HOME}" "/etc/passwd" "/etc/group /node_modules /default-theia-plugins /projects"; do\
            sudo chgrp -R 0 ${f} && \
            sudo chmod -R g+rwX ${f}; \
@@ -125,7 +125,7 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 COPY --chown=theia:root --from=builder /home/theia /home/theia
-
+ENV PATH=/opt/rh/rh-git29/root/bin/:${PATH}
 USER theia
 WORKDIR /projects
 ADD src/entrypoint.sh /entrypoint.sh
