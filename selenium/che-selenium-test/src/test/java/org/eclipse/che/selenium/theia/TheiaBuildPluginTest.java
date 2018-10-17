@@ -39,7 +39,7 @@ public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
   private static final String GIT_CLONE_COMMAND =
       "git clone https://github.com/ws-skeleton/che-dummy-plugin.git";
-  private static final String GO_TO_DIRECTORY_COMMAND = "cd projects/che-dummy-plugin";
+  private static final String GO_TO_DIRECTORY_COMMAND = "cd che-dummy-plugin";
   private static final String BUILD_COMMAND = "./build.sh";
   private static final String WS_DEV_TERMINAL_TITLE = "ws/dev terminal 0";
   private static final String WS_THEIA_IDE_TERMINAL_TITLE = "ws/theia-ide terminal 1";
