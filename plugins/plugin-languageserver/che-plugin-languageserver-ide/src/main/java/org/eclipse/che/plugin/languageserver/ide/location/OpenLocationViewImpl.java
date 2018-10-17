@@ -82,13 +82,13 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
       presentation.setPresentableText(location.getUri());
       presentation.setInfoText(
           "From:"
-              + location.getRange().getStart().getLine()
+              + (location.getRange().getStart().getLine() + 1)
               + ":"
-              + location.getRange().getStart().getCharacter()
+              + (location.getRange().getStart().getCharacter() + 1)
               + " To:"
-              + location.getRange().getEnd().getLine()
+              + (location.getRange().getEnd().getLine() + 1)
               + ":"
-              + location.getRange().getEnd().getCharacter());
+              + (location.getRange().getEnd().getCharacter() + 1));
     }
 
     @Override
