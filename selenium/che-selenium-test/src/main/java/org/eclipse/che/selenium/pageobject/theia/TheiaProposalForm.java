@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locato
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.SEARCH_FIELD_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.WIDGET_BODY_XPATH;
+import static org.openqa.selenium.Keys.BACK_SPACE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -77,6 +78,14 @@ public class TheiaProposalForm {
   }
 
   public void enterTextToSearchField(String text) {
+    // clear input field
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper
+                .waitVisibility(By.xpath(SEARCH_FIELD_XPATH))
+                .sendKeys(BACK_SPACE),
+        StaleElementReferenceException.class);
+
     seleniumWebDriverHelper.setValue(By.xpath(SEARCH_FIELD_XPATH), text);
   }
 

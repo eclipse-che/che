@@ -1189,6 +1189,15 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Checks appears more than ne window.
+   *
+   * @return {@code true} if more than one window opened, {@code false} if only one window opened
+   */
+  public boolean isOpenedSomeWin() {
+    return seleniumWebDriver.getWindowHandles().size() > 1;
+  }
+
+  /**
    * Waits during {@code timeout} until count of opened browser tabs are equals to {@code
    * expectedCount}.
    *

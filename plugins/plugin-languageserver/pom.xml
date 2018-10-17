@@ -25,6 +25,5 @@
     <name>Che Plugin :: Language Server :: Parent</name>
     <modules>
         <module>che-plugin-languageserver-ide</module>
-        <module>che-plugin-test-ls</module>
     </modules>
 </project>

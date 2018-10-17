@@ -49,6 +49,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
+import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
@@ -65,7 +67,6 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
-import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
@@ -272,23 +273,54 @@ public class WorkspaceRuntimesTest {
     when(context.getRuntime()).thenReturn(new TestInternalRuntime(context));
     when(statuses.remove(anyString())).thenReturn(WorkspaceStatus.RUNNING);
 
-    RuntimeStatusEvent event =
-        DtoFactory.newDto(RuntimeStatusEvent.class)
-            .withIdentity(identity)
-            .withFailed(true)
-            .withError(error);
+    RuntimeAbnormalStoppedEvent event = new RuntimeAbnormalStoppedEvent(identity, error);
     localRuntimes.recoverOne(infrastructure, identity);
     ArgumentCaptor<WorkspaceImpl> captor = ArgumentCaptor.forClass(WorkspaceImpl.class);
 
     // when
     localEventService.publish(event);
 
-    // than
+    // then
     verify(workspaceDao, atLeastOnce()).update(captor.capture());
     WorkspaceImpl ws = captor.getAllValues().get(captor.getAllValues().size() - 1);
     assertNotNull(ws.getAttributes().get(STOPPED_ATTRIBUTE_NAME));
     assertTrue(Boolean.valueOf(ws.getAttributes().get(STOPPED_ABNORMALLY_ATTRIBUTE_NAME)));
     assertEquals(ws.getAttributes().get(ERROR_MESSAGE_ATTRIBUTE_NAME), error);
+  }
+
+  @Test
+  public void stoppingStatusIsSetWhenRuntimeAbnormallyStopping() throws Exception {
+    String error = "Some kind of error happened";
+    EventService localEventService = new EventService();
+    WorkspaceRuntimes localRuntimes =
+        new WorkspaceRuntimes(
+            localEventService,
+            ImmutableMap.of(TEST_ENVIRONMENT_TYPE, testEnvFactory),
+            infrastructure,
+            sharedPool,
+            workspaceDao,
+            dbInitializer,
+            probeScheduler,
+            statuses,
+            lockService);
+    localRuntimes.init();
+    RuntimeIdentityDto identity =
+        DtoFactory.newDto(RuntimeIdentityDto.class)
+            .withWorkspaceId("workspace123")
+            .withEnvName("my-env")
+            .withOwnerId("myId");
+    mockWorkspace(identity);
+    RuntimeContext context = mockContext(identity);
+    when(context.getRuntime()).thenReturn(new TestInternalRuntime(context));
+
+    RuntimeAbnormalStoppingEvent event = new RuntimeAbnormalStoppingEvent(identity, error);
+    localRuntimes.recoverOne(infrastructure, identity);
+
+    // when
+    localEventService.publish(event);
+
+    // then
+    verify(statuses).replace("workspace123", WorkspaceStatus.STOPPING);
   }
 
   @Test

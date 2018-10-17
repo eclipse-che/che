@@ -81,7 +81,7 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
             namespaceFactory.create(workspaceId, runtimeState.getNamespace()),
             getEnvironment().getWarnings());
 
-    runtime.scheduleServersCheckers();
+    runtime.scheduleRuntimeStateChecks();
 
     return runtime;
   }

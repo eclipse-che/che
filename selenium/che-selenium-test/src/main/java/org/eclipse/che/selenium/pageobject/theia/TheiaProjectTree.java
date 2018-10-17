@@ -24,6 +24,7 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 
 @Singleton
 public class TheiaProjectTree {
@@ -51,7 +52,9 @@ public class TheiaProjectTree {
   }
 
   public void clickOnFilesTab() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(FILES_TAB_XPATH));
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> seleniumWebDriverHelper.waitAndClick(By.xpath(FILES_TAB_XPATH)),
+        WebDriverException.class);
   }
 
   private String getProjectItemId(String itemPath) {

@@ -188,22 +188,22 @@
                     <plugin>
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
-                          <execution>
-                            <id>install-yarn</id>
-                            <phase>compile</phase>
-                            <goals>
-                              <goal>run</goal>
-                            </goals>
-                            <configuration>
-                              <target>
-                                <!-- install yarn -->
-                                <exec dir="${basedir}" executable="npm" failonerror="true">
-                                  <arg value="install" />
-                                  <arg value="yarn" />
-                                </exec>
-                              </target>
-                            </configuration>
-                          </execution>
+                            <execution>
+                                <id>install-yarn</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- install yarn -->
+                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                            <arg value="install" />
+                                            <arg value="yarn" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
                             <execution>
                                 <id>build-dashboard</id>
                                 <phase>compile</phase>

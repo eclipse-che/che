@@ -92,8 +92,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesInternalRuntime.class);
 
-  private final int workspaceStartTimeout;
-  private final int ingressStartTimeout;
+  private final int workspaceStartTimeoutMin;
+  private final long ingressStartTimeoutMillis;
   private final UnrecoverablePodEventListenerFactory unrecoverableEventListenerFactory;
   private final ServersCheckerFactory serverCheckerFactory;
   private final KubernetesBootstrapperFactory bootstrapperFactory;
@@ -109,11 +109,12 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
+  private final RuntimeHangingDetector runtimeHangingDetector;
 
   @Inject
   public KubernetesInternalRuntime(
-      @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeout,
-      @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeout,
+      @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeoutMin,
+      @Named("che.infra.kubernetes.ingress_start_timeout_min") int ingressStartTimeoutMin,
       NoOpURLRewriter urlRewriter,
       UnrecoverablePodEventListenerFactory unrecoverableEventListenerFactory,
       KubernetesBootstrapperFactory bootstrapperFactory,
@@ -129,6 +130,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
+      RuntimeHangingDetector runtimeHangingDetector,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace,
       @Assisted List<Warning> warnings) {
@@ -137,8 +139,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
     this.volumesStrategy = volumesStrategy;
-    this.workspaceStartTimeout = workspaceStartTimeout;
-    this.ingressStartTimeout = ingressStartTimeout;
+    this.workspaceStartTimeoutMin = workspaceStartTimeoutMin;
+    this.ingressStartTimeoutMillis = TimeUnit.MINUTES.toMillis(ingressStartTimeoutMin);
     this.probeScheduler = probeScheduler;
     this.probesFactory = probesFactory;
     this.namespace = namespace;
@@ -149,6 +151,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.toolingProvisioner = toolingProvisioner;
     this.kubernetesEnvironmentProvisioner = kubernetesEnvironmentProvisioner;
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
+    this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
   }
 
@@ -217,6 +220,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         startFailureCause = e;
       }
 
+      startSynchronizer.completeExceptionally(startFailureCause);
       LOG.warn(
           "Failed to start Kubernetes runtime of workspace {}. Cause: {}",
           workspaceId,
@@ -236,13 +240,44 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             cleanUppingEx.getMessage());
       }
 
-      startSynchronizer.completeExceptionally(startFailureCause);
       if (interrupted) {
         throw new RuntimeStartInterruptedException(getContext().getIdentity());
       }
       wrapAndRethrow(startFailureCause);
     } finally {
       namespace.deployments().stopWatch();
+    }
+  }
+
+  /**
+   * Schedules runtime state checks that are needed after recovering of runtime.
+   *
+   * <p>Different checks will be scheduled according to current runtime status:
+   *
+   * <ul>
+   *   <li>STARTING - schedules servers checkers and starts tracking of starting runtime
+   *   <li>RUNNING - schedules servers checkers
+   *   <li>STOPPING - starts tracking of stopping runtime
+   *   <li>STOPPED - do nothing. Should not happen since only active runtimes are recovered
+   * </ul>
+   */
+  public void scheduleRuntimeStateChecks() throws InfrastructureException {
+    switch (getStatus()) {
+      case RUNNING:
+        scheduleServersCheckers();
+        break;
+
+      case STOPPING:
+        runtimeHangingDetector.trackStopping(this, workspaceStartTimeoutMin);
+        break;
+
+      case STARTING:
+        runtimeHangingDetector.trackStarting(this, workspaceStartTimeoutMin);
+        scheduleServersCheckers();
+        break;
+      case STOPPED:
+      default:
+        // do nothing
     }
   }
 
@@ -277,7 +312,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final CompletableFuture<Void> allDone =
           CompletableFuture.allOf(
               machinesFutures.toArray(new CompletableFuture[machinesFutures.size()]));
-      CompletableFuture.anyOf(allDone, failure).get(workspaceStartTimeout, TimeUnit.MINUTES);
+      CompletableFuture.anyOf(allDone, failure)
+          .get(startSynchronizer.getStartTimeoutMillis(), TimeUnit.MILLISECONDS);
 
       if (failure.isCompletedExceptionally()) {
         cancelAll(toCancelFutures);
@@ -285,14 +321,16 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         failure.get();
       }
     } catch (TimeoutException ex) {
-      failure.completeExceptionally(ex);
+      InfrastructureException ie =
+          new InfrastructureException(
+              "Waiting for Kubernetes environment '"
+                  + getContext().getIdentity().getEnvName()
+                  + "' of the workspace'"
+                  + getContext().getIdentity().getWorkspaceId()
+                  + "' reached timeout");
+      failure.completeExceptionally(ie);
       cancelAll(toCancelFutures);
-      throw new InfrastructureException(
-          "Waiting for Kubernetes environment '"
-              + getContext().getIdentity().getEnvName()
-              + "' of the workspace'"
-              + getContext().getIdentity().getWorkspaceId()
-              + "' reached timeout");
+      throw ie;
     } catch (InterruptedException ex) {
       RuntimeStartInterruptedException runtimeInterruptedEx =
           new RuntimeStartInterruptedException(getContext().getIdentity());
@@ -300,7 +338,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       cancelAll(toCancelFutures);
       throw runtimeInterruptedEx;
     } catch (ExecutionException ex) {
-      failure.completeExceptionally(ex);
+      failure.completeExceptionally(ex.getCause());
       cancelAll(toCancelFutures);
       wrapAndRethrow(ex.getCause());
     }
@@ -458,10 +496,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   @Override
   protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
+    runtimeHangingDetector.stopTracking(getContext().getIdentity());
     if (startSynchronizer.interrupt()) {
       // runtime is STARTING. Need to wait until start will be interrupted properly
       try {
-        if (!startSynchronizer.awaitInterruption(workspaceStartTimeout, TimeUnit.SECONDS)) {
+        if (!startSynchronizer.awaitInterruption(workspaceStartTimeoutMin, TimeUnit.MINUTES)) {
           // Runtime is not interrupted yet. It may occur when start was performing by another
           // Che Server that is crashed so start is hung up in STOPPING phase.
           // Need to clean up runtime resources
@@ -620,7 +659,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
               .ingresses()
               .wait(
                   ingress.getMetadata().getName(),
-                  ingressStartTimeout,
+                  // Smaller value of ingress and start timeout should be used
+                  Math.min(ingressStartTimeoutMillis, startSynchronizer.getStartTimeoutMillis()),
+                  TimeUnit.MILLISECONDS,
                   p -> (!p.getStatus().getLoadBalancer().getIngress().isEmpty()));
       readyIngresses.add(actualIngress);
     }
@@ -726,6 +767,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   private class ServerLivenessHandler implements Consumer<ProbeResult> {
+
     @Override
     public void accept(ProbeResult probeResult) {
       String machineName = probeResult.getMachineName();
@@ -791,6 +833,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
     @Override
     public void handle(Action action, Pod pod) {
+      eventPublisher.sendAbnormalStoppingEvent(
+          getContext().getIdentity(),
+          format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
       // Cancels workspace servers probes if any
       probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
       if (pod.getStatus() != null && POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
@@ -799,9 +844,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         } catch (InfrastructureException ex) {
           LOG.error("Kubernetes environment stop failed cause '{}'", ex.getMessage());
         } finally {
-          eventPublisher.sendRuntimeStoppedEvent(
-              format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()),
-              getContext().getIdentity());
+          eventPublisher.sendAbnormalStoppedEvent(
+              getContext().getIdentity(),
+              format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
         }
       }
     }

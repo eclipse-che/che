@@ -63,7 +63,7 @@ public class KubernetesIngresses {
     }
   }
 
-  public Ingress wait(String name, int timeoutMin, Predicate<Ingress> predicate)
+  public Ingress wait(String name, long timeout, TimeUnit timeoutUnit, Predicate<Ingress> predicate)
       throws InfrastructureException {
     CompletableFuture<Ingress> future = new CompletableFuture<>();
     Watch watch = null;
@@ -102,7 +102,7 @@ public class KubernetesIngresses {
         return actualIngress;
       }
       try {
-        return future.get(timeoutMin, TimeUnit.MINUTES);
+        return future.get(timeout, timeoutUnit);
       } catch (ExecutionException e) {
         throw new InfrastructureException(e.getCause().getMessage(), e);
       } catch (TimeoutException e) {

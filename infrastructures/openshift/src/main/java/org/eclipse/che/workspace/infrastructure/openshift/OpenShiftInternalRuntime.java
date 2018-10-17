@@ -31,6 +31,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
+import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -73,6 +74,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner,
+      RuntimeHangingDetector runtimeHangingDetector,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
@@ -94,6 +96,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         internalEnvironmentProvisioners,
         kubernetesEnvironmentProvisioner,
         toolingProvisioner,
+        runtimeHangingDetector,
         context,
         project,
         warnings);

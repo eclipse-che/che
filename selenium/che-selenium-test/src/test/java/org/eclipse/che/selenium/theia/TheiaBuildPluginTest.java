@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.theia;
 
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 import static org.testng.Assert.fail;
 
@@ -33,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
-import org.eclipse.che.selenium.pageobject.theia.TheiaQuickTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
@@ -52,12 +52,12 @@ public class TheiaBuildPluginTest {
   private static final String EXPECTED_STARTING_SERVER_MESSAGE =
       "Starting hosted instance server ...";
   private static final String EXPECTED_INSTANCE_RUNNING_MESSAGE = "Hosted instance is running at:";
-  private static final String GO_TO_DIRECTORY_COMMAND = "cd projects/che-dummy-plugin";
+  private static final String GO_TO_DIRECTORY_COMMAND = "cd che-dummy-plugin";
   private static final String BUILD_COMMAND = "./build.sh";
   private static final String WS_DEV_TERMINAL_TITLE = "ws/dev terminal 0";
   private static final String WS_THEIA_IDE_TERMINAL_TITLE = "ws/theia-ide terminal 1";
-  private static final String HOSTED_SEARCH_SEQUENCE = "hosted";
-  private static final String HELLO_WORLD_SEARCH_SEQUENCE = "Hello";
+  private static final String HOSTED_SEARCH_SEQUENCE = ">hosted";
+  private static final String HELLO_WORLD_SEARCH_SEQUENCE = ">Hello";
   private static final String HELLO_WORLD_PROPOSAL = "Hello World";
   private static final String EXPECTED_HELLO_WORLD_NOTIFICATION = "Hello World!";
   private static final String SUGGESTION_FOR_SELECTION = "Hosted Plugin: Start Instance";
@@ -93,7 +93,6 @@ public class TheiaBuildPluginTest {
   @Inject private TheiaProjectTree theiaProjectTree;
   @Inject private TheiaEditor theiaEditor;
   @Inject private TheiaNewFileDialog theiaNewFileDialog;
-  @Inject private TheiaQuickTree theiaQuickTree;
   @Inject private TheiaHostedPluginSelectPathForm hostedPluginSelectPathForm;
   @Inject private TheiaProposalForm theiaProposalForm;
 
@@ -146,7 +145,7 @@ public class TheiaBuildPluginTest {
     theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1);
   }
 
-  // @Test(priority = 1)
+  @Test(priority = 1)
   public void hostedModeShouldWork() {
     final String parentWindow = seleniumWebDriver.getWindowHandle();
 
@@ -154,12 +153,12 @@ public class TheiaBuildPluginTest {
     WaitUtils.sleepQuietly(5);
 
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
-    theiaQuickTree.waitForm();
+    theiaProposalForm.waitForm();
     WaitUtils.sleepQuietly(4);
-    theiaQuickTree.enterTextToSearchField(HOSTED_SEARCH_SEQUENCE);
+    theiaProposalForm.enterTextToSearchField(HOSTED_SEARCH_SEQUENCE);
     WaitUtils.sleepQuietly(4);
 
-    theiaQuickTree.clickOnProposal(SUGGESTION_FOR_SELECTION);
+    theiaProposalForm.clickOnProposal(SUGGESTION_FOR_SELECTION);
 
     hostedPluginSelectPathForm.waitForm();
     hostedPluginSelectPathForm.clickOnItem(PROJECT_NAME);
@@ -168,11 +167,9 @@ public class TheiaBuildPluginTest {
     hostedPluginSelectPathForm.clickOnOpenButton();
     hostedPluginSelectPathForm.waitFormClosed();
 
-    waitNewBrowserWindowAndSwitchToParent(parentWindow);
-
-    theiaIde.waitNotificationMessageContains(EXPECTED_INSTANCE_RUNNING_MESSAGE);
-    theiaIde.waitNotificationEqualsTo(EXPECTED_STARTING_SERVER_MESSAGE);
-    theiaIde.waitNotificationEqualsTo(EXPECTED_PLUGIN_FOLDER_MESSAGE);
+    waitNotificationEqualsTo(EXPECTED_PLUGIN_FOLDER_MESSAGE, parentWindow);
+    waitNotificationEqualsTo(EXPECTED_STARTING_SERVER_MESSAGE, parentWindow);
+    waitNotificationContains(EXPECTED_INSTANCE_RUNNING_MESSAGE, parentWindow);
 
     switchToNonParentWindow(parentWindow);
     waitDevelopmentHostTitle();
@@ -180,11 +177,11 @@ public class TheiaBuildPluginTest {
     theiaProjectTree.clickOnFilesTab();
 
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
-    theiaQuickTree.waitSearchField();
-    theiaQuickTree.enterTextToSearchField(HELLO_WORLD_SEARCH_SEQUENCE);
-    theiaQuickTree.clickOnProposal(HELLO_WORLD_PROPOSAL);
+    theiaProposalForm.waitSearchField();
+    theiaProposalForm.enterTextToSearchField(HELLO_WORLD_SEARCH_SEQUENCE);
+    theiaProposalForm.clickOnProposal(HELLO_WORLD_PROPOSAL);
     theiaIde.waitNotificationEqualsTo(EXPECTED_HELLO_WORLD_NOTIFICATION);
-    theiaIde.waitNotificationDissappearance(EXPECTED_HELLO_WORLD_NOTIFICATION);
+    theiaIde.waitNotificationDisappearance(EXPECTED_HELLO_WORLD_NOTIFICATION);
 
     switchToParentWindow(parentWindow);
   }
@@ -196,7 +193,6 @@ public class TheiaBuildPluginTest {
 
   private void switchToNonParentWindow(String parentWindowHandle) {
     seleniumWebDriver.switchToNoneCurrentWindow(parentWindowHandle);
-    theiaIde.switchToIdeFrame();
   }
 
   private void switchToParentWindow(String parentWindowHandle) {
@@ -233,9 +229,35 @@ public class TheiaBuildPluginTest {
   private void openTerminal(String topMenuCommand, String commandName, String proposalText) {
     theiaIde.runMenuCommand(topMenuCommand, commandName);
 
-    theiaQuickTree.waitSearchField();
-    theiaQuickTree.waitProposal(proposalText);
-    theiaQuickTree.clickOnProposal(proposalText);
-    theiaQuickTree.waitFormDisappearance();
+    theiaProposalForm.waitSearchField();
+    theiaProposalForm.waitProposal(proposalText);
+    theiaProposalForm.clickOnProposal(proposalText);
+    theiaProposalForm.waitFormDisappearance();
+  }
+
+  private void waitNotificationEqualsTo(String notificationMessage, String parentWindowHandle) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> {
+          if (seleniumWebDriverHelper.isOpenedSomeWin()) {
+            seleniumWebDriver.switchTo().window(parentWindowHandle);
+            theiaIde.switchToIdeFrame();
+          }
+
+          return theiaIde.isDisplayedNotificationEqualsTo(notificationMessage);
+        },
+        LOADER_TIMEOUT_SEC);
+  }
+
+  private void waitNotificationContains(String notificationMessage, String parentWindowHandle) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> {
+          if (seleniumWebDriverHelper.isOpenedSomeWin()) {
+            seleniumWebDriver.switchTo().window(parentWindowHandle);
+            theiaIde.switchToIdeFrame();
+          }
+
+          return theiaIde.isDisplayedNotificationContains(notificationMessage);
+        },
+        LOADER_TIMEOUT_SEC);
   }
 }

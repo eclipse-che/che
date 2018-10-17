@@ -99,13 +99,25 @@ public class TheiaIde {
     seleniumWebDriverHelper.waitVisibility(By.xpath(notificationXpath));
   }
 
+  public boolean isDisplayedNotificationEqualsTo(String notificationText) {
+    final String notificationXpath = getNotificationMessageEqualsToXpath(notificationText);
+
+    return seleniumWebDriverHelper.isVisible(By.xpath(notificationXpath));
+  }
+
+  public boolean isDisplayedNotificationContains(String notificationText) {
+    final String notificationXpath = getNotificationMessageContainsXpath(notificationText);
+
+    return seleniumWebDriverHelper.isVisible(By.xpath(notificationXpath));
+  }
+
   public void waitNotificationMessageContains(String expectedText) {
     final String notificationMessage = getNotificationMessageContainsXpath(expectedText);
 
     seleniumWebDriverHelper.waitVisibility(By.xpath(notificationMessage));
   }
 
-  public void waitNotificationDissappearance(String notificationText) {
+  public void waitNotificationDisappearance(String notificationText) {
     final String notificationMessage = getNotificationMessageContainsXpath(notificationText);
 
     seleniumWebDriverHelper.waitInvisibility(By.xpath(notificationMessage));

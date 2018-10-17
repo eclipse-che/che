@@ -26,7 +26,7 @@ context('Check Extensions are installed', () => {
     cy.theiaCommandPaletteItems('Plugin:').then((value) => {
       expect(value).to.have.length(6);
       expect(value).to.have.members([
-        "Hosted Plugin: Restart Instance", "Hosted Plugin: Select Path", "Hosted Plugin: Start Instance", "Hosted Plugin: Stop Instance", "Plugin: Deploy a plugin's id", "Hosted Plugin: Debug Instance"]);
+        "Hosted Plugin: Restart Instance", "Hosted Plugin: Select Path", "Hosted Plugin: Start Instance", "Hosted Plugin: Stop Instance", "Plugin: Deploy Plugin by Id", "Hosted Plugin: Debug Instance"]);
     })
   });
 

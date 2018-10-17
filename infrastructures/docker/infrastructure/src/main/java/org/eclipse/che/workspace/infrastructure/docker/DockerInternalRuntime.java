@@ -34,6 +34,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
+import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
+import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult;
@@ -47,7 +49,6 @@ import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
-import org.eclipse.che.api.workspace.shared.dto.event.RuntimeStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.ServerStatusEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.infrastructure.docker.client.json.ContainerListEntry;
@@ -460,18 +461,13 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private class AbnormalMachineStopHandlerImpl implements AbnormalMachineStopHandler {
     @Override
     public void handle(String error) {
+      eventService.publish(new RuntimeAbnormalStoppingEvent(getContext().getIdentity(), error));
       try {
         internalStop(emptyMap());
       } catch (InfrastructureException e) {
         LOG.error(e.getLocalizedMessage(), e);
       } finally {
-        eventService.publish(
-            DtoFactory.newDto(RuntimeStatusEvent.class)
-                .withIdentity(DtoConverter.asDto(getContext().getIdentity()))
-                .withStatus("STOPPED")
-                .withPrevStatus("RUNNING")
-                .withFailed(true)
-                .withError(error));
+        eventService.publish(new RuntimeAbnormalStoppedEvent(getContext().getIdentity(), error));
       }
     }
   }
