@@ -38,7 +38,6 @@
         <module>ls-python</module>
         <module>ls-typescript</module>
         <module>ls-csharp</module>
-        <module>test-ls</module>
         <module>ls-yaml</module>
         <module>ls-camel</module>
         <module>ls-clang</module>
