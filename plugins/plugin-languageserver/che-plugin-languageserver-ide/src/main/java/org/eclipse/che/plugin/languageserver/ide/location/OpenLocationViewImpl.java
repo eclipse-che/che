@@ -92,7 +92,6 @@ public class OpenLocationViewImpl extends BaseView<OpenLocationView.ActionDelega
               + (location.getRange().getEnd().getLine() + 1)
               + ":"
               + (location.getRange().getEnd().getCharacter() + 1));
-
     }
 
     @Override
