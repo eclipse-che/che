@@ -114,6 +114,7 @@ public class WorkspaceDetailsOverviewTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
+    newWorkspace.clickOnAllStacksTab();
 
     selectStackAndCheckWorkspaceName(ANDROID);
 
