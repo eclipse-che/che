@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.miscellaneous;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
+import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -27,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -80,22 +80,20 @@ public class FileStructureCodeEditorTest {
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
-    fileStructure.selectItemInFileStructure("INSTANCE");
-    fileStructure.selectItemInFileStructureByEnter("INSTANCE");
+    fileStructure.selectAndOpenItemInFileStructureByEnter("INSTANCE");
     fileStructure.waitFileStructureFormIsClosed();
     editor.waitSpecifiedValueForLineAndChar(25, 46);
 
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
-    fileStructure.selectItemInFileStructure("getId():double");
-    fileStructure.selectItemInFileStructureByEnter("getId():double");
+    fileStructure.selectAndOpenItemInFileStructureByEnter("getId():double");
     fileStructure.waitFileStructureFormIsClosed();
     editor.waitSpecifiedValueForLineAndChar(37, 28);
 
     // check new elements in the 'file structure' form
     editor.setCursorToLine(20);
     editor.waitActive();
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor(NEW_CONTENT);
     editor.waitTextIntoEditor(EXPECTED_TEXT);
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
