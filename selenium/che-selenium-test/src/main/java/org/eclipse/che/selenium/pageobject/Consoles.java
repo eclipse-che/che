@@ -610,7 +610,7 @@ public class Consoles {
 
     waitTabNameProcessIsPresent(commandName);
     waitProcessInProcessConsoleTree(commandName);
-    waitExpectedTextIntoConsole(expectedMessageInTerminal, PREPARING_WS_TIMEOUT_SEC);
+    waitExpectedTextIntoConsole(expectedMessageInTerminal, APPLICATION_START_TIMEOUT_SEC);
   }
 
   public void closeProcessTabWithAskDialog(String tabName) {
