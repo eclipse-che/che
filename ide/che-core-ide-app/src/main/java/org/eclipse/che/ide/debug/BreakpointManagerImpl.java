@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.ide.debug;
 
-import com.google.gwt.user.client.Timer;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -40,9 +39,6 @@ import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorOpenedEvent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.document.Document;
-import org.eclipse.che.ide.api.editor.events.DocumentChangedEvent;
-import org.eclipse.che.ide.api.editor.events.FileContentUpdateEvent;
-import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.ResourceChangedEvent;
@@ -375,8 +371,6 @@ public class BreakpointManagerImpl
         EditorOpenedEvent.TYPE,
         event -> onOpenEditor(event.getFile().getLocation().toString(), event.getEditor()));
 
-    eventBus.addHandler(FileContentUpdateEvent.TYPE, this::onFileContentUpdate);
-
     eventBus.addHandler(
         ResourceChangedEvent.getType(),
         event -> {
@@ -391,54 +385,6 @@ public class BreakpointManagerImpl
             }
           }
         });
-  }
-
-  /**
-   * When source is downloaded then {@link FileContentUpdateEvent} will be generated. After that we
-   * have to wait {@link DocumentChangedEvent} to know when {@link TextEditor} will be updated.
-   */
-  private void onFileContentUpdate(FileContentUpdateEvent event) {
-    String filePath = event.getFilePath();
-    if (suspendedLocation != null && suspendedLocation.getTarget().equals(filePath)) {
-
-      EditorPartPresenter editor = getEditorForFile(filePath);
-      if (editor instanceof TextEditor) {
-
-        final TextEditor textEditor = (TextEditor) editor;
-        textEditor
-            .getDocument()
-            .getDocumentHandle()
-            .getDocEventBus()
-            .addHandler(
-                DocumentChangedEvent.TYPE,
-                docChangedEvent -> {
-                  String changedFilePath =
-                      docChangedEvent
-                          .getDocument()
-                          .getDocument()
-                          .getFile()
-                          .getLocation()
-                          .toString();
-                  if (suspendedLocation == null
-                      || !suspendedLocation.getTarget().equals(changedFilePath)) {
-                    return;
-                  }
-
-                  BreakpointRenderer breakpointRenderer = getBreakpointRendererForEditor(editor);
-                  if (breakpointRenderer != null) {
-                    new Timer() {
-                      @Override
-                      public void run() {
-                        breakpointRenderer.setLineActive(
-                            suspendedLocation.getLineNumber() - 1, true);
-                        textEditor.setCursorPosition(
-                            new TextPosition(suspendedLocation.getLineNumber(), 0));
-                      }
-                    }.schedule(300);
-                  }
-                });
-      }
-    }
   }
 
   /** The new file has been opened in the editor. Method reads breakpoints. */
