@@ -69,6 +69,7 @@ trap 'responsible_shutdown' SIGHUP SIGTERM SIGINT
 
 # run che
 cd ${HOME}
+export LD_LIBRARY_PATH=/opt/rh/httpd24/root/usr/lib64
 node_modules/.bin/theia start /projects --hostname=0.0.0.0 --port=${THEIA_PORT} &
 
 PID=$!
