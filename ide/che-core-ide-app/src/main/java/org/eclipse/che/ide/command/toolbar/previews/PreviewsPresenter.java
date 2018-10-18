@@ -108,7 +108,7 @@ public class PreviewsPresenter implements Presenter, PreviewsView.ActionDelegate
         .filter(it -> !it.isEmpty())
         .map(s -> macroProcessorProvider.get().expandMacros(s))
         .orElseGet(
-            () -> promiseProvider.reject(new Exception(messages.previewsNotAvailableError())));
+            () -> promiseProvider.resolve(messages.previewsNotAvailableError()));
   }
 
   @Override
