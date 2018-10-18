@@ -231,17 +231,10 @@ public class GolangFileEditingTest {
     // check element in the editor
     editor.goToPosition(19, 5);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-
-    // it is a workaround, need to fix after resolve the issue
-    try {
-      findReferencesConsoleTab.waitAllReferencesWithText(
-          "/desktop-go-simple/towers.go\nFrom:23:71 To:23:76");
-      findReferencesConsoleTab.doubleClickOnReference("From:23:71 To:23:76");
-    } catch (TimeoutException ex) {
-      fail(
-          "Need to delete 'try/catch' and change values of the parameters, because the known issue https://github.com/eclipse/che/issues/10698 is resolved");
-    }
-
+    findReferencesConsoleTab.waitAllReferencesWithText(
+        "/desktop-go-simple/towers.go\nFrom:24:72 To:24:77");
+    findReferencesConsoleTab.doubleClickOnReference("From:24:72 To:24:77");
+    editor.waitSpecifiedValueForLineAndChar(24, 77);
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.waitSpecifiedValueForLineAndChar(24, 72);
     editor.waitTextElementsActiveLine("count");
@@ -249,13 +242,7 @@ public class GolangFileEditingTest {
     // check the references expected text
     editor.goToPosition(19, 5);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-
-    try {
-      findReferencesConsoleTab.waitAllReferencesWithText(REFERENCES_EXPECTED_TEXT);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
-    }
+    findReferencesConsoleTab.waitAllReferencesWithText(REFERENCES_EXPECTED_TEXT);
   }
 
   @Test(priority = 1)
