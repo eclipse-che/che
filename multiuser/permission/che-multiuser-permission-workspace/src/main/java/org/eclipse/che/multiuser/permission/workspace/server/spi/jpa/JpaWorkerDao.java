@@ -82,7 +82,11 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
       throws ServerException, NotFoundException {
     requireNonNull(instanceId, "Workspace identifier required");
     requireNonNull(userId, "User identifier required");
-    return new WorkerImpl(getEntity(wildcardToNull(userId), instanceId));
+    try {
+      return new WorkerImpl(getEntity(wildcardToNull(userId), instanceId));
+    } catch (RuntimeException x) {
+      throw new ServerException(x.getLocalizedMessage(), x);
+    }
   }
 
   @Override
