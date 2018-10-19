@@ -37,6 +37,7 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplore
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.COMMAND;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.F6;
@@ -62,6 +63,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
+import org.eclipse.che.selenium.core.utils.PlatformUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
@@ -740,11 +742,19 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void selectMultiFilesByCtrlKeys(String path) {
-    Actions actions = actionsFactory.createAction(seleniumWebDriver);
-    actions.keyDown(CONTROL).perform();
-    waitAndSelectItem(path);
-    waitItemIsSelected(path);
-    actions.keyUp(CONTROL).perform();
+    if (PlatformUtils.isMac()) {
+      Actions actions = actionsFactory.createAction(seleniumWebDriver);
+      actions.keyDown(COMMAND).perform();
+      waitAndSelectItem(path);
+      waitItemIsSelected(path);
+      actions.keyUp(COMMAND).perform();
+    } else {
+      Actions actions = actionsFactory.createAction(seleniumWebDriver);
+      actions.keyDown(CONTROL).perform();
+      waitAndSelectItem(path);
+      waitItemIsSelected(path);
+      actions.keyUp(CONTROL).perform();
+    }
   }
 
   /**
