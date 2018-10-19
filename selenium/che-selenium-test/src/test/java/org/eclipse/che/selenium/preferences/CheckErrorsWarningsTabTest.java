@@ -75,12 +75,11 @@ public class CheckErrorsWarningsTabTest {
 
   @Test
   public void errorsWarningTest() throws Exception {
-    final URL errorsWarningFilePath =
-        CheckErrorsWarningsTabTest.class.getResource("errors-warnings");
-    final URL embededCodeFilePath = CheckErrorsWarningsTabTest.class.getResource("embed-code");
+    final URL errorsWarningFilePath = getClass().getResource("errors-warnings");
+    final URL embedCodeFilePath = getClass().getResource("embed-code");
 
     List<String> expectedErrorsWarningsList = readFile(errorsWarningFilePath);
-    String embedCode = readFileToString(embededCodeFilePath);
+    String embedCode = readFileToString(embedCodeFilePath);
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
