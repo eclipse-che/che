@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.languageserver.python;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
@@ -116,7 +117,7 @@ public class PythonAssistantFeaturesTest {
     editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_TEXT);
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkFindReferenceFeature() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + CALC_TAB_NAME);

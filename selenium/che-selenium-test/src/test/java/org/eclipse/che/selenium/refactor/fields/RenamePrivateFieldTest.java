@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.refactor.fields;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -83,7 +84,7 @@ public class RenamePrivateFieldTest {
     }
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField0() throws Exception {
     setFieldsForTest("test0");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -103,7 +104,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField1() throws Exception {
     setFieldsForTest("test1");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -123,7 +124,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField2() throws Exception {
     setFieldsForTest("test2");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -143,7 +144,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField3() throws Exception {
     setFieldsForTest("test3");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -166,7 +167,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField4() throws Exception {
     setFieldsForTest("test4");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -189,7 +190,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField5() throws Exception {
     setFieldsForTest("test5");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -211,7 +212,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField6() throws Exception {
     setFieldsForTest("test6");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -233,7 +234,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField7() throws Exception {
     setFieldsForTest("test7");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -255,7 +256,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField8() throws Exception {
     setFieldsForTest("test8");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -275,7 +276,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField9() throws Exception {
     setFieldsForTest("test9");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -295,7 +296,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField10() throws Exception {
     setFieldsForTest("test10");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -318,7 +319,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenamePrivateField11() throws Exception {
     setFieldsForTest("test11");
     consoles.closeProcessesArea();
@@ -344,7 +345,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkRenameUnicode12() throws Exception {
     setFieldsForTest("test12");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");

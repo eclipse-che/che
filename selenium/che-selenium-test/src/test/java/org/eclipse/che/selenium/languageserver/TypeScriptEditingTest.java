@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
@@ -142,7 +143,7 @@ public class TypeScriptEditingTest {
     editor.waitTextElementsActiveLine("print");
   }
 
-  @Test(priority = 4, alwaysRun = true)
+  @Test(priority = 4, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkHoveringFeature() {
     editor.moveCursorToText("Greeter");
     try {
@@ -152,7 +153,7 @@ public class TypeScriptEditingTest {
     }
   }
 
-  @Test(priority = 5, alwaysRun = true)
+  @Test(priority = 5, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkSignatureHelpProvider() {
     editor.goToCursorPositionVisible(25, 38);
     editor.typeTextIntoEditor(ENTER.toString());
@@ -165,7 +166,7 @@ public class TypeScriptEditingTest {
     }
   }
 
-  @Test(priority = 6, alwaysRun = true)
+  @Test(priority = 6, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkCodeCommentFeature() {
     editor.goToCursorPositionVisible(26, 9);
     editor.launchCommentCodeFeature();
@@ -175,7 +176,7 @@ public class TypeScriptEditingTest {
     editor.waitMarkerInPosition(CodenvyEditor.MarkerLocator.ERROR, 26);
   }
 
-  @Test(priority = 7, alwaysRun = true)
+  @Test(priority = 7, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkCodeFormattingFeature() throws URISyntaxException, IOException {
     // read all lines from template
     URL resources =

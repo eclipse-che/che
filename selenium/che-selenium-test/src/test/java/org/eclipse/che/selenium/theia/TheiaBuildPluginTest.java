@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.selenium.theia;
 
-import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 import static org.testng.Assert.fail;
 
@@ -35,6 +35,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = UNDER_REPAIR)
 public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
   private static final String GIT_CLONE_COMMAND =
@@ -91,7 +92,7 @@ public class TheiaBuildPluginTest {
     workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
-  @Test(groups = OPENSHIFT)
+  @Test
   public void pluginShouldBeBuilt() {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();

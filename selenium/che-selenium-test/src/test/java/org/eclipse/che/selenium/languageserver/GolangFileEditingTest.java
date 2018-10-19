@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
@@ -201,7 +202,7 @@ public class GolangFileEditingTest {
     editor.clickOnCloseFileIcon("print.go");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkRenameFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
@@ -245,7 +246,7 @@ public class GolangFileEditingTest {
     findReferencesConsoleTab.waitAllReferencesWithText(REFERENCES_EXPECTED_TEXT);
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkSignatureHelpFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.goToPosition(27, 1);

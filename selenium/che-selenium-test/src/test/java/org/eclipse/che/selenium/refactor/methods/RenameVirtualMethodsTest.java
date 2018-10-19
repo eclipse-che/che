@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.refactor.methods;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -117,7 +118,7 @@ public class RenameVirtualMethodsTest {
     doRefactoringWithKeys(15, 10, "k");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void test25() {
     doRefactorByWizard(14, 10, "k");
   }
@@ -127,18 +128,18 @@ public class RenameVirtualMethodsTest {
     doRefactoringWithKeys(30, 20, "get2ndPower");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void testFail35() {
     doRefactorByWizardWithClosingWarnMess(14, 10, "k");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void testGeneric2() {
     doRefactorByWizard(20, 20, "addIfPositive");
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void testVarArgs1() {
     doRefactorByWizard(26, 74, "runThes");
     editor.waitTextIntoEditor(contentFromOutA);

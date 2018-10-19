@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
@@ -90,7 +91,7 @@ public class ImportProjectFromGitHubTest {
     workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkAbilityImportProjectFromGithub() {
     testRepoName = testRepo.getName();
     projectName = String.format("%s-%s", gitHubUsername, testRepoName);

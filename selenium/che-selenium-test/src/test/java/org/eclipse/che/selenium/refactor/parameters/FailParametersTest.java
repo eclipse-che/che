@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.refactor.parameters;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -37,6 +38,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 23.11.15 */
+@Test(groups = UNDER_REPAIR)
 public class FailParametersTest {
   private static final String PROJECT_NAME = NameGenerator.generate("FailParametersProject-", 4);
   private static final String pathToPackageInChePrefix = PROJECT_NAME + "/src/main/java";

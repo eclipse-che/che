@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.projectexplorer;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.RENAME;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.testng.Assert.fail;
@@ -32,6 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
+@Test(groups = UNDER_REPAIR)
 public class RenameProjectTest {
   private static final String PROJECT_NAME = generate("project", 5);
   private static final String NEW_PROJECT_NAME = generate("new-project", 5);

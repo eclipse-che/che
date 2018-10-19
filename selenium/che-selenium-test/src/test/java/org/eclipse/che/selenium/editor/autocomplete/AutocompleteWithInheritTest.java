@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.TASK_OVERVIEW;
 import static org.testng.Assert.fail;
@@ -37,6 +38,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = UNDER_REPAIR)
 public class AutocompleteWithInheritTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(AutocompleteWithInheritTest.class.getSimpleName(), 4);

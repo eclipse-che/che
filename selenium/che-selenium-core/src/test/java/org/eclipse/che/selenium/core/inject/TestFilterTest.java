@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.TestGroup.MULTIUSER;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.TestGroup.OSIO;
 import static org.eclipse.che.selenium.core.TestGroup.SINGLEUSER;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -66,8 +67,13 @@ public class TestFilterTest {
   public Object[][] disableTestGroupManagementData() {
     return new Object[][] {
       {new String[] {GITHUB}, GITHUB, CHE_MULTIUSER, Infrastructure.OPENSHIFT},
-      {new String[] {GITHUB}, SOME_GROUP + "," + GITHUB, CHE_SINGLEUSER, Infrastructure.OPENSHIFT},
-      {new String[] {OPENSHIFT}, GITHUB, CHE_MULTIUSER, Infrastructure.DOCKER},
+      {
+        new String[] {UNDER_REPAIR},
+        SOME_GROUP + "," + UNDER_REPAIR,
+        CHE_SINGLEUSER,
+        Infrastructure.OPENSHIFT
+      },
+      {new String[] {OPENSHIFT, UNDER_REPAIR}, GITHUB, CHE_MULTIUSER, Infrastructure.DOCKER},
       {new String[] {MULTIUSER}, SOME_GROUP, CHE_SINGLEUSER, Infrastructure.DOCKER},
       {
         new String[] {OPENSHIFT, OSIO}, EMPTY_EXCLUDED_GROUPS, CHE_SINGLEUSER, Infrastructure.DOCKER

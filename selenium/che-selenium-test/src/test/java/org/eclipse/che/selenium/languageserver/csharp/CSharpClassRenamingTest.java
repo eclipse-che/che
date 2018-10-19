@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver.csharp;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.LS_RENAME;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
@@ -40,6 +41,7 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = UNDER_REPAIR)
 public class CSharpClassRenamingTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CSharpClassRenamingTest.class.getSimpleName(), 4);

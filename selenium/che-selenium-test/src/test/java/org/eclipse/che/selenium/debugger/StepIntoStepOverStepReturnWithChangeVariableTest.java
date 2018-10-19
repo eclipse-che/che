@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
@@ -49,6 +50,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = UNDER_REPAIR)
 public class StepIntoStepOverStepReturnWithChangeVariableTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(StepIntoStepOverStepReturnWithChangeVariableTest.class);
@@ -180,7 +182,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
   }
 
   // @Test(priority = 1)
-  public void shouldOpenDebuggingFile() {
+  private void shouldOpenDebuggingFile() {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(START_DEBUG);

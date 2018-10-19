@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.LS_RENAME;
@@ -78,7 +79,7 @@ public class ClangFileEditingTest {
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkCodeValidation() {
     projectExplorer.openItemByPath(PATH_TO_CPP_FILE);
     editor.waitActive();

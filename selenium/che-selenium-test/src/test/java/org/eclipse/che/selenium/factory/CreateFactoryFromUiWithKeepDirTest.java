@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.factory;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestGitConstants.CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_FACTORY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
@@ -54,6 +55,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = UNDER_REPAIR)
 public class CreateFactoryFromUiWithKeepDirTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(

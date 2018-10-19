@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
@@ -37,6 +38,7 @@ import org.testng.annotations.Test;
  * @author Aleksandr Shmaraev
  * @author Serhii Skoryk
  */
+@Test(groups = UNDER_REPAIR)
 public class FileStructureNodesTest {
   private static final String PROJECT_NAME = generate("project", 4);
   private static final String JAVA_FILE_NAME = "Company";

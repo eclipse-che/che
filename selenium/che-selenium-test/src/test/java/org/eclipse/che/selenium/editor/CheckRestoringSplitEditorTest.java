@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.editor;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_JAVA_MULTIMODULE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPIT_HORISONTALLY;
@@ -42,6 +43,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = UNDER_REPAIR)
 public class CheckRestoringSplitEditorTest {
   private String javaClassName = "AppController.java";
   private String readmeFileName = "README.md";
@@ -100,15 +102,15 @@ public class CheckRestoringSplitEditorTest {
     projectExplorer.waitVisibilityByName(javaClassName);
 
     notificationsPopupPanel.waitPopupPanelsAreClosed();
-    checkSplitdEditorAfterRefreshing(
+    checkSplitedEditorAfterRefreshing(
         1, javaClassTab, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
-    checkSplitdEditorAfterRefreshing(
+    checkSplitedEditorAfterRefreshing(
         2, readmeFileName, expectedTextFromEditor.get(1).trim(), cursorPositionForReadMeFile);
-    checkSplitdEditorAfterRefreshing(
+    checkSplitedEditorAfterRefreshing(
         3, pomFileTab, expectedTextFromEditor.get(2).trim(), cursorPositionForPomFile);
   }
 
-  private void checkSplitdEditorAfterRefreshing(
+  private void checkSplitedEditorAfterRefreshing(
       int numOfEditor,
       String nameOfEditorTab,
       String expectedTextAfterRefresh,

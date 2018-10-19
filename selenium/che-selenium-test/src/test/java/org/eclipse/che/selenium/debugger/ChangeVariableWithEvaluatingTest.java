@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -112,7 +113,7 @@ public class ChangeVariableWithEvaluatingTest {
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME_CHANGE_VARIABLE);
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void changeVariableTest() throws Exception {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();
