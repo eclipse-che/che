@@ -41,13 +41,11 @@ import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestIdeUrlProvider;
-import org.eclipse.che.selenium.core.provider.CheTestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestWorkspaceAgentApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
-import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
@@ -99,8 +97,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
     bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
     bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
-    bind(TestOfflineToAccessTokenExchangeApiEndpointUrlProvider.class)
-        .to(CheTestOfflineToAccessTokenExchangeApiEndpointUrlProvider.class);
     bind(TestWorkspaceAgentApiEndpointUrlProvider.class)
         .to(CheTestWorkspaceAgentApiEndpointUrlProvider.class);
 
@@ -136,8 +132,10 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     switch (cheInfrastructure) {
       case OPENSHIFT:
       case K8S:
+        install(new KeycloakCheSeleniumOpenshiftModule());
+        break;
       case OSIO:
-        install(new CheSeleniumOpenshiftModule());
+        install(new OSIOCheSeleniumOpenshiftModule());
         break;
 
       case DOCKER:

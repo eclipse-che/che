@@ -25,6 +25,5 @@ public interface TestUserFactory<T extends TestUserImpl> {
       @Assisted("name") String name,
       @Assisted("email") String email,
       @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken,
       RemovableUserProvider testUserProvider);
 }
