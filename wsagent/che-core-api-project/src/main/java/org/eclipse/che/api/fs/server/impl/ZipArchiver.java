@@ -111,6 +111,7 @@ class ZipArchiver {
             }
           }
 
+          Files.createDirectories(path.getParent());
           if (zipEntry.isDirectory()) {
             Files.createDirectory(path);
           } else {
