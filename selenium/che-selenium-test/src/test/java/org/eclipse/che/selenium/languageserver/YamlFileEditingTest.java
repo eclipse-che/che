@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
@@ -54,7 +53,7 @@ public class YamlFileEditingTest {
   private static final String YAML_FILE_NAME = "openshift.yaml";
   private static final String PATH_TO_YAML_FILE = PROJECT_NAME + "/" + YAML_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_YAML_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.yaml.server.languageserver'";
   private static final List<String> EXPECTED_GO_TO_SYMBOL_ALTERNATIVES =
       Arrays.asList("apiVersionsymbols (194)", "kind", "metadata");
 
@@ -125,13 +124,15 @@ public class YamlFileEditingTest {
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("diskName");
     editor.selectAutocompleteProposal("diskName");
-    editor.checkProposalDocumentation("The Name of the data disk in the blob storage");
+    editor.waitProposalDocumentationHTML(
+        "<p>The Name of the data disk in the blob storage</p>\n", 2);
     editor.waitProposalIntoAutocompleteContainer("diskURI");
     editor.selectAutocompleteProposal("diskURI");
-    editor.checkProposalDocumentation("The URI the data disk in the blob storage");
+    editor.waitProposalDocumentationHTML("<p>The URI the data disk in the blob storage</p>\n", 2);
 
     // select proposal and check expected text in the Editor
     editor.enterAutocompleteProposal("kind");
+    editor.waitTextIntoEditor("kind:");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("PersistentVolume");
     editor.enterAutocompleteProposal("PersistentVolume");
@@ -196,13 +197,14 @@ public class YamlFileEditingTest {
 
     editor.goToPosition(13, 2);
     editor.typeTextIntoEditor("a");
+    editor.waitTextElementsActiveLine("aapiVersion: v1");
     editor.moveCursorToText("aapiVersion");
     editor.waitTextInHoverPopup("Unexpected property aapiVersion");
 
     editor.goToPosition(13, 1);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
-    editor.moveCursorToText("apiVersion:");
+    editor.moveCursorToText("apiVersion");
     editor.waitTextInHoverPopup(
         "APIVersion defines the versioned schema of this representation of an object.");
   }

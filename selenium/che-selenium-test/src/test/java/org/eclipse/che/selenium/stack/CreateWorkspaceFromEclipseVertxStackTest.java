@@ -86,6 +86,9 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
 
     projectExplorer.waitProjectInitialization(HEALTH_CHECKS_BOOSTER_PROJECT);
     projectExplorer.waitProjectInitialization(HEALTH_HTTP_BOOSTER_PROJECT);
+
+    consoles.waitJDTLSProjectResolveFinishedMessage(
+        HEALTH_CHECKS_BOOSTER_PROJECT, HEALTH_HTTP_BOOSTER_PROJECT);
   }
 
   @Test(priority = 1)

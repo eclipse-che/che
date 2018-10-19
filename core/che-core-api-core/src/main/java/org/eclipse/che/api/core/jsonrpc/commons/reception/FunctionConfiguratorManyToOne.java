@@ -16,6 +16,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerManager;
 import org.slf4j.Logger;
 
@@ -64,5 +65,14 @@ public class FunctionConfiguratorManyToOne<P, R> {
             + rClass);
 
     handlerManager.registerManyToOne(method, pClass, rClass, function);
+  }
+
+  /**
+   * Define a function to be applied
+   *
+   * @param function function
+   */
+  public void withFunction(Function<List<P>, R> function) {
+    withFunction((str, ps) -> function.apply(ps));
   }
 }

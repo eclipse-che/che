@@ -23,6 +23,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -42,95 +43,98 @@ public class FileStructureNodesTest {
   private static final String INNER_CLASS_NAME = "CompanyHelper";
   private static final String INTERFACE_NAME = "Inter";
 
-  private static final String ITEMS_CLASS =
-      "Company() : void\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "removeEmployee(String) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortSalary() : List<Employee>\n"
-          + "sortSurname() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
-          + "sortDate() : List<Employee>\n"
-          + "listEmployees\n"
-          + "listId\n"
-          + "listName\n"
-          + "listDate\n"
+  public static final String ITEMS_CLASS =
+      "Company\n"
+          + "Company()\n"
           + "CompanyHelper\n"
           + "INSTANCE\n"
           + "ONE\n"
           + "QWE\n"
           + "TWO\n"
           + "Inter\n"
-          + "setDate() : void\n"
-          + "getId() : double\n"
-          + "getDate() : String\n"
           + "ASD\n"
           + "FIVE\n"
-          + "TEN";
-
-  private static final String ITEMS_CLASS_1 =
-      "Company() : void\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "removeEmployee(String) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortSalary() : List<Employee>\n"
-          + "sortSurname() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
-          + "sortDate() : List<Employee>\n"
+          + "TEN\n"
+          + "setDate():void\n"
+          + "getId():double\n"
+          + "getDate():String\n"
+          + "getInstance():Company\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
+          + "doListId():List<String>\n"
+          + "doListName():List<String>\n"
+          + "doListDate():List<String>\n"
+          + "createListEmpl():List<Employee>\n"
+          + "createListEmpl(int):List<Employee>\n"
+          + "removeEmployee(String):List<Employee>\n"
+          + "getListEmployees():List<Employee>\n"
+          + "sortSalary():List<Employee>\n"
+          + "sortSurname():List<Employee>\n"
+          + "sortId():List<Employee>\n"
+          + "sortDate():List<Employee>";
+
+  public static final String ITEMS_CLASS_1 =
+      "Company\n"
+          + "Company()\n"
           + "CompanyHelper\n"
-          + "Inter";
+          + "Inter\n"
+          + "getInstance():Company\n"
+          + "listEmployees\n"
+          + "listId\n"
+          + "listName\n"
+          + "listDate\n"
+          + "doListId():List<String>\n"
+          + "doListName():List<String>\n"
+          + "doListDate():List<String>\n"
+          + "createListEmpl():List<Employee>\n"
+          + "createListEmpl(int):List<Employee>\n"
+          + "removeEmployee(String):List<Employee>\n"
+          + "getListEmployees():List<Employee>\n"
+          + "sortSalary():List<Employee>\n"
+          + "sortSurname():List<Employee>\n"
+          + "sortId():List<Employee>\n"
+          + "sortDate():List<Employee>";
 
-  private static final String ITEMS_INNER_CLASS = "INSTANCE\n" + "ONE\n" + "QWE\n" + "TWO\n";
+  public static final String ITEMS_INNER_CLASS = "INSTANCE\n" + "ONE\n" + "QWE\n" + "TWO\n";
 
-  private static final String ITEMS_INTERFACE =
-      "setDate() : void\n"
-          + "getId() : double\n"
-          + "getDate() : String\n"
-          + "ASD\n"
-          + "FIVE\n"
-          + "TEN";
+  public static final String ITEMS_INTERFACE =
+      "ASD\n" + "FIVE\n" + "TEN\n" + "setDate():void\n" + "getId():double\n" + "getDate():String";
 
   private static final String ITEMS_FILTERED_GET =
       "Company\n"
-          + "getInstance() : Company\n"
-          + "getListEmployees() : List<Employee>\n"
           + "Inter\n"
-          + "getId() : double\n"
-          + "getDate() : String\n";
+          + "getId():double\n"
+          + "getDate():String\n"
+          + "getInstance():Company\n"
+          + "getListEmployees():List<Employee>\n";
 
   private static final String ITEMS_FILTERED_I =
       "Company\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
+          + "CompanyHelper\n"
+          + "INSTANCE\n"
+          + "Inter\n"
+          + "FIVE\n"
+          + "setDate():void\n"
+          + "getId():double\n"
+          + "getDate():String\n"
+          + "getInstance():Company\n"
           + "listEmployees\n"
           + "listId\n"
           + "listName\n"
           + "listDate\n"
-          + "CompanyHelper\n"
-          + "INSTANCE\n"
-          + "Inter\n"
-          + "getId() : double\n"
-          + "FIVE\n";
+          + "doListId():List<String>\n"
+          + "doListName():List<String>\n"
+          + "doListDate():List<String>\n"
+          + "createListEmpl():List<Employee>\n"
+          + "createListEmpl(int):List<Employee>\n"
+          + "removeEmployee(String):List<Employee>\n"
+          + "getListEmployees():List<Employee>\n"
+          + "sortSalary():List<Employee>\n"
+          + "sortSurname():List<Employee>\n"
+          + "sortId():List<Employee>\n"
+          + "sortDate():List<Employee>";
 
   @Inject private Ide ide;
   @Inject private Menu menu;
@@ -138,6 +142,7 @@ public class FileStructureNodesTest {
   @Inject private FileStructure fileStructure;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -147,6 +152,7 @@ public class FileStructureNodesTest {
 
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -172,16 +178,16 @@ public class FileStructureNodesTest {
     fileStructure.type("i");
     fileStructure.waitExpectedTextInFileStructure(ITEMS_FILTERED_I);
     fileStructure.type(ESCAPE.toString());
-
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
   }
 
   @Test(priority = 1)
   public void checkFileStructureNodes() {
-    // close nodes in the File Structure form by click
+    // check work nodes in the 'file structure' by click on the icon
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
 
@@ -192,18 +198,11 @@ public class FileStructureNodesTest {
     fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
     fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
 
-    // close nodes in the File Structure form by double click
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
-
-    // open nodes in the File Structure form by double click
-    fileStructure.selectItemInFileStructureByDoubleClick(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
-    fileStructure.selectItemInFileStructureByDoubleClick(INTERFACE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
+    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
+    fileStructure.clickOnIconNodeInFileStructure(JAVA_FILE_NAME);
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
 
     // close and open root node in the File Structure form
     fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);

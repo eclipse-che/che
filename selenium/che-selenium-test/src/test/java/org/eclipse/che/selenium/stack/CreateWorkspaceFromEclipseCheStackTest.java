@@ -85,6 +85,7 @@ public class CreateWorkspaceFromEclipseCheStackTest {
             ECLIPSE_CHE, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(CONSOLE_JAVA_PROJECT, WEB_JAVA_SPRING_PROJECT);
 
     projectExplorer.waitProjectInitialization(CONSOLE_JAVA_PROJECT);
     projectExplorer.waitProjectInitialization(WEB_JAVA_SPRING_PROJECT);

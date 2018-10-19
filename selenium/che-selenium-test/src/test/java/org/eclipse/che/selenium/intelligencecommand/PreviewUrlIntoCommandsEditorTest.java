@@ -64,6 +64,7 @@ public class PreviewUrlIntoCommandsEditorTest {
     testProjectServiceClient.importProject(
         testWorkspace.getId(), Paths.get(resource.toURI()), PROJ_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(testWorkspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJ_NAME);
   }
 
   @Test

@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
@@ -32,8 +31,10 @@ import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
@@ -47,7 +48,7 @@ public class JsonFileEditingTest {
   private static final String PATH_TO_JSON_FILE = PROJECT_NAME + "/" + JSON_FILE_NAME;
   private static final String NEW_OBJECT = "\"newObj\":[1,2,3],";
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_JSON_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.json.languageserver";
 
   private String[] symbols = {
     "namesymbols (12)",
@@ -70,6 +71,8 @@ public class JsonFileEditingTest {
   @Inject private Wizard wizard;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
+  @Inject private PullRequestPanel pullRequestPanel;
+  @Inject private Loader loader;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private AssistantFindPanel assistantFindPanel;
@@ -79,11 +82,13 @@ public class JsonFileEditingTest {
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
     createProjectFromWizard();
+    loader.waitOnClosed();
   }
 
   @Test
   public void checkLanguageServerInitialized() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_JSON_FILE);
     editor.waitTabIsPresent(JSON_FILE_NAME);

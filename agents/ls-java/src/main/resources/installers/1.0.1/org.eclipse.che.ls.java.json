@@ -1,0 +1,8 @@
+{
+  "id": "org.eclipse.che.ls.java",
+  "version": "1.0.1",
+  "name": "Java language server",
+  "description": "Eclipse jdt.ls based language server ",
+  "dependencies": [],
+  "properties": {}
+}

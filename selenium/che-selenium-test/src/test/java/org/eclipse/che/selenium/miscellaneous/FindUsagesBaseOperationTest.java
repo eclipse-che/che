@@ -27,6 +27,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.FindUsages;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -76,6 +77,7 @@ public class FindUsagesBaseOperationTest {
   @Inject private TestWorkspace workspace;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -85,6 +87,7 @@ public class FindUsagesBaseOperationTest {
 
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -199,6 +202,7 @@ public class FindUsagesBaseOperationTest {
 
     // Check the found items in the editor
     findUsages.selectHighlightedItemInFindUsagesByDoubleClick(30);
+    editor.waitActive();
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.expectedNumberOfActiveLine(30);
     editor.waitTextElementsActiveLine("numGuessByUser");
@@ -209,6 +213,7 @@ public class FindUsagesBaseOperationTest {
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
+    editor.waitActive();
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.expectedNumberOfActiveLine(34);
     editor.waitTextElementsActiveLine("numGuessByUser");

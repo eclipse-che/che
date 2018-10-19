@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -33,74 +34,13 @@ public class FileStructureByKeyboardTest {
   private static final String INNER_CLASS_NAME = "CompanyHelper";
   private static final String INTERFACE_NAME = "Inter";
 
-  private static final String ITEMS_CLASS =
-      "Company() : void\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "removeEmployee(String) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortSalary() : List<Employee>\n"
-          + "sortSurname() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
-          + "sortDate() : List<Employee>\n"
-          + "listEmployees\n"
-          + "listId\n"
-          + "listName\n"
-          + "listDate\n"
-          + "CompanyHelper\n"
-          + "INSTANCE\n"
-          + "ONE\n"
-          + "QWE\n"
-          + "TWO\n"
-          + "Inter\n"
-          + "setDate() : void\n"
-          + "getId() : double\n"
-          + "getDate() : String\n"
-          + "ASD\n"
-          + "FIVE\n"
-          + "TEN";
-
-  private static final String ITEMS_CLASS_1 =
-      "Company() : void\n"
-          + "getInstance() : Company\n"
-          + "doListId() : List<String>\n"
-          + "doListName() : List<String>\n"
-          + "doListDate() : List<String>\n"
-          + "createListEmpl() : List<Employee>\n"
-          + "createListEmpl(int) : List<Employee>\n"
-          + "removeEmployee(String) : List<Employee>\n"
-          + "getListEmployees() : List<Employee>\n"
-          + "sortSalary() : List<Employee>\n"
-          + "sortSurname() : List<Employee>\n"
-          + "sortId() : List<Employee>\n"
-          + "sortDate() : List<Employee>\n"
-          + "listEmployees\n"
-          + "listId\n"
-          + "listName\n"
-          + "listDate\n"
-          + "CompanyHelper\n"
-          + "Inter";
-
-  private static final String ITEMS_INNER_CLASS = "INSTANCE\n" + "ONE\n" + "QWE\n" + "TWO\n";
-
-  private static final String ITEMS_INTERFACE =
-      "setDate() : void\n"
-          + "getId() : double\n"
-          + "getDate() : String\n"
-          + "ASD\n"
-          + "FIVE\n"
-          + "TEN";
-
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private FileStructure fileStructure;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -109,6 +49,7 @@ public class FileStructureByKeyboardTest {
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
 
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -120,41 +61,45 @@ public class FileStructureByKeyboardTest {
     // check work nodes in the 'file structure' by keyboard
     fileStructure.launchFileStructureFormByKeyboard();
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(FileStructureNodesTest.ITEMS_CLASS);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_LEFT.toString());
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(FileStructureNodesTest.ITEMS_CLASS);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_RIGHT.toString());
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS_1);
+    fileStructure.waitExpectedTextInFileStructure(FileStructureNodesTest.ITEMS_CLASS_1);
     fileStructure.selectItemInFileStructure(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(
+        FileStructureNodesTest.ITEMS_INNER_CLASS);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_RIGHT.toString());
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(FileStructureNodesTest.ITEMS_INNER_CLASS);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_LEFT.toString());
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(
+        FileStructureNodesTest.ITEMS_INNER_CLASS);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_RIGHT.toString());
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INNER_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(FileStructureNodesTest.ITEMS_INNER_CLASS);
     fileStructure.selectItemInFileStructure(INTERFACE_NAME);
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(
+        FileStructureNodesTest.ITEMS_INTERFACE);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_RIGHT.toString());
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
+    fileStructure.waitExpectedTextInFileStructure(FileStructureNodesTest.ITEMS_INTERFACE);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_LEFT.toString());
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_INTERFACE);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(
+        FileStructureNodesTest.ITEMS_INTERFACE);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_RIGHT.toString());
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_INTERFACE);
+    fileStructure.waitExpectedTextInFileStructure(FileStructureNodesTest.ITEMS_INTERFACE);
 
     // check go on the root node after 'double click arrow left'
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_LEFT.toString());
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_LEFT.toString());
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_LEFT.toString());
-    fileStructure.waitExpectedTextIsNotPresentInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextIsNotPresentInFileStructure(FileStructureNodesTest.ITEMS_CLASS);
     fileStructure.sendCommandByKeyboardInFileStructure(Keys.ARROW_RIGHT.toString());
     fileStructure.clickOnIconNodeInFileStructure(INTERFACE_NAME);
     fileStructure.clickOnIconNodeInFileStructure(INNER_CLASS_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(FileStructureNodesTest.ITEMS_CLASS);
 
     // check scroll by keyboard
     fileStructure.selectItemInFileStructure(JAVA_FILE_NAME);
-    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
+    fileStructure.waitExpectedTextInFileStructure(FileStructureNodesTest.ITEMS_CLASS);
     fileStructure.moveDownToItemInFileStructure("TEN");
     // TODO add code scroll up later
   }

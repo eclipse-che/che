@@ -15,13 +15,14 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.plugin.maven.server.core.reconcile.PomReconciler;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.CodeLens;
 import org.eclipse.lsp4j.CodeLensParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
+import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -30,6 +31,7 @@ import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
+import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
@@ -45,16 +47,13 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 
 @Singleton
 public class MavenTextDocumentService implements TextDocumentService {
-  private PomReconciler reconciler;
 
   @Inject
-  public MavenTextDocumentService(PomReconciler reconciler) {
-    this.reconciler = reconciler;
-  }
+  public MavenTextDocumentService() {}
 
   @Override
   public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(
-      TextDocumentPositionParams position) {
+      CompletionParams position) {
     return null;
   }
 
@@ -91,13 +90,13 @@ public class MavenTextDocumentService implements TextDocumentService {
   }
 
   @Override
-  public CompletableFuture<List<? extends SymbolInformation>> documentSymbol(
+  public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> documentSymbol(
       DocumentSymbolParams params) {
     return null;
   }
 
   @Override
-  public CompletableFuture<List<? extends Command>> codeAction(CodeActionParams params) {
+  public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
     return null;
   }
 
@@ -134,11 +133,7 @@ public class MavenTextDocumentService implements TextDocumentService {
   }
 
   @Override
-  public void didOpen(DidOpenTextDocumentParams params) {
-    String uri = params.getTextDocument().getUri();
-    String text = params.getTextDocument().getText();
-    reconciler.reconcileUri(uri, text);
-  }
+  public void didOpen(DidOpenTextDocumentParams params) {}
 
   @Override
   public void didChange(DidChangeTextDocumentParams params) {}

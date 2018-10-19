@@ -96,6 +96,7 @@ public class UpdateListOfLibraryTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

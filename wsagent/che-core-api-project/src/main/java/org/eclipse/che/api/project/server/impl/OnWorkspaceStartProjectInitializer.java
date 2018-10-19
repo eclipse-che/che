@@ -25,8 +25,11 @@ import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
+import org.eclipse.che.api.project.server.notification.BeforeProjectInitializedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectInitializedEvent;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.search.server.excludes.HiddenItemPathMatcher;
 
@@ -37,6 +40,7 @@ public class OnWorkspaceStartProjectInitializer {
   private final WorkspaceProjectSynchronizer projectSynchronizer;
   private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectHandlerRegistry projectHandlerRegistry;
+  private final EventService eventService;
   private final HiddenItemPathMatcher hiddenItemPathMatcher;
 
   @Inject
@@ -45,12 +49,14 @@ public class OnWorkspaceStartProjectInitializer {
       WorkspaceProjectSynchronizer projectSynchronizer,
       ProjectConfigRegistry projectConfigRegistry,
       ProjectHandlerRegistry projectHandlerRegistry,
-      HiddenItemPathMatcher hiddenItemPathMatcher) {
+      HiddenItemPathMatcher hiddenItemPathMatcher,
+      EventService eventService) {
     this.fsManager = fsManager;
     this.projectSynchronizer = projectSynchronizer;
     this.projectConfigRegistry = projectConfigRegistry;
     this.projectHandlerRegistry = projectHandlerRegistry;
     this.hiddenItemPathMatcher = hiddenItemPathMatcher;
+    this.eventService = eventService;
   }
 
   @PostConstruct
@@ -64,6 +70,7 @@ public class OnWorkspaceStartProjectInitializer {
   private void initializeRegisteredProjects()
       throws ServerException, NotFoundException, ConflictException {
     for (ProjectConfig projectConfig : projectSynchronizer.getProjects()) {
+      eventService.publish(new BeforeProjectInitializedEvent(projectConfig));
       projectConfigRegistry.put(projectConfig, false, false);
     }
   }
@@ -80,7 +87,6 @@ public class OnWorkspaceStartProjectInitializer {
       throws ServerException, ConflictException, NotFoundException, ForbiddenException {
 
     for (RegisteredProject project : projectConfigRegistry.getAll()) {
-
       if (project.getBaseFolder() == null) {
         continue;
       }
@@ -94,6 +100,8 @@ public class OnWorkspaceStartProjectInitializer {
           hOptional.get().onProjectInitialized(project.getBaseFolder());
         }
       }
+
+      eventService.publish(new ProjectInitializedEvent(project.getBaseFolder()));
     }
   }
 }

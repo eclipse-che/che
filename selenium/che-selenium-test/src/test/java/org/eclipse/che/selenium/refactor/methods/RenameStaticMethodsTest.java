@@ -45,7 +45,7 @@ public class RenameStaticMethodsTest {
   private static final String pathToPackageInChePrefix =
       NAME_OFP_ROJECT + "/src" + "/main" + "/java" + "/renameStaticMethods";
   private static final String testsFail5ErrorMess =
-      "Related method 'm' (declared in 'renameStaticMethods.testFail5.A') is native. Renaming will cause an UnsatisfiedLinkError on runtime.";
+      "Renaming native methods will cause an unsatisfied link error on runtime.";
 
   private String pathToCurrentPackage;
   private String contentFromInA;
@@ -76,6 +76,7 @@ public class RenameStaticMethodsTest {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(NAME_OFP_ROJECT);
     projectExplorer.quickExpandWithJavaScript();
+    consoles.waitJDTLSProjectResolveFinishedMessage(NAME_OFP_ROJECT);
     consoles.closeProcessesArea();
   }
 

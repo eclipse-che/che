@@ -13,8 +13,6 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
@@ -39,7 +37,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.HOVER_P
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATIONS_ITEM;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.IMPLEMENTATION_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ITEM_TAB_LIST;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.JAVA_DOC_POPUP;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_ACTIVE_EDITOR_CONTAINER_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ORION_CONTENT_ACTIVE_EDITOR_XPATH;
@@ -58,6 +55,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FIL
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_LIST_BUTTON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_WITH_UNSAVED_STATUS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TEXT_VIEW_RULER;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TEXT_VIEW_TOOLTIP;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TOOLTIP_TITLE_CSS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.BLUE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabColor.FOCUSED_DEFAULT;
@@ -78,21 +76,13 @@ import static org.openqa.selenium.Keys.SHIFT;
 import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElements;
 import static org.slf4j.LoggerFactory.getLogger;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -101,10 +91,8 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -113,13 +101,13 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.FluentWait;
 import org.slf4j.Logger;
 
 @Singleton
 public class CodenvyEditor {
   public static final String CLOSE_ALL_TABS = "gwt-debug-contextMenu/closeAllEditors";
-  public static final String VCS_RULER = "//div[@class='ruler vcs']/div";
+  public static final String VCS_RULER =
+      "//div[@class='ruler vcs']/div[not(contains(@style,'visibility: hidden'))]";
   public static final Logger LOG = getLogger(CodenvyEditor.class);
 
   protected final SeleniumWebDriver seleniumWebDriver;
@@ -185,7 +173,7 @@ public class CodenvyEditor {
     String ASSIST_CONTENT_CONTAINER = "//div[@class='contentassist']/following-sibling::div";
     String AUTOCOMPLETE_CONTAINER = "//div[text()='Proposals:']//following::div/ulist";
     String PROPOSITION_CONTAINER = "//div[@id='gwt_root']/following::div/ulist";
-    String SHOW_HINTS_POP_UP = "//div[@class='popupContent']/div[1]";
+    String SHOW_HINTS_POP_UP = "//div[@id='signaturesContent']";
     String RULER_ANNOTATIONS = "//div[@class='ruler annotations']";
     String RULER_OVERVIEW = "//div[@class='ruler overview']";
     String RULER_LINES = "//div[@class='ruler lines']";
@@ -198,7 +186,6 @@ public class CodenvyEditor {
         "//div[contains(text(), 'Choose Implementation of')]/following::span[text()='%s']";
     String PUNCTUATION_SEPARATOR = "//span[contains(@class,'punctuation separator space')]";
     String TEXT_VIEW_RULER = "//div[@class='textviewInnerRightRuler']";
-    String DOWNLOAD_SOURCES_LINK = "//anchor[text()='Download sources']";
     String TAB_LIST_BUTTON = "gwt-debug-editorMenu";
     String ITEM_TAB_LIST = "//div[@class='popupContent']//div[text()='%s']/parent::div";
     String NOTIFICATION_PANEL_ID = "gwt-debug-leftNotificationGutter";
@@ -208,9 +195,9 @@ public class CodenvyEditor {
     String DEBUGGER_BREAKPOINT_CONDITION =
         "//div[@class='breakpoint %s condition' and text()='%d']";
     String DEBUGGER_BREAKPOINT_DISABLED = "//div[@class='breakpoint disabled' and text()='%d']";
-    String JAVA_DOC_POPUP = "//div[@class='gwt-PopupPanel']//iframe";
-    String AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP =
-        "//div//iframe[contains(@src, 'api/java/code-assist/compute/info?')]";
+    String TEXT_VIEW_TOOLTIP = "//div[contains(@class, 'textviewTooltip')]";
+    String AUTOCOMPLETE_PROPOSAL_DOC_POPUP =
+        "//div[@id='gwt-debug-content-assist-doc-popup']//div[@class='gwt-HTML']";
     String HIGHLIGHT_ITEM_PATTERN = "//li[@selected='true']//span[text()='%s']";
     String TOOLTIP_TITLE_CSS = "span.tooltipTitle";
     String TEXT_TO_MOVE_CURSOR_XPATH =
@@ -276,7 +263,7 @@ public class CodenvyEditor {
     FORMAT(By.id("contextMenu/Format")),
     QUICK_DOC(By.id("contextMenu/Quick Documentation")),
     QUICK_FIX(By.id("contextMenu/Quick Fix")),
-    OPEN_DECLARATION(By.id("contextMenu/Open Declaration")),
+    FIND_DEFINITION(By.id("contextMenu/Find Definition")),
     NAVIGATE_FILE_STRUCTURE(By.id("contextMenu/Navigate File Structure")),
     FIND(By.id("contextMenu/Find")),
     OPEN_ON_GITHUB(By.id("contextMenu/Open on GitHub")),
@@ -321,8 +308,8 @@ public class CodenvyEditor {
   @FindBy(xpath = PROPOSITION_CONTAINER)
   private WebElement propositionContainer;
 
-  @FindBy(xpath = JAVA_DOC_POPUP)
-  private WebElement javaDocPopUp;
+  @FindBy(xpath = TEXT_VIEW_TOOLTIP)
+  private WebElement textViewTooltip;
 
   @FindBy(xpath = ASSIST_CONTENT_CONTAINER)
   private WebElement assistContentContainer;
@@ -339,8 +326,8 @@ public class CodenvyEditor {
   @FindBy(xpath = ORION_ACTIVE_EDITOR_CONTAINER_XPATH)
   private WebElement activeEditorContainer;
 
-  @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_JAVA_DOC_POPUP)
-  private WebElement autocompleteProposalJavaDocPopup;
+  @FindBy(xpath = Locators.AUTOCOMPLETE_PROPOSAL_DOC_POPUP)
+  private WebElement autocompleteProposalDocPopup;
 
   @FindBy(xpath = ALL_TABS_XPATH)
   private WebElement someOpenedTab;
@@ -460,6 +447,26 @@ public class CodenvyEditor {
     return getTextFromOrionLines(inner);
   }
 
+  private void waitForText(String expectedText, int timeout, Supplier<String> textProvider) {
+    String[] result = new String[1];
+    webDriverWaitFactory
+        .get(timeout)
+        .ignoring(StaleElementReferenceException.class)
+        .withMessage(
+            () ->
+                "Timeout waiting for txt, expected= '"
+                    + expectedText
+                    + "', actual='"
+                    + result[0]
+                    + "'")
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver -> {
+                  result[0] = textProvider.get();
+                  return result[0].contains(expectedText);
+                });
+  }
+
   /**
    * Waits during {@code timeout} until specified {@code expectedText} is present in editor.
    *
@@ -467,11 +474,7 @@ public class CodenvyEditor {
    * @param timeout waiting time in seconds
    */
   public void waitTextIntoEditor(final String expectedText, final int timeout) {
-    webDriverWaitFactory
-        .get(timeout)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> getVisibleTextFromEditor().contains(expectedText));
+    waitForText(expectedText, timeout, () -> getVisibleTextFromEditor());
   }
 
   /**
@@ -493,11 +496,7 @@ public class CodenvyEditor {
    */
   public void waitTextInDefinedSplitEditor(
       int indexOfEditor, final int timeout, String expectedText) {
-    webDriverWaitFactory
-        .get(timeout)
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> getTextFromSplitEditor(indexOfEditor).contains(expectedText));
+    waitForText(expectedText, timeout, () -> getTextFromSplitEditor(indexOfEditor));
   }
 
   /**
@@ -682,9 +681,7 @@ public class CodenvyEditor {
    * @param text text which should be typed
    */
   public void typeTextIntoEditor(String text) {
-    loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(text);
-    loader.waitOnClosed();
   }
 
   /**
@@ -799,7 +796,6 @@ public class CodenvyEditor {
 
   /** Launches code assistant by "ctrl" + "space" keys pressing. */
   public void launchAutocomplete() {
-    loader.waitOnClosed();
     Actions action = actionsFactory.createAction(seleniumWebDriver);
     action.keyDown(CONTROL).perform();
     typeTextIntoEditor(SPACE.toString());
@@ -862,14 +858,7 @@ public class CodenvyEditor {
 
   /** Waits for "no Git change" markers in the opened editor. */
   public void waitNoGitChangeMarkers() {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver ->
-                    getListGitMarkers()
-                        .stream()
-                        .allMatch(element -> "".equals(element.getAttribute("class"))));
+    waitGitMarkerInPosition("", 0, Integer.MAX_VALUE);
   }
 
   /**
@@ -879,19 +868,7 @@ public class CodenvyEditor {
    * @param endLine line number of the markers end
    */
   public void waitGitInsertionMarkerInPosition(int startLine, int endLine) {
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> {
-                  for (int i = startLine; i <= endLine; i++) {
-                    if (!"git-change-marker insertion"
-                        .equals(getListGitMarkers().get(i).getAttribute("class"))) {
-                      return false;
-                    }
-                  }
-                  return true;
-                });
+    waitGitMarkerInPosition("git-change-marker insertion", startLine, endLine);
   }
 
   /**
@@ -902,21 +879,7 @@ public class CodenvyEditor {
    * @param endLine line number of the markers end
    */
   public void waitGitModificationMarkerInPosition(int startLine, int endLine) {
-    webDriverWaitFactory
-        .get(REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> {
-                  for (int i = startLine; i <= endLine; i++) {
-                    WebElement webElement = getListGitMarkers().get(i);
-                    webDriverWaitFactory.get().until(visibilityOf(webElement));
-                    if (!"git-change-marker modification"
-                        .equals(webElement.getAttribute("class"))) {
-                      return false;
-                    }
-                  }
-                  return true;
-                });
+    waitGitMarkerInPosition("git-change-marker modification", startLine, endLine);
   }
 
   /**
@@ -925,27 +888,61 @@ public class CodenvyEditor {
    * @param line line's number where the marker should be displayed
    */
   public void waitGitDeletionMarkerInPosition(int line) {
+    waitGitMarkerInPosition("git-change-marker deletion", line, line);
+  }
+
+  /**
+   * Wait specific git marker at giving positions. Since operation is not atomic the {@link
+   * StaleElementReferenceException} might occur. That's why it is necessary to give one more try
+   * until throwing an exception.
+   *
+   * @param marker the marker to wait
+   * @param startLine the first line of git marker
+   * @param endLine the last line of git marker
+   */
+  public void waitGitMarkerInPosition(String marker, int startLine, int endLine) {
     seleniumWebDriverHelper.waitNoExceptions(
         () ->
             seleniumWebDriverHelper.waitSuccessCondition(
-                webDriver ->
-                    "git-change-marker deletion"
-                        .equals(getListGitMarkers().get(line).getAttribute("class")),
+                webDriver -> {
+                  List<String> classAttrs;
+
+                  for (int i = 0; ; i++) {
+                    try {
+                      classAttrs =
+                          getListGitMarkers()
+                              .stream()
+                              .map(webElement -> webElement.getAttribute("class"))
+                              .collect(toList());
+                      break;
+                    } catch (StaleElementReferenceException e) {
+                      if (i == 2) {
+                        throw e;
+                      }
+                    }
+                  }
+
+                  for (int i = 0; i < classAttrs.size(); i++) {
+                    if (startLine - 1 <= i && i <= endLine - 1) {
+                      if (!marker.equals(classAttrs.get(i))) {
+                        return false;
+                      }
+                    }
+                  }
+
+                  return true;
+                },
                 REDRAW_UI_ELEMENTS_TIMEOUT_SEC),
         StaleElementReferenceException.class);
   }
 
   /**
-   * get the list of git markers web-elements in the editor
+   * Gets the list of git markers web-elements in the editor.
    *
    * @return the list of git markers web-elements
    */
   private List<WebElement> getListGitMarkers() {
-    List<WebElement> rulerVcsElements =
-        seleniumWebDriverHelper.waitPresenceOfAllElements(By.xpath(VCS_RULER));
-    List<WebElement> subList = rulerVcsElements.subList(1, rulerVcsElements.size() - 1);
-    webDriverWaitFactory.get().until(visibilityOfAllElements(subList));
-    return rulerVcsElements;
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(VCS_RULER));
   }
 
   /**
@@ -1014,6 +1011,16 @@ public class CodenvyEditor {
     return autocompleteContainer.getText();
   }
 
+  /** Scroll autocomplete form to the bottom */
+  public void scrollAutocompleteFormToBottom() {
+    webDriverWaitFactory
+        .get(ELEMENT_TIMEOUT_SEC)
+        .until(
+            ExpectedConditions.visibilityOfElementLocated(
+                By.xpath(Locators.AUTOCOMPLETE_CONTAINER + "/li[2]")))
+        .sendKeys(Keys.END);
+  }
+
   /**
    * Selects specified {@code item} in the autocomplete proposal container, and presses "ENTER".
    *
@@ -1045,6 +1052,17 @@ public class CodenvyEditor {
   public void selectAutocompleteProposal(String item) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[text()='%s']", item)));
+  }
+
+  /**
+   * Selects composite {@code item} in the autocomplete container. It works when autocomplete item
+   * contains many <span> elements.
+   *
+   * @param item item from autocomplete container.
+   */
+  public void selectCompositeAutocompleteProposal(String item) {
+    seleniumWebDriverHelper.waitAndClick(
+        By.xpath(format(AUTOCOMPLETE_CONTAINER + "/li/span[.='%s']", item)));
   }
 
   /**
@@ -1231,7 +1249,7 @@ public class CodenvyEditor {
 
   /** Gets visible text from the 'Show hints' popup panel. */
   public String getTextFromShowHintsPopUp() {
-    testWebElementRenderChecker.waitElementIsRendered(By.xpath("//div[@class='gwt-PopupPanel']"));
+    testWebElementRenderChecker.waitElementIsRendered(By.xpath(Locators.SHOW_HINTS_POP_UP));
     return seleniumWebDriverHelper.waitVisibilityAndGetText(showHintsPopUp);
   }
 
@@ -1565,21 +1583,17 @@ public class CodenvyEditor {
 
   /** Waits until javadoc popup is opened. */
   public void waitJavaDocPopUpOpened() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(JAVA_DOC_POPUP), ELEMENT_TIMEOUT_SEC);
+    seleniumWebDriverHelper.waitVisibility(By.xpath(TEXT_VIEW_TOOLTIP), ELEMENT_TIMEOUT_SEC);
   }
 
   /** Waits until javadoc popup is closed */
   public void waitJavaDocPopUpClosed() {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(JAVA_DOC_POPUP));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(TEXT_VIEW_TOOLTIP));
   }
 
-  /**
-   * Waits until {@code expectedText} is present in javadoc's popup body, and switches to parent
-   * frame.
-   */
+  /** Waits until {@code expectedText} is present in javadoc's popup body */
   public void checkTextToBePresentInJavaDocPopUp(String expectedText) {
     waitTextInJavaDoc(expectedText);
-    seleniumWebDriver.switchTo().parentFrame();
   }
 
   /**
@@ -1597,13 +1611,10 @@ public class CodenvyEditor {
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
-                  waitAvailabilityAndSwitchToJavaDocFrame();
-
                   if (waitAndCheckTextPresenceInJavaDoc(expectedText)) {
                     return true;
                   }
 
-                  seleniumWebDriver.switchTo().parentFrame();
                   return false;
                 });
   }
@@ -1613,25 +1624,15 @@ public class CodenvyEditor {
    *
    * <p>Note! {@link SeleniumWebDriver} should be switched to the javadoc frame.
    *
-   * <p>Please use {@link CodenvyEditor#waitAvailabilityAndSwitchToJavaDocFrame()} method for
-   * switching to javadoc frame.
-   *
    * @param expectedText text which should be present in javadoc body
    * @return true - if {@code expectedText} is present in javadoc body, false - if not
    */
   public boolean waitAndCheckTextPresenceInJavaDoc(String expectedText) {
+    seleniumWebDriverHelper.moveCursorTo(By.xpath(TEXT_VIEW_TOOLTIP));
     return seleniumWebDriverHelper
-        .waitVisibility(By.tagName("body"))
+        .waitVisibility(By.xpath(TEXT_VIEW_TOOLTIP))
         .getText()
         .contains(expectedText);
-  }
-
-  /**
-   * Waits until frame, which contains javadoc popup, is available and switches the {@link
-   * SeleniumWebDriver} to it.
-   */
-  public void waitAvailabilityAndSwitchToJavaDocFrame() {
-    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
   }
 
   /**
@@ -1641,7 +1642,7 @@ public class CodenvyEditor {
    * @param textLink visible link's text
    */
   public void checkTextAfterGoToLinkInJavaDocPopUp(String text, String textLink) {
-    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(JAVA_DOC_POPUP));
+    seleniumWebDriverHelper.waitAndSwitchToFrame(By.xpath(TEXT_VIEW_TOOLTIP));
 
     WebElement link =
         seleniumWebDriverHelper.waitVisibility(By.xpath(format("//a[text()='%s']", textLink)));
@@ -1667,6 +1668,15 @@ public class CodenvyEditor {
         .sendKeys(Keys.chord("q"))
         .keyUp(CONTROL)
         .perform();
+  }
+
+  /**
+   * Checks visibility state of the java doc popup.
+   *
+   * @return {@code true} if the container is visible, otherwise returns {@code false}
+   */
+  public boolean isTooltipPopupVisible() {
+    return seleniumWebDriverHelper.isVisible(By.xpath(TEXT_VIEW_TOOLTIP));
   }
 
   /**
@@ -1801,13 +1811,22 @@ public class CodenvyEditor {
    * @param charPosition char's number where cursor is expected
    */
   public void waitSpecifiedValueForLineAndChar(final int linePosition, final int charPosition) {
+    int[] lastPos = new int[] {-1, -1};
     webDriverWaitFactory
         .get()
+        .withMessage(
+            () -> {
+              return String.format(
+                  "Expected (%d, %d), but was (%d, %d)",
+                  linePosition, charPosition, lastPos[0], lastPos[1]);
+            })
         .until(
             (ExpectedCondition<Boolean>)
-                webDriver ->
-                    (getPositionVisible() == linePosition)
-                        && (getPositionOfChar() == charPosition));
+                webDriver -> {
+                  lastPos[0] = getPositionVisible();
+                  lastPos[1] = getPositionOfChar();
+                  return (lastPos[0] == linePosition) && (lastPos[1] == charPosition);
+                });
   }
 
   /**
@@ -2048,11 +2067,6 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(TEXT_VIEW_RULER));
   }
 
-  /** Clicks on 'Download sources' link in the editor. */
-  public void clickOnDownloadSourcesLink() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(Locators.DOWNLOAD_SOURCES_LINK));
-  }
-
   /**
    * Changes width of the editor's window.
    *
@@ -2288,96 +2302,6 @@ public class CodenvyEditor {
     loader.waitOnClosed();
   }
 
-  /**
-   * Get html code of java doc of autocomplete proposal.
-   *
-   * @return html code of JavaDoc of already opened autocomplete proposal by making request on 'src'
-   *     attribute of iframe of JavaDoc popup.
-   */
-  public String getAutocompleteProposalJavaDocHtml() throws IOException {
-    waitJavaDocPopupSrcAttributeIsNotEmpty();
-    return getJavaDocPopupText();
-  }
-
-  /**
-   * Waits until specified {@code expectedText} is present in javadoc.
-   *
-   * @param expectedText text which should be present in javadoc
-   */
-  public void waitContextMenuJavaDocText(String expectedText) {
-    waitJavaDocPopupSrcAttributeIsNotEmpty();
-
-    webDriverWaitFactory
-        .get()
-        .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  String javaDocPopupHtmlText = "";
-                  try {
-                    javaDocPopupHtmlText = getJavaDocPopupText();
-                  } catch (StaleElementReferenceException e) {
-                    LOG.warn(
-                        "Can not get java doc HTML text from autocomplete context menu in editor");
-                  }
-                  return javaDocPopupHtmlText.length() > 0
-                      && verifyJavaDoc(javaDocPopupHtmlText, expectedText);
-                });
-  }
-
-  private void waitJavaDocPopupSrcAttributeIsNotEmpty() {
-    new FluentWait<>(seleniumWebDriver)
-        .withTimeout(LOAD_PAGE_TIMEOUT_SEC * 2, SECONDS)
-        .pollingEvery(LOAD_PAGE_TIMEOUT_SEC / 2, SECONDS)
-        .ignoring(StaleElementReferenceException.class, NoSuchElementException.class)
-        .until(ExpectedConditions.attributeToBeNotEmpty(autocompleteProposalJavaDocPopup, "src"));
-  }
-
-  private String getJavaDocPopupText() {
-    HttpURLConnection connection = null;
-
-    try {
-      URL connectionUrl = new URL(getElementSrcLink(autocompleteProposalJavaDocPopup));
-      connection = (HttpURLConnection) connectionUrl.openConnection();
-      connection.setRequestMethod("GET");
-
-      return openStreamAndGetAllText(connection);
-
-    } catch (IOException e) {
-      LOG.error("Can not open connection for src link ");
-    } finally {
-      if (connection != null) connection.disconnect();
-    }
-
-    return "";
-  }
-
-  private boolean verifyJavaDoc(String javaDocHtml, String regex) {
-    return Pattern.compile(regex, Pattern.DOTALL).matcher(javaDocHtml).matches();
-  }
-
-  private String getElementSrcLink(WebElement element) {
-    FluentWait<WebDriver> srcLinkWait =
-        new FluentWait<WebDriver>(seleniumWebDriver)
-            .withTimeout(LOAD_PAGE_TIMEOUT_SEC, SECONDS)
-            .pollingEvery(500, MILLISECONDS)
-            .ignoring(StaleElementReferenceException.class, NoSuchElementException.class);
-
-    return srcLinkWait.until((ExpectedCondition<String>) driver -> element.getAttribute("src"));
-  }
-
-  private String openStreamAndGetAllText(HttpURLConnection httpURLConnection) {
-    if (httpURLConnection != null) {
-      try (BufferedReader br =
-          new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream(), "UTF-8"))) {
-        return br.lines().collect(Collectors.joining());
-
-      } catch (IOException ex) {
-        LOG.error("Can not get stream in openConnectionAndSetRequestMethod");
-      }
-    }
-    return "";
-  }
-
   private List<WebElement> getAllTabsWithProvidedName(String tabName) {
     return seleniumWebDriverHelper.waitVisibilityOfAllElements(
         By.xpath(
@@ -2389,8 +2313,19 @@ public class CodenvyEditor {
         By.xpath(format(Locators.TEXT_TO_MOVE_CURSOR_XPATH, text)));
   }
 
-  public void checkProposalDocumentation(String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(proposalDoc, expectedText);
+  public void waitProposalDocumentationHTML(String expectedText, int timeout) {
+    waitForText(expectedText, timeout, () -> getProposalDocumentationHTML());
+  }
+
+  public void waitProposalDocumentationHTML(String expectedText) {
+    waitProposalDocumentationHTML(expectedText, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public String getProposalDocumentationHTML() {
+    return seleniumWebDriverHelper
+        .waitVisibility(proposalDoc)
+        .findElement(By.tagName("div"))
+        .getAttribute("innerHTML");
   }
 
   /** enter the 'Ctrl + F12' */

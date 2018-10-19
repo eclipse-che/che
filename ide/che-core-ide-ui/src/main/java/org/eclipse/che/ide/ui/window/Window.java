@@ -20,10 +20,12 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.user.client.ui.impl.FocusImpl;
+import com.google.web.bindery.event.shared.EventBus;
 import javax.inject.Inject;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.ui.button.ButtonAlignment;
 import org.eclipse.che.ide.ui.smartTree.KeyboardNavigationHandler;
+import org.eclipse.che.ide.ui.window.event.WindowOpenedEvent;
 
 /**
  * Base class to create a window based panel with user defined widgets. In general, window contains
@@ -55,6 +57,7 @@ public abstract class Window implements IsWidget {
   private final WindowView view;
   private final WindowManager windowManager;
   private KeyBindingAgent keyBinding;
+  private EventBus eventBus;
 
   public Window() {
     windowManager = WindowManager.getInstance();
@@ -68,6 +71,11 @@ public abstract class Window implements IsWidget {
   @Inject
   protected void setKeyBinding(KeyBindingAgent keyBinding) {
     this.keyBinding = keyBinding;
+  }
+
+  @Inject
+  protected void setEventBus(EventBus eventBus) {
+    this.eventBus = eventBus;
   }
 
   // Configuration section
@@ -240,6 +248,7 @@ public abstract class Window implements IsWidget {
       keyBinding.disable();
     }
 
+    eventBus.fireEvent(new WindowOpenedEvent());
     onShow();
 
     windowManager.bringToFront(this);

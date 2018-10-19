@@ -75,6 +75,9 @@ public class FileStructure {
   /** wait the 'file structure' form is closed */
   public void waitFileStructureFormIsClosed() {
     seleniumWebDriverHelper.waitInvisibility(By.id(Locators.FILE_STRUCTURE_CONTENT));
+
+    // for avoiding cases of canceling chosen in the form element selection
+    WaitUtils.sleepQuietly(3);
   }
 
   /** launch the 'File Structure' form by keyboard */
@@ -159,8 +162,12 @@ public class FileStructure {
    *
    * @param item is the name of the item
    */
-  public void selectItemInFileStructureByEnter(String item) {
-    seleniumWebDriverHelper.getAction().sendKeys(ENTER).perform();
+  public void selectAndOpenItemInFileStructureByEnter(String item) {
+    selectItemInFileStructure(item);
+
+    // we need to wait a little to avoid quick nodes opening
+    WaitUtils.sleepQuietly(1);
+    seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
 
   /**

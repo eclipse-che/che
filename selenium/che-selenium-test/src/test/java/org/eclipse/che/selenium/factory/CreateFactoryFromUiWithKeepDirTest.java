@@ -33,6 +33,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.CreateFactoryWidget;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -62,7 +63,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   private static final String PROJECT_URL = "https://github.com/spring-guides/gs-rest-service";
   private static final String KEEPED_DIR = "complete";
   private static final String[] autocompleteContentAfterFirst = {
-    "GreetingController()", "Greeting", "GreetingController", "Greeting() : void"
+    "GreetingController", "GreetingControllerTest", "Greeting"
   };
   private static final String FACTORY_NAME = NameGenerator.generate("keepFactory", 2);
 
@@ -86,6 +87,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Inject private TestFactoryServiceClient factoryServiceClient;
   @Inject private PullRequestPanel pullRequestPanel;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -106,8 +108,12 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Test
   public void createFactoryFromUiWithKeepDirTest() throws Exception {
     projectExplorer.waitProjectExplorer();
+    consoles.waitJDTLSStartedMessage();
     makeKeepDirectoryFromGitUrl(PROJECT_URL, PROJECT_NAME, KEEPED_DIR);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     setUpModuleForFactory();
+    consoles.clickOnProcessesButton();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     checkAutocompletion();
     checkOpenDeclaration();
   }

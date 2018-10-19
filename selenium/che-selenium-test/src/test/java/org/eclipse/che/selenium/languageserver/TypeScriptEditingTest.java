@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
@@ -64,6 +63,8 @@ public class TypeScriptEditingTest {
       NameGenerator.generate(TypeScriptEditingTest.class.getSimpleName(), 4);
   private static final String PATH_TO_GREETER_FILE = PROJECT_NAME + "/Greeter.ts";
   private static final String PATH_TO_PRINT_TEST_FILE = PROJECT_NAME + "/printTest.ts";
+  public static final String INITIALIZE_LANG_SERVER_MESSAGE =
+      "Initialized language server 'org.eclipse.che.plugin.web.typescript'";
 
   @InjectTestWorkspace(template = ECLIPSE_NODEJS)
   private TestWorkspace workspace;
@@ -92,7 +93,7 @@ public class TypeScriptEditingTest {
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_GREETER_FILE);
-    consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
+    consoles.waitExpectedTextIntoConsole(INITIALIZE_LANG_SERVER_MESSAGE);
   }
 
   @Test
@@ -125,10 +126,6 @@ public class TypeScriptEditingTest {
 
   @Test(priority = 2, alwaysRun = true)
   public void checkMainFeaturesTypeScriptLS() {
-    String initTypeScriptLanguageServerMessage =
-        format("Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
-
-    consoles.waitExpectedTextIntoConsole(initTypeScriptLanguageServerMessage);
     checkCodeValidation();
     checkCodeAssistant();
     checkGoToDefinition();
@@ -202,7 +199,7 @@ public class TypeScriptEditingTest {
 
     final int expectedAmountOfErrorMarkers = 9;
 
-    String tooltipWithErrorMessage = "Cannot find name 'c'";
+    String tooltipWithErrorMessage = "Cannot find name 'c'.";
 
     editor.waitActive();
     editor.goToPosition(14, 2);

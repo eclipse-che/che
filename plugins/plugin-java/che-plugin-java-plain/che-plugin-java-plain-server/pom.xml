@@ -23,12 +23,32 @@
     <name>Che Plugin :: Java :: Plain :: Server</name>
     <dependencies>
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.inject.extensions</groupId>
             <artifactId>guice-multibindings</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.annotation</groupId>
+            <artifactId>javax.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.ws.rs</groupId>
@@ -39,12 +59,12 @@
             <artifactId>tika-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.birt.runtime</groupId>
-            <artifactId>org.eclipse.equinox.common</artifactId>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-core</artifactId>
+            <artifactId>che-core-api-languageserver</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -59,18 +79,12 @@
             <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>org-eclipse-jdt-core-repack</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.eclipse.jdt.core</artifactId>
-                    <groupId>org.eclipse.tycho</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-server</artifactId>
+            <groupId>org.eclipse.che.ls.jdt</groupId>
+            <artifactId>jdt.ls.extension.api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
@@ -82,11 +96,11 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.core.resources</artifactId>
+            <artifactId>che-plugin-java-server</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.jdt.ui</artifactId>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -110,11 +124,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-workspace-shared</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-lang</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

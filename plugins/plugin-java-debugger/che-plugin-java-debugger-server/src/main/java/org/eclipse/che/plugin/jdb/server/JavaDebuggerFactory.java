@@ -14,14 +14,23 @@ package org.eclipse.che.plugin.jdb.server;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Map;
+import javax.inject.Inject;
 import org.eclipse.che.api.debugger.server.Debugger;
 import org.eclipse.che.api.debugger.server.DebuggerFactory;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 
 /** @author Anatoliy Bazko */
 public class JavaDebuggerFactory implements DebuggerFactory {
 
   private static final String TYPE = "jdb";
+
+  private final JavaLanguageServerExtensionService languageServer;
+
+  @Inject
+  public JavaDebuggerFactory(JavaLanguageServerExtensionService languageServer) {
+    this.languageServer = languageServer;
+  }
 
   @Override
   public String getType() {
@@ -54,6 +63,6 @@ public class JavaDebuggerFactory implements DebuggerFactory {
       throw new DebuggerException("Unknown port property format: " + portProp);
     }
 
-    return new JavaDebugger(host, port, debuggerCallback);
+    return new JavaDebugger(languageServer, host, port, debuggerCallback);
   }
 }

@@ -37,6 +37,7 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplore
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.COMMAND;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.F6;
@@ -62,6 +63,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
+import org.eclipse.che.selenium.core.utils.PlatformUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
@@ -660,19 +662,31 @@ public class ProjectExplorer {
   }
 
   /**
-   * Opens context menu on item with specified {@code path}
+   * Opens context menu on item with specified {@code path} Selecting item and invoking context menu
+   * are two separate operations. If some item retakes focus then context menu will be invoked at
+   * wrong item. It might happen because project explorer is updated asynchronously and new appeared
+   * items retake focus. So, there are several tries to invoke context menu at correct item.
    *
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void openContextMenuByPathSelectedItem(String path) {
-    waitItem(path);
-    waitAndSelectItem(path);
-    waitItemIsSelected(path);
+    for (int i = 1; ; i++) {
+      waitAndSelectItem(path);
 
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.moveToElement(waitAndGetItem(path)).contextClick().perform();
+      actionsFactory.createAction(seleniumWebDriver).contextClick().perform();
+      waitContextMenu();
 
-    waitContextMenu();
+      try {
+        waitItemIsSelected(path, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        return;
+      } catch (TimeoutException e) {
+        seleniumWebDriverHelper.hideContextMenu();
+        waitContextMenuPopUpClosed();
+        if (i == 2) {
+          throw e;
+        }
+      }
+    }
   }
 
   /** Waits on context menu body's visibility. */
@@ -728,11 +742,19 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void selectMultiFilesByCtrlKeys(String path) {
-    Actions actions = actionsFactory.createAction(seleniumWebDriver);
-    actions.keyDown(CONTROL).perform();
-    waitAndSelectItem(path);
-    waitItemIsSelected(path);
-    actions.keyUp(CONTROL).perform();
+    if (PlatformUtils.isMac()) {
+      Actions actions = actionsFactory.createAction(seleniumWebDriver);
+      actions.keyDown(COMMAND).perform();
+      waitAndSelectItem(path);
+      waitItemIsSelected(path);
+      actions.keyUp(COMMAND).perform();
+    } else {
+      Actions actions = actionsFactory.createAction(seleniumWebDriver);
+      actions.keyDown(CONTROL).perform();
+      waitAndSelectItem(path);
+      waitItemIsSelected(path);
+      actions.keyUp(CONTROL).perform();
+    }
   }
 
   /**
@@ -889,6 +911,7 @@ public class ProjectExplorer {
   public void clickOnRefreshTreeButton() {
     clickOnProjectExplorerOptionsButton();
     clickOnOptionsMenuItem(REFRESH_MAIN);
+    loader.waitOnClosed();
   }
 
   /**
@@ -1101,12 +1124,21 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void waitItemIsSelected(String path) {
+    waitItemIsSelected(path, ELEMENT_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits until item with specified {@code path} be selected
+   *
+   * @param path item's path in format: "Test/src/pom.xml".
+   */
+  public void waitItemIsSelected(String path, int timeout) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(
             format(
                 "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
                 path)),
-        ELEMENT_TIMEOUT_SEC);
+        timeout);
   }
 
   public void waitItemSelectedByName(String visibleName) {

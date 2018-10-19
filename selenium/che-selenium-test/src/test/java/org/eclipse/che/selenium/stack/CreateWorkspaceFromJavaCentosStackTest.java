@@ -89,6 +89,8 @@ public class CreateWorkspaceFromJavaCentosStackTest {
 
     projectExplorer.waitProjectInitialization(CONSOLE_JAVA_PROJECT);
     projectExplorer.waitProjectInitialization(WEB_JAVA_SPRING_PROJECT);
+
+    consoles.waitJDTLSProjectResolveFinishedMessage(CONSOLE_JAVA_PROJECT, WEB_JAVA_SPRING_PROJECT);
   }
 
   @Test(priority = 1)

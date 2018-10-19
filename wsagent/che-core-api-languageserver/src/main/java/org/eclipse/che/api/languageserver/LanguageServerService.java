@@ -43,18 +43,18 @@ class LanguageServerService {
   private final RequestHandlerConfigurator configurator;
   private final LanguageServerInitializer languageServerInitializer;
   private final Registry<String> languageFilterRegistry;
-  private final LanguageServerConfigInitializer languageServerConfigInitializer;
+  private final LanguageServerConfigInitializer configInitializer;
 
   @Inject
   LanguageServerService(
       RequestHandlerConfigurator configurator,
       LanguageServerInitializer languageServerInitializer,
       RegistryContainer registryContainer,
-      LanguageServerConfigInitializer languageServerConfigInitializer) {
+      LanguageServerConfigInitializer configInitializer) {
     this.configurator = configurator;
     this.languageServerInitializer = languageServerInitializer;
     this.languageFilterRegistry = registryContainer.languageFilterRegistry;
-    this.languageServerConfigInitializer = languageServerConfigInitializer;
+    this.configInitializer = configInitializer;
   }
 
   @PostConstruct
@@ -78,7 +78,7 @@ class LanguageServerService {
     LOG.debug("Received 'languageServer/getLanguageRegexes' request");
     List<LanguageRegexDto> languageRegexes = newLinkedList();
 
-    languageServerConfigInitializer.initialize();
+    configInitializer.initialize();
 
     for (Entry<String, String> entry : languageFilterRegistry.getAll().entrySet()) {
       LanguageRegexDto languageRegexDto = new LanguageRegexDto();
@@ -95,7 +95,7 @@ class LanguageServerService {
     try {
       LOG.debug("Received 'languageServer/initialize' request for path: {}", wsPath);
 
-      languageServerConfigInitializer.initialize();
+      configInitializer.initialize();
 
       ServerCapabilitiesDto serverCapabilitiesDto =
           new ServerCapabilitiesDto(languageServerInitializer.initialize(wsPath).get(1, MINUTES));

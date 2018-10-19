@@ -26,14 +26,6 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
         </dependency>
@@ -50,29 +42,12 @@
             <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>javax.ws.rs</groupId>
             <artifactId>javax.ws.rs-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.birt.runtime</groupId>
-            <artifactId>org.eclipse.equinox.common</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-dto</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-model</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -83,69 +58,8 @@
             <artifactId>che-core-commons-inject</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-commons-schedule</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>org-eclipse-jdt-core-repack</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.eclipse.jdt.core</artifactId>
-                    <groupId>org.eclipse.tycho</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-lang-shared</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.core.filebuffers</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.core.resources</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.jdt.ui</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.jface</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.jface.text</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.search</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.text</groupId>
-            <artifactId>org.eclipse.text</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.eclipse.equinox.common</artifactId>
-                    <groupId>org.eclipse.equinox</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.google.gwt</groupId>
@@ -165,16 +79,6 @@
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.ui.ide</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.equinox</groupId>
-            <artifactId>preferences</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

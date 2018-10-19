@@ -25,7 +25,6 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.debug.shared.model.Location;
 import org.eclipse.che.api.debug.shared.model.impl.LocationImpl;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.debug.HasLocation;
@@ -38,10 +37,8 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHan
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.api.theme.Style;
+import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.shared.JarEntry;
-import org.eclipse.che.ide.ext.java.shared.dto.ClassContent;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.shared.NodesResources;
 import org.eclipse.che.ide.resource.Path;
@@ -49,6 +46,10 @@ import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
+import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
+import org.eclipse.che.plugin.languageserver.ide.location.HasURI;
+import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 
 /**
  * It might be used for any jar content.
@@ -57,13 +58,19 @@ import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
  */
 @Beta
 public class JarFileNode extends SyntheticNode<JarEntry>
-    implements VirtualFile, HasAction, FileEventHandler, ResourceChangedHandler, HasLocation {
+    implements VirtualFile,
+        HasAction,
+        FileEventHandler,
+        ResourceChangedHandler,
+        HasLocation,
+        HasURI {
 
-  private final int libId;
+  private final String libId;
   private final Path project;
+  private final TextDocumentServiceClient service;
+  private final DtoFactory dtoFactory;
   private final JavaResources javaResources;
   private final NodesResources nodesResources;
-  private final JavaNavigationService service;
   private final EditorAgent editorAgent;
   private final EventBus eventBus;
 
@@ -74,20 +81,22 @@ public class JarFileNode extends SyntheticNode<JarEntry>
   @Inject
   public JarFileNode(
       @Assisted JarEntry jarEntry,
-      @Assisted int libId,
+      @Assisted String libId,
       @Assisted Path project,
       @Assisted NodeSettings nodeSettings,
+      TextDocumentServiceClient service,
+      DtoFactory dtoFactory,
       JavaResources javaResources,
       NodesResources nodesResources,
-      JavaNavigationService service,
       EditorAgent editorAgent,
       EventBus eventBus) {
     super(jarEntry, nodeSettings);
     this.libId = libId;
     this.project = project;
+    this.service = service;
+    this.dtoFactory = dtoFactory;
     this.javaResources = javaResources;
     this.nodesResources = nodesResources;
-    this.service = service;
     this.editorAgent = editorAgent;
     this.eventBus = eventBus;
 
@@ -137,7 +146,12 @@ public class JarFileNode extends SyntheticNode<JarEntry>
 
   @Override
   public Path getLocation() {
-    return Path.valueOf(getData().getPath());
+    // We have to use uri instead of path here despite it looks a bit weird.
+    // We are allowed to do this because this path is used as virtual file ID in the editor only.
+    // First, sometimes we don't have path field filled in (like in case
+    // TextDocumentServiceClient#references)
+    // Second, to prevent collision in case if two classes have the same FQN from different jars.
+    return Path.valueOf(getData().getUri());
   }
 
   /** {@inheritDoc} */
@@ -169,29 +183,13 @@ public class JarFileNode extends SyntheticNode<JarEntry>
   /** {@inheritDoc} */
   @Override
   public Promise<String> getContent() {
-    if (libId != -1) {
-      return service
-          .getContent(project, libId, Path.valueOf(getData().getPath()))
-          .then(
-              new Function<ClassContent, String>() {
-                @Override
-                public String apply(ClassContent result) throws FunctionException {
-                  JarFileNode.this.contentGenerated = result.isGenerated();
-                  return result.getContent();
-                }
-              });
-    } else {
-      return service
-          .getContent(project, getData().getPath())
-          .then(
-              new Function<ClassContent, String>() {
-                @Override
-                public String apply(ClassContent result) throws FunctionException {
-                  JarFileNode.this.contentGenerated = result.isGenerated();
-                  return result.getContent();
-                }
-              });
-    }
+    ExternalLibrariesParameters params = dtoFactory.createDto(ExternalLibrariesParameters.class);
+    params.setProjectUri(project.toString());
+    params.setNodePath(getData().getPath());
+    params.setNodeId(libId);
+    return service
+        .getFileContent(getData().getUri())
+        .then((Function<String, String>) result -> result);
   }
 
   /** {@inheritDoc} */
@@ -274,6 +272,11 @@ public class JarFileNode extends SyntheticNode<JarEntry>
   @Override
   public Location toLocation(int lineNumber) {
     return new LocationImpl(
-        getLocation().toString(), lineNumber, true, libId, getProject().toString());
+        getData().getPath(), lineNumber, true, getData().getUri(), getProject().toString());
+  }
+
+  @Override
+  public String getURI() {
+    return getData().getUri();
   }
 }

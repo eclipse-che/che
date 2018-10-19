@@ -15,7 +15,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.api.editor.document.Document;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
+import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.plugin.languageserver.ide.location.HasURI;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
@@ -35,31 +37,37 @@ public class DtoBuildHelper {
   }
 
   public TextDocumentPositionParams createTDPP(Document document, int cursorOffset) {
-    TextDocumentPositionParams paramsDTO = dtoFactory.createDto(TextDocumentPositionParams.class);
-    TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
-    identifierDTO.setUri(document.getFile().getLocation().toString());
-
-    Position Position = dtoFactory.createDto(Position.class);
     TextPosition position = document.getPositionFromIndex(cursorOffset);
-    Position.setCharacter(position.getCharacter());
-    Position.setLine(position.getLine());
+    return createTDPP(document.getFile(), position);
+  }
 
-    paramsDTO.setUri(document.getFile().getLocation().toString());
-    paramsDTO.setTextDocument(identifierDTO);
-    paramsDTO.setPosition(Position);
-    return paramsDTO;
+  public TextDocumentIdentifier createTDI(VirtualFile file) {
+    TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
+    identifierDTO.setUri(getUri(file));
+    return identifierDTO;
+  }
+
+  public String getUri(VirtualFile file) {
+    if (file instanceof HasURI) {
+      return ((HasURI) file).getURI();
+    } else {
+      return file.getLocation().toString();
+    }
   }
 
   public TextDocumentPositionParams createTDPP(Document document, TextPosition position) {
-    TextDocumentPositionParams paramsDTO = dtoFactory.createDto(TextDocumentPositionParams.class);
-    TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
-    identifierDTO.setUri(document.getFile().getLocation().toString());
+    VirtualFile file = document.getFile();
+    return createTDPP(file, position);
+  }
 
+  private TextDocumentPositionParams createTDPP(VirtualFile file, TextPosition position) {
+    TextDocumentPositionParams paramsDTO = dtoFactory.createDto(TextDocumentPositionParams.class);
+    TextDocumentIdentifier identifierDTO = createTDI(file);
     Position Position = dtoFactory.createDto(Position.class);
     Position.setCharacter(position.getCharacter());
     Position.setLine(position.getLine());
 
-    paramsDTO.setUri(document.getFile().getLocation().toString());
+    paramsDTO.setUri(identifierDTO.getUri());
     paramsDTO.setTextDocument(identifierDTO);
     paramsDTO.setPosition(Position);
     return paramsDTO;

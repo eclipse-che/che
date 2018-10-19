@@ -123,6 +123,9 @@ public class EditMachineForm {
   }
 
   public void typeRam(String ramValue) {
+    // wait until ram can be set into input field
+    WaitUtils.sleepQuietly(1);
+
     seleniumWebDriverHelper.setValue(waitRamTextField(), ramValue);
   }
 
@@ -141,7 +144,7 @@ public class EditMachineForm {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isRamValueValid());
   }
 
-  public void waitInvalideRamFieldHighlighting() {
+  public void waitInvalidRamFieldHighlighting() {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> !isRamValueValid());
   }
 
@@ -231,7 +234,7 @@ public class EditMachineForm {
 
   public String getRecipeText() {
     return seleniumWebDriverHelper
-        .waitVisibilityOfAllElements(By.xpath(RECIPE_EDITOR_TEXT_XPATH))
+        .waitPresenceOfAllElements(By.xpath(RECIPE_EDITOR_TEXT_XPATH))
         .stream()
         .map(element -> element.getText())
         .collect(Collectors.joining("\n"));

@@ -13,18 +13,25 @@ package org.eclipse.che.api.languageserver;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.isStartWithProject;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixProject;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removeUriScheme;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Singleton;
-import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,13 +42,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
+import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CommandDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.CompletionItemDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.DocumentHighlightDto;
@@ -53,16 +65,27 @@ import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.RenameResult
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SignatureHelpDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.SymbolInformationDto;
 import org.eclipse.che.api.languageserver.server.dto.DtoServerImpls.TextEditDto;
-import org.eclipse.che.api.languageserver.shared.model.*;
+import org.eclipse.che.api.languageserver.service.FileContentAccess;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedTextDocumentEdit;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedTextEdit;
+import org.eclipse.che.api.languageserver.shared.model.ExtendedWorkspaceEdit;
+import org.eclipse.che.api.languageserver.shared.model.RenameResult;
+import org.eclipse.che.api.languageserver.shared.model.SnippetParameters;
+import org.eclipse.che.api.languageserver.shared.model.SnippetResult;
+import org.eclipse.che.api.languageserver.shared.util.CharStreamEditor;
+import org.eclipse.che.api.languageserver.shared.util.CharStreamIterator;
+import org.eclipse.che.api.languageserver.shared.util.LinearRangeComparator;
 import org.eclipse.che.api.languageserver.util.LSOperation;
+import org.eclipse.che.api.languageserver.util.LineReader;
 import org.eclipse.che.api.languageserver.util.OperationUtil;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.che.jdt.ls.extension.api.dto.LinearRange;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
+import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -71,9 +94,14 @@ import org.eclipse.lsp4j.DocumentFormattingParams;
 import org.eclipse.lsp4j.DocumentHighlight;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingParams;
 import org.eclipse.lsp4j.DocumentRangeFormattingParams;
+import org.eclipse.lsp4j.DocumentSymbol;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.MarkedString;
+import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
 import org.eclipse.lsp4j.SignatureHelp;
@@ -101,11 +129,14 @@ public class TextDocumentService {
 
   private final FindServer findServer;
   private final RequestHandlerConfigurator requestHandler;
+  private FsManager fsManager;
 
   @Inject
-  public TextDocumentService(FindServer findServer, RequestHandlerConfigurator requestHandler) {
+  public TextDocumentService(
+      FindServer findServer, RequestHandlerConfigurator requestHandler, FsManager fsManager) {
     this.findServer = findServer;
     this.requestHandler = requestHandler;
+    this.fsManager = fsManager;
   }
 
   @PostConstruct
@@ -142,10 +173,7 @@ public class TextDocumentService {
         DocumentHighlight.class,
         this::documentHighlight);
     dtoToDto(
-        "completion",
-        TextDocumentPositionParams.class,
-        ExtendedCompletionListDto.class,
-        this::completion);
+        "completion", CompletionParams.class, ExtendedCompletionListDto.class, this::completion);
     dtoToDto("hover", TextDocumentPositionParams.class, HoverDto.class, this::hover);
     dtoToDto(
         "signatureHelp",
@@ -159,6 +187,20 @@ public class TextDocumentService {
     dtoToNothing("didClose", DidCloseTextDocumentParams.class, this::didClose);
     dtoToNothing("didOpen", DidOpenTextDocumentParams.class, this::didOpen);
     dtoToNothing("didSave", DidSaveTextDocumentParams.class, this::didSave);
+
+    requestHandler
+        .newConfiguration()
+        .methodName("textDocument/fileContent")
+        .paramsAsString()
+        .resultAsString()
+        .withFunction(this::getFileContent);
+
+    requestHandler
+        .newConfiguration()
+        .methodName("textDocument/snippets")
+        .paramsAsDto(SnippetParameters.class)
+        .resultAsListOfDto(SnippetResult.class)
+        .withFunction(this::getSnippets);
   }
 
   private List<CommandDto> codeAction(CodeActionParams params) {
@@ -168,8 +210,8 @@ public class TextDocumentService {
     textDocument.setUri(uri);
     List<CommandDto> result = new ArrayList<>();
     Set<ExtendedLanguageServer> servers = findServer.byPath(wsPath);
-    LSOperation<ExtendedLanguageServer, List<? extends Command>> op =
-        new LSOperation<ExtendedLanguageServer, List<? extends Command>>() {
+    LSOperation<ExtendedLanguageServer, List<Either<Command, CodeAction>>> op =
+        new LSOperation<ExtendedLanguageServer, List<Either<Command, CodeAction>>>() {
 
           @Override
           public boolean canDo(ExtendedLanguageServer server) {
@@ -177,14 +219,21 @@ public class TextDocumentService {
           }
 
           @Override
-          public CompletableFuture<List<? extends Command>> start(ExtendedLanguageServer element) {
+          public CompletableFuture<List<Either<Command, CodeAction>>> start(
+              ExtendedLanguageServer element) {
             return element.getTextDocumentService().codeAction(params);
           }
 
           @Override
-          public boolean handleResult(ExtendedLanguageServer element, List<? extends Command> res) {
-            for (Command cmd : res) {
-              result.add(new CommandDto(cmd));
+          public boolean handleResult(
+              ExtendedLanguageServer element, List<Either<Command, CodeAction>> res) {
+            for (Either<Command, CodeAction> cmd : res) {
+              if (cmd.isLeft()) {
+                result.add(new CommandDto(cmd.getLeft()));
+              } else {
+                // see https://github.com/eclipse/che/issues/11140
+                LOG.warn("Ignoring code action: {}", cmd.getRight());
+              }
             }
             return false;
           }
@@ -193,8 +242,7 @@ public class TextDocumentService {
     return result;
   }
 
-  private ExtendedCompletionListDto completion(
-      TextDocumentPositionParams textDocumentPositionParams) {
+  private ExtendedCompletionListDto completion(CompletionParams textDocumentPositionParams) {
     TextDocumentIdentifier textDocument = textDocumentPositionParams.getTextDocument();
     String wsPath = textDocument.getUri();
     String uri = prefixURI(wsPath);
@@ -259,7 +307,7 @@ public class TextDocumentService {
 
     OperationUtil.doInParallel(
         servers,
-        new LSOperation<ExtendedLanguageServer, List<? extends SymbolInformation>>() {
+        new LSOperation<ExtendedLanguageServer, List<Either<SymbolInformation, DocumentSymbol>>>() {
 
           @Override
           public boolean canDo(ExtendedLanguageServer element) {
@@ -267,20 +315,41 @@ public class TextDocumentService {
           }
 
           @Override
-          public CompletableFuture<List<? extends SymbolInformation>> start(
+          public CompletableFuture<List<Either<SymbolInformation, DocumentSymbol>>> start(
               ExtendedLanguageServer element) {
             return element.getTextDocumentService().documentSymbol(documentSymbolParams);
           }
 
           @Override
           public boolean handleResult(
-              ExtendedLanguageServer element, List<? extends SymbolInformation> locations) {
+              ExtendedLanguageServer element,
+              List<Either<SymbolInformation, DocumentSymbol>> locations) {
             locations.forEach(
                 o -> {
-                  o.getLocation().setUri(removePrefixUri(o.getLocation().getUri()));
-                  result.add(new SymbolInformationDto(o));
+                  // minimal fix for https://github.com/eclipse/che/issues/11139 when updating
+                  // lsp4j
+                  if (o.isLeft()) {
+                    SymbolInformation si = o.getLeft();
+                    si.getLocation().setUri(removePrefixUri(si.getLocation().getUri()));
+                    result.add(new SymbolInformationDto(si));
+                  } else {
+                    result.addAll(convertDocumentSymbol(o.getRight()));
+                  }
                 });
             return true;
+          }
+
+          private Collection<? extends SymbolInformationDto> convertDocumentSymbol(
+              DocumentSymbol symbol) {
+            ArrayList<SymbolInformationDto> result = new ArrayList<>();
+            result.add(
+                new SymbolInformationDto(
+                    new SymbolInformation(
+                        symbol.getName(), symbol.getKind(), new Location(uri, symbol.getRange()))));
+            for (DocumentSymbol child : symbol.getChildren()) {
+              result.addAll(convertDocumentSymbol(child));
+            }
+            return result;
           }
         },
         10000);
@@ -383,8 +452,8 @@ public class TextDocumentService {
     String uri = prefixURI(wsPath);
     positionParams.getTextDocument().setUri(uri);
     positionParams.setUri(prefixURI(positionParams.getUri()));
-    HoverDto result = new HoverDto();
-    result.setContents(new ArrayList<>());
+    Hover result = new Hover();
+    StringBuilder content = new StringBuilder();
 
     Set<ExtendedLanguageServer> servers = findServer.byPath(uri);
     OperationUtil.doInParallel(
@@ -404,14 +473,42 @@ public class TextDocumentService {
           @Override
           public boolean handleResult(ExtendedLanguageServer element, Hover hover) {
             if (hover != null) {
-              HoverDto hoverDto = new HoverDto(hover);
-              result.getContents().addAll(hoverDto.getContents());
+              Either<List<Either<String, MarkedString>>, MarkupContent> contents =
+                  hover.getContents();
+              if (contents.isLeft()) {
+                for (Either<String, MarkedString> part : contents.getLeft()) {
+                  if (content.length() > 0) {
+                    content.append("\n\n");
+                  }
+                  if (part.isLeft()) {
+                    content.append(part.getLeft());
+                  } else {
+                    // we don't handle the "language" in the IDE anyway.
+                    content.append(part.getRight().getValue());
+                  }
+                }
+              } else {
+                MarkupContent markup = contents.getRight();
+                if (MarkupKind.MARKDOWN.equals(markup.getKind())
+                    || MarkupKind.PLAINTEXT.equals(markup.getKind())) {
+                  if (content.length() > 0) {
+                    content.append("\n\n");
+                  }
+                  content.append(markup.getValue());
+                } else {
+                  LOG.warn("Unknown markup type: {}", markup.getKind());
+                }
+              }
             }
             return true;
           }
         },
         10000);
-    return result;
+    MarkupContent markupContent = new MarkupContent();
+    markupContent.setKind(MarkupKind.MARKDOWN);
+    markupContent.setValue(content.toString());
+    result.setContents(markupContent);
+    return new HoverDto(result);
   }
 
   private SignatureHelpDto signatureHelp(TextDocumentPositionParams positionParams) {
@@ -700,41 +797,152 @@ public class TextDocumentService {
     }
   }
 
-  private List<ExtendedTextEdit> convertToExtendedEdit(List<TextEdit> edits, String filePath) {
-    try {
-      // for some reason C# LS sends ws related path,
-      if (!isStartWithProject(filePath)) {
-        filePath = prefixProject(filePath);
-      }
-      String fileContent =
-          com.google.common.io.Files.toString(new File(filePath), Charset.defaultCharset());
-      Document document = new Document(fileContent);
-      return edits
-          .stream()
-          .map(
-              textEdit -> {
-                ExtendedTextEdit result = new ExtendedTextEdit();
-                result.setRange(textEdit.getRange());
-                result.setNewText(textEdit.getNewText());
-                try {
-                  IRegion lineInformation =
-                      document.getLineInformation(textEdit.getRange().getStart().getLine());
-                  String lineText =
-                      document.get(lineInformation.getOffset(), lineInformation.getLength());
-                  result.setLineText(lineText);
-                  result.setInLineStart(textEdit.getRange().getStart().getCharacter());
-                  result.setInLineEnd(textEdit.getRange().getEnd().getCharacter());
-                } catch (BadLocationException e) {
-                  LOG.error("Can't read file line", e);
-                }
+  private static List<ExtendedTextEdit> convertToExtendedEdit(
+      List<TextEdit> edits, String filePath) {
+    // for some reason C# LS sends ws related path,
+    if (!isStartWithProject(filePath)) {
+      filePath = prefixProject(filePath);
+    }
+    try (FileReader reader = new FileReader(filePath)) {
+      CharStreamIterator charStreamIter =
+          new CharStreamIterator(CharStreamEditor.forReader(reader));
 
-                return result;
-              })
-          .collect(Collectors.toList());
+      return convertToExtendedEdits(edits, charStreamIter);
     } catch (IOException e) {
       LOG.error("Can't read file", e);
+      return Collections.emptyList();
     }
-    return emptyList();
+  }
+
+  @VisibleForTesting
+  static List<ExtendedTextEdit> convertToExtendedEdits(
+      List<TextEdit> edits, CharStreamIterator charStreamIter) {
+    // don't manipulate the original collection
+    edits = new ArrayList<>(edits);
+    edits.sort(CharStreamEditor.COMPARATOR);
+
+    List<ExtendedTextEdit> result = new ArrayList<>(edits.size());
+    Iterator<TextEdit> editIterator = edits.iterator();
+    if (editIterator.hasNext()) {
+      TextEdit edit = editIterator.next();
+      while (edit != null) {
+        int currentLine = edit.getRange().getStart().getLine();
+        Position lineStart = new Position(edit.getRange().getStart().getLine(), 0);
+        Position nextLineStart = new Position(edit.getRange().getStart().getLine() + 1, 0);
+        charStreamIter.advanceTo(lineStart, CharStreamIterator.NULL_CONSUMER);
+        StringBuilder lineText = new StringBuilder();
+        charStreamIter.advanceTo(
+            nextLineStart,
+            new BiConsumer<Integer, Integer>() {
+
+              @Override
+              public void accept(Integer t, Integer u) {
+                if (t != '\r' && t != '\n') {
+                  lineText.append((char) t.intValue());
+                }
+              }
+            });
+        while (edit != null && edit.getRange().getStart().getLine() == currentLine) {
+          result.add(doConvert(edit, lineText));
+          if (editIterator.hasNext()) {
+            edit = editIterator.next();
+          } else {
+            edit = null;
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  private static ExtendedTextEdit doConvert(TextEdit edit, StringBuilder currentLine) {
+    ExtendedTextEdit extendedEdit = new ExtendedTextEdit();
+    extendedEdit.setRange(edit.getRange());
+    extendedEdit.setNewText(edit.getNewText());
+
+    extendedEdit.setLineText(currentLine.toString());
+    extendedEdit.setInLineStart(edit.getRange().getStart().getCharacter());
+    if (edit.getRange().getEnd().getLine() == edit.getRange().getStart().getLine()) {
+      extendedEdit.setInLineEnd(edit.getRange().getEnd().getCharacter());
+    } else {
+      extendedEdit.setInLineEnd(Math.max(0, currentLine.length() - 1));
+    }
+    return extendedEdit;
+  }
+
+  private String getFileContent(String uri) {
+    try {
+      uri = prefixURI(uri);
+      Optional<ExtendedLanguageServer> serverOptional =
+          findServer
+              .byPath(uri)
+              .stream()
+              .filter(
+                  s -> {
+                    return s.getServer() instanceof FileContentAccess;
+                  })
+              .findFirst();
+      if (serverOptional.isPresent()) {
+        return ((FileContentAccess) serverOptional.get().getServer())
+            .getFileContent(uri)
+            .get(5000, TimeUnit.MILLISECONDS);
+      } else {
+        return null;
+      }
+    } catch (InterruptedException | ExecutionException | TimeoutException e) {
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
+  }
+
+  List<SnippetResult> getSnippets(SnippetParameters params) {
+    try {
+      String uri = params.getUri();
+      if (LanguageServiceUtils.isWorkspaceUri(uri)) {
+        uri = LanguageServiceUtils.workspaceURIToFileURI(uri);
+      }
+      Reader content = null;
+
+      if (LanguageServiceUtils.isProjectUri(uri)) {
+        String path = LanguageServiceUtils.removePrefixUri(uri);
+        String wsPath = absolutize(path);
+
+        if (fsManager.existsAsFile(wsPath)) {
+          content = new InputStreamReader(new BufferedInputStream(fsManager.read(wsPath)));
+        }
+      } else {
+        String fileContent = getFileContent(uri);
+        if (fileContent != null) {
+          content = new StringReader(fileContent);
+        }
+      }
+
+      if (content != null) {
+        ArrayList<LinearRange> ranges = new ArrayList<>(params.getRanges());
+        try {
+          List<SnippetResult> result = new ArrayList<>();
+          Collections.sort(ranges, LinearRangeComparator.INSTANCE);
+          LineReader lineReader = new LineReader(content);
+          for (LinearRange range : ranges) {
+            lineReader.readTo(range.getOffset());
+            String snippet = lineReader.getCurrentLine();
+            int offsetInLine = range.getOffset() - lineReader.getCurrentLineStartOffset();
+            int lengthInLine = Math.min(snippet.length() - offsetInLine, range.getLength());
+            LinearRange rangeInLine = new LinearRange(offsetInLine, lengthInLine);
+            result.add(
+                new SnippetResult(range, snippet, lineReader.getCurrentLineIndex(), rangeInLine));
+          }
+          return result;
+        } finally {
+          content.close();
+        }
+      } else {
+        LOG.error("did not find file " + params.getUri());
+        throw new JsonRpcException(-27000, "File not found for edit: " + params.getUri());
+      }
+    } catch (ServerException | NotFoundException | IOException | ConflictException e) {
+      LOG.error("error editing file", e);
+      throw new JsonRpcException(-27000, e.getMessage());
+    }
   }
 
   private <P> void dtoToNothing(String name, Class<P> pClass, Consumer<P> consumer) {

@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.similarnam
 
 import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameSettings.MachStrategy;
+import org.eclipse.che.jdt.ls.extension.api.MatchStrategy;
 
 /**
  * The visual part of Similar name wizard.
@@ -23,7 +23,7 @@ import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameSettings.MachSt
 @ImplementedBy(SimilarNamesConfigurationViewImpl.class)
 interface SimilarNamesConfigurationView extends View<SimilarNamesConfigurationView.ActionDelegate> {
 
-  MachStrategy getMachStrategy();
+  MatchStrategy getMatchStrategy();
 
   /** Show Similar Names Configuration panel. */
   void showDialog();

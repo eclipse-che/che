@@ -76,6 +76,7 @@ public class RenameMethodInInterfaceTest {
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(nameOfProject);
     projectExplorer.waitVisibleItem(nameOfProject);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
@@ -172,6 +173,10 @@ public class RenameMethodInInterfaceTest {
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.clickOkButtonRefactorForm();
+    loader.waitOnClosed();
+    refactor.waitRenameMethodFormIsClosed();
+    loader.waitOnClosed();
+    editor.waitTextIntoEditor(contentFromOutA);
   }
 
   private void doRefactorByWizardWithExpectedWarningMessage(

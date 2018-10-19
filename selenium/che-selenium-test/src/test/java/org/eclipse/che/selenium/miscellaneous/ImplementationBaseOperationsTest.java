@@ -11,30 +11,33 @@
  */
 package org.eclipse.che.selenium.miscellaneous;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.IMPLEMENTATION_S;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
+import static org.openqa.selenium.Keys.ARROW_LEFT;
+import static org.openqa.selenium.Keys.ENTER;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 12.01.16 */
 public class ImplementationBaseOperationsTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
+  private static final String PROJECT_NAME = generate("project", 5);
   private static final String JAVA_FILE_NAME = "Company";
   private static final String ABSTRACT_CLASS_NAME = "Empl";
   private static final String INTERFACE_NAME = "Employee";
+  private static final String GENERAL_INTERFACE_NAME = "Remote";
   private static final String NO_FOUND_TEXT = "No implementations found";
   private static final String LIST_IMPLEMENTATIONS =
       "Empl - (/"
@@ -50,11 +53,12 @@ public class ImplementationBaseOperationsTest {
           + PROJECT_NAME
           + "/src/main/java/com/codenvy/qa/EmployeeHourlyWages.java)";
 
-  @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
+  @Inject private Consoles consoles;
+  @Inject private CodenvyEditor editor;
+  @Inject private TestWorkspace workspace;
+  @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -63,11 +67,12 @@ public class ImplementationBaseOperationsTest {
     testProjectServiceClient.importProject(
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, MAVEN_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void checkImplementationInEditor() {
-    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.openItemByPath(PROJECT_NAME);
     expandTReeProjectAndOpenClass(JAVA_FILE_NAME);
 
@@ -93,10 +98,11 @@ public class ImplementationBaseOperationsTest {
     projectExplorer.openItemByVisibleNameInExplorer(ABSTRACT_CLASS_NAME + ".java");
     editor.goToCursorPositionVisible(16, 25);
     editor.waitActive();
-    editor.waitTextElementsActiveLine("Empl");
+    editor.waitTextElementsActiveLine(ABSTRACT_CLASS_NAME);
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeFixedSalary");
-    editor.expectedNumberOfActiveLine(14);
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
+    editor.waitSpecifiedValueForLineAndChar(14, 14);
     editor.waitTextElementsActiveLine("EmployeeFixedSalary extends Empl");
     editor.clickOnCloseFileIcon("EmployeeFixedSalary");
     editor.waitActiveTabFileName(ABSTRACT_CLASS_NAME);
@@ -105,16 +111,19 @@ public class ImplementationBaseOperationsTest {
     editor.clickOnSelectedElementInEditor("toString");
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitActiveTabFileName("EmployeeFixedSalary");
-    editor.expectedNumberOfActiveLine(39);
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
+    editor.waitSpecifiedValueForLineAndChar(39, 19);
     editor.waitTextElementsActiveLine("toString");
 
     // check the 'implementations' for interface
     projectExplorer.openItemByVisibleNameInExplorer(INTERFACE_NAME + ".java");
     editor.goToCursorPositionVisible(16, 20);
-    editor.waitTextElementsActiveLine("Employee");
+    editor.waitTextElementsActiveLine(INTERFACE_NAME);
     editor.launchImplementationFormByKeyboard();
     editor.waitActiveTabFileName("EmployeeHourlyWages");
     editor.expectedNumberOfActiveLine(15);
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
+    editor.waitSpecifiedValueForLineAndChar(15, 14);
     editor.waitTextElementsActiveLine("EmployeeHourlyWages implements Employee");
     editor.clickOnCloseFileIcon("EmployeeHourlyWages");
     editor.waitActiveTabFileName(INTERFACE_NAME);
@@ -123,34 +132,35 @@ public class ImplementationBaseOperationsTest {
     editor.clickOnSelectedElementInEditor("toString");
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
     editor.waitActiveTabFileName("EmployeeHourlyWages");
-    editor.expectedNumberOfActiveLine(59);
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
+    editor.waitSpecifiedValueForLineAndChar(59, 19);
     editor.waitTextElementsActiveLine("toString");
     editor.selectTabByName(INTERFACE_NAME);
-    editor.setCursorToLine(16);
-    editor.waitTextElementsActiveLine("interface Employee extends Serializable");
-    editor.clickOnSelectedElementInEditor("Serializable");
+    editor.goToCursorPositionVisible(16, 38);
+    editor.waitTextElementsActiveLine("interface Employee extends Remote");
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
-    editor.waitImplementationFormIsOpen("Serializable");
+    editor.waitImplementationFormIsOpen(GENERAL_INTERFACE_NAME);
+
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitImplementationFormIsClosed("Serializable");
+    editor.typeTextIntoEditor(ENTER.toString());
+    editor.waitImplementationFormIsClosed(GENERAL_INTERFACE_NAME);
     editor.waitActiveTabFileName(ABSTRACT_CLASS_NAME);
     editor.setCursorToLine(16);
-    editor.waitTextElementsActiveLine("class Empl implements Serializable");
+    editor.waitTextElementsActiveLine("class Empl implements Remote");
     editor.selectTabByName(INTERFACE_NAME);
     editor.launchImplementationFormByKeyboard();
-    editor.waitImplementationFormIsOpen("Serializable");
+    editor.waitImplementationFormIsOpen(GENERAL_INTERFACE_NAME);
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
     editor.selectImplementationByClick("EmployeeHourlyWages");
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
-    editor.waitImplementationFormIsClosed("Serializable");
+    editor.typeTextIntoEditor(ENTER.toString());
+    editor.waitImplementationFormIsClosed(GENERAL_INTERFACE_NAME);
     editor.waitActiveTabFileName("EmployeeHourlyWages");
     editor.selectTabByName(INTERFACE_NAME);
     menu.runCommand(ASSISTANT, IMPLEMENTATION_S);
-    editor.waitImplementationFormIsOpen("Serializable");
+    editor.waitImplementationFormIsOpen(GENERAL_INTERFACE_NAME);
     editor.waitTextInImplementationForm(LIST_IMPLEMENTATIONS);
     editor.chooseImplementationByDoubleClick("EmployeeFixedSalary");
-    editor.waitImplementationFormIsClosed("Serializable");
+    editor.waitImplementationFormIsClosed(GENERAL_INTERFACE_NAME);
     editor.waitActiveTabFileName("EmployeeFixedSalary");
   }
 

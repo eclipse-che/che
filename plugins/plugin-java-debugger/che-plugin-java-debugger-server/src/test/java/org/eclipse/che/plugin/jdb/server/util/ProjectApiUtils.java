@@ -27,21 +27,15 @@ import org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageTransmitter;
 import org.eclipse.che.api.editor.server.EditorApiModule;
 import org.eclipse.che.api.fs.server.FsApiModule;
-import org.eclipse.che.api.fs.server.FsManager;
-import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectApiModule;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApi;
 import org.eclipse.che.api.project.server.impl.ProjectServiceApiFactory;
 import org.eclipse.che.api.project.server.impl.ProjectServiceVcsStatusInjector;
-import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.eclipse.che.api.search.server.SearchApiModule;
 import org.eclipse.che.api.watcher.server.FileWatcherApiModule;
 import org.eclipse.che.plugin.java.server.inject.JavaModule;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.jdt.internal.core.JavaModelManager;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,26 +132,6 @@ public class ProjectApiUtils {
             });
 
     ProjectManager projectManager = injector.getInstance(ProjectManager.class);
-    FsManager fsManager = injector.getInstance(FsManager.class);
-    PathTransformer pathTransformer = injector.getInstance(PathTransformer.class);
-    RootDirPathProvider pathProvider = injector.getInstance(RootDirPathProvider.class);
-
     projectManager.setType("/test", "java", false);
-
-    ResourcesPlugin resourcesPlugin =
-        new ResourcesPlugin(
-            indexDir.getAbsolutePath(),
-            pathProvider,
-            // root.getAbsolutePath(),
-            () -> projectManager,
-            () -> pathTransformer,
-            () -> fsManager);
-    resourcesPlugin.start();
-
-    JavaPlugin javaPlugin =
-        new JavaPlugin(root.getAbsolutePath() + "/.settings", resourcesPlugin, projectManager);
-    javaPlugin.start();
-
-    JavaModelManager.getDeltaState().initializeRoots(true);
   }
 }

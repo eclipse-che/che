@@ -11,11 +11,10 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.DOWN;
 import static org.openqa.selenium.Keys.SHIFT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -26,10 +25,12 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -54,6 +55,7 @@ public class TransitiveDependencyTest {
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -69,11 +71,9 @@ public class TransitiveDependencyTest {
   @Test
   public void transitiveDependencyTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorer(
-        PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples");
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-    projectExplorer.clickOnItemInContextMenu(MAVEN);
-    projectExplorer.clickOnNewContextMenuItem(REIMPORT);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
+    projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
@@ -89,13 +89,18 @@ public class TransitiveDependencyTest {
     deleteDependency();
 
     popupDialogsBrowser.waitAlertClose();
-    projectExplorer.waitLibraryIsNotPresent(MAIN_LIBRARY);
+    try {
+      projectExplorer.waitLibraryIsNotPresent(MAIN_LIBRARY);
+    } catch (TimeoutException ex) {
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11660", ex);
+    }
+
     projectExplorer.waitLibraryIsNotPresent(TRANSITIVE_DEPENDENCY_FOR_MAIN_LIBRARY);
   }
 
   private void deleteDependency() {
     editor.waitActive();
-    editor.setCursorToLine(36);
+    editor.setCursorToLine(34);
     seleniumWebDriverHelper
         .getAction()
         .keyDown(SHIFT)

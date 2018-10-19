@@ -15,10 +15,7 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -26,9 +23,6 @@ import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -43,8 +37,6 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate("CheckAuthoCompleteInTheTestFolder_", 4);
   private static final String tesClass = "AppTest.java";
-  private static final String BUILD_COMMAND = "mvn clean install -f ${current.project.path}";
-  private static final String BUILD_COMMAND_NAME = "build";
   private final String pathToClassInTstFolder =
       PROJECT_NAME + "/src/test/java/com/codenvy/example/java/";
 
@@ -54,11 +46,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private TestCommandServiceClient testCommandServiceClient;
-  @Inject private CommandsToolbar commandsToolbar;
   @Inject private Consoles consoles;
-  @Inject private CommandsExplorer commandsExplorer;
-  @Inject private CommandsEditor commandsEditor;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -69,21 +57,14 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
 
-    testCommandServiceClient.createCommand(
-        BUILD_COMMAND, BUILD_COMMAND_NAME, TestCommandsConstants.MAVEN, workspace.getId());
-
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void checkAutocompleteFeaturesInTheTestFolderTest() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-
-    commandsExplorer.openCommandsExplorer();
-    commandsExplorer.waitCommandExplorerIsOpened();
-    commandsExplorer.runCommandByName(BUILD_COMMAND_NAME);
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
 
     projectExplorer.clickOnProjectExplorerTab();
     projectExplorer.waitProjectExplorer();
@@ -103,22 +84,28 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
     editor.waitActive();
     editor.waitSpecifiedValueForLineAndChar(36, 21);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("Test");
+    editor.waitTabIsPresent("Test.class");
     String expectedContent =
-        "\n"
-            + " // Failed to get sources. Instead, stub sources have been generated.\n"
-            + " // Implementation of methods is unavailable.\n"
-            + "package junit.framework;\n"
+        "package junit.framework;\n"
+            + "\n"
+            + "/**\n"
+            + " * A <em>Test</em> can be run and collect its results.\n"
+            + " *\n"
+            + " * @see TestResult\n"
+            + " */\n"
             + "public interface Test {\n"
-            + "\n"
-            + "    public int countTestCases();\n"
-            + "\n"
-            + "    public void run(junit.framework.TestResult arg0);\n"
-            + "\n"
-            + "}\n";
+            + " /**\n"
+            + "  * Counts the number of test cases that will be run by this test.\n"
+            + "  */\n"
+            + " public abstract int countTestCases();\n"
+            + " /**\n"
+            + "  * Runs a test and collects its result in a TestResult instance.\n"
+            + "  */\n"
+            + " public abstract void run(TestResult result);\n"
+            + "}";
 
     editor.waitTextIntoEditor(expectedContent);
-    editor.closeFileByNameWithSaving("Test");
+    editor.closeFileByNameWithSaving("Test.class");
   }
 
   private void checkAutocompletion() {
@@ -133,7 +120,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
     for (String autocompleteItem : autocompleteItems) {
       editor.waitProposalIntoAutocompleteContainer(autocompleteItem);
     }
-    editor.enterAutocompleteProposal("TestCase");
+    editor.enterAutocompleteProposal("Case - junit.framework");
     editor.waitTextIntoEditor(
         "    public AppTest(String testName) {\n"
             + "        super(testName);\n"

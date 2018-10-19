@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver.csharp;
 
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
@@ -48,6 +47,9 @@ public class CSharpFileAdvancedOperationsTest {
 
   private static final String PATH_TO_DOT_NET_FILE = PROJECT_NAME + "/Hello.cs";
 
+  private final String LANGUAGE_SERVER_INIT_MESSAGE =
+      "Initialized language server 'org.eclipse.che.plugin.csharp.languageserver";
+
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
   private TestWorkspace workspace;
 
@@ -76,7 +78,7 @@ public class CSharpFileAdvancedOperationsTest {
     // after opening the file we are checking initializing message from LS and than check, that
     // dependencies have been added properly in this case
     // folders obj and bin should appear in the Project tree
-    consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
+    consoles.waitExpectedTextIntoConsole(LANGUAGE_SERVER_INIT_MESSAGE);
     projectExplorer.waitItem(PROJECT_NAME + "/obj");
     projectExplorer.waitItem(PROJECT_NAME + "/bin");
   }

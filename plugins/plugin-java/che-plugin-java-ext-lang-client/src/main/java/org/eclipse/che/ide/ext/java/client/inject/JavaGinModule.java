@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.ide.ext.java.client.inject;
 
+import static com.google.gwt.inject.client.multibindings.GinMultibinder.newSetBinder;
 import static org.eclipse.che.ide.ext.java.client.JavaResources.INSTANCE;
 import static org.eclipse.che.ide.ext.java.client.action.OrganizeImportsAction.JAVA_ORGANIZE_IMPORT_ID;
 
@@ -21,6 +22,7 @@ import com.google.gwt.inject.client.multibindings.GinMultibinder;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.name.Named;
+import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
@@ -39,13 +41,15 @@ import org.eclipse.che.ide.ext.java.client.command.valueproviders.ClasspathMacro
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.MainClassMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.OutputDirMacro;
 import org.eclipse.che.ide.ext.java.client.command.valueproviders.SourcepathMacro;
+import org.eclipse.che.ide.ext.java.client.diagnostics.PomDiagnosticsRequestor;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocPresenter;
 import org.eclipse.che.ide.ext.java.client.documentation.QuickDocumentation;
+import org.eclipse.che.ide.ext.java.client.inject.factories.ProgressWidgetFactory;
 import org.eclipse.che.ide.ext.java.client.inject.factories.PropertyWidgetFactory;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationService;
-import org.eclipse.che.ide.ext.java.client.navigation.service.JavaNavigationServiceImpl;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileView;
 import org.eclipse.che.ide.ext.java.client.newsourcefile.NewJavaSourceFileViewImpl;
+import org.eclipse.che.ide.ext.java.client.progressor.ProgressView;
+import org.eclipse.che.ide.ext.java.client.progressor.ProgressViewImpl;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.ClasspathPagePresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.libraries.LibEntryPresenter;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pages.sources.SourceEntryPresenter;
@@ -53,9 +57,8 @@ import org.eclipse.che.ide.ext.java.client.reference.JavaFqnProvider;
 import org.eclipse.che.ide.ext.java.client.resource.ClassInterceptor;
 import org.eclipse.che.ide.ext.java.client.resource.JavaSourceRenameValidator;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderInterceptor;
-import org.eclipse.che.ide.ext.java.client.search.JavaSearchJsonRpcClient;
-import org.eclipse.che.ide.ext.java.client.search.JavaSearchService;
-import org.eclipse.che.ide.ext.java.client.search.node.NodeFactory;
+import org.eclipse.che.ide.ext.java.client.search.FindUsagesView;
+import org.eclipse.che.ide.ext.java.client.search.FindUsagesViewImpl;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorsWarningsPreferenceManager;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPreferenceManager;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPreferencePresenter;
@@ -80,6 +83,9 @@ public class JavaGinModule extends AbstractGinModule {
   @Override
   protected void configure() {
     install(new FormatterGinModule());
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(JavaLanguageDescriptionProvider.class);
 
     GinMapBinder<String, ProposalAction> proposalActionMapBinder =
         GinMapBinder.newMapBinder(binder(), String.class, ProposalAction.class);
@@ -87,8 +93,8 @@ public class JavaGinModule extends AbstractGinModule {
 
     bind(NewJavaSourceFileView.class).to(NewJavaSourceFileViewImpl.class).in(Singleton.class);
     bind(QuickDocumentation.class).to(QuickDocPresenter.class).in(Singleton.class);
-    bind(JavaNavigationService.class).to(JavaNavigationServiceImpl.class);
-    bind(JavaSearchService.class).to(JavaSearchJsonRpcClient.class);
+
+    bind(PomDiagnosticsRequestor.class).asEagerSingleton();
 
     GinMultibinder.newSetBinder(binder(), NodeInterceptor.class)
         .addBinding()
@@ -123,10 +129,15 @@ public class JavaGinModule extends AbstractGinModule {
             .implement(PropertyWidget.class, PropertyWidgetImpl.class)
             .build(PropertyWidgetFactory.class));
 
-    install(new GinFactoryModuleBuilder().build(NodeFactory.class));
     install(
         new GinFactoryModuleBuilder()
-            .build(org.eclipse.che.ide.ext.java.client.navigation.factory.NodeFactory.class));
+            .implement(ProgressView.class, ProgressViewImpl.class)
+            .build(ProgressWidgetFactory.class));
+
+    install(
+        new GinFactoryModuleBuilder()
+            .build(org.eclipse.che.ide.ext.java.client.search.NodeFactory.class));
+    bind(FindUsagesView.class).to(FindUsagesViewImpl.class);
 
     GinMultibinder<PreferencePagePresenter> settingsBinder =
         GinMultibinder.newSetBinder(binder(), PreferencePagePresenter.class);
