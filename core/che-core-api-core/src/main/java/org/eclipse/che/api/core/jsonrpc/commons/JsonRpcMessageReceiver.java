@@ -70,7 +70,7 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     List<String> messages = jsonRpcUnmarshaller.unmarshalArray(message);
     for (String innerMessage : messages) {
       if (jsonRpcQualifier.isJsonRpcRequest(innerMessage)) {
-        requestProcessor.process(new JsonRpcRunnable(endpointId, innerMessage));
+        requestProcessor.process(new ProcessRequestTask(endpointId, innerMessage));
       } else if (jsonRpcQualifier.isJsonRpcResponse(innerMessage)) {
         processResponse(endpointId, innerMessage);
       } else {
@@ -91,12 +91,12 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     responseDispatcher.dispatch(endpointId, response);
   }
 
-  private class JsonRpcRunnable implements Runnable {
+  private class ProcessRequestTask implements Runnable {
 
     private final String endpointId;
     private final String innerMessage;
 
-    public JsonRpcRunnable(String endpointId, String innerMessage) {
+    public ProcessRequestTask(String endpointId, String innerMessage) {
       this.endpointId = endpointId;
       this.innerMessage = innerMessage;
     }
@@ -119,7 +119,7 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
 
     @Override
     public String toString() {
-      return "JsonRPC request " + innerMessage + " for " + endpointId;
+      return "JsonRPC request `" + innerMessage + "` for " + endpointId;
     }
   }
 }
