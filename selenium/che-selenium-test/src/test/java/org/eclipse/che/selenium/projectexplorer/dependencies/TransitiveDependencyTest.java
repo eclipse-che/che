@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.projectexplorer.dependencies;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.DOWN;
 import static org.openqa.selenium.Keys.SHIFT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -29,6 +30,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -87,7 +89,12 @@ public class TransitiveDependencyTest {
     deleteDependency();
 
     popupDialogsBrowser.waitAlertClose();
-    projectExplorer.waitLibraryIsNotPresent(MAIN_LIBRARY);
+    try {
+      projectExplorer.waitLibraryIsNotPresent(MAIN_LIBRARY);
+    } catch (TimeoutException ex) {
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11660", ex);
+    }
+
     projectExplorer.waitLibraryIsNotPresent(TRANSITIVE_DEPENDENCY_FOR_MAIN_LIBRARY);
   }
 
