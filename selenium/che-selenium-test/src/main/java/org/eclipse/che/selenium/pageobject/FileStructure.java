@@ -159,8 +159,12 @@ public class FileStructure {
    *
    * @param item is the name of the item
    */
-  public void selectItemInFileStructureByEnter(String item) {
-    seleniumWebDriverHelper.getAction().sendKeys(ENTER).perform();
+  public void selectAndOpenItemInFileStructureByEnter(String item) {
+    selectItemInFileStructure(item);
+
+    // we need to wait a little to avoid quick nodes opening
+    WaitUtils.sleepQuietly(1);
+    seleniumWebDriverHelper.sendKeys(ENTER.toString());
   }
 
   /**

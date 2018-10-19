@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.pageobject;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
@@ -67,6 +68,7 @@ public class Consoles {
   private final WebDriverWait redrawDriverWait;
   private final WebDriverWait loadPageDriverWait;
   private final WebDriverWait updateProjDriverWait;
+  private final WebDriverWait appStartDriverWait;
   private final ProjectExplorer projectExplorer;
   private final AskDialog askDialog;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
@@ -141,6 +143,7 @@ public class Consoles {
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
+    appStartDriverWait = new WebDriverWait(seleniumWebDriver, APPLICATION_START_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -436,7 +439,7 @@ public class Consoles {
     }
     try {
 
-      updateProjDriverWait.until(
+      appStartDriverWait.until(
           (Predicate<WebDriver>)
               webdriver -> {
                 ArrayList<String> projectsCopy = new ArrayList<>(projectStrings);
@@ -473,7 +476,7 @@ public class Consoles {
   /**
    * wait expected text into 'Command console'
    *
-   * @param expectedText expected messaje in concole
+   * @param expectedText expected message in console
    * @param definedTimeout timeout in seconds defined with user
    */
   public void waitExpectedTextIntoConsole(String expectedText, int definedTimeout) {
@@ -607,7 +610,7 @@ public class Consoles {
 
     waitTabNameProcessIsPresent(commandName);
     waitProcessInProcessConsoleTree(commandName);
-    waitExpectedTextIntoConsole(expectedMessageInTerminal, PREPARING_WS_TIMEOUT_SEC);
+    waitExpectedTextIntoConsole(expectedMessageInTerminal, APPLICATION_START_TIMEOUT_SEC);
   }
 
   public void closeProcessTabWithAskDialog(String tabName) {

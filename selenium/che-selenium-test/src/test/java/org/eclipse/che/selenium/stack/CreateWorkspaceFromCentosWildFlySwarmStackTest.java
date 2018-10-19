@@ -69,9 +69,10 @@ public class CreateWorkspaceFromCentosWildFlySwarmStackTest {
             CENTOS_WILDFLY_SWARM, WORKSPACE_NAME, PROJECT_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     projectExplorer.waitProjectInitialization(PROJECT_NAME);
+
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test(priority = 1)
