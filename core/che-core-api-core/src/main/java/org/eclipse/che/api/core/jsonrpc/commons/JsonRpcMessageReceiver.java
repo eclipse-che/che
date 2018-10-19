@@ -94,13 +94,12 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
   private class JsonRpcRunnable implements Runnable {
 
     private final String endpointId;
+    private final String innerMessage;
 
     public JsonRpcRunnable(String endpointId, String innerMessage) {
       this.endpointId = endpointId;
       this.innerMessage = innerMessage;
     }
-
-    private final String innerMessage;
 
     @Override
     public void run() {
