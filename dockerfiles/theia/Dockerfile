@@ -77,7 +77,9 @@ RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 FROM centos as runtime
 ENV USE_LOCAL_GIT=true \
     HOME=/home/theia \
-    THEIA_DEFAULT_PLUGINS=local-dir:///default-theia-plugins
+    THEIA_DEFAULT_PLUGINS=local-dir:///default-theia-plugins \
+    PATH=/opt/rh/rh-git29/root/bin/:${PATH} \
+    LD_LIBRARY_PATH=/opt/rh/httpd24/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 EXPOSE 3000 3030
 
@@ -88,8 +90,9 @@ ADD src/builder/setup-nodejs.sh /tmp/builder/scripts/setup-nodejs.sh
 # Install git (from software collection in order to have a recent version)
 # Install bzip2 to unpack files
 # Install supervisor for running theia
+# Install which tool in order to search git
 RUN yum install -y centos-release-scl
-RUN yum install -y rh-git29 scl-utils sudo java-1.8.0-openjdk-devel bzip2 && \
+RUN yum install -y rh-git29 scl-utils sudo java-1.8.0-openjdk-devel bzip2 which && \
     /tmp/builder/scripts/setup-nodejs.sh
 
 RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
@@ -124,8 +127,8 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && rm -rf /tmp/* \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
+
 COPY --chown=theia:root --from=builder /home/theia /home/theia
-ENV PATH=/opt/rh/rh-git29/root/bin/:${PATH}
 USER theia
 WORKDIR /projects
 ADD src/entrypoint.sh /entrypoint.sh
