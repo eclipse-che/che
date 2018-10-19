@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.PYTHON;
+import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -28,7 +29,6 @@ import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -60,12 +60,11 @@ public class PythonAssistantFeaturesTest {
 
   @Inject private Ide ide;
   @Inject private Menu menu;
-  @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private AssistantFindPanel assistantFindPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
-  @Inject private AssistantFindPanel assistantFindPanel;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -126,7 +125,12 @@ public class PythonAssistantFeaturesTest {
 
     editor.goToCursorPositionVisible(16, 2);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-    waitAllReferenceWithText(EXPECTED_FIND_REFERENCE_NODE_TEXT);
+    findReferencesConsoleTab.waitAllReferencesWithText(EXPECTED_FIND_REFERENCE_NODE_TEXT);
+    findReferencesConsoleTab.doubleClickOnReference("From:16:1 To:16:5");
+    editor.waitSpecifiedValueForLineAndChar(16, 5);
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
+    editor.waitSpecifiedValueForLineAndChar(16, 1);
+    editor.waitTextElementsActiveLine("var2");
   }
 
   @Test
@@ -155,15 +159,6 @@ public class PythonAssistantFeaturesTest {
     assistantFindPanel.clickOnActionNodeWithTextContains(EXPECTED_GO_TO_SYMBOL_NODES.get(0));
     editor.waitCursorPosition(14, 1);
     editor.waitVisibleTextEqualsTo(14, EXPECTED_LINE_TEXT);
-  }
-
-  private void waitAllReferenceWithText(String expectedText) {
-    try {
-      findReferencesConsoleTab.waitAllReferencesWithText(expectedText);
-    } catch (org.openqa.selenium.TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
-    }
   }
 
   private void waitExpectedTextIntoShowHintsPopup(String expectedText) {

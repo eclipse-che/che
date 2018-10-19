@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
+import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.testng.Assert.fail;
@@ -30,7 +31,6 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
-import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -74,7 +74,6 @@ public class PhpAssistantFeaturesTest {
   @Inject private NotificationsPopupPanel notificationPopup;
   @Inject private Menu menu;
   @Inject private CodenvyEditor editor;
-  @Inject private Consoles consoles;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
@@ -127,12 +126,13 @@ public class PhpAssistantFeaturesTest {
 
     editor.goToCursorPositionVisible(15, 8);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-    try {
-      findReferencesConsoleTab.waitAllReferencesWithText(EXPECTED_REFERENCE_TEXT);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
-    }
+
+    findReferencesConsoleTab.waitAllReferencesWithText(EXPECTED_REFERENCE_TEXT);
+    findReferencesConsoleTab.doubleClickOnReference("From:15:6 To:15:14");
+    editor.waitSpecifiedValueForLineAndChar(15, 14);
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
+    editor.waitSpecifiedValueForLineAndChar(15, 6);
+    editor.waitTextElementsActiveLine("sayHello");
   }
 
   @Test
@@ -157,7 +157,7 @@ public class PhpAssistantFeaturesTest {
 
     editor.waitTabIsPresent(LIB_TAB_NAME);
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
-    waitActionNodeContainsText(EXPECTED_GO_TO_SYMBOL_TEXT);
+    assistantFindPanel.waitNode(EXPECTED_GO_TO_SYMBOL_TEXT);
   }
 
   @Test
@@ -185,15 +185,6 @@ public class PhpAssistantFeaturesTest {
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
-    }
-  }
-
-  private void waitActionNodeContainsText(String expectedText) {
-    try {
-      assistantFindPanel.waitNode(expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
     }
   }
 }
