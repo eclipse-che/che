@@ -45,6 +45,7 @@ public class TheiaBuildPluginTest {
   private static final String WS_THEIA_IDE_TERMINAL_TITLE = "ws/theia-ide terminal 1";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
+  private static final String EXPECTED_PLUGIN_OUTPUT = "Generated plugin: hello_world_plugin.theia";
   private static final String EXPECTED_TERMINAL_OUTPUT =
       "Packaging of plugin\n"
           + "\uD83D\uDD0D Validating...✔️\n"
@@ -114,7 +115,7 @@ public class TheiaBuildPluginTest {
       theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      if (theiaTerminal.isTextPresentInTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1)) {
+      if (theiaTerminal.isTextPresentInTerminalOutput(EXPECTED_PLUGIN_OUTPUT, 1)) {
         fail("Known permanent failure https://github.com/eclipse/che/issues/11624", ex);
       }
 

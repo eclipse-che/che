@@ -68,39 +68,39 @@
                     </excludes>
                 </configuration>
             </plugin>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <executions>
-              <execution>
-                <id>add-source</id>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>add-source</goal>
-                </goals>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>.</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
                 <configuration>
-                  <sources>
-                    <source>.</source>
-                  </sources>
+                    <includePom>true</includePom>
+                    <includes>
+                        <include>e2e/**/*</include>
+                        <include>gulp/**/*</include>
+                        <include>src/**/*</include>
+                        <include>*.json</include>
+                        <include>*.js</include>
+                        <include>.*</include>
+                    </includes>
                 </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <configuration>
-              <includePom>true</includePom>
-              <includes>
-                <include>e2e/**/*</include>
-                <include>gulp/**/*</include>
-                <include>src/**/*</include>
-                <include>*.json</include>
-                <include>*.js</include>
-                <include>.*</include>
-              </includes>
-            </configuration>
-          </plugin>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -281,4 +281,3 @@
         </profile>
     </profiles>
 </project>
-

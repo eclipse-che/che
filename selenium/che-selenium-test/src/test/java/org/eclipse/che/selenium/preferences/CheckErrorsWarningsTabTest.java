@@ -13,15 +13,17 @@ package org.eclipse.che.selenium.preferences;
 
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
+import static org.eclipse.che.selenium.core.utils.FileUtil.readFile;
+import static org.eclipse.che.selenium.core.utils.FileUtil.readFileToString;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING_OVERVIEW;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -39,7 +41,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -47,6 +48,8 @@ import org.testng.annotations.Test;
 public class CheckErrorsWarningsTabTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CheckErrorsWarningsTabTest.class.getSimpleName(), 4);
+  private static final String PATH_TO_CLASS_IN_SPRING_PACKAGE =
+      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java";
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -67,12 +70,16 @@ public class CheckErrorsWarningsTabTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
-    consoles.waitExpectedTextIntoConsole(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void errorsWarningTest() throws Exception {
-    List<String> expectedErrorsWarningsList = getTextInListFromFile("errors-warnings");
+    final URL errorsWarningFilePath = getClass().getResource("errors-warnings");
+    final URL embedCodeFilePath = getClass().getResource("embed-code");
+
+    List<String> expectedErrorsWarningsList = readFile(errorsWarningFilePath);
+    String embedCode = readFileToString(embedCodeFilePath);
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
@@ -80,27 +87,34 @@ public class CheckErrorsWarningsTabTest {
     editor.waitActive();
     loader.waitOnClosed();
     editor.waitActive();
+    editor.deleteAllContent();
+    editor.typeTextIntoEditorWithoutDelayForSaving(embedCode);
+    loader.waitOnClosed();
+    editor.removeLineAndAllAfterIt(105);
 
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
     preferences.waitMenuInCollapsedDropdown(Preferences.DropDownJavaCompilerMenu.ERRORS_WARNINGS);
     preferences.selectDroppedMenuByName(Preferences.DropDownJavaCompilerMenu.ERRORS_WARNINGS);
     preferences.getItemsFromErrorWarningsWidget();
-    Assert.assertEquals(preferences.getItemsFromErrorWarningsWidget(), expectedErrorsWarningsList);
+    assertEquals(preferences.getItemsFromErrorWarningsWidget(), expectedErrorsWarningsList);
 
     preferences.close();
     consoles.closeProcessesArea();
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.WARNING);
     editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
-    Assert.assertTrue(editor.getMarkersQuantity(WARNING_OVERVIEW) >= 12);
-    Assert.assertEquals(editor.getMarkersQuantity(WARNING), 22);
+    assertTrue(editor.getMarkersQuantity(WARNING_OVERVIEW) >= 12);
+    assertEquals(editor.getMarkersQuantity(WARNING), 22);
 
+    editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.ERROR);
+    assertEquals(editor.getMarkersQuantity(ERROR_OVERVIEW), 12);
+    assertEquals(editor.getMarkersQuantity(ERROR), 22);
     editor.waitAnnotationsAreNotPresent(WARNING_OVERVIEW);
-    Assert.assertTrue(editor.getMarkersQuantity(ERROR_OVERVIEW) >= 12);
-    Assert.assertEquals(editor.getMarkersQuantity(ERROR), 22);
+    assertTrue(editor.getMarkersQuantity(ERROR_OVERVIEW) >= 12);
+    assertEquals(editor.getMarkersQuantity(ERROR), 22);
 
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.IGNORE);
@@ -117,6 +131,9 @@ public class CheckErrorsWarningsTabTest {
     preferences.clickOnOkBtn();
     preferences.close();
     loader.waitOnClosed();
+    projectExplorer.waitItem(PATH_TO_CLASS_IN_SPRING_PACKAGE);
+    projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);
+    loader.waitOnClosed();
     editor.setCursorToLine(85);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
@@ -125,10 +142,5 @@ public class CheckErrorsWarningsTabTest {
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     editor.typeTextIntoEditor(Keys.DELETE.toString());
     WaitUtils.sleepQuietly(DEFAULT_TIMEOUT);
-  }
-
-  private List<String> getTextInListFromFile(String path) throws Exception {
-    URL pathInUrl = CheckErrorsWarningsTabTest.class.getResource(path);
-    return Files.readAllLines(Paths.get(pathInUrl.toURI()), Charset.forName("UTF-8"));
   }
 }

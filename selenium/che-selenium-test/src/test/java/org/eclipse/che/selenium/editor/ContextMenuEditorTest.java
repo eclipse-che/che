@@ -261,10 +261,13 @@ public class ContextMenuEditorTest {
 
   @Test(priority = 6)
   public void checkRefactoring() {
+    final String editorTabName = "Test1";
+    final String renamedEditorTabName = "Zclass";
+
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/com/example/Test1.java");
     editor.goToCursorPositionVisible(14, 15);
-    editor.openContextMenuOnElementInEditor("Test1");
+    editor.openContextMenuOnElementInEditor(editorTabName);
     editor.clickOnItemInContextMenu(REFACTORING);
     editor.clickOnItemInContextMenu(REFACTORING_MOVE);
     editor.waitContextMenuIsNotPresent();
@@ -277,15 +280,17 @@ public class ContextMenuEditorTest {
     refactor.clickOkButtonRefactorForm();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
+    editor.waitTabIsPresent(editorTabName);
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Test1.java");
     editor.goToCursorPositionVisible(14, 15);
-    editor.openContextMenuOnElementInEditor("Test1");
+    editor.openContextMenuOnElementInEditor(editorTabName);
     editor.clickOnItemInContextMenu(REFACTORING);
     editor.clickOnItemInContextMenu(REFACTORING_RENAME);
     editor.waitContextMenuIsNotPresent();
-    editor.typeTextIntoEditor("Zclass");
+    editor.typeTextIntoEditor(renamedEditorTabName);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
+    editor.waitTabIsPresent(renamedEditorTabName);
     editor.waitTextIntoEditor("public class Zclass");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Zclass.java");
   }
