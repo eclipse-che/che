@@ -164,6 +164,94 @@
     }
   },
   {
+    "id": "java-theia-kubernetes",
+    "creator": "ide",
+    "name": "Java Theia on Kubernetes",
+    "description": "Che development + Theia in a sidecar container (kubernetes)",
+    "scope": "general",
+    "tags": [
+      "Java 1.8",
+      "Theia",
+      "Alpine",
+      "CentOS"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "ws/theia": {
+              "attributes": {},
+              "servers": {
+                "theia": {
+                  "protocol": "http",
+                  "port": "3000",
+                  "path": "/",
+                  "attributes": {
+                    "type": "ide",
+                    "cookiesAuthEnabled": "true",
+                    "secure": "true"
+                  }
+                },
+                "theia-dev": {
+                  "protocol": "http",
+                  "port": "3030",
+                  "attributes": {
+                    "type": "ide-dev"
+                  }
+                }
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {
+                "HOSTED_PLUGIN_HOSTNAME": "0.0.0.0"
+              }
+            },
+            "ws/dev": {
+              "attributes": {},
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            },
+            "ws/machine-exec": {
+              "servers": {
+                "machine-exec": {
+                  "attributes": {
+                    "type": "terminal"
+                  },
+                  "protocol": "ws",
+                  "port": "4444"
+                }
+              },
+              "installers": []
+            }
+          },
+          "recipe": {
+            "type": "kubernetes",
+            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:plugin-id-nightly'\n     name: theia\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     resources:\n      limits:\n       memory: 512Mi\n",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "defaultEnv": "default",
+      "name": "theia",
+      "projects": [],
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-theia.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "che7-preview",
     "creator": "ide",
     "name": "Che 7 Preview",
