@@ -12,7 +12,6 @@
 package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
 import static org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Guice;
@@ -28,7 +27,6 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.multiuser.permission.workspace.server.jpa.WorkspaceTckModule;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
-import org.mockito.Mockito;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
