@@ -11,21 +11,24 @@
  */
 package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
+import static org.eclipse.che.inject.Matchers.names;
 import static org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.matcher.Matchers;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.persistence.EntityManager;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
-import org.eclipse.che.multiuser.permission.workspace.server.jpa.WorkspaceTckModule;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -39,7 +42,8 @@ public class JpaWorkerDaoTest {
 
   @BeforeMethod
   private void setUpManager() {
-    final Injector injector = Guice.createInjector(new WorkspaceTckModule());
+    final Injector injector =
+        Guice.createInjector(new JpaTckModule(), new ExceptionEntityManagerModule());
     manager = injector.getInstance(EntityManager.class);
     workerDao = injector.getInstance(JpaWorkerDao.class);
     tckResourcesCleaner = injector.getInstance(TckResourcesCleaner.class);
@@ -60,8 +64,12 @@ public class JpaWorkerDaoTest {
     tckResourcesCleaner.clean();
   }
 
-  @Test
-  public void shouldSuccesfullyCheckExistingPersmission() throws Exception {
+  @Test(
+      expectedExceptions = ServerException.class,
+      expectedExceptionsMessageRegExp = "Database exception")
+  public void shouldThrowServerExceptionOnExistsWhenRuntimeExceptionOccursInDoGetMethod()
+      throws Exception {
+
     final Account account = new AccountImpl("accountId", "namespace", "test");
     final WorkspaceImpl workspace = new WorkspaceImpl("workspaceId", account, null);
 
@@ -91,6 +99,16 @@ public class JpaWorkerDaoTest {
     manager.getTransaction().commit();
     manager.clear();
 
-    assertTrue(workerDao.exists("user0", "workspaceId", SET_PERMISSIONS));
+    workerDao.exists("user0", "workspaceId", SET_PERMISSIONS);
+  }
+
+  public class ExceptionEntityManagerModule extends TckModule {
+
+    @Override
+    protected void configure() {
+      MethodInterceptor interceptor = new EntityManagerExceptionInterceptor();
+      requestInjection(interceptor);
+      bindInterceptor(Matchers.subclassesOf(JpaWorkerDao.class), names("doGet"), interceptor);
+    }
   }
 }
