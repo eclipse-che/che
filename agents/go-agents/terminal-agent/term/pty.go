@@ -83,7 +83,7 @@ func (wp *wsPty) handleMessage(msg WebSocketMessage) error {
 		if err := json.Unmarshal(msg.Data, &size); err != nil {
 			log.Printf("Invalid resize message: %s\n", err)
 		} else {
-			if err := pty.Setsize(wp.ptyFile, &pty.Winsize{Cols: uint16(size[1]), Rows: uint16(size[0]), X: 0, Y: 0}); err != nil {
+			if err := pty.Setsize(wp.ptyFile, &pty.Winsize{Cols: uint16(size[0]), Rows: uint16(size[1]), X: 0, Y: 0}); err != nil {
 				log.Printf("Error occurs on setting terminal size. %s", err)
 			}
 			activity.Tracker.Notify()
