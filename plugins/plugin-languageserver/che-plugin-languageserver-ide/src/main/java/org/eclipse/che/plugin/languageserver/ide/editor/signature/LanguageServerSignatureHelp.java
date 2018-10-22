@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.plugin.languageserver.ide.editor.signature;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -106,7 +108,13 @@ public class LanguageServerSignatureHelp implements SignatureHelpProvider {
                   new DocumentChangedHandler() {
                     @Override
                     public void onDocumentChanged(DocumentChangedEvent event) {
-                      String candidate = String.valueOf(event.getText().charAt(0));
+                      String eventText = event.getText();
+
+                      if (isNullOrEmpty(eventText)) {
+                        return;
+                      }
+
+                      String candidate = String.valueOf(eventText.charAt(0));
                       if (triggerCharacters.contains(candidate)) {
                         ((HandlesTextOperations) editor)
                             .doOperation(TextEditorOperations.SIGNATURE_HELP);
