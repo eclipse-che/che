@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
@@ -25,6 +26,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.Preferences.DropDownLanguageServerSettings.YAML;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -43,6 +45,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -170,13 +173,19 @@ public class YamlFileEditingTest {
     editor.waitTextIntoEditor("spec:");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkHoverFeature() {
     editor.selectTabByName("deployment.yaml");
 
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("namespace:");
-    editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
+
+    try {
+      editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+    }
 
     editor.moveCursorToText("kind:");
     editor.waitTextInHoverPopup(

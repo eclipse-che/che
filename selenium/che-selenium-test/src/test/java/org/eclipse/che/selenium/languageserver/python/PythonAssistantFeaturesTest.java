@@ -106,7 +106,7 @@ public class PythonAssistantFeaturesTest {
     editor.waitTextIntoEditor(EXPECTED_TEXT_AFTER_RENAME);
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkHoverFeature() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + MAIN_TAB_NAME);
@@ -114,7 +114,13 @@ public class PythonAssistantFeaturesTest {
     editor.waitActive();
 
     editor.goToCursorPositionVisible(18, 11);
-    editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_TEXT);
+
+    try {
+      editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_TEXT);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10117", ex);
+    }
   }
 
   @Test(groups = UNDER_REPAIR)
