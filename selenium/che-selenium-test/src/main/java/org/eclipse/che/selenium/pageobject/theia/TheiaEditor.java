@@ -47,7 +47,7 @@ public class TheiaEditor {
     String EDITOR_LINE_XPATH =
         "//div[@data-mode-id='plaintext']//span[@class='mtk1']/parent::span/parent::div";
     String ACTIVE_LINE_XPATH =
-        "//div[@data-mode-id='plaintext']//div[contains(@class, 'monaco-editor') and contains(@class, 'focused')]";
+        "//div[contains(@class, 'monaco-scrollable-element')]//div[contains(@class, 'monaco-editor-background')]//div[contains(@class, 'focused')]";
     String EDITOR_LINE_BY_INDEX_XPATH_TEMPLATE = "(" + EDITOR_LINE_XPATH + ")[%s]";
     String EDITOR_LINE_BY_PIXEL_COORDINATES_XPATH_TEMPLATE =
         "//div[@data-mode-id='plaintext']//div[contains(@style, 'top:%spx;')]//span[@class='mtk1']/parent::span/parent::div";

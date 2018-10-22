@@ -176,6 +176,8 @@ public class TheiaBuildPluginTest {
     waitDevelopmentHostTitle();
 
     theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectAreaOpened();
+    theiaProjectTree.waitOpenWorkspaceButton();
 
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitSearchField();
@@ -185,6 +187,11 @@ public class TheiaBuildPluginTest {
     theiaIde.waitNotificationDisappearance(EXPECTED_HELLO_WORLD_NOTIFICATION);
 
     switchToParentWindow(parentWindow);
+
+    theiaProjectTree.waitProjectAreaOpened();
+    theiaProjectTree.waitItem(PROJECT_NAME);
+    theiaProjectTree.expandPathAndOpenFile(
+        PROJECT_NAME + "/ui/lib", "hello-world-backend-plugin.js");
   }
 
   private void waitNewBrowserWindowAndSwitchToParent(String parentWindowHandle) {
