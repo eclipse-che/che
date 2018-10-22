@@ -111,13 +111,19 @@ public class PhpAssistantFeaturesTest {
     editor.waitTextIntoEditor(EXPECTED_ORIGINAL_TEXT);
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void hoverShouldBeDisplayedWithExpectedText() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
 
     editor.moveCursorToText(TEXT_FOR_HOVERING);
-    editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_POPUP_TEXT);
+
+    try {
+      editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_POPUP_TEXT);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   @Test(groups = UNDER_REPAIR)

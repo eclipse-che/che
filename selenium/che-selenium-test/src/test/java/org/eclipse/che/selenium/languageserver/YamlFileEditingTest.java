@@ -192,11 +192,17 @@ public class YamlFileEditingTest {
         "Kind is a string value representing the REST resource this object represents.");
 
     editor.moveCursorToText("apiVersion:");
-    editor.waitTextInHoverPopUpEqualsTo(
-        "APIVersion defines the versioned schema of this representation of an object. "
-            + "Servers should convert recognized schemas to the latest internal value, "
-            + "and may reject unrecognized values. More info: "
-            + "http://releases\\.k8s\\.io/HEAD/docs/devel/api\\-conventions\\.md\\#resources");
+
+    try {
+      editor.waitTextInHoverPopUpEqualsTo(
+          "APIVersion defines the versioned schema of this representation of an object. "
+              + "Servers should convert recognized schemas to the latest internal value, "
+              + "and may reject unrecognized values. More info: "
+              + "http://releases\\.k8s\\.io/HEAD/docs/devel/api\\-conventions\\.md\\#resources");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   @Test(priority = 1)
