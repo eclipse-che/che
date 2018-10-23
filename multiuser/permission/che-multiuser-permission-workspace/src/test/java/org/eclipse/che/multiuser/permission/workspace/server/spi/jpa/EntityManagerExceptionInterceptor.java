@@ -11,13 +11,18 @@
  */
 package org.eclipse.che.multiuser.permission.workspace.server.spi.jpa;
 
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import javax.persistence.EntityManager;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 public class EntityManagerExceptionInterceptor implements MethodInterceptor {
+  @Inject Provider<EntityManager> emf;
 
   @Override
   public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+    emf.get().getTransaction().setRollbackOnly();
     throw new RuntimeException("Database exception");
   }
 }
