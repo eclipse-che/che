@@ -41,7 +41,11 @@ public class StackDetails {
   @FindBy(name = Locators.NEW_STACK_NAME)
   WebElement stackNameField;
 
-  public void waitToolbar(String stackName) {
+  public void waitToolbar() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath("//*[@name='stackForm']"));
+  }
+
+  public void waitToolbarWithStackName(String stackName) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(format(Locators.TOOLBAR_XPATH_PATTERN, stackName)));
   }
