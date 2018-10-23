@@ -99,7 +99,6 @@
           <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolderTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSparseCheckoutTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.EditFilesWithTabsTest"/>
-          <class name="org.eclipse.che.selenium.filewatcher.RefactoringFeatureTest"/>
           <class name="org.eclipse.che.selenium.filewatcher.RemoveFilesWithActiveTabs"/>
           <class name="org.eclipse.che.selenium.filewatcher.UpdateFilesWithoutIDE"/>
           <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
@@ -140,7 +139,6 @@
           <class name="org.eclipse.che.selenium.miscellaneous.CheckMacrosFeatureTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.CheckRestoringWorkspaceAfterStoppingWsAgentProcessTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.ConvertToProjectFromConfigurationTest"/>
-          <class name="org.eclipse.che.selenium.miscellaneous.ConvertToMavenProjectTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.DialogAboutTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.FileStructureBaseOperationTest"/>
           <class name="org.eclipse.che.selenium.miscellaneous.FileStructureByKeyboardTest"/>
