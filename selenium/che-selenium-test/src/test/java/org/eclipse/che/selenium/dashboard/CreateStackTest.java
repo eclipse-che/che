@@ -109,6 +109,11 @@ public class CreateStackTest {
 
   @Test(groups = {TestGroup.OPENSHIFT})
   public void createStackFromKubernetesRecipe() {
+    createStack("kubernetes", KUBERNETES_RECIPE);
+  }
+
+  @Test(groups = {TestGroup.OPENSHIFT})
+  public void createStackFromOpenshiftRecipe() {
     createStack("openshift", KUBERNETES_RECIPE);
   }
 
