@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.pageobject.dashboard.stacks;
 import static java.lang.String.format;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -24,6 +25,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+@Singleton
 public class Stacks {
   private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;

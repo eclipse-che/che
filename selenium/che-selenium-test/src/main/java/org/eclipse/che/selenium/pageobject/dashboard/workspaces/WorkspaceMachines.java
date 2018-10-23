@@ -19,6 +19,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
@@ -27,6 +28,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+@Singleton
 public class WorkspaceMachines {
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
