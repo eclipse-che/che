@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.Refactor.Locators.ERROR_CONTAINER_OF_COMPILATION_FORM;
@@ -45,14 +46,13 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentI
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -64,6 +64,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class Refactor {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Loader loader;
   private final WebDriverWait redrawUiElementWait;
   private final WebDriverWait loadPageWait;
@@ -74,10 +75,12 @@ public class Refactor {
   @Inject
   public Refactor(
       SeleniumWebDriver seleniumWebDriver,
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
       Loader loader,
       ProjectExplorer projectExplorer,
       NotificationsPopupPanel notifications) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
     this.redrawUiElementWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
@@ -245,12 +248,7 @@ public class Refactor {
 
   /** wait the 'Rename Method' form is closed */
   public void waitRenameMethodFormIsClosed() {
-    try {
-      elementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_METHOD_FORM)));
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
-    }
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(RENAME_METHOD_FORM), LOADER_TIMEOUT_SEC);
   }
 
   /** wait the 'Rename Field' form is open */
