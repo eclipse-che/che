@@ -155,6 +155,7 @@ public class JavaDocPopupTest {
     editor.typeTextIntoEditor(Keys.CONTROL.toString());
 
     // Class constructor name javadoc popup
+    editor.waitActive();
     editor.setCursorToLine(24);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("public AppController() {}");
@@ -169,6 +170,7 @@ public class JavaDocPopupTest {
     editor.typeTextIntoEditor(Keys.CONTROL.toString());
 
     createClass("TestClass", PATH_TO_FILES);
+    editor.waitActive();
     editor.setCursorToLine(2);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("/**");
@@ -179,6 +181,7 @@ public class JavaDocPopupTest {
     editor.typeTextIntoEditor("<script>alert('Hello')</script>");
     editor.closeAllTabsByContextMenu();
     projectExplorer.openItemByPath(PATH_TO_FILES + "/AppController.java");
+    editor.waitActive();
     editor.setCursorToLine(24);
     editor.typeTextIntoEditor(Keys.END.toString());
     editor.typeTextIntoEditor(Keys.ENTER.toString());
