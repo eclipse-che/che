@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
@@ -20,6 +21,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
+@Singleton
 public class BuildStackFromRecipe {
 
   private final SeleniumWebDriver seleniumWebDriver;
