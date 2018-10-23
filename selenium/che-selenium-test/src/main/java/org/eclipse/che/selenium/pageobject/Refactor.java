@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.Refactor.Locators.ERROR_CONTAINER_OF_COMPILATION_FORM;
 import static org.eclipse.che.selenium.pageobject.Refactor.Locators.EXPAND_ITEM_ICON;
 import static org.eclipse.che.selenium.pageobject.Refactor.Locators.FLAG_ITEM;
@@ -68,6 +69,7 @@ public class Refactor {
   private final WebDriverWait redrawUiElementWait;
   private final WebDriverWait loadPageWait;
   private final WebDriverWait elementWait;
+  private final WebDriverWait widgetTimeout;
   private final ProjectExplorer projectExplorer;
   private final NotificationsPopupPanel notifications;
 
@@ -82,6 +84,7 @@ public class Refactor {
     this.redrawUiElementWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     this.loadPageWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     this.elementWait = new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC);
+    this.widgetTimeout = new WebDriverWait(seleniumWebDriver, WIDGET_TIMEOUT_SEC);
     this.projectExplorer = projectExplorer;
     this.notifications = notifications;
     PageFactory.initElements(seleniumWebDriver, this);
@@ -246,7 +249,7 @@ public class Refactor {
   /** wait the 'Rename Method' form is closed */
   public void waitRenameMethodFormIsClosed() {
     try {
-      elementWait.until(invisibilityOfElementLocated(By.xpath(RENAME_METHOD_FORM)));
+      widgetTimeout.until(invisibilityOfElementLocated(By.xpath(RENAME_METHOD_FORM)));
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
