@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
+import org.eclipse.che.security.oauth.SecurityTokenProvider;
 
 /**
  * Main appointment of this class is upload private SSH key to the server.
@@ -32,6 +33,7 @@ import org.eclipse.che.plugin.ssh.key.client.SshKeyLocalizationConstant;
 @Singleton
 public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
   private UploadSshKeyView view;
+  private SecurityTokenProvider securityTokenProvider;
   private SshKeyLocalizationConstant constant;
   private String restContext;
   private NotificationManager notificationManager;
@@ -43,8 +45,10 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
       UploadSshKeyView view,
       SshKeyLocalizationConstant constant,
       AppContext appContext,
-      NotificationManager notificationManager) {
+      NotificationManager notificationManager,
+      SecurityTokenProvider securityTokenProvider) {
     this.view = view;
+    this.securityTokenProvider = securityTokenProvider;
     this.view.setDelegate(this);
     this.constant = constant;
     this.restContext = appContext.getMasterApiEndpoint();
@@ -77,7 +81,6 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
     }
     view.setEncoding(FormPanel.ENCODING_MULTIPART);
 
-    String action = restContext + "/ssh";
     StringBuilder queryParametersBuilder = new StringBuilder();
 
     String csrfToken = appContext.getProperties().get("X-CSRF-Token");
@@ -85,18 +88,23 @@ public class UploadSshKeyPresenter implements UploadSshKeyView.ActionDelegate {
       queryParametersBuilder.append("&X-CSRF-Token=").append(csrfToken);
     }
 
-    String machineToken = appContext.getWorkspace().getRuntime().getMachineToken();
-    if (!isNullOrEmpty(machineToken)) {
-      queryParametersBuilder.append("&token=").append(machineToken);
-    }
+    securityTokenProvider
+        .getSecurityToken()
+        .then(
+            token -> {
+              String action = restContext + "/ssh";
+              if (!isNullOrEmpty(token)) {
+                queryParametersBuilder.append("&token=").append(token);
+              }
 
-    String queryParameters = queryParametersBuilder.toString();
-    if (!isNullOrEmpty(queryParameters)) {
-      action += queryParameters.replaceFirst("&", "?");
-    }
+              String queryParameters = queryParametersBuilder.toString();
+              if (!isNullOrEmpty(queryParameters)) {
+                action += queryParameters.replaceFirst("&", "?");
+              }
 
-    view.setAction(action);
-    view.submit();
+              view.setAction(action);
+              view.submit();
+            });
   }
 
   /** {@inheritDoc} */
