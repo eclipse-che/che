@@ -55,6 +55,7 @@ try {
 }
 
 const depResolutions = listToResolutions(theiaResolutionsList);
+depResolutions["**/inversify"] = "4.13.0"; // Remove this when https://github.com/theia-ide/theia/issues/3204 fixed
 console.log(depResolutions);
 
 PACKAGE_JSON["resolutions"] = depResolutions;

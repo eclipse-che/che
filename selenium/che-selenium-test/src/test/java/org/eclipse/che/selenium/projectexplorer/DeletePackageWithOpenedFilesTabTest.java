@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -132,7 +133,13 @@ public class DeletePackageWithOpenedFilesTabTest {
 
   private void openJavaFile(String path, String fileName) {
     projectExplorer.openItemByPath(path);
-    editor.waitTabIsPresent(fileName);
+    try {
+      editor.waitTabIsPresent(fileName);
+    } catch (TimeoutException ex) {
+      projectExplorer.openItemByPath(path);
+      editor.waitTabIsPresent(fileName);
+    }
+
     editor.waitActive();
   }
 }

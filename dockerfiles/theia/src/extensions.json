@@ -25,7 +25,7 @@
             "name": "@eclipse-che/theia-factory-extension",
             "source": "https://github.com/eclipse/che-theia-factory-extension.git",
             "folder": "che-theia-factory",
-            "checkoutTo": "master",
+            "checkoutTo": "extension",
             "type": "git"
         },
         {

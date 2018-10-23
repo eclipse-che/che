@@ -64,7 +64,7 @@ public class TheiaBuildPluginTest {
   private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
-  private static final String EXPECTED_PLUGIN_OUTPUT = "Generated plugin: hello_world_plugin.theia";
+  private static final String EXPECTED_PLUGIN_OUTPUT = "hello_world_plugin.theia";
   private static final String EXPECTED_TERMINAL_OUTPUT =
       "Packaging of plugin\n"
           + "\uD83D\uDD0D Validating...✔️\n"
