@@ -120,7 +120,7 @@ public class CreateStackTest {
   private void createStack(String stackName, String recipe) {
     String name = generate(stackName, 5);
 
-    buildStackFromRecipe.selectTab(stackName);
+    buildStackFromRecipe.selectTabByName(stackName);
 
     // wait for editor to ready for typing after tab selection
     WaitUtils.sleepQuietly(1);

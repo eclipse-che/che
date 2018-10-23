@@ -14,28 +14,25 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.PageFactory;
 
 @Singleton
 public class BuildStackFromRecipe {
 
   private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
-  private final ActionsFactory actionsFactory;
 
   @Inject
   public BuildStackFromRecipe(
-      SeleniumWebDriver seleniumWebDriver,
-      SeleniumWebDriverHelper seleniumWebDriverHelper,
-      ActionsFactory actionsFactory) {
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
-    this.actionsFactory = actionsFactory;
+
+    PageFactory.initElements(seleniumWebDriver, this);
   }
 
   public interface Locators {
@@ -49,21 +46,22 @@ public class BuildStackFromRecipe {
         "//div[contains(@class, 'md-dialog-container ng-scope')]/md-dialog";
   }
 
-  @FindBy(xpath = Locators.EDITOR_XPATH)
-  WebElement editor;
-
-  public void selectTab(String tabName) {
+  public void selectTabByName(String tabName) {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(String.format(Locators.SELECT_TAB_XPATH, tabName)));
   }
 
   public void enterRecipe(String recipe) {
     WebElement element = seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.EDITOR_XPATH));
-    actionsFactory.createAction(seleniumWebDriver).moveToElement(element).click().perform();
-    actionsFactory.createAction(seleniumWebDriver).sendKeys(recipe).perform();
+    seleniumWebDriverHelper
+        .getAction(seleniumWebDriver)
+        .moveToElement(element)
+        .click()
+        .sendKeys(recipe)
+        .perform();
   }
 
-  public String getRecipe() {
+  public String getRecipeFromActiveTab() {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(Locators.EDITOR_XPATH));
   }
 
