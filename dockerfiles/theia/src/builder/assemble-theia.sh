@@ -24,4 +24,8 @@ ls ${HOME}/extensions
 echo ******************
 
 # Build Theia with all the extensions
-cd ${HOME} && yarn && yarn theia build
+cd ${HOME}
+echo "YARN"
+yarn
+echo "YARN BUILD"
+yarn theia build --mode development
