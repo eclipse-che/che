@@ -687,7 +687,7 @@ public class ProjectExplorer {
       } catch (TimeoutException e) {
         seleniumWebDriverHelper.hideContextMenu();
         waitContextMenuPopUpClosed();
-        if (i >= 2) {
+        if (i > 1) {
           final String errorMessage =
               format(
                   "Selection of the project tree item which located by \"%s\" has been lost, context menu event can't be performed for this element",
