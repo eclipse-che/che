@@ -44,6 +44,7 @@ public class BuildStackFromRecipe {
     String CLOSE_DIALOG_BUTTON_XPATH = "//md-dialog//i";
     String CREATE_STACK_DIALOG_FORM_XPATH =
         "//div[contains(@class, 'md-dialog-container ng-scope')]/md-dialog";
+    String ERROR_MESSAGE_XPATH = "//div[@ng-message='customValidator']";
   }
 
   public void selectTabByName(String tabName) {
@@ -96,7 +97,11 @@ public class BuildStackFromRecipe {
   }
 
   public void checkRecipeIsCorrect() {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath("//div[@ng-message='customValidator']"));
+    waitNoErrorMessage();
     waitOkButtonEnabled();
+  }
+
+  public void waitNoErrorMessage() {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(Locators.ERROR_MESSAGE_XPATH));
   }
 }
