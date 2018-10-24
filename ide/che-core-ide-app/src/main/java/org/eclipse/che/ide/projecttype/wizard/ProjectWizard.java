@@ -221,6 +221,7 @@ public class ProjectWizard extends AbstractWizard<MutableProjectConfig> {
 
         default:
           title = localizedConstant.projectWizardDefaultErrorTitle();
+          break;
       }
 
       Throwable throwable = error.getCause();
