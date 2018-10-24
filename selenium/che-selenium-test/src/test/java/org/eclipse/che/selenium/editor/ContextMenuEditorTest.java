@@ -24,6 +24,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocat
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.REFACTORING_RENAME;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.UNDO;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -39,9 +40,11 @@ import org.eclipse.che.selenium.pageobject.FileStructure;
 import org.eclipse.che.selenium.pageobject.FindText;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -120,6 +123,7 @@ public class ContextMenuEditorTest {
   @Inject private FileStructure fileStructure;
   @Inject private FindText findText;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -166,7 +170,7 @@ public class ContextMenuEditorTest {
     editor.waitContextMenuIsNotPresent();
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, alwaysRun = true)
   public void checkUndoRedo() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.scrollToItemByPath(
@@ -192,7 +196,7 @@ public class ContextMenuEditorTest {
     editor.waitContextMenuIsNotPresent();
   }
 
-  @Test(priority = 2)
+  @Test(priority = 2, alwaysRun = true)
   public void checkClose() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.scrollToItemByPath(
@@ -208,7 +212,7 @@ public class ContextMenuEditorTest {
     editor.waitTabIsNotPresent("AppController");
   }
 
-  @Test(priority = 3)
+  @Test(priority = 3, alwaysRun = true)
   public void checkQuickDocumentation() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
@@ -225,7 +229,7 @@ public class ContextMenuEditorTest {
     editor.waitJavaDocPopUpClosed();
   }
 
-  @Test(priority = 4)
+  @Test(priority = 4, alwaysRun = true)
   public void checkQuickFix() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
@@ -246,7 +250,7 @@ public class ContextMenuEditorTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
   }
 
-  @Test(priority = 5)
+  @Test(priority = 5, alwaysRun = true)
   public void checkOpenDeclaration() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
@@ -259,7 +263,7 @@ public class ContextMenuEditorTest {
     editor.closeFileByNameWithSaving("ModelAndView.class");
   }
 
-  @Test(priority = 6)
+  @Test(priority = 6, alwaysRun = true)
   public void checkRefactoring() {
     final String editorTabName = "Test1";
     final String renamedEditorTabName = "Zclass";
@@ -280,7 +284,13 @@ public class ContextMenuEditorTest {
     refactor.clickOkButtonRefactorForm();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
-    editor.waitTabIsPresent(editorTabName);
+    try {
+      editor.waitTabIsPresent(editorTabName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11697");
+    }
+
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Test1.java");
     editor.goToCursorPositionVisible(14, 15);
     editor.openContextMenuOnElementInEditor(editorTabName);
@@ -295,7 +305,7 @@ public class ContextMenuEditorTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Zclass.java");
   }
 
-  @Test(priority = 7)
+  @Test(priority = 7, alwaysRun = true)
   public void checkNaviFileStructure() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
@@ -318,7 +328,7 @@ public class ContextMenuEditorTest {
     editor.waitSpecifiedValueForLineAndChar(26, 25);
   }
 
-  @Test(priority = 8)
+  @Test(priority = 8, alwaysRun = true)
   public void checkFind() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(

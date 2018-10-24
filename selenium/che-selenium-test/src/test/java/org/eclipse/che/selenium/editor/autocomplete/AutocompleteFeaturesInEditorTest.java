@@ -33,8 +33,7 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class AutocompleteFeaturesInEditorTest {
-  private static final String PROJECT_NAME =
-      NameGenerator.generate(AutocompleteFeaturesInEditorTest.class.getSimpleName(), 4);
+  private static final String PROJECT_NAME = NameGenerator.generate("TestProject", 4);
   private static final String[] autocompleteContentAfterFirst = {
     "request : HttpServletRequest",
     "response : HttpServletResponse",
