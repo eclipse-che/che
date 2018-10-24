@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.13.0</version>
+        <version>6.13.1-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-ide-war</artifactId>
     <packaging>war</packaging>
