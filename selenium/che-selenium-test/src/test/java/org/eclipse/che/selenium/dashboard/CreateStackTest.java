@@ -85,11 +85,14 @@ public class CreateStackTest {
     stacks.waitToolbarTitleName();
 
     stacks.selectAllStacksByBulk();
-    stacks.clickOnDeleteStackButton();
-    stacks.clickOnDeleteDialogButton();
 
-    dashboard.waitNotificationMessage("Selected stacks have been successfully removed.");
-    dashboard.waitNotificationIsClosed();
+    if (stacks.isDeleteStackButtonEnabled()) {
+      stacks.clickOnDeleteStackButton();
+      stacks.clickOnDeleteDialogButton();
+
+      dashboard.waitNotificationMessage("Selected stacks have been successfully removed.");
+      dashboard.waitNotificationIsClosed();
+    }
   }
 
   @Test(groups = {TestGroup.DOCKER})
@@ -122,7 +125,7 @@ public class CreateStackTest {
 
     buildStackFromRecipe.selectTabByName(stackName);
 
-    // wait for editor to ready for typing after tab selection
+    // wait for editor to be active for typing after tab selection
     WaitUtils.sleepQuietly(1);
     buildStackFromRecipe.enterRecipe(recipe);
 
