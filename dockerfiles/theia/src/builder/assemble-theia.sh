@@ -28,4 +28,4 @@ cd ${HOME}
 echo "YARN"
 yarn
 echo "YARN BUILD"
-yarn theia build --mode development
+yarn theia build
