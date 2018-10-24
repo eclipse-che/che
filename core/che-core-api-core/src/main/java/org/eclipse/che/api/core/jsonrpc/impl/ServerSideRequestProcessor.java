@@ -42,7 +42,7 @@ public class ServerSideRequestProcessor implements RequestProcessor {
   public ServerSideRequestProcessor(
       @Named("che.core.jsonrpc.processor_max_pool_size") int maxPoolSize) {
     this.maxPoolSize = maxPoolSize;
-    LOG.info(" che.core.jsonrpc.processor_max_pool_siz {}  ", maxPoolSize);
+    LOG.debug("che.core.jsonrpc.processor_max_pool_size {}  ", maxPoolSize);
   }
 
   @PostConstruct
@@ -59,7 +59,7 @@ public class ServerSideRequestProcessor implements RequestProcessor {
             0, maxPoolSize, 60L, TimeUnit.SECONDS, new SynchronousQueue<>(), factory);
     ((ThreadPoolExecutor) executorService)
         .setRejectedExecutionHandler(
-            (r, executor) -> LOG.warn("Message {} rejected for execution in {}", r, executor));
+            (r, executor) -> LOG.warn("Message {} rejected for execution", r));
   }
 
   @PreDestroy

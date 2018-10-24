@@ -58,7 +58,6 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions>
   }
 
   @Override
-  @Transactional
   public boolean exists(String userId, String instanceId, String action) throws ServerException {
     requireNonNull(userId, "User identifier required");
     requireNonNull(action, "Action name required");
@@ -97,7 +96,8 @@ public abstract class AbstractJpaPermissionsDao<T extends AbstractPermissions>
    * Parameters {@code userId} and {@code instanceId} are the same to {@link #get(String, String)}
    * method parameters.
    */
-  protected abstract T getEntity(String userId, String instanceId) throws NotFoundException;
+  protected abstract T getEntity(String userId, String instanceId)
+      throws NotFoundException, ServerException;
 
   @Transactional
   protected Optional<T> doCreate(T permissions) throws ServerException {

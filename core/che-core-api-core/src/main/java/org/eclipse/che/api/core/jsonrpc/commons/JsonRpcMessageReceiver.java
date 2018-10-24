@@ -70,7 +70,7 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     List<String> messages = jsonRpcUnmarshaller.unmarshalArray(message);
     for (String innerMessage : messages) {
       if (jsonRpcQualifier.isJsonRpcRequest(innerMessage)) {
-        requestProcessor.process(() -> processRequest(endpointId, innerMessage));
+        requestProcessor.process(new ProcessRequestTask(endpointId, innerMessage));
       } else if (jsonRpcQualifier.isJsonRpcResponse(innerMessage)) {
         processResponse(endpointId, innerMessage);
       } else {
@@ -91,18 +91,35 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     responseDispatcher.dispatch(endpointId, response);
   }
 
-  private void processRequest(String endpointId, String innerMessage) {
-    JsonRpcRequest request = null;
-    try {
-      request = jsonRpcUnmarshaller.unmarshalRequest(innerMessage);
-      requestDispatcher.dispatch(endpointId, request);
-    } catch (JsonRpcException e) {
-      if (request == null || request.getId() == null) {
-        errorTransmitter.transmit(endpointId, e);
-      } else {
-        errorTransmitter.transmit(
-            endpointId, new JsonRpcException(e.getCode(), e.getMessage(), request.getId()));
+  private class ProcessRequestTask implements Runnable {
+
+    private final String endpointId;
+    private final String innerMessage;
+
+    public ProcessRequestTask(String endpointId, String innerMessage) {
+      this.endpointId = endpointId;
+      this.innerMessage = innerMessage;
+    }
+
+    @Override
+    public void run() {
+      JsonRpcRequest request = null;
+      try {
+        request = jsonRpcUnmarshaller.unmarshalRequest(innerMessage);
+        requestDispatcher.dispatch(endpointId, request);
+      } catch (JsonRpcException e) {
+        if (request == null || request.getId() == null) {
+          errorTransmitter.transmit(endpointId, e);
+        } else {
+          errorTransmitter.transmit(
+              endpointId, new JsonRpcException(e.getCode(), e.getMessage(), request.getId()));
+        }
       }
+    }
+
+    @Override
+    public String toString() {
+      return "JsonRPC request `" + innerMessage + "` for " + endpointId;
     }
   }
 }
