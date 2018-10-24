@@ -18,7 +18,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/eclipse/che-lib/websocket"
+	"github.com/gorilla/websocket"
 )
 
 // readWriteRoutingFinalizer helps to close connection in concurrent environment corectly

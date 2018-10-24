@@ -15,7 +15,7 @@ package jsonrpctest
 import (
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc"
 )
 
 // NewTmpTunnel creates a new running jsonrpc.Tunnel based on test connection

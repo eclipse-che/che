@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc"
 )
 
 // ConnRecorder is a fake connection which records all writes

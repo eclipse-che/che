@@ -12,14 +12,19 @@ func open() (pty, tty *os.File, err error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	// In case of error after this point, make sure we close the ptmx fd.
+	defer func() {
+		if err != nil {
+			_ = p.Close() // Best effort.
+		}
+	}()
 
 	sname, err := ptsname(p)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	err = unlockpt(p)
-	if err != nil {
+	if err := unlockpt(p); err != nil {
 		return nil, nil, err
 	}
 
@@ -43,11 +48,4 @@ func unlockpt(f *os.File) error {
 	var u _C_int
 	// use TIOCSPTLCK with a zero valued arg to clear the slave pty lock
 	return ioctl(f.Fd(), syscall.TIOCSPTLCK, uintptr(unsafe.Pointer(&u)))
-}
-
-func setsize(f *os.File, rows uint16, cols uint16) error {
-	var ws winsize
-	ws.ws_row = rows
-	ws.ws_col = cols
-	return ioctl(f.Fd(), syscall.TIOCSWINSZ, uintptr(unsafe.Pointer(&ws)))
 }
