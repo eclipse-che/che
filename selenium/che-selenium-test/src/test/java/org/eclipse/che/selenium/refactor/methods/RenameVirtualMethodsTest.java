@@ -163,7 +163,13 @@ public class RenameVirtualMethodsTest {
     // need for validation on server side
     WaitUtils.sleepQuietly(2);
     refactor.clickOkButtonRefactorForm();
-    refactor.waitRenameMethodFormIsClosed();
+
+    try {
+      refactor.waitRenameMethodFormIsClosed();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
+    }
   }
 
   private void doRefactorByWizardWithClosingWarnMess(
@@ -176,7 +182,13 @@ public class RenameVirtualMethodsTest {
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
-    refactor.waitRenameMethodFormIsClosed();
+
+    try {
+      refactor.waitRenameMethodFormIsClosed();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
+    }
   }
 
   private void prepareProjectForRefactor(int cursorPositionLine, int cursorPositionChar) {
