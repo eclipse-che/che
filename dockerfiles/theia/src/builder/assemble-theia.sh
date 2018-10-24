@@ -19,5 +19,9 @@ cd ${HOME}/verdaccio
 verdaccio &
 sleep 3
 
+echo ******************
+ls ${HOME}/extensions
+echo ******************
+
 # Build Theia with all the extensions
 cd ${HOME} && yarn && yarn theia build
