@@ -124,8 +124,8 @@ public class MoveItemsTest {
     refactor.clickOnExpandIconTree("/src/main/java");
     refactor.chooseDestinationForItem("p1");
     refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
+    loader.waitOnClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A0.java");
     editor.waitTextIntoEditor(contentFromOutA);
@@ -145,8 +145,8 @@ public class MoveItemsTest {
     refactor.clickOnExpandIconTree("/src/main/java");
     refactor.chooseDestinationForItem("p1");
     refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
+    loader.waitOnClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A1.java");
     editor.waitTextIntoEditor(contentFromOutA);
@@ -176,7 +176,6 @@ public class MoveItemsTest {
     refactor.clickOnExpandIconTree("/src/main/java");
     refactor.chooseDestinationForItem("p1");
     refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
@@ -189,6 +188,29 @@ public class MoveItemsTest {
 
   @Test
   public void checkMoveItem3() throws Exception {
+    setFieldsForTest("test5");
+    projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A5.java");
+    editor.waitActive();
+    editor.waitTextIntoEditor(contentFromInA);
+    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A5.java");
+    projectExplorer.launchRefactorMoveByKeyboard();
+    refactor.waitMoveItemFormIsOpen();
+    refactor.clickOnExpandIconTree(PROJECT_NAME);
+    refactor.clickOnExpandIconTree("/src/main/java");
+    refactor.chooseDestinationForItem("r");
+    refactor.waitTextInErrorMessage("A file or folder cannot be moved to its own parent.");
+    refactor.chooseDestinationForItem("r.r");
+    refactor.clickOkButtonRefactorForm();
+    refactor.waitMoveItemFormIsClosed();
+    loader.waitOnClosed();
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
+    projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/r/A5.java");
+    editor.waitTextIntoEditor(contentFromOutA);
+    projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A5.java");
+  }
+
+  @Test
+  public void checkMoveItem5() throws Exception {
     setFieldsForTest("test3");
     setFieldsForTestB("test3");
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/r/A3.java");
@@ -204,7 +226,6 @@ public class MoveItemsTest {
     refactor.clickOnExpandIconTree("/src/main/java");
     refactor.chooseDestinationForItem("p1");
     refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
@@ -212,29 +233,6 @@ public class MoveItemsTest {
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A3.java");
     editor.waitTextIntoEditor(contentFromOutA);
     projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/r/A3.java");
-  }
-
-  @Test
-  public void checkMoveItem5() throws Exception {
-    setFieldsForTest("test5");
-    projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/A5.java");
-    editor.waitActive();
-    editor.waitTextIntoEditor(contentFromInA);
-    projectExplorer.waitAndSelectItem(pathToPackageInChePrefix + "/r/A5.java");
-    projectExplorer.launchRefactorMoveByKeyboard();
-    refactor.waitMoveItemFormIsOpen();
-    refactor.clickOnExpandIconTree(PROJECT_NAME);
-    refactor.clickOnExpandIconTree("/src/main/java");
-    refactor.chooseDestinationForItem("r");
-    refactor.waitTextInErrorMessage("A file or folder cannot be moved to its own parent.");
-    refactor.chooseDestinationForItem("r.r");
-    refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
-    refactor.waitMoveItemFormIsClosed();
-    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
-    projectExplorer.openItemByPath(pathToPackageInChePrefix + "/r/r/A5.java");
-    editor.waitTextIntoEditor(contentFromOutA);
-    projectExplorer.waitDisappearItemByPath(pathToPackageInChePrefix + "/r/A5.java");
   }
 
   @Test
@@ -250,8 +248,8 @@ public class MoveItemsTest {
     refactor.clickOnExpandIconTree("/src/main/java");
     refactor.chooseDestinationForItem("p1");
     refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
+    loader.waitOnClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A6.java");
     editor.waitTextIntoEditor(contentFromOutA);
@@ -276,8 +274,8 @@ public class MoveItemsTest {
     refactor.chooseDestinationForItem("(default package)");
     refactor.waitTextInMoveForm("Java references will not be updated.");
     refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
+    loader.waitOnClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/A7.java");
     editor.waitTextIntoEditor(contentFromOutA);
@@ -297,8 +295,8 @@ public class MoveItemsTest {
     refactor.clickOnExpandIconTree("/src/main/java");
     refactor.chooseDestinationForItem("p1");
     refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
+    loader.waitOnClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/Klass.java");
     editor.waitTextIntoEditor(contentFromOutA);
@@ -319,8 +317,8 @@ public class MoveItemsTest {
     refactor.clickOnExpandIconTree("/src/main/java");
     refactor.chooseDestinationForItem("p1");
     refactor.clickOkButtonRefactorForm();
-    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
+    loader.waitOnClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     projectExplorer.openItemByPath(pathToPackageInChePrefix + "/p1/A9.java");
     editor.waitTextIntoEditor(contentFromOutA);

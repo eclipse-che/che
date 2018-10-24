@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.refactor.packages;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -27,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -158,12 +161,12 @@ public class RenamePackageTest {
           + "}\n";
 
   private static String TEST10_HIERAR_OUT =
-      "package your.pack;\n"
+      "package yo_ur.pack;\n"
           + "\n"
           + "public class C {\n"
           + "/*\n"
-          + "your.pack\n"
-          + "your.pack.subpack\n"
+          + "yo_ur.pack\n"
+          + "yo_ur.pack.subpack\n"
           + "m_y.pack2\n"
           + "m_y.pack2.subpack\n"
           + "not.m_y.pack.subpack\n"
@@ -373,6 +376,14 @@ public class RenamePackageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/main");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/main/Textfile.txt");
     editor.waitTextIntoEditor(TEST12_RENAME_WITH_RESOURCE_OUT);
+
+    try {
+      projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/src/main/java/mine");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11713");
+    }
+
     editor.closeFileByNameWithSaving("Textfile.txt");
   }
 
@@ -567,6 +578,7 @@ public class RenamePackageTest {
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/your");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/your/MyA.java");
     editor.waitTextIntoEditor(TEST9_HIERAR_OUT);
+    projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/src/main/java/my");
     editor.closeFileByNameWithSaving("MyA");
   }
 
@@ -585,14 +597,22 @@ public class RenamePackageTest {
     refactor.setAndWaitStateUpdateNonJavaFilesCheckbox(false);
     refactor.setAndWaitStateCommentsAndStringsCheckbox(true);
     loader.waitOnClosed();
-    refactor.clearFieldAndSendKeys("your.pack");
-    refactor.waitTextIntoNewNameField("your.pack");
+    refactor.clearFieldAndSendKeys("yo_ur.pack");
+    refactor.waitTextIntoNewNameField("yo_ur.pack");
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
     refactor.waitRenamePackageFormIsClosed();
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/your/pack");
+    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/yo_ur/pack");
     editor.waitTextIntoEditor(TEST10_HIERAR_OUT);
+
+    try {
+      projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/src/main/java/m_y");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11713");
+    }
+
     editor.closeFileByNameWithSaving("C");
   }
 
@@ -621,6 +641,14 @@ public class RenamePackageTest {
     refactor.waitRenamePackageFormIsClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/your_/pack");
     editor.waitTextIntoEditor(TEST11_DISABLED_IMPORT_OUT);
+
+    try {
+      projectExplorer.waitDisappearItemByPath(PROJECT_NAME + "/src/main/java/my_");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11713");
+    }
+
     editor.closeFileByNameWithSaving("C");
   }
 
