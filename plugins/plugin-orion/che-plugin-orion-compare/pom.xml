@@ -47,6 +47,10 @@
             <artifactId>gin</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-ide-ui</artifactId>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
