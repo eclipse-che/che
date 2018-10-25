@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -24,6 +26,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -162,8 +165,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   private void checkJavadoc() {
     final String tabTitle = "AppTest";
     final String expectedTextInJavaDoc =
-        "The String class represents character strings. "
-            + "All string literals in Java programs, such as \"abc\", are implemented as instances of this class.";
+        "The class String includes methods for examining individual characters of the sequence, for comparing strings, for searching strings, for extracting substrings, and for creating a copy of a string with all characters translated to uppercase or to lowercase.";
 
     editor.waitTabIsPresent(tabTitle);
     editor.selectTabByName(tabTitle);
@@ -171,6 +173,13 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
     editor.waitActive();
     editor.goToCursorPositionVisible(29, 21);
     editor.openJavaDocPopUp();
+    try {
+      editor.waitJavaDocPopUpOpened();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11735", ex);
+    }
+
     editor.checkTextToBePresentInJavaDocPopUp(expectedTextInJavaDoc);
   }
 }
