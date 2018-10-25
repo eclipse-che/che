@@ -77,7 +77,6 @@ import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -92,7 +91,6 @@ import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -518,12 +516,7 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.waitVisibility(hoverPopup);
 
     // waits until text in popup is equals to specified
-    try {
-      seleniumWebDriverHelper.waitTextEqualsTo(hoverPopup, expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10117", ex);
-    }
+    seleniumWebDriverHelper.waitTextEqualsTo(hoverPopup, expectedText);
   }
 
   public void waitHoverPopupAppearance() {
