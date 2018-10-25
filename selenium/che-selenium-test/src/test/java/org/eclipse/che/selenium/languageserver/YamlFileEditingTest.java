@@ -25,6 +25,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.Preferences.DropDownLanguageServerSettings.YAML;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -43,6 +44,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -176,11 +178,21 @@ public class YamlFileEditingTest {
 
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("namespace:");
-    editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
+    try {
+      editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
 
     editor.moveCursorToText("kind:");
-    editor.waitTextInHoverPopup(
-        "Kind is a string value representing the REST resource this object represents.");
+    try {
+      editor.waitTextInHoverPopup(
+          "Kind is a string value representing the REST resource this object represents.");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
 
     editor.moveCursorToText("apiVersion:");
     editor.waitTextInHoverPopUpEqualsTo(
@@ -199,14 +211,25 @@ public class YamlFileEditingTest {
     editor.typeTextIntoEditor("a");
     editor.waitTextElementsActiveLine("aapiVersion: v1");
     editor.moveCursorToText("aapiVersion");
-    editor.waitTextInHoverPopup("Unexpected property aapiVersion");
+    try {
+      editor.waitTextInHoverPopup("Unexpected property aapiVersion");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
 
     editor.goToPosition(13, 1);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
     editor.moveCursorToText("apiVersion");
-    editor.waitTextInHoverPopup(
-        "APIVersion defines the versioned schema of this representation of an object.");
+
+    try {
+      editor.waitTextInHoverPopup(
+          "APIVersion defines the versioned schema of this representation of an object.");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   @Test(priority = 1)
