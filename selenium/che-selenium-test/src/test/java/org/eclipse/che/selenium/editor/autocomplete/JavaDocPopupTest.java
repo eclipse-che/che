@@ -114,12 +114,16 @@ public class JavaDocPopupTest {
 
   @Test
   public void javaDocPopupTest() throws Exception {
+    final String tabTitle = "AppController";
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(PATH_TO_FILES + "/AppController.java");
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
+    editor.waitTabIsPresent(tabTitle);
+    editor.waitActive();
     loader.waitOnClosed();
     // Class javadoc popup
     editor.goToCursorPositionVisible(26, 105);
@@ -128,7 +132,7 @@ public class JavaDocPopupTest {
     editor.waitJavaDocPopUpOpened();
     editor.checkTextToBePresentInJavaDocPopUp(CLASS_TEXT);
 
-    editor.selectTabByName("AppController");
+    editor.selectTabByName(tabTitle);
     editor.waitJavaDocPopUpClosed();
 
     // Annotation javadoc popup
