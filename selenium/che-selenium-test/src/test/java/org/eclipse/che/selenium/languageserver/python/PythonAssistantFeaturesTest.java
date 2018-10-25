@@ -112,7 +112,7 @@ public class PythonAssistantFeaturesTest {
     editor.waitTabIsPresent(MAIN_TAB_NAME);
     editor.waitActive();
 
-    editor.goToCursorPositionVisible(18, 11);
+    editor.moveCursorToText("function");
     editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_TEXT);
   }
 
