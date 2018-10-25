@@ -50,6 +50,7 @@
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateFactoryTest"/>
           <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.CreateStackTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.AddOrImportProjectFormTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.NewWorkspacePageTest"/>
           <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>

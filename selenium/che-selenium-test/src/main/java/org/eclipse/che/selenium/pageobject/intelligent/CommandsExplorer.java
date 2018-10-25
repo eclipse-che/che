@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsCons
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.DEPLOY_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.TEST_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 
@@ -194,7 +195,7 @@ public class CommandsExplorer {
   }
 
   public void waitCommandInExplorerByName(String commandName) {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until(
             ExpectedConditions.visibilityOfElementLocated(
                 By.xpath("//div[@id='gwt-debug-navPanel']//div[text()='" + commandName + "']")));

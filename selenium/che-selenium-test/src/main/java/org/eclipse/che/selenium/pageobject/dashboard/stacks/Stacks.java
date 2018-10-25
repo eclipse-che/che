@@ -167,6 +167,10 @@ public class Stacks {
     WaitUtils.sleepQuietly(1);
   }
 
+  public Boolean isDeleteStackButtonEnabled() {
+    return seleniumWebDriverHelper.isVisible(deleteStackButton);
+  }
+
   public void clickOnDeleteStackButton() {
     seleniumWebDriverHelper.waitAndClick(deleteStackButton);
   }

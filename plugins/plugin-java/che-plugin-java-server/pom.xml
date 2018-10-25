@@ -137,7 +137,7 @@
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-languageserver</artifactId>
-                        <version>${che.version}</version>
+                        <version>${project.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.che.ls.jdt</groupId>
