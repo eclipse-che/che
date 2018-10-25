@@ -48,6 +48,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_F
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_LINES;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.SELECTED_ITEM_IN_EDITOR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.SIGNATURES_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_CONTEXT_MENU_BODY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_CLOSE_ICON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_NAME_AND_STYLE;
@@ -207,6 +208,7 @@ public class CodenvyEditor {
     String FOCUSED_TAB_XPATH_TEMPLATE =
         "//div[@id='gwt-debug-editor-tab-title' and text()='%s']"
             + "//parent::div[@id='gwt-debug-editor-tab' and @focused]";
+    String SIGNATURES_CONTAINER = "//div[text()='Signatures:']//following::div/ulist";
   }
 
   public enum TabActionLocator {
@@ -341,6 +343,9 @@ public class CodenvyEditor {
 
   @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
   private WebElement languageServerRenameField;
+
+  @FindBy(xpath = SIGNATURES_CONTAINER)
+  private WebElement signaturesContainer;
 
   /**
    * Waits until specified {@code editorTab} is presented, selected, focused and editor activated.
@@ -2350,4 +2355,36 @@ public class CodenvyEditor {
     seleniumWebDriverHelper.setValue(languageServerRenameField, renameValue);
     seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
   }
+
+  public void waitSignaturesContainer() {
+    seleniumWebDriverHelper.waitVisibility(signaturesContainer, ELEMENT_TIMEOUT_SEC);
+  }
+
+  public void closeSignaturesContainer() {
+    typeTextIntoEditor(ESCAPE.toString());
+    waitSignaturesContainerIsClosed();
+  }
+
+  public void waitSignaturesContainerIsClosed() {
+    seleniumWebDriverHelper.waitInvisibility(signaturesContainer);
+  }
+
+  public String getAllVisibleTextFromSignaturesContainer() {
+    waitSignaturesContainer();
+    return signaturesContainer.getText();
+  }
+
+  /**
+   * Waits specified {@code expectedProposal} in signatures container.
+   *
+   * @param expectedProposal text which should be present in the container
+   */
+  public void waitProposalIntoSignaturesContainer(final String expectedProposal) {
+    webDriverWaitFactory
+        .get(ELEMENT_TIMEOUT_SEC)
+        .until(
+            (ExpectedCondition<Boolean>)
+                webDriver -> getAllVisibleTextFromSignaturesContainer().contains(expectedProposal));
+  }
+  ///
 }
