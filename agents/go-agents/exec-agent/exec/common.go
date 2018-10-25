@@ -14,7 +14,7 @@ package exec
 
 import (
 	"errors"
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc"
 	"github.com/eclipse/che/agents/go-agents/core/process"
 	"strconv"
 	"strings"

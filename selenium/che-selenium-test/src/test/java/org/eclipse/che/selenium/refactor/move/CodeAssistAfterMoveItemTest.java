@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.refactor.move;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -30,6 +31,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -110,7 +112,14 @@ public class CodeAssistAfterMoveItemTest {
     editor.goToCursorPositionVisible(33, 5);
     editor.launchPropositionAssistPanel();
     loader.waitOnClosed();
-    editor.waitTextIntoFixErrorProposition("Import 'A5' (p1)");
+
+    try {
+      editor.waitTextIntoFixErrorProposition("Import 'A5' (p1)");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11701");
+    }
+
     editor.enterTextIntoFixErrorPropByEnter("Import 'A5' (p1)");
     editor.waitTextIntoEditor("import p1.A5;");
   }

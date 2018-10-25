@@ -22,8 +22,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/core/event"
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc/event"
+	"github.com/eclipse/che-go-jsonrpc"
 	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 
