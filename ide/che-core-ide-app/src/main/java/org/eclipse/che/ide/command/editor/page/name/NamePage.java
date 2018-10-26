@@ -71,6 +71,8 @@ public class NamePage extends AbstractCommandEditorPage implements NamePageView.
 
   @Override
   public void onNameChanged(String name) {
+    name = name.trim();
+
     editedCommand.setName(name);
 
     notifyDirtyStateChanged();

@@ -196,7 +196,7 @@ public class ExecuteCommandActionManager {
       }
 
       // remove action group if it's empty
-      DefaultActionGroup goalPopUpGroup = goalPopUpGroups.remove(goalId);
+      DefaultActionGroup goalPopUpGroup = goalPopUpGroups.get(goalId);
 
       if (goalPopUpGroup != null) {
         goalPopUpGroup.remove(commandAction);
