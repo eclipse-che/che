@@ -64,6 +64,14 @@ public interface SubPanel {
    */
   void removeWidget(WidgetToShow widget);
 
+  /**
+   * Remove the given {@code widget} from this panel.
+   *
+   * @param widget widget to remove
+   * @param activateNeighbor <code>true</code> if need to activate neighbor widget
+   */
+  void removeWidget(WidgetToShow widget, boolean activateNeighbor);
+
   /** Close this panel. Note that each widget will be removed from the panel before it close. */
   void closePane();
 

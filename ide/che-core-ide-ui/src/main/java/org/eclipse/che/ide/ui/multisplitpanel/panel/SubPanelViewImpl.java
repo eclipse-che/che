@@ -39,7 +39,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.FontAwesome;
 import org.eclipse.che.ide.api.action.Action;
 import org.eclipse.che.ide.api.action.BaseAction;
-import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
 import org.eclipse.che.ide.ui.multisplitpanel.actions.ClosePaneAction;
 import org.eclipse.che.ide.ui.multisplitpanel.actions.RemoveAllWidgetsInPaneAction;
@@ -245,22 +244,39 @@ public class SubPanelViewImpl extends Composite
 
   @Override
   public void removeWidget(WidgetToShow widget) {
+    removeWidget(widget, true);
+  }
+
+  @Override
+  public void removeWidget(WidgetToShow widget, boolean activateNeighbor) {
     final Tab tab = widgets2Tabs.get(widget);
     if (tab != null) {
-      closeTab(tab);
+      closeTab(tab, activateNeighbor);
     }
   }
 
-  private void closeTab(Tab tab) {
+  private void closeTab(Tab tab, boolean activateNeighbor) {
     final WidgetToShow widget = tabs2Widgets.get(tab);
 
     if (widget != null) {
       delegate.onWidgetRemoving(
           widget.getWidget(),
-          new SubPanel.RemoveCallback() {
-            @Override
-            public void remove() {
-              removeWidgetFromUI(widget);
+          () -> {
+            final int removedTabIndex = tabsPanel.getWidgetIndex(tab);
+
+            removeWidgetFromUI(widget);
+
+            if (activateNeighbor && tab == selectedTab && tabsPanel.getWidgetCount() > 1) {
+              Widget widgetToSelect;
+              if (removedTabIndex < tabsPanel.getWidgetCount() - 1) {
+                widgetToSelect = tabsPanel.getWidget(removedTabIndex);
+              } else {
+                widgetToSelect = tabsPanel.getWidget(tabsPanel.getWidgetCount() - 2);
+              }
+
+              if (widgetToSelect instanceof Tab) {
+                onTabClicked((Tab) widgetToSelect);
+              }
             }
           });
     }
@@ -269,8 +285,6 @@ public class SubPanelViewImpl extends Composite
   private void removeWidgetFromUI(WidgetToShow widget) {
     final Tab tab = widgets2Tabs.remove(widget);
     if (tab != null) {
-      final int removedTabIndex = tabsPanel.getWidgetIndex(tab);
-
       tabsPanel.remove(tab);
       widgetsPanel.remove(widget.getWidget());
       tabs2Widgets.remove(tab);
@@ -279,20 +293,6 @@ public class SubPanelViewImpl extends Composite
       final MenuItemWidget listItemWidget = widgets2ListItems.remove(widget);
       if (listItemWidget != null) {
         menu.removeListItem(listItemWidget);
-      }
-
-      if (tab == selectedTab && tabsPanel.getWidgetCount() > 1) {
-        Widget widgetToSelect;
-        if (removedTabIndex < tabsPanel.getWidgetCount() - 1) {
-          widgetToSelect = tabsPanel.getWidget(removedTabIndex);
-        } else {
-          widgetToSelect = tabsPanel.getWidget(tabsPanel.getWidgetCount() - 2);
-        }
-
-        if (widgetToSelect instanceof Tab) {
-          selectTab((Tab) widgetToSelect);
-          onTabClicked((Tab) widgetToSelect);
-        }
       }
     }
   }
@@ -381,7 +381,7 @@ public class SubPanelViewImpl extends Composite
   public void onMenuItemClosing(MenuItem menuItem) {
     Object data = menuItem.getData();
     if (data instanceof Tab) {
-      closeTab((Tab) data);
+      closeTab((Tab) data, true);
     }
   }
 
@@ -416,7 +416,7 @@ public class SubPanelViewImpl extends Composite
 
   @Override
   public void onTabClosing(Tab tab) {
-    closeTab(tab);
+    closeTab(tab, true);
   }
 
   @Override

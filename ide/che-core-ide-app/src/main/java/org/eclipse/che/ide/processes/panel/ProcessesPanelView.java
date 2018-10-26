@@ -85,6 +85,13 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
   /** Removes widget for process with given ID */
   void removeWidget(String processId);
 
+  /**
+   * Removes widget for process with given ID
+   *
+   * @param activateNeighbor <code>true</code> if need to activate neighbor widget
+   */
+  void removeWidget(String processId, boolean activateNeighbor);
+
   /** Marks process with a badge in process tree */
   void markProcessHasOutput(String processId);
 

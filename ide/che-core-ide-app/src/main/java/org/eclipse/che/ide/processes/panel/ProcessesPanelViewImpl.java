@@ -405,19 +405,21 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
   @Override
   public void hideProcessOutput(String processId) {
-    final WidgetToShow widgetToShow = processWidgets.get(processId);
-    final SubPanel subPanel = widget2Panels.get(widgetToShow);
-    if (subPanel != null) {
-      subPanel.removeWidget(widgetToShow);
-    }
-    processWidgets.remove(processId);
+    removeWidget(processId);
   }
 
   @Override
   public void removeWidget(String processId) {
-    WidgetToShow widget = processWidgets.get(processId);
-    hideProcessOutput(processId);
-    widget2Panels.remove(widget);
+    removeWidget(processId, true);
+  }
+
+  @Override
+  public void removeWidget(String processId, boolean activateNeighbor) {
+    WidgetToShow widget = processWidgets.remove(processId);
+    SubPanel subPanel = widget2Panels.remove(widget);
+    if (subPanel != null) {
+      subPanel.removeWidget(widget, activateNeighbor);
+    }
   }
 
   @Override
@@ -437,7 +439,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
   public void clear() {
     for (WidgetToShow widgetToShow : processWidgets.values()) {
       SubPanel subPanel = widget2Panels.get(widgetToShow);
-      subPanel.removeWidget(widgetToShow);
+      subPanel.removeWidget(widgetToShow, false);
     }
 
     processWidgets.clear();
