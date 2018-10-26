@@ -16,7 +16,7 @@ import (
 	"log"
 	"net"
 
-	"github.com/eclipse/che-lib/websocket"
+	"github.com/gorilla/websocket"
 )
 
 func isNormalWSError(err error) bool {

@@ -24,8 +24,8 @@ import (
 	"syscall"
 	"unicode/utf8"
 
-	"github.com/eclipse/che-lib/pty"
 	"github.com/eclipse/che/agents/go-agents/core/activity"
+	"github.com/kr/pty"
 )
 
 type wsPty struct {
@@ -44,7 +44,7 @@ func startPty(command string) (*wsPty, error) {
 	}
 
 	//Set the size of the pty
-	if err := pty.Setsize(file, 60, 200); err != nil {
+	if err := pty.Setsize(file, &pty.Winsize{Cols: 200, Rows: 60, X: 0, Y: 0}); err != nil {
 		log.Printf("Error occurs on setting terminal size. %s", err)
 	}
 
@@ -83,7 +83,7 @@ func (wp *wsPty) handleMessage(msg WebSocketMessage) error {
 		if err := json.Unmarshal(msg.Data, &size); err != nil {
 			log.Printf("Invalid resize message: %s\n", err)
 		} else {
-			if err := pty.Setsize(wp.ptyFile, uint16(size[1]), uint16(size[0])); err != nil {
+			if err := pty.Setsize(wp.ptyFile, &pty.Winsize{Cols: uint16(size[0]), Rows: uint16(size[1]), X: 0, Y: 0}); err != nil {
 				log.Printf("Error occurs on setting terminal size. %s", err)
 			}
 			activity.Tracker.Notify()

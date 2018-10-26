@@ -26,6 +26,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachi
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.SLIDER_RAM_TEXT_FIELD_XPATH;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
@@ -35,6 +36,7 @@ import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+@Singleton
 public class EditMachineForm {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final TestWebElementRenderChecker testWebElementRenderChecker;

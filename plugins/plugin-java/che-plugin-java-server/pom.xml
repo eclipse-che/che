@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-java-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.13.0-SNAPSHOT</version>
+        <version>6.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-server</artifactId>
     <name>Che Plugin :: Java :: Language Server</name>
@@ -137,7 +137,7 @@
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-languageserver</artifactId>
-                        <version>${che.version}</version>
+                        <version>${project.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.che.ls.jdt</groupId>

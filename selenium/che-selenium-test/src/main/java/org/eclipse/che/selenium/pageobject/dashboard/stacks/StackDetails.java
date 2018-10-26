@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.pageobject.dashboard.stacks;
 import static java.lang.String.format;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
@@ -21,6 +22,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+@Singleton
 public class StackDetails {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
@@ -32,7 +34,8 @@ public class StackDetails {
   }
 
   private interface Locators {
-    String TOOLBAR_XPATH_PATTERN = "//div[@che-title='%s']";
+    String TOOLBAR_XPATH = "//*[@name='stackForm']";
+    String TOOLBAR_WITH_STACK_NAME_XPATH_PATTERN = "//div[@che-title='%s']";
     String NEW_STACK_NAME = "deskname";
     String SAVE_CHANGES_BUTTON_NAME = "saveButton";
     String ALL_STACKS_BUTTON_XPATH = "//a[@title='All stacks']";
@@ -41,9 +44,13 @@ public class StackDetails {
   @FindBy(name = Locators.NEW_STACK_NAME)
   WebElement stackNameField;
 
-  public void waitToolbar(String stackName) {
+  public void waitToolbar() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.TOOLBAR_XPATH));
+  }
+
+  public void waitToolbarWithStackName(String stackName) {
     seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(Locators.TOOLBAR_XPATH_PATTERN, stackName)));
+        By.xpath(format(Locators.TOOLBAR_WITH_STACK_NAME_XPATH_PATTERN, stackName)));
   }
 
   public void setStackName(String stackName) {
