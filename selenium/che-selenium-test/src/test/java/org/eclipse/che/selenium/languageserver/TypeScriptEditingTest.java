@@ -51,7 +51,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -158,11 +157,10 @@ public class TypeScriptEditingTest {
     editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor("printVar.print(");
 
-    try {
-      editor.waitExpTextIntoShowHintsPopUp("setValue: string");
-    } catch (WebDriverException ex) {
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
-    }
+    editor.waitSignaturesContainer();
+    editor.waitProposalIntoSignaturesContainer("print(setVAlue: string): void");
+    editor.closeSignaturesContainer();
+    editor.waitSignaturesContainerIsClosed();
   }
 
   @Test(priority = 6, alwaysRun = true)
