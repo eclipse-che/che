@@ -2380,11 +2380,6 @@ public class CodenvyEditor {
    * @param expectedProposal text which should be present in the container
    */
   public void waitProposalIntoSignaturesContainer(final String expectedProposal) {
-    webDriverWaitFactory
-        .get(ELEMENT_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>)
-                webDriver -> getAllVisibleTextFromSignaturesContainer().contains(expectedProposal));
+    seleniumWebDriverHelper.waitTextContains(signaturesContainer, expectedProposal);
   }
-  ///
 }
