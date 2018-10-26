@@ -43,7 +43,8 @@ public class TheiaEditor {
   }
 
   public interface Locators {
-    String EDITOR_TAB_XPATH_TEMPLATE = "//ul[@class='p-TabBar-content']//li[@title='%s']";
+    String EDITOR_TAB_XPATH_TEMPLATE =
+        "//ul[@class='p-TabBar-content']//li[contains(@title, '%s')]";
     String EDITOR_LINE_XPATH =
         "//div[@data-mode-id='plaintext']//span[@class='mtk1']/parent::span/parent::div";
     String ACTIVE_LINE_XPATH =
