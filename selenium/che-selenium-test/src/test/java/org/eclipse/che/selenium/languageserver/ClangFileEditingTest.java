@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.CPP;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.openqa.selenium.Keys.F4;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -34,7 +33,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -114,12 +112,12 @@ public class ClangFileEditingTest {
     editor.deleteCurrentLineAndInsertNew();
     editor.typeTextIntoEditor("  std::abs(");
 
-    try {
-      editor.waitExpTextIntoShowHintsPopUp("abs(int __x) -> int");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
-    }
+    editor.waitSignaturesContainer();
+    editor.waitProposalIntoSignaturesContainer("abs(int __x) -> int");
+    editor.closeSignaturesContainer();
+    editor.waitSignaturesContainerIsClosed();
+
+    editor.deleteCurrentLineAndInsertNew();
   }
 
   @Test(priority = 1)
