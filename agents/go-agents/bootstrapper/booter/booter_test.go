@@ -47,7 +47,7 @@ var (
 		ID:          "test-installer-3",
 		Description: "Installer for testing",
 		Version:     "1.0",
-		Script:      "printf \"1\n\" && printf \"error\" >&2 && exit 1",
+		Script:      "printf \"1\n\" && sleep 1 && printf \"error\" >&2 && exit 1",
 	}
 )
 
