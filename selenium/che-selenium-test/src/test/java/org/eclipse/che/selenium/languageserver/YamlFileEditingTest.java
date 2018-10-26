@@ -211,6 +211,7 @@ public class YamlFileEditingTest {
     editor.typeTextIntoEditor("a");
     editor.waitTextElementsActiveLine("aapiVersion: v1");
     editor.moveCursorToText("aapiVersion");
+
     try {
       editor.waitTextInHoverPopup("Unexpected property aapiVersion");
     } catch (TimeoutException ex) {
