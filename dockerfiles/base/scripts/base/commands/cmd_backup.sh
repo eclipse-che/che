@@ -59,7 +59,7 @@ cmd_backup() {
         "${CHE_CONTAINER_BACKUP}/moved-$(get_current_date)-${CHE_BACKUP_FILE_NAME}"
   fi
 
-  info "backup" "Saving codenvy data..."
+  info "backup" "Saving Eclipse Che data..."
   docker_run -v "${CHE_HOST_CONFIG}":/root${CHE_CONTAINER_ROOT} \
                -v "${CHE_HOST_BACKUP}":/root/backup \
                $(cmd_backup_extra_args) \
