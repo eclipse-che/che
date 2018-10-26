@@ -18,7 +18,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
 import static org.openqa.selenium.Keys.DELETE;
-import static org.openqa.selenium.Keys.ESCAPE;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -26,6 +25,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.InformationDialog;
@@ -61,6 +61,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   @Inject private Menu menu;
   @Inject private ImportProjectFromLocation importProject;
   @Inject private Loader loader;
+  @Inject private Consoles consoles;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Wizard projectWizard;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
@@ -85,6 +86,7 @@ public class ImportAndValidateEclipseCheProjectTest {
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSStartedMessage();
   }
 
   @AfterClass
@@ -94,9 +96,6 @@ public class ImportAndValidateEclipseCheProjectTest {
 
   @Test
   public void checkImportAndResolveDependenciesEclipseCheProject() {
-    final int timeoutToOpenInfoPanelInSec = 1200;
-    final int timeoutToClosingInfoPanelInSec = 5400;
-
     // import the eclipse-che project
     projectExplorer.waitProjectExplorer();
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
@@ -107,23 +106,7 @@ public class ImportAndValidateEclipseCheProjectTest {
     projectWizard.selectTypeProject(MAVEN);
     projectWizard.clickSaveButton();
     loader.waitOnClosed();
-
-    // TODO it is the workaround, delete it after resolving the issue
-    // TODO https://github.com/eclipse/che/issues/10515
-    closeErrorDialog();
-
-    try {
-      projectWizard.waitCreateProjectWizardFormIsClosed();
-    } catch (TimeoutException ex) {
-      // TODO it is the workaround, delete it after resolving the issue
-      // TODO https://github.com/eclipse/che/issues/11145
-      LOG.warn(
-          "'Project Configuration' panel didn't close in time. "
-              + "It is known random failure https://github.com/eclipse/che/issues/11145",
-          ex);
-      projectWizard.closeWithIcon();
-    }
-
+    projectWizard.waitCreateProjectWizardFormIsClosed();
     loader.waitOnClosed();
 
     // expand the project
@@ -144,28 +127,17 @@ public class ImportAndValidateEclipseCheProjectTest {
     quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_TS_FILE);
     editor.waitActive();
 
-    // open the resolving dependencies form
-    loader.waitOnClosed();
-    mavenPluginStatusBar.waitExpectedTextInInfoPanel(
-        "Resolving project:", timeoutToOpenInfoPanelInSec);
-    mavenPluginStatusBar.clickOnInfoPanel();
-
-    // should close the resolve dependencies form by Esc
-    mavenPluginStatusBar.waitResolveDependenciesFormToOpen();
-    mavenPluginStatusBar.closeResolveDependenciesFormByKeys(ESCAPE.toString());
-
-    // then open it again
-    mavenPluginStatusBar.clickOnInfoPanel();
-    mavenPluginStatusBar.waitResolveDependenciesFormToOpen();
-
-    // wait while dependencies are resolved
-    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanelInSec);
-    mavenPluginStatusBar.waitResolveDependenciesFormToClose();
-
     // wait the project and the files
     projectExplorer.waitItem(PROJECT_NAME);
     editor.waitTabIsPresent("CodenvyEditor");
-    editor.waitTabIsPresent("che-dashboard-war");
+
+    try {
+      editor.waitTabIsPresent("che-dashboard-war");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11537");
+    }
+
     editor.waitTabIsPresent("index.module.ts");
   }
 
@@ -197,28 +169,6 @@ public class ImportAndValidateEclipseCheProjectTest {
     editor.waitActive();
     editor.typeTextIntoEditor("q");
     editor.waitMarkerInPosition(ERROR, 1);
-  }
-
-  private void closeErrorDialog() {
-    // if the error dialog is appeared more 5 times, the test will be failed
-    int counterErrorDialog = 0;
-
-    while (informationDialog.isFormOpened()) {
-      counterErrorDialog++;
-
-      if (counterErrorDialog > 5) {
-
-        fail(
-            "The unexpected error information dialog is appeared more than "
-                + counterErrorDialog
-                + " times");
-      }
-
-      informationDialog.waitFormToOpen();
-      informationDialog.clickOkBtn();
-      projectWizard.clickSaveButton();
-      loader.waitOnClosed();
-    }
   }
 
   private void quickRevealToItemWithJavaScriptAndOpenFile(String pathToItem) {
