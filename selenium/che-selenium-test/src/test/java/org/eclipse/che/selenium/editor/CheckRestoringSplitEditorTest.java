@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.editor;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_JAVA_MULTIMODULE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPIT_HORISONTALLY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPLIT_VERTICALLY;
@@ -97,7 +98,7 @@ public class CheckRestoringSplitEditorTest {
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
     loader.waitOnClosed();
-    projectExplorer.waitVisibilityByName(javaClassName);
+    projectExplorer.waitVisibilityByName(javaClassName, WIDGET_TIMEOUT_SEC);
 
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     checkSplitdEditorAfterRefreshing(
