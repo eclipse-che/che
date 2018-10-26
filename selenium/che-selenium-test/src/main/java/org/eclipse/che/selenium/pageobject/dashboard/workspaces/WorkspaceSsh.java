@@ -14,11 +14,13 @@ package org.eclipse.che.selenium.pageobject.dashboard.workspaces;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.support.PageFactory;
 
+@Singleton
 public class WorkspaceSsh {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
