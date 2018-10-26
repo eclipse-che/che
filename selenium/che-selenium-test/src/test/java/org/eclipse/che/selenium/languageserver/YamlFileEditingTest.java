@@ -178,21 +178,11 @@ public class YamlFileEditingTest {
 
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("namespace:");
-    try {
-      editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
-    }
+    waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
 
     editor.moveCursorToText("kind:");
-    try {
-      editor.waitTextInHoverPopup(
-          "Kind is a string value representing the REST resource this object represents.");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
-    }
+    waitTextInHoverPopup(
+        "Kind is a string value representing the REST resource this object represents.");
 
     editor.moveCursorToText("apiVersion:");
     editor.waitTextInHoverPopUpEqualsTo(
@@ -211,26 +201,14 @@ public class YamlFileEditingTest {
     editor.typeTextIntoEditor("a");
     editor.waitTextElementsActiveLine("aapiVersion: v1");
     editor.moveCursorToText("aapiVersion");
-
-    try {
-      editor.waitTextInHoverPopup("Unexpected property aapiVersion");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
-    }
+    waitTextInHoverPopup("Unexpected property aapiVersion");
 
     editor.goToPosition(13, 1);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
     editor.moveCursorToText("apiVersion");
-
-    try {
-      editor.waitTextInHoverPopup(
-          "APIVersion defines the versioned schema of this representation of an object.");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
-    }
+    waitTextInHoverPopup(
+        "APIVersion defines the versioned schema of this representation of an object.");
   }
 
   @Test(priority = 1)
@@ -320,5 +298,14 @@ public class YamlFileEditingTest {
     preferences.clickOnOkBtn();
 
     preferences.close();
+  }
+
+  private void waitTextInHoverPopup(String expectedText) {
+    try {
+      editor.waitTextInHoverPopup(expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 }
