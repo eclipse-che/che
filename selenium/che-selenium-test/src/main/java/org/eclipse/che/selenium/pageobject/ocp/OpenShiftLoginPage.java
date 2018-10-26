@@ -17,12 +17,14 @@ import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locator
 import static org.eclipse.che.selenium.pageobject.ocp.OpenShiftLoginPage.Locators.USERNAME_INPUT_NAME;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+@Singleton
 public class OpenShiftLoginPage {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 

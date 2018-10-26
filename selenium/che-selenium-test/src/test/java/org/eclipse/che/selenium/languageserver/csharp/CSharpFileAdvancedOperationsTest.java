@@ -87,13 +87,9 @@ public class CSharpFileAdvancedOperationsTest {
   public void checkHoveringFeature() {
     String expectedTextInHoverPopUp =
         "System.Console\nRepresents the standard input, output, and error streams for console applications. This class cannot be inherited.";
-    editor.moveCursorToText("Console");
-    try {
 
-      editor.waitTextInHoverPopUpEqualsTo(expectedTextInHoverPopUp);
-    } catch (TimeoutException ex) {
-      fail("Known permanent failure: https://github.com/eclipse/che/issues/10117", ex);
-    }
+    editor.moveCursorToText("Console");
+    editor.waitTextInHoverPopUpEqualsTo(expectedTextInHoverPopUp);
   }
 
   @Test(priority = 1, alwaysRun = true)
