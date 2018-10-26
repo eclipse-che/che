@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.APACHE_CAMEL;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -106,7 +108,13 @@ public class ApacheCamelFileEditingTest {
   public void checkHoverFeature() {
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("velocity");
-    editor.waitTextInHoverPopup("Transforms the message using a Velocity template.");
+
+    try {
+      editor.waitTextInHoverPopup("Transforms the message using a Velocity template.");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   @Test(priority = 1)
