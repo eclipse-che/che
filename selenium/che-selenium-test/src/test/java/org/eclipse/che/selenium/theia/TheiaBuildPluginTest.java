@@ -62,6 +62,9 @@ public class TheiaBuildPluginTest {
   private static final String EXPECTED_HELLO_WORLD_NOTIFICATION = "Hello World!";
   private static final String SUGGESTION_FOR_SELECTION = "Hosted Plugin: Start Instance";
   private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";
+  private static final String YEOMAN_WIZARD_SEARCH_SEQUENCE = ">yeom";
+  private static final String PLUGIN_NAME_SEARCH_SEQUENCE = "hello-world";
+  private static final String BACKEND_PLUGIN_DESCRIPTION = "Backend plug-in, it will run on the server side.";
   private static final String EXPECTED_CLONE_OUTPUT =
       "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
   private static final String EXPECTED_PLUGIN_OUTPUT = "hello_world_plugin.theia";
@@ -117,6 +120,32 @@ public class TheiaBuildPluginTest {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
 
+    //-------------------------------------------------------
+
+    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
+    theiaProposalForm.waitForm();
+
+    WaitUtils.sleepQuietly(4);
+    theiaProposalForm.enterTextToSearchField(YEOMAN_WIZARD_SEARCH_SEQUENCE);
+
+    WaitUtils.sleepQuietly(4);
+    theiaProposalForm.clickOnProposal("Yeoman Wizard");
+
+    WaitUtils.sleepQuietly(4);
+    theiaProposalForm.waitForm();
+
+    WaitUtils.sleepQuietly(4);
+    theiaProposalForm.enterTextToSearchField(PLUGIN_NAME_SEARCH_SEQUENCE);
+
+    WaitUtils.sleepQuietly(4);
+    theiaProposalForm.clickOnProposal(BACKEND_PLUGIN_DESCRIPTION);
+
+    WaitUtils.sleepQuietly(4);
+
+
+    //-------------------------------------------------------
+
+
     openTerminal("File", "Open new multi-machine terminal", "ws/dev");
     theiaTerminal.waitTab(WS_DEV_TERMINAL_TITLE);
     theiaTerminal.clickOnTab(WS_DEV_TERMINAL_TITLE);
@@ -146,7 +175,7 @@ public class TheiaBuildPluginTest {
     theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1);
   }
 
-  @Test(priority = 1)
+  // @Test(priority = 1)
   public void hostedModeShouldWork() {
     final String parentWindow = seleniumWebDriver.getWindowHandle();
 
