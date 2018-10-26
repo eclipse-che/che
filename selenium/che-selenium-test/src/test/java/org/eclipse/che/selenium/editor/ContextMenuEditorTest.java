@@ -223,7 +223,13 @@ public class ContextMenuEditorTest {
     editor.openContextMenuOnElementInEditor("Exception");
     editor.clickOnItemInContextMenu(QUICK_DOC);
     editor.waitContextMenuIsNotPresent();
-    editor.waitJavaDocPopUpOpened();
+    try {
+      editor.waitJavaDocPopUpOpened();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11735", ex);
+    }
+
     editor.checkTextToBePresentInJavaDocPopUp(QUICK_DOC_TEXT);
     editor.selectTabByName("AppController");
     editor.waitJavaDocPopUpClosed();
@@ -300,7 +306,12 @@ public class ContextMenuEditorTest {
     editor.typeTextIntoEditor(renamedEditorTabName);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
-    editor.waitTabIsPresent(renamedEditorTabName);
+    try {
+      editor.waitTabIsPresent(renamedEditorTabName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11697");
+    }
     editor.waitTextIntoEditor("public class Zclass");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Zclass.java");
   }
