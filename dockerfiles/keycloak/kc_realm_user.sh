@@ -10,11 +10,11 @@
 
 echo "Configuring Keycloak by modifying realm and user templates..."
 
-cat /scripts/che-users-0.json.erb | \
-                                  sed -e "/<% if scope.lookupvar('keycloak::che_keycloak_admin_require_update_password') == 'true' -%>/d" | \
-                                  sed -e "/<% else -%>/d" | \
-                                  sed -e "/<% end -%>/d" | \
-                                  sed -e "/\"requiredActions\" : \[ \],/d" > /scripts/che-users-0.json
+#cat /scripts/che-users-0.json.erb | \
+#                                  sed -e "/<% if scope.lookupvar('keycloak::che_keycloak_admin_require_update_password') == 'true' -%>/d" | \
+#                                  sed -e "/<% else -%>/d" | \
+#                                  sed -e "/<% end -%>/d" | \
+#                                  sed -e "/\"requiredActions\" : \[ \],/d" > /scripts/che-users-0.json
 
 if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
     sed -i -e "s#\"UPDATE_PASSWORD\"##" /scripts/che-users-0.json
@@ -23,9 +23,9 @@ fi
 DEFAULT_CHE_HOST="che-${NAMESPACE}.${ROUTING_SUFFIX}"
 CHE_HOST=${CHE_HOST:-${DEFAULT_CHE_HOST}}
 
-cat /scripts/che-realm.json.erb | \
-                                sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://${CHE_HOST}@" \
-                                > /scripts/che-realm.json
+#cat /scripts/che-realm.json.erb | \
+#                                sed -e "s@<%= scope\.lookupvar('che::che_server_url') %>@${PROTOCOL}://${CHE_HOST}@" \
+#                                > /scripts/che-realm.json
 
 echo "Creating Admin user..."
 
@@ -42,7 +42,7 @@ fi
 
 echo "Starting Keycloak server..."
 
-/opt/jboss/keycloak/bin/standalone.sh -Dkeycloak.migration.action=import \
+/opt/jboss/docker-entrypoint.sh -Dkeycloak.migration.action=import \
                                       -Dkeycloak.migration.provider=dir \
                                       -Dkeycloak.migration.strategy=IGNORE_EXISTING \
                                       -Dkeycloak.migration.dir=/scripts/ \
