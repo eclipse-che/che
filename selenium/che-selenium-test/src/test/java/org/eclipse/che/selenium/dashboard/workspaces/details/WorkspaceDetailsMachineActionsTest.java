@@ -22,7 +22,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -36,7 +35,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceInstallers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -207,7 +205,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitFormInvisibility();
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
-    waitRecipeText(expectedRecipeText);
+    editMachineForm.waitRecipeText(expectedRecipeText);
 
     // check saving of the changes
     editMachineForm.typeRam(CHANGED_RAM_SIZE);
@@ -266,14 +264,5 @@ public class WorkspaceDetailsMachineActionsTest {
   private void setValidName() {
     editMachineForm.typeName(MACHINE_NAME);
     editMachineForm.waitValidNameHighlighting();
-  }
-
-  private void waitRecipeText(String expectedText) {
-    try {
-      editMachineForm.waitRecipeText(expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10732", ex);
-    }
   }
 }
