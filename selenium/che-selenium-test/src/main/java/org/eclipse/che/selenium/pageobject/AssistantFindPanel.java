@@ -12,7 +12,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.ACTION_NODE_ID_PATTERN;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.ALL_ACTIONS_XPATH;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.PANEL_ID;
@@ -113,7 +113,7 @@ public class AssistantFindPanel {
                   }
                   return false;
                 }),
-        ELEMENT_TIMEOUT_SEC,
+        WIDGET_TIMEOUT_SEC * 2,
         StaleElementReferenceException.class);
   }
 
