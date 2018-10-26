@@ -29,6 +29,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
@@ -38,6 +39,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+@Singleton
 public class WorkspaceOverview {
   private final SeleniumWebDriver seleniumWebDriver;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
