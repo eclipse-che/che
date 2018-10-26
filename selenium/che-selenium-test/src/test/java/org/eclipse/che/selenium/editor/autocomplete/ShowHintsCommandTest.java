@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -25,6 +27,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -93,7 +96,13 @@ public class ShowHintsCommandTest {
     editor.waitMarkerInPosition(MarkerLocator.ERROR, 34);
     editor.goToCursorPositionVisible(33, 16);
     editor.callShowHintsPopUp();
-    editor.waitShowHintsPopUpOpened();
+    try {
+      editor.waitShowHintsPopUpOpened();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11747", ex);
+    }
+
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_1);
     editor.typeTextIntoEditor(Keys.ESCAPE.toString());
     editor.waitShowHintsPopUpClosed();
