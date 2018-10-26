@@ -78,7 +78,7 @@ class LanguageServerAbstractFileWatcher implements Consumer<Path> {
           .put(
               pathMatcher,
               path -> {
-                FileEvent fileEvent = new FileEvent(path.toString(), fileChangeType);
+                FileEvent fileEvent = new FileEvent(path.toUri().toString(), fileChangeType);
                 List<FileEvent> changes = ImmutableList.of(fileEvent);
                 DidChangeWatchedFilesParams params = new DidChangeWatchedFilesParams(changes);
                 WorkspaceService service = languageServer.getWorkspaceService();
