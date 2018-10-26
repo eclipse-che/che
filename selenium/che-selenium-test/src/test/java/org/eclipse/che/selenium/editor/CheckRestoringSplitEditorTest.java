@@ -82,7 +82,7 @@ public class CheckRestoringSplitEditorTest {
   }
 
   @Test
-  public void checkRestoringStateSplittedEditor() throws IOException, Exception {
+  public void checkRestoringStateSplitEditor() throws IOException, Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     splitEditorAndOpenFiles();
@@ -101,15 +101,15 @@ public class CheckRestoringSplitEditorTest {
     projectExplorer.waitVisibilityByName(javaClassName, WIDGET_TIMEOUT_SEC);
 
     notificationsPopupPanel.waitPopupPanelsAreClosed();
-    checkSplitdEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         1, javaClassTab, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
-    checkSplitdEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         2, readmeFileName, expectedTextFromEditor.get(1).trim(), cursorPositionForReadMeFile);
-    checkSplitdEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         3, pomFileTab, expectedTextFromEditor.get(2).trim(), cursorPositionForPomFile);
   }
 
-  private void checkSplitdEditorAfterRefreshing(
+  private void checkSplitEditorAfterRefreshing(
       int numOfEditor,
       String nameOfEditorTab,
       String expectedTextAfterRefresh,
