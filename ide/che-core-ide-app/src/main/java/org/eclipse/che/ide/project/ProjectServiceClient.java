@@ -18,11 +18,11 @@ import static com.google.gwt.http.client.URL.encodePathSegment;
 import static com.google.gwt.http.client.URL.encodeQueryString;
 import static org.eclipse.che.api.project.shared.Constants.Services.PROJECTS_BATCH;
 import static org.eclipse.che.api.project.shared.Constants.Services.PROJECT_IMPORT;
+import static org.eclipse.che.api.project.shared.Constants.Services.PROJECT_UPDATE;
 import static org.eclipse.che.ide.MimeType.APPLICATION_JSON;
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 import static org.eclipse.che.ide.jsonrpc.JsonRpcErrorUtils.getPromiseError;
 import static org.eclipse.che.ide.rest.HTTPHeader.ACCEPT;
-import static org.eclipse.che.ide.rest.HTTPHeader.CONTENT_TYPE;
 import static org.eclipse.che.ide.util.PathEncoder.encodePath;
 
 import com.google.inject.Inject;
@@ -41,6 +41,7 @@ import org.eclipse.che.api.project.shared.dto.SourceEstimation;
 import org.eclipse.che.api.project.shared.dto.TreeElement;
 import org.eclipse.che.api.project.shared.dto.service.CreateBatchProjectsRequestDto;
 import org.eclipse.che.api.project.shared.dto.service.ImportRequestDto;
+import org.eclipse.che.api.project.shared.dto.service.UpdateRequestDto;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
@@ -507,21 +508,26 @@ public class ProjectServiceClient {
    * Updates the project with the new {@code configuration} or creates the new one from existed
    * folder on server side.
    *
-   * @param configuration configuration which which be applied to the existed project
+   * @param configuration configuration which be applied to the existed project
    * @return {@link Promise} with the applied {@link ProjectConfigDto}
    * @see ProjectConfigDto
    * @since 4.4.0
    */
   public Promise<ProjectConfigDto> updateProject(ProjectConfigDto configuration) {
-    Path prjPath = new Path(configuration.getPath());
-    final String url = getBaseUrl() + encodePath(prjPath.addLeadingSeparator());
-
-    return reqFactory
-        .createRequest(PUT, url, configuration, false)
-        .header(CONTENT_TYPE, APPLICATION_JSON)
-        .header(ACCEPT, APPLICATION_JSON)
-        .loader(loaderFactory.newLoader("Updating project..."))
-        .send(unmarshaller.newUnmarshaller(ProjectConfigDto.class));
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName(PROJECT_UPDATE)
+                .paramsAsDto(
+                    dtoFactory
+                        .createDto(UpdateRequestDto.class)
+                        .withWsPath(configuration.getPath())
+                        .withConfig(configuration))
+                .sendAndReceiveResultAsDto(ProjectConfigDto.class)
+                .onSuccess(resolve::apply)
+                .onFailure(error -> reject.apply(getPromiseError(error))));
   }
 
   /**

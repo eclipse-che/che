@@ -183,7 +183,13 @@ public class GolangFileEditingTest {
 
     // check the 'Hover' popup
     editor.moveCursorToText("COLOR_YELLOW");
-    editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
+
+    try {
+      editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
 
     // check Find Definition feature from Assistant menu
     editor.goToPosition(24, 8);
@@ -251,13 +257,12 @@ public class GolangFileEditingTest {
     editor.goToPosition(27, 1);
     editor.typeTextIntoEditor("    hanoi(");
 
-    try {
-      editor.waitExpTextIntoShowHintsPopUp("hanoi(n int, a, b, c string)");
-    } catch (TimeoutException ex) {
-      editor.deleteCurrentLineAndInsertNew();
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
-    }
+    editor.waitSignaturesContainer();
+    editor.waitProposalIntoSignaturesContainer("hanoi(n int, a, b, c string)");
+    editor.closeSignaturesContainer();
+    editor.waitSignaturesContainerIsClosed();
+
+    editor.deleteCurrentLineAndInsertNew();
   }
 
   @Test(priority = 1)

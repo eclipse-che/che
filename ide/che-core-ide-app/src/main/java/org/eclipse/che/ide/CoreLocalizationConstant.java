@@ -229,6 +229,21 @@ public interface CoreLocalizationConstant extends Messages {
   @Key("projectWizard.saveButtonText")
   String projectWizardSaveButtonText();
 
+  @Key("projectWizard.updateProject")
+  String projectWizardUpdateProject(String projectName);
+
+  @Key("projectWizard.createProject.failed")
+  String projectWizardCreateProjectFailed();
+
+  @Key("projectWizard.importProject.failed")
+  String projectWizardImportProjectFailed();
+
+  @Key("projectWizard.updateProject.failed")
+  String projectWizardUpdateProjectFailed();
+
+  @Key("projectWizard.defaultErrorTitle")
+  String projectWizardDefaultErrorTitle();
+
   @Key("format.name")
   String formatName();
 

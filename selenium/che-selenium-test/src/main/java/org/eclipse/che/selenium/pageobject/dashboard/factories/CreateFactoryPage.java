@@ -17,6 +17,7 @@ import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.DELETE;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -35,6 +36,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+@Singleton
 public class CreateFactoryPage {
 
   private final SeleniumWebDriver seleniumWebDriver;
