@@ -927,7 +927,7 @@ testProduct() {
     runTests
 
     if [[ ${RERUN_ATTEMPTS} > 0 ]]; then
-        MAVEN_OPTIONS="${MAVEN_OPTIONS} -o"
+#        MAVEN_OPTIONS="${MAVEN_OPTIONS} -o"
         rerunTests 1 $@
     fi
 }
