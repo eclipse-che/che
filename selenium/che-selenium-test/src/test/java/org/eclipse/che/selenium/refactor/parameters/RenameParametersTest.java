@@ -199,9 +199,12 @@ public class RenameParametersTest {
     events.clearAllMessages();
     editor.waitActive();
     editor.goToCursorPositionVisible(15, 23);
-    editor.launchLocalRefactor();
-    editor.typeTextIntoEditor("i");
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    editor.launchRefactorForm();
+    refactor.waitRenameParametersFormIsOpen();
+    refactor.typeAndWaitNewName("i");
+    loader.waitOnClosed();
+    refactor.clickOkButtonRefactorForm();
+    refactor.waitRenameParametersFormIsClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitMarkerInvisibility(ERROR, 15);
     editor.waitTextIntoEditor(contentFromOutA);
