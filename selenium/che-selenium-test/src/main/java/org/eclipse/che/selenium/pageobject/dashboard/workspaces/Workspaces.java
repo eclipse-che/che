@@ -23,7 +23,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_RAM;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Locators.WORKSPACE_ITEM_STOP_START_WORKSPACE_BUTTON;
 import static org.openqa.selenium.support.ui.ExpectedConditions.*;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -37,7 +36,6 @@ import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -326,26 +324,13 @@ public class Workspaces {
   }
 
   public void selectWorkspaceItemName(String wsName) {
-    try {
-      new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-          .until(visibilityOfElementLocated(By.xpath(format(Locators.WORKSPACE_ITEM_NAME, wsName))))
-          .click();
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8594");
-    }
+    waitWorkspaceIsPresent(wsName);
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(Locators.WORKSPACE_ITEM_NAME, wsName)));
   }
 
   public void waitWorkspaceIsPresent(String workspaceName) {
-    try {
-      new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
-          .until(
-              visibilityOfElementLocated(
-                  By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName))));
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8594");
-    }
+    seleniumWebDriverHelper.waitVisibility(
+        By.xpath(format(Locators.WORKSPACE_ITEM_NAME, workspaceName)));
   }
 
   public void waitWorkspaceIsPresent(String organizationName, String workspaceName) {

@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -27,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -129,7 +132,7 @@ public class JavaDocPopupTest {
     editor.goToCursorPositionVisible(26, 105);
 
     editor.openJavaDocPopUp();
-    editor.waitJavaDocPopUpOpened();
+    checkJavaDocPopUpOpened();
     editor.checkTextToBePresentInJavaDocPopUp(CLASS_TEXT);
 
     editor.selectTabByName(tabTitle);
@@ -141,7 +144,7 @@ public class JavaDocPopupTest {
     editor.goToCursorPositionVisible(25, 6);
 
     editor.openJavaDocPopUp();
-    editor.waitJavaDocPopUpOpened();
+    checkJavaDocPopUpOpened();
     // editor.checkTextToBePresentInJavaDocPopUp(ANNOTATION_TEXT);
 
     editor.typeTextIntoEditor(Keys.ESCAPE.toString());
@@ -151,7 +154,7 @@ public class JavaDocPopupTest {
     // Class name javadoc popup
     editor.goToCursorPositionVisible(22, 17);
     editor.openJavaDocPopUp();
-    editor.waitJavaDocPopUpOpened();
+    checkJavaDocPopUpOpened();
     editor.checkTextToBePresentInJavaDocPopUp(CLASS_NAME_TEXT);
 
     editor.selectTabByName("AppController");
@@ -202,7 +205,7 @@ public class JavaDocPopupTest {
 
     editor.goToCursorPositionVisible(25, 35);
     editor.openJavaDocPopUp();
-    editor.waitJavaDocPopUpOpened();
+    checkJavaDocPopUpOpened();
     editor.checkTextToBePresentInJavaDocPopUp(JAVA_DOC_FOR_OBJECT);
   }
 
@@ -216,5 +219,14 @@ public class JavaDocPopupTest {
     askForValueDialog.createJavaFileByNameAndType(className, AskForValueDialog.JavaFiles.CLASS);
     loader.waitOnClosed();
     projectExplorer.waitVisibilityByName(className + ".java");
+  }
+
+  private void checkJavaDocPopUpOpened() {
+    try {
+      editor.waitJavaDocPopUpOpened();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11735", ex);
+    }
   }
 }

@@ -16,14 +16,13 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -37,11 +36,16 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class Wizard {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Loader loader;
 
   @Inject
-  public Wizard(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public Wizard(
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -360,13 +364,7 @@ public class Wizard {
   }
 
   public void waitCloseProjectConfigForm() {
-    try {
-      new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
-          .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM_ID)));
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10713", ex);
-    }
+    seleniumWebDriverHelper.waitInvisibility(By.id(Locators.MAIN_FORM_ID), LOADER_TIMEOUT_SEC);
   }
 
   /** wait parent directory name on the 'Project Configuration' form */
