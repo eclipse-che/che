@@ -61,7 +61,8 @@ public class NameUtilsTest {
   @Test(dataProvider = "ValidCommandNames")
   public void validCommandNamesShouldGetValidated(String validCommandName) {
     assertTrue(
-        validCommandName + " is supposed to be valid", NameUtils.isValidCommandName(validCommandName));
+        validCommandName + " is supposed to be valid",
+        NameUtils.isValidCommandName(validCommandName));
   }
 
   @Test
