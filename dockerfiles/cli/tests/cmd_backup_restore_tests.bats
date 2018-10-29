@@ -101,7 +101,7 @@ teardown() {
   backup=$(execute_cli_command --che-data-path=${tmp_path} --che-cli-command=backup --che-cli-extra-options="--skip:nightly --skip:pull")
 
   #THEN
-  [[ "$backup" == *"Saving codenvy data..."* ]]
+  [[ "$backup" == *"Saving Eclipse Che data..."* ]]
   [[ "$backup" == *"che data saved in ${tmp_path}/backup/che_backup.tar.gz"* ]]
   [[ -f "${container_tmp_path}"/backup/che_backup.tar.gz ]]
 

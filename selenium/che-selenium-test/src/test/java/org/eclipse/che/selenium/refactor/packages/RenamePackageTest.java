@@ -508,7 +508,14 @@ public class RenamePackageTest {
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
-    refactor.waitRenamePackageFormIsClosed();
+
+    try {
+      refactor.waitRenamePackageFormIsClosed();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11754");
+    }
+
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/test7/q");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/test7/q/A.java");
     editor.waitTextIntoEditor(TEST7_Q_OUT);
@@ -638,7 +645,14 @@ public class RenamePackageTest {
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
     loader.waitOnClosed();
-    refactor.waitRenamePackageFormIsClosed();
+
+    try {
+      refactor.waitRenamePackageFormIsClosed();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11754");
+    }
+
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/your_/pack");
     editor.waitTextIntoEditor(TEST11_DISABLED_IMPORT_OUT);
 
