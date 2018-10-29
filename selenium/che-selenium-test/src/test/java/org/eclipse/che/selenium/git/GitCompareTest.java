@@ -23,6 +23,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.JAVA_CLASS;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -48,6 +49,7 @@ import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.git.GitCompare;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -230,7 +232,14 @@ public class GitCompareTest {
     git.typeTextIntoGitCompareEditor("//change content from compare editor");
     git.waitExpTextIntoCompareLeftEditor("//change content from compare editor");
     git.clickOnGitCompareCloseButton();
-    askDialog.confirmAndWaitClosed();
+
+    try {
+      askDialog.confirmAndWaitClosed();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11769");
+    }
+
     git.waitGitCompareFormIsClosed();
     git.waitGitCompareRevisionFormIsOpen();
     git.clickOnCloseRevisionButton();
