@@ -320,7 +320,6 @@ export class ComposeEnvironmentManager extends EnvironmentManager {
 
     return {
       name: machineName,
-      installers: [this.TERMINAL_AGENT_NAME],
       attributes: {
         memoryLimitBytes: this.DEFAULT_MEMORY_LIMIT
       },
