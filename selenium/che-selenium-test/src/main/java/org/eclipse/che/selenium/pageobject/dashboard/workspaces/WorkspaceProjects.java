@@ -23,14 +23,12 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.Locators.SELECT_ALL_CHECKBOX_XPATH;
 import static org.openqa.selenium.support.ui.ExpectedConditions.invisibilityOfElementLocated;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -189,12 +187,7 @@ public class WorkspaceProjects {
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName)));
 
-    try {
-      seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.DELETE_PROJECT));
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8931");
-    }
+    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.DELETE_PROJECT));
   }
 
   /** click on 'DELETE' button in settings of project */
