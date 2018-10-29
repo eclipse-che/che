@@ -13,13 +13,13 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
-import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -35,10 +35,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class NavigationBar {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
-  public NavigationBar(SeleniumWebDriver seleniumWebDriver) {
+  public NavigationBar(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -72,7 +76,7 @@ public class NavigationBar {
   List<WebElement> teamsList;
 
   public void waitNavigationBar() {
-    new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC).until(visibilityOf(navigationBar));
+    seleniumWebDriverHelper.waitVisibility(navigationBar, LOAD_PAGE_TIMEOUT_SEC);
   }
 
   public void clickOnMenu(MenuItem menuItem) {

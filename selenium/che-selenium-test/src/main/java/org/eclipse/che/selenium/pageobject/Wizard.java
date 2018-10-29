@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -35,11 +36,16 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class Wizard {
 
   private final SeleniumWebDriver seleniumWebDriver;
+  private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Loader loader;
 
   @Inject
-  public Wizard(SeleniumWebDriver seleniumWebDriver, Loader loader) {
+  public Wizard(
+      SeleniumWebDriver seleniumWebDriver,
+      Loader loader,
+      SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     this.loader = loader;
     PageFactory.initElements(seleniumWebDriver, this);
   }
@@ -358,8 +364,7 @@ public class Wizard {
   }
 
   public void waitCloseProjectConfigForm() {
-    new WebDriverWait(seleniumWebDriver, LOADER_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(Locators.MAIN_FORM_ID)));
+    seleniumWebDriverHelper.waitInvisibility(By.id(Locators.MAIN_FORM_ID), LOADER_TIMEOUT_SEC);
   }
 
   /** wait parent directory name on the 'Project Configuration' form */
