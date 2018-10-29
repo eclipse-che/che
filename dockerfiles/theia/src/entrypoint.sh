@@ -69,7 +69,7 @@ trap 'responsible_shutdown' SIGHUP SIGTERM SIGINT
 
 # run che
 cd ${HOME}
-node_modules/.bin/theia start /projects --hostname=0.0.0.0 --port=${THEIA_PORT} &
+node src-gen/backend/main.js /projects --hostname=0.0.0.0 --port=${THEIA_PORT} &
 
 PID=$!
 
