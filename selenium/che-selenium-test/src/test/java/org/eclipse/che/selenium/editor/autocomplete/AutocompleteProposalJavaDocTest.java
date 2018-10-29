@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.editor.autocomplete;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -99,16 +101,8 @@ public class AutocompleteProposalJavaDocTest {
 
   @Test
   public void shouldDisplayJavaDocOfClassMethod() throws Exception {
-    // when
-    editor.waitActive();
-    loader.waitOnClosed();
-    editor.goToCursorPositionVisible(31, 30);
-    editor.launchAutocompleteAndWaitContainer();
-    editor.selectCompositeAutocompleteProposal(
-        "concat(String part1, String part2, char divider) : String App");
-
-    // then
-    editor.waitProposalDocumentationHTML(
+    // given
+    final String expectedJavadocHtmlText =
         "<p><strong>Deprecated</strong>  <em>As of version 1.0, use <a href=\"jdt://contents/commons-lang-2.6.jar/org.apache.commons.lang/StringUtils.class?=app/%5C/home%5C/user%5C/.m2%5C/repository%5C/commons-lang%5C/commons-lang%5C/2.6%5C/commons-lang-2.6.jar%3Corg.apache.commons.lang%28StringUtils.class#3169\">org.apache.commons.lang.StringUtils.join(Object [], char)</a></em></p>\n"
             + "<p>Returns concatination of two strings into one divided by special symbol.</p>\n"
             + "<ul>\n"
@@ -132,7 +126,23 @@ public class AutocompleteProposalJavaDocTest {
             + "<li><a href=\"jdt://contents/rt.jar/java.lang/NullPointerException.class?=app/%5C/usr%5C/lib%5C/jvm%5C/java-8-openjdk-amd64%5C/jre%5C/lib%5C/rt.jar%3Cjava.lang%28NullPointerException.class#53\">NullPointerException</a> - if one of the part has null value.</li>\n"
             + "</ul>\n"
             + "</li>\n"
-            + "</ul>\n");
+            + "</ul>\n";
+
+    // when
+    editor.waitActive();
+    loader.waitOnClosed();
+    editor.goToCursorPositionVisible(31, 30);
+    editor.launchAutocompleteAndWaitContainer();
+    editor.selectCompositeAutocompleteProposal(
+        "concat(String part1, String part2, char divider) : String App");
+
+    // then
+    try {
+      editor.waitProposalDocumentationHTML(expectedJavadocHtmlText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11743");
+    }
   }
 
   @Test

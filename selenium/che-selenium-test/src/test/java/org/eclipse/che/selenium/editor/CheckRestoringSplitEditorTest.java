@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.editor;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_JAVA_MULTIMODULE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPIT_HORISONTALLY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPLIT_VERTICALLY;
@@ -81,7 +82,7 @@ public class CheckRestoringSplitEditorTest {
   }
 
   @Test
-  public void checkRestoringStateSplittedEditor() throws IOException, Exception {
+  public void checkRestoringStateSplitEditor() throws IOException, Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     splitEditorAndOpenFiles();
@@ -97,18 +98,18 @@ public class CheckRestoringSplitEditorTest {
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
     loader.waitOnClosed();
-    projectExplorer.waitVisibilityByName(javaClassName);
+    projectExplorer.waitVisibilityByName(javaClassName, WIDGET_TIMEOUT_SEC);
 
     notificationsPopupPanel.waitPopupPanelsAreClosed();
-    checkSplitdEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         1, javaClassTab, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
-    checkSplitdEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         2, readmeFileName, expectedTextFromEditor.get(1).trim(), cursorPositionForReadMeFile);
-    checkSplitdEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         3, pomFileTab, expectedTextFromEditor.get(2).trim(), cursorPositionForPomFile);
   }
 
-  private void checkSplitdEditorAfterRefreshing(
+  private void checkSplitEditorAfterRefreshing(
       int numOfEditor,
       String nameOfEditorTab,
       String expectedTextAfterRefresh,
