@@ -47,19 +47,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Class for obtaining active token from OSIO using login/pass credentials.
- * As fabric8-auth service does not have REST endpoint for login, the logic for obtaining 
- * active token is not so simple:
- * 
- * 1) Access <auth.service.url>/api/login?redirect=che.openshift.io (the redirect URL doesn't matter). 
- *    This redirects us to redhat developer portal login page.
- * 2) Parse that page - obtain `action` attribute of the login form
- * 3) Send login request to URL obtained in step 2) and follow redirects until `token_json` appears in redirect URL.
- * 
- * @author rhopp
+ * Class for obtaining active token from OSIO using login/pass credentials. As fabric8-auth service
+ * does not have REST endpoint for login, the logic for obtaining active token is not so simple:
  *
+ * <p>1) Access <auth.service.url>/api/login?redirect=che.openshift.io (the redirect URL doesn't
+ * matter). This redirects us to redhat developer portal login page. 2) Parse that page - obtain
+ * `action` attribute of the login form 3) Send login request to URL obtained in step 2) and follow
+ * redirects until `token_json` appears in redirect URL.
+ *
+ * @author rhopp
  */
-
 @Singleton
 public class OSIOTestAuthServiceClient extends AbstractKeycloakTestAuthServiceClient {
 
@@ -87,7 +84,8 @@ public class OSIOTestAuthServiceClient extends AbstractKeycloakTestAuthServiceCl
     String tokenJsonString = followRedirects(conn);
 
     // "token_json={}"
-    String tokenJson = URLDecoder.decode(new URL(tokenJsonString).getQuery(), "UTF-8").substring(11);
+    String tokenJson =
+        URLDecoder.decode(new URL(tokenJsonString).getQuery(), "UTF-8").substring(11);
     KeycloakToken readerToKeycloakToken = readerToKeycloakToken(new StringReader(tokenJson));
     return readerToKeycloakToken;
   }
