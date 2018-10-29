@@ -73,7 +73,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   @Inject private DefaultTestUser defaultTestUser;
 
   // it is used to read workspace logs on test failure
-  private TestWorkspace testWorkspace;
+  private TestWorkspa/ config the projectce testWorkspace;
 
   @BeforeClass
   public void prepare() {
@@ -109,10 +109,17 @@ public class ImportAndValidateEclipseCheProjectTest {
     projectWizard.waitCreateProjectWizardFormIsClosed();
     loader.waitOnClosed();
 
+    // waits on project resolving message
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
     // expand the project
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
+
+    // checks packages in project Explorer (issue https://github.com/eclipse/che/issues/11537)
+
+    // waits 'Building Workspace' progress bar
 
     // then open files
     // open a java file
