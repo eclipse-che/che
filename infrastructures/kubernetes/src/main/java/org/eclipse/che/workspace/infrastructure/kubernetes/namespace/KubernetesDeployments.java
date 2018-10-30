@@ -141,7 +141,7 @@ public class KubernetesDeployments {
     try {
       clientFactory
           .create(workspaceId)
-          .extensions()
+          .apps()
           .deployments()
           .inNamespace(namespace)
           .createNew()
@@ -679,7 +679,7 @@ public class KubernetesDeployments {
       List<Deployment> deployments =
           clientFactory
               .create(workspaceId)
-              .extensions()
+              .apps()
               .deployments()
               .inNamespace(namespace)
               .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -740,7 +740,7 @@ public class KubernetesDeployments {
       ScalableResource<Deployment, DoneableDeployment> deploymentResource =
           clientFactory
               .create(workspaceId)
-              .extensions()
+              .apps()
               .deployments()
               .inNamespace(namespace)
               .withName(deploymentName);
@@ -857,7 +857,7 @@ public class KubernetesDeployments {
     Deployment deployment =
         clientFactory
             .create(workspaceId)
-            .extensions()
+            .apps()
             .deployments()
             .inNamespace(namespace)
             .withName(name)
