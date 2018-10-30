@@ -88,7 +88,7 @@ public class NodeJsDebugTest {
       notifications.waitExpectedMessageOnProgressPanelAndClose("Remote debugger connected");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10728");
+      fail("Known random failure https://github.com/eclipse/che/issues/10728");
     }
 
     editorPageObj.waitTabFileWithSavedStatus(APP_FILE);
@@ -143,7 +143,7 @@ public class NodeJsDebugTest {
       debugPanel.waitExpectedResultInEvaluateExpression("19");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/4720", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/4720", ex);
     }
     debugPanel.clickCloseEvaluateBtn();
   }

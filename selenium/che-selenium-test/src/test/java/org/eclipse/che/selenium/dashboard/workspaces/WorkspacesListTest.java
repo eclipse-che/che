@@ -224,7 +224,7 @@ public class WorkspacesListTest {
       assertEquals(items.get(1).getRamAmount(), JAVA_WS_MB);
     } catch (AssertionError ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/4242");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/4242");
     }
 
     // check reverse order after "RAM" clicking
@@ -235,7 +235,7 @@ public class WorkspacesListTest {
       assertEquals(items.get(1).getRamAmount(), BLANK_WS_MB);
     } catch (AssertionError ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/4242");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/4242");
     }
 
     // check items order after "Projects" clicking

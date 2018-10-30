@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.selenium.refactor.fields;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -32,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -398,20 +395,10 @@ public class RenamePrivateFieldTest {
   }
 
   private void typeAndWaitNewName(String newName) {
-    try {
-      refactor.typeAndWaitNewName(newName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
+    refactor.typeAndWaitNewName(newName);
   }
 
   private void waitTextIntoEditor(String expectedText) {
-    try {
-      editor.waitTextIntoEditor(expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
+    editor.waitTextIntoEditor(expectedText);
   }
 }
