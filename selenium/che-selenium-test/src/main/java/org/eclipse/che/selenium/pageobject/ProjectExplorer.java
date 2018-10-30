@@ -49,7 +49,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -271,17 +270,8 @@ public class ProjectExplorer {
    * @param timeout waiting timeout in seconds
    */
   public void waitProjectExplorer(int timeout) {
-    try {
-      seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
-      loader.waitOnClosed();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
-        fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
-      }
-
-      throw ex;
-    }
+    seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
+    loader.waitOnClosed();
   }
 
   /**
