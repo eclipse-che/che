@@ -125,7 +125,7 @@ public class CheckRestoringSplitEditorTest {
           numOfEditor, LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9456", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/9456", ex);
     }
   }
 

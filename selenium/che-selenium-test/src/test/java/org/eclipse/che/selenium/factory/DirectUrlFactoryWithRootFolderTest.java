@@ -99,7 +99,7 @@ public class DirectUrlFactoryWithRootFolderTest {
       events.waitExpectedMessage(expectedMessInTheEventsPanel);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6440");
+      fail("Known random failure https://github.com/eclipse/che/issues/6440");
     }
     projectExplorer.openItemByPath(projectName);
 
