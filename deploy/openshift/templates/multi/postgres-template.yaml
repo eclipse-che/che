@@ -48,7 +48,7 @@ objects:
           - name: "POSTGRESQL_LOG_DEBUG"
             value: "${POSTGRESQL_LOG_DEBUG}"
           image: '${IMAGE_POSTGRES}:${CHE_VERSION}'
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           name: postgres
           livenessProbe:
             failureThreshold: 3
