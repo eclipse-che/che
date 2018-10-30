@@ -37,9 +37,10 @@ import org.slf4j.LoggerFactory;
  * @author Anton Korneta
  */
 @Singleton
-public class KeycloakTestAuthServiceClient extends AbstractKeycloakTestAuthServiceClient {
+public class OpenShiftKeycloakTestAuthServiceClient extends AbstractKeycloakTestAuthServiceClient {
 
-  private static final Logger LOG = LoggerFactory.getLogger(KeycloakTestAuthServiceClient.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(OpenShiftKeycloakTestAuthServiceClient.class);
 
   private static final String CONTENT_TYPE = "Content-Type";
   private static final String FORM_MIME_TYPE = "application/x-www-form-urlencoded";
@@ -53,7 +54,7 @@ public class KeycloakTestAuthServiceClient extends AbstractKeycloakTestAuthServi
   private final KeycloakSettings keycloakSettings;
 
   @Inject
-  public KeycloakTestAuthServiceClient(
+  public OpenShiftKeycloakTestAuthServiceClient(
       DefaultHttpJsonRequestFactory requestFactory,
       TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient) {
     super();

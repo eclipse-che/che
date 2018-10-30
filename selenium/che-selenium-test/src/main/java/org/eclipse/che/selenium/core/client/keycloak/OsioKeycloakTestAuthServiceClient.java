@@ -58,15 +58,16 @@ import org.slf4j.LoggerFactory;
  * @author rhopp
  */
 @Singleton
-public class OSIOTestAuthServiceClient extends AbstractKeycloakTestAuthServiceClient {
+public class OsioKeycloakTestAuthServiceClient extends AbstractKeycloakTestAuthServiceClient {
 
-  private static final Logger LOG = LoggerFactory.getLogger(OSIOTestAuthServiceClient.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(OsioKeycloakTestAuthServiceClient.class);
   private static final String REFRESH_TOKEN_TEMPLATE = "{\"refresh_token\":\"%s\"}";
 
   private final String osioAuthEndpoint;
 
   @Inject
-  public OSIOTestAuthServiceClient(@Named("che.osio.auth.endpoint") String authEndpoint) {
+  public OsioKeycloakTestAuthServiceClient(@Named("che.osio.auth.endpoint") String authEndpoint) {
     super();
     this.osioAuthEndpoint = authEndpoint;
   }

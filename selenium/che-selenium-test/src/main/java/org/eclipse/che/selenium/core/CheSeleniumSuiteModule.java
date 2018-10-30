@@ -132,10 +132,10 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     switch (cheInfrastructure) {
       case OPENSHIFT:
       case K8S:
-        install(new KeycloakCheSeleniumOpenshiftModule());
+        install(new CheSeleniumOpenShiftModule());
         break;
       case OSIO:
-        install(new OSIOCheSeleniumOpenshiftModule());
+        install(new CheSeleniumOsioModule());
         break;
 
       case DOCKER:
