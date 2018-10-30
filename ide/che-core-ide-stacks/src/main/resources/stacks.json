@@ -252,7 +252,7 @@
     }
   },
   {
-    "id": "che7",
+    "id": "che7-preview",
     "creator": "ide",
     "name": "Che 7",
     "description": "Workspace.next sidecars and Theia as IDE",
