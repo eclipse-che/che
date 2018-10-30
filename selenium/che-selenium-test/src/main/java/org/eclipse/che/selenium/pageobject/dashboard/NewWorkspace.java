@@ -154,6 +154,7 @@ public class NewWorkspace {
     GO("go-default"),
     JAVA_CENTOS("java-centos"),
     JAVA_THEIA_DOCKER("simple-theia-docker"),
+    JAVA_THEIA_ON_KUBERNETES("java-theia-kubernetes"),
     JAVA_THEIA_OPENSHIFT("java-theia-openshift"),
     JAVA_MYSQL_CENTOS("java-centos-mysql"),
     JAVA_DEBIAN("java-debian"),

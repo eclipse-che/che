@@ -84,8 +84,7 @@ public class DownloadProjectTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide.open(workspace);
-    consoles.waitJDTLSProjectResolveFinishedMessage(TEST_PROJECT_1);
-    consoles.waitJDTLSProjectResolveFinishedMessage(TEST_PROJECT_2);
+    consoles.waitJDTLSProjectResolveFinishedMessage(TEST_PROJECT_1, TEST_PROJECT_2);
     projectExplorer.waitProjectExplorer();
     loader.waitOnClosed();
   }

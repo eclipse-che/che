@@ -46,6 +46,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -1073,10 +1074,22 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAndContextClick(By elementLocator, int timeout) {
     waitVisibility(elementLocator, timeout);
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .contextClick(seleniumWebDriver.findElement(elementLocator))
-        .perform();
+
+    waitNoExceptions(
+        () -> performContextClick(elementLocator), timeout, StaleElementReferenceException.class);
+  }
+
+  /**
+   * Waits visibility of element located at {@code elementLocator} and then context click on it.
+   *
+   * @param elementLocator locator of element which should be context clicked on
+   */
+  public void waitAndContextClick(By elementLocator) {
+    waitAndContextClick(elementLocator, DEFAULT_TIMEOUT);
+  }
+
+  private void performContextClick(By elementLocator) {
+    getAction().contextClick(seleniumWebDriver.findElement(elementLocator)).perform();
   }
 
   /**

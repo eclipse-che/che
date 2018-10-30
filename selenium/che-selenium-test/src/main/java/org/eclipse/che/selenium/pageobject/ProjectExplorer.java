@@ -49,7 +49,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -190,6 +189,10 @@ public class ProjectExplorer {
     // "//div[@name='%s' or @name='%s.class']//div[contains(@class, 'selected')] ";
   }
 
+  private String getItemXpathByPath(String itemPath) {
+    return format(PROJECT_EXPLORER_ITEM_TEMPLATE, itemPath);
+  }
+
   /**
    * Waits for visibility of the {@link WebElement} with specified {@code path} for a during {@code
    * timeout} and gets this {@link WebElement}
@@ -199,8 +202,7 @@ public class ProjectExplorer {
    * @return found {@link WebElement}
    */
   private WebElement waitAndGetItem(String path, int timeout) {
-    return seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
+    return seleniumWebDriverHelper.waitVisibility(By.xpath(getItemXpathByPath(path)), timeout);
   }
 
   /**
@@ -268,17 +270,8 @@ public class ProjectExplorer {
    * @param timeout waiting timeout in seconds
    */
   public void waitProjectExplorer(int timeout) {
-    try {
-      seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
-      loader.waitOnClosed();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
-        fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
-      }
-
-      throw ex;
-    }
+    seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
+    loader.waitOnClosed();
   }
 
   /**
@@ -549,7 +542,7 @@ public class ProjectExplorer {
    * @param path item's path in format: 'Test/src/pom.xml'
    */
   public void openItemByPath(String path) {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
+    Actions action = seleniumWebDriverHelper.getAction();
 
     seleniumWebDriverHelper.waitNoExceptions(
         () -> {
@@ -561,11 +554,12 @@ public class ProjectExplorer {
 
     seleniumWebDriverHelper.waitNoExceptions(
         () -> {
-          action.moveToElement(waitAndGetItem(path)).perform();
-          action.doubleClick().perform();
+          action.doubleClick(waitAndGetItem(path)).perform();
         },
         LOAD_PAGE_TIMEOUT_SEC,
         StaleElementReferenceException.class);
+
+    loader.waitOnClosed();
   }
 
   /**
@@ -670,20 +664,25 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void openContextMenuByPathSelectedItem(String path) {
+    final String itemXpath = getItemXpathByPath(path);
+
     for (int i = 1; ; i++) {
       waitAndSelectItem(path);
-
-      actionsFactory.createAction(seleniumWebDriver).contextClick().perform();
+      waitItemIsSelected(path);
+      seleniumWebDriverHelper.waitAndContextClick(By.xpath(itemXpath));
       waitContextMenu();
-
       try {
         waitItemIsSelected(path, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
         return;
       } catch (TimeoutException e) {
         seleniumWebDriverHelper.hideContextMenu();
         waitContextMenuPopUpClosed();
-        if (i == 2) {
-          throw e;
+        if (i > 1) {
+          final String errorMessage =
+              format(
+                  "Selection of the project tree item which located by \"%s\" has been lost, context menu event can't be performed for this element",
+                  getItemXpathByPath(path));
+          throw new RuntimeException(errorMessage);
         }
       }
     }

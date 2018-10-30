@@ -30,7 +30,7 @@ RUN /tmp/builder/scripts/setup-nodejs.sh
 RUN yum install -y gcc-c++ make python git
 
 # Define upstream version of theia to use
-ARG THEIA_VERSION=plugin-id
+ARG THEIA_VERSION=0.3.16
 
 ENV THEIA_VERSION=${THEIA_VERSION} \
     HOME=/home/theia
@@ -43,7 +43,7 @@ ADD src/config.yaml ${HOME}/.config/verdaccio/
 ADD src/patches /home/theia-build/patches
 
 # Invalidate cache if there is a new commit
-ADD https://api.github.com/repos/theia-ide/theia/git/refs/heads/v${THEIA_VERSION} /tmp/sha1-repository
+ADD https://api.github.com/repos/theia-ide/theia/git/refs/tags/v${THEIA_VERSION} /tmp/sha1-repository
 # Build theia from source code and publish artifacts locally
 ADD src/builder/build-and-publish-theia.sh /tmp/builder/scripts/build-and-publish-theia.sh
 RUN /tmp/builder/scripts/build-and-publish-theia.sh
@@ -62,11 +62,21 @@ RUN /tmp/builder/scripts/add-extensions.sh
 ADD src/builder/assemble-theia.sh /tmp/builder/scripts/assemble-theia.sh
 RUN /tmp/builder/scripts/assemble-theia.sh
 
+# Run into production mode
+ADD src/builder/production-mode.sh /tmp/builder/scripts/production-mode.sh
+RUN /tmp/builder/scripts/production-mode.sh
+
 # Clean
 RUN yarn cache clean
 
 # Restore registry setting
 RUN npm config set registry https://registry.npmjs.org && yarn config set registry https://registry.npmjs.org
+
+# Do cleanup with yarn autoclean and on some folders
+ADD src/.yarnclean ${HOME}/.yarnclean
+RUN yarn autoclean --force
+ADD src/cleanup* /tmp/builder/scripts/
+RUN /tmp/builder/scripts/cleanup.sh
 
 # change permissions
 RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
@@ -79,7 +89,10 @@ ENV USE_LOCAL_GIT=true \
     HOME=/home/theia \
     THEIA_DEFAULT_PLUGINS=local-dir:///default-theia-plugins \
     PATH=/opt/rh/rh-git29/root/bin/:${PATH} \
-    LD_LIBRARY_PATH=/opt/rh/httpd24/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+    LD_LIBRARY_PATH=/opt/rh/httpd24/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \
+    # Specify the directory of git (avoid to search at init of Theia)
+    LOCAL_GIT_DIRECTORY=/opt/rh/rh-git29/root/ \
+    GIT_EXEC_PATH=/opt/rh/rh-git29/root/usr/libexec/git-core
 
 EXPOSE 3000 3030
 
@@ -89,11 +102,13 @@ ADD src/builder/setup-nodejs.sh /tmp/builder/scripts/setup-nodejs.sh
 # Install Java for java extension
 # Install git (from software collection in order to have a recent version)
 # Install bzip2 to unpack files
-# Install supervisor for running theia
 # Install which tool in order to search git
-RUN yum install -y centos-release-scl
-RUN yum install -y rh-git29 scl-utils sudo java-1.8.0-openjdk-devel bzip2 which && \
-    /tmp/builder/scripts/setup-nodejs.sh
+RUN yum install -y centos-release-scl && \
+    yum install -y rh-git29 scl-utils sudo java-1.8.0-openjdk bzip2 which && \
+    /tmp/builder/scripts/setup-nodejs.sh && \
+    # cleanup cache
+    yum clean all && \
+    rm -rf /var/cache/yum
 
 RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && usermod -p "*" theia \
@@ -106,25 +121,29 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && mkdir /default-theia-plugins \
     # Download yeoman generator plug-in
     && curl -L -o /default-theia-plugins/theia_yeoman_plugin.theia https://github.com/eclipse/theia-yeoman-plugin/releases/download/untagged-04f28ee329e479cc465b/theia_yeoman_plugin.theia \
+    && curl -L -o /default-theia-plugins/eclipse_che_theia_factory_plugin.theia https://github.com/eclipse/che-theia-factory-extension/releases/download/untagged-856bf351cc3b4bcc335a/eclipse_che_theia_factory_plugin.theia \
     && for f in "${HOME}" "/etc/passwd" "/etc/group /node_modules /default-theia-plugins /projects"; do\
            sudo chgrp -R 0 ${f} && \
            sudo chmod -R g+rwX ${f}; \
        done \
     && cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template \
     && cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template \
-    && npm install -g yo @theia/generator-plugin \
+    # Add yeoman, theia plugin generator and typescript (to have tsc/typescript working)
+    && yarn global add yo @theia/generator-plugin@0.0.1-1540209403 typescript@2.9.2 \
     && mkdir -p ${HOME}/.config/insight-nodejs/ \
     && chmod -R 777 ${HOME}/.config/ \
-    # Defines the root /node_modules as the folder to use by yarn
-    && echo '"--*.modules-folder" "/node_modules"' > $HOME/.yarnrc \
-    # use typescript globally (to have tsc/typescript working)
-    && npm install -g typescript@2.9.2 \
     # Disable the statistics for yeoman
     && echo '{"optOut": true}' > $HOME/.config/insight-nodejs/insight-yo.json \
     # Add software collection git to env
     && echo 'source scl_source enable rh-git29' >> /home/theia/.bashrc \
+    # Link yarn global modules for yeoman
+    && ln -s /usr/local/share/.config/yarn/global/node_modules /usr/local/lib/ \
     # Cleanup tmp folder
     && rm -rf /tmp/* \
+    # Cleanup yarn cache
+    && yarn cache clean \
+    # Defines the root /node_modules as the folder to use by yarn
+    && echo '"--*.modules-folder" "/node_modules"' > $HOME/.yarnrc \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 

@@ -18,8 +18,8 @@ import (
 
 	"github.com/eclipse/che/agents/go-agents/bootstrapper/booter"
 	"github.com/eclipse/che/agents/go-agents/bootstrapper/cfg"
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc/jsonrpcws"
+	"github.com/eclipse/che-go-jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc/jsonrpcws"
 	"github.com/eclipse/che/agents/go-agents/core/process"
 )
 

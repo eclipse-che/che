@@ -119,12 +119,6 @@ final class CompareViewImpl extends Window implements CompareView {
   }
 
   @Override
-  protected void onHide() {
-    visible = false;
-    delegate.onClose();
-  }
-
-  @Override
   public String getEditableContent() {
     return compareWidget.getContent();
   }
@@ -182,6 +176,7 @@ final class CompareViewImpl extends Window implements CompareView {
 
   @Override
   public void close() {
+    visible = false;
     hide();
   }
 

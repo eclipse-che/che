@@ -90,7 +90,7 @@ context('TypeScript', () => {
 
         }).then(() => {
             // now, search if there is an invalid syntax
-            cy.get('div.lines-content.monaco-editor-background > div.view-overlays > div:nth-child(3) > div').should('have.class', 'squiggly-error');
+            cy.get('.lines-content.monaco-editor-background').contains('invalid').should('have.class', 'mtk11');
         });
     })
 });

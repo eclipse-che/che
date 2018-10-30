@@ -1,5 +1,3 @@
-// moved from https://github.com/eclipse/che-lib/tree/master/websocket-terminal
-
 package term
 
 import (
@@ -11,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/eclipse/che-lib/websocket"
+	"github.com/gorilla/websocket"
 	"github.com/eclipse/che/agents/go-agents/core/common"
 	"github.com/eclipse/che/agents/go-agents/core/rest"
 )

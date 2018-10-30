@@ -179,13 +179,16 @@ public class JpaMemberDao extends AbstractJpaPermissionsDao<MemberImpl> implemen
   }
 
   @Override
-  protected MemberImpl getEntity(String userId, String instanceId) throws NotFoundException {
+  protected MemberImpl getEntity(String userId, String instanceId)
+      throws NotFoundException, ServerException {
     try {
       return doGet(userId, instanceId);
     } catch (NoResultException e) {
       throw new NotFoundException(
           String.format(
               "Membership of user %s in organization %s was not found", userId, instanceId));
+    } catch (RuntimeException e) {
+      throw new ServerException(e.getMessage(), e);
     }
   }
 

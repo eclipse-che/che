@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc"
 	"github.com/eclipse/che/agents/go-agents/core/process"
 	"github.com/eclipse/che/agents/go-agents/core/rest"
 	"github.com/eclipse/che/agents/go-agents/core/rest/restutil"

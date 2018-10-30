@@ -11,7 +11,7 @@
             "name": "che-theia-ssh-extension",
             "source": "https://github.com/eclipse/che-theia-ssh-plugin",
             "folder": "ssh-extension",
-            "checkoutTo": "master",
+            "checkoutTo": "0.0.1",
             "type": "git"
         },
         {
@@ -19,13 +19,6 @@
             "source": "https://github.com/eclipse/che-theia-machines-plugin.git",
             "folder": "theia-machines-extension",
             "checkoutTo": "master",
-            "type": "git"
-        },
-        {
-            "name": "@eclipse-che/theia-factory-extension",
-            "source": "https://github.com/eclipse/che-theia-factory-extension.git",
-            "folder": "che-theia-factory",
-            "checkoutTo": "extension",
             "type": "git"
         },
         {

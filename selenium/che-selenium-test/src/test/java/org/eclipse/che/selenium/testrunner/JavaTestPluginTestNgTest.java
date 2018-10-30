@@ -123,7 +123,7 @@ public class JavaTestPluginTestNgTest {
           "Test runner executed successfully.");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10728");
+      fail("Known random failure https://github.com/eclipse/che/issues/10728");
     }
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppOne");
     pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppOne");
@@ -150,20 +150,14 @@ public class JavaTestPluginTestNgTest {
           "Test runner executed successfully.");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10728");
+      fail("Known random failure https://github.com/eclipse/che/issues/10728");
     }
 
     pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     editor.goToCursorPositionVisible(31, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);
-
-    try {
-      pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7338", ex);
-    }
+    pluginConsole.waitMethodMarkedAsFailed("shouldFailOfAppAnother");
 
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(FAILED).size() == 1);
     String testErrorMessage = pluginConsole.getTestErrorMessage();
@@ -189,16 +183,10 @@ public class JavaTestPluginTestNgTest {
           "Test runner executed successfully.");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10728");
+      fail("Known random failure https://github.com/eclipse/che/issues/10728");
     }
 
-    try {
-      pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7338", ex);
-    }
-
+    pluginConsole.waitMethodMarkedAsPassed("shouldSuccessOfAppAnother");
     assertTrue(pluginConsole.getAllNamesOfMethodsMarkedDefinedStatus(PASSED).size() == 1);
     editor.goToCursorPositionVisible(31, 17);
     menu.runCommand(RUN_MENU, TEST, TEST_NG_TEST_DROP_DAWN_ITEM);

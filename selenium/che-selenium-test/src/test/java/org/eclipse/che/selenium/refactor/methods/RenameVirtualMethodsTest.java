@@ -134,7 +134,13 @@ public class RenameVirtualMethodsTest {
 
   @Test
   public void testGeneric2() {
-    doRefactorByWizard(20, 20, "addIfPositive");
+    try {
+      doRefactorByWizard(20, 20, "addIfPositive");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10784", ex);
+    }
+
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
@@ -157,7 +163,7 @@ public class RenameVirtualMethodsTest {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
     editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
-    typeAndWaitNewName(newName);
+    refactor.typeAndWaitNewName(newName);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     // need for validation on server side
@@ -171,7 +177,7 @@ public class RenameVirtualMethodsTest {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
     editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
-    typeAndWaitNewName(newName);
+    refactor.typeAndWaitNewName(newName);
     refactor.clickOkButtonRefactorForm();
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
@@ -215,14 +221,5 @@ public class RenameVirtualMethodsTest {
     }
 
     return result;
-  }
-
-  private void typeAndWaitNewName(String newName) {
-    try {
-      refactor.typeAndWaitNewName(newName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
   }
 }

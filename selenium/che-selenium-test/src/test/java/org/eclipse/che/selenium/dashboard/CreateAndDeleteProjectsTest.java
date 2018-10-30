@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.J
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.PROJECTS;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
@@ -36,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -126,12 +128,12 @@ public class CreateAndDeleteProjectsTest {
     workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
     workspaceProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
     workspaceProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
-    workspaceProjects.openSettingsForProjectByName(WEB_JAVA_SPRING);
+    openProjectSettings(WEB_JAVA_SPRING);
     workspaceProjects.clickOnDeleteProject();
     workspaceProjects.clickOnDeleteItInDialogWindow();
     workspaceProjects.waitProjectIsNotPresent(WEB_JAVA_SPRING);
     workspaceProjects.waitProjectIsPresent(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
-    workspaceProjects.openSettingsForProjectByName(CONSOLE_JAVA_SIMPLE);
+    openProjectSettings(CONSOLE_JAVA_SIMPLE);
     workspaceProjects.clickOnDeleteProject();
     workspaceProjects.clickOnDeleteItInDialogWindow();
     workspaceProjects.waitProjectIsNotPresent(CONSOLE_JAVA_SIMPLE);
@@ -139,5 +141,14 @@ public class CreateAndDeleteProjectsTest {
 
   private void switchToWindow(String windowHandle) {
     seleniumWebDriver.switchTo().window(windowHandle);
+  }
+
+  private void openProjectSettings(String projectName) {
+    try {
+      workspaceProjects.openSettingsForProjectByName(projectName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/8931");
+    }
   }
 }

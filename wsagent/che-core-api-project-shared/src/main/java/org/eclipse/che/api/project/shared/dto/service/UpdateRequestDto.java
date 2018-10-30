@@ -21,11 +21,17 @@ public interface UpdateRequestDto {
 
   void setWsPath(String wsPath);
 
+  UpdateRequestDto withWsPath(String wsPath);
+
   ProjectConfigDto getConfig();
 
   void setConfig(ProjectConfigDto config);
 
+  UpdateRequestDto withConfig(ProjectConfigDto config);
+
   Map<String, String> getOptions();
 
   void setOptions(Map<String, String> options);
+
+  UpdateRequestDto withOptions(Map<String, String> options);
 }
