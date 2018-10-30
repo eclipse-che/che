@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -36,53 +35,13 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
-  private static final String PROJECT_NAME = "che-dummy-plugin";
-  private static final String HOSTED_PLUGIN_PATH = PROJECT_NAME + "/ui";
-  private static final String GIT_CLONE_COMMAND =
-      "git clone https://github.com/ws-skeleton/che-dummy-plugin.git";
-  private static final String EXPECTED_PLUGIN_FOLDER_MESSAGE =
-      "Plugin folder is set to: file:///projects/che-dummy-plugin/ui";
-  private static final String EXPECTED_STARTING_SERVER_MESSAGE =
-      "Starting hosted instance server ...";
-  private static final String EXPECTED_INSTANCE_RUNNING_MESSAGE = "Hosted instance is running at:";
-  private static final String GO_TO_DIRECTORY_COMMAND = "cd che-dummy-plugin";
-  private static final String BUILD_COMMAND = "./build.sh";
-  private static final String WS_DEV_TERMINAL_TITLE = "ws/dev terminal 0";
-  private static final String WS_THEIA_IDE_TERMINAL_TITLE = "ws/theia-ide terminal 1";
-  private static final String HOSTED_SEARCH_SEQUENCE = ">hosted";
-  private static final String HELLO_WORLD_SEARCH_SEQUENCE = ">Hello";
-  private static final String HELLO_WORLD_PROPOSAL = "Hello World";
-  private static final String EXPECTED_HELLO_WORLD_NOTIFICATION = "Hello World!";
-  private static final String SUGGESTION_FOR_SELECTION = "Hosted Plugin: Start Instance";
   private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";
-  private static final String YEOMAN_WIZARD_SEARCH_SEQUENCE = ">yeom";
-  private static final String PLUGIN_NAME_SEARCH_SEQUENCE = "hello-world";
-  private static final String BACKEND_PLUGIN_DESCRIPTION = "Backend plug-in, it will run on the server side.";
-  private static final String EXPECTED_CLONE_OUTPUT =
-      "Unpacking objects: 100% (27/27), done.\n" + "sh-4.2$";
-  private static final String EXPECTED_PLUGIN_OUTPUT = "hello_world_plugin.theia";
-  private static final String EXPECTED_TERMINAL_OUTPUT =
-      "Packaging of plugin\n"
-          + "\uD83D\uDD0D Validating...✔️\n"
-          + "\uD83D\uDDC2  Getting dependencies...✔️\n"
-          + "\uD83D\uDDC3  Resolving files...✔️\n"
-          + "✂️  Excluding files...✔️\n"
-          + "✍️  Generating Assembly...✔️\n"
-          + "\uD83C\uDF89 Generated plugin: hello_world_plugin.theia\n";
-  private static final String EXPECTED_TERMINAL_SUCCESS_OUTPUT =
-      "Generating Che plug-in file...\n"
-          + "hello_world_plugin.theia\n"
-          + "./\n"
-          + "./che-plugin.yaml\n"
-          + "./che-dependency.yaml\n"
-          + "Generated in assembly/che-service-plugin.tar.gz";
 
   @Inject private Dashboard dashboard;
   @Inject private NewWorkspace newWorkspace;
@@ -117,110 +76,132 @@ public class TheiaBuildPluginTest {
 
   @Test(groups = {OPENSHIFT})
   public void pluginShouldBeBuilt() {
+    final String pluginNameSearchSequence = "hello-world";
+    final String yeomanWizardSearchSequence = ">yeom";
+    final String helloWorldPluginProposal = "Hello World plug-in";
+    final String goToDirectoryCommand = "cd hello-world";
+    final String wsTheiaIdeTerminalTitle = "ws/theia-ide terminal 0";
+    final String expectedTerminalSuccessOutput =
+        "Packaging of plugin\n"
+            + "\uD83D\uDD0D Validating...✔️\n"
+            + "\uD83D\uDDC2  Getting dependencies...✔️\n"
+            + "\uD83D\uDDC3  Resolving files...✔️\n"
+            + "✂️  Excluding files...✔️\n"
+            + "✍️  Generating Assembly...✔️\n"
+            + "\uD83C\uDF89 Generated plugin: hello_world.theia";
+    final String backendPluginDescription = "Backend plug-in, it will run on the server side.";
+
+    // prepare project tree
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
 
-    //-------------------------------------------------------
-
+    // create project by "Yeoman Wizard"
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitForm();
-
-    WaitUtils.sleepQuietly(4);
-    theiaProposalForm.enterTextToSearchField(YEOMAN_WIZARD_SEARCH_SEQUENCE);
-
-    WaitUtils.sleepQuietly(4);
+    theiaProposalForm.enterTextToSearchField(yeomanWizardSearchSequence);
     theiaProposalForm.clickOnProposal("Yeoman Wizard");
-
-    WaitUtils.sleepQuietly(4);
     theiaProposalForm.waitForm();
+    theiaProposalForm.enterTextToSearchField(pluginNameSearchSequence);
+    seleniumWebDriverHelper.pressEnter();
+    theiaProposalForm.clickOnProposal(backendPluginDescription);
+    theiaProposalForm.clickOnProposal(helloWorldPluginProposal);
 
-    WaitUtils.sleepQuietly(4);
-    theiaProposalForm.enterTextToSearchField(PLUGIN_NAME_SEARCH_SEQUENCE);
-
-    WaitUtils.sleepQuietly(4);
-    theiaProposalForm.clickOnProposal(BACKEND_PLUGIN_DESCRIPTION);
-
-    WaitUtils.sleepQuietly(4);
-
-
-    //-------------------------------------------------------
-
-
-    openTerminal("File", "Open new multi-machine terminal", "ws/dev");
-    theiaTerminal.waitTab(WS_DEV_TERMINAL_TITLE);
-    theiaTerminal.clickOnTab(WS_DEV_TERMINAL_TITLE);
-    theiaTerminal.performCommand(GIT_CLONE_COMMAND);
-    theiaTerminal.waitTerminalOutput(EXPECTED_CLONE_OUTPUT, 0);
-
+    // build plugin
     openTerminal("File", "Open new multi-machine terminal", "ws/theia-ide");
-    theiaTerminal.waitTab(WS_THEIA_IDE_TERMINAL_TITLE);
-    theiaTerminal.clickOnTab(WS_THEIA_IDE_TERMINAL_TITLE);
-    theiaTerminal.performCommand(GO_TO_DIRECTORY_COMMAND);
-    theiaTerminal.waitTerminalOutput(GO_TO_DIRECTORY_COMMAND, 1);
+    theiaTerminal.waitTab(wsTheiaIdeTerminalTitle);
+    theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
+    theiaTerminal.performCommand(goToDirectoryCommand);
+    theiaTerminal.waitTerminalOutput(goToDirectoryCommand, 0);
+    theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
+    theiaTerminal.waitTabSelected(wsTheiaIdeTerminalTitle);
+    theiaTerminal.performCommand("yarn");
+    theiaTerminal.waitTerminalOutput(expectedTerminalSuccessOutput, 0);
 
-    theiaTerminal.waitTab(WS_THEIA_IDE_TERMINAL_TITLE);
-    theiaTerminal.clickOnTab(WS_THEIA_IDE_TERMINAL_TITLE);
-    theiaTerminal.performCommand(BUILD_COMMAND);
-    try {
-      theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_OUTPUT, 1);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      if (theiaTerminal.isTextPresentInTerminalOutput(EXPECTED_PLUGIN_OUTPUT, 1)) {
-        fail("Known permanent failure https://github.com/eclipse/che/issues/11624", ex);
-      }
-
-      throw ex;
-    }
-
-    theiaTerminal.waitTerminalOutput(EXPECTED_TERMINAL_SUCCESS_OUTPUT, 1);
+    // fail("Known permanent failure https://github.com/eclipse/che/issues/11624", ex);
   }
 
-  // @Test(priority = 1)
+  @Test(priority = 1)
   public void hostedModeShouldWork() {
+    final String projectName = "hello-world";
+    final String hostedSearchSequence = ">hosted";
+    final String editedSourceFile = "hello-world-backend.ts";
+    final String expectedHelloWorldNotification = "Hello World!";
+    final String expectedAlohaWorldNotification = "Aloha World!";
+    final String suggestionForSelection = "Hosted Plugin: Start Instance";
+    final String helloWorldProposal = "Hello World";
+    final String helloWorldSearchSequence = ">Hello";
+    final String expectedInstanceRunningMessage = "Hosted instance is running at:";
     final String parentWindow = seleniumWebDriver.getWindowHandle();
+    final String expectedPluginFolderMessage =
+        "Plugin folder is set to: file:///projects/hello-world";
+    final String expectedStartingServerMessage = "Starting hosted instance server ...";
+    final String editedSourceLine = "theia.window.showInformationMessage('Aloha World!');";
+    final String expectedTextAfterDeleting =
+        "context.subscriptions.push(theia.commands.registerCommand(informationMessageTestCommand, (...args: any[]) => {\n"
+            + " \n"
+            + "    }));";
 
-    theiaProjectTree.waitItem(PROJECT_NAME);
-    WaitUtils.sleepQuietly(5);
-
+    // run hosted mode
+    theiaProjectTree.waitItem(projectName);
+    theiaProjectTree.clickOnItem(projectName);
+    theiaProjectTree.waitItemSelected(projectName);
+    WaitUtils.sleepQuietly(2);
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitForm();
     WaitUtils.sleepQuietly(4);
-    theiaProposalForm.enterTextToSearchField(HOSTED_SEARCH_SEQUENCE);
+    theiaProposalForm.enterTextToSearchField(hostedSearchSequence);
     WaitUtils.sleepQuietly(4);
-
-    theiaProposalForm.clickOnProposal(SUGGESTION_FOR_SELECTION);
-
+    theiaProposalForm.clickOnProposal(suggestionForSelection);
     hostedPluginSelectPathForm.waitForm();
-    hostedPluginSelectPathForm.clickOnItem(PROJECT_NAME);
-    hostedPluginSelectPathForm.clickOnItem(HOSTED_PLUGIN_PATH);
-    hostedPluginSelectPathForm.waitItemSelected(HOSTED_PLUGIN_PATH);
+    hostedPluginSelectPathForm.clickOnItem(projectName);
+    hostedPluginSelectPathForm.waitItemSelected(projectName);
     hostedPluginSelectPathForm.clickOnOpenButton();
     hostedPluginSelectPathForm.waitFormClosed();
+    waitNotificationEqualsTo(expectedPluginFolderMessage, parentWindow);
+    waitNotificationEqualsTo(expectedStartingServerMessage, parentWindow);
+    waitNotificationContains(expectedInstanceRunningMessage, parentWindow);
 
-    waitNotificationEqualsTo(EXPECTED_PLUGIN_FOLDER_MESSAGE, parentWindow);
-    waitNotificationEqualsTo(EXPECTED_STARTING_SERVER_MESSAGE, parentWindow);
-    waitNotificationContains(EXPECTED_INSTANCE_RUNNING_MESSAGE, parentWindow);
-
+    // check hosted mode availability
     switchToNonParentWindow(parentWindow);
     waitDevelopmentHostTitle();
-
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitOpenWorkspaceButton();
 
+    // check plugin output
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitSearchField();
-    theiaProposalForm.enterTextToSearchField(HELLO_WORLD_SEARCH_SEQUENCE);
-    theiaProposalForm.clickOnProposal(HELLO_WORLD_PROPOSAL);
-    theiaIde.waitNotificationEqualsTo(EXPECTED_HELLO_WORLD_NOTIFICATION);
-    theiaIde.waitNotificationDisappearance(EXPECTED_HELLO_WORLD_NOTIFICATION);
+    theiaProposalForm.enterTextToSearchField(helloWorldSearchSequence);
+    theiaProposalForm.clickOnProposal(helloWorldProposal);
+    theiaIde.waitNotificationEqualsTo(expectedHelloWorldNotification);
+    theiaIde.waitNotificationDisappearance(expectedHelloWorldNotification);
 
+    // check editing of the source code and applying it in hosted mode window
     switchToParentWindow(parentWindow);
-
     theiaProjectTree.waitProjectAreaOpened();
-    theiaProjectTree.waitItem(PROJECT_NAME);
-    theiaProjectTree.expandPathAndOpenFile(
-        PROJECT_NAME + "/ui/lib", "hello-world-backend-plugin.js");
+    theiaProjectTree.waitItem(projectName);
+    theiaProjectTree.expandPathAndOpenFile(projectName + "/src", editedSourceFile);
+    theiaEditor.waitEditorTab(editedSourceFile);
+    theiaEditor.waitTabSelecting(editedSourceFile);
+    theiaEditor.waitActiveEditor();
+    theiaEditor.selectLineText(14);
+    seleniumWebDriverHelper.pressDelete();
+    theiaEditor.waitEditorText(expectedTextAfterDeleting);
+    theiaEditor.enterTextByTypingEachChar(editedSourceLine);
+    theiaEditor.waitEditorText(editedSourceLine);
+    theiaEditor.waitTabSavedStatus(editedSourceFile);
+    switchToNonParentWindow(parentWindow);
+    waitDevelopmentHostTitle();
+    seleniumWebDriver.navigate().refresh();
+    waitDevelopmentHostTitle();
+    theiaProjectTree.waitProjectAreaOpened();
+    theiaProjectTree.waitOpenWorkspaceButton();
+    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
+    theiaProposalForm.waitSearchField();
+    theiaProposalForm.enterTextToSearchField(helloWorldSearchSequence);
+    theiaProposalForm.clickOnProposal(helloWorldProposal);
+    theiaIde.waitNotificationEqualsTo(expectedAlohaWorldNotification);
+    theiaIde.waitNotificationDisappearance(expectedAlohaWorldNotification);
   }
 
   private void waitNewBrowserWindowAndSwitchToParent(String parentWindowHandle) {

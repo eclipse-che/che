@@ -22,7 +22,9 @@ import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.ARROW_RIGHT;
 import static org.openqa.selenium.Keys.ARROW_UP;
+import static org.openqa.selenium.Keys.BACK_SPACE;
 import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.F12;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
@@ -1564,6 +1566,14 @@ public class SeleniumWebDriverHelper {
 
   public void pressEnter() {
     getAction().sendKeys(ENTER.toString()).perform();
+  }
+
+  public void pressDelete() {
+    getAction().sendKeys(DELETE.toString()).perform();
+  }
+
+  public void pressBackspace() {
+    getAction().sendKeys(BACK_SPACE.toString()).perform();
   }
 
   public void pressCtrlF12() {
