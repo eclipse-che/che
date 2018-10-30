@@ -134,7 +134,13 @@ public class RenameVirtualMethodsTest {
 
   @Test
   public void testGeneric2() {
-    doRefactorByWizard(20, 20, "addIfPositive");
+    try {
+      doRefactorByWizard(20, 20, "addIfPositive");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10784", ex);
+    }
+
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
@@ -164,12 +170,7 @@ public class RenameVirtualMethodsTest {
     WaitUtils.sleepQuietly(2);
     refactor.clickOkButtonRefactorForm();
 
-    try {
-      refactor.waitRenameMethodFormIsClosed();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
-    }
+    refactor.waitRenameMethodFormIsClosed();
   }
 
   private void doRefactorByWizardWithClosingWarnMess(
