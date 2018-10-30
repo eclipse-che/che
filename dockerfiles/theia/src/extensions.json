@@ -4,7 +4,7 @@
             "name": "github-extension",
             "source": "https://github.com/eclipse/che-theia-github-plugin",
             "folder": "github-extension",
-            "checkoutTo": "master",
+            "checkoutTo": "0.0.1",
             "type": "git"
         },
         {
