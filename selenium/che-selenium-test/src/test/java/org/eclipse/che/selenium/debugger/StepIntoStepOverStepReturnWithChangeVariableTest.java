@@ -172,7 +172,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     } catch (AssertionError ex) {
       machineTerminal.logApplicationInfo(PROJECT, ws);
       if (applicationResponse != null && applicationResponse.contains("504 Gateway Time-out")) {
-        fail("Known issue: https://github.com/eclipse/che/issues/9251", ex);
+        fail("Known random failure https://github.com/eclipse/che/issues/9251", ex);
       } else {
         throw ex;
       }

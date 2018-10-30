@@ -15,7 +15,6 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
-import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.inject.Inject;
@@ -38,7 +37,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -141,13 +139,7 @@ public class ImportProjectFromGitHubTest {
     if (!projectSourcePage.isGithubProjectsListDisplayed()) {
       seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
-      try {
-        projectSourcePage.waitAuthorizeBtn();
-      } catch (WebDriverException ex) {
-        // remove try-catch block after issue has been resolved
-        fail("Known issue https://github.com/redhat-developer/rh-che/issues/621", ex);
-      }
-
+      projectSourcePage.waitAuthorizeBtn();
       projectSourcePage.clickOnAuthorizeBtn();
       seleniumWebDriver.switchTo().window(ideWin);
     }
