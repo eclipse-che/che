@@ -126,13 +126,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     wizard.selectSample(Wizard.TypeProject.MAVEN);
     wizard.clickSaveButton();
 
-    // TODO sometimes after importing project doest not open to keep folder. Need investigate later
-    try {
-      projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
-    } catch (TimeoutException e) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10852", e);
-    }
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
 
     events.clickEventLogBtn();
     createFactoryAndSwitchToWs();
@@ -163,7 +157,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
       events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7253");
+      fail("Known random failure https://github.com/eclipse/che/issues/7253");
     }
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME);

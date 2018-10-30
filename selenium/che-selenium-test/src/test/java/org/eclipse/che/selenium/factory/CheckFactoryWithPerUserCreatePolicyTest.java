@@ -70,7 +70,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
       notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose("Project Spring imported");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10728");
+      fail("Known random failure https://github.com/eclipse/che/issues/10728");
     }
 
     String workspaceUrl = seleniumWebDriver.getCurrentUrl();
@@ -85,7 +85,7 @@ public class CheckFactoryWithPerUserCreatePolicyTest {
               CheckFactoryWithPerUserCreatePolicyTest.class.getSimpleName(),
               testFactory.getWorkspaceStatusAssociatedWithFactory(),
               "Current workspace status for %s is: %s"));
-      fail("Known issue https://github.com/eclipse/che/issues/8798");
+      fail("Known random failure https://github.com/eclipse/che/issues/8798");
     }
     projectExplorer.waitProjectExplorer();
 

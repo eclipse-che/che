@@ -85,7 +85,7 @@ public class QuickFixAndCodeAssistantFeaturesTest {
       editor.waitTextIntoFixErrorProposition("Inline local variable");
     } catch (TimeoutException e) {
       fail(
-          "Known issues: https://github.com/eclipse/eclipse.jdt.ls/issues/772, "
+          "Known permanent failure https://github.com/eclipse/eclipse.jdt.ls/issues/772, "
               + "https://github.com/eclipse/eclipse.jdt.ls/issues/771");
     }
     editor.typeTextIntoEditor(Keys.ESCAPE.toString());
