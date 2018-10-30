@@ -25,11 +25,11 @@ public interface TestWorkspaceProvider {
    *
    * @param owner the workspace owner
    * @param memoryGB the workspace memory size in GB
-   * @param template the workspace template {@link WorkspaceTemplate}
+   * @param templateFileName the workspace template file name {@link WorkspaceTemplate}
    * @param startAfterCreation start workspace just after creation, if <bold>true</bold>
    */
   TestWorkspace createWorkspace(
-      TestUser owner, int memoryGB, WorkspaceTemplate template, boolean startAfterCreation)
+      TestUser owner, int memoryGB, String templateFileName, boolean startAfterCreation)
       throws Exception;
 
   /**

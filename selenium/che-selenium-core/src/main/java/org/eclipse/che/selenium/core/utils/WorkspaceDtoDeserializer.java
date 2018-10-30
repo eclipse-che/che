@@ -23,7 +23,6 @@ import javax.inject.Named;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.selenium.core.constant.Infrastructure;
-import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,26 +41,27 @@ public class WorkspaceDtoDeserializer {
   @Named("che.infrastructure")
   private Infrastructure infrastructure;
 
-  public WorkspaceConfigDto deserializeWorkspaceTemplate(WorkspaceTemplate templateName) {
-    requireNonNull(templateName);
+  public WorkspaceConfigDto deserializeWorkspaceTemplate(String workspaceTemplateName) {
+    requireNonNull(workspaceTemplateName);
 
     try {
 
       URL url =
-          Resources.getResource(WorkspaceDtoDeserializer.class, getTemplateDirectory(templateName));
+          Resources.getResource(
+              WorkspaceDtoDeserializer.class, getTemplateDirectory(workspaceTemplateName));
       return DtoFactory.getInstance()
           .createDtoFromJson(Resources.toString(url, Charsets.UTF_8), WorkspaceConfigDto.class);
     } catch (IOException | IllegalArgumentException | JsonSyntaxException e) {
       LOG.error(
           "Fail to read workspace template {} for infrastructure {} because {} ",
-          templateName,
-          getTemplateDirectory(templateName),
+          workspaceTemplateName,
+          getTemplateDirectory(workspaceTemplateName),
           e.getMessage());
       throw new RuntimeException(e.getLocalizedMessage(), e);
     }
   }
 
-  private String getTemplateDirectory(WorkspaceTemplate template) {
+  private String getTemplateDirectory(String workspaceTemplateName) {
     String templateDirectoryName;
     switch (infrastructure) {
       case OSIO:
@@ -74,6 +74,6 @@ public class WorkspaceDtoDeserializer {
     }
 
     return String.format(
-        "/templates/workspace/%s/%s", templateDirectoryName, template.getTemplateFileName());
+        "/templates/workspace/%s/%s", templateDirectoryName, workspaceTemplateName);
   }
 }
