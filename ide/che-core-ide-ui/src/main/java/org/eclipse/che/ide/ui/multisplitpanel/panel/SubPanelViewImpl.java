@@ -201,6 +201,15 @@ public class SubPanelViewImpl extends Composite
   }
 
   @Override
+  public void activateTab(Tab tab) {
+    final WidgetToShow widget = tabs2Widgets.get(tab);
+    if (widget != null) {
+      activateWidget(widget);
+      delegate.onWidgetFocused(widget.getWidget());
+    }
+  }
+
+  @Override
   public void addWidget(WidgetToShow widget, boolean removable) {
     final Tab tab = tabItemFactory.createTabItem(widget.getTitle(), widget.getIcon(), removable);
     tab.setDelegate(this);
@@ -243,19 +252,18 @@ public class SubPanelViewImpl extends Composite
   }
 
   @Override
-  public void removeWidget(WidgetToShow widget) {
-    removeWidget(widget, true);
-  }
-
-  @Override
-  public void removeWidget(WidgetToShow widget, boolean activateNeighbor) {
+  public void removeWidget(WidgetToShow widget, ActiveTabClosedHandler activeTabClosedHandler) {
     final Tab tab = widgets2Tabs.get(widget);
     if (tab != null) {
-      closeTab(tab, activateNeighbor);
+      closeTab(tab, activeTabClosedHandler);
     }
   }
 
-  private void closeTab(Tab tab, boolean activateNeighbor) {
+  private void closeTab(Tab tab) {
+    closeTab(tab, SubPanelView::activateTab);
+  }
+
+  private void closeTab(Tab tab, ActiveTabClosedHandler activeTabClosedHandler) {
     final WidgetToShow widget = tabs2Widgets.get(tab);
 
     if (widget != null) {
@@ -266,7 +274,7 @@ public class SubPanelViewImpl extends Composite
 
             removeWidgetFromUI(widget);
 
-            if (activateNeighbor && tab == selectedTab && tabsPanel.getWidgetCount() > 1) {
+            if (tab == selectedTab && tabsPanel.getWidgetCount() > 1) {
               Widget widgetToSelect;
               if (removedTabIndex < tabsPanel.getWidgetCount() - 1) {
                 widgetToSelect = tabsPanel.getWidget(removedTabIndex);
@@ -275,7 +283,7 @@ public class SubPanelViewImpl extends Composite
               }
 
               if (widgetToSelect instanceof Tab) {
-                onTabClicked((Tab) widgetToSelect);
+                activeTabClosedHandler.onActiveTabClosed(this, (Tab) widgetToSelect);
               }
             }
           });
@@ -381,17 +389,13 @@ public class SubPanelViewImpl extends Composite
   public void onMenuItemClosing(MenuItem menuItem) {
     Object data = menuItem.getData();
     if (data instanceof Tab) {
-      closeTab((Tab) data, true);
+      closeTab((Tab) data);
     }
   }
 
   @Override
   public void onTabClicked(Tab tab) {
-    final WidgetToShow widget = tabs2Widgets.get(tab);
-    if (widget != null) {
-      activateWidget(widget);
-      delegate.onWidgetFocused(widget.getWidget());
-    }
+    activateTab(tab);
   }
 
   @Override
@@ -416,7 +420,7 @@ public class SubPanelViewImpl extends Composite
 
   @Override
   public void onTabClosing(Tab tab) {
-    closeTab(tab, true);
+    closeTab(tab);
   }
 
   @Override

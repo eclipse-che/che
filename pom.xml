@@ -36,7 +36,7 @@
         <module>ide/che-ide-core</module>
         <module>ide/che-ide-full</module>
         <module>ide/che-ide-gwt-app</module>
-        <module>dashboard</module>
+        <!--<module>dashboard</module>-->
         <module>workspace-loader</module>
         <module>assembly</module>
         <module>selenium</module>

@@ -724,7 +724,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       // 'reuse' already existing console
       // actually - remove 'already used' console
       commandId = processTreeNode.getId();
-      view.removeWidget(commandId, true);
+      view.removeWidget(commandId, (subPanel, tabToActivate) -> {});
     }
 
     ProcessTreeNode commandNode =
