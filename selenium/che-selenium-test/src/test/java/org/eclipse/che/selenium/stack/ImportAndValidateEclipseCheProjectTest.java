@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
 import static org.openqa.selenium.Keys.DELETE;
+import static org.openqa.selenium.Keys.ESCAPE;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -50,6 +51,7 @@ public class ImportAndValidateEclipseCheProjectTest {
       LoggerFactory.getLogger(ImportAndValidateEclipseCheProjectTest.class);
   private static final String WORKSPACE_NAME = generate("EclipseCheWs", 4);
   private static final String PROJECT_NAME = "eclipse-che";
+  private static final String PACKAGE_NAME = "org.eclipse.che.selenium.pageobject";
   private static final String ECLIPSE_CHE_PROJECT_URL = "https://github.com/eclipse/che.git";
   private static final String PATH_TO_JAVA_FILE =
       PROJECT_NAME
@@ -73,7 +75,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   @Inject private DefaultTestUser defaultTestUser;
 
   // it is used to read workspace logs on test failure
-  private TestWorkspa/ config the projectce testWorkspace;
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void prepare() {
@@ -96,6 +98,9 @@ public class ImportAndValidateEclipseCheProjectTest {
 
   @Test
   public void checkImportAndResolveDependenciesEclipseCheProject() {
+    final int timeoutToOpenInfoPanelInSec = 500;
+    final int timeoutToClosingInfoPanelInSec = 1200;
+
     // import the eclipse-che project
     projectExplorer.waitProjectExplorer();
     menu.runCommand(WORKSPACE, IMPORT_PROJECT);
@@ -112,19 +117,44 @@ public class ImportAndValidateEclipseCheProjectTest {
     // waits on project resolving message
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
+    // waits while the 'Import Maven project(s)' info bar is closed
+    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanelInSec);
+
     // expand the project
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
 
-    // checks packages in project Explorer (issue https://github.com/eclipse/che/issues/11537)
+    // waits the text in the progress info bar
+    loader.waitOnClosed();
+    mavenPluginStatusBar.waitExpectedTextInInfoPanel(
+        "Building workspace", timeoutToOpenInfoPanelInSec);
 
-    // waits 'Building Workspace' progress bar
+    // should close the progress monitor form by Esc
+    mavenPluginStatusBar.clickOnInfoPanel();
+    mavenPluginStatusBar.waitProgressMonitorFormToOpen();
+    mavenPluginStatusBar.closeProgressMonitorFormByKeys(ESCAPE.toString());
+
+    // then open it again
+    mavenPluginStatusBar.clickOnInfoPanel();
+    mavenPluginStatusBar.waitProgressMonitorFormToOpen();
+
+    // wait while progress info is closed
+    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanelInSec);
+    mavenPluginStatusBar.waitProgressMonitorFormToClose();
 
     // then open files
     // open a java file
     quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_JAVA_FILE);
     editor.waitActive();
+
+    // checks packages in project Explorer
+    try {
+      projectExplorer.waitVisibilityByName(PACKAGE_NAME);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11537");
+    }
 
     // open a xml file
     quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_POM_FILE);
@@ -137,14 +167,7 @@ public class ImportAndValidateEclipseCheProjectTest {
     // wait the project and the files
     projectExplorer.waitItem(PROJECT_NAME);
     editor.waitTabIsPresent("CodenvyEditor");
-
-    try {
-      editor.waitTabIsPresent("che-dashboard-war");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11537");
-    }
-
+    editor.waitTabIsPresent("che-dashboard-war");
     editor.waitTabIsPresent("index.module.ts");
   }
 
