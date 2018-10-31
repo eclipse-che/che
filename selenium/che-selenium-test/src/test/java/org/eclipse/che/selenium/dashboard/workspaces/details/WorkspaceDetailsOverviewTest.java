@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.openqa.selenium.Keys.ESCAPE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.List;
@@ -27,7 +26,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.Test;
 
 public class WorkspaceDetailsOverviewTest {
@@ -193,13 +191,7 @@ public class WorkspaceDetailsOverviewTest {
 
   private void nameShouldBeInvalid(String name, String expectedErrorMessage) {
     workspaceOverview.enterNameWorkspace(name);
-
-    try {
-      workspaceOverview.waitErrorBorderOfNameField();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10659", ex);
-    }
+    workspaceOverview.waitErrorBorderOfNameField();
 
     workspaceOverview.waitNameErrorMessage(expectedErrorMessage);
     workspaceOverview.waitDisabledSaveButton();

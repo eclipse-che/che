@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -25,6 +26,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
  *
  * @author Skoryk Serhii
  */
+@Singleton
 public class CreateWorkspaceHelper {
 
   @Inject private Dashboard dashboard;

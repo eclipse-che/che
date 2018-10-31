@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
@@ -177,7 +176,7 @@ public class GolangFileEditingTest {
     editor.waitTextIntoEditor(FORMATTED_CODE);
   }
 
-  @Test(priority = 1, groups = UNDER_REPAIR)
+  @Test(priority = 1)
   public void checkFindDefinitionFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
@@ -189,7 +188,7 @@ public class GolangFileEditingTest {
       editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
     }
 
     // check Find Definition feature from Assistant menu
@@ -208,7 +207,7 @@ public class GolangFileEditingTest {
     editor.clickOnCloseFileIcon("print.go");
   }
 
-  @Test(priority = 1, groups = UNDER_REPAIR)
+  @Test(priority = 1)
   public void checkRenameFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
@@ -252,19 +251,18 @@ public class GolangFileEditingTest {
     findReferencesConsoleTab.waitAllReferencesWithText(REFERENCES_EXPECTED_TEXT);
   }
 
-  @Test(priority = 1, groups = UNDER_REPAIR)
+  @Test(priority = 1)
   public void checkSignatureHelpFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.goToPosition(27, 1);
     editor.typeTextIntoEditor("    hanoi(");
 
-    try {
-      editor.waitExpTextIntoShowHintsPopUp("hanoi(n int, a, b, c string)");
-    } catch (TimeoutException ex) {
-      editor.deleteCurrentLineAndInsertNew();
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
-    }
+    editor.waitSignaturesContainer();
+    editor.waitProposalIntoSignaturesContainer("hanoi(n int, a, b, c string)");
+    editor.closeSignaturesContainer();
+    editor.waitSignaturesContainerIsClosed();
+
+    editor.deleteCurrentLineAndInsertNew();
   }
 
   @Test(priority = 1)

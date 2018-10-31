@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -39,7 +38,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -51,8 +49,7 @@ public class PhpAssistantFeaturesTest {
       "/*\n" + " * Copyright (c) 2012-2018 Red Hat, Inc.";
   private static final String EXPECTED_COMMENTED_TEXT =
       "/*\n" + "// * Copyright (c) 2012-2018 Red Hat, Inc.";
-  private static final String EXPECTED_HOVER_POPUP_TEXT =
-      "php\n" + "<?php function sayHello($name) {\n";
+  private static final String EXPECTED_HOVER_POPUP_TEXT = "<?php function sayHello($name) {";
   private static final String EXPECTED_REFERENCE_TEXT =
       PROJECT + "/index.php\n" + "From:15:6 To:15:14";
   private static final String EXPECTED_TEXT_AFTER_TYPING =
@@ -151,9 +148,13 @@ public class PhpAssistantFeaturesTest {
     editor.typeTextIntoEditor(ENTER.toString());
     editor.waitCursorPosition(16, 1);
     editor.typeTextIntoEditor(TEXT_FOR_HOVERING + "(");
-    editor.waitTextIntoEditor(EXPECTED_TEXT_AFTER_TYPING);
-    waitExpectedTextIntoShowHintsPopup(EXPECTED_HINT_TEXT);
-    editor.deleteCurrentLine();
+
+    editor.waitSignaturesContainer();
+    editor.waitProposalIntoSignaturesContainer(EXPECTED_HINT_TEXT);
+    editor.closeSignaturesContainer();
+    editor.waitSignaturesContainerIsClosed();
+
+    editor.deleteCurrentLineAndInsertNew();
   }
 
   @Test
@@ -184,14 +185,5 @@ public class PhpAssistantFeaturesTest {
   private void performCommentAction() {
     String comment = Keys.chord(CONTROL, "/");
     seleniumWebDriverHelper.sendKeys(comment);
-  }
-
-  private void waitExpectedTextIntoShowHintsPopup(String expectedText) {
-    try {
-      editor.waitExpTextIntoShowHintsPopUp(expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
-    }
   }
 }

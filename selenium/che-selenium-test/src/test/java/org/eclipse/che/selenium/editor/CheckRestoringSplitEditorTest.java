@@ -11,8 +11,8 @@
  */
 package org.eclipse.che.selenium.editor;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_JAVA_MULTIMODULE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPIT_HORISONTALLY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPLIT_VERTICALLY;
@@ -43,7 +43,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = UNDER_REPAIR)
 public class CheckRestoringSplitEditorTest {
   private String javaClassName = "AppController.java";
   private String readmeFileName = "README.md";
@@ -83,7 +82,7 @@ public class CheckRestoringSplitEditorTest {
   }
 
   @Test
-  public void checkRestoringStateSplittedEditor() throws IOException, Exception {
+  public void checkRestoringStateSplitEditor() throws IOException, Exception {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     splitEditorAndOpenFiles();
@@ -99,18 +98,18 @@ public class CheckRestoringSplitEditorTest {
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitItem(PROJECT_NAME);
     loader.waitOnClosed();
-    projectExplorer.waitVisibilityByName(javaClassName);
+    projectExplorer.waitVisibilityByName(javaClassName, WIDGET_TIMEOUT_SEC);
 
     notificationsPopupPanel.waitPopupPanelsAreClosed();
-    checkSplitedEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         1, javaClassTab, expectedTextFromEditor.get(0), cursorPositionForJavaFile);
-    checkSplitedEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         2, readmeFileName, expectedTextFromEditor.get(1).trim(), cursorPositionForReadMeFile);
-    checkSplitedEditorAfterRefreshing(
+    checkSplitEditorAfterRefreshing(
         3, pomFileTab, expectedTextFromEditor.get(2).trim(), cursorPositionForPomFile);
   }
 
-  private void checkSplitedEditorAfterRefreshing(
+  private void checkSplitEditorAfterRefreshing(
       int numOfEditor,
       String nameOfEditorTab,
       String expectedTextAfterRefresh,
@@ -126,7 +125,7 @@ public class CheckRestoringSplitEditorTest {
           numOfEditor, LOAD_PAGE_TIMEOUT_SEC, expectedTextAfterRefresh);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9456", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/9456", ex);
     }
   }
 

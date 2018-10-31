@@ -11,9 +11,6 @@
  */
 package org.eclipse.che.selenium.refactor.fields;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -33,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -84,7 +80,7 @@ public class RenamePrivateFieldTest {
     }
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField0() throws Exception {
     setFieldsForTest("test0");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -104,7 +100,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField1() throws Exception {
     setFieldsForTest("test1");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -124,7 +120,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField2() throws Exception {
     setFieldsForTest("test2");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -144,7 +140,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField3() throws Exception {
     setFieldsForTest("test3");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -167,7 +163,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField4() throws Exception {
     setFieldsForTest("test4");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -190,7 +186,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField5() throws Exception {
     setFieldsForTest("test5");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -212,7 +208,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField6() throws Exception {
     setFieldsForTest("test6");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -234,7 +230,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField7() throws Exception {
     setFieldsForTest("test7");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -256,7 +252,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField8() throws Exception {
     setFieldsForTest("test8");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -276,7 +272,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField9() throws Exception {
     setFieldsForTest("test9");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -296,7 +292,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField10() throws Exception {
     setFieldsForTest("test10");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -319,7 +315,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenamePrivateField11() throws Exception {
     setFieldsForTest("test11");
     consoles.closeProcessesArea();
@@ -345,7 +341,7 @@ public class RenamePrivateFieldTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenameUnicode12() throws Exception {
     setFieldsForTest("test12");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
@@ -399,20 +395,10 @@ public class RenamePrivateFieldTest {
   }
 
   private void typeAndWaitNewName(String newName) {
-    try {
-      refactor.typeAndWaitNewName(newName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
+    refactor.typeAndWaitNewName(newName);
   }
 
   private void waitTextIntoEditor(String expectedText) {
-    try {
-      editor.waitTextIntoEditor(expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
+    editor.waitTextIntoEditor(expectedText);
   }
 }

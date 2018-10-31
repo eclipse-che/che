@@ -95,7 +95,7 @@ public class CSharpFileEditingTest {
       editor.waitMarkerInPosition(INFO, 2);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue: https://github.com/eclipse/che/issues/10151", ex);
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10151", ex);
     }
   }
 
@@ -108,7 +108,7 @@ public class CSharpFileEditingTest {
     try {
       editor.waitMarkerInPosition(INFO, 23);
     } catch (TimeoutException ex) {
-      fail("Known issue: https://github.com/eclipse/che/issues/10789", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10789", ex);
     }
 
     editor.waitMarkerInPosition(ERROR, 21);

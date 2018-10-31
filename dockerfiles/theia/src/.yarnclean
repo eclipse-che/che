@@ -1,0 +1,80 @@
+#
+# Copyright (c) 2018-2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#   Red Hat, Inc. - initial API and implementation
+#
+
+# Ignore files
+.*ignore
+
+# Remove electron package
+electron
+
+# Java download
+@theia/java/download
+
+# build scripts
+Makefile
+Gulpfile.js
+Gruntfile.js
+
+# git of node_modules
+dugite/git/*
+
+# onigasm (already in lib folder)
+onigasm
+oniguruma
+@theia/monaco
+monaco-css
+react-dom
+font-awesome
+monaco-html
+@typefox/monaco-editor-core
+@theia/terminal/node_modules/xterm/dist/xterm.js
+#onigasm/lib/onigasm.wast
+#onigasm/lib/onigasm.wat
+
+# MD files
+CHANGELOG.md
+CONTRIBUTING.md
+LICENSE.md
+README.md
+HISTORY.md
+History.md
+
+# licenses
+LICENSE
+LICENSE.txt
+ThirdPartyNotices.txt
+
+# test directories
+__tests__
+test
+tests
+powered-test
+test.js
+*.spec.js
+testData
+
+# code coverage directories
+coverage
+.nyc_output
+
+# asset directories
+docs
+doc
+
+# locks
+package-lock.json 
+.yarn-integrity
+
+# configs
+.travis.yml
+tsconfig.json
+

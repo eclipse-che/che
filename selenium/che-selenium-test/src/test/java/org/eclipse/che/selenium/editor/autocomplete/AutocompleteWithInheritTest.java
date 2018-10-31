@@ -94,7 +94,7 @@ public class AutocompleteWithInheritTest {
       editor.waitTextIntoFixErrorProposition("Add constructor 'InheritClass(int,String)'");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/eclipse.jdt.ls/issues/767");
+      fail("Known permanent failure https://github.com/eclipse/eclipse.jdt.ls/issues/767");
     }
     editor.selectFirstItemIntoFixErrorPropByEnter();
     editor.waitTextIntoEditor(contentAfterFix);

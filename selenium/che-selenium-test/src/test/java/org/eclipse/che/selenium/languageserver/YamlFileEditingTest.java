@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
@@ -173,36 +172,24 @@ public class YamlFileEditingTest {
     editor.waitTextIntoEditor("spec:");
   }
 
-  @Test(priority = 1, groups = UNDER_REPAIR)
+  @Test(priority = 1)
   public void checkHoverFeature() {
     editor.selectTabByName("deployment.yaml");
 
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("namespace:");
-
-    try {
-      editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
-    }
+    waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
 
     editor.moveCursorToText("kind:");
-    editor.waitTextInHoverPopup(
+    waitTextInHoverPopup(
         "Kind is a string value representing the REST resource this object represents.");
 
     editor.moveCursorToText("apiVersion:");
-
-    try {
-      editor.waitTextInHoverPopUpEqualsTo(
-          "APIVersion defines the versioned schema of this representation of an object. "
-              + "Servers should convert recognized schemas to the latest internal value, "
-              + "and may reject unrecognized values. More info: "
-              + "http://releases\\.k8s\\.io/HEAD/docs/devel/api\\-conventions\\.md\\#resources");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
-    }
+    editor.waitTextInHoverPopUpEqualsTo(
+        "APIVersion defines the versioned schema of this representation of an object. "
+            + "Servers should convert recognized schemas to the latest internal value, "
+            + "and may reject unrecognized values. More info: "
+            + "http://releases\\.k8s\\.io/HEAD/docs/devel/api\\-conventions\\.md\\#resources");
   }
 
   @Test(priority = 1)
@@ -214,13 +201,13 @@ public class YamlFileEditingTest {
     editor.typeTextIntoEditor("a");
     editor.waitTextElementsActiveLine("aapiVersion: v1");
     editor.moveCursorToText("aapiVersion");
-    editor.waitTextInHoverPopup("Unexpected property aapiVersion");
+    waitTextInHoverPopup("Unexpected property aapiVersion");
 
     editor.goToPosition(13, 1);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
     editor.moveCursorToText("apiVersion");
-    editor.waitTextInHoverPopup(
+    waitTextInHoverPopup(
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
@@ -311,5 +298,14 @@ public class YamlFileEditingTest {
     preferences.clickOnOkBtn();
 
     preferences.close();
+  }
+
+  private void waitTextInHoverPopup(String expectedText) {
+    try {
+      editor.waitTextInHoverPopup(expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 }

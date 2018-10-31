@@ -39,7 +39,6 @@ import org.eclipse.che.ide.projecttype.wizard.ProjectWizardFactory;
 import org.eclipse.che.ide.projecttype.wizard.ProjectWizardRegistry;
 import org.eclipse.che.ide.projecttype.wizard.categoriespage.CategoriesPagePresenter;
 import org.eclipse.che.ide.resource.Path;
-import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 
 /**
  * Presenter for project wizard.
@@ -61,7 +60,6 @@ public class ProjectWizardPresenter
   private final ProjectWizardFactory projectWizardFactory;
   private final ProjectWizardRegistry wizardRegistry;
   private final Provider<CategoriesPagePresenter> categoriesPageProvider;
-  private final DialogFactory dialogFactory;
   private final Map<ProjectTypeDto, ProjectWizard> wizardsCache;
   private CategoriesPagePresenter categoriesPage;
   private ProjectWizard wizard;
@@ -75,13 +73,11 @@ public class ProjectWizardPresenter
       ProjectWizardView view,
       ProjectWizardFactory projectWizardFactory,
       ProjectWizardRegistry wizardRegistry,
-      Provider<CategoriesPagePresenter> categoriesPageProvider,
-      DialogFactory dialogFactory) {
+      Provider<CategoriesPagePresenter> categoriesPageProvider) {
     this.view = view;
     this.projectWizardFactory = projectWizardFactory;
     this.wizardRegistry = wizardRegistry;
     this.categoriesPageProvider = categoriesPageProvider;
-    this.dialogFactory = dialogFactory;
     wizardsCache = new HashMap<>();
     view.setDelegate(this);
   }
@@ -114,7 +110,6 @@ public class ProjectWizardPresenter
 
           @Override
           public void onFailure(Throwable e) {
-            dialogFactory.createMessageDialog("Error", e.getMessage(), null).show();
             view.setLoaderVisibility(false);
           }
         });

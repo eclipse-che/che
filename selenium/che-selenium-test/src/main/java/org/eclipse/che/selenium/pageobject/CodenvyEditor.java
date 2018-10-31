@@ -48,6 +48,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_F
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_LINES;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.RULER_OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.SELECTED_ITEM_IN_EDITOR;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.SIGNATURES_CONTAINER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_CONTEXT_MENU_BODY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_CLOSE_ICON;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.TAB_FILE_NAME_AND_STYLE;
@@ -77,7 +78,6 @@ import static org.openqa.selenium.Keys.SPACE;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.textToBePresentInElementLocated;
 import static org.slf4j.LoggerFactory.getLogger;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -92,7 +92,6 @@ import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -209,6 +208,7 @@ public class CodenvyEditor {
     String FOCUSED_TAB_XPATH_TEMPLATE =
         "//div[@id='gwt-debug-editor-tab-title' and text()='%s']"
             + "//parent::div[@id='gwt-debug-editor-tab' and @focused]";
+    String SIGNATURES_CONTAINER = "//div[text()='Signatures:']//following::div/ulist";
   }
 
   public enum TabActionLocator {
@@ -343,6 +343,9 @@ public class CodenvyEditor {
 
   @FindBy(css = LANGUAGE_SERVER_REFACTORING_RENAME_FIELD_CSS)
   private WebElement languageServerRenameField;
+
+  @FindBy(xpath = SIGNATURES_CONTAINER)
+  private WebElement signaturesContainer;
 
   /**
    * Waits until specified {@code editorTab} is presented, selected, focused and editor activated.
@@ -515,21 +518,10 @@ public class CodenvyEditor {
 
   /** wait full matching of text in hover popup */
   public void waitTextInHoverPopUpEqualsTo(String expectedText) {
-    // waits popup body visibility
-    try {
-      seleniumWebDriverHelper.waitVisibility(hoverPopup);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10674", ex);
-    }
+    seleniumWebDriverHelper.waitVisibility(hoverPopup);
 
     // waits until text in popup is equals to specified
-    try {
-      seleniumWebDriverHelper.waitTextEqualsTo(hoverPopup, expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10117", ex);
-    }
+    seleniumWebDriverHelper.waitTextEqualsTo(hoverPopup, expectedText);
   }
 
   public void waitHoverPopupAppearance() {
@@ -542,12 +534,7 @@ public class CodenvyEditor {
    * @param expectedText the expected text into hover pop-up
    */
   public void waitTextInHoverPopup(String expectedText) {
-    try {
-      seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
-    }
+    seleniumWebDriverHelper.waitTextContains(hoverPopup, expectedText);
   }
 
   /**
@@ -2367,5 +2354,32 @@ public class CodenvyEditor {
   public void doRenamingByLanguageServerField(String renameValue) {
     seleniumWebDriverHelper.setValue(languageServerRenameField, renameValue);
     seleniumWebDriverHelper.waitAndSendKeysTo(languageServerRenameField, Keys.ENTER.toString());
+  }
+
+  public void waitSignaturesContainer() {
+    seleniumWebDriverHelper.waitVisibility(signaturesContainer, ELEMENT_TIMEOUT_SEC);
+  }
+
+  public void closeSignaturesContainer() {
+    typeTextIntoEditor(ESCAPE.toString());
+    waitSignaturesContainerIsClosed();
+  }
+
+  public void waitSignaturesContainerIsClosed() {
+    seleniumWebDriverHelper.waitInvisibility(signaturesContainer);
+  }
+
+  public String getAllVisibleTextFromSignaturesContainer() {
+    waitSignaturesContainer();
+    return signaturesContainer.getText();
+  }
+
+  /**
+   * Waits specified {@code expectedProposal} in signatures container.
+   *
+   * @param expectedProposal text which should be present in the container
+   */
+  public void waitProposalIntoSignaturesContainer(final String expectedProposal) {
+    seleniumWebDriverHelper.waitTextContains(signaturesContainer, expectedProposal);
   }
 }

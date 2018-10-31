@@ -135,7 +135,13 @@ public class RenameVirtualMethodsTest {
 
   @Test(groups = UNDER_REPAIR)
   public void testGeneric2() {
-    doRefactorByWizard(20, 20, "addIfPositive");
+    try {
+      doRefactorByWizard(20, 20, "addIfPositive");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10784", ex);
+    }
+
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
@@ -158,19 +164,13 @@ public class RenameVirtualMethodsTest {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
     editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
-    typeAndWaitNewName(newName);
+    refactor.typeAndWaitNewName(newName);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     // need for validation on server side
     WaitUtils.sleepQuietly(2);
     refactor.clickOkButtonRefactorForm();
-
-    try {
-      refactor.waitRenameMethodFormIsClosed();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
-    }
+    refactor.waitRenameMethodFormIsClosed();
   }
 
   private void doRefactorByWizardWithClosingWarnMess(
@@ -178,18 +178,12 @@ public class RenameVirtualMethodsTest {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
     editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
-    typeAndWaitNewName(newName);
+    refactor.typeAndWaitNewName(newName);
     refactor.clickOkButtonRefactorForm();
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
-
-    try {
-      refactor.waitRenameMethodFormIsClosed();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue: https://github.com/eclipse/che/issues/10784", ex);
-    }
+    refactor.waitRenameMethodFormIsClosed();
   }
 
   private void prepareProjectForRefactor(int cursorPositionLine, int cursorPositionChar) {
@@ -228,14 +222,5 @@ public class RenameVirtualMethodsTest {
     }
 
     return result;
-  }
-
-  private void typeAndWaitNewName(String newName) {
-    try {
-      refactor.typeAndWaitNewName(newName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
   }
 }

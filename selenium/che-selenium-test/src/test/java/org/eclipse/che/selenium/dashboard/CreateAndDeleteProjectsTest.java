@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
@@ -44,7 +43,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
-@Test(groups = UNDER_REPAIR)
 public class CreateAndDeleteProjectsTest {
 
   private static final String WORKSPACE = generate("workspace", 4);
@@ -130,19 +128,12 @@ public class CreateAndDeleteProjectsTest {
     workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
     workspaceProjects.waitProjectIsPresent(WEB_JAVA_SPRING);
     workspaceProjects.waitProjectIsPresent(CONSOLE_JAVA_SIMPLE);
-
-    try {
-      workspaceProjects.openSettingsForProjectByName(WEB_JAVA_SPRING);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8931");
-    }
-
+    openProjectSettings(WEB_JAVA_SPRING);
     workspaceProjects.clickOnDeleteProject();
     workspaceProjects.clickOnDeleteItInDialogWindow();
     workspaceProjects.waitProjectIsNotPresent(WEB_JAVA_SPRING);
     workspaceProjects.waitProjectIsPresent(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
-    workspaceProjects.openSettingsForProjectByName(CONSOLE_JAVA_SIMPLE);
+    openProjectSettings(CONSOLE_JAVA_SIMPLE);
     workspaceProjects.clickOnDeleteProject();
     workspaceProjects.clickOnDeleteItInDialogWindow();
     workspaceProjects.waitProjectIsNotPresent(CONSOLE_JAVA_SIMPLE);
@@ -150,5 +141,14 @@ public class CreateAndDeleteProjectsTest {
 
   private void switchToWindow(String windowHandle) {
     seleniumWebDriver.switchTo().window(windowHandle);
+  }
+
+  private void openProjectSettings(String projectName) {
+    try {
+      workspaceProjects.openSettingsForProjectByName(projectName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/8931");
+    }
   }
 }

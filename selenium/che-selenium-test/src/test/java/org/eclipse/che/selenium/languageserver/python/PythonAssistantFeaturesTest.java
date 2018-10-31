@@ -12,13 +12,11 @@
 package org.eclipse.che.selenium.languageserver.python;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.PYTHON;
 import static org.openqa.selenium.Keys.ARROW_LEFT;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -34,7 +32,6 @@ import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -106,24 +103,18 @@ public class PythonAssistantFeaturesTest {
     editor.waitTextIntoEditor(EXPECTED_TEXT_AFTER_RENAME);
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkHoverFeature() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + MAIN_TAB_NAME);
     editor.waitTabIsPresent(MAIN_TAB_NAME);
     editor.waitActive();
 
-    editor.goToCursorPositionVisible(18, 11);
-
-    try {
-      editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_TEXT);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure: issue https://github.com/eclipse/che/issues/10117", ex);
-    }
+    editor.moveCursorToText("function");
+    editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_TEXT);
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkFindReferenceFeature() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + CALC_TAB_NAME);
@@ -149,8 +140,12 @@ public class PythonAssistantFeaturesTest {
 
     editor.setCursorToLine(15);
     editor.typeTextIntoEditor(TEXT_FOR_INVOKING_SIGNATURE_HELP);
-    waitExpectedTextIntoShowHintsPopup(EXPECTED_SIGNATURE_TEXT);
-    editor.deleteCurrentLine();
+    editor.waitSignaturesContainer();
+    editor.waitProposalIntoSignaturesContainer(EXPECTED_SIGNATURE_TEXT);
+    editor.closeSignaturesContainer();
+    editor.waitSignaturesContainerIsClosed();
+
+    editor.deleteCurrentLineAndInsertNew();
   }
 
   @Test
@@ -166,15 +161,5 @@ public class PythonAssistantFeaturesTest {
     assistantFindPanel.clickOnActionNodeWithTextContains(EXPECTED_GO_TO_SYMBOL_NODES.get(0));
     editor.waitCursorPosition(14, 1);
     editor.waitVisibleTextEqualsTo(14, EXPECTED_LINE_TEXT);
-  }
-
-  private void waitExpectedTextIntoShowHintsPopup(String expectedText) {
-    try {
-      editor.waitExpTextIntoShowHintsPopUp(expectedText);
-    } catch (TimeoutException ex) {
-      editor.deleteCurrentLine();
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
-    }
   }
 }
