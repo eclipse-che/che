@@ -36,17 +36,9 @@ public class DefaultTestUser extends TestUserImpl {
       @Assisted RemovableUserProvider testUserProvider,
       @Assisted("name") String name,
       @Assisted("email") String email,
-      @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken)
+      @Assisted("password") String password)
       throws NotFoundException, ServerException, BadRequestException {
-    super(
-        testUserServiceClientFactory,
-        authServiceClient,
-        testUserProvider,
-        name,
-        email,
-        password,
-        offlineToken);
+    super(testUserServiceClientFactory, authServiceClient, testUserProvider, name, email, password);
   }
 
   @Override
