@@ -25,8 +25,10 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Inject;
@@ -92,7 +94,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
-    if (ephemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
+    if (EphemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
@@ -107,7 +109,10 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
                 .getByLabel(CHE_WORKSPACE_ID_LABEL, workspaceId));
     for (Pod pod : k8sEnv.getPods().values()) {
       final PodSpec podSpec = pod.getSpec();
-      for (Container container : podSpec.getContainers()) {
+      List<Container> containers = new ArrayList<>();
+      containers.addAll(podSpec.getContainers());
+      containers.addAll(podSpec.getInitContainers());
+      for (Container container : containers) {
         final String machineName = Names.machineName(pod, container);
         Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
         addMachineVolumes(workspaceId, claims, volumeName2PVC, pod, container, volumes);
@@ -119,7 +124,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   @Override
   public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
       throws InfrastructureException {
-    if (ephemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
+    if (EphemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
       return;
     }
     if (!k8sEnv.getPersistentVolumeClaims().isEmpty()) {
@@ -185,7 +190,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
   @Override
   public void cleanup(Workspace workspace) throws InfrastructureException {
-    if (ephemeralWorkspaceAdapter.isEphemeral(workspace)) {
+    if (EphemeralWorkspaceAdapter.isEphemeral(workspace)) {
       return;
     }
     String workspaceId = workspace.getId();

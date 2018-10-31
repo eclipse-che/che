@@ -25,6 +25,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironment
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceAdapter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
@@ -84,7 +85,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
    * <p>This API is in <b>Beta</b> and is subject to changes or removal.
    */
   @Beta
-  public List<ChePlugin> getTooling(RuntimeIdentity runtimeID, Collection<PluginMeta> pluginsMeta)
+  public List<ChePlugin> getTooling(
+      RuntimeIdentity runtimeID, Collection<PluginMeta> pluginsMeta, boolean isEphemeral)
       throws InfrastructureException {
 
     String workspaceId = runtimeID.getWorkspaceId();
@@ -92,6 +94,9 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     BrokersResult brokersResult = new BrokersResult();
 
     E brokerEnvironment = brokerEnvironmentFactory.create(pluginsMeta, runtimeID, brokersResult);
+    if (isEphemeral) {
+      EphemeralWorkspaceAdapter.makeEphemeral(brokerEnvironment.getAttributes());
+    }
     environmentProvisioner.provision(brokerEnvironment, runtimeID);
 
     ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, brokersResult);

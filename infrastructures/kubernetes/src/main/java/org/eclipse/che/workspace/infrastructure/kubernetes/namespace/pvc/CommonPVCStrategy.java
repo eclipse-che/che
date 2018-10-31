@@ -23,8 +23,10 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -102,7 +104,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
-    if (ephemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
+    if (EphemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
@@ -112,6 +114,9 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
     for (Pod pod : k8sEnv.getPods().values()) {
       PodSpec podSpec = pod.getSpec();
+      List<Container> containers = new ArrayList<>();
+      containers.addAll(podSpec.getContainers());
+      containers.addAll(podSpec.getInitContainers());
       for (Container container : podSpec.getContainers()) {
         String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
@@ -129,7 +134,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   @Override
   public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
       throws InfrastructureException {
-    if (ephemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
+    if (EphemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
       return;
     }
     final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
@@ -156,7 +161,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
   @Override
   public void cleanup(Workspace workspace) throws InfrastructureException {
-    if (ephemeralWorkspaceAdapter.isEphemeral(workspace)) {
+    if (EphemeralWorkspaceAdapter.isEphemeral(workspace)) {
       return;
     }
     String workspaceId = workspace.getId();
