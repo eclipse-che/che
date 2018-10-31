@@ -64,6 +64,7 @@ public class PullRequestPanel {
     static final String PULL_REQUEST_BTN = "gwt-debug-partButton-Pull Request";
     static final String BRANCH_NAME =
         "//div[text()='Branch name:']/following-sibling::div//span/label[text()='%s']";
+    static final String REFRESH_BRANCH_BUTTON = "gwt-debug-refreshContributionBranchButton";
     static final String OK_COMMIT_BTN = "commit-dialog-ok";
     static final String STATUS_OK = "//div[text()='%s']/parent::div//i[@class='fa fa-check']";
     static final String MESSAGE = "gwt-debug-statusSectionMessage";
@@ -132,6 +133,9 @@ public class PullRequestPanel {
   @FindBy(id = PullRequestLocators.CONTEXT_HIDE_BUTTON_ID)
   WebElement contextHideButton;
 
+  @FindBy(id = PullRequestLocators.REFRESH_BRANCH_BUTTON)
+  WebElement refreshBranchListButton;
+
   /** Wait that 'Pull Request' panel is open */
   public void waitOpenPanel() {
     seleniumWebDriverHelper.waitVisibility(panel);
@@ -193,6 +197,11 @@ public class PullRequestPanel {
     seleniumWebDriverHelper.waitAndClick(selectBranch);
     seleniumWebDriverHelper.waitAndClick(
         By.xpath(String.format(PullRequestLocators.BRANCH_NAME, branchName)));
+  }
+
+  /** Click 'refresh branch list' button on the 'Pull Request' panel */
+  public void clickRefreshBranchListButton() {
+    seleniumWebDriverHelper.waitAndClick(refreshBranchListButton);
   }
 
   /** Click 'Ok' button in the 'Commit your changes' window */

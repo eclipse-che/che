@@ -19,6 +19,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
@@ -40,6 +41,7 @@ public class Eclipse0122Test {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -47,6 +49,7 @@ public class Eclipse0122Test {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -58,6 +61,6 @@ public class Eclipse0122Test {
     editor.waitActive();
     editor.goToCursorPositionVisible(16, 24);
     editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitSpecifiedValueForLineAndChar(15, 16);
+    editor.waitSpecifiedValueForLineAndChar(15, 19);
   }
 }

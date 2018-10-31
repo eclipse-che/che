@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -96,6 +98,8 @@ public class CommonPVCStrategyTest {
   @Mock private KubernetesNamespaceFactory factory;
   @Mock private KubernetesNamespace k8sNamespace;
   @Mock private KubernetesPersistentVolumeClaims pvcs;
+  @Mock private Workspace workspace;
+  @Mock private EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
   private CommonPVCStrategy commonPVCStrategy;
 
@@ -103,54 +107,62 @@ public class CommonPVCStrategyTest {
   public void setup() throws Exception {
     commonPVCStrategy =
         new CommonPVCStrategy(
-            PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, true, pvcSubPathHelper, factory);
+            PVC_NAME,
+            PVC_QUANTITY,
+            PVC_ACCESS_MODE,
+            true,
+            pvcSubPathHelper,
+            factory,
+            ephemeralWorkspaceAdapter);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
     Map<String, Volume> volumes1 = new HashMap<>();
     volumes1.put(VOLUME_1_NAME, new VolumeImpl().withPath("/path"));
     volumes1.put(VOLUME_2_NAME, new VolumeImpl().withPath("/path2"));
-    when(machine1.getVolumes()).thenReturn(volumes1);
+    lenient().when(machine1.getVolumes()).thenReturn(volumes1);
     machines.put(MACHINE_1_NAME, machine1);
     InternalMachineConfig machine2 = mock(InternalMachineConfig.class);
     Map<String, Volume> volumes2 = new HashMap<>();
     volumes2.put(VOLUME_2_NAME, new VolumeImpl().withPath("/path2"));
-    when(machine2.getVolumes()).thenReturn(volumes2);
+    lenient().when(machine2.getVolumes()).thenReturn(volumes2);
     machines.put(MACHINE_2_NAME, machine2);
     InternalMachineConfig machine3 = mock(InternalMachineConfig.class);
     Map<String, Volume> volumes3 = new HashMap<>();
     volumes3.put(VOLUME_1_NAME, new VolumeImpl().withPath("/path"));
-    when(machine3.getVolumes()).thenReturn(volumes3);
+    lenient().when(machine3.getVolumes()).thenReturn(volumes3);
     machines.put(MACHINE_3_NAME, machine3);
-    when(k8sEnv.getMachines()).thenReturn(machines);
+    lenient().when(k8sEnv.getMachines()).thenReturn(machines);
 
     Map<String, Pod> pods = new HashMap<>();
     pods.put(POD_NAME, pod);
     pods.put(POD_NAME_2, pod2);
-    when(k8sEnv.getPods()).thenReturn(pods);
+    lenient().when(k8sEnv.getPods()).thenReturn(pods);
 
-    when(pod.getSpec()).thenReturn(podSpec);
-    when(pod2.getSpec()).thenReturn(podSpec2);
-    when(podSpec.getContainers()).thenReturn(asList(container, container2));
-    when(podSpec2.getContainers()).thenReturn(singletonList(container3));
-    when(podSpec.getVolumes()).thenReturn(new ArrayList<>());
-    when(podSpec2.getVolumes()).thenReturn(new ArrayList<>());
-    when(container.getName()).thenReturn(CONTAINER_NAME);
-    when(container2.getName()).thenReturn(CONTAINER_NAME_2);
-    when(container3.getName()).thenReturn(CONTAINER_NAME_3);
-    when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
-    when(container2.getVolumeMounts()).thenReturn(new ArrayList<>());
-    when(container3.getVolumeMounts()).thenReturn(new ArrayList<>());
+    lenient().when(pod.getSpec()).thenReturn(podSpec);
+    lenient().when(pod2.getSpec()).thenReturn(podSpec2);
+    lenient().when(podSpec.getContainers()).thenReturn(asList(container, container2));
+    lenient().when(podSpec2.getContainers()).thenReturn(singletonList(container3));
+    lenient().when(podSpec.getVolumes()).thenReturn(new ArrayList<>());
+    lenient().when(podSpec2.getVolumes()).thenReturn(new ArrayList<>());
+    lenient().when(container.getName()).thenReturn(CONTAINER_NAME);
+    lenient().when(container2.getName()).thenReturn(CONTAINER_NAME_2);
+    lenient().when(container3.getName()).thenReturn(CONTAINER_NAME_3);
+    lenient().when(container.getVolumeMounts()).thenReturn(new ArrayList<>());
+    lenient().when(container2.getVolumeMounts()).thenReturn(new ArrayList<>());
+    lenient().when(container3.getVolumeMounts()).thenReturn(new ArrayList<>());
 
-    doNothing().when(pvcSubPathHelper).execute(any(), any(), any());
-    when(k8sEnv.getPersistentVolumeClaims()).thenReturn(new HashMap<>());
-    when(pvcSubPathHelper.removeDirsAsync(anyString(), any(String.class)))
+    lenient().doNothing().when(pvcSubPathHelper).execute(any(), any(), any());
+    lenient().when(k8sEnv.getPersistentVolumeClaims()).thenReturn(new HashMap<>());
+    lenient()
+        .when(pvcSubPathHelper.removeDirsAsync(anyString(), any(String.class)))
         .thenReturn(CompletableFuture.completedFuture(null));
-    when(factory.create(WORKSPACE_ID)).thenReturn(k8sNamespace);
-    when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
+    lenient().when(factory.create(WORKSPACE_ID)).thenReturn(k8sNamespace);
+    lenient().when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
 
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
+    when(workspace.getId()).thenReturn(WORKSPACE_ID);
   }
 
   @Test
@@ -208,7 +220,13 @@ public class CommonPVCStrategyTest {
   public void testDoNotAddsSubpathsWhenPreCreationIsNotNeeded() throws Exception {
     commonPVCStrategy =
         new CommonPVCStrategy(
-            PVC_NAME, PVC_QUANTITY, PVC_ACCESS_MODE, false, pvcSubPathHelper, factory);
+            PVC_NAME,
+            PVC_QUANTITY,
+            PVC_ACCESS_MODE,
+            false,
+            pvcSubPathHelper,
+            factory,
+            ephemeralWorkspaceAdapter);
 
     commonPVCStrategy.provision(k8sEnv, IDENTITY);
 
@@ -259,15 +277,15 @@ public class CommonPVCStrategyTest {
 
   @Test
   public void testCleanup() throws Exception {
-    commonPVCStrategy.cleanup(WORKSPACE_ID);
+    commonPVCStrategy.cleanup(workspace);
 
     verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, WORKSPACE_ID);
   }
 
   static <T extends HasMetadata> T mockName(T obj, String name) {
     final ObjectMeta objectMeta = mock(ObjectMeta.class);
-    when(obj.getMetadata()).thenReturn(objectMeta);
-    when(objectMeta.getName()).thenReturn(name);
+    lenient().when(obj.getMetadata()).thenReturn(objectMeta);
+    lenient().when(objectMeta.getName()).thenReturn(name);
     return obj;
   }
 

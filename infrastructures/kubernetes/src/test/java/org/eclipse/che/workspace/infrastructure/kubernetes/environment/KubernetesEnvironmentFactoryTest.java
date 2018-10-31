@@ -27,6 +27,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.Ku
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory.SECRET_IGNORED_WARNING_MESSAGE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -109,7 +110,7 @@ public class KubernetesEnvironmentFactoryTest {
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
     when(serverGettable.get()).thenReturn(validatedObjects);
-    when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
+    lenient().when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
     when(internalRecipe.getContentType()).thenReturn(YAML_RECIPE);
     when(internalRecipe.getContent()).thenReturn("recipe content");
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);

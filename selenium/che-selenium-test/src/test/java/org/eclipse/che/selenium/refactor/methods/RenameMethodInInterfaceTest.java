@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.refactor.methods;
 
 import com.google.inject.Inject;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -76,6 +75,8 @@ public class RenameMethodInInterfaceTest {
         nameOfProject,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(nameOfProject);
     projectExplorer.waitVisibleItem(nameOfProject);
     consoles.closeProcessesArea();
     projectExplorer.quickExpandWithJavaScript();
@@ -83,7 +84,7 @@ public class RenameMethodInInterfaceTest {
   }
 
   @BeforeMethod
-  public void expandTreeOfProject(Method testName) throws IOException {
+  public void expandTreeOfProject(Method testName) {
     try {
       setFieldsForTest(testName.getName());
     } catch (Exception e) {
@@ -172,6 +173,10 @@ public class RenameMethodInInterfaceTest {
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.clickOkButtonRefactorForm();
+    loader.waitOnClosed();
+    refactor.waitRenameMethodFormIsClosed();
+    loader.waitOnClosed();
+    editor.waitTextIntoEditor(contentFromOutA);
   }
 
   private void doRefactorByWizardWithExpectedWarningMessage(

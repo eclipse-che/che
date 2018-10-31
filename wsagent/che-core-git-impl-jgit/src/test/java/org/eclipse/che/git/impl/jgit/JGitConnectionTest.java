@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -48,7 +49,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryState;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.eclipse.jgit.transport.SshTransport;
-import org.eclipse.jgit.transport.Transport;
 import org.eclipse.jgit.transport.TransportHttp;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.mockito.ArgumentCaptor;
@@ -87,14 +87,14 @@ public class JGitConnectionTest {
 
     RepositoryState repositoryState = mock(RepositoryState.class);
     GitUser gitUser = mock(GitUser.class);
-    when(repositoryState.canAmend()).thenReturn(true);
-    when(repositoryState.canCommit()).thenReturn(true);
-    when(repository.getRepositoryState()).thenReturn(repositoryState);
-    when(gitUser.getName()).thenReturn("username");
-    when(gitUser.getEmail()).thenReturn("email");
-    when(userResolver.getUser()).thenReturn(gitUser);
-    when(repository.getDirectory()).thenReturn(directory);
-    when(directory.getPath()).thenReturn("path");
+    lenient().when(repositoryState.canAmend()).thenReturn(true);
+    lenient().when(repositoryState.canCommit()).thenReturn(true);
+    lenient().when(repository.getRepositoryState()).thenReturn(repositoryState);
+    lenient().when(gitUser.getName()).thenReturn("username");
+    lenient().when(gitUser.getEmail()).thenReturn("email");
+    lenient().when(userResolver.getUser()).thenReturn(gitUser);
+    lenient().when(repository.getDirectory()).thenReturn(directory);
+    lenient().when(directory.getPath()).thenReturn("path");
   }
 
   @DataProvider(name = "gitUrlsWithCredentialsProvider")
@@ -192,7 +192,8 @@ public class JGitConnectionTest {
      * with  help real children {@link TransportHttp}, which returns real not null
      * value. And then we can create mock {@link TransportHttp}.
      */
-    mock(Transport.class);
+    org.eclipse.jgit.transport.Transport transport =
+        mock(org.eclipse.jgit.transport.Transport.class);
     TransportHttp transportHttp = mock(TransportHttp.class);
     when(sshKeyProvider.getPrivateKey(anyString())).thenReturn(new byte[0]);
     doAnswer(

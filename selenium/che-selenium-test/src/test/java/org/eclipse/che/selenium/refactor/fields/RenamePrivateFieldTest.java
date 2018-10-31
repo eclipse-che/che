@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.selenium.refactor.fields;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -23,6 +21,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -31,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -52,6 +50,7 @@ public class RenamePrivateFieldTest {
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private Refactor refactor;
+  @Inject private AskDialog askDialog;
   @Inject private Consoles consoles;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
@@ -65,6 +64,7 @@ public class RenamePrivateFieldTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
@@ -333,6 +333,8 @@ public class RenamePrivateFieldTest {
     refactor.setAndWaitStateUpdateReferencesCheckbox(true);
     loader.waitOnClosed();
     refactor.clickOkButtonRefactorForm();
+    askDialog.acceptDialogWithText(
+        "Code modification may not be accurate as affected resource 'qa-spring-sample/src/main/java/test11/A.java' has compile errors.");
     loader.waitOnClosed();
     refactor.waitRenameFieldFormIsClosed();
     waitTextIntoEditor(contentFromOutA);
@@ -393,20 +395,10 @@ public class RenamePrivateFieldTest {
   }
 
   private void typeAndWaitNewName(String newName) {
-    try {
-      refactor.typeAndWaitNewName(newName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
+    refactor.typeAndWaitNewName(newName);
   }
 
   private void waitTextIntoEditor(String expectedText) {
-    try {
-      editor.waitTextIntoEditor(expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
+    editor.waitTextIntoEditor(expectedText);
   }
 }

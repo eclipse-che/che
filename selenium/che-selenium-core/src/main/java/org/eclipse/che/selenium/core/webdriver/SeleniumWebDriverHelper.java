@@ -39,11 +39,15 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -127,9 +131,9 @@ public class SeleniumWebDriverHelper {
    */
   public void setText(WebElement webElement, String value) {
     waitVisibility(webElement).clear();
-    waitTextEqualsTo(webElement, "");
+    waitTextEqualsTo(webElement, "", element -> element.getAttribute("value"), DEFAULT_TIMEOUT);
     waitAndSendKeysTo(webElement, value);
-    waitTextEqualsTo(webElement, value);
+    waitTextEqualsTo(webElement, value, element -> element.getAttribute("value"), DEFAULT_TIMEOUT);
   }
 
   /**
@@ -526,6 +530,32 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Waits visibility of element which specified by {@code elementLocator} and gets provided {@code
+   * cssPropertyName} from it.
+   *
+   * @param elementLocator locator of the investigating element
+   * @param cssPropertyName name of the css properties which should be extracted
+   * @return value of the specified {@code cssPropertyName}
+   */
+  public String waitAndGetCssValue(By elementLocator, String cssPropertyName) {
+    return waitVisibility(elementLocator).getCssValue(cssPropertyName);
+  }
+
+  /**
+   * Waits until specified {@code cssPropertyName} in the element which defined by provided {@code
+   * elementLocator} is equals to {@code expectedValue}.
+   *
+   * @param elementLocator locator of the investigating element
+   * @param cssPropertyName name of the css properties which should be extracted
+   * @param expectedValue expected value of the specified {@code cssPropertyName}
+   */
+  public void waitCssValueEqualsTo(
+      By elementLocator, String cssPropertyName, String expectedValue) {
+    waitSuccessCondition(
+        driver -> waitAndGetCssValue(elementLocator, cssPropertyName).equals(expectedValue));
+  }
+
+  /**
    * Waits visibility of {@link WebElement} with provided {@code elementLocator} and gets text.
    *
    * @param elementLocator element from which text should be got
@@ -565,7 +595,20 @@ public class SeleniumWebDriverHelper {
    * @return element text by {@link WebElement#getText()}
    */
   public String waitVisibilityAndGetText(WebElement webElement, int timeout) {
-    return waitVisibility(webElement, timeout).getText();
+    return waitVisibilityAndGetText(webElement, WebElement::getText, timeout);
+  }
+
+  /**
+   * Waits during {@code timeout} visibility of provided {@code webElement} and gets text.
+   *
+   * @param webElement element from which text should be got
+   * @param timeout waiting time in seconds
+   * @return element text by {@link WebElement#getText()}
+   */
+  public String waitVisibilityAndGetText(
+      WebElement webElement, Function<WebElement, String> textProvider, int timeout) {
+    waitVisibility(webElement, timeout);
+    return textProvider.apply(webElement);
   }
 
   /**
@@ -743,6 +786,28 @@ public class SeleniumWebDriverHelper {
                   actual[0] = waitVisibilityAndGetText(element, timeout);
                   return actual[0].equals(expected);
                 });
+  }
+
+  /**
+   * Waits during {@code timeout} until text extracted from specified {@code webElement} by {@link
+   * WebElement#getText()} equals to provided {@code expectedText}.
+   *
+   * @param webElement element in which text should be checked
+   * @param expectedText expected text which should be present in the element
+   * @param timeout waiting time in seconds
+   */
+  public void waitTextEqualsTo(
+      WebElement webElement,
+      String expectedText,
+      Function<WebElement, String> textProvider,
+      int timeout) {
+    webDriverWaitFactory
+        .get(timeout)
+        .until(
+            (ExpectedCondition<Boolean>)
+                driver ->
+                    waitVisibilityAndGetText(webElement, textProvider, timeout)
+                        .equals(expectedText));
   }
 
   /**
@@ -1009,10 +1074,22 @@ public class SeleniumWebDriverHelper {
    */
   public void waitAndContextClick(By elementLocator, int timeout) {
     waitVisibility(elementLocator, timeout);
-    actionsFactory
-        .createAction(seleniumWebDriver)
-        .contextClick(seleniumWebDriver.findElement(elementLocator))
-        .perform();
+
+    waitNoExceptions(
+        () -> performContextClick(elementLocator), timeout, StaleElementReferenceException.class);
+  }
+
+  /**
+   * Waits visibility of element located at {@code elementLocator} and then context click on it.
+   *
+   * @param elementLocator locator of element which should be context clicked on
+   */
+  public void waitAndContextClick(By elementLocator) {
+    waitAndContextClick(elementLocator, DEFAULT_TIMEOUT);
+  }
+
+  private void performContextClick(By elementLocator) {
+    getAction().contextClick(seleniumWebDriver.findElement(elementLocator)).perform();
   }
 
   /**
@@ -1448,6 +1525,11 @@ public class SeleniumWebDriverHelper {
     waitSuccessCondition(expression, DEFAULT_TIMEOUT);
   }
 
+  /** Hides context menu. */
+  public void hideContextMenu() {
+    actionsFactory.createAction(seleniumWebDriver).moveByOffset(-1, -1).click().build().perform();
+  }
+
   public void closeCurrentWindowAndSwitchToAnother(String windowToSwitch) {
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(windowToSwitch);
@@ -1479,11 +1561,11 @@ public class SeleniumWebDriverHelper {
    * {@code DEFAULT_TIMEOUT}.
    *
    * @param action action which should stop throwing of certain exception during timeout
-   * @param ignoredExceptionType exception which should be ignored when action is performed
+   * @param ignoredExceptionTypes exceptions which should be ignored when action is performed
    */
   public void waitNoExceptions(
-      Runnable action, Class<? extends WebDriverException> ignoredExceptionType) {
-    waitNoExceptions(action, ignoredExceptionType, DEFAULT_TIMEOUT);
+      Runnable action, Class<? extends WebDriverException>... ignoredExceptionTypes) {
+    waitNoExceptions(action, DEFAULT_TIMEOUT, ignoredExceptionTypes);
   }
 
   /**
@@ -1491,18 +1573,40 @@ public class SeleniumWebDriverHelper {
    * {@code timeoutInSec}.
    *
    * @param action action which should stop throwing of certain exception during timeout
-   * @param ignoredExceptionType exception which should be ignored when action is being performed
    * @param timeoutInSec waiting time in seconds
+   * @param ignoredExceptionTypes exceptions which should be ignored when action is being performed
    */
   public void waitNoExceptions(
-      Runnable action, Class<? extends WebDriverException> ignoredExceptionType, int timeoutInSec) {
+      Runnable action,
+      int timeoutInSec,
+      Class<? extends WebDriverException>... ignoredExceptionTypes) {
     webDriverWaitFactory
-        .get(timeoutInSec, ignoredExceptionType)
+        .get(timeoutInSec, asList(ignoredExceptionTypes))
         .until(
             (ExpectedCondition<Boolean>)
                 driver -> {
                   action.run();
                   return true;
                 });
+  }
+  /**
+   * Performs and verifies action.
+   *
+   * @param perform perform action
+   * @param verify verification action
+   * @param rollback rollback action
+   */
+  public void performAndVerify(
+      UnaryOperator<Void> perform, UnaryOperator<Void> verify, UnaryOperator<Void> rollback) {
+    for (; ; ) {
+      perform.apply(null);
+
+      try {
+        verify.apply(null);
+        break;
+      } catch (TimeoutException e) {
+        rollback.apply(null);
+      }
+    }
   }
 }

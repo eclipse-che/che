@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.pageobject;
 import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
@@ -28,10 +29,15 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOf;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
+import com.google.common.base.Predicate;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.ws.rs.core.Response.Status;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
@@ -41,6 +47,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
@@ -61,6 +68,7 @@ public class Consoles {
   private final WebDriverWait redrawDriverWait;
   private final WebDriverWait loadPageDriverWait;
   private final WebDriverWait updateProjDriverWait;
+  private final WebDriverWait appStartDriverWait;
   private final ProjectExplorer projectExplorer;
   private final AskDialog askDialog;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
@@ -98,6 +106,11 @@ public class Consoles {
   public static final String COMMANDS_MENU_ITEM = "gwt-debug-contextMenu/commandsActionGroup";
   public static final String SERVERS_MENU_ITEM = "contextMenu/Servers";
   public static final String COMMAND_NAME = "//tr[contains(@id,'command_%s')]";
+  public static final Pattern LANGUAGE_SERVER_UPDATE_MESSAGE =
+      Pattern.compile(
+          "Workspace updated. Result code: '0', message: 'OK'. Added projects: '\\[([^\\n\\r\\]]*)\\]', removed projects: ");
+  public static final String JAVA_LANGUAGE_SERVER_STARTED =
+      "Starting: 100% Starting Java Language Server";
 
   public interface CommandsGoal {
     String COMMON = "gwt-debug-contextMenu/Commands/goal_Common";
@@ -130,6 +143,7 @@ public class Consoles {
     redrawDriverWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     loadPageDriverWait = new WebDriverWait(seleniumWebDriver, LOAD_PAGE_TIMEOUT_SEC);
     updateProjDriverWait = new WebDriverWait(seleniumWebDriver, UPDATING_PROJECT_TIMEOUT_SEC);
+    appStartDriverWait = new WebDriverWait(seleniumWebDriver, APPLICATION_START_TIMEOUT_SEC);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -408,6 +422,52 @@ public class Consoles {
     updateProjDriverWait.until(textToBePresentInElement(consoleContainer, expectedText));
   }
 
+  /** wait on "Starting: 100% Starting Java Language Server" message appears in console */
+  public void waitJDTLSStartedMessage() {
+    try {
+      waitExpectedTextIntoConsole(JAVA_LANGUAGE_SERVER_STARTED);
+    } catch (TimeoutException e) {
+      LOG.warn("timed out waiting for java language server to start");
+    }
+  }
+
+  /** wait JDT LS message about project is updated */
+  public void waitJDTLSProjectResolveFinishedMessage(String... projects) {
+    List<String> projectStrings = new ArrayList<>(projects.length);
+    for (String project : projects) {
+      projectStrings.add("file:///projects/" + project);
+    }
+    try {
+
+      appStartDriverWait.until(
+          (Predicate<WebDriver>)
+              webdriver -> {
+                ArrayList<String> projectsCopy = new ArrayList<>(projectStrings);
+                String text = consoleContainer.getText();
+                Matcher matcher = LANGUAGE_SERVER_UPDATE_MESSAGE.matcher(text);
+                while (matcher.find()) {
+                  String addedProjects = matcher.group(1);
+                  Iterator<String> iter = projectsCopy.iterator();
+                  while (iter.hasNext()) {
+                    if (addedProjects.contains(iter.next())) {
+                      iter.remove();
+                    }
+                  }
+                  if (projectsCopy.isEmpty()) {
+                    return true;
+                  }
+                }
+                return false;
+              });
+    } catch (TimeoutException e) {
+      LOG.warn("timed out waiting for resolving projects {}", (Object[]) projects);
+    }
+    // once a new project has been added to the workspace, stuff in the project
+    // explorer will be updated, for example showing packages instead of folders
+    // wait for this to be finished
+    loader.waitOnClosed();
+  }
+
   /** get visible text from command console */
   public String getVisibleTextFromCommandConsole() {
     return redrawDriverWait.until(visibilityOf(consoleContainer)).getText();
@@ -416,7 +476,7 @@ public class Consoles {
   /**
    * wait expected text into 'Command console'
    *
-   * @param expectedText expected messaje in concole
+   * @param expectedText expected message in console
    * @param definedTimeout timeout in seconds defined with user
    */
   public void waitExpectedTextIntoConsole(String expectedText, int definedTimeout) {
@@ -524,17 +584,19 @@ public class Consoles {
     waitPreviewUrlIsPresent();
     waitPreviewUrlIsResponsive(10);
 
-    // wait for 2 sec to prevent "Application is not available" error
-    WaitUtils.sleepQuietly(2);
+    // wait for 5 sec to prevent "Application is not available" error
+    WaitUtils.sleepQuietly(5);
     clickOnPreviewUrl();
 
     seleniumWebDriverHelper.switchToNextWindow(currentWindow);
 
-    seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
-
-    seleniumWebDriver.close();
-    seleniumWebDriver.switchTo().window(currentWindow);
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    try {
+      seleniumWebDriverHelper.waitVisibility(webElement, LOADER_TIMEOUT_SEC);
+    } finally {
+      seleniumWebDriver.close();
+      seleniumWebDriver.switchTo().window(currentWindow);
+      seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    }
   }
 
   // Start command from project context menu and check expected message in Console
@@ -548,7 +610,7 @@ public class Consoles {
 
     waitTabNameProcessIsPresent(commandName);
     waitProcessInProcessConsoleTree(commandName);
-    waitExpectedTextIntoConsole(expectedMessageInTerminal, PREPARING_WS_TIMEOUT_SEC);
+    waitExpectedTextIntoConsole(expectedMessageInTerminal, APPLICATION_START_TIMEOUT_SEC);
   }
 
   public void closeProcessTabWithAskDialog(String tabName) {

@@ -1,5 +1,13 @@
 <div class="che-machine-agents">
-  <div flex>
+  <div flex layout="row"
+        layout-align="start stretch"          
+        ng-if="machineAgentsController.isPluginsEnabled" class="warning-message">
+    <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+    <div>Installers and plugins are different concepts, which are not compatible between each others.<br>
+      If you want to enable installers, you need to disable all the plugins already configured.<br>
+      Please note: Installers will be completely replaced by plugins in a near version.</div>
+  </div>
+  <div ng-if="!machineAgentsController.isPluginsEnabled" flex>
     <!-- Agents list header -->
     <div flex layout="column" md-theme="maincontent-theme">
       <che-list-header che-hide-header="!machineAgentsController.agentItemsList.length">

@@ -21,6 +21,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_NODEJS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WILDFLY_SWARM;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CEYLON_WITH_JAVA_JAVASCRIPT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
@@ -31,6 +32,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.J
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_DOCKER;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_ON_KUBERNETES;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.KOTLIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODE;
@@ -38,8 +40,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.P
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_HELLO_WORLD;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.WORKSPACE_NEXT_REST;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -82,15 +82,15 @@ public class NewWorkspacePageTest {
           DOT_NET,
           ANDROID,
           CPP,
+          CHE_7_PREVIEW,
           ECLIPSE_CHE,
           GO,
+          JAVA_THEIA_ON_KUBERNETES,
           JAVA_THEIA_OPENSHIFT,
           NODE,
           PHP,
           PYTHON,
-          RAILS,
-          WORKSPACE_NEXT_HELLO_WORLD,
-          WORKSPACE_NEXT_REST);
+          RAILS);
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
       asList(
@@ -99,14 +99,14 @@ public class NewWorkspacePageTest {
           DOT_NET,
           ANDROID,
           CPP,
+          CHE_7_PREVIEW,
           ECLIPSE_CHE,
           GO,
+          JAVA_THEIA_ON_KUBERNETES,
           NODE,
           PHP,
           PYTHON,
-          RAILS,
-          WORKSPACE_NEXT_HELLO_WORLD,
-          WORKSPACE_NEXT_REST);
+          RAILS);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
       asList(
@@ -137,6 +137,7 @@ public class NewWorkspacePageTest {
           CENTOS_NODEJS,
           CENTOS_WILDFLY_SWARM,
           CEYLON_WITH_JAVA_JAVASCRIPT,
+          CHE_7_PREVIEW,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
@@ -146,9 +147,7 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          SPRING_BOOT,
-          WORKSPACE_NEXT_HELLO_WORLD,
-          WORKSPACE_NEXT_REST);
+          SPRING_BOOT);
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_SINGLE_MACHINE_STACKS =
       asList(
@@ -163,6 +162,7 @@ public class NewWorkspacePageTest {
           CENTOS_NODEJS,
           CENTOS_WILDFLY_SWARM,
           CEYLON_WITH_JAVA_JAVASCRIPT,
+          CHE_7_PREVIEW,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
@@ -172,9 +172,7 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          SPRING_BOOT,
-          WORKSPACE_NEXT_HELLO_WORLD,
-          WORKSPACE_NEXT_REST);
+          SPRING_BOOT);
 
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
@@ -189,6 +187,7 @@ public class NewWorkspacePageTest {
           CENTOS_NODEJS,
           CENTOS_WILDFLY_SWARM,
           CEYLON_WITH_JAVA_JAVASCRIPT,
+          CHE_7_PREVIEW,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
@@ -198,33 +197,46 @@ public class NewWorkspacePageTest {
           PHP,
           PYTHON,
           RAILS,
-          SPRING_BOOT,
-          WORKSPACE_NEXT_HELLO_WORLD,
-          WORKSPACE_NEXT_REST);
+          SPRING_BOOT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
+      asList(
+          JAVA_MYSQL,
+          JAVA_THEIA_ON_KUBERNETES,
+          JAVA_THEIA_OPENSHIFT,
+          JAVA_MYSQL_CENTOS,
+          JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_K8S_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
+      asList(
+          JAVA_MYSQL,
+          JAVA_THEIA_ON_KUBERNETES,
+          JAVA_THEIA_OPENSHIFT,
+          JAVA_MYSQL_CENTOS,
+          JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
-      asList(JAVA_MYSQL, JAVA_THEIA_OPENSHIFT, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
+      asList(
+          JAVA_MYSQL,
+          JAVA_THEIA_ON_KUBERNETES,
+          JAVA_THEIA_OPENSHIFT,
+          JAVA_MYSQL_CENTOS,
+          JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack>
       EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
           asList(
               JAVA,
               BLANK,
-              WORKSPACE_NEXT_REST,
-              WORKSPACE_NEXT_HELLO_WORLD,
               RAILS,
               PYTHON,
               PHP,
               NODE,
               JAVA_THEIA_OPENSHIFT,
+              JAVA_THEIA_ON_KUBERNETES,
               GO,
               ECLIPSE_CHE,
+              CHE_7_PREVIEW,
               CPP,
               ANDROID,
               DOT_NET);
@@ -233,14 +245,14 @@ public class NewWorkspacePageTest {
       asList(
           JAVA,
           BLANK,
-          WORKSPACE_NEXT_REST,
-          WORKSPACE_NEXT_HELLO_WORLD,
           RAILS,
           PYTHON,
           PHP,
           NODE,
+          JAVA_THEIA_ON_KUBERNETES,
           GO,
           ECLIPSE_CHE,
+          CHE_7_PREVIEW,
           CPP,
           ANDROID,
           DOT_NET);

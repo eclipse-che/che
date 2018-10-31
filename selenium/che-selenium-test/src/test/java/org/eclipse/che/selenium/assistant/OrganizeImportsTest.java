@@ -23,6 +23,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -37,16 +38,11 @@ import org.testng.annotations.Test;
 public class OrganizeImportsTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(OrganizeImportsTest.class.getSimpleName(), 4);
-  private static final String SOURCE_FOLDER = "src/main/java";
   private static final String PATH_TO_CLASS_IN_SPRING_PACKAGE =
       PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/" + "AppController.java";
   private static final String TEST_FILE_NAME = "TestClass.java";
   private static final String PATH_TO_A_PACKAGE = PROJECT_NAME + "/src/main/java/a";
-  private static final String PATH_TO_CLASS_IN_A_PACKAGE =
-      PROJECT_NAME + "/src/main/java/a/TestClass.java";
   private static final String PATH_TO_B_PACKAGE = PROJECT_NAME + "/src/main/java/b";
-  private static final String PATH_TO_CLASS_IN_B_PACKAGE =
-      PROJECT_NAME + "/src/main/java/b/TestClass.java";
   private static final String NAME_OF_A_PACKAGE = "a.TestClass";
   private static final String NAME_OF_B_PACKAGE = "b.TestClass";
   private static final String NAME_OF_LIST_PACKAGE = "java.util.List";
@@ -70,6 +66,7 @@ public class OrganizeImportsTest {
   @Inject private OrganizeImports organizeImports;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -81,6 +78,7 @@ public class OrganizeImportsTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -100,7 +98,6 @@ public class OrganizeImportsTest {
         TestMenuCommandsConstants.Assistant.ASSISTANT,
         TestMenuCommandsConstants.Assistant.ORGANIZE_IMPORTS);
     loader.waitOnClosed();
-    editor.waitAllMarkersInvisibility(ERROR);
     Assert.assertTrue(
         editor.checkWhatTextLinePresentOnce(
             "import org.springframework.web.servlet.ModelAndView;"));
@@ -109,6 +106,7 @@ public class OrganizeImportsTest {
     editor.typeTextIntoEditorWithoutDelayForSaving(
         "import org.springframework.web.servlet.ModelAndView;");
     loader.waitOnClosed();
+    editor.waitAllMarkersInvisibility(ERROR);
     editor.goToCursorPositionVisible(21, 8);
     editor.launchPropositionAssistPanel();
     editor.enterTextIntoFixErrorPropByEnter("Organize imports");
@@ -149,12 +147,8 @@ public class OrganizeImportsTest {
     organizeImports.selectImport(NAME_OF_B_PACKAGE);
     organizeImports.clickOnNextButton();
     organizeImports.clickOnFinishButton();
+    loader.waitOnClosed();
     editor.waitAllMarkersInvisibility(ERROR);
-    loader.waitOnClosed();
-
-    projectExplorer.waitItem(PATH_TO_CLASS_IN_SPRING_PACKAGE);
-    projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);
-    loader.waitOnClosed();
 
     Assert.assertTrue(editor.checkWhatTextLinePresentOnce("import b.TestClass;"));
     Assert.assertTrue(editor.checkWhatTextLinePresentOnce("import java.util.ArrayList;"));

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsagent-server</artifactId>
     <packaging>pom</packaging>
@@ -44,14 +44,6 @@
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-tomcat8-slf4j-logback</artifactId>
             <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>maven-server-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>maven-server-impl</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jdom</groupId>
@@ -87,8 +79,6 @@
                 <artifactId>maven-dependency-plugin</artifactId>
                 <configuration>
                     <usedDependencies>
-                        <param>org.eclipse.che.plugin:maven-server-impl</param>
-                        <param>org.eclipse.che.plugin:maven-server-api</param>
                         <param>log4j:log4j</param>
                         <param>org.jdom:jdom</param>
                         <param>org.eclipse.che.core:che-core-commons-lang</param>

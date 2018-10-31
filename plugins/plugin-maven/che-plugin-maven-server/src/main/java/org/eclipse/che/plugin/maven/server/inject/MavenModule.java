@@ -15,7 +15,6 @@ import static com.google.inject.multibindings.MapBinder.newMapBinder;
 import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.nio.file.PathMatcher;
@@ -24,15 +23,10 @@ import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
 import org.eclipse.che.inject.DynaModule;
-import org.eclipse.che.maven.server.MavenTerminal;
 import org.eclipse.che.plugin.maven.generator.archetype.MavenArchetypeJsonRpcMessenger;
+import org.eclipse.che.plugin.maven.lsp.MavenLanguageServer;
 import org.eclipse.che.plugin.maven.lsp.MavenLanguageServerConfig;
-import org.eclipse.che.plugin.maven.server.PomModificationDetector;
-import org.eclipse.che.plugin.maven.server.core.MavenJsonRpcCommunication;
-import org.eclipse.che.plugin.maven.server.core.MavenProgressNotifier;
-import org.eclipse.che.plugin.maven.server.core.MavenServerNotifier;
-import org.eclipse.che.plugin.maven.server.core.MavenTerminalImpl;
-import org.eclipse.che.plugin.maven.server.core.project.PomChangeListener;
+import org.eclipse.che.plugin.maven.lsp.MavenTextDocumentService;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenProjectType;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenTargetExcludeMatcher;
 import org.eclipse.che.plugin.maven.server.projecttype.MavenValueProviderFactory;
@@ -41,7 +35,6 @@ import org.eclipse.che.plugin.maven.server.projecttype.handler.GeneratorStrategy
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectGenerator;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.MavenProjectInitHandler;
 import org.eclipse.che.plugin.maven.server.projecttype.handler.SimpleGeneratorStrategy;
-import org.eclipse.che.plugin.maven.server.rest.MavenServerService;
 
 /** @author Artem Zatsarynnyi */
 @DynaModule
@@ -77,15 +70,10 @@ public class MavenModule extends AbstractModule {
             binder(), PathMatcher.class, Names.named("che.user.workspaces.storage.excludes"));
     fileWatcherExcludes.addBinding().to(MavenTargetExcludeMatcher.class);
 
-    bind(MavenTerminal.class).to(MavenTerminalImpl.class).in(Singleton.class);
-    bind(MavenProgressNotifier.class).to(MavenServerNotifier.class).in(Singleton.class);
-
-    bind(MavenServerService.class);
-    bind(MavenJsonRpcCommunication.class);
     bind(MavenArchetypeJsonRpcMessenger.class);
 
-    bind(PomChangeListener.class).asEagerSingleton();
-    bind(PomModificationDetector.class).asEagerSingleton();
+    bind(MavenLanguageServer.class);
+    bind(MavenTextDocumentService.class);
 
     newMapBinder(binder(), String.class, LanguageServerConfig.class)
         .addBinding("org.eclipse.che.plugin.maven")

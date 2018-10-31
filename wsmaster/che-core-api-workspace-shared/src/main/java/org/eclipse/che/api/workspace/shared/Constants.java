@@ -47,7 +47,7 @@ public final class Constants {
   /**
    * Property name for Che plugin registry url. Key name of api workspace/settings method results.
    */
-  public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR =
+  public static final String CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY =
       "che.workspace.plugin_registry_url";
 
   /** Name for environment variable of machine name */
@@ -91,6 +91,21 @@ public final class Constants {
   public static final String WORKSPACE_TOOLING_EDITOR_ATTRIBUTE = "editor";
 
   /**
+   * The attribute allows to configure workspace to be ephemeral with no PVC attached on K8S /
+   * OpenShift infrastructure. Should be set/read from {@link WorkspaceConfig#getAttributes}.
+   *
+   * <p>Value is expected to be boolean, and if set to 'false' regardless of the PVC strategy,
+   * workspace volumes would be created as `emptyDir`. When a workspace Pod is removed for any
+   * reason, the data in the `emptyDir` volume is deleted forever
+   *
+   * @see <a
+   *     href="https://www.eclipse.org/che/docs/kubernetes-admin-guide.html#che-workspaces-storage">Che
+   *     PVC strategies</a>
+   * @see <a href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir">emptyDir</a>
+   */
+  public static final String PERSIST_VOLUMES_ATTRIBUTE = "persistVolumes";
+
+  /**
    * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
    * set/read from {@link WorkspaceConfig#getAttributes}.
    *
@@ -118,7 +133,16 @@ public final class Constants {
   public static final String WORKSPACE_STATUS_CHANGED_METHOD = "workspace/statusChanged";
   public static final String MACHINE_STATUS_CHANGED_METHOD = "machine/statusChanged";
   public static final String SERVER_STATUS_CHANGED_METHOD = "server/statusChanged";
-  public static final String MACHINE_LOG_METHOD = "machine/log";
+
+  public static final String RUNTIME_LOG_METHOD = "runtime/log";
+
+  /**
+   * JSON RPC methods for listening to machine logs.
+   *
+   * @deprecated use {@link #RUNTIME_LOG_METHOD} instead
+   */
+  @Deprecated public static final String MACHINE_LOG_METHOD = "machine/log";
+
   public static final String INSTALLER_LOG_METHOD = "installer/log";
   public static final String INSTALLER_STATUS_CHANGED_METHOD = "installer/statusChanged";
   public static final String BOOTSTRAPPER_STATUS_CHANGED_METHOD = "bootstrapper/statusChanged";

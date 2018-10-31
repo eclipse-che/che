@@ -57,6 +57,7 @@ public class MacrosCommandsEditorTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJ_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJ_NAME);
   }
 
   @Test(priority = 1)
@@ -123,7 +124,6 @@ public class MacrosCommandsEditorTest {
       "${server.terminal}",
       "${server.tomcat8-debug}",
       "${server.tomcat8}",
-      "${server.wsagent-debug}",
       "${server.wsagent/http}",
       "${server.wsagent/ws}"
     };

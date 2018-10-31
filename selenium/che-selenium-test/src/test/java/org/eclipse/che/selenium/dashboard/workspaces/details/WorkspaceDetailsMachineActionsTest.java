@@ -22,7 +22,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ESCAPE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -33,11 +32,9 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceEnvVariables;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceInstallers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceServers;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -68,7 +65,6 @@ public class WorkspaceDetailsMachineActionsTest {
   @Inject private WorkspaceInstallers workspaceInstallers;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private WorkspaceServers workspaceServers;
-  @Inject private WorkspaceEnvVariables workspaceEnvVariables;
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -116,6 +112,16 @@ public class WorkspaceDetailsMachineActionsTest {
     checkEditOfMachineName("FROM " + IMAGE_NAME + "\n");
   }
 
+  @Test(groups = {OPENSHIFT, K8S, OSIO})
+  public void checkRamSectionOpenshift() {
+    checkRamSection(IMAGE_NAME);
+  }
+
+  @Test(groups = DOCKER)
+  public void checkRamSectionDocker() {
+    checkRamSection("FROM " + IMAGE_NAME + "\n");
+  }
+
   private void checkEditOfMachineName(String expectedRecipeText) {
     // check default values
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
@@ -150,8 +156,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitSaveButtonDisabling();
   }
 
-  @Test
-  public void checkRamSection() {
+  public void checkRamSection(String expectedRecipeText) {
     // check machine name editing
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
@@ -200,7 +205,7 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitFormInvisibility();
     workspaceDetailsMachines.clickOnEditButton(MACHINE_NAME);
     editMachineForm.waitForm();
-    waitRecipeText(IMAGE_NAME);
+    editMachineForm.waitRecipeText(expectedRecipeText);
 
     // check saving of the changes
     editMachineForm.typeRam(CHANGED_RAM_SIZE);
@@ -221,7 +226,6 @@ public class WorkspaceDetailsMachineActionsTest {
   public void checkMachineSettings() {
     final String installerName = "Exec";
     final String serverName = "tomcat8";
-    final String envVariable = "CHE_MACHINE_NAME";
 
     // check the "Installers" link
     waitMachineListItemAndClickOnSettingsButton();
@@ -234,13 +238,6 @@ public class WorkspaceDetailsMachineActionsTest {
     waitMachineListItemAndClickOnSettingsButton();
     workspaceDetailsMachines.clickOnServersLink();
     workspaceServers.checkServerName(serverName);
-
-    seleniumWebDriver.navigate().back();
-
-    // Check the "Environment Variables" link
-    waitMachineListItemAndClickOnSettingsButton();
-    workspaceDetailsMachines.clickOnEnvironmentVariablesLink();
-    workspaceEnvVariables.checkEnvVariableExists(envVariable);
 
     seleniumWebDriver.navigate().back();
 
@@ -267,14 +264,5 @@ public class WorkspaceDetailsMachineActionsTest {
   private void setValidName() {
     editMachineForm.typeName(MACHINE_NAME);
     editMachineForm.waitValidNameHighlighting();
-  }
-
-  private void waitRecipeText(String expectedText) {
-    try {
-      editMachineForm.waitRecipeText(expectedText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10732", ex);
-    }
   }
 }

@@ -50,6 +50,12 @@ public abstract class AbstractCommandEditorPage implements CommandEditorPage {
    */
   protected abstract void initialize();
 
+  /** Should be overwritten by a page to return a data validation state. */
+  @Override
+  public boolean hasInvalidData() {
+    return false;
+  }
+
   @Override
   public void setDirtyStateListener(DirtyStateListener listener) {
     this.listener = listener;

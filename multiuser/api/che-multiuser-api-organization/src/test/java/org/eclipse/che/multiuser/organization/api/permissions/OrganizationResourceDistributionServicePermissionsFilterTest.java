@@ -21,6 +21,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -90,12 +91,14 @@ public class OrganizationResourceDistributionServicePermissionsFilterTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(manager.getById(SUBORGANIZATION))
+    lenient()
+        .when(manager.getById(SUBORGANIZATION))
         .thenReturn(new OrganizationImpl(SUBORGANIZATION, "testOrg", PARENT_ORGANIZATION));
-    when(manager.getById(PARENT_ORGANIZATION))
+    lenient()
+        .when(manager.getById(PARENT_ORGANIZATION))
         .thenReturn(new OrganizationImpl(PARENT_ORGANIZATION, "parentOrg", null));
 
-    when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(true);
+    lenient().when(subject.hasPermission(anyString(), anyString(), anyString())).thenReturn(true);
   }
 
   @Test

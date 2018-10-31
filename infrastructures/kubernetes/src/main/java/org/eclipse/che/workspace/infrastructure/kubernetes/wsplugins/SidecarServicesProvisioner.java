@@ -52,6 +52,10 @@ public class SidecarServicesProvisioner {
   public void provision(KubernetesEnvironment kubernetesEnvironment)
       throws InfrastructureException {
     for (ChePluginEndpoint endpoint : endpoints) {
+      if (!isDiscoverable(endpoint)) {
+        continue;
+      }
+
       String serviceName = endpoint.getName();
       Service service = createService(serviceName, podName, endpoint.getTargetPort());
 
@@ -65,6 +69,10 @@ public class SidecarServicesProvisioner {
                 serviceName));
       }
     }
+  }
+
+  private boolean isDiscoverable(ChePluginEndpoint endpoint) {
+    return Boolean.parseBoolean(endpoint.getAttributes().getOrDefault("discoverable", "true"));
   }
 
   private Service createService(String name, String podName, int port) {

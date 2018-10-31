@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-languageserver</artifactId>
     <packaging>jar</packaging>
@@ -83,16 +83,16 @@
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.ls.jdt</groupId>
+            <artifactId>jdt.ls.extension.api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.text</groupId>
-            <artifactId>org.eclipse.text</artifactId>
         </dependency>
         <dependency>
             <groupId>org.everrest</groupId>
@@ -118,8 +118,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockitong</groupId>
-            <artifactId>mockitong</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-testng</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -150,6 +150,15 @@
                     </dependency>
                 </dependencies>
                 <configuration>
+                    <classes>
+                        <classe>org.eclipse.che.jdt.ls.extension.api.dto.LinearRange</classe>
+                    </classes>
+                    <excludes>
+                        <exclude>org.eclipse.lsp4j.WatchKind</exclude>
+                        <exclude>org.eclipse.lsp4j.MarkupKind</exclude>
+                        <exclude>org.eclipse.lsp4j.CodeActionKind</exclude>
+                        <exclude>org.eclipse.lsp4j.FoldingRangeKind</exclude>
+                    </excludes>
                     <dtoPackages>
                         <package>org.eclipse.lsp4j</package>
                         <package>org.eclipse.che.api.languageserver.shared.event</package>

@@ -12,10 +12,9 @@
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.openqa.selenium.Keys.ESCAPE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.List;
@@ -26,7 +25,6 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.Test;
 
 public class WorkspaceDetailsOverviewTest {
@@ -114,10 +112,11 @@ public class WorkspaceDetailsOverviewTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
+    newWorkspace.clickOnAllStacksTab();
 
-    selectStackAndCheckWorkspaceName(DOT_NET);
+    selectStackAndCheckWorkspaceName(ANDROID);
 
-    selectStackAndCheckWorkspaceName(JAVA);
+    selectStackAndCheckWorkspaceName(JAVA_CENTOS);
 
     // create workspace
     newWorkspace.setMachineRAM(MACHINE_NAME, 3.0);
@@ -146,8 +145,6 @@ public class WorkspaceDetailsOverviewTest {
 
     nameShouldBeValid(MAX_LONG_NAME);
     namesShouldBeValid();
-
-    namesShouldBeInvalid();
   }
 
   @Test(priority = 1)
@@ -193,13 +190,7 @@ public class WorkspaceDetailsOverviewTest {
 
   private void nameShouldBeInvalid(String name, String expectedErrorMessage) {
     workspaceOverview.enterNameWorkspace(name);
-
-    try {
-      workspaceOverview.waitErrorBorderOfNameField();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10659", ex);
-    }
+    workspaceOverview.waitErrorBorderOfNameField();
 
     workspaceOverview.waitNameErrorMessage(expectedErrorMessage);
     workspaceOverview.waitDisabledSaveButton();
@@ -210,14 +201,6 @@ public class WorkspaceDetailsOverviewTest {
         name -> {
           nameShouldBeInvalid(TOO_SHORT_NAME, SHORT_NAME_ERROR_MESSAGE);
           nameShouldBeValid(name);
-        });
-  }
-
-  private void namesShouldBeInvalid() {
-    NOT_VALID_NAMES.forEach(
-        name -> {
-          nameShouldBeValid(CHANGED_WORKSPACE_NAME);
-          nameShouldBeInvalid(name, SPECIAL_CHARACTERS_ERROR_MESSAGE);
         });
   }
 

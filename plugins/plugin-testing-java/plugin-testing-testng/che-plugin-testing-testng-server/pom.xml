@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-testing-testng</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-testing-testng-server</artifactId>
     <name>Che Plugin :: Java Testing :: TestNG Server</name>
@@ -39,16 +39,12 @@
             <artifactId>guice-multibindings</artifactId>
         </dependency>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.birt.runtime</groupId>
-            <artifactId>org.eclipse.equinox.common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -71,26 +67,16 @@
             <artifactId>che-core-commons-lang</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.lib</groupId>
-            <artifactId>org-eclipse-jdt-core-repack</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>org.eclipse.jdt.core</artifactId>
-                    <groupId>org.eclipse.tycho</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-java-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-testing-classpath</artifactId>
+            <artifactId>che-plugin-testing-base</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-testing-testng-runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>org.eclipse.core.resources</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -116,8 +102,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockitong</groupId>
-            <artifactId>mockitong</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-testng</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

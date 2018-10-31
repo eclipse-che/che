@@ -61,6 +61,10 @@ public class OrganizeImportsAction extends JavaEditorAction implements ProposalA
   @Override
   public void actionPerformed(ActionEvent e) {
     final EditorPartPresenter editor = editorAgent.getActiveEditor();
+    doOrganizeImports(editor);
+  }
+
+  private void doOrganizeImports(EditorPartPresenter editor) {
     organizeImportsPresenter.organizeImports(editor);
   }
 }

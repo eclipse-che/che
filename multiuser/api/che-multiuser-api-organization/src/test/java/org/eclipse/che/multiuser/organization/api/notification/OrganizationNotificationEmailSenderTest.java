@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -130,10 +131,12 @@ public class OrganizationNotificationEmailSenderTest {
         .when(organizationManager)
         .getMembers(anyString(), anyInt(), anyLong());
 
-    when(userManager.getById("user1"))
-        .thenReturn(new UserImpl("user1", "email1", null, null, emptyList()));
-    when(userManager.getById("user2"))
-        .thenReturn(new UserImpl("user2", "email2", null, null, emptyList()));
+    doReturn(new UserImpl("user1", "email1", null, null, emptyList()))
+        .when(userManager)
+        .getById("user1");
+    doReturn(new UserImpl("user2", "email2", null, null, emptyList()))
+        .when(userManager)
+        .getById("user2");
 
     EmailBean email = new EmailBean().withBody("Org Remaned Notification");
     when(emails.organizationRenamed(anyString(), anyString())).thenReturn(email);
@@ -165,8 +168,9 @@ public class OrganizationNotificationEmailSenderTest {
         .getMembers(anyString(), anyInt(), anyLong());
 
     when(userManager.getById("user1")).thenThrow(new NotFoundException(""));
-    when(userManager.getById("user2"))
-        .thenReturn(new UserImpl("user2", "email2", null, null, emptyList()));
+    doReturn(new UserImpl("user2", "email2", null, null, emptyList()))
+        .when(userManager)
+        .getById("user2");
 
     EmailBean email = new EmailBean().withBody("Org Renamed Notification");
     when(emails.organizationRenamed(anyString(), anyString())).thenReturn(email);
@@ -191,10 +195,12 @@ public class OrganizationNotificationEmailSenderTest {
     MemberImpl member1 = new MemberImpl("user1", "org123", emptyList());
     MemberImpl member2 = new MemberImpl("user2", "org123", emptyList());
 
-    when(userManager.getById("user1"))
-        .thenReturn(new UserImpl("user1", "email1", null, null, emptyList()));
-    when(userManager.getById("user2"))
-        .thenReturn(new UserImpl("user2", "email2", null, null, emptyList()));
+    doReturn(new UserImpl("user1", "email1", null, null, emptyList()))
+        .when(userManager)
+        .getById("user1");
+    doReturn(new UserImpl("user2", "email2", null, null, emptyList()))
+        .when(userManager)
+        .getById("user2");
 
     EmailBean email = new EmailBean().withBody("Org Removed Notification");
     when(emails.organizationRemoved(anyString())).thenReturn(email);
@@ -221,9 +227,10 @@ public class OrganizationNotificationEmailSenderTest {
     MemberImpl member1 = new MemberImpl("user1", "org123", emptyList());
     MemberImpl member2 = new MemberImpl("user2", "org123", emptyList());
 
-    when(userManager.getById("user1")).thenThrow(new NotFoundException(""));
-    when(userManager.getById("user2"))
-        .thenReturn(new UserImpl("user2", "email2", null, null, emptyList()));
+    doThrow(new NotFoundException("")).when(userManager).getById("user1");
+    doReturn(new UserImpl("user2", "email2", null, null, emptyList()))
+        .when(userManager)
+        .getById("user2");
 
     EmailBean email = new EmailBean().withBody("Org Removed Notification");
     when(emails.organizationRemoved(anyString())).thenReturn(email);

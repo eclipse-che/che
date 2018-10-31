@@ -19,7 +19,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.mockito.ArgumentCaptor;
@@ -40,13 +40,12 @@ public class PlainJavaValueProviderFactoryTest {
   @Mock private Map<String, List<String>> attributes;
   @Mock private ProjectManager projectManager;
   @Mock private RegisteredProject registeredProject;
+  @Mock private EventService eventService;
   @Captor private ArgumentCaptor<List<String>> captor;
 
   @Test
   public void attributeShouldBeSet() throws Exception {
-    when(projectManager.get(PROJECT_PATH)).thenReturn(Optional.of(registeredProject));
     when(registeredProject.getAttributes()).thenReturn(attributes);
-    when(registeredProject.getPath()).thenReturn(PROJECT_PATH);
 
     registeredProject.getAttributes().put(SOURCE_FOLDER, Arrays.asList("src"));
 

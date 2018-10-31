@@ -19,7 +19,6 @@ import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.BRANCH
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.FORK_CREATED;
 import static org.eclipse.che.selenium.pageobject.PullRequestPanel.Status.NEW_COMMITS_PUSHED;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -33,6 +32,7 @@ import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -41,7 +41,6 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel.Status;
 import org.eclipse.che.selenium.pageobject.git.Git;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -80,6 +79,7 @@ public class PullRequestPluginWithForkTest {
   @Inject private PullRequestPanel pullRequestPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -88,6 +88,8 @@ public class PullRequestPluginWithForkTest {
     testAuxiliaryRepo.addContent(entryPath);
 
     ide.open(testWorkspace);
+    // wait until jdt.ls initialized this need to avoid problem in next steps of test
+    consoles.waitJDTLSStartedMessage();
 
     // add committer info
     testUserPreferencesServiceClient.addGitCommitter(githubUserName, testUser.getEmail());
@@ -108,6 +110,11 @@ public class PullRequestPluginWithForkTest {
     }
   }
 
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
+  }
+
   @Test
   public void createPullRequest() throws Exception {
     // import project
@@ -126,13 +133,7 @@ public class PullRequestPluginWithForkTest {
     pullRequestPanel.clickOkCommitBtn();
     pullRequestPanel.waitStatusOk(FORK_CREATED);
     pullRequestPanel.waitStatusOk(BRANCH_PUSHED_ON_YOUR_FORK);
-
-    try {
-      pullRequestPanel.waitMessage(PULL_REQUEST_CREATED);
-    } catch (TimeoutException te) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/9548");
-    }
+    pullRequestPanel.waitMessage(PULL_REQUEST_CREATED);
   }
 
   @Test(priority = 1)

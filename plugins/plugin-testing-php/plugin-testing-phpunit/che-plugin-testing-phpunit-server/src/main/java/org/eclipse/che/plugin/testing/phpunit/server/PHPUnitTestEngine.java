@@ -28,7 +28,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.eclipse.che.api.core.util.CommandLine;
 import org.eclipse.che.api.testing.shared.TestExecutionContext;
 import org.eclipse.che.commons.lang.execution.ProcessHandler;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 /**
  * PHPUnit tests running engine.
@@ -48,10 +47,10 @@ public class PHPUnitTestEngine {
     this.projectsRoot = projectsRoot.toPath().normalize().toAbsolutePath();
   }
 
-  public ProcessHandler executeTests(TestExecutionContext context) {
+  public ProcessHandler executeTests(TestExecutionContext context) throws IOException {
     String projectPath = context.getProjectPath();
     String testTargetRelativePath = context.getFilePath();
-    String projectAbsolutePath = ResourcesPlugin.getPathToWorkspace() + projectPath;
+    String projectAbsolutePath = projectsRoot.resolve(projectPath).toString();
     File testTargetFile = getTestTargetFile(testTargetRelativePath, projectAbsolutePath);
     File testTargetWorkingDirectory =
         testTargetFile.isDirectory() ? testTargetFile : testTargetFile.getParentFile();
@@ -77,13 +76,7 @@ public class PHPUnitTestEngine {
             .directory(testTargetWorkingDirectory)
             .command(cmdRunTests.toShellCommand());
     pb.environment().put("ZEND_PHPUNIT_PORT", String.valueOf(PRINTER_PORT));
-    try {
-      return new ProcessHandler(pb.start());
-    } catch (IOException e) {
-      LOG.error("Can't run PHPUnit", e);
-    }
-
-    return null;
+    return new ProcessHandler(pb.start());
   }
 
   private File getPrinterFile() {

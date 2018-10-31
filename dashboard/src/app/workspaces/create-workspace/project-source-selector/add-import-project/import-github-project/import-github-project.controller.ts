@@ -205,6 +205,15 @@ export class ImportGithubProjectController {
     this.importGithubProjectService.onRepositorySelected(this.selectedRepositories);
   }
 
+  private storeRedirectUri(encodeHash) {
+    var redirectUri = location.href;
+    if (location.hash && encodeHash) {
+      redirectUri = redirectUri.substring(0, location.href.indexOf('#'));
+      redirectUri += (redirectUri.indexOf('?') == -1 ? '?' : '&') + 'redirect_fragment=' + encodeURIComponent(location.hash.substring(1));
+    }
+    window.sessionStorage.setItem('oidcIdeRedirectUrl', redirectUri);
+  }
+
   /**
    * Shows authentication popup window.
    */
@@ -226,6 +235,7 @@ export class ImportGithubProjectController {
         let token = '&token=' + this.keycloakAuth.keycloak.token;
         this.openGithubPopup(token);
       }).error(() => {
+        window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
         this.keycloakAuth.keycloak.login();
       });
     } else {

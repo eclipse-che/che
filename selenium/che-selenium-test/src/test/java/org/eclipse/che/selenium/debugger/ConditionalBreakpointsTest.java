@@ -79,10 +79,10 @@ public class ConditionalBreakpointsTest {
 
     ide.open(ws);
     projectExplorer.waitItem(PROJECT);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT);
+    projectExplorer.quickExpandWithJavaScript();
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick("build");
-    projectExplorer.quickExpandWithJavaScript();
-    debugPanel.openDebugPanel();
   }
 
   @Test
@@ -91,7 +91,6 @@ public class ConditionalBreakpointsTest {
     editor.setBreakpoint(15);
     editor.waitInactiveBreakpoint(15);
 
-    projectExplorer.openItemByVisibleNameInExplorer("External Libraries");
     projectExplorer.openItemByVisibleNameInExplorer("rt.jar");
     projectExplorer.openItemByVisibleNameInExplorer("com");
     projectExplorer.openItemByVisibleNameInExplorer("oracle");
@@ -101,6 +100,7 @@ public class ConditionalBreakpointsTest {
     editor.waitInactiveBreakpoint(7);
 
     editor.closeAllTabs();
+    debugPanel.openDebugPanel();
 
     debugPanel.navigateToBreakpoint("com.oracle.net.Sdp", 7);
     editor.waitActiveTabFileName("Sdp");

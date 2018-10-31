@@ -61,4 +61,18 @@ public class NamePageViewImplTest {
 
     verify(actionDelegate).onCommandRun();
   }
+
+  @Test
+  public void shouldShowWarningLabel() throws Exception {
+    view.showWarning(true);
+
+    verify(view.warningLabel).setVisible(true);
+  }
+
+  @Test
+  public void shouldHideWarningLabel() throws Exception {
+    view.showWarning(false);
+
+    verify(view.warningLabel).setVisible(false);
+  }
 }

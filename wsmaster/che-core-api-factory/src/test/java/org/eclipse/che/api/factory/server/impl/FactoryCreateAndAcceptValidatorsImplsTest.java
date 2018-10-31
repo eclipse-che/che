@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.factory.server.impl;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
@@ -61,7 +62,7 @@ public class FactoryCreateAndAcceptValidatorsImplsTest {
     doNothing().when(spy).validateProjects(any(FactoryDto.class));
     doNothing().when(spy).validateCurrentTimeAfterSinceUntil(any(FactoryDto.class));
     doNothing().when(spy).validateProjectActions(any(FactoryDto.class));
-    doNothing().when(workspaceConfigValidator).validateConfig(any(WorkspaceConfig.class));
+    doNothing().when(workspaceConfigValidator).validateConfig(nullable(WorkspaceConfig.class));
 
     // main invoke
     spy.validateOnCreate(factory);

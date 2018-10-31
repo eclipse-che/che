@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PULL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
 import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.BLANK;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -31,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -70,6 +72,7 @@ public class GitPullTest {
     String jsFileName = "app.js";
     String htmlFileName = "file.html";
     String readmeTxtFileName = "readme-txt";
+    String readmeMdFileName = "README.md";
     String folderWithPlainFilesPath = "plain-files";
 
     String currentTimeInMillis = Long.toString(System.currentTimeMillis());
@@ -79,6 +82,7 @@ public class GitPullTest {
     prepareFilesForTest(jsFileName);
     prepareFilesForTest(htmlFileName);
     prepareFilesForTest(folderWithPlainFilesPath + "/" + readmeTxtFileName);
+    prepareFilesForTest(folderWithPlainFilesPath + "/" + readmeMdFileName);
 
     testRepo.changeFileContent(jsFileName, currentTimeInMillis);
     testRepo.changeFileContent(htmlFileName, currentTimeInMillis);
@@ -90,7 +94,7 @@ public class GitPullTest {
     git.waitGitStatusBarWithMess(
         String.format("Successfully pulled from %s", testRepo.getHtmlUrl()));
 
-    checkPullAfterUpdatingContent(readmeTxtFileName, currentTimeInMillis);
+    checkPullAfterUpdatingContent(jsFileName, currentTimeInMillis);
     checkPullAfterUpdatingContent(htmlFileName, currentTimeInMillis);
     checkPullAfterUpdatingContent(readmeTxtFileName, currentTimeInMillis);
 
@@ -103,8 +107,8 @@ public class GitPullTest {
         readmeTxtFileName,
         String.format("/%s/%s/%s", PROJECT_NAME, folderWithPlainFilesPath, readmeTxtFileName));
     checkPullAfterRemovingContent(
-        readmeTxtFileName,
-        String.format("/%s/%s/%s", PROJECT_NAME, folderWithPlainFilesPath, "README.md"));
+        readmeMdFileName,
+        String.format("/%s/%s/%s", PROJECT_NAME, folderWithPlainFilesPath, readmeMdFileName));
   }
 
   private void performPull() {
@@ -127,7 +131,14 @@ public class GitPullTest {
 
   private void checkPullAfterRemovingContent(
       String tabNameOpenedFile, String pathToItemInProjectExplorer) {
-    editor.waitTextNotPresentIntoEditor(tabNameOpenedFile);
+
+    try {
+      editor.waitTabIsNotPresent(tabNameOpenedFile);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11648");
+    }
+
     projectExplorer.waitLibrariesAreNotPresent(pathToItemInProjectExplorer);
   }
 }

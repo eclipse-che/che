@@ -26,12 +26,14 @@ import java.io.IOException;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.CreateFactoryWidget;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -61,7 +63,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
   private static final String PROJECT_URL = "https://github.com/spring-guides/gs-rest-service";
   private static final String KEEPED_DIR = "complete";
   private static final String[] autocompleteContentAfterFirst = {
-    "GreetingController()", "Greeting", "GreetingController", "Greeting() : void"
+    "GreetingController", "GreetingControllerTest", "Greeting"
   };
   private static final String FACTORY_NAME = NameGenerator.generate("keepFactory", 2);
 
@@ -84,6 +86,8 @@ public class CreateFactoryFromUiWithKeepDirTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
   @Inject private PullRequestPanel pullRequestPanel;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -91,16 +95,25 @@ public class CreateFactoryFromUiWithKeepDirTest {
   }
 
   @AfterClass
-  public void tearDown() throws Exception {
+  public void deleteFactoryRelatedStaff() throws Exception {
     workspaceServiceClient.deleteFactoryWorkspaces(testWorkspace.getName(), user.getName());
     factoryServiceClient.deleteFactory(FACTORY_NAME);
+  }
+
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
   }
 
   @Test
   public void createFactoryFromUiWithKeepDirTest() throws Exception {
     projectExplorer.waitProjectExplorer();
+    consoles.waitJDTLSStartedMessage();
     makeKeepDirectoryFromGitUrl(PROJECT_URL, PROJECT_NAME, KEEPED_DIR);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     setUpModuleForFactory();
+    consoles.clickOnProcessesButton();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     checkAutocompletion();
     checkOpenDeclaration();
   }
@@ -113,13 +126,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
     wizard.selectSample(Wizard.TypeProject.MAVEN);
     wizard.clickSaveButton();
 
-    // TODO sometimes after importing project doest not open to keep folder. Need investigate later
-    try {
-      projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
-    } catch (TimeoutException e) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10852", e);
-    }
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
 
     events.clickEventLogBtn();
     createFactoryAndSwitchToWs();
@@ -150,7 +157,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
       events.waitExpectedMessage("Project " + PROJECT_NAME + " imported");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7253");
+      fail("Known random failure https://github.com/eclipse/che/issues/7253");
     }
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME);

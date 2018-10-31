@@ -40,6 +40,8 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.GoToSymbolAct
 import org.eclipse.che.plugin.languageserver.ide.navigation.workspace.FindSymbolAction;
 import org.eclipse.che.plugin.languageserver.ide.registry.LanguageServerRegistry;
 import org.eclipse.che.plugin.languageserver.ide.rename.LSRenameAction;
+import org.eclipse.che.plugin.languageserver.ide.service.CustomNotificationReceiver;
+import org.eclipse.che.plugin.languageserver.ide.service.ExecuteClientCommandReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.PublishDiagnosticsReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.ShowMessageJsonRpcReceiver;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
@@ -63,7 +65,9 @@ public class LanguageServerExtension {
       EventBus eventBus,
       AppContext appContext,
       ShowMessageJsonRpcReceiver showMessageJsonRpcReceiver,
-      PublishDiagnosticsReceiver publishDiagnosticsReceiver) {
+      PublishDiagnosticsReceiver publishDiagnosticsReceiver,
+      ExecuteClientCommandReceiver executeClientCommandReceiver,
+      CustomNotificationReceiver customNotificationReceiver) {
     eventBus.addHandler(
         WsAgentServerRunningEvent.TYPE,
         e -> {
@@ -73,6 +77,8 @@ public class LanguageServerExtension {
           defaultHoverProviderInitializer.initialize();
           showMessageJsonRpcReceiver.subscribe();
           publishDiagnosticsReceiver.subscribe();
+          executeClientCommandReceiver.subscribe();
+          customNotificationReceiver.subscribe();
         });
 
     if (appContext.getWorkspace().getStatus() == RUNNING) {
@@ -82,6 +88,8 @@ public class LanguageServerExtension {
       defaultHoverProviderInitializer.initialize();
       showMessageJsonRpcReceiver.subscribe();
       publishDiagnosticsReceiver.subscribe();
+      executeClientCommandReceiver.subscribe();
+      customNotificationReceiver.subscribe();
     }
   }
 
@@ -154,6 +162,12 @@ public class LanguageServerExtension {
     keyBindingManager
         .getGlobal()
         .addKey(new KeyBuilder().shift().charCode(KeyCodeMap.F6).build(), "LS.rename");
+
+    DefaultActionGroup editorContextMenuGroup =
+        (DefaultActionGroup) actionManager.getAction("editorContextMenu");
+    editorContextMenuGroup.addSeparator();
+    editorContextMenuGroup.add(findDefinitionAction);
+    editorContextMenuGroup.add(refactoringGroup);
   }
 
   @Inject

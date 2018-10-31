@@ -146,6 +146,7 @@ public class NewWorkspace {
     CENTOS_NODEJS("nodejs6"),
     CENTOS_WILDFLY_SWARM("wildfly-swarm"),
     CEYLON_WITH_JAVA_JAVASCRIPT("ceylon-java-javascript-dart-centos"),
+    CHE_7_PREVIEW("che7-preview"),
     DEBIAN("debian"),
     DEBIAN_LSP("debianlsp"),
     ECLIPSE_CHE("che-in-che"),
@@ -153,6 +154,7 @@ public class NewWorkspace {
     GO("go-default"),
     JAVA_CENTOS("java-centos"),
     JAVA_THEIA_DOCKER("simple-theia-docker"),
+    JAVA_THEIA_ON_KUBERNETES("java-theia-kubernetes"),
     JAVA_THEIA_OPENSHIFT("java-theia-openshift"),
     JAVA_MYSQL_CENTOS("java-centos-mysql"),
     JAVA_DEBIAN("java-debian"),
@@ -172,11 +174,10 @@ public class NewWorkspace {
     SELENIUM("selenium"),
     SPRING_BOOT("spring-boot"),
     TOM_EE("tomee-default"),
-    WORKSPACE_NEXT_HELLO_WORLD("wsnext-helloworld-openshift"),
-    WORKSPACE_NEXT_REST("wsnext-service-openshift"),
     UBUNTU("ubuntu"),
     ZEND("zend");
 
+    // wsnext-helloworld-openshift
     private final String id;
 
     Stack(String id) {

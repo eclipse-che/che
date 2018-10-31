@@ -18,7 +18,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_ULR;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
@@ -51,6 +51,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
@@ -101,7 +102,7 @@ public class WorkspaceService extends Service {
       WorkspaceManager workspaceManager,
       MachineTokenProvider machineTokenProvider,
       WorkspaceLinksGenerator linksGenerator,
-      @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_ULR) @Nullable String pluginRegistryUrl) {
+      @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
@@ -223,7 +224,7 @@ public class WorkspaceService extends Service {
     @ApiResponse(code = 200, message = "The workspaces successfully fetched"),
     @ApiResponse(code = 500, message = "Internal server error occurred during workspaces fetching")
   })
-  public List<WorkspaceDto> getWorkspaces(
+  public Response getWorkspaces(
       @ApiParam("The number of the items to skip") @DefaultValue("0") @QueryParam("skipCount")
           Integer skipCount,
       @ApiParam("The limit of the items in the response, default is 30")
@@ -232,18 +233,19 @@ public class WorkspaceService extends Service {
           Integer maxItems,
       @ApiParam("Workspace status") @QueryParam("status") String status)
       throws ServerException, BadRequestException {
-    return withLinks(
-        workspaceManager
-            .getWorkspaces(
-                EnvironmentContext.getCurrent().getSubject().getUserId(),
-                false,
-                maxItems,
-                skipCount)
-            .getItems()
-            .stream()
-            .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
-            .map(DtoConverter::asDto)
-            .collect(toList()));
+    Page<WorkspaceImpl> workspacesPage =
+        workspaceManager.getWorkspaces(
+            EnvironmentContext.getCurrent().getSubject().getUserId(), false, maxItems, skipCount);
+    return Response.ok()
+        .entity(
+            workspacesPage
+                .getItems()
+                .stream()
+                .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
+                .map(DtoConverter::asDto)
+                .collect(toList()))
+        .header("Link", createLinkHeader(workspacesPage))
+        .build();
   }
 
   @GET

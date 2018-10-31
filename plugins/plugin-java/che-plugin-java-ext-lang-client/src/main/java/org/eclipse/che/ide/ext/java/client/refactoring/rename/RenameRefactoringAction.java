@@ -12,8 +12,7 @@
 package org.eclipse.che.ide.ext.java.client.refactoring.rename;
 
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
-import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.COMPILATION_UNIT;
-import static org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType.PACKAGE;
+import static org.eclipse.che.ide.ext.java.client.util.JavaUtil.isJavaProject;
 
 import com.google.common.base.Optional;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -40,7 +39,6 @@ import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.RefactoredItemType;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.RenamePresenter;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderMarker;
-import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
 import org.eclipse.che.ide.util.loging.Log;
 
@@ -135,9 +133,9 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
 
       final Resource resource = resources[0];
 
-      final Optional<Project> project = resource.getRelatedProject();
+      final Project project = resource.getProject();
 
-      if (!JavaUtil.isJavaProject(project.get())) {
+      if (!isJavaProject(project)) {
         return;
       }
 
@@ -150,9 +148,9 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
       RefactoredItemType renamedItemType = null;
 
       if (resource.getResourceType() == FILE && isJavaFile((File) resource)) {
-        renamedItemType = COMPILATION_UNIT;
+        renamedItemType = RefactoredItemType.COMPILATION_UNIT;
       } else if (resource instanceof Container) {
-        renamedItemType = PACKAGE;
+        renamedItemType = RefactoredItemType.PACKAGE;
       }
 
       if (renamedItemType == null) {
@@ -177,16 +175,14 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
       final VirtualFile file = editorPart.getEditorInput().getFile();
 
       if (file instanceof File) {
-        final Optional<Project> project = ((File) file).getRelatedProject();
+        final Project project = ((File) file).getProject();
 
-        if (!project.isPresent()) {
+        if (project == null) {
           event.getPresentation().setEnabledAndVisible(false);
           return;
         }
 
-        event
-            .getPresentation()
-            .setEnabledAndVisible(JavaUtil.isJavaProject(project.get()) && isJavaFile(file));
+        event.getPresentation().setEnabledAndVisible(isJavaProject(project) && isJavaFile(file));
       } else {
         event.getPresentation().setEnabledAndVisible(isJavaFile(file));
       }
@@ -201,9 +197,9 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
 
       final Resource resource = resources[0];
 
-      final Optional<Project> project = resource.getRelatedProject();
+      final Project project = resource.getProject();
 
-      if (!project.isPresent()) {
+      if (project == null) {
         event.getPresentation().setEnabledAndVisible(false);
         return;
       }
@@ -214,13 +210,11 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
         event
             .getPresentation()
             .setEnabledAndVisible(
-                JavaUtil.isJavaProject(project.get())
-                    && srcFolder.isPresent()
-                    && isJavaFile((File) resource));
+                isJavaProject(project) && srcFolder.isPresent() && isJavaFile((File) resource));
       } else if (resource instanceof Container) {
         event
             .getPresentation()
-            .setEnabledAndVisible(JavaUtil.isJavaProject(project.get()) && srcFolder.isPresent());
+            .setEnabledAndVisible(isJavaProject(project) && srcFolder.isPresent());
       }
     }
   }
@@ -228,11 +222,7 @@ public class RenameRefactoringAction extends AbstractPerspectiveAction
   protected boolean isJavaFile(VirtualFile file) {
     String fileExtension = fileTypeRegistry.getFileTypeByFile(file).getExtension();
 
-    if (fileExtension == null) {
-      return false;
-    }
-
-    return fileExtension.equals("java") || fileExtension.equals("class");
+    return fileExtension != null && (fileExtension.equals("java") || fileExtension.equals("class"));
   }
 
   @Override

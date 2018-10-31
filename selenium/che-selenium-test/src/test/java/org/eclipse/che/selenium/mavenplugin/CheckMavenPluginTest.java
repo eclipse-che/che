@@ -15,13 +15,10 @@ import static java.nio.file.Paths.get;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.SIMPLE_FOLDER;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -30,32 +27,29 @@ import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.git.Git;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckMavenPluginTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
+  private static final String PATH_TO_EXTERNAL_LIBRARIES_IN_MODULE_1 =
+      PROJECT_NAME + "/my-lib/External Libraries";
+  private static final String PATH_TO_EXTERNAL_LIBRARIES_IN_MODULE_2 =
+      PROJECT_NAME + "/my-webapp/External Libraries";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
-  @Inject private MavenPluginStatusBar mavenPluginStatusBar;
-  @Inject private Consoles console;
   @Inject private Menu menu;
   @Inject private Loader loader;
   @Inject private AskForValueDialog askDialog;
-  @Inject private Git git;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-
-  @Inject private TestCommandServiceClient commandServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -63,6 +57,7 @@ public class CheckMavenPluginTest {
     testProjectServiceClient.importProject(
         workspace.getId(), get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
   }
@@ -77,6 +72,7 @@ public class CheckMavenPluginTest {
     editor.waitActive();
     editor.setCursorToLine(15);
     enterClassNameViaAutocomplete();
+    editor.waitTextIntoEditor("import hello.TestClass;");
     editor.typeTextIntoEditor(" testClass = new TestClass();");
     editor.waitAllMarkersInvisibility(ERROR);
   }
@@ -89,14 +85,9 @@ public class CheckMavenPluginTest {
     editor.typeTextIntoEditor("!--");
     editor.goToCursorPositionVisible(27, 32);
     editor.typeTextIntoEditor("--");
-    try {
-      projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-lib", SIMPLE_FOLDER);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7109");
-    }
 
-    projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/my-webapp", SIMPLE_FOLDER);
+    projectExplorer.waitItemInvisibility(PATH_TO_EXTERNAL_LIBRARIES_IN_MODULE_1);
+    projectExplorer.waitItemInvisibility(PATH_TO_EXTERNAL_LIBRARIES_IN_MODULE_2);
   }
 
   @Test(priority = 2)
@@ -129,12 +120,6 @@ public class CheckMavenPluginTest {
   private void enterClassNameViaAutocomplete() {
     editor.typeTextIntoEditor("Test");
     editor.launchAutocomplete();
-    try {
-      editor.enterAutocompleteProposal("TestClass");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7109");
-    }
   }
 
   /**

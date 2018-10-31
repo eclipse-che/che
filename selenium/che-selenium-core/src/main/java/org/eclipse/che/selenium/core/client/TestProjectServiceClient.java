@@ -11,10 +11,17 @@
  */
 package org.eclipse.che.selenium.core.client;
 
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.io.Resources.getResource;
+import static com.google.common.io.Resources.toByteArray;
 import static java.lang.String.format;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.write;
 import static java.util.Optional.ofNullable;
 import static org.eclipse.che.dto.server.DtoFactory.getInstance;
+import static org.eclipse.che.selenium.core.project.ProjectTemplates.PLAIN_JAVA;
 
+import com.google.common.io.Resources;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -27,6 +34,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.zip.ZipOutputStream;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -144,7 +152,23 @@ public class TestProjectServiceClient {
     }
 
     Path zip = Files.createTempFile("project", projectName);
-    ZipUtils.zipDir(sourceFolder.toString(), sourceFolder.toFile(), zip.toFile(), null);
+    try (ZipOutputStream out = ZipUtils.stream(zip)) {
+      ZipUtils.add(out, sourceFolder, sourceFolder);
+      if (PLAIN_JAVA.equals(template)) {
+        Path tmpDir = Files.createTempDirectory("TestProject");
+        Path dotClasspath = createFile(tmpDir.resolve(".classpath"));
+        Path dotProject = Files.createFile(tmpDir.resolve(".project"));
+        write(
+            dotProject,
+            format(
+                    Resources.toString(getResource("projects/jdt-ls-project-files/project"), UTF_8),
+                    projectName)
+                .getBytes());
+        write(dotClasspath, toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
+        ZipUtils.add(out, dotClasspath);
+        ZipUtils.add(out, dotProject);
+      }
+    }
 
     importZipProject(workspaceId, zip, projectName, template);
   }
@@ -293,6 +317,8 @@ public class TestProjectServiceClient {
     return requestFactory
         .fromUrl(workspaceAgentApiEndpointUrlProvider.get(workspaceId) + "project/" + projectName)
         .useGetMethod()
+        .setAuthorizationHeader(
+            BEARER_TOKEN_PREFIX + machineServiceClient.getMachineApiToken(workspaceId))
         .request()
         .asDto(ProjectConfigDto.class);
   }

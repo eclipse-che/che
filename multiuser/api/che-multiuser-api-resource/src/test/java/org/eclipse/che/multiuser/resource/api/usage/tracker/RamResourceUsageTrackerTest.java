@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -79,7 +80,7 @@ public class RamResourceUsageTrackerTest {
   @BeforeMethod
   public void setUp() throws Exception {
     when(workspaceManagerProvider.get()).thenReturn(workspaceManager);
-    when(accountManager.getById(ACCOUNT_ID)).thenReturn(account);
+    lenient().when(accountManager.getById(ACCOUNT_ID)).thenReturn(account);
     when(account.getName()).thenReturn(ACCOUNT_NAME);
   }
 

@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.ide.factory;
 
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WORKSPACE;
 
 import com.google.inject.Inject;
@@ -21,7 +20,6 @@ import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.extension.Extension;
 import org.eclipse.che.ide.factory.accept.AcceptFactoryHandler;
 import org.eclipse.che.ide.factory.action.CreateFactoryAction;
-import org.eclipse.che.ide.factory.json.ImportFromConfigAction;
 import org.eclipse.che.ide.factory.welcome.OpenWelcomePageAction;
 
 /** @author Vladyslav Zhukovskii */
@@ -35,21 +33,17 @@ public class FactoryExtension {
       ActionManager actionManager,
       FactoryResources resources,
       CreateFactoryAction configureFactoryAction,
-      ImportFromConfigAction importFromConfigAction,
       OpenWelcomePageAction openWelcomePageAction) {
     acceptFactoryHandler.process();
 
     resources.factoryCSS().ensureInjected();
 
-    DefaultActionGroup projectGroup = (DefaultActionGroup) actionManager.getAction(GROUP_PROJECT);
     DefaultActionGroup workspaceGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_WORKSPACE);
 
     actionManager.registerAction("openWelcomePage", openWelcomePageAction);
-    actionManager.registerAction("importProjectFromCodenvyConfigAction", importFromConfigAction);
     actionManager.registerAction("configureFactoryAction", configureFactoryAction);
 
-    projectGroup.add(importFromConfigAction);
     workspaceGroup.add(configureFactoryAction);
   }
 }

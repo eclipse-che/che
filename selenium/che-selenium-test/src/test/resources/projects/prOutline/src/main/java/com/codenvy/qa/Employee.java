@@ -11,9 +11,9 @@
  */
 package com.codenvy.qa;
 
-import java.io.Serializable;
+import java.rmi.Remote;
 
-public interface Employee extends Serializable {
+public interface Employee extends Remote {
 
     public double getAvrSalary();
     public String toString();

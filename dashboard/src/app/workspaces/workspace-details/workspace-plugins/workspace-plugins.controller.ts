@@ -40,6 +40,7 @@ export class WorkspacePluginsController {
 
   pluginOrderBy = 'name';
   plugins: Array<IPlugin> = [];
+  editors: Array<IPlugin> = [];
   selectedPlugins: Array<string> = [];
   selectedEditor: string = '';
 
@@ -84,10 +85,19 @@ export class WorkspacePluginsController {
    * Loads the list of plugins from registry.
    */
   loadPlugins(): void {
+    this.plugins = [];
+    this.editors = [];
     this.isLoading = true;
     this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPlugin>) => {
       this.isLoading = false;
-      this.plugins = result;
+      result.forEach((item: IPlugin) => {
+        if (item.type === EDITOR_TYPE) {
+          this.editors.push(item);
+        } else {
+          this.plugins.push(item);
+        }
+      });  
+
       this.updatePlugins();
     }, (error: any) => {
       this.isLoading = false;
@@ -124,7 +134,21 @@ export class WorkspacePluginsController {
       }
       this.workspaceConfig.attributes[PLUGINS_ATTRIBUTE] = this.selectedPlugins.join(PLUGIN_SEPARATOR);
     }
+    
+    this.cleanupInstallers();
     this.onChange();
+  }
+
+  /**
+   * Clean up all the installers in all machines, when plugin is selected.
+   */
+  cleanupInstallers(): void {
+    let defaultEnv : string = this.workspaceConfig.defaultEnv;
+    let machines : any = this.workspaceConfig.environments[defaultEnv].machines;
+    let machineNames : Array<string> = Object.keys(machines);
+    machineNames.forEach((machineName: string) => {
+      machines[machineName].installers = [];
+    });
   }
 
   /**
@@ -142,6 +166,11 @@ export class WorkspacePluginsController {
       plugin.isEnabled = this.isPluginEnabled(plugin);
     });
 
+    // check each editor's enabled state:
+    this.editors.forEach((editor: IPlugin) => {
+      editor.isEnabled = this.isEditorEnabled(editor);
+    });
+
     this.cheListHelper.setList(this.plugins, 'name');
   }
 
@@ -153,7 +182,17 @@ export class WorkspacePluginsController {
   private isPluginEnabled(plugin: IPlugin): boolean {
     // name in the format: id:version
     let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
-    // check based on type (editor or plugin):
-    return plugin.type === PLUGIN_TYPE ? (this.selectedPlugins.indexOf(name) >= 0) : name === this.selectedEditor;
+    return this.selectedPlugins.indexOf(name) >= 0;
+  }
+
+  /**
+   *
+   * @param {IPlugin} plugin
+   * @returns {boolean} the editor's enabled state
+   */
+  private isEditorEnabled(editor: IPlugin): boolean {
+    // name in the format: id:version
+    let name = editor.id + PLUGIN_VERSION_SEPARATOR + editor.version;
+    return name === this.selectedEditor;
   }
 }

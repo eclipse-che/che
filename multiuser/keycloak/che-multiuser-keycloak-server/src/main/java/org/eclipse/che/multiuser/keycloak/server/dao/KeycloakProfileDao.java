@@ -13,22 +13,16 @@ package org.eclipse.che.multiuser.keycloak.server.dao;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.multiuser.keycloak.server.KeycloakSettings;
-import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.multiuser.keycloak.server.KeycloakProfileRetriever;
 
 /**
  * Fetches user profile from Keycloack server.
@@ -37,17 +31,12 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  */
 public class KeycloakProfileDao implements ProfileDao {
-  private static final Logger LOG = LoggerFactory.getLogger(KeycloakProfileDao.class);
 
-  private final String keyclockCurrentUserInfoUrl;
-  private final HttpJsonRequestFactory requestFactory;
+  private final KeycloakProfileRetriever keycloakProfileRetriever;
 
   @Inject
-  public KeycloakProfileDao(
-      KeycloakSettings keycloakSettings, HttpJsonRequestFactory requestFactory) {
-    this.requestFactory = requestFactory;
-    this.keyclockCurrentUserInfoUrl =
-        keycloakSettings.get().get(KeycloakConstants.USERINFO_ENDPOINT_SETTING);
+  public KeycloakProfileDao(KeycloakProfileRetriever keycloakProfileRetriever) {
+    this.keycloakProfileRetriever = keycloakProfileRetriever;
   }
 
   @Override
@@ -74,15 +63,9 @@ public class KeycloakProfileDao implements ProfileDao {
           "It's not allowed to get foreign profile on current configured storage.");
     }
 
-    Map<String, String> keycloakUserAttributes;
     // Retrieving own profile
-    try {
-      keycloakUserAttributes =
-          requestFactory.fromUrl(keyclockCurrentUserInfoUrl).request().asProperties();
-    } catch (IOException | ApiException e) {
-      LOG.warn("Exception during retrieval of the Keycloak user profile", e);
-      throw new ServerException("Exception during retrieval of the Keycloak user profile", e);
-    }
+    Map<String, String> keycloakUserAttributes =
+        keycloakProfileRetriever.retrieveKeycloakAttributes();
 
     return new ProfileImpl(userId, mapAttributes(keycloakUserAttributes));
   }

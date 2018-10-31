@@ -36,8 +36,8 @@ import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.shared.Constants;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,9 +58,9 @@ public class ClasspathMacroTest {
   @Mock private Resource resource;
   @Mock private Optional<Project> projectOptional;
   @Mock private Project project;
-  @Mock private Promise<List<ClasspathEntryDto>> classpathEntriesPromise;
+  @Mock private Promise<List<ClasspathEntry>> classpathEntriesPromise;
 
-  @Captor private ArgumentCaptor<Function<List<ClasspathEntryDto>, String>> classpathEntriesCapture;
+  @Captor private ArgumentCaptor<Function<List<ClasspathEntry>, String>> classpathEntriesCapture;
 
   @InjectMocks private ClasspathMacro classpathMacro;
 
@@ -88,7 +88,7 @@ public class ClasspathMacroTest {
     String lib1 = "lib1.jar";
     String lib2 = "lib2.jar";
 
-    List<ClasspathEntryDto> entries = new ArrayList<>();
+    List<ClasspathEntry> entries = new ArrayList<>();
 
     Set<String> libs = new HashSet<>();
     libs.add(lib1);
@@ -112,23 +112,23 @@ public class ClasspathMacroTest {
     String lib1 = "lib1.jar";
     String lib2 = "lib2.jar";
 
-    List<ClasspathEntryDto> entries = new ArrayList<>();
+    List<ClasspathEntry> entries = new ArrayList<>();
 
     Set<String> libs = new HashSet<>();
     libs.add(lib1);
     libs.add(lib2);
 
-    ClasspathEntryDto container = mock(ClasspathEntryDto.class);
-    ClasspathEntryDto cLib1 = mock(ClasspathEntryDto.class);
-    ClasspathEntryDto cLib2 = mock(ClasspathEntryDto.class);
+    ClasspathEntry container = mock(ClasspathEntry.class);
+    ClasspathEntry cLib1 = mock(ClasspathEntry.class);
+    ClasspathEntry cLib2 = mock(ClasspathEntry.class);
     when(container.getPath()).thenReturn("containerPath");
-    when(container.getExpandedEntries()).thenReturn(asList(cLib1, cLib2));
+    when(container.getChildren()).thenReturn(asList(cLib1, cLib2));
     when(cLib1.getPath()).thenReturn("cLib1.jar");
     when(cLib1.getEntryKind()).thenReturn(LIBRARY);
     when(cLib2.getPath()).thenReturn("cLib2.jar");
     when(cLib2.getEntryKind()).thenReturn(LIBRARY);
 
-    Set<ClasspathEntryDto> containers = new HashSet<>();
+    Set<ClasspathEntry> containers = new HashSet<>();
     containers.add(container);
 
     when(classpathContainer.getClasspathEntries(anyString())).thenReturn(classpathEntriesPromise);
@@ -146,7 +146,7 @@ public class ClasspathMacroTest {
 
   @Test
   public void defaultValueOfClasspathShouldBeBuilt() throws Exception {
-    List<ClasspathEntryDto> entries = new ArrayList<>();
+    List<ClasspathEntry> entries = new ArrayList<>();
     Set<String> libs = new HashSet<>();
     Path projectsRoot = Path.valueOf("/projects");
 

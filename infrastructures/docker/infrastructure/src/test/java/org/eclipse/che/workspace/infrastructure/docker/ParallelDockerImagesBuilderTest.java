@@ -118,7 +118,6 @@ public class ParallelDockerImagesBuilderTest {
     input.put("machine1", config1);
     input.put("machine2", config2);
 
-    when(dockerConnector.listImages(any())).thenReturn(Collections.emptyList());
     Map<String, String> result = dockerImagesBuilder.prepareImages(input);
 
     ArgumentCaptor<BuildImageParams> captor = ArgumentCaptor.forClass(BuildImageParams.class);

@@ -21,7 +21,7 @@ import org.eclipse.lsp4j.Location;
 @ImplementedBy(OpenLocationViewImpl.class)
 public interface OpenLocationView extends View<OpenLocationView.ActionDelegate> {
 
-  void setLocations(List<Location> locations);
+  void setLocations(List<Location> arg);
 
   void setTitle(String title);
 

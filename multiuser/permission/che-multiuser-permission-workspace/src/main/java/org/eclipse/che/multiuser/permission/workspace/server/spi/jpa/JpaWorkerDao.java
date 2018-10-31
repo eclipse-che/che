@@ -128,12 +128,15 @@ public class JpaWorkerDao extends AbstractJpaPermissionsDao<WorkerImpl> implemen
   }
 
   @Override
-  protected WorkerImpl getEntity(String userId, String instanceId) throws NotFoundException {
+  protected WorkerImpl getEntity(String userId, String instanceId)
+      throws NotFoundException, ServerException {
     try {
       return doGet(userId, instanceId);
     } catch (NoResultException e) {
       throw new NotFoundException(
           format("Worker of workspace '%s' with id '%s' was not found.", instanceId, userId));
+    } catch (RuntimeException e) {
+      throw new ServerException(e.getMessage(), e);
     }
   }
 

@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -59,6 +60,7 @@ public class UploadIntoProjectTest {
   @Inject private UploadDirectoryDialogPage uploadDirectoryDialogPage;
   @Inject private NotificationsPopupPanel notificationPopup;
   @Inject private CodenvyEditor editor;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -66,10 +68,11 @@ public class UploadIntoProjectTest {
         testWorkspace.getId(),
         get(PROJECT_SOURCES.toURI()),
         PROJECT_NAME,
-        ProjectTemplates.MAVEN_SPRING);
+        ProjectTemplates.PLAIN_JAVA);
 
     ide.open(testWorkspace);
-    projectExplorer.waitProjectInitialization(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+    projectExplorer.waitVisibleItem(PROJECT_NAME);
   }
 
   @BeforeMethod
@@ -82,6 +85,7 @@ public class UploadIntoProjectTest {
   public void shouldUploadFileWithDefaultOptions() throws URISyntaxException, IOException {
     // given
     final String uploadingFileName = "Aclass.java";
+    final String uploadingTabTitle = "Aclass";
     final String pathToUploadingFileInsideTheProject =
         format("%s/%s", PROJECT_NAME, uploadingFileName);
     final Path localPathToFileToUpload =
@@ -103,6 +107,7 @@ public class UploadIntoProjectTest {
     // Check that uploading file doesn't overwrite existed one
     // when change the file
     projectExplorer.openItemByPath(pathToUploadingFileInsideTheProject);
+    editor.waitEditorReadiness(uploadingTabTitle);
     editor.typeTextIntoEditor(TEXT_TO_INSERT);
 
     // when re-upload the file
@@ -124,6 +129,7 @@ public class UploadIntoProjectTest {
   public void shouldUploadFileWithOverwriting() throws IOException {
     // given
     final String uploadingFileName = "AppController.java";
+    final String uploadingTabTitle = "AppController";
     final String pathToUploadingFileInsideTheProject =
         format("%s/%s", PROJECT_NAME, uploadingFileName);
     final Path localPathToFileToUpload =
@@ -145,6 +151,7 @@ public class UploadIntoProjectTest {
     // Check that uploading file overwrites existed one
     // when change the file
     projectExplorer.openItemByPath(pathToUploadingFileInsideTheProject);
+    editor.waitEditorReadiness(uploadingTabTitle);
     editor.typeTextIntoEditor(TEXT_TO_INSERT);
 
     // when re-upload the file
@@ -185,6 +192,7 @@ public class UploadIntoProjectTest {
     // when change the directory - when change the file
     projectExplorer.waitAndSelectItem(pathToUploadingFileInsideTheProject);
     projectExplorer.openItemByPath(pathToUploadingFileInsideTheProject);
+    editor.waitEditorReadiness(uploadingFileName);
     editor.typeTextIntoEditor(TEXT_TO_INSERT);
 
     // when re-upload the directory
@@ -226,10 +234,12 @@ public class UploadIntoProjectTest {
     // when change the directory - when change the files
     projectExplorer.waitAndSelectItem(pathToUploadingHtmlFileInsideTheProject);
     projectExplorer.openItemByPath(pathToUploadingHtmlFileInsideTheProject);
+    editor.waitEditorReadiness(uploadingHtmlFileName);
     editor.typeTextIntoEditor(TEXT_TO_INSERT);
 
     projectExplorer.waitAndSelectItem(pathToUploadingTextFileInsideTheProject);
     projectExplorer.openItemByPath(pathToUploadingTextFileInsideTheProject);
+    editor.waitEditorReadiness(uploadingTextFileName);
     editor.typeTextIntoEditor(TEXT_TO_INSERT);
 
     // when re-upload the directory with overwriting

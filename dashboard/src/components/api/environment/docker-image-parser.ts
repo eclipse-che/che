@@ -21,6 +21,10 @@ export interface IDockerimage {
 export class DockerimageParser implements IParser {
 
   parse(content: string): IDockerimage {
+    if (angular.isUndefined(content)) {
+      throw new TypeError(`Docker image shouldn't be undefined.`);
+    }
+
     content = content.trim();
 
     if (/\s/.test(content)) {

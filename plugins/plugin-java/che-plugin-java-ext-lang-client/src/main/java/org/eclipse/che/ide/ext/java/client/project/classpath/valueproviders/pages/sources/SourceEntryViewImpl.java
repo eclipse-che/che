@@ -24,7 +24,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.Event;
-import com.google.gwt.user.client.EventListener;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
@@ -38,10 +37,10 @@ import java.util.Map;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathResources;
 import org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.node.NodeWidget;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
 import org.eclipse.che.ide.ui.list.CategoriesList;
 import org.eclipse.che.ide.ui.list.Category;
 import org.eclipse.che.ide.ui.list.CategoryRenderer;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * The implementation of {@link SourceEntryView}.
@@ -63,19 +62,16 @@ public class SourceEntryViewImpl extends Composite implements SourceEntryView {
   @UiField FlowPanel sourcePanel;
   @UiField Button addSourceBtn;
 
-  private final Category.CategoryEventDelegate<ClasspathEntryDto> librariesDelegate =
-      new Category.CategoryEventDelegate<ClasspathEntryDto>() {
-        @Override
-        public void onListItemClicked(Element listItemBase, ClasspathEntryDto itemData) {}
-      };
+  private final Category.CategoryEventDelegate<ClasspathEntry> librariesDelegate =
+      (listItemBase, itemData) -> {};
 
-  private final CategoryRenderer<ClasspathEntryDto> classpathEntryRenderer =
-      new CategoryRenderer<ClasspathEntryDto>() {
+  private final CategoryRenderer<ClasspathEntry> classpathEntryRenderer =
+      new CategoryRenderer<ClasspathEntry>() {
         @Override
-        public void renderElement(Element element, ClasspathEntryDto data) {}
+        public void renderElement(Element element, ClasspathEntry data) {}
 
         @Override
-        public Element renderCategory(final Category<ClasspathEntryDto> category) {
+        public Element renderCategory(final Category<ClasspathEntry> category) {
           DivElement categoryHeaderElement = Document.get().createDivElement();
 
           categoryHeaderElement.setClassName(classpathResources.getCss().categoryHeader());
@@ -99,30 +95,24 @@ public class SourceEntryViewImpl extends Composite implements SourceEntryView {
           Event.sinkEvents(categoryHeaderElement, Event.MOUSEEVENTS);
           Event.setEventListener(
               categoryHeaderElement,
-              new EventListener() {
-                @Override
-                public void onBrowserEvent(Event event) {
-                  if (!delegate.isPlainJava()) {
-                    return;
-                  }
-                  if (Event.ONMOUSEOVER == event.getTypeInt()) {
-                    buttonElement.getStyle().setVisibility(Style.Visibility.VISIBLE);
-                  } else if (Event.ONMOUSEOUT == event.getTypeInt()) {
-                    buttonElement.getStyle().setVisibility(HIDDEN);
-                  }
+              event -> {
+                if (!delegate.isPlainJava()) {
+                  return;
+                }
+                if (Event.ONMOUSEOVER == event.getTypeInt()) {
+                  buttonElement.getStyle().setVisibility(Style.Visibility.VISIBLE);
+                } else if (Event.ONMOUSEOUT == event.getTypeInt()) {
+                  buttonElement.getStyle().setVisibility(HIDDEN);
                 }
               });
 
           Event.sinkEvents(buttonElement, Event.ONCLICK);
           Event.setEventListener(
               buttonElement,
-              new EventListener() {
-                @Override
-                public void onBrowserEvent(Event event) {
-                  if (Event.ONCLICK == event.getTypeInt()) {
-                    event.stopPropagation();
-                    delegate.onRemoveClicked(category.getTitle());
-                  }
+              event -> {
+                if (Event.ONCLICK == event.getTypeInt()) {
+                  event.stopPropagation();
+                  delegate.onRemoveClicked(category.getTitle());
                 }
               });
 
@@ -173,15 +163,16 @@ public class SourceEntryViewImpl extends Composite implements SourceEntryView {
   }
 
   @Override
-  public void setData(Map<String, ClasspathEntryDto> data) {
+  public void setData(Map<String, ClasspathEntry> data) {
     categoriesList.clear();
-    for (Map.Entry<String, ClasspathEntryDto> elem : data.entrySet()) {
+    for (Map.Entry<String, ClasspathEntry> elem : data.entrySet()) {
+      ClasspathEntry value = elem.getValue();
+      List<ClasspathEntry> children = value.getChildren();
+      if (children == null) {
+        children = Collections.emptyList();
+      }
       categoriesList.add(
-          new Category<>(
-              elem.getKey(),
-              classpathEntryRenderer,
-              elem.getValue().getExpandedEntries(),
-              librariesDelegate));
+          new Category<>(elem.getKey(), classpathEntryRenderer, children, librariesDelegate));
 
       Collections.reverse(categoriesList);
     }

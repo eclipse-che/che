@@ -14,14 +14,13 @@ package org.eclipse.che.ide.ext.java.client.command.valueproviders;
 import static org.eclipse.che.ide.ext.java.client.command.ClasspathContainer.JRE_CONTAINER;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.promises.client.Function;
-import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.macro.Macro;
@@ -31,7 +30,7 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.command.ClasspathContainer;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathResolver;
 import org.eclipse.che.ide.ext.java.client.util.JavaUtil;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * Provides project's classpath.
@@ -40,7 +39,6 @@ import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
  */
 @Singleton
 public class ClasspathMacro implements Macro {
-
   private static final String KEY = "${project.java.classpath}";
 
   private final ClasspathContainer classpathContainer;
@@ -83,47 +81,46 @@ public class ClasspathMacro implements Macro {
     }
 
     final Resource resource = resources[0];
-    final Optional<Project> project = resource.getRelatedProject();
+    final Project project = resource.getProject();
 
-    if (!JavaUtil.isJavaProject(project.get())) {
+    if (!JavaUtil.isJavaProject(project)) {
       return promises.resolve("");
     }
 
-    final String projectPath = project.get().getLocation().toString();
+    final String projectPath = project.getLocation().toString();
 
     return classpathContainer
         .getClasspathEntries(projectPath)
         .then(
-            new Function<List<ClasspathEntryDto>, String>() {
-              @Override
-              public String apply(List<ClasspathEntryDto> arg) throws FunctionException {
-                classpathResolver.resolveClasspathEntries(arg);
-                Set<String> libs = classpathResolver.getLibs();
-                StringBuilder classpath = new StringBuilder();
-                for (String lib : libs) {
-                  classpath.append(lib).append(':');
-                }
-
-                for (ClasspathEntryDto container : classpathResolver.getContainers()) {
-                  if (!JRE_CONTAINER.equals(container.getPath())) {
-                    addLibsFromContainer(container, classpath);
+            (Function<List<ClasspathEntry>, String>)
+                arg -> {
+                  classpathResolver.resolveClasspathEntries(arg);
+                  Set<String> libs = classpathResolver.getLibs();
+                  StringBuilder classpath = new StringBuilder();
+                  for (String lib : libs) {
+                    classpath.append(appContext.getProjectsRoot()).append(lib).append(':');
                   }
-                }
 
-                if (classpath.toString().isEmpty()) {
-                  classpath
-                      .append(appContext.getProjectsRoot().toString())
-                      .append(projectPath)
-                      .append(':');
-                }
+                  for (ClasspathEntry container : classpathResolver.getContainers()) {
+                    if (!JRE_CONTAINER.equals(container.getPath())) {
+                      addLibsFromContainer(container, classpath);
+                    }
+                  }
 
-                return classpath.toString();
-              }
-            });
+                  if (classpath.toString().isEmpty()) {
+                    classpath
+                        .append(appContext.getProjectsRoot().toString())
+                        .append(projectPath)
+                        .append(':');
+                  }
+
+                  return classpath.toString();
+                })
+        .catchError(PromiseError::getMessage);
   }
 
-  private void addLibsFromContainer(ClasspathEntryDto container, StringBuilder classpath) {
-    for (ClasspathEntryDto entry : container.getExpandedEntries()) {
+  private void addLibsFromContainer(ClasspathEntry container, StringBuilder classpath) {
+    for (ClasspathEntry entry : container.getChildren()) {
       if (LIBRARY == entry.getEntryKind()) {
         classpath.append(entry.getPath()).append(':');
       }

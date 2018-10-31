@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 
 import com.google.common.base.Joiner;
@@ -25,6 +26,8 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -35,6 +38,7 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 05.01.16 */
 public class FailMoveItemTest {
+  private static final String APPLY_WORKSPACE_CHANGES = "Apply Workspace Changes\nDone";
   private static final String PROJECT_NAME = NameGenerator.generate("FailMoveItemProject-", 4);
   private static final String pathToPackageInChePrefix = PROJECT_NAME + "/src" + "/main" + "/java";
 
@@ -49,6 +53,8 @@ public class FailMoveItemTest {
   @Inject private CodenvyEditor editor;
   @Inject private Refactor refactor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
+  @Inject private Events events;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -59,11 +65,13 @@ public class FailMoveItemTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     terminal.waitFirstTerminalTab();
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
+    events.clickEventLogBtn();
   }
 
   @AfterMethod(alwaysRun = true)
@@ -88,7 +96,9 @@ public class FailMoveItemTest {
     refactor.chooseDestinationForItem("p1");
     refactor.setAndWaitStateUpdateReferencesCheckbox(false);
     refactor.clickOkButtonRefactorForm();
+    loader.waitOnClosed();
     refactor.waitMoveItemFormIsClosed();
+    events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.clickOnSelectedElementInEditor("r.A17");
     editor.waitMarkerInPosition(ERROR, 14);

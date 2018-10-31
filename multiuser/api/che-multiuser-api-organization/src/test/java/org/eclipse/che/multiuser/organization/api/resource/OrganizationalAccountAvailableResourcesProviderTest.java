@@ -23,6 +23,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -78,9 +79,9 @@ public class OrganizationalAccountAvailableResourcesProviderTest {
     suborganization = new OrganizationImpl(SUBORG_ID, "root/suborg", ROOT_ORG_ID);
     subsuborganization = new OrganizationImpl(SUBSUBORG_ID, "root/suborg/subsuborg", SUBORG_ID);
 
-    when(organizationManager.getById(ROOT_ORG_ID)).thenReturn(rootOrganization);
-    when(organizationManager.getById(SUBORG_ID)).thenReturn(suborganization);
-    when(organizationManager.getById(SUBSUBORG_ID)).thenReturn(subsuborganization);
+    lenient().when(organizationManager.getById(ROOT_ORG_ID)).thenReturn(rootOrganization);
+    lenient().when(organizationManager.getById(SUBORG_ID)).thenReturn(suborganization);
+    lenient().when(organizationManager.getById(SUBSUBORG_ID)).thenReturn(subsuborganization);
   }
 
   @Test

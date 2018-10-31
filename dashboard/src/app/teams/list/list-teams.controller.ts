@@ -19,8 +19,7 @@
  */
 export class ListTeamsController {
 
-  static $inject = ['cheTeam', 'chePermissions', 'cheResourcesDistribution', 'cheNotification', 'cheTeamEventsManager', 'confirmDialogService',
-'$scope', '$q', '$location', 'resourcesService'];
+  static $inject = ['cheTeam', 'chePermissions', 'cheResourcesDistribution', 'cheNotification', 'cheTeamEventsManager', 'confirmDialogService', '$scope', '$q', '$location', 'resourcesService'];
 
   /**
    * Team API interaction.

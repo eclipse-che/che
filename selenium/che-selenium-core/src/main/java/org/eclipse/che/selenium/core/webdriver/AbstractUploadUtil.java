@@ -12,11 +12,12 @@
 package org.eclipse.che.selenium.core.webdriver;
 
 import static com.google.common.io.Files.createTempDir;
-import static org.eclipse.che.commons.lang.ZipUtils.zipDir;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.zip.ZipOutputStream;
+import org.eclipse.che.commons.lang.ZipUtils;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 
 /** @author Dmytro Nochevnov */
@@ -29,8 +30,9 @@ public abstract class AbstractUploadUtil implements UploadUtil {
     if (!localPath.toFile().isFile()) {
       Path zipFile = Paths.get(createTempDir().toString()).resolve(ZIP_FILE_NAME);
 
-      zipDir(localPath.toString(), localPath.toFile(), zipFile.toFile(), null);
-
+      try (ZipOutputStream out = ZipUtils.stream(zipFile)) {
+        ZipUtils.add(out, localPath, localPath);
+      }
       localPath = zipFile;
     }
 

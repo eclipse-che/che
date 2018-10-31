@@ -23,7 +23,7 @@ public class KeycloakServletModule extends ServletModule {
   private static final String KEYCLOAK_FILTER_PATHS =
       "^"
           // not equals to /keycloak/OIDCKeycloak.js
-          + "(?!/keycloak/OIDCKeycloak.js)"
+          + "(?!/keycloak/(OIDC|oidc)[^\\/]+$)"
           // not contains /docs/ (for swagger)
           + "(?!.*(/docs/))"
           // not ends with '/oauth/callback/' or '/keycloak/settings/' or '/system/state'

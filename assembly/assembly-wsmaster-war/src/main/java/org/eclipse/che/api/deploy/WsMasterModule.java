@@ -49,6 +49,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.InstallerConfigProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.spi.provision.MachineNameProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.ProjectsVolumeForWsAgentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiEnvVarProvider;
@@ -63,6 +64,8 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVar
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceMavenServerJavaOptsEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNamespaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
@@ -165,6 +168,7 @@ public class WsMasterModule extends AbstractModule {
     internalEnvironmentProvisioners.addBinding().to(InstallerConfigProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(EnvVarEnvironmentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(ProjectsVolumeForWsAgentProvisioner.class);
+    internalEnvironmentProvisioners.addBinding().to(MachineNameProvisioner.class);
 
     Multibinder<EnvVarProvider> envVarProviders =
         Multibinder.newSetBinder(binder(), EnvVarProvider.class);
@@ -173,6 +177,8 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(CheApiExternalEnvVarProvider.class);
     envVarProviders.addBinding().to(MachineTokenEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceIdEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceNamespaceNameEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceNameEnvVarProvider.class);
 
     envVarProviders.addBinding().to(JavaOptsEnvVariableProvider.class);
     envVarProviders.addBinding().to(MavenOptsEnvVariableProvider.class);
@@ -198,7 +204,7 @@ public class WsMasterModule extends AbstractModule {
         .asEagerSingleton();
     bind(org.eclipse.che.api.workspace.server.event.InstallerLogJsonRpcMessenger.class)
         .asEagerSingleton();
-    bind(org.eclipse.che.api.workspace.server.event.MachineLogJsonRpcMessenger.class)
+    bind(org.eclipse.che.api.workspace.server.event.RuntimeLogJsonRpcMessenger.class)
         .asEagerSingleton();
 
     bind(org.eclipse.che.security.oauth.OAuthAuthenticatorProvider.class)

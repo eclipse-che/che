@@ -21,6 +21,8 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm;
@@ -103,6 +105,10 @@ public class AddOrImportProjectFormTest {
   @Inject private CodenvyEditor editor;
   @Inject private ProjectOptions projectOptions;
   @Inject private AddOrImportForm addOrImportForm;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setup() {
@@ -111,10 +117,10 @@ public class AddOrImportProjectFormTest {
 
   @AfterClass
   public void cleanup() throws Exception {
-    checkWorkspaceStatusAndDelete(WORKSPACE_NAME);
-    checkWorkspaceStatusAndDelete(TEST_BLANK_WORKSPACE_NAME);
-    checkWorkspaceStatusAndDelete(TEST_JAVA_WORKSPACE_NAME);
-    checkWorkspaceStatusAndDelete(TEST_JAVA_WORKSPACE_NAME_EDIT);
+    testWorkspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
+    testWorkspaceServiceClient.delete(TEST_BLANK_WORKSPACE_NAME, defaultTestUser.getName());
+    testWorkspaceServiceClient.delete(TEST_JAVA_WORKSPACE_NAME, defaultTestUser.getName());
+    testWorkspaceServiceClient.delete(TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName());
   }
 
   @BeforeMethod
@@ -386,7 +392,12 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.clickOnGitHubButton();
     newWorkspace.setMachineRAM("dev-machine", 5.0);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
+
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE_NAME, defaultTestUser);
+
     testWorkspaceServiceClient.waitStatus(WORKSPACE_NAME, defaultTestUser.getName(), RUNNING);
     dashboard.selectWorkspacesItemOnDashboard();
   }
@@ -501,11 +512,5 @@ public class AddOrImportProjectFormTest {
     // open create dialog
     newWorkspace.clickOnBottomCreateButton();
     newWorkspace.waitWorkspaceCreatedDialogIsVisible();
-  }
-
-  private void checkWorkspaceStatusAndDelete(String workspaceName) throws Exception {
-    if (testWorkspaceServiceClient.exists(workspaceName, defaultTestUser.getName())) {
-      testWorkspaceServiceClient.delete(workspaceName, defaultTestUser.getName());
-    }
   }
 }

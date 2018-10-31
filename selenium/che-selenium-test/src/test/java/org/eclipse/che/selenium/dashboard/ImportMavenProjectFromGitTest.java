@@ -19,11 +19,12 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutionException;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
@@ -47,11 +48,15 @@ public class ImportMavenProjectFromGitTest {
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
   @Inject private Ide ide;
   @Inject private ToastLoader toastLoader;
   @Inject private TestGitHubRepository testRepo;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() throws IOException {
@@ -67,7 +72,7 @@ public class ImportMavenProjectFromGitTest {
   }
 
   @Test
-  public void checkAbilityImportMavenProjectTest() throws ExecutionException, InterruptedException {
+  public void checkAbilityImportMavenProjectTest() {
     testProjectName = testRepo.getName();
 
     dashboard.waitDashboardToolbarTitle();
@@ -88,6 +93,9 @@ public class ImportMavenProjectFromGitTest {
     projectSourcePage.clickOnAddProjectButton();
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 

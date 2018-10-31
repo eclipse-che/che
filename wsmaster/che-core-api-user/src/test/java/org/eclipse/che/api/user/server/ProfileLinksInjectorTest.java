@@ -12,6 +12,7 @@
 package org.eclipse.che.api.user.server;
 
 import static java.util.Arrays.asList;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -48,7 +49,7 @@ public class ProfileLinksInjectorTest {
     final UriBuilderImpl uriBuilder = new UriBuilderImpl();
     uriBuilder.uri("http://localhost:8080");
     when(serviceContext.getServiceUriBuilder()).thenReturn(uriBuilder);
-    when(serviceContext.getBaseUriBuilder()).thenReturn(uriBuilder);
+    lenient().when(serviceContext.getBaseUriBuilder()).thenReturn(uriBuilder);
   }
 
   @Test

@@ -28,7 +28,14 @@ public class ClientDtoGenerator extends DtoGenerator {
 
   public static void main(String[] args) throws IOException {
     new ClientDtoGenerator()
-        .generate(new File(args[0]), "Dtos", args[1], args[2].split(","), new String[] {});
+        .generate(
+            new File(args[0]),
+            "Dtos",
+            args[1],
+            args[2].split(","),
+            new String[] {},
+            new String[] {},
+            new String[] {});
   }
 
   @Override

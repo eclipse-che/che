@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpol
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter.DEFAULT_RESTART_POLICY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter.RESTART_POLICY_SET_TO_NEVER;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,7 +66,7 @@ public class RestartPolicyRewriterTest {
         k8sEnv.getPods().get(TEST_POD_NAME).getSpec().getRestartPolicy(), DEFAULT_RESTART_POLICY);
     verifyWarnings(
         new WarningImpl(
-            101,
+            RESTART_POLICY_SET_TO_NEVER,
             format(
                 "Restart policy '%s' for pod '%s' is rewritten with %s",
                 ALWAYS_RESTART_POLICY, TEST_POD_NAME, DEFAULT_RESTART_POLICY)));

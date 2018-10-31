@@ -109,6 +109,7 @@ public class ChangeVariableWithEvaluatingTest {
         TestCommandsConstants.CUSTOM,
         ws.getId());
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME_CHANGE_VARIABLE);
   }
 
   @Test
@@ -165,7 +166,7 @@ public class ChangeVariableWithEvaluatingTest {
     } catch (AssertionError ex) {
       machineTerminal.logApplicationInfo(PROJECT_NAME_CHANGE_VARIABLE, ws);
       if (applicationResponse != null && applicationResponse.contains("504 Gateway Time-out")) {
-        fail("Known issue: https://github.com/eclipse/che/issues/9251", ex);
+        fail("Known random failure https://github.com/eclipse/che/issues/9251", ex);
       } else {
         throw ex;
       }

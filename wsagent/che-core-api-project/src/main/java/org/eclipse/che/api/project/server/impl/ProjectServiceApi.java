@@ -64,6 +64,8 @@ import org.eclipse.che.api.fs.server.FsDtoConverter;
 import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectService;
+import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
@@ -104,6 +106,7 @@ public class ProjectServiceApi {
 
   private final ServiceContext serviceContext;
 
+  private final ProjectConfigRegistry projectConfigRegistry;
   private final ProjectManager projectManager;
   private final FsManager fsManager;
   private final FsDtoConverter fsDtoConverter;
@@ -116,6 +119,7 @@ public class ProjectServiceApi {
   @AssistedInject
   public ProjectServiceApi(
       @Assisted ServiceContext serviceContext,
+      ProjectConfigRegistry projectConfigRegistry,
       Searcher searcher,
       ProjectManager projectManager,
       FsManager fsManager,
@@ -125,6 +129,7 @@ public class ProjectServiceApi {
       ProjectServiceVcsStatusInjector vcsStatusInjector,
       RequestTransmitter transmitter) {
     this.serviceContext = serviceContext;
+    this.projectConfigRegistry = projectConfigRegistry;
     this.projectManager = projectManager;
     this.fsManager = fsManager;
     this.fsDtoConverter = fsDtoConverter;
@@ -205,7 +210,8 @@ public class ProjectServiceApi {
       throws NotFoundException, ConflictException, ForbiddenException, ServerException, IOException,
           BadRequestException {
     if (wsPath != null) {
-      projectConfigDto.setPath(absolutize(wsPath));
+      wsPath = absolutize(wsPath);
+      projectConfigDto.setPath(wsPath);
     }
     RegisteredProject updated = projectManager.update(projectConfigDto);
     eventService.publish(new ProjectUpdatedEvent(updated.getPath()));
@@ -219,6 +225,8 @@ public class ProjectServiceApi {
     wsPath = absolutize(wsPath);
 
     if (projectManager.isRegistered(wsPath)) {
+      eventService.publish(new PreProjectDeletedEvent(wsPath));
+
       projectManager
           .delete(wsPath)
           .map(RegisteredProject::getPath)
@@ -517,14 +525,17 @@ public class ProjectServiceApi {
 
     fsManager.unzip(wsPath, zip, skipFirstLevel);
 
-    return Response.created(
-            serviceContext
-                .getBaseUriBuilder()
-                .clone()
-                .path(ProjectService.class)
-                .path(ProjectService.class, "getChildren")
-                .build(new String[] {wsPath.substring(1)}, false))
-        .build();
+    Response response =
+        Response.created(
+                serviceContext
+                    .getBaseUriBuilder()
+                    .clone()
+                    .path(ProjectService.class)
+                    .path(ProjectService.class, "getChildren")
+                    .build(new String[] {wsPath.substring(1)}, false))
+            .build();
+    eventService.publish(new ProjectCreatedEvent(wsPath));
+    return response;
   }
 
   /** Zip content under specified location */

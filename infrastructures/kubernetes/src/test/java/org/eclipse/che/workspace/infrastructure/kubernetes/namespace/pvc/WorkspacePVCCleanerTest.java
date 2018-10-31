@@ -41,11 +41,10 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class WorkspacePVCCleanerTest {
 
-  private static final String WORKSPACE_ID = "workspace132";
-
   @Mock private WorkspaceVolumesStrategy pvcStrategy;
   @Mock private EventService eventService;
   @Mock private KubernetesNamespaceFactory namespaceFactory;
+  @Mock private Workspace workspace;
 
   private WorkspacePVCCleaner workspacePVCCleaner;
 
@@ -88,9 +87,7 @@ public class WorkspacePVCCleanerTest {
               final EventSubscriber<WorkspaceRemovedEvent> argument =
                   invocationOnMock.getArgument(0);
               final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              final Workspace removed = mock(Workspace.class);
-              when(event.getWorkspace()).thenReturn(removed);
-              when(removed.getId()).thenReturn(WORKSPACE_ID);
+              when(event.getWorkspace()).thenReturn(workspace);
               argument.onEvent(event);
               return invocationOnMock;
             })
@@ -99,7 +96,7 @@ public class WorkspacePVCCleanerTest {
 
     workspacePVCCleaner.subscribe(eventService);
 
-    verify(pvcStrategy).cleanup(WORKSPACE_ID);
+    verify(pvcStrategy).cleanup(workspace);
   }
 
   @Test
@@ -109,18 +106,16 @@ public class WorkspacePVCCleanerTest {
               final EventSubscriber<WorkspaceRemovedEvent> argument =
                   invocationOnMock.getArgument(0);
               final WorkspaceRemovedEvent event = mock(WorkspaceRemovedEvent.class);
-              final Workspace removed = mock(Workspace.class);
-              when(event.getWorkspace()).thenReturn(removed);
-              when(removed.getId()).thenReturn(WORKSPACE_ID);
+              when(event.getWorkspace()).thenReturn(workspace);
               argument.onEvent(event);
               return invocationOnMock;
             })
         .when(eventService)
         .subscribe(any(), eq(WorkspaceRemovedEvent.class));
-    doThrow(InfrastructureException.class).when(pvcStrategy).cleanup(WORKSPACE_ID);
+    doThrow(InfrastructureException.class).when(pvcStrategy).cleanup(workspace);
 
     workspacePVCCleaner.subscribe(eventService);
 
-    verify(pvcStrategy).cleanup(WORKSPACE_ID);
+    verify(pvcStrategy).cleanup(workspace);
   }
 }

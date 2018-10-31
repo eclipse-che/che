@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
@@ -26,6 +25,7 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.Preferences.DropDownLanguageServerSettings.YAML;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -44,6 +44,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -54,7 +55,7 @@ public class YamlFileEditingTest {
   private static final String YAML_FILE_NAME = "openshift.yaml";
   private static final String PATH_TO_YAML_FILE = PROJECT_NAME + "/" + YAML_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_YAML_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.yaml.server.languageserver'";
   private static final List<String> EXPECTED_GO_TO_SYMBOL_ALTERNATIVES =
       Arrays.asList("apiVersionsymbols (194)", "kind", "metadata");
 
@@ -125,13 +126,15 @@ public class YamlFileEditingTest {
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("diskName");
     editor.selectAutocompleteProposal("diskName");
-    editor.checkProposalDocumentation("The Name of the data disk in the blob storage");
+    editor.waitProposalDocumentationHTML(
+        "<p>The Name of the data disk in the blob storage</p>\n", 2);
     editor.waitProposalIntoAutocompleteContainer("diskURI");
     editor.selectAutocompleteProposal("diskURI");
-    editor.checkProposalDocumentation("The URI the data disk in the blob storage");
+    editor.waitProposalDocumentationHTML("<p>The URI the data disk in the blob storage</p>\n", 2);
 
     // select proposal and check expected text in the Editor
     editor.enterAutocompleteProposal("kind");
+    editor.waitTextIntoEditor("kind:");
     editor.launchAutocompleteAndWaitContainer();
     editor.waitProposalIntoAutocompleteContainer("PersistentVolume");
     editor.enterAutocompleteProposal("PersistentVolume");
@@ -175,10 +178,10 @@ public class YamlFileEditingTest {
 
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("namespace:");
-    editor.waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
+    waitTextInHoverPopup("Namespace defines the space within each name must be unique.");
 
     editor.moveCursorToText("kind:");
-    editor.waitTextInHoverPopup(
+    waitTextInHoverPopup(
         "Kind is a string value representing the REST resource this object represents.");
 
     editor.moveCursorToText("apiVersion:");
@@ -196,14 +199,15 @@ public class YamlFileEditingTest {
 
     editor.goToPosition(13, 2);
     editor.typeTextIntoEditor("a");
+    editor.waitTextElementsActiveLine("aapiVersion: v1");
     editor.moveCursorToText("aapiVersion");
-    editor.waitTextInHoverPopup("Unexpected property aapiVersion");
+    waitTextInHoverPopup("Unexpected property aapiVersion");
 
     editor.goToPosition(13, 1);
     editor.typeTextIntoEditor(DELETE.toString());
     editor.waitAllMarkersInvisibility(ERROR);
-    editor.moveCursorToText("apiVersion:");
-    editor.waitTextInHoverPopup(
+    editor.moveCursorToText("apiVersion");
+    waitTextInHoverPopup(
         "APIVersion defines the versioned schema of this representation of an object.");
   }
 
@@ -241,7 +245,7 @@ public class YamlFileEditingTest {
     assistantFindPanel.waitAllNodes(EXPECTED_GO_TO_SYMBOL_ALTERNATIVES);
 
     // open item by mouse click
-    assistantFindPanel.clickOnActionNodeWithText("apiVersion");
+    assistantFindPanel.clickOnActionNodeWithTextContains("apiVersion");
     editor.waitCursorPosition(13, 1);
 
     // find and open item from Go To Symbol panel
@@ -249,7 +253,7 @@ public class YamlFileEditingTest {
     assistantFindPanel.waitForm();
     assistantFindPanel.typeToInputField("kin");
     assistantFindPanel.waitNode("kind");
-    assistantFindPanel.clickOnActionNodeWithText("kind");
+    assistantFindPanel.clickOnActionNodeWithTextContains("kind");
     editor.waitCursorPosition(14, 1);
 
     // select items by DOWN and UP buttons
@@ -280,7 +284,7 @@ public class YamlFileEditingTest {
     preferences.addSchemaUrl("kubernetes");
     preferences.clickOnOkBtn();
 
-    preferences.closeForm();
+    preferences.close();
   }
 
   private void deleteSchema() {
@@ -293,6 +297,15 @@ public class YamlFileEditingTest {
     preferences.deleteSchema();
     preferences.clickOnOkBtn();
 
-    preferences.closeForm();
+    preferences.close();
+  }
+
+  private void waitTextInHoverPopup(String expectedText) {
+    try {
+      editor.waitTextInHoverPopup(expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 }

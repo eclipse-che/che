@@ -163,7 +163,7 @@ public class RemovePermissionsFilterTest {
   public void shouldDoChainIfUserDoesNotHavePermissionToSetPermissionsButHasSuperPrivileges()
       throws Exception {
     when(superPrivilegesChecker.isPrivilegedToManagePermissions(anyString())).thenReturn(true);
-    when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
+    //    when(subject.hasPermission("test", "test123", SET_PERMISSIONS)).thenReturn(false);
 
     final Response response =
         given()

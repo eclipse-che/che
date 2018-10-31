@@ -42,4 +42,10 @@ public interface JavaCss extends CssResource {
 
   @ClassName("search-match")
   String searchMatch();
+
+  @ClassName("progressContainer")
+  String progressContainer();
+
+  @ClassName("progress")
+  String progress();
 }

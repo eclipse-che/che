@@ -18,9 +18,9 @@ import (
 	"time"
 	"sync"
 
-	"github.com/eclipse/che/agents/go-agents/core/event"
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc"
-	"github.com/eclipse/che/agents/go-agents/core/jsonrpc/jsonrpctest"
+	"github.com/eclipse/che-go-jsonrpc/event"
+	"github.com/eclipse/che-go-jsonrpc"
+	"github.com/eclipse/che-go-jsonrpc/jsonrpctest"
 )
 
 var (
@@ -47,7 +47,7 @@ var (
 		ID:          "test-installer-3",
 		Description: "Installer for testing",
 		Version:     "1.0",
-		Script:      "printf \"1\n\" && printf \"error\" >&2 && exit 1",
+		Script:      "printf \"1\n\" && sleep 1 && printf \"error\" >&2 && exit 1",
 	}
 )
 

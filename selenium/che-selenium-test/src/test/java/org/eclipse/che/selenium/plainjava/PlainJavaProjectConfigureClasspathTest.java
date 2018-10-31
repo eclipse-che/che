@@ -30,6 +30,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -64,6 +65,7 @@ public class PlainJavaProjectConfigureClasspathTest {
   @Inject private Loader loader;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -75,6 +77,7 @@ public class PlainJavaProjectConfigureClasspathTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), LIB_PROJECT, ProjectTemplates.PLAIN_JAVA);
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -172,16 +175,16 @@ public class PlainJavaProjectConfigureClasspathTest {
     configureClasspath.openItemInSelectPathForm(LIB_PROJECT);
     configureClasspath.selectItemInSelectPathForm("log4j-1.2.17.jar");
     configureClasspath.clickOkBtnSelectPathForm();
-    configureClasspath.waitExpectedTextJarsAndFolderArea("log4j-1.2.17.jar - /projects/lib");
-    configureClasspath.deleteJarOrFolderFromBuildPath("log4j-1.2.17.jar - /projects/lib");
+    configureClasspath.waitExpectedTextJarsAndFolderArea("log4j-1.2.17.jar - /lib");
+    configureClasspath.deleteJarOrFolderFromBuildPath("log4j-1.2.17.jar - /lib");
     configureClasspath.waitExpectedTextIsNotPresentInJarsAndFolderArea(
         "log4j-1.2.17.jar - /projects/lib");
     configureClasspath.addJarOrFolderToBuildPath(ConfigureClasspath.ADD_JAR);
     configureClasspath.waitSelectPathFormIsOpen();
     configureClasspath.openItemInSelectPathForm(LIB_PROJECT);
-    configureClasspath.selectItemInSelectPathForm("mockito-core-2.10.0.jar");
+    configureClasspath.selectItemInSelectPathForm("mockito-core-2.21.0.jar");
     configureClasspath.clickOkBtnSelectPathForm();
-    configureClasspath.waitExpectedTextJarsAndFolderArea("mockito-core-2.10.0.jar - /projects/lib");
+    configureClasspath.waitExpectedTextJarsAndFolderArea("mockito-core-2.21.0.jar - /lib");
     configureClasspath.clickOnDoneBtnConfigureClasspath();
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company");

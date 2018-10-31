@@ -25,8 +25,14 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 
+/**
+ * Applies LSP edits to a stream of characters and writes the edited chars to an output. In the
+ * process, a list of undo edits is generated.
+ *
+ * @author Thomas Mäder
+ */
 public class CharStreamEditor {
-  private static final Comparator<TextEdit> COMPARATOR =
+  public static final Comparator<TextEdit> COMPARATOR =
       RangeComparator.transform(new RangeComparator(), TextEdit::getRange);
   private ArrayList<TextEdit> edits;
   private int currentReadLine = 0;

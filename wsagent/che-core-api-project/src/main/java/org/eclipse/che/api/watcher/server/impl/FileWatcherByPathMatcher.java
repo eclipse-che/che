@@ -12,11 +12,19 @@
 package org.eclipse.che.api.watcher.server.impl;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.FileVisitResult.SKIP_SUBTREE;
 import static java.nio.file.Files.exists;
 
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -24,8 +32,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.fs.server.PathTransformer;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +46,10 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
 
   private final AtomicInteger operationIdCounter = new AtomicInteger();
 
+  private final RootDirPathProvider pathProvider;
   private final FileWatcherByPathValue watcher;
+  private final Set<PathMatcher> directoryExcludes;
+  private final Set<PathMatcher> fileExcludes;
 
   /** Operation ID -> Operation (create, modify, delete) */
   private final Map<Integer, Operation> operations = new ConcurrentHashMap<>();
@@ -50,7 +63,15 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
   private PathTransformer pathTransformer;
 
   @Inject
-  public FileWatcherByPathMatcher(FileWatcherByPathValue watcher, PathTransformer pathTransformer) {
+  public FileWatcherByPathMatcher(
+      @Named("che.fs.directory.excludes") Set<PathMatcher> directoryExcludes,
+      @Named("che.fs.file.excludes") Set<PathMatcher> fileExcludes,
+      RootDirPathProvider pathProvider,
+      FileWatcherByPathValue watcher,
+      PathTransformer pathTransformer) {
+    this.directoryExcludes = directoryExcludes;
+    this.fileExcludes = fileExcludes;
+    this.pathProvider = pathProvider;
     this.watcher = watcher;
     this.pathTransformer = pathTransformer;
   }
@@ -101,6 +122,45 @@ public class FileWatcherByPathMatcher implements Consumer<Path> {
     operations.put(operationId, new Operation(create, modify, delete));
 
     LOG.debug("Registered matcher operation set with id '{}'", operationId);
+
+    try {
+      Files.walkFileTree(
+          Paths.get(pathProvider.get()),
+          new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
+              for (PathMatcher matcher : directoryExcludes) {
+                if (matcher.matches(dir)) {
+                  return SKIP_SUBTREE;
+                }
+              }
+
+              if (matcher.matches(dir)) {
+                accept(dir);
+              }
+
+              return CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+              for (PathMatcher matcher : fileExcludes) {
+                if (matcher.matches(file)) {
+                  return CONTINUE;
+                }
+              }
+
+              if (matcher.matches(file)) {
+                accept(file);
+              }
+
+              return CONTINUE;
+            }
+          });
+    } catch (IOException e) {
+      LOG.error("Can't watch because of: {}", e.getLocalizedMessage(), e);
+    }
+
     return operationId;
   }
 

@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver.csharp;
 
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
@@ -45,6 +44,8 @@ import org.testng.annotations.Test;
 public class CSharpFileEditingTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
+  private final String LANGUAGE_SERVER_INIT_MESSAGE =
+      "Initialized language server 'org.eclipse.che.plugin.csharp.languageserver";
   private final String NAME_OF_EDITING_FILE = "Program.cs";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
@@ -92,7 +93,7 @@ public class CSharpFileEditingTest {
       editor.waitMarkerInPosition(INFO, 2);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue: https://github.com/eclipse/che/issues/10151", ex);
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10151", ex);
     }
   }
 
@@ -105,7 +106,7 @@ public class CSharpFileEditingTest {
     try {
       editor.waitMarkerInPosition(INFO, 23);
     } catch (TimeoutException ex) {
-      fail("Known issue: https://github.com/eclipse/che/issues/10789", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10789", ex);
     }
 
     editor.waitMarkerInPosition(ERROR, 21);
@@ -116,7 +117,7 @@ public class CSharpFileEditingTest {
     projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/" + NAME_OF_EDITING_FILE);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + NAME_OF_EDITING_FILE);
     consoles.selectProcessByTabName("dev-machine");
-    consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
+    consoles.waitExpectedTextIntoConsole(LANGUAGE_SERVER_INIT_MESSAGE);
     editor.selectTabByName(NAME_OF_EDITING_FILE);
   }
 
