@@ -20,6 +20,7 @@ import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.ARROW_RIGHT;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ENTER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -34,6 +35,7 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -215,7 +217,14 @@ public class FindUsagesBaseOperationTest {
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     editor.waitActive();
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
-    editor.expectedNumberOfActiveLine(34);
+
+    try {
+      editor.expectedNumberOfActiveLine(34);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11780", ex);
+    }
+
     editor.waitTextElementsActiveLine("numGuessByUser");
   }
 }

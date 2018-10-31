@@ -11,19 +11,21 @@
  */
 package org.eclipse.che.selenium.factory;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestGitConstants.CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_FACTORY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.CONVERT_TO_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.eclipse.che.selenium.pageobject.Wizard.TypeProject.MAVEN;
+import static org.openqa.selenium.Keys.F4;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import java.io.IOException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
@@ -47,25 +49,19 @@ import org.eclipse.che.selenium.pageobject.PullRequestPanel;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CreateFactoryFromUiWithKeepDirTest {
-  private static final String PROJECT_NAME =
-      NameGenerator.generate(
-          CreateFactoryFromUiWithKeepDirTest.class.getSimpleName().substring(6), 2);
-  private static final Logger LOG =
-      LoggerFactory.getLogger(CreateFactoryFromUiWithKeepDirTest.class);
+  private static final String PROJECT_NAME = generate("project", 5);
   private static final String PROJECT_URL = "https://github.com/spring-guides/gs-rest-service";
   private static final String KEEPED_DIR = "complete";
+  private static final String FACTORY_NAME = generate("keepFactory", 2);
   private static final String[] autocompleteContentAfterFirst = {
     "GreetingController", "GreetingControllerTest", "Greeting"
   };
-  private static final String FACTORY_NAME = NameGenerator.generate("keepFactory", 2);
 
   @Inject private DefaultTestUser user;
   @Inject private CodenvyEditor editor;
@@ -106,24 +102,27 @@ public class CreateFactoryFromUiWithKeepDirTest {
   }
 
   @Test
-  public void createFactoryFromUiWithKeepDirTest() throws Exception {
+  public void createFactoryFromUiWithKeepDirTest() {
     projectExplorer.waitProjectExplorer();
+
     consoles.waitJDTLSStartedMessage();
     makeKeepDirectoryFromGitUrl(PROJECT_URL, PROJECT_NAME, KEEPED_DIR);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
     setUpModuleForFactory();
+
     consoles.clickOnProcessesButton();
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     checkAutocompletion();
     checkOpenDeclaration();
   }
 
-  private void setUpModuleForFactory() throws IOException {
+  private void setUpModuleForFactory() {
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME + "/" + KEEPED_DIR);
+
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/" + KEEPED_DIR);
     projectExplorer.clickOnItemInContextMenu(CONVERT_TO_PROJECT);
-    wizard.selectSample(Wizard.TypeProject.MAVEN);
+    wizard.selectSample(MAVEN);
     wizard.clickSaveButton();
 
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + KEEPED_DIR);
@@ -132,8 +131,9 @@ public class CreateFactoryFromUiWithKeepDirTest {
     createFactoryAndSwitchToWs();
   }
 
-  private void createFactoryAndSwitchToWs() throws IOException {
+  private void createFactoryAndSwitchToWs() {
     String currentWin = seleniumWebDriver.getWindowHandle();
+
     menu.runCommand(WORKSPACE, CREATE_FACTORY);
     factoryWidget.waitOpen();
     factoryWidget.typeNameFactory(FACTORY_NAME);
@@ -143,11 +143,12 @@ public class CreateFactoryFromUiWithKeepDirTest {
     seleniumWebDriverHelper.switchToNextWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+
     try {
-      projectExplorer.waitProjectExplorer(80);
+      projectExplorer.waitProjectExplorer(LOADER_TIMEOUT_SEC);
     } catch (org.openqa.selenium.TimeoutException ex) {
       seleniumWebDriver.switchTo().defaultContent();
-      projectExplorer.waitProjectExplorer(50);
+      projectExplorer.waitProjectExplorer(LOADER_TIMEOUT_SEC);
     }
 
     events.clickEventLogBtn();
@@ -159,6 +160,9 @@ public class CreateFactoryFromUiWithKeepDirTest {
       // remove try-catch block after issue has been resolved
       fail("Known random failure https://github.com/eclipse/che/issues/7253");
     }
+
+    consoles.clickOnProcessesButton();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
@@ -193,16 +197,19 @@ public class CreateFactoryFromUiWithKeepDirTest {
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor("Greeting");
     editor.launchAutocompleteAndWaitContainer();
+
     String textFromEditorAfterFirstCall = editor.getAllVisibleTextFromAutocomplete();
+
     for (String content : autocompleteContentAfterFirst) {
       assertTrue(textFromEditorAfterFirstCall.contains(content));
     }
+
     editor.closeAutocomplete();
     editor.typeTextIntoEditor(" greeting =null;");
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
-  private void checkOpenDeclaration() throws IOException {
+  private void checkOpenDeclaration() {
     String expectedTextBeforeDownloadSources =
         "package hello;\n"
             + "\n"
@@ -226,7 +233,7 @@ public class CreateFactoryFromUiWithKeepDirTest {
             + "}";
 
     editor.goToCursorPositionVisible(15, 12);
-    editor.typeTextIntoEditor(Keys.F4.toString());
+    editor.typeTextIntoEditor(F4.toString());
     editor.waitTabIsPresent("Greeting");
     editor.waitTextIntoEditor(expectedTextBeforeDownloadSources);
   }
