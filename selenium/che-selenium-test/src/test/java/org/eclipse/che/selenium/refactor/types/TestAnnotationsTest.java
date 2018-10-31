@@ -19,6 +19,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.RENAME;
+import static org.testng.Assert.fail;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
@@ -95,7 +96,13 @@ public class TestAnnotationsTest {
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     projectExplorer.waitItem(pathToCurrentPackage + "/B.java");
-    editor.waitTextIntoEditor(contentFromInB);
+
+    try {
+      editor.waitTextIntoEditor(contentFromInB);
+    } catch (AssertionError ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11779");
+    }
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {
