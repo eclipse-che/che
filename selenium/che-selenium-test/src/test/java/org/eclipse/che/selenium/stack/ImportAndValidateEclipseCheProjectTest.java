@@ -26,6 +26,7 @@ import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ImportProjectFromLocation;
 import org.eclipse.che.selenium.pageobject.InformationDialog;
@@ -50,6 +51,7 @@ public class ImportAndValidateEclipseCheProjectTest {
       LoggerFactory.getLogger(ImportAndValidateEclipseCheProjectTest.class);
   private static final String WORKSPACE_NAME = generate("EclipseCheWs", 4);
   private static final String PROJECT_NAME = "eclipse-che";
+  private static final String PACKAGE_NAME = "org.eclipse.che.selenium.pageobject";
   private static final String ECLIPSE_CHE_PROJECT_URL = "https://github.com/eclipse/che.git";
   private static final String PATH_TO_JAVA_FILE =
       PROJECT_NAME
@@ -61,6 +63,7 @@ public class ImportAndValidateEclipseCheProjectTest {
   @Inject private Menu menu;
   @Inject private ImportProjectFromLocation importProject;
   @Inject private Loader loader;
+  @Inject private Consoles consoles;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Wizard projectWizard;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
@@ -85,6 +88,7 @@ public class ImportAndValidateEclipseCheProjectTest {
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSStartedMessage();
   }
 
   @AfterClass
@@ -94,8 +98,8 @@ public class ImportAndValidateEclipseCheProjectTest {
 
   @Test
   public void checkImportAndResolveDependenciesEclipseCheProject() {
-    final int timeoutToOpenInfoPanelInSec = 1200;
-    final int timeoutToClosingInfoPanelInSec = 5400;
+    final int timeoutToOpenInfoPanelInSec = 500;
+    final int timeoutToClosingInfoPanelInSec = 1200;
 
     // import the eclipse-che project
     projectExplorer.waitProjectExplorer();
@@ -107,34 +111,50 @@ public class ImportAndValidateEclipseCheProjectTest {
     projectWizard.selectTypeProject(MAVEN);
     projectWizard.clickSaveButton();
     loader.waitOnClosed();
-
-    // TODO it is the workaround, delete it after resolving the issue
-    // TODO https://github.com/eclipse/che/issues/10515
-    closeErrorDialog();
-
-    try {
-      projectWizard.waitCreateProjectWizardFormIsClosed();
-    } catch (TimeoutException ex) {
-      // TODO it is the workaround, delete it after resolving the issue
-      // TODO https://github.com/eclipse/che/issues/11145
-      LOG.warn(
-          "'Project Configuration' panel didn't close in time. "
-              + "It is known random failure https://github.com/eclipse/che/issues/11145",
-          ex);
-      projectWizard.closeWithIcon();
-    }
-
+    projectWizard.waitCreateProjectWizardFormIsClosed();
     loader.waitOnClosed();
+
+    // waits on project resolving message
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
+    // waits while the 'Import Maven project(s)' info bar is closed
+    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanelInSec);
 
     // expand the project
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
 
+    // waits the text in the progress info bar
+    loader.waitOnClosed();
+    mavenPluginStatusBar.waitExpectedTextInInfoPanel(
+        "Building workspace", timeoutToOpenInfoPanelInSec);
+
+    // should close the progress monitor form by Esc
+    mavenPluginStatusBar.clickOnInfoPanel();
+    mavenPluginStatusBar.waitProgressMonitorFormToOpen();
+    mavenPluginStatusBar.closeProgressMonitorFormByKeys(ESCAPE.toString());
+
+    // then open it again
+    mavenPluginStatusBar.clickOnInfoPanel();
+    mavenPluginStatusBar.waitProgressMonitorFormToOpen();
+
+    // wait while progress info is closed
+    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanelInSec);
+    mavenPluginStatusBar.waitProgressMonitorFormToClose();
+
     // then open files
     // open a java file
     quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_JAVA_FILE);
     editor.waitActive();
+
+    // checks packages in project Explorer
+    try {
+      projectExplorer.waitVisibilityByName(PACKAGE_NAME);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11537");
+    }
 
     // open a xml file
     quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_POM_FILE);
@@ -143,24 +163,6 @@ public class ImportAndValidateEclipseCheProjectTest {
     // open a ts file
     quickRevealToItemWithJavaScriptAndOpenFile(PATH_TO_TS_FILE);
     editor.waitActive();
-
-    // open the resolving dependencies form
-    loader.waitOnClosed();
-    mavenPluginStatusBar.waitExpectedTextInInfoPanel(
-        "Resolving project:", timeoutToOpenInfoPanelInSec);
-    mavenPluginStatusBar.clickOnInfoPanel();
-
-    // should close the resolve dependencies form by Esc
-    mavenPluginStatusBar.waitResolveDependenciesFormToOpen();
-    mavenPluginStatusBar.closeResolveDependenciesFormByKeys(ESCAPE.toString());
-
-    // then open it again
-    mavenPluginStatusBar.clickOnInfoPanel();
-    mavenPluginStatusBar.waitResolveDependenciesFormToOpen();
-
-    // wait while dependencies are resolved
-    mavenPluginStatusBar.waitClosingInfoPanel(timeoutToClosingInfoPanelInSec);
-    mavenPluginStatusBar.waitResolveDependenciesFormToClose();
 
     // wait the project and the files
     projectExplorer.waitItem(PROJECT_NAME);
@@ -197,28 +199,6 @@ public class ImportAndValidateEclipseCheProjectTest {
     editor.waitActive();
     editor.typeTextIntoEditor("q");
     editor.waitMarkerInPosition(ERROR, 1);
-  }
-
-  private void closeErrorDialog() {
-    // if the error dialog is appeared more 5 times, the test will be failed
-    int counterErrorDialog = 0;
-
-    while (informationDialog.isFormOpened()) {
-      counterErrorDialog++;
-
-      if (counterErrorDialog > 5) {
-
-        fail(
-            "The unexpected error information dialog is appeared more than "
-                + counterErrorDialog
-                + " times");
-      }
-
-      informationDialog.waitFormToOpen();
-      informationDialog.clickOkBtn();
-      projectWizard.clickSaveButton();
-      loader.waitOnClosed();
-    }
   }
 
   private void quickRevealToItemWithJavaScriptAndOpenFile(String pathToItem) {

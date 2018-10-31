@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Singleton;
@@ -37,6 +38,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  *
  * @see <a href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir">emptyDir</a>
  * @author Ilya Buziuk
+ * @author Angel Misevski
  */
 @Singleton
 public class EphemeralWorkspaceAdapter {
@@ -68,39 +70,43 @@ public class EphemeralWorkspaceAdapter {
       throws InfrastructureException {
     for (Pod pod : k8sEnv.getPods().values()) {
       PodSpec podSpec = pod.getSpec();
+
+      // To ensure same volumes get mounted correctly in different containers, we need to track
+      // which volumes have been "created"
+      Map<String, String> volumeKeyToNameCache = new HashMap<>();
+
       for (Container container : podSpec.getContainers()) {
         String machineName = Names.machineName(pod, container);
         Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
-        addMachineVolumes(identity.getWorkspaceId(), pod, container, volumes);
+        if (volumes.isEmpty()) {
+          continue;
+        }
+
+        for (Entry<String, Volume> volumeEntry : volumes.entrySet()) {
+          final String volumePath = volumeEntry.getValue().getPath();
+          final String volumeKey =
+              LOGS_VOLUME_NAME.equals(volumeEntry.getKey())
+                  ? volumeEntry.getKey() + '-' + pod.getMetadata().getName()
+                  : volumeEntry.getKey();
+
+          final String uniqueVolumeName;
+          if (volumeKeyToNameCache.containsKey(volumeKey)) {
+            uniqueVolumeName = volumeKeyToNameCache.get(volumeKey);
+          } else {
+            uniqueVolumeName = Names.generateName(EPHEMERAL_VOLUME_NAME_PREFIX);
+            volumeKeyToNameCache.put(volumeKey, uniqueVolumeName);
+          }
+          // binds volume to pod and container
+          container
+              .getVolumeMounts()
+              .add(
+                  newVolumeMount(
+                      uniqueVolumeName,
+                      volumePath,
+                      getSubPath(identity.getWorkspaceId(), volumeKey, machineName)));
+          addEmptyDirVolumeIfAbsent(pod.getSpec(), uniqueVolumeName);
+        }
       }
-    }
-  }
-
-  private void addMachineVolumes(
-      String workspaceId, Pod pod, Container container, Map<String, Volume> volumes)
-      throws InfrastructureException {
-    if (volumes.isEmpty()) {
-      return;
-    }
-
-    for (Entry<String, Volume> volumeEntry : volumes.entrySet()) {
-      final String volumePath = volumeEntry.getValue().getPath();
-      final String volumeName =
-          LOGS_VOLUME_NAME.equals(volumeEntry.getKey())
-              ? volumeEntry.getKey() + '-' + pod.getMetadata().getName()
-              : volumeEntry.getKey();
-
-      final String uniqueVolumeName = Names.generateName(EPHEMERAL_VOLUME_NAME_PREFIX);
-
-      // binds volume to pod and container
-      container
-          .getVolumeMounts()
-          .add(
-              newVolumeMount(
-                  uniqueVolumeName,
-                  volumePath,
-                  getSubPath(workspaceId, volumeName, Names.machineName(pod, container))));
-      addEmptyDirVolumeIfAbsent(pod.getSpec(), uniqueVolumeName);
     }
   }
 
