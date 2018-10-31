@@ -270,6 +270,7 @@ public class TheiaEditor {
 
   public void enterTextByTypingEachChar(String text) {
     for (char character : text.toCharArray()) {
+      // for avoiding unexpected autocomplete during typing
       seleniumWebDriverHelper.sendKeys(Character.toString(character));
       seleniumWebDriverHelper.sendKeys(ESCAPE.toString());
     }
