@@ -254,7 +254,7 @@
   {
     "id": "che7-preview",
     "creator": "ide",
-    "name": "Che 7 Preview",
+    "name": "Che 7",
     "description": "Workspace.next sidecars and Theia as IDE",
     "scope": "general",
     "tags": [
@@ -291,7 +291,9 @@
         "default": {
           "machines": {
             "ws/dev": {
-              "attributes": {},
+              "attributes": {
+                "memoryLimitBytes": "536870912"
+              },
               "servers": {},
               "volumes": {
                 "projects": {
@@ -303,8 +305,8 @@
             }
           },
           "recipe": {
-            "type": "openshift",
-            "content": "---\nkind: List\nitems:\n-\n  apiVersion: v1\n  kind: Pod\n  metadata:\n    name: ws\n  spec:\n    containers:\n      -\n        image: eclipse/che-dev:nightly\n        name: dev",
+            "type": "kubernetes",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
             "contentType": "application/x-yaml"
           }
         }
@@ -315,6 +317,86 @@
         "plugins": "che-machine-exec-plugin:0.0.1"
       },
       "commands": [],
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "che7-preview-plugin-dev",
+    "creator": "ide",
+    "name": "Che 7 Dev",
+    "description": "Workspace.next sidecars and Theia as IDE with the tooling for plugin development",
+    "scope": "general",
+    "tags": [
+      "ws.next",
+      "Theia",
+      "Java",
+      "JDK",
+      "Node.JS",
+      "NPM",
+      "Yeoman"
+    ],
+    "components": [
+      {
+        "name": "Centos",
+        "version": "7"
+      },
+      {
+        "name": "OpenJDK",
+        "version": "1.8.0_181"
+      },
+      {
+        "name": "NodeJS",
+        "version": "8.12.0"
+      },
+      {
+        "name": "NPM",
+        "version": "6.4.1"
+      }
+    ],
+    "workspaceConfig": {
+      "name": "che7-preview-plugin-dev",
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "ws/dev": {
+              "attributes": {
+                "memoryLimitBytes": "536870912"
+              },
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "kubernetes",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'wsskeleton/che-plugin-dev-tooling'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "projects": [],
+      "attributes": {
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-machine-exec-plugin:0.0.1"
+      },
+      "commands": [
+        {
+          "commandLine": "echo ${CHE_OSO_CLUSTER//api/console}",
+          "name": "Get OpenShift Console URL",
+          "type": "",
+          "attributes": {}
+        }
+      ],
       "links": []
     },
     "stackIcon": {
@@ -2155,10 +2237,8 @@
           },
           "machines": {
             "dev-machine": {
-              "env": {
-              },
-              "volumes": {
-              },
+              "env": {},
+              "volumes": {},
               "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal",
@@ -2168,14 +2248,12 @@
               ],
               "servers": {
                 "tomcat8-debug": {
-                  "attributes": {
-                  },
+                  "attributes": {},
                   "protocol": "http",
                   "port": "8000"
                 },
                 "springboot": {
-                  "attributes": {
-                  },
+                  "attributes": {},
                   "protocol": "http",
                   "port": "8080"
                 }
@@ -2187,8 +2265,7 @@
           }
         }
       },
-      "projects": [
-      ],
+      "projects": [],
       "commands": [
         {
           "commandLine": "scl enable rh-maven33 'mvn install -f ${current.project.path}'",
@@ -2228,8 +2305,7 @@
         }
       ],
       "name": "default",
-      "links": [
-      ]
+      "links": []
     },
     "components": [
       {
