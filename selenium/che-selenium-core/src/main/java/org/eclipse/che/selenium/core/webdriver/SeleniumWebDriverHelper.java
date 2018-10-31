@@ -1242,11 +1242,11 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
-   * Checks appears more than ne window.
+   * Checks appears more than one window.
    *
-   * @return {@code true} if more than one window opened, {@code false} if only one window opened
+   * @return {@code true} if more than one window opened, {@code false} if one or zero window opened
    */
-  public boolean isOpenedSomeWin() {
+  public boolean isTwoOrMoreWindowsOpened() {
     return seleniumWebDriver.getWindowHandles().size() > 1;
   }
 

@@ -197,6 +197,26 @@ public class TheiaProjectTree {
     theiaEditor.waitActiveEditor();
   }
 
+  /**
+   * Transforms specified {@code path} to paths of the each element.
+   *
+   * <p>For example {@code project/src/main/java/com.package}:
+   *
+   * <p>project
+   *
+   * <p>project/src
+   *
+   * <p>project/src/main
+   *
+   * <p>project/src/main/java
+   *
+   * <p>project/src/main/java/com
+   *
+   * <p>project/src/main/java/com/package
+   *
+   * @param path
+   * @return paths of the each element
+   */
   private List<String> splitProjectPath(String path) {
     Path fullPath = Paths.get(path);
     List<String> itemsPaths = new ArrayList<>();

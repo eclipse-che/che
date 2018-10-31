@@ -81,11 +81,11 @@ public class TheiaIde {
   @FindBy(xpath = Locators.ABOUT_DIALOG_OK_BUTTON_XPATH)
   WebElement aboutDialogOkButton;
 
-  private String getNotificationMessageEqualsToXpath(String messageText) {
+  private String getNotificationEqualsToXpath(String messageText) {
     return format(NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE, messageText);
   }
 
-  private String getNotificationMessageContainsXpath(String messageText) {
+  private String getNotificationContainsXpath(String messageText) {
     return format(NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE, messageText);
   }
 
@@ -94,31 +94,31 @@ public class TheiaIde {
   }
 
   public void waitNotificationEqualsTo(String expectedText) {
-    final String notificationXpath = getNotificationMessageEqualsToXpath(expectedText);
+    final String notificationXpath = getNotificationEqualsToXpath(expectedText);
 
     seleniumWebDriverHelper.waitVisibility(By.xpath(notificationXpath));
   }
 
-  public boolean isDisplayedNotificationEqualsTo(String notificationText) {
-    final String notificationXpath = getNotificationMessageEqualsToXpath(notificationText);
+  public boolean isNotificationEqualsTo(String notificationText) {
+    final String notificationXpath = getNotificationEqualsToXpath(notificationText);
 
     return seleniumWebDriverHelper.isVisible(By.xpath(notificationXpath));
   }
 
-  public boolean isDisplayedNotificationContains(String notificationText) {
-    final String notificationXpath = getNotificationMessageContainsXpath(notificationText);
+  public boolean isNotificationContains(String notificationText) {
+    final String notificationXpath = getNotificationContainsXpath(notificationText);
 
     return seleniumWebDriverHelper.isVisible(By.xpath(notificationXpath));
   }
 
   public void waitNotificationMessageContains(String expectedText) {
-    final String notificationMessage = getNotificationMessageContainsXpath(expectedText);
+    final String notificationMessage = getNotificationContainsXpath(expectedText);
 
     seleniumWebDriverHelper.waitVisibility(By.xpath(notificationMessage));
   }
 
   public void waitNotificationDisappearance(String notificationText) {
-    final String notificationMessage = getNotificationMessageContainsXpath(notificationText);
+    final String notificationMessage = getNotificationContainsXpath(notificationText);
 
     seleniumWebDriverHelper.waitInvisibility(By.xpath(notificationMessage));
   }

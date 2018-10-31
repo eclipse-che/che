@@ -80,7 +80,7 @@ public class TheiaEditor {
     seleniumWebDriverHelper.waitAndClick(By.xpath(tabCloseButtonXpath));
   }
 
-  public boolean isTabHasSavedStatus(String tabTitle) {
+  public boolean isTabWithSavedStatus(String tabTitle) {
     final String backgroundImageProperty = "background-image";
     final String savedBackgroundImageUrl = "url(\"data:image/svg+xml;base64,PHN2ZyBmaWxsPSI";
 
@@ -90,7 +90,7 @@ public class TheiaEditor {
   }
 
   public void waitTabSavedStatus(String tabTitle) {
-    seleniumWebDriverHelper.waitSuccessCondition(driver -> isTabHasSavedStatus(tabTitle));
+    seleniumWebDriverHelper.waitSuccessCondition(driver -> isTabWithSavedStatus(tabTitle));
   }
 
   public void waitActiveEditor() {

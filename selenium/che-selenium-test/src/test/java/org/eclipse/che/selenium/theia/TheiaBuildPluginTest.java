@@ -116,8 +116,6 @@ public class TheiaBuildPluginTest {
     theiaTerminal.waitTabSelected(wsTheiaIdeTerminalTitle);
     theiaTerminal.performCommand("yarn");
     theiaTerminal.waitTerminalOutput(expectedTerminalSuccessOutput, 0);
-
-    // fail("Known permanent failure https://github.com/eclipse/che/issues/11624", ex);
   }
 
   @Test(priority = 1)
@@ -176,7 +174,7 @@ public class TheiaBuildPluginTest {
     theiaIde.waitNotificationEqualsTo(expectedHelloWorldNotification);
     theiaIde.waitNotificationDisappearance(expectedHelloWorldNotification);
 
-    // check editing of the source code and applying it in hosted mode window
+    // check editing of the source code
     switchToParentWindow(parentWindow);
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(projectName);
@@ -190,6 +188,8 @@ public class TheiaBuildPluginTest {
     theiaEditor.enterTextByTypingEachChar(editedSourceLine);
     theiaEditor.waitEditorText(editedSourceLine);
     theiaEditor.waitTabSavedStatus(editedSourceFile);
+
+    // check applying of the changes in hosted mode window
     switchToNonParentWindow(parentWindow);
     waitDevelopmentHostTitle();
     seleniumWebDriver.navigate().refresh();
@@ -204,11 +204,6 @@ public class TheiaBuildPluginTest {
     theiaIde.waitNotificationDisappearance(expectedAlohaWorldNotification);
   }
 
-  private void waitNewBrowserWindowAndSwitchToParent(String parentWindowHandle) {
-    seleniumWebDriver.waitOpenedSomeWin();
-    switchToParentWindow(parentWindowHandle);
-  }
-
   private void switchToNonParentWindow(String parentWindowHandle) {
     seleniumWebDriver.switchToNoneCurrentWindow(parentWindowHandle);
   }
@@ -216,13 +211,6 @@ public class TheiaBuildPluginTest {
   private void switchToParentWindow(String parentWindowHandle) {
     seleniumWebDriver.switchTo().window(parentWindowHandle);
     theiaIde.switchToIdeFrame();
-  }
-
-  private void waitTitleHaveNotRouteOccurrence() {
-    final String textForChecking = "route";
-
-    seleniumWebDriverHelper.waitSuccessCondition(
-        driver -> !seleniumWebDriver.getTitle().contains(textForChecking));
   }
 
   private void waitDevelopmentHostTitle() {
@@ -236,7 +224,7 @@ public class TheiaBuildPluginTest {
 
           seleniumWebDriver.navigate().refresh();
 
-          // give a time for refreshing
+          // give a time for title refreshing
           WaitUtils.sleepQuietly(3);
 
           return false;
@@ -256,12 +244,12 @@ public class TheiaBuildPluginTest {
   private void waitNotificationEqualsTo(String notificationMessage, String parentWindowHandle) {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver -> {
-          if (seleniumWebDriverHelper.isOpenedSomeWin()) {
-            seleniumWebDriver.switchTo().window(parentWindowHandle);
+          if (seleniumWebDriverHelper.isTwoOrMoreWindowsOpened()) {
+            driver.switchTo().window(parentWindowHandle);
             theiaIde.switchToIdeFrame();
           }
 
-          return theiaIde.isDisplayedNotificationEqualsTo(notificationMessage);
+          return theiaIde.isNotificationEqualsTo(notificationMessage);
         },
         LOADER_TIMEOUT_SEC);
   }
@@ -269,12 +257,12 @@ public class TheiaBuildPluginTest {
   private void waitNotificationContains(String notificationMessage, String parentWindowHandle) {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver -> {
-          if (seleniumWebDriverHelper.isOpenedSomeWin()) {
-            seleniumWebDriver.switchTo().window(parentWindowHandle);
+          if (seleniumWebDriverHelper.isTwoOrMoreWindowsOpened()) {
+            driver.switchTo().window(parentWindowHandle);
             theiaIde.switchToIdeFrame();
           }
 
-          return theiaIde.isDisplayedNotificationContains(notificationMessage);
+          return theiaIde.isNotificationContains(notificationMessage);
         },
         LOADER_TIMEOUT_SEC);
   }

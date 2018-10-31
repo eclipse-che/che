@@ -78,7 +78,7 @@ public class TheiaProposalForm {
   }
 
   public void enterTextToSearchField(String text) {
-    clearSearchFieldByBackspace();
+    clearSearchFieldByPressingBackspace();
 
     seleniumWebDriverHelper.setValue(By.xpath(SEARCH_FIELD_XPATH), text);
   }
@@ -222,7 +222,7 @@ public class TheiaProposalForm {
     return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.xpath(SEARCH_FIELD_XPATH));
   }
 
-  public void clearSearchFieldByBackspace() {
+  public void clearSearchFieldByPressingBackspace() {
     final int symbolsCount = getSearchFieldText().length();
 
     seleniumWebDriverHelper.waitNoExceptions(
