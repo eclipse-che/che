@@ -24,6 +24,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.PluginMetaRetriever;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +39,18 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
   private static final Logger LOG = LoggerFactory.getLogger(SidecarToolingProvisioner.class);
 
   private final Map<String, ChePluginsApplier> workspaceNextAppliers;
+  private final KubernetesBrokerInitContainerApplier<E> brokerApplier;
   private final PluginMetaRetriever pluginMetaRetriever;
   private final PluginBrokerManager<E> pluginBrokerManager;
 
   @Inject
   public SidecarToolingProvisioner(
       Map<String, ChePluginsApplier> workspaceNextAppliers,
+      KubernetesBrokerInitContainerApplier<E> brokerApplier,
       PluginMetaRetriever pluginMetaRetriever,
       PluginBrokerManager<E> pluginBrokerManager) {
     this.workspaceNextAppliers = ImmutableMap.copyOf(workspaceNextAppliers);
+    this.brokerApplier = brokerApplier;
     this.pluginMetaRetriever = pluginMetaRetriever;
     this.pluginBrokerManager = pluginBrokerManager;
   }
@@ -66,9 +70,13 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
           "Sidecar tooling configuration is not supported with environment type " + recipeType);
     }
 
-    List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta);
+    boolean isEphemeral = EphemeralWorkspaceAdapter.isEphemeral(environment.getAttributes());
+    List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta, isEphemeral);
 
     pluginsApplier.apply(environment, chePlugins);
+    if (isEphemeral) {
+      brokerApplier.apply(environment, id, pluginsMeta);
+    }
     LOG.debug("Finished sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
   }
 }
