@@ -602,11 +602,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     LOG.debug("Begin pods creation for workspace {}", workspaceId);
     for (Pod toCreate : environment.getPods().values()) {
       final Pod createdPod = namespace.deployments().deploy(toCreate);
-      LOG.debug("Creating pod {} in workspace {}.", toCreate.getMetadata().getName(), workspaceId);
+      LOG.debug("Creating pod {} in workspace {}", toCreate.getMetadata().getName(), workspaceId);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
         String machineName = Names.machineName(toCreate, container);
-        LOG.debug("Creating machine {} in workspace {}.", machineName, workspaceId);
+        LOG.debug("Creating machine {} in workspace {}", machineName, workspaceId);
         machines.put(
             getContext().getIdentity(),
             new KubernetesMachineImpl(
