@@ -49,10 +49,6 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
   @Named("che.admin.password")
   private String password;
 
-  @Inject
-  @Named("che.admin.offline_token")
-  private String offlineToken;
-
   @Override
   public AdminTestUser get() {
     if (adminTestUser == null) {
@@ -63,7 +59,7 @@ public class MultiUserCheAdminTestUserProvider implements AdminTestUserProvider 
         throw new IllegalStateException("Admin test user credentials are unknown");
       }
 
-      adminTestUser = adminTestUserFactory.create(name, email, password, offlineToken, this);
+      adminTestUser = adminTestUserFactory.create(name, email, password, this);
       keycloakCliClient.setupAdmin(adminTestUser);
 
       LOG.info("User name='{}', id='{}' is being used as admin", name, adminTestUser.getId());

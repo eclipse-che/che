@@ -65,7 +65,7 @@ public class KeycloakCliClient {
 
     LOG.info("Test user with name='{}' and id='{}' has been created.", username, userId);
 
-    return testUserFactory.create(username, email, password, "", testUserProvider);
+    return testUserFactory.create(username, email, password, testUserProvider);
   }
 
   public DefaultTestUser createDefaultUser(RemovableUserProvider testUserProvider)
@@ -79,7 +79,7 @@ public class KeycloakCliClient {
 
     LOG.info("Default test user with name='{}' and id='{}' has been created.", username, userId);
 
-    return defaultTestUserFactory.create(username, email, password, "", testUserProvider);
+    return defaultTestUserFactory.create(username, email, password, testUserProvider);
   }
 
   private String doCreateUser(String username, String email, String password) throws IOException {
