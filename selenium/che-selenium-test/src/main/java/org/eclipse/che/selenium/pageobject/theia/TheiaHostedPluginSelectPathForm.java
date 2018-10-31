@@ -14,12 +14,12 @@ package org.eclipse.che.selenium.pageobject.theia;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.CANCEL_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.CLOSE_ICON_XPATH;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.DROP_DOWN_TITLE_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.OPEN_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.PROJECT_TREE_ITEM_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.ROOT_PROJECTS_FOLDER_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.SELECTED_PROJECT_ITEM_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.SUGGESTIONS_XPATH;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.SUGGESTION_LIST_TITLE_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.SUGGESTION_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.TITLE_XPATH;
 
@@ -45,9 +45,9 @@ public class TheiaHostedPluginSelectPathForm {
         "//div[@class='dialogBlock']//div[@class='dialogTitle']//div[text()='Hosted Plugin: Select Path']";
     String CLOSE_ICON_XPATH =
         "//div[@class='dialogBlock']//div[@class='dialogTitle']//i[contains(@class, 'closeButton')]";
-    String DROP_DOWN_TITLE_XPATH =
+    String SUGGESTION_LIST_TITLE_XPATH =
         "//div[@class='dialogBlock']//select[@class='theia-LocationList']";
-    String SUGGESTIONS_XPATH = DROP_DOWN_TITLE_XPATH + "//option";
+    String SUGGESTIONS_XPATH = SUGGESTION_LIST_TITLE_XPATH + "//option";
     String SUGGESTION_XPATH_TEMPLATE =
         "(//div[@class='dialogBlock']//select[@class='theia-LocationList']//option)[%s]";
 
@@ -90,11 +90,11 @@ public class TheiaHostedPluginSelectPathForm {
   }
 
   public String getTitleText() {
-    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.xpath(DROP_DOWN_TITLE_XPATH));
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.xpath(SUGGESTION_LIST_TITLE_XPATH));
   }
 
   public void waitSuggestionsTitleText(String expectedText) {
-    seleniumWebDriverHelper.waitValueEqualsTo(By.xpath(DROP_DOWN_TITLE_XPATH), expectedText);
+    seleniumWebDriverHelper.waitValueEqualsTo(By.xpath(SUGGESTION_LIST_TITLE_XPATH), expectedText);
   }
 
   private int getSuggestionsCount() {
