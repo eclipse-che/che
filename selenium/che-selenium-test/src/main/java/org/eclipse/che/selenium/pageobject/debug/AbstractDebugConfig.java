@@ -97,19 +97,13 @@ public abstract class AbstractDebugConfig {
   public void removeConfig(String configName) {
     String configItemXpath = String.format(Locators.CONFIG_ITEM_XPATH_TEMPLATE, configName);
     seleniumWebDriverHelper.waitAndClick(By.xpath(configItemXpath));
-
     String removeConfigButtonXpath =
         String.format(Locators.REMOVE_CONFIG_BUTTON_XPATH_TEMPLATE, configName);
     seleniumWebDriverHelper.waitAndClick(By.xpath(removeConfigButtonXpath));
-
     seleniumWebDriverHelper.waitVisibility(deleteConfigurationDialogTitle);
-
     seleniumWebDriverHelper.waitAndClick(By.id(AskDialog.OK_BTN_ID));
-
     seleniumWebDriverHelper.waitInvisibility(By.id(AskDialog.OK_BTN_ID));
-
     seleniumWebDriverHelper.waitInvisibility(By.xpath(configItemXpath));
-
     close();
   }
 
