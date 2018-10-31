@@ -29,11 +29,14 @@ import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
+import org.eclipse.che.selenium.core.client.keycloak.KeycloakTestAuthServiceClient;
+import org.eclipse.che.selenium.core.client.keycloak.OsioKeycloakTestAuthServiceClient;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.constant.Infrastructure;
@@ -116,13 +119,14 @@ public class CheSeleniumSuiteModule extends AbstractModule {
 
     bind(PageObjectsInjector.class).to(PageObjectsInjectorImpl.class);
 
+    configureInfrastructureRelatedDependencies(config);
+
     if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
       install(new CheSeleniumMultiUserModule());
     } else {
       install(new CheSeleniumSingleUserModule());
     }
 
-    configureInfrastructureRelatedDependencies(config);
     configureTestExecutionModeRelatedDependencies();
   }
 
@@ -132,13 +136,26 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     switch (cheInfrastructure) {
       case OPENSHIFT:
       case K8S:
+        if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
+          bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
+        }
+
         install(new CheSeleniumOpenShiftModule());
         break;
+
       case OSIO:
-        install(new CheSeleniumOsioModule());
+        if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
+          bind(TestAuthServiceClient.class).to(OsioKeycloakTestAuthServiceClient.class);
+        }
+
+        install(new CheSeleniumOpenShiftModule());
         break;
 
       case DOCKER:
+        if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
+          bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
+        }
+
         install(new CheSeleniumDockerModule());
         break;
 

@@ -12,8 +12,6 @@
 package org.eclipse.che.selenium.core;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
-import org.eclipse.che.selenium.core.client.keycloak.OpenShiftKeycloakTestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.keycloak.cli.KeycloakCliCommandExecutor;
 import org.eclipse.che.selenium.core.client.keycloak.cli.OpenShiftKeycloakCliCommandExecutor;
 import org.eclipse.che.selenium.core.workspace.CheTestOpenshiftWorkspaceLogsReader;
@@ -23,7 +21,6 @@ public class CheSeleniumOpenShiftModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(TestAuthServiceClient.class).to(OpenShiftKeycloakTestAuthServiceClient.class);
     bind(TestWorkspaceLogsReader.class).to(CheTestOpenshiftWorkspaceLogsReader.class);
     bind(KeycloakCliCommandExecutor.class).to(OpenShiftKeycloakCliCommandExecutor.class);
   }
