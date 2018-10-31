@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
-  private static final Logger LOG = LoggerFactory.getLogger(UniqueWorkspacePVCStrategy.class);
+  private static final Logger LOG = LoggerFactory.getLogger(CommonPVCStrategy.class);
   public static final String COMMON_STRATEGY = "common";
 
   /**
