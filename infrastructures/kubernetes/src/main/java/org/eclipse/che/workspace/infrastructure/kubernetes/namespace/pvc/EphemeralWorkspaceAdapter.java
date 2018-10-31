@@ -19,7 +19,9 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Singleton;
@@ -51,7 +53,7 @@ public class EphemeralWorkspaceAdapter {
    *     When a workspace Pod is removed for any reason, the data in the `emptyDir` volume is
    *     deleted forever
    */
-  public boolean isEphemeral(Workspace workspace) {
+  public static boolean isEphemeral(Workspace workspace) {
     return isEphemeral(workspace.getConfig().getAttributes());
   }
 
@@ -61,9 +63,19 @@ public class EphemeralWorkspaceAdapter {
    *     of the PVC strategy, workspace volumes would be created as `emptyDir`. When a workspace Pod
    *     is removed for any reason, the data in the `emptyDir` volume is deleted forever
    */
-  public boolean isEphemeral(Map<String, String> workspaceAttributes) {
+  public static boolean isEphemeral(Map<String, String> workspaceAttributes) {
     String persistVolumes = workspaceAttributes.get(PERSIST_VOLUMES_ATTRIBUTE);
     return "false".equals(persistVolumes);
+  }
+
+  /**
+   * Change workspace attributes such that future calls to {@link
+   * EphemeralWorkspaceAdapter#isEphemeral} will return true.
+   *
+   * @param workspaceAttributes
+   */
+  public static void makeEphemeral(Map<String, String> workspaceAttributes) {
+    workspaceAttributes.put(PERSIST_VOLUMES_ATTRIBUTE, "false");
   }
 
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
@@ -75,7 +87,10 @@ public class EphemeralWorkspaceAdapter {
       // which volumes have been "created"
       Map<String, String> volumeKeyToNameCache = new HashMap<>();
 
-      for (Container container : podSpec.getContainers()) {
+      List<Container> containers = new ArrayList<>();
+      containers.addAll(podSpec.getContainers());
+      containers.addAll(podSpec.getInitContainers());
+      for (Container container : containers) {
         String machineName = Names.machineName(pod, container);
         Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
         if (volumes.isEmpty()) {
