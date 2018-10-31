@@ -14,12 +14,12 @@ package org.eclipse.che.selenium.pageobject.theia;
 import static java.lang.String.format;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.CANCEL_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.CLOSE_ICON_XPATH;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.DROP_DOWN_SUGGESTIONS_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.DROP_DOWN_TITLE_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.OPEN_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.PROJECT_TREE_ITEM_ID_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.ROOT_PROJECTS_FOLDER_XPATH;
-import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.SELECTED_ITEM_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.SELECTED_PROJECT_ITEM_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.SUGGESTIONS_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.SUGGESTION_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm.Locators.TITLE_XPATH;
 
@@ -47,28 +47,28 @@ public class TheiaHostedPluginSelectPathForm {
         "//div[@class='dialogBlock']//div[@class='dialogTitle']//i[contains(@class, 'closeButton')]";
     String DROP_DOWN_TITLE_XPATH =
         "//div[@class='dialogBlock']//select[@class='theia-LocationList']";
-    String DROP_DOWN_SUGGESTIONS_XPATH = DROP_DOWN_TITLE_XPATH + "//option";
+    String SUGGESTIONS_XPATH = DROP_DOWN_TITLE_XPATH + "//option";
     String SUGGESTION_XPATH_TEMPLATE =
         "(//div[@class='dialogBlock']//select[@class='theia-LocationList']//option)[%s]";
 
     String ROOT_PROJECTS_FOLDER_XPATH =
         "//div[@class='dialogBlock']//div[@class='theia-TreeNodeContent']//div[@id='/projects']";
     String PROJECT_TREE_ITEM_ID_TEMPLATE = "/projects/%s";
-    String SELECTED_ITEM_XPATH_TEMPLATE =
+    String SELECTED_PROJECT_ITEM_XPATH_TEMPLATE =
         "//div[@data-node-id='/projects/%s']/parent::div/parent::div[contains(@class, 'theia-mod-selected') and contains(@class, 'theia-mod-focus')]";
     String CANCEL_BUTTON_XPATH = "//div[@class='dialogBlock']//button[text()='Cancel']";
     String OPEN_BUTTON_XPATH = "//div[@class='dialogBlock']//button[text()='Open']";
   }
 
-  private String getSelectedProjectTreeItemXpath(String itemPath) {
-    return format(SELECTED_ITEM_XPATH_TEMPLATE, itemPath);
+  private String getSelectedProjectTreeItemXpath(String projectItemPath) {
+    return format(SELECTED_PROJECT_ITEM_XPATH_TEMPLATE, projectItemPath);
   }
 
-  private String getProjectsTreeItemId(String itemPath) {
-    return format(PROJECT_TREE_ITEM_ID_TEMPLATE, itemPath);
+  private String getProjectsTreeItemId(String projectItemPath) {
+    return format(PROJECT_TREE_ITEM_ID_TEMPLATE, projectItemPath);
   }
 
-  private String getDropDownSuggestionXpath(int suggestionIndex) {
+  private String getSuggestionXpath(int suggestionIndex) {
     final int adoptedSuggestionIndex = suggestionIndex + 1;
     return format(SUGGESTION_XPATH_TEMPLATE, adoptedSuggestionIndex);
   }
@@ -89,7 +89,7 @@ public class TheiaHostedPluginSelectPathForm {
     seleniumWebDriverHelper.waitAndClick(By.xpath(CLOSE_ICON_XPATH));
   }
 
-  public String getDropDownTitleText() {
+  public String getTitleText() {
     return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.xpath(DROP_DOWN_TITLE_XPATH));
   }
 
@@ -97,20 +97,18 @@ public class TheiaHostedPluginSelectPathForm {
     seleniumWebDriverHelper.waitValueEqualsTo(By.xpath(DROP_DOWN_TITLE_XPATH), expectedText);
   }
 
-  private int getDropDownSuggestionsCount() {
-    return seleniumWebDriverHelper
-        .waitVisibilityOfAllElements(By.xpath(DROP_DOWN_SUGGESTIONS_XPATH))
-        .size();
+  private int getSuggestionsCount() {
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(SUGGESTIONS_XPATH)).size();
   }
 
   public List<String> getSuggestions() {
     // realized by "for" loop for avoiding the "StaleElementReferenceException".
     // in this case each element will be found before text extracting
-    final int suggestionsCount = getDropDownSuggestionsCount();
+    final int suggestionsCount = getSuggestionsCount();
     List<String> result = new ArrayList<>();
 
     for (int i = 0; i < suggestionsCount; i++) {
-      String suggestionXpath = getDropDownSuggestionXpath(i);
+      String suggestionXpath = getSuggestionXpath(i);
       String suggestionText =
           seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(suggestionXpath));
       result.add(suggestionText);
@@ -119,26 +117,26 @@ public class TheiaHostedPluginSelectPathForm {
     return result;
   }
 
-  public String getDropDownSuggestion(int suggestionIndex) {
-    final String suggestionXpath = getDropDownSuggestionXpath(suggestionIndex);
+  public String getSuggestion(int suggestionIndex) {
+    final String suggestionXpath = getSuggestionXpath(suggestionIndex);
 
     return seleniumWebDriverHelper.waitVisibilityAndGetText(By.xpath(suggestionXpath));
   }
 
-  private int getDropDownSuggestionIndex(String suggestionText) {
+  private int getSuggestionIndex(String suggestionText) {
     return getSuggestions().indexOf(suggestionText);
   }
 
-  public void clickOnDropDownSuggestion(int suggestionIndex) {
-    final String suggestionXpath = getDropDownSuggestionXpath(suggestionIndex);
+  public void clickOnSuggestion(int suggestionIndex) {
+    final String suggestionXpath = getSuggestionXpath(suggestionIndex);
 
     seleniumWebDriverHelper.waitAndClick(By.xpath(suggestionXpath));
   }
 
-  public void clickOnDropDownSuggestion(String suggestionText) {
-    final int suggestionIndex = getDropDownSuggestionIndex(suggestionText);
+  public void clickOnSuggestion(String suggestionText) {
+    final int suggestionIndex = getSuggestionIndex(suggestionText);
 
-    clickOnDropDownSuggestion(suggestionIndex);
+    clickOnSuggestion(suggestionIndex);
   }
 
   public void waitProjectsRootFolder() {
@@ -149,26 +147,26 @@ public class TheiaHostedPluginSelectPathForm {
     seleniumWebDriverHelper.moveCursorToAndDoubleClick(By.xpath(ROOT_PROJECTS_FOLDER_XPATH));
   }
 
-  public void clickOnItem(String itemPath) {
-    waitItem(itemPath).click();
+  public void clickOnProjectItem(String projectItemPath) {
+    waitProjectItem(projectItemPath).click();
   }
 
-  public WebElement waitItem(String itemPath) {
-    final String itemId = getProjectsTreeItemId(itemPath);
+  public WebElement waitProjectItem(String projectItemPath) {
+    final String projectItemId = getProjectsTreeItemId(projectItemPath);
 
-    return seleniumWebDriverHelper.waitVisibility(By.id(itemId));
+    return seleniumWebDriverHelper.waitVisibility(By.id(projectItemId));
   }
 
-  public void waitItemDisappearance(String itemPath) {
-    final String itemId = getProjectsTreeItemId(itemPath);
+  public void waitProjectItemDisappearance(String projectItemPath) {
+    final String projectItemId = getProjectsTreeItemId(projectItemPath);
 
-    seleniumWebDriverHelper.waitInvisibility(By.id(itemId));
+    seleniumWebDriverHelper.waitInvisibility(By.id(projectItemId));
   }
 
-  public void waitItemSelected(String itemPath) {
-    final String selectedItemXpath = getSelectedProjectTreeItemXpath(itemPath);
+  public void waitProjectItemSelected(String projectItemPath) {
+    final String selectedProjectItemXpath = getSelectedProjectTreeItemXpath(projectItemPath);
 
-    seleniumWebDriverHelper.waitVisibility(By.xpath(selectedItemXpath));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(selectedProjectItemXpath));
   }
 
   public void pressEnter() {

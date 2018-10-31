@@ -151,8 +151,8 @@ public class TheiaBuildPluginTest {
     WaitUtils.sleepQuietly(4);
     theiaProposalForm.clickOnProposal(suggestionForSelection);
     hostedPluginSelectPathForm.waitForm();
-    hostedPluginSelectPathForm.clickOnItem(projectName);
-    hostedPluginSelectPathForm.waitItemSelected(projectName);
+    hostedPluginSelectPathForm.clickOnProjectItem(projectName);
+    hostedPluginSelectPathForm.waitProjectItemSelected(projectName);
     hostedPluginSelectPathForm.clickOnOpenButton();
     hostedPluginSelectPathForm.waitFormClosed();
     waitNotificationEqualsTo(expectedPluginFolderMessage, parentWindow);
