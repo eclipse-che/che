@@ -35,9 +35,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.shared.RegisteredProject;
@@ -74,8 +74,7 @@ public class ProjectTreeTracker {
       HiddenItemPathMatcher hiddenItemPathMatcher,
       RootDirPathProvider rootDirPathProvider,
       ProjectManager projectManager,
-      EventService eventService,
-      HiddenItemPathMatcher hiddenItemPathMatcher) {
+      EventService eventService) {
     this.transmitter = transmitter;
     this.fileWatcherManager = fileWatcherManager;
     this.projectManager = projectManager;
@@ -191,7 +190,8 @@ public class ProjectTreeTracker {
       return;
     }
 
-    // Check if the given folder is a project.
+    // Need to distinguish project created event from empty folder created event by project check.
+    // Timer is needed for wait while the project will be initialized.
     final Timer timer = new Timer();
     timer.schedule(
         new TimerTask() {

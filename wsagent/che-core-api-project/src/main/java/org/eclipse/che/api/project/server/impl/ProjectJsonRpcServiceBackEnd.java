@@ -43,7 +43,6 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
@@ -238,7 +237,6 @@ public class ProjectJsonRpcServiceBackEnd {
 
     RegisteredProject registeredProject =
         projectManager.doImport(wsPath, sourceStorage, false, getImportConsumer(endpointId));
-    eventService.publish(new ProjectCreatedEvent(wsPath));
     ProjectConfigDto projectConfigDto = asDto(registeredProject);
     ImportResponseDto response = newDto(ImportResponseDto.class);
     response.setConfig(projectConfigDto);
@@ -262,12 +260,6 @@ public class ProjectJsonRpcServiceBackEnd {
     for (NewProjectConfigDto projectConfig : newProjectConfigs) {
       registeredProjects.add(projectManager.update(projectConfig));
     }
-
-    registeredProjects
-        .stream()
-        .map(RegisteredProject::getPath)
-        .map(ProjectCreatedEvent::new)
-        .forEach(eventService::publish);
 
     return registeredProjects.stream().map(ProjectDtoConverter::asDto).collect(toList());
   }

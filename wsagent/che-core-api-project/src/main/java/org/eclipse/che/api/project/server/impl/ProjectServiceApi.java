@@ -65,7 +65,6 @@ import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.ProjectService;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
-import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
@@ -534,7 +533,6 @@ public class ProjectServiceApi {
                     .path(ProjectService.class, "getChildren")
                     .build(new String[] {wsPath.substring(1)}, false))
             .build();
-    eventService.publish(new ProjectCreatedEvent(wsPath));
     return response;
   }
 
