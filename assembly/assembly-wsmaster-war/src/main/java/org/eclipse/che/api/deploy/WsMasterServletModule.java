@@ -12,6 +12,7 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
+import io.opentracing.contrib.web.servlet.filter.TracingFilter;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Singleton;
@@ -27,6 +28,9 @@ import org.everrest.guice.servlet.GuiceEverrestServlet;
 public class WsMasterServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
+
+    bind(TracingFilter.class).toProvider(TracingFilterProvider.class);
+
     final Map<String, String> corsFilterParams = new HashMap<>();
     corsFilterParams.put("cors.allowed.origins", "*");
     corsFilterParams.put(
@@ -44,6 +48,7 @@ public class WsMasterServletModule extends ServletModule {
     corsFilterParams.put("cors.preflight.maxage", "10");
     bind(CorsFilter.class).in(Singleton.class);
 
+    filter("/*").through(TracingFilter.class);
     filter("/*").through(CorsFilter.class, corsFilterParams);
     filter("/*").through(RequestIdLoggerFilter.class);
 

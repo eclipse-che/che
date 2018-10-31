@@ -375,6 +375,14 @@ if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
 fi
 }
 
+deployJaeger(){
+  echo "Deploying Jaeger..."
+  ${OC_BINARY} new-app -f ${BASE_DIR}/templates/jaeger-all-in-one-template.yml
+  JAEGER_ROUTE=$($OC_BINARY get route/jaeger-query --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+  echo "Jaeger deployment complete. $JAEGER_ROUTE"
+
+}
+
 
 deployChe() {
     CHE_VAR_ARRAY=$(env | grep "^CHE_.")
@@ -503,4 +511,5 @@ isLoggedIn
 createNewProject
 getRoutingSuffix
 deployChePluginRegistry
+deployJaeger
 deployChe
