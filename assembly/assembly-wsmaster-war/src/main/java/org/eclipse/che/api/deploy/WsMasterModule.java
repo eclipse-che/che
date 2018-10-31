@@ -21,6 +21,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import io.opentracing.Tracer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -119,6 +120,9 @@ public class WsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
     install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
     install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
+
+    // tracing
+    bind(Tracer.class).toProvider(TracerProvider.class);
 
     // db configuration
     bind(SchemaInitializer.class)

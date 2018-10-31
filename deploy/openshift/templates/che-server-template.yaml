@@ -74,6 +74,18 @@ objects:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: JAEGER_SERVICE_NAME
+            value: "che"
+          - name: JAEGER_AGENT_HOST
+            value: "jaeger-agent"
+          - name: JAEGER_SAMPLER_TYPE
+            value: "const"
+          - name: JAEGER_SAMPLER_PARAM
+            value: "1"
+          - name: JAEGER_REPORTER_MAX_QUEUE_SIZE
+            value: "10000"
+          - name: JAEGER_SAMPLER_MANAGER_HOST_PORT
+            value: "jaeger:5778"
           - name: CHE_MULTIUSER
             value: "${CHE_MULTIUSER}"
           - name: CHE_WORKSPACE_HTTP__PROXY

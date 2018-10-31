@@ -29,7 +29,7 @@ public class WsMasterServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
 
-    bind(TracingFilter.class).toProvider(TracingFilterProvider.class);
+    bind(TracingFilter.class).toProvider(TracingFilterProvider.class).in(Singleton.class);
 
     final Map<String, String> corsFilterParams = new HashMap<>();
     corsFilterParams.put("cors.allowed.origins", "*");
