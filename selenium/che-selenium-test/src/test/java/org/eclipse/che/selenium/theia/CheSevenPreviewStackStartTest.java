@@ -16,21 +16,12 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.eclipse.che.selenium.pageobject.theia.TheiaEditor;
-import org.eclipse.che.selenium.pageobject.theia.TheiaHostedPluginSelectPathForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
-import org.eclipse.che.selenium.pageobject.theia.TheiaNewFileDialog;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
-import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
-import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
@@ -38,20 +29,11 @@ public class CheSevenPreviewStackStartTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
 
   @Inject private Dashboard dashboard;
-  @Inject private NewWorkspace newWorkspace;
-  @Inject private Workspaces workspaces;
   @Inject private TheiaIde theiaIde;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TheiaTerminal theiaTerminal;
   @Inject private TheiaProjectTree theiaProjectTree;
-  @Inject private TheiaEditor theiaEditor;
-  @Inject private TheiaNewFileDialog theiaNewFileDialog;
-  @Inject private TheiaHostedPluginSelectPathForm hostedPluginSelectPathForm;
-  @Inject private TheiaProposalForm theiaProposalForm;
 
   @AfterClass
   public void tearDown() throws Exception {
