@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSALS_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_DESCRIPTION_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm.Locators.PROPOSAL_KEY_BINDING_XPATH_TEMPLATE;
@@ -77,6 +78,8 @@ public class TheiaProposalForm {
   }
 
   public void enterTextToSearchField(String text) {
+    clearSearchFieldByPressingBackspace();
+
     seleniumWebDriverHelper.setValue(By.xpath(SEARCH_FIELD_XPATH), text);
   }
 
@@ -213,5 +216,22 @@ public class TheiaProposalForm {
 
   public void pressArrowDown() {
     seleniumWebDriverHelper.pressArrowDown();
+  }
+
+  public String getSearchFieldText() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetValue(By.xpath(SEARCH_FIELD_XPATH));
+  }
+
+  public void clearSearchFieldByPressingBackspace() {
+    final int symbolsCount = getSearchFieldText().length();
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> {
+          for (int i = 0; i < symbolsCount; i++) {
+            seleniumWebDriverHelper.pressBackspace();
+          }
+        },
+        ELEMENT_TIMEOUT_SEC,
+        StaleElementReferenceException.class);
   }
 }
