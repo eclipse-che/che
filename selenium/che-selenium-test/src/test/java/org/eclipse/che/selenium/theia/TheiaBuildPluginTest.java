@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -35,6 +36,7 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -115,7 +117,12 @@ public class TheiaBuildPluginTest {
     theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
     theiaTerminal.waitTabSelected(wsTheiaIdeTerminalTitle);
     theiaTerminal.performCommand("yarn");
-    theiaTerminal.waitTerminalOutput(expectedTerminalSuccessOutput, 0);
+    try {
+      theiaTerminal.waitTerminalOutput(expectedTerminalSuccessOutput, 0);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11624", ex);
+    }
   }
 
   @Test(priority = 1)
@@ -143,12 +150,9 @@ public class TheiaBuildPluginTest {
     theiaProjectTree.waitItem(projectName);
     theiaProjectTree.clickOnItem(projectName);
     theiaProjectTree.waitItemSelected(projectName);
-    WaitUtils.sleepQuietly(2);
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitForm();
-    WaitUtils.sleepQuietly(4);
     theiaProposalForm.enterTextToSearchField(hostedSearchSequence);
-    WaitUtils.sleepQuietly(4);
     theiaProposalForm.clickOnProposal(suggestionForSelection);
     hostedPluginSelectPathForm.waitForm();
     hostedPluginSelectPathForm.clickOnProjectItem(projectName);
