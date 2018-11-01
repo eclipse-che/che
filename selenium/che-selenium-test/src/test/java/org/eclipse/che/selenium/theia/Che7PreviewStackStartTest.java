@@ -25,7 +25,7 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
 
-public class CheSevenPreviewStackStartTest {
+public class Che7PreviewStackStartTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
 
   @Inject private Dashboard dashboard;
