@@ -50,7 +50,7 @@ public class WaitBrokerResult extends BrokerPhase {
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     try {
-      LOG.debug("Trying to get brokers result for ws '{}'", workspaceId);
+      LOG.debug("Trying to get brokers result for workspace '{}'", workspaceId);
       return brokersResult.get(resultWaitingTimeout, TimeUnit.MINUTES);
     } catch (InterruptedException e) {
       throw new InfrastructureException(
