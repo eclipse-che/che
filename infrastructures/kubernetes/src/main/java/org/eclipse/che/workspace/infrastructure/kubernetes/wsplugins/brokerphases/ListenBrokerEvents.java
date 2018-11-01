@@ -56,7 +56,7 @@ public class ListenBrokerEvents extends BrokerPhase {
     BrokerStatusListener brokerStatusListener =
         new BrokerStatusListener(workspaceId, pluginsValidator, brokersResult);
     try {
-      LOG.debug("Subscribing broker events listener for workspace {}", workspaceId);
+      LOG.debug("Subscribing broker events listener for workspace '{}'", workspaceId);
       eventService.subscribe(brokerStatusListener, BrokerEvent.class);
 
       return nextPhase.execute();

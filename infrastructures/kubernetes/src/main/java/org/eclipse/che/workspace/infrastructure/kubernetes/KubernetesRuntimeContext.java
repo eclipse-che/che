@@ -79,7 +79,12 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
 
     // there is cached runtime, restore cached one
     KubernetesRuntimeState runtimeState = runtimeStateOpt.get();
-    LOG.debug("Restoring runtime {} in workspace {}", runtimeState.getRuntimeId(), workspaceId);
+    RuntimeIdentity runtimeId = runtimeState.getRuntimeId();
+    LOG.debug(
+        "Restoring runtime `{}:{}:{}`",
+        runtimeId.getWorkspaceId(),
+        runtimeId.getEnvName(),
+        runtimeId.getOwnerId());
     KubernetesInternalRuntime runtime =
         runtimeFactory.create(
             this,

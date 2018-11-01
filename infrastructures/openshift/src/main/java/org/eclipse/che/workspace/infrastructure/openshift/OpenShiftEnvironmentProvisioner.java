@@ -100,7 +100,7 @@ public class OpenShiftEnvironmentProvisioner
       throws InfrastructureException {
 
     LOG.debug(
-        "Start provisioning OpenShift environment for workspace {}", identity.getWorkspaceId());
+        "Start provisioning OpenShift environment for workspace '{}'", identity.getWorkspaceId());
     // 1 stage - update environment according Infrastructure specific
     installerServersPortProvisioner.provision(osEnv, identity);
     if (pvcEnabled) {
@@ -124,6 +124,6 @@ public class OpenShiftEnvironmentProvisioner
     proxySettingsProvisioner.provision(osEnv, identity);
     serviceAccountProvisioner.provision(osEnv, identity);
     LOG.debug(
-        "Provisioning OpenShift environment done for workspace {}", identity.getWorkspaceId());
+        "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }
 }

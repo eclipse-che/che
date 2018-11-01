@@ -46,7 +46,7 @@ public class ProjectsVolumeForWsAgentProvisioner implements InternalEnvironmentP
   @Override
   public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
-    LOG.debug("Provisioning project volumes for ws {}", id.getWorkspaceId());
+    LOG.debug("Provisioning project volumes for ws '{}'", id.getWorkspaceId());
     Optional<String> wsAgentServerMachine =
         WsAgentMachineFinderUtil.getWsAgentServerMachine(internalEnvironment);
 

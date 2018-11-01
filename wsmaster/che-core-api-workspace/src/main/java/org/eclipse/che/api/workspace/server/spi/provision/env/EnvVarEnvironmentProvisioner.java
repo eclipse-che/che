@@ -41,7 +41,7 @@ public class EnvVarEnvironmentProvisioner implements InternalEnvironmentProvisio
   @Override
   public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
-    LOG.debug("Provisioning environment variables for ws {}", id.getWorkspaceId());
+    LOG.debug("Provisioning environment variables for ws '{}'", id.getWorkspaceId());
     for (EnvVarProvider envVarProvider : envVarProviders) {
       Pair<String, String> envVar = envVarProvider.get(id);
       internalEnvironment
@@ -49,6 +49,6 @@ public class EnvVarEnvironmentProvisioner implements InternalEnvironmentProvisio
           .values()
           .forEach(m -> m.getEnv().putIfAbsent(envVar.first, envVar.second));
     }
-    LOG.debug("Environment variables provisioning done wor ws {}", id.getWorkspaceId());
+    LOG.debug("Environment variables provisioning done wor ws '{}'", id.getWorkspaceId());
   }
 }

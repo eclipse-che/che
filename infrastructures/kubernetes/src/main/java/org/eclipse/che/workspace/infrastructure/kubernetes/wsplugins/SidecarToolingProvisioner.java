@@ -58,7 +58,7 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
     if (pluginsMeta.isEmpty()) {
       return;
     }
-    LOG.debug("Started sidecar tooling provisioning workspace {}", id.getWorkspaceId());
+    LOG.debug("Started sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
     String recipeType = environment.getType();
     ChePluginsApplier pluginsApplier = workspaceNextAppliers.get(recipeType);
     if (pluginsApplier == null) {
@@ -69,6 +69,6 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
     List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta);
 
     pluginsApplier.apply(environment, chePlugins);
-    LOG.debug("Finished sidecar tooling provisioning workspace {}", id.getWorkspaceId());
+    LOG.debug("Finished sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
   }
 }

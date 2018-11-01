@@ -96,7 +96,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
-    LOG.debug("Provisioning PVC strategy for workspace {}", workspaceId);
+    LOG.debug("Provisioning PVC strategy for workspace '{}'", workspaceId);
     final Map<String, PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims();
     // fetches all existing PVCs related to given workspace and groups them by volume name
     final Map<String, PersistentVolumeClaim> volumeName2PVC =
@@ -113,7 +113,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
         addMachineVolumes(workspaceId, claims, volumeName2PVC, pod, container, volumes);
       }
     }
-    LOG.debug("PVC strategy provisioning done for workspace {}", workspaceId);
+    LOG.debug("PVC strategy provisioning done for workspace '{}'", workspaceId);
   }
 
   @Override
@@ -123,13 +123,13 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       return;
     }
     if (!k8sEnv.getPersistentVolumeClaims().isEmpty()) {
-      LOG.debug("Preparing PVC started for workspace {}", workspaceId);
+      LOG.debug("Preparing PVC started for workspace '{}'", workspaceId);
       final KubernetesPersistentVolumeClaims k8sClaims =
           factory.create(workspaceId).persistentVolumeClaims();
       for (PersistentVolumeClaim pvc : k8sEnv.getPersistentVolumeClaims().values()) {
         k8sClaims.create(pvc);
       }
-      LOG.debug("Preparing PVC done for workspace {}", workspaceId);
+      LOG.debug("Preparing PVC done for workspace '{}'", workspaceId);
     }
   }
 

@@ -99,7 +99,7 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
     for (InstallerImpl installer : installers) {
       for (Map.Entry<String, ? extends ServerConfig> serverEntry :
           installer.getServers().entrySet()) {
-        LOG.debug("Provisioning installer config for ws {} and installer {}", workspaceId,
+        LOG.debug("Provisioning installer config for ws '{}' and installer '{}'", workspaceId,
             installer.getId());
         if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
             && !servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {

@@ -33,7 +33,7 @@ public class MachineNameProvisioner implements InternalEnvironmentProvisioner {
   @Override
   public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
-    LOG.debug("Provisioning machine names for ws {}", id.getWorkspaceId());
+    LOG.debug("Provisioning machine names for ws '{}'", id.getWorkspaceId());
     for (Entry<String, InternalMachineConfig> machineEntry :
         internalEnvironment.getMachines().entrySet()) {
       machineEntry.getValue().getEnv().put(CHE_MACHINE_NAME_ENV_VAR, machineEntry.getKey());

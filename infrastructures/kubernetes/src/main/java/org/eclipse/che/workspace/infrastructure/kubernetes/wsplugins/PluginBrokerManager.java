@@ -100,7 +100,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     DeployBroker deployBroker =
         getDeployBrokerPhase(
             runtimeID.getWorkspaceId(), kubernetesNamespace, brokerEnvironment, brokersResult);
-    LOG.debug("Entering plugin brokers deployment chain workspace {}", workspaceId);
+    LOG.debug("Entering plugin brokers deployment chain workspace '{}'", workspaceId);
     listenBrokerEvents.then(prepareStorage).then(deployBroker).then(waitBrokerResult);
     return listenBrokerEvents.execute();
   }

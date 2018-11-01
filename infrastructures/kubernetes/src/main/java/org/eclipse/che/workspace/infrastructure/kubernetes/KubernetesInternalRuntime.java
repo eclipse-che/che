@@ -180,7 +180,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // from previous provisioners into infrastructure specific objects
       kubernetesEnvironmentProvisioner.provision(context.getEnvironment(), context.getIdentity());
 
-      LOG.debug("Provisioning of workspace {} completed.", workspaceId);
+      LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
 
       volumesStrategy.prepare(context.getEnvironment(), workspaceId);
 
@@ -312,7 +312,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       throws InfrastructureException {
     try {
       LOG.debug(
-          "Waiting to start machines of workspace {}", getContext().getIdentity().getWorkspaceId());
+          "Waiting to start machines of workspace '{}'",
+          getContext().getIdentity().getWorkspaceId());
       final CompletableFuture<Void> allDone =
           CompletableFuture.allOf(
               machinesFutures.toArray(new CompletableFuture[machinesFutures.size()]));
@@ -324,7 +325,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         // rethrow the failure cause
         failure.get();
       }
-      LOG.debug("Machines of workspace {} started", getContext().getIdentity().getWorkspaceId());
+      LOG.debug("Machines of workspace '{}' started", getContext().getIdentity().getWorkspaceId());
     } catch (TimeoutException ex) {
       InfrastructureException ie =
           new InfrastructureException(
@@ -364,7 +365,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           serverCheckerFactory.create(runtimeId, machineName, machine.getServers());
       final CompletableFuture<?> serversReadyFuture;
       LOG.debug(
-          "Performing servers check for machine {} in workspace {}",
+          "Performing servers check for machine '{}' in workspace '{}'",
           machineName,
           runtimeId.getWorkspaceId());
       try {
@@ -373,7 +374,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         serversAndProbesFuture.whenComplete(
             (ok, ex) -> {
               LOG.debug(
-                  "Servers checks done for machine {} in workspace {}",
+                  "Servers checks done for machine '{}' in workspace '{}'",
                   machineName,
                   runtimeId.getWorkspaceId());
               serversReadyFuture.cancel(true);
@@ -414,7 +415,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final InternalMachineConfig machineConfig =
           getContext().getEnvironment().getMachines().get(machine.getName());
       LOG.debug(
-          "Bootstrapping machine {} in workspace {}",
+          "Bootstrapping machine '{}' in workspace '{}'",
           machine.getName(),
           getContext().getIdentity().getWorkspaceId());
       final CompletableFuture<Void> bootstrapperFuture;
@@ -599,14 +600,15 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
-    LOG.debug("Begin pods creation for workspace {}", workspaceId);
+    LOG.debug("Begin pods creation for workspace '{}'", workspaceId);
     for (Pod toCreate : environment.getPods().values()) {
       final Pod createdPod = namespace.deployments().deploy(toCreate);
-      LOG.debug("Creating pod {} in workspace {}", toCreate.getMetadata().getName(), workspaceId);
+      LOG.debug(
+          "Creating pod '{}' in workspace '{}'", toCreate.getMetadata().getName(), workspaceId);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
         String machineName = Names.machineName(toCreate, container);
-        LOG.debug("Creating machine {} in workspace {}", machineName, workspaceId);
+        LOG.debug("Creating machine '{}' in workspace '{}'", machineName, workspaceId);
         machines.put(
             getContext().getIdentity(),
             new KubernetesMachineImpl(
@@ -620,7 +622,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         eventPublisher.sendStartingEvent(machineName, getContext().getIdentity());
       }
     }
-    LOG.debug("Pods creation finished in in ws {}", workspaceId);
+    LOG.debug("Pods creation finished in workspace '{}'", workspaceId);
   }
 
   @Override
@@ -673,7 +675,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       createdIngresses.add(namespace.ingresses().create(ingress));
     }
     LOG.debug(
-        "Ingresses created for workspace {}. Wait them to be ready.",
+        "Ingresses created for workspace '{}'. Wait them to be ready.",
         getContext().getIdentity().getWorkspaceId());
 
     // wait for LB ip
@@ -691,7 +693,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       readyIngresses.add(actualIngress);
     }
     LOG.debug(
-        "Ingresses creation for workspace {} done.", getContext().getIdentity().getWorkspaceId());
+        "Ingresses creation for workspace '{}' done.", getContext().getIdentity().getWorkspaceId());
     return readyIngresses;
   }
 
