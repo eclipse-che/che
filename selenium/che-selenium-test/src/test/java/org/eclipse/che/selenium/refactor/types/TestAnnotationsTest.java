@@ -36,6 +36,7 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -99,7 +100,7 @@ public class TestAnnotationsTest {
 
     try {
       editor.waitTextIntoEditor(contentFromInB);
-    } catch (AssertionError ex) {
+    } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known random failure https://github.com/eclipse/che/issues/11779");
     }

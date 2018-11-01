@@ -12,17 +12,17 @@
 package org.eclipse.che.selenium.pageobject.debug;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.debug.AbstractDebugConfig.Locators.DEBUG_CONFIGURATION_WIDGET_ID;
 
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * @author Dmytro Nochevnov
@@ -30,11 +30,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  */
 @Singleton
 public abstract class AbstractDebugConfig {
+  private SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   protected final SeleniumWebDriver seleniumWebDriver;
 
-  public AbstractDebugConfig(SeleniumWebDriver seleniumWebDriver) {
+  public AbstractDebugConfig(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
+    this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -53,9 +56,11 @@ public abstract class AbstractDebugConfig {
     String REMOVE_CONFIG_BUTTON_XPATH_TEMPLATE = CONFIG_ITEM_XPATH_TEMPLATE + "/span/span[1]";
 
     String DELETE_CONFIGURATION_DIALOG_TITLE_XPATH = "//div[text()='Delete Configuration']";
+
+    String DEBUG_BUTTON_ID = "window-edit-debug-configurations-debug";
   }
 
-  @FindBy(id = Locators.DEBUG_CONFIGURATION_WIDGET_ID)
+  @FindBy(id = DEBUG_CONFIGURATION_WIDGET_ID)
   WebElement debugConfigurationsView;
 
   @FindBy(xpath = Locators.NAME_OF_DEBUG_CONFIG_FIELD_XPATH)
@@ -63,6 +68,9 @@ public abstract class AbstractDebugConfig {
 
   @FindBy(id = Locators.DEBUG_CONFIG_CLOSE_BTN_XPATH)
   WebElement configCloseBtn;
+
+  @FindBy(id = Locators.DEBUG_BUTTON_ID)
+  WebElement debugButton;
 
   @FindBy(xpath = Locators.DEBUG_CONFIG_SAVE_BTN_XPATH)
   WebElement configSaveBtn;
@@ -72,16 +80,13 @@ public abstract class AbstractDebugConfig {
 
   /** Wait opening of the Debug configuration widget */
   public void waitDebugConfigurationIsOpened() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(debugConfigurationsView));
+    seleniumWebDriverHelper.waitVisibility(debugConfigurationsView, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /** Wait closing of the Debug configuration widget */
   public void waitDebugConfigurationIsClosed() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(
-            ExpectedConditions.invisibilityOfElementLocated(
-                By.id(Locators.DEBUG_CONFIGURATION_WIDGET_ID)));
+    seleniumWebDriverHelper.waitInvisibility(
+        By.id(DEBUG_CONFIGURATION_WIDGET_ID), REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
   /**
@@ -91,29 +96,14 @@ public abstract class AbstractDebugConfig {
    */
   public void removeConfig(String configName) {
     String configItemXpath = String.format(Locators.CONFIG_ITEM_XPATH_TEMPLATE, configName);
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(configItemXpath)))
-        .click();
-
+    seleniumWebDriverHelper.waitAndClick(By.xpath(configItemXpath));
     String removeConfigButtonXpath =
         String.format(Locators.REMOVE_CONFIG_BUTTON_XPATH_TEMPLATE, configName);
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.xpath(removeConfigButtonXpath)))
-        .click();
-
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(deleteConfigurationDialogTitle));
-
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOfElementLocated(By.id(AskDialog.OK_BTN_ID)))
-        .click();
-
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.id(AskDialog.OK_BTN_ID)));
-
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.invisibilityOfElementLocated(By.xpath(configItemXpath)));
-
+    seleniumWebDriverHelper.waitAndClick(By.xpath(removeConfigButtonXpath));
+    seleniumWebDriverHelper.waitVisibility(deleteConfigurationDialogTitle);
+    seleniumWebDriverHelper.waitAndClick(By.id(AskDialog.OK_BTN_ID));
+    seleniumWebDriverHelper.waitInvisibility(By.id(AskDialog.OK_BTN_ID));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(configItemXpath));
     close();
   }
 
@@ -137,20 +127,26 @@ public abstract class AbstractDebugConfig {
   void createConfigWithoutClosingDialog(String configName) {
     waitDebugConfigurationIsOpened();
     expandDebugCategory();
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(nameFieldOfDebugConf));
+    seleniumWebDriverHelper.waitVisibility(nameFieldOfDebugConf);
     nameFieldOfDebugConf.clear();
     nameFieldOfDebugConf.sendKeys(configName);
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(ExpectedConditions.visibilityOf(configSaveBtn))
-        .click();
+    clickOnSaveBtn();
   }
 
   /** Expand the debugger type icon '+' */
-  abstract void expandDebugCategory();
+  public abstract void expandDebugCategory();
 
-  void close() {
-    configCloseBtn.click();
+  protected void clickOnSaveBtn() {
+    seleniumWebDriverHelper.waitAndClick(configSaveBtn);
+  }
+
+  protected void close() {
+    seleniumWebDriverHelper.waitAndClick(configCloseBtn);
+    waitDebugConfigurationIsClosed();
+  }
+
+  protected void clickOnDebugAndWaitClosing() {
+    seleniumWebDriverHelper.waitAndClick(debugButton);
     waitDebugConfigurationIsClosed();
   }
 }

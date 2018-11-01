@@ -29,11 +29,14 @@ import org.eclipse.che.selenium.core.action.GenericActionsFactory;
 import org.eclipse.che.selenium.core.action.MacOSActionsFactory;
 import org.eclipse.che.selenium.core.client.CheTestUserServiceClient;
 import org.eclipse.che.selenium.core.client.CheTestWorkspaceServiceClient;
+import org.eclipse.che.selenium.core.client.TestAuthServiceClient;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserServiceClient;
 import org.eclipse.che.selenium.core.client.TestUserServiceClientFactory;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClientFactory;
+import org.eclipse.che.selenium.core.client.keycloak.KeycloakTestAuthServiceClient;
+import org.eclipse.che.selenium.core.client.keycloak.OsioKeycloakTestAuthServiceClient;
 import org.eclipse.che.selenium.core.configuration.SeleniumTestConfiguration;
 import org.eclipse.che.selenium.core.configuration.TestConfiguration;
 import org.eclipse.che.selenium.core.constant.Infrastructure;
@@ -41,13 +44,11 @@ import org.eclipse.che.selenium.core.pageobject.PageObjectsInjector;
 import org.eclipse.che.selenium.core.provider.CheTestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestIdeUrlProvider;
-import org.eclipse.che.selenium.core.provider.CheTestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.CheTestWorkspaceAgentApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.DefaultTestUserProvider;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestDashboardUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestIdeUrlProvider;
-import org.eclipse.che.selenium.core.provider.TestOfflineToAccessTokenExchangeApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.provider.TestWorkspaceAgentApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.CheTestDefaultHttpJsonRequestFactory;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactory;
@@ -99,8 +100,6 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     bind(TestApiEndpointUrlProvider.class).to(CheTestApiEndpointUrlProvider.class);
     bind(TestIdeUrlProvider.class).to(CheTestIdeUrlProvider.class);
     bind(TestDashboardUrlProvider.class).to(CheTestDashboardUrlProvider.class);
-    bind(TestOfflineToAccessTokenExchangeApiEndpointUrlProvider.class)
-        .to(CheTestOfflineToAccessTokenExchangeApiEndpointUrlProvider.class);
     bind(TestWorkspaceAgentApiEndpointUrlProvider.class)
         .to(CheTestWorkspaceAgentApiEndpointUrlProvider.class);
 
@@ -120,13 +119,14 @@ public class CheSeleniumSuiteModule extends AbstractModule {
 
     bind(PageObjectsInjector.class).to(PageObjectsInjectorImpl.class);
 
+    configureInfrastructureRelatedDependencies(config);
+
     if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
       install(new CheSeleniumMultiUserModule());
     } else {
       install(new CheSeleniumSingleUserModule());
     }
 
-    configureInfrastructureRelatedDependencies(config);
     configureTestExecutionModeRelatedDependencies();
   }
 
@@ -136,11 +136,26 @@ public class CheSeleniumSuiteModule extends AbstractModule {
     switch (cheInfrastructure) {
       case OPENSHIFT:
       case K8S:
+        if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
+          bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
+        }
+
+        install(new CheSeleniumOpenShiftModule());
+        break;
+
       case OSIO:
-        install(new CheSeleniumOpenshiftModule());
+        if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
+          bind(TestAuthServiceClient.class).to(OsioKeycloakTestAuthServiceClient.class);
+        }
+
+        install(new CheSeleniumOpenShiftModule());
         break;
 
       case DOCKER:
+        if (config.getBoolean(CHE_MULTIUSER_VARIABLE)) {
+          bind(TestAuthServiceClient.class).to(KeycloakTestAuthServiceClient.class);
+        }
+
         install(new CheSeleniumDockerModule());
         break;
 
