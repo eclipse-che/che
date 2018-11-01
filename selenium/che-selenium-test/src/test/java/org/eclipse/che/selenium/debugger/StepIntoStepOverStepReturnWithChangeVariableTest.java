@@ -182,7 +182,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
   }
 
   // @Test(priority = 1)
-  private void shouldOpenDebuggingFile() {
+  public void shouldOpenDebuggingFile() {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(START_DEBUG);
