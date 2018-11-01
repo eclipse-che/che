@@ -45,6 +45,8 @@ objects:
             value: "pgchepassword"
           - name: "CHE_POSTGRES_DATABASE"
             value: "dbche"
+          - name: "POSTGRESQL_LOG_DEBUG"
+            value: "${POSTGRESQL_LOG_DEBUG}"
           image: '${IMAGE_POSTGRES}:${CHE_VERSION}'
           imagePullPolicy: Always
           name: postgres
@@ -112,6 +114,10 @@ parameters:
   displayName: Postgres DB Image
   description: Postgres DB Image. Defaults to docker.io/eclipse/che-postgres
   value: docker.io/eclipse/che-postgres
+- name: POSTGRESQL_LOG_DEBUG
+  displayName: Postgres DB debug
+  description: Enable Postgres DB debug log mode
+  value: "false"
 labels:
   app: postgres
   template: postgres

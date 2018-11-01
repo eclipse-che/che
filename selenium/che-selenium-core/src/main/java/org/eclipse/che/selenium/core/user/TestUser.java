@@ -28,9 +28,6 @@ public interface TestUser {
   /** Re-login to product to obtain authentication token of the user. */
   String obtainAuthToken();
 
-  /** Return user's offline token. */
-  String getOfflineToken();
-
   /** Return user's name. */
   String getName();
 
