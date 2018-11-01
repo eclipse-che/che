@@ -22,6 +22,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_WILDFLY_SWARM;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CEYLON_WITH_JAVA_JAVASCRIPT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW_DEV;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
@@ -83,6 +84,7 @@ public class NewWorkspacePageTest {
           ANDROID,
           CPP,
           CHE_7_PREVIEW,
+          CHE_7_PREVIEW_DEV,
           ECLIPSE_CHE,
           GO,
           JAVA_THEIA_ON_KUBERNETES,
@@ -100,6 +102,7 @@ public class NewWorkspacePageTest {
           ANDROID,
           CPP,
           CHE_7_PREVIEW,
+          CHE_7_PREVIEW_DEV,
           ECLIPSE_CHE,
           GO,
           JAVA_THEIA_ON_KUBERNETES,
@@ -138,6 +141,7 @@ public class NewWorkspacePageTest {
           CENTOS_WILDFLY_SWARM,
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
+          CHE_7_PREVIEW_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
@@ -163,6 +167,7 @@ public class NewWorkspacePageTest {
           CENTOS_WILDFLY_SWARM,
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
+          CHE_7_PREVIEW_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
@@ -188,6 +193,7 @@ public class NewWorkspacePageTest {
           CENTOS_WILDFLY_SWARM,
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
+          CHE_7_PREVIEW_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
@@ -236,6 +242,7 @@ public class NewWorkspacePageTest {
               JAVA_THEIA_ON_KUBERNETES,
               GO,
               ECLIPSE_CHE,
+              CHE_7_PREVIEW_DEV,
               CHE_7_PREVIEW,
               CPP,
               ANDROID,
@@ -252,6 +259,7 @@ public class NewWorkspacePageTest {
           JAVA_THEIA_ON_KUBERNETES,
           GO,
           ECLIPSE_CHE,
+          CHE_7_PREVIEW_DEV,
           CHE_7_PREVIEW,
           CPP,
           ANDROID,
