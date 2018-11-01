@@ -230,7 +230,14 @@ public class GitCompareTest {
     git.setFocusOnLeftGitCompareEditor();
     git.setCursorToLine(2, LEFT_COMPARE_ST);
     git.typeTextIntoGitCompareEditor("//change content from compare editor");
-    git.waitExpTextIntoCompareLeftEditor("//change content from compare editor");
+
+    try {
+      git.waitExpTextIntoCompareLeftEditor("//change content from compare editor");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11791");
+    }
+
     git.clickOnGitCompareCloseButton();
 
     try {
