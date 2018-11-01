@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRA
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -31,8 +32,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class CppDebugConfig extends AbstractDebugConfig {
 
   @Inject
-  public CppDebugConfig(SeleniumWebDriver seleniumWebDriver) {
-    super(seleniumWebDriver);
+  public CppDebugConfig(
+      SeleniumWebDriver seleniumWebDriver, SeleniumWebDriverHelper seleniumWebDriverHelper) {
+    super(seleniumWebDriver, seleniumWebDriverHelper);
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -75,7 +77,7 @@ public class CppDebugConfig extends AbstractDebugConfig {
   }
 
   @Override
-  void expandDebugCategory() {
+  public void expandDebugCategory() {
     new WebDriverWait(seleniumWebDriver, ATTACHING_ELEM_TO_DOM_SEC)
         .until(ExpectedConditions.visibilityOf(debugCategoryExpandIcon))
         .click();
