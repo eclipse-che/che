@@ -18,22 +18,19 @@ import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev on 10.02.16 */
 @Singleton
 public class GitCompare {
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
+  private final CodenvyEditor codenvyEditor;
   private final ActionsFactory actionsFactory;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
@@ -41,10 +38,12 @@ public class GitCompare {
   public GitCompare(
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
+      CodenvyEditor codenvyEditor,
       ActionsFactory actionsFactory,
       SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
+    this.codenvyEditor = codenvyEditor;
     this.actionsFactory = actionsFactory;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
     PageFactory.initElements(seleniumWebDriver, this);
@@ -192,16 +191,7 @@ public class GitCompare {
    * @param status is expected line and column position
    */
   public void setCursorToLine(int positionLine, String status) {
-    loader.waitOnClosed();
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.CONTROL).sendKeys("l").perform();
-    Alert alert =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(ExpectedConditions.alertIsPresent());
-    seleniumWebDriver.switchTo().alert();
-    alert.sendKeys(String.valueOf(positionLine));
-    alert.accept();
-    action.keyUp(Keys.CONTROL).perform();
+    codenvyEditor.goToLine(positionLine);
     waitLineAndColumnInLeftCompare(status);
   }
 
