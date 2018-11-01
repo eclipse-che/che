@@ -199,10 +199,6 @@ public class ExecuteCommandActionManager {
 
       if (goalPopUpGroup != null) {
         goalPopUpGroup.remove(commandAction);
-
-        if (goalPopUpGroup.getChildrenCount() == 0) {
-          removeAction(goalPopUpGroup);
-        }
       }
     }
   }
