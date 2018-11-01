@@ -12,7 +12,12 @@
 package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_CLOSE_BUTTON;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE;
+import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE;
+import static org.openqa.selenium.Keys.chord;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -47,6 +52,12 @@ public class TheiaIde {
     String ABOUT_DIALOG_TITLE_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogTitle']";
     String ABOUT_DIALOG_CONTENT_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogContent']";
     String ABOUT_DIALOG_OK_BUTTON_XPATH = ABOUT_DIALOG_XPATH + "//button";
+    String NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE =
+        "//div[@class='theia-NotificationsContainer']//p[text()='%s']";
+    String NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE =
+        "//div[@class='theia-NotificationsContainer']//p[contains(text(), '%s')]";
+    String NOTIFICATION_CLOSE_BUTTON =
+        "//div[@class='theia-NotificationsContainer']//button[text()='Close']";
   }
 
   @FindBy(id = Locators.THEIA_IDE_ID)
@@ -69,6 +80,48 @@ public class TheiaIde {
 
   @FindBy(xpath = Locators.ABOUT_DIALOG_OK_BUTTON_XPATH)
   WebElement aboutDialogOkButton;
+
+  private String getNotificationEqualsToXpath(String messageText) {
+    return format(NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE, messageText);
+  }
+
+  private String getNotificationContainsXpath(String messageText) {
+    return format(NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE, messageText);
+  }
+
+  public void clickOnNotificationCloseButton() {
+    seleniumWebDriverHelper.waitAndClick(By.xpath(NOTIFICATION_CLOSE_BUTTON));
+  }
+
+  public void waitNotificationEqualsTo(String expectedText) {
+    final String notificationXpath = getNotificationEqualsToXpath(expectedText);
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(notificationXpath));
+  }
+
+  public boolean isNotificationEqualsTo(String notificationText) {
+    final String notificationXpath = getNotificationEqualsToXpath(notificationText);
+
+    return seleniumWebDriverHelper.isVisible(By.xpath(notificationXpath));
+  }
+
+  public boolean isNotificationContains(String notificationText) {
+    final String notificationXpath = getNotificationContainsXpath(notificationText);
+
+    return seleniumWebDriverHelper.isVisible(By.xpath(notificationXpath));
+  }
+
+  public void waitNotificationMessageContains(String expectedText) {
+    final String notificationMessage = getNotificationContainsXpath(expectedText);
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(notificationMessage));
+  }
+
+  public void waitNotificationDisappearance(String notificationText) {
+    final String notificationMessage = getNotificationContainsXpath(notificationText);
+
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(notificationMessage));
+  }
 
   public void waitTheiaIde() {
     seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
@@ -123,6 +176,12 @@ public class TheiaIde {
   public void switchToIdeFrame() {
     seleniumWebDriverHelper.waitAndSwitchToFrame(
         By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+  }
+
+  public void pressKeyCombination(CharSequence... combination) {
+    final String keyCombination = chord(asList(combination));
+
+    seleniumWebDriverHelper.sendKeys(keyCombination);
   }
 
   @PreDestroy

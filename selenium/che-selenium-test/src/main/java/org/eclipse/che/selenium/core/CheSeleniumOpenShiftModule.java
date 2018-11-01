@@ -17,8 +17,7 @@ import org.eclipse.che.selenium.core.client.keycloak.cli.OpenShiftKeycloakCliCom
 import org.eclipse.che.selenium.core.workspace.CheTestOpenshiftWorkspaceLogsReader;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceLogsReader;
 
-/** @author Dmytro Nochevnov */
-public class CheSeleniumOpenshiftModule extends AbstractModule {
+public class CheSeleniumOpenShiftModule extends AbstractModule {
 
   @Override
   protected void configure() {

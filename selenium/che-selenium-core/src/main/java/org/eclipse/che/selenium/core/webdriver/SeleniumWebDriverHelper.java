@@ -19,8 +19,12 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.ARROW_LEFT;
+import static org.openqa.selenium.Keys.ARROW_RIGHT;
 import static org.openqa.selenium.Keys.ARROW_UP;
+import static org.openqa.selenium.Keys.BACK_SPACE;
 import static org.openqa.selenium.Keys.CONTROL;
+import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.F12;
 import static org.openqa.selenium.support.ui.ExpectedConditions.elementSelectionStateToBe;
@@ -1238,6 +1242,15 @@ public class SeleniumWebDriverHelper {
   }
 
   /**
+   * Checks appears more than one window.
+   *
+   * @return {@code true} if more than one window opened, {@code false} if one or zero window opened
+   */
+  public boolean isTwoOrMoreWindowsOpened() {
+    return seleniumWebDriver.getWindowHandles().size() > 1;
+  }
+
+  /**
    * Waits during {@code timeout} until count of opened browser tabs are equals to {@code
    * expectedCount}.
    *
@@ -1543,8 +1556,24 @@ public class SeleniumWebDriverHelper {
     getAction().sendKeys(ARROW_UP.toString()).perform();
   }
 
+  public void pressArrowLeft() {
+    getAction().sendKeys(ARROW_LEFT.toString()).perform();
+  }
+
+  public void pressArrowRight() {
+    getAction().sendKeys(ARROW_RIGHT.toString()).perform();
+  }
+
   public void pressEnter() {
     getAction().sendKeys(ENTER.toString()).perform();
+  }
+
+  public void pressDelete() {
+    getAction().sendKeys(DELETE.toString()).perform();
+  }
+
+  public void pressBackspace() {
+    getAction().sendKeys(BACK_SPACE.toString()).perform();
   }
 
   public void pressCtrlF12() {

@@ -181,11 +181,6 @@ public class LoginNewUserWithOpenShiftOAuthTest {
       }
 
       @Override
-      public String getOfflineToken() {
-        return null;
-      }
-
-      @Override
       public String getName() {
         return name;
       }

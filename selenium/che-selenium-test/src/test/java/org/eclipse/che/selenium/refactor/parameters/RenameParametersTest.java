@@ -176,17 +176,17 @@ public class RenameParametersTest {
 
   @Test
   public void checkRenameParameters15() throws Exception {
+    // preparations
     setFieldsForTest("test15");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
     editor.waitActive();
     editor.waitTextIntoEditor(contentFromInA);
     editor.goToCursorPositionVisible(15, 15);
-    editor.launchRefactorForm();
-    refactor.waitRenameParametersFormIsOpen();
-    refactor.setAndWaitStateUpdateReferencesCheckbox(true);
-    refactor.typeAndWaitNewName("j");
-    refactor.clickOkButtonRefactorForm();
 
+    // rename the 'i' parameter to the 'j'
+    renameLocalVariableByRefactorForm("j");
+
+    // accept the ask dialog about duplicate parameters
     try {
       askDialog.acceptDialogWithText("Duplicate parameter j");
     } catch (TimeoutException ex) {
@@ -199,9 +199,10 @@ public class RenameParametersTest {
     events.clearAllMessages();
     editor.waitActive();
     editor.goToCursorPositionVisible(15, 23);
-    editor.launchLocalRefactor();
-    editor.typeTextIntoEditor("i");
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
+
+    // rename the 'j' parameter to the 'i'
+    renameLocalVariableByRefactorForm("i");
+    refactor.waitRenameParametersFormIsClosed();
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitMarkerInvisibility(ERROR, 15);
     editor.waitTextIntoEditor(contentFromOutA);
@@ -302,6 +303,14 @@ public class RenameParametersTest {
     events.waitExpectedMessage(APPLY_WORKSPACE_CHANGES, DEFAULT_TIMEOUT);
     editor.waitTextIntoEditor(contentFromOutA);
     editor.closeFileByNameWithSaving("A");
+  }
+
+  private void renameLocalVariableByRefactorForm(String newValue) {
+    editor.launchRefactorForm();
+    refactor.waitRenameParametersFormIsOpen();
+    refactor.setAndWaitStateUpdateReferencesCheckbox(true);
+    refactor.typeAndWaitNewName(newValue);
+    refactor.clickOkButtonRefactorForm();
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {

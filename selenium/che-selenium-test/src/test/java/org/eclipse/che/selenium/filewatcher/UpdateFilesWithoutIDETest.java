@@ -33,7 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-public class UpdateFilesWithoutIDE {
+public class UpdateFilesWithoutIDETest {
 
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
 
@@ -90,6 +90,7 @@ public class UpdateFilesWithoutIDE {
     String nameFiletxt3 = "file3.txt";
     String expectedMessage2 = "File '" + nameFiletxt2 + "' is updated";
     String expectedMessage3 = "File '" + nameFiletxt3 + "' is updated";
+
     projectExplorer1.openItemByPath(PROJECT_NAME);
     projectExplorer2.openItemByPath(PROJECT_NAME);
     projectExplorer1.openItemByPath(PROJECT_NAME + "/" + nameFiletxt2);
@@ -108,7 +109,7 @@ public class UpdateFilesWithoutIDE {
 
     String currentTimeInMs = Long.toString(System.currentTimeMillis());
     testProjectServiceClient.updateFile(
-        ws.getId(), PROJECT_NAME + "/" + nameFiletxt3, Long.toString(System.currentTimeMillis()));
+        ws.getId(), PROJECT_NAME + "/" + nameFiletxt3, currentTimeInMs);
 
     editor1.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
     editor2.waitTextIntoEditor(currentTimeInMs, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);

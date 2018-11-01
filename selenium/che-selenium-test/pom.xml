@@ -48,6 +48,10 @@
             <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.annotation</groupId>
             <artifactId>javax.annotation-api</artifactId>
         </dependency>
@@ -242,7 +246,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <!-- Do not exclude .gitignore file from resources. See more: https://maven.apache.org/plugins/maven-resources-plugin/copy-resources-mojo.html-->
+            <!-- Do not exclude .gitignore file from resources. See more: https://maven.apache.org/plugins/maven-resources-plugin/copy-resources-mojo.html -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -261,7 +265,8 @@
                         </goals>
                         <configuration>
                             <trimStackTrace>false</trimStackTrace>
-                            <!-- we need to set 'parallel=classes' to prevent unexpected destroy of test objects in case of execution the package of tests -->
+                            <!-- we need to set 'parallel=classes' to prevent unexpected destroy 
+								of test objects in case of execution the package of tests -->
                             <parallel>classes</parallel>
                             <properties>
                                 <property>

@@ -35,7 +35,6 @@ public class TestUserImpl implements TestUser {
   private final String password;
   private final String name;
   private final String id;
-  private final String offlineToken;
 
   private final TestUserServiceClient userServiceClient;
   private final TestAuthServiceClient authServiceClient;
@@ -49,8 +48,7 @@ public class TestUserImpl implements TestUser {
       @Assisted RemovableUserProvider testUserProvider,
       @Assisted("name") String name,
       @Assisted("email") String email,
-      @Assisted("password") String password,
-      @Assisted("offlineToken") String offlineToken)
+      @Assisted("password") String password)
       throws NotFoundException, ServerException, BadRequestException {
     this.authServiceClient = authServiceClient;
     this.testUserProvider = testUserProvider;
@@ -58,7 +56,6 @@ public class TestUserImpl implements TestUser {
     this.name = name;
     this.email = email;
     this.password = password;
-    this.offlineToken = offlineToken;
 
     this.userServiceClient = testUserServiceClientFactory.create(this);
     this.id = userServiceClient.findByEmail(email).getId();
@@ -77,7 +74,7 @@ public class TestUserImpl implements TestUser {
   @Override
   public String obtainAuthToken() {
     try {
-      return authServiceClient.login(name, password, offlineToken);
+      return authServiceClient.login(name, password);
     } catch (Exception e) {
       throw new RuntimeException(format("Error of log into the product as user '%s'.", name), e);
     }
@@ -91,11 +88,6 @@ public class TestUserImpl implements TestUser {
   @Override
   public String getId() {
     return id;
-  }
-
-  @Override
-  public String getOfflineToken() {
-    return offlineToken;
   }
 
   @Override

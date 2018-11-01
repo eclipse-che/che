@@ -137,12 +137,7 @@ public class AutocompleteProposalJavaDocTest {
         "concat(String part1, String part2, char divider) : String App");
 
     // then
-    try {
-      editor.waitProposalDocumentationHTML(expectedJavadocHtmlText);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11743");
-    }
+    checkProposalDocumentationHTML(expectedJavadocHtmlText);
   }
 
   @Test
@@ -155,7 +150,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectCompositeAutocompleteProposal("App() multimodule.App");
 
     // then
-    editor.waitProposalDocumentationHTML("<p>No documentation found.</p>\n");
+    checkProposalDocumentationHTML("<p>No documentation found.</p>\n");
   }
 
   @Test
@@ -168,7 +163,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectCompositeAutocompleteProposal("isEquals(Object o) : boolean Book");
 
     // then
-    editor.waitProposalDocumentationHTML(
+    checkProposalDocumentationHTML(
         "<p>Returns <code>true</code> if the argument is equal to instance. otherwise <code>false</code></p>\n"
             + "<ul>\n"
             + "<li><p><strong>Parameters:</strong></p>\n"
@@ -224,7 +219,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectCompositeAutocompleteProposal("hashCode() : int Object");
 
     // then
-    editor.waitProposalDocumentationHTML(
+    checkProposalDocumentationHTML(
         "Returns a hash code value for the object. "
             + "This method is supported for the benefit of hash tables such as those provided by");
   }
@@ -239,7 +234,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectCompositeAutocompleteProposal("info(String msg) : void Logger");
 
     // then
-    editor.waitProposalDocumentationHTML(
+    checkProposalDocumentationHTML(
         "<ul>\n"
             + "<li><p><strong>Parameters:</strong></p>\n"
             + "<ul>\n"
@@ -264,5 +259,14 @@ public class AutocompleteProposalJavaDocTest {
 
     // then
     assertFalse(editor.isTooltipPopupVisible());
+  }
+
+  private void checkProposalDocumentationHTML(String expectedText) {
+    try {
+      editor.waitProposalDocumentationHTML(expectedText);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11743");
+    }
   }
 }

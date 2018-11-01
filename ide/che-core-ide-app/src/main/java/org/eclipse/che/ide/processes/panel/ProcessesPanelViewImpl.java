@@ -43,6 +43,7 @@ import org.eclipse.che.ide.ui.SplitterFancyUtil;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanelFactory;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.ActiveTabClosedHandler;
 import org.eclipse.che.ide.ui.tree.SelectionModel;
 import org.eclipse.che.ide.ui.tree.Tree;
 import org.eclipse.che.ide.ui.tree.TreeNodeElement;
@@ -405,19 +406,16 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
 
   @Override
   public void hideProcessOutput(String processId) {
-    final WidgetToShow widgetToShow = processWidgets.get(processId);
-    final SubPanel subPanel = widget2Panels.get(widgetToShow);
-    if (subPanel != null) {
-      subPanel.removeWidget(widgetToShow);
-    }
-    processWidgets.remove(processId);
+    removeWidget(processId);
   }
 
   @Override
-  public void removeWidget(String processId) {
-    WidgetToShow widget = processWidgets.get(processId);
-    hideProcessOutput(processId);
-    widget2Panels.remove(widget);
+  public void removeWidget(String processId, ActiveTabClosedHandler handler) {
+    WidgetToShow widget = processWidgets.remove(processId);
+    SubPanel subPanel = widget2Panels.remove(widget);
+    if (subPanel != null) {
+      subPanel.removeWidget(widget, handler);
+    }
   }
 
   @Override
@@ -437,7 +435,7 @@ public class ProcessesPanelViewImpl extends BaseView<ProcessesPanelView.ActionDe
   public void clear() {
     for (WidgetToShow widgetToShow : processWidgets.values()) {
       SubPanel subPanel = widget2Panels.get(widgetToShow);
-      subPanel.removeWidget(widgetToShow);
+      subPanel.removeWidget(widgetToShow, (subPanelView, tabToActivate) -> {});
     }
 
     processWidgets.clear();

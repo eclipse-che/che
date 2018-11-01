@@ -188,19 +188,19 @@ public class RenameTypeTest {
     menu.runCommand(ASSISTANT, REFACTORING, RENAME);
 
     refactorPanel.typeAndWaitNewName("B.java");
-
-    try {
-      refactorPanel.clickOkButtonRefactorForm();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500", ex);
-    }
+    refactorPanel.clickOkButtonRefactorForm();
 
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     refactorPanel.waitRefactorPreviewFormIsClosed();
     projectExplorer.waitItem(pathToCurrentPackage + "/B.java", 6);
-    editor.waitTextIntoEditor(contentFromOutB);
+
+    try {
+      editor.waitTextIntoEditor(contentFromOutB);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11779");
+    }
   }
 }

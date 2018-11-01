@@ -667,7 +667,7 @@ public class ImportWizardFormTest {
           projectName + "/" + REGULAR_SUBMODULE + "/src/main/java/com.company.example", "A.java");
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10012", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10012", ex);
     }
     editor.closeFileByNameWithSaving("A");
   }
