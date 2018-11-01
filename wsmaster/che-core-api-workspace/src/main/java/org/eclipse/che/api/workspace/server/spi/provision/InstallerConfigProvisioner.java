@@ -51,7 +51,7 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
   public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
     for (InternalMachineConfig machineConfig : internalEnvironment.getMachines().values()) {
-      LOG.debug("Start provisioning installer configs for ws {}.", id.getWorkspaceId());
+      LOG.debug("Start provisioning installer configs for workspace '{}'", id.getWorkspaceId());
       fillEnv(machineConfig.getEnv(), machineConfig.getInstallers());
       fillServers(id.getWorkspaceId(), machineConfig.getServers(), machineConfig.getInstallers());
     }
@@ -99,7 +99,7 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
     for (InstallerImpl installer : installers) {
       for (Map.Entry<String, ? extends ServerConfig> serverEntry :
           installer.getServers().entrySet()) {
-        LOG.debug("Provisioning installer config for ws '{}' and installer '{}'", workspaceId,
+        LOG.debug("Provisioning installer config for workspace '{}' and installer '{}'", workspaceId,
             installer.getId());
         if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
             && !servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
