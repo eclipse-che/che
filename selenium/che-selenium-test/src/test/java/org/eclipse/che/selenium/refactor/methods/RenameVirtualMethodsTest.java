@@ -118,7 +118,7 @@ public class RenameVirtualMethodsTest {
     doRefactoringWithKeys(15, 10, "k");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void test25() {
     doRefactorByWizard(14, 10, "k");
   }
@@ -128,7 +128,7 @@ public class RenameVirtualMethodsTest {
     doRefactoringWithKeys(30, 20, "get2ndPower");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void testFail35() {
     doRefactorByWizardWithClosingWarnMess(14, 10, "k");
   }
@@ -145,7 +145,7 @@ public class RenameVirtualMethodsTest {
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void testVarArgs1() {
     doRefactorByWizard(26, 74, "runThes");
     editor.waitTextIntoEditor(contentFromOutA);

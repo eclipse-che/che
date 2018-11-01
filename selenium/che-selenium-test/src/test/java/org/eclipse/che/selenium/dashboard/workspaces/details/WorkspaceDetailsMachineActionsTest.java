@@ -15,7 +15,6 @@ import static org.eclipse.che.selenium.core.TestGroup.DOCKER;
 import static org.eclipse.che.selenium.core.TestGroup.K8S;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.TestGroup.OSIO;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.APPLY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.CANCEL_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.SAVE_BUTTON;
@@ -113,12 +112,12 @@ public class WorkspaceDetailsMachineActionsTest {
     checkEditOfMachineName("FROM " + IMAGE_NAME + "\n");
   }
 
-  @Test(groups = {OPENSHIFT, K8S, OSIO, UNDER_REPAIR})
+  @Test(groups = {OPENSHIFT, K8S, OSIO})
   public void checkRamSectionOpenshift() {
     checkRamSection(IMAGE_NAME);
   }
 
-  @Test(groups = {DOCKER, UNDER_REPAIR})
+  @Test(groups = {DOCKER})
   public void checkRamSectionDocker() {
     checkRamSection("FROM " + IMAGE_NAME + "\n");
   }

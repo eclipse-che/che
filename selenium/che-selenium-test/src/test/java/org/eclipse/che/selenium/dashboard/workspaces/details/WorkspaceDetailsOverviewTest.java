@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.openqa.selenium.Keys.ESCAPE;
@@ -127,7 +126,7 @@ public class WorkspaceDetailsOverviewTest {
     workspaceOverview.checkNameWorkspace(WORKSPACE_NAME);
   }
 
-  @Test(priority = 2, groups = UNDER_REPAIR)
+  @Test(priority = 2)
   public void shouldCheckNameField() {
     workspaceOverview.waitNameFieldValue(WORKSPACE_NAME);
 

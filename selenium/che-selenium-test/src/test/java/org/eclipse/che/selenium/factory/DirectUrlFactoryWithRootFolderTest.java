@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -37,7 +36,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = {GITHUB, UNDER_REPAIR})
+@Test(groups = {GITHUB})
 public class DirectUrlFactoryWithRootFolderTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private DefaultTestUser testUser;

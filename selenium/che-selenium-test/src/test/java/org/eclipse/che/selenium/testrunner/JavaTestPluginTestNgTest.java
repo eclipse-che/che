@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_NG_TEST_DROP_DAWN_ITEM;
@@ -46,7 +45,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Dmytro Nochevnov */
-@Test(groups = UNDER_REPAIR)
 public class JavaTestPluginTestNgTest {
 
   private static final String PROJECT = "testng-tests";

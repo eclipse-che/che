@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
@@ -24,7 +23,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -42,7 +40,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.GITHUB})
 public class ImportProjectFromGitHubTest {
   private static final String WORKSPACE =
       generate(ImportProjectFromGitHubTest.class.getSimpleName(), 4);
@@ -89,7 +86,7 @@ public class ImportProjectFromGitHubTest {
     workspaceServiceClient.delete(WORKSPACE, defaultTestUser.getName());
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkAbilityImportProjectFromGithub() {
     testRepoName = testRepo.getName();
     projectName = String.format("%s-%s", gitHubUsername, testRepoName);

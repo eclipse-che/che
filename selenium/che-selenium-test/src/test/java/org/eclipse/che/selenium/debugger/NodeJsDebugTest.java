@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.debugger;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -44,7 +43,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** Created by mmusienko on 12.02.17. */
-@Test(groups = UNDER_REPAIR)
 public class NodeJsDebugTest {
 
   private static final String PROJECT_NAME =

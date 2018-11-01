@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.refactor.parameters;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.testng.Assert.fail;
@@ -175,7 +174,7 @@ public class RenameParametersTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void checkRenameParameters15() throws Exception {
     // preparations
     setFieldsForTest("test15");

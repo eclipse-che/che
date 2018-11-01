@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.languageserver.php;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
@@ -110,7 +109,7 @@ public class PhpAssistantFeaturesTest {
     editor.waitTextIntoEditor(EXPECTED_ORIGINAL_TEXT);
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void hoverShouldBeDisplayedWithExpectedText() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
@@ -121,11 +120,11 @@ public class PhpAssistantFeaturesTest {
       editor.waitTextInHoverPopUpEqualsTo(EXPECTED_HOVER_POPUP_TEXT);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10674", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
     }
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void findReferenceNodeShouldBeDisplayed() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();
@@ -141,7 +140,7 @@ public class PhpAssistantFeaturesTest {
     editor.waitTextElementsActiveLine("sayHello");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void signatureShouldBeDisplayed() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();

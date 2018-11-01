@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.DOWN;
 import static org.openqa.selenium.Keys.SHIFT;
@@ -37,7 +36,6 @@ import org.testng.annotations.Test;
  * @author Andrienko Alexander
  * @author Andrey Chizhikov
  */
-@Test(groups = UNDER_REPAIR)
 public class TransitiveDependencyTest {
 
   private static final String PROJECT_NAME =

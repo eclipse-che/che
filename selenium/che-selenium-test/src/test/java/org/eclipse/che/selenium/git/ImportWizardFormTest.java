@@ -60,7 +60,6 @@ import org.testng.annotations.Test;
  * @author Aleksandr Shmaraev
  * @author Ihor Okhrimenko
  */
-@Test(groups = TestGroup.GITHUB)
 public class ImportWizardFormTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportWizardFormTest.class);
   private static final String GITHUB_COM = "github.com";

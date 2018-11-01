@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.factory;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.testng.Assert.fail;
 
@@ -39,7 +38,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = UNDER_REPAIR)
 public class CheckFactoryWithMultiModuleTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
 
