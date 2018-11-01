@@ -152,7 +152,7 @@ public class TypeScriptEditingTest {
     }
   }
 
-  @Test(priority = 5, alwaysRun = true, groups = UNDER_REPAIR)
+  @Test(priority = 5, alwaysRun = true)
   public void checkSignatureHelpProvider() {
     editor.goToCursorPositionVisible(25, 38);
     editor.typeTextIntoEditor(ENTER.toString());
@@ -164,7 +164,7 @@ public class TypeScriptEditingTest {
     editor.waitSignaturesContainerIsClosed();
   }
 
-  @Test(priority = 6, alwaysRun = true, groups = UNDER_REPAIR)
+  @Test(priority = 6, alwaysRun = true)
   public void checkCodeCommentFeature() {
     editor.goToCursorPositionVisible(26, 9);
     editor.launchCommentCodeFeature();
@@ -174,7 +174,7 @@ public class TypeScriptEditingTest {
     editor.waitMarkerInPosition(CodenvyEditor.MarkerLocator.ERROR, 26);
   }
 
-  @Test(priority = 7, alwaysRun = true, groups = UNDER_REPAIR)
+  @Test(priority = 7, alwaysRun = true)
   public void checkCodeFormattingFeature() throws URISyntaxException, IOException {
     // read all lines from template
     URL resources =

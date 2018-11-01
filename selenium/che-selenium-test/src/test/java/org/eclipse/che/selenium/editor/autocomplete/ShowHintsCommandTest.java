@@ -11,11 +11,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
-import java.net.URL;
-import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -33,7 +29,14 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.net.URL;
+import java.nio.file.Paths;
+
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
+import static org.testng.Assert.fail;
+
 /** @author Aleksandr Shmaraev */
+@Test(groups = UNDER_REPAIR)
 public class ShowHintsCommandTest {
   private final Logger LOG = LoggerFactory.getLogger(ShowHintsCommandTest.class);
   private static final String PROJECT_NAME =
@@ -96,6 +99,7 @@ public class ShowHintsCommandTest {
     editor.waitMarkerInPosition(MarkerLocator.ERROR, 34);
     editor.goToCursorPositionVisible(33, 16);
     editor.callShowHintsPopUp();
+
     try {
       editor.waitShowHintsPopUpOpened();
     } catch (TimeoutException ex) {
