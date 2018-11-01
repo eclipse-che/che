@@ -14,7 +14,9 @@ package org.eclipse.che.ide.ui.multisplitpanel;
 import com.google.gwt.user.client.ui.IsWidget;
 import java.util.List;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.ActiveTabClosedHandler;
 import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelView;
+import org.eclipse.che.ide.ui.multisplitpanel.tab.Tab;
 
 /**
  * A panel that represents a tabbed set of pages, each of which contains another widget. Its child
@@ -58,11 +60,23 @@ public interface SubPanel {
   List<WidgetToShow> getAllWidgets();
 
   /**
-   * Remove the given {@code widget} from this panel.
+   * Remove the given {@code widget} from this panel. Nearby widget will be activated if widget for
+   * removing is active {@link Tab}. To override this behavior use {@link
+   * #removeWidget(WidgetToShow, ActiveTabClosedHandler)}
    *
    * @param widget widget to remove
    */
-  void removeWidget(WidgetToShow widget);
+  default void removeWidget(WidgetToShow widget) {
+    removeWidget(widget, SubPanelView::activateTab);
+  }
+
+  /**
+   * Remove the given {@code widget} from this panel.
+   *
+   * @param widget widget to remove
+   * @param handler provides ability to process case when widget for removing is active {@link Tab}
+   */
+  void removeWidget(WidgetToShow widget, ActiveTabClosedHandler handler);
 
   /** Close this panel. Note that each widget will be removed from the panel before it close. */
   void closePane();
