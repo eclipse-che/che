@@ -11,7 +11,12 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
+import java.net.URL;
+import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
@@ -28,12 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.net.URL;
-import java.nio.file.Paths;
-
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
-import static org.testng.Assert.fail;
 
 /** @author Aleksandr Shmaraev */
 @Test(groups = UNDER_REPAIR)

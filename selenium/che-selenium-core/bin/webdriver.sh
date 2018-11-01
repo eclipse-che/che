@@ -794,8 +794,8 @@ generateTestNgFailedReport() {
 
 # generates and updates failsafe report
 generateFailSafeReport () {
-    mvn -q surefire-report:failsafe-report-only ${MAVEN_OPTIONS}
-    mvn -q site -DgenerateReports=false ${MAVEN_OPTIONS}
+    mvn -q surefire-report:failsafe-report-only
+    mvn -q site -DgenerateReports=false
 
     echo "[TEST]"
     echo -e "[TEST] ${YELLOW}REPORT:${NO_COLOUR}"
@@ -927,7 +927,7 @@ testProduct() {
     runTests
 
     if [[ ${RERUN_ATTEMPTS} > 0 ]]; then
-#        MAVEN_OPTIONS="${MAVEN_OPTIONS} -o"
+        MAVEN_OPTIONS="${MAVEN_OPTIONS} -o"
         rerunTests 1 $@
     fi
 }
