@@ -248,6 +248,7 @@
           <class name="org.eclipse.che.selenium.refactor.types.TestFailTest"/>
           <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
           <class name="org.eclipse.che.selenium.theia.TheiaBuildPluginTest"/>
+          <class name="org.eclipse.che.selenium.theia.CheSevenPreviewStackStartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStopStartWsTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CreateWorkspaceOnDashboardTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>

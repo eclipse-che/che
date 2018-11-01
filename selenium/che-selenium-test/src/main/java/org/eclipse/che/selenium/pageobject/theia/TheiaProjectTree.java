@@ -81,6 +81,10 @@ public class TheiaProjectTree {
         WebDriverException.class);
   }
 
+  public void waitFilesTab() {
+    seleniumWebDriverHelper.waitVisibility(By.xpath(FILES_TAB_XPATH));
+  }
+
   public void waitProjectAreaOpened() {
     seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_TREE_CONTAINER_ID));
     renderChecker.waitElementIsRendered(By.id(PROJECT_TREE_CONTAINER_ID));
