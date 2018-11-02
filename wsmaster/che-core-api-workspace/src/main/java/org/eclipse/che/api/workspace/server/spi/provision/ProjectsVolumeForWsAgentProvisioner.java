@@ -30,8 +30,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ProjectsVolumeForWsAgentProvisioner implements InternalEnvironmentProvisioner {
 
-  private static final Logger LOG = LoggerFactory
-      .getLogger(ProjectsVolumeForWsAgentProvisioner.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(ProjectsVolumeForWsAgentProvisioner.class);
   public static final String PROJECTS_VOLUME_NAME = "projects";
 
   private final String projectFolderPath;

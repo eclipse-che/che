@@ -93,13 +93,15 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
    * @throws InfrastructureException if any installer has server that conflicts with already
    *     configured one
    */
-  private void fillServers(String  workspaceId, Map<String, ServerConfig> servers,
-      List<InstallerImpl> installers)
+  private void fillServers(
+      String workspaceId, Map<String, ServerConfig> servers, List<InstallerImpl> installers)
       throws InfrastructureException {
     for (InstallerImpl installer : installers) {
       for (Map.Entry<String, ? extends ServerConfig> serverEntry :
           installer.getServers().entrySet()) {
-        LOG.debug("Provisioning installer config for workspace '{}' and installer '{}'", workspaceId,
+        LOG.debug(
+            "Provisioning installer config for workspace '{}' and installer '{}'",
+            workspaceId,
             installer.getId());
         if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
             && !servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
