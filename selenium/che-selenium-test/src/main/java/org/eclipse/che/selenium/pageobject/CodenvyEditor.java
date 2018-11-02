@@ -697,17 +697,6 @@ public class CodenvyEditor {
    * @param positionLine line's number where cursor should be placed
    */
   public void setCursorToLine(int positionLine) {
-    moveCursorToLine(positionLine);
-    waitActive();
-    expectedNumberOfActiveLine(positionLine);
-  }
-
-  /**
-   * Moves the cursor to specified {@code positionLine}
-   *
-   * @param positionLine line's number where cursor should be placed
-   */
-  public void moveCursorToLine(int positionLine) {
     loader.waitOnClosed();
     seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
     askForValueDialog.waitFormToOpen();
@@ -716,6 +705,8 @@ public class CodenvyEditor {
     loader.waitOnClosed();
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
+    waitActive();
+    expectedNumberOfActiveLine(positionLine);
   }
 
   /**

@@ -12,15 +12,17 @@
 package org.eclipse.che.selenium.pageobject.git;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.Keys.CONTROL;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -30,22 +32,22 @@ import org.openqa.selenium.support.PageFactory;
 public class GitCompare {
   private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
-  private final CodenvyEditor codenvyEditor;
   private final ActionsFactory actionsFactory;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final AskForValueDialog askForValueDialog;
 
   @Inject
   public GitCompare(
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
-      CodenvyEditor codenvyEditor,
       ActionsFactory actionsFactory,
-      SeleniumWebDriverHelper seleniumWebDriverHelper) {
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      AskForValueDialog askForValueDialog) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
-    this.codenvyEditor = codenvyEditor;
     this.actionsFactory = actionsFactory;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.askForValueDialog = askForValueDialog;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -191,7 +193,13 @@ public class GitCompare {
    * @param status is expected line and column position
    */
   public void setCursorToLine(int positionLine, String status) {
-    codenvyEditor.moveCursorToLine(positionLine);
+    seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
+    askForValueDialog.waitFormToOpen();
+    loader.waitOnClosed();
+    askForValueDialog.typeAndWaitText(String.valueOf(positionLine));
+    loader.waitOnClosed();
+    askForValueDialog.clickOkBtn();
+    askForValueDialog.waitFormToClose();
     waitLineAndColumnInLeftCompare(status);
   }
 
