@@ -164,146 +164,6 @@
     }
   },
   {
-    "id": "java-mysql-theia-openshift",
-    "creator": "ide",
-    "name": "Che 7 - Java + MySQL",
-    "description": "Multi Container Workspace -Java + MySQL in Theia IDE",
-    "scope": "general",
-    "tags": [
-      "Java 1.8",
-      "Theia",
-      "MySQL"
-    ],
-    "workspaceConfig": {
-      "environments": {
-        "default": {
-          "recipe": {
-            "contentType": "text/x-yaml",
-            "type": "openshift",
-            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: web\n   labels:\n    type: db\n  spec:\n   containers:\n    - \n     image: eclipse/centos_jdk8\n     name: dev\n     ports:\n      - \n       containerPort: 8080\n       protocol: TCP\n     resources:\n      limits:\n       memory: 512Mi\n    - \n     image: centos/mysql-57-centos7\n     name: mysql\n     ports:\n      - \n       name: mysql\n       containerPort: 3306\n       protocol: TCP\n     env:\n      - \n       name: MYSQL_USER\n       value: petclinic\n      - \n       name: MYSQL_ROOT_PASSWORD\n       value: password\n      - \n       name: MYSQL_PASSWORD\n       value: password\n      - \n       name: MYSQL_DATABASE\n       value: petclinic\n     resources:\n      limits:\n       memory: 256Mi\n - \n  apiVersion: v1\n  kind: Service\n  metadata:\n   name: db\n  spec:\n   selector:\n    type: db\n   ports:\n    - \n     name: mysql\n     port: 3306\n     protocol: TCP\n     targetPort: mysql\n"
-          },
-          "machines": {
-            "web/dev": {
-              "servers": {
-                "tomcat8": {
-                  "attributes": {},
-                  "protocol": "http",
-                  "port": "8080/tcp"
-                }
-              },
-              "volumes": {
-                "projects": {
-                  "path": "/projects"
-                }
-              },
-              "installers": [],
-              "env": {},
-              "attributes": {
-                "memoryLimitBytes": "536870912"
-              }
-            },
-            "web/mysql": {
-              "servers": {
-                "mysql": {
-                  "attributes": {},
-                  "port": "3306",
-                  "protocol": "tcp"
-                }
-              },
-              "volumes": {},
-              "installers": [],
-              "env": {},
-              "attributes": {
-                "memoryLimitBytes": "214748365"
-              }
-            }
-          }
-        }
-      },
-      "defaultEnv": "default",
-      "name": "default",
-      "projects": [],
-      "commands": [
-        {
-          "commandLine": "/opt/rh/rh-maven33/enable && mvn clean install -f ${current.project.path}",
-          "name": "build",
-          "type": "mvn",
-          "attributes": {
-            "machineName": "web/dev",
-            "previewUrl": "",
-            "goal": "Build"
-          }
-        },
-        {
-          "commandLine": "cd ${current.project.path}/target/ && cp *.war ${TOMCAT_HOME}/webapps/ROOT.war",
-          "name": "deploy",
-          "type": "custom",
-          "attributes": {
-            "machineName": "web/dev",
-            "previewUrl": "",
-            "goal": "Build"
-          }
-        },
-        {
-          "commandLine": "/opt/rh/rh-maven33/enable && mvn clean install -f ${current.project.path} && cd ${current.project.path}/target/ && cp *.war ${TOMCAT_HOME}/webapps/ROOT.war",
-          "name": "build and deploy",
-          "type": "custom",
-          "attributes": {
-            "machineName": "web/dev",
-            "previewUrl": "${server.tomcat8}",
-            "goal": "Build"
-          }
-        },
-        {
-          "commandLine": "${TOMCAT_HOME}/bin/catalina.sh run 2>&1",
-          "name": "start Tomcat",
-          "type": "custom",
-          "attributes": {
-            "machineName": "web/dev",
-            "previewUrl": "${server.tomcat8}",
-            "goal": "Run"
-          }
-        },
-        {
-          "commandLine": "${TOMCAT_HOME}/bin/catalina.sh stop",
-          "name": "stop Tomcat",
-          "type": "custom",
-          "attributes": {
-            "machineName": "web/dev",
-            "previewUrl": "",
-            "goal": "Run"
-          }
-        },
-        {
-          "commandLine": "/opt/rh/rh-maven33/enable && mvn clean install -f ${current.project.path} && cd ${current.project.path}/target/ && cp *.war ${TOMCAT_HOME}/webapps/ROOT.war && ${TOMCAT_HOME}/bin/catalina.sh run 2>&1",
-          "name": "build, deploy and start Tomcat",
-          "type": "custom",
-          "attributes": {
-            "machineName": "web/dev",
-            "previewUrl": "${server.tomcat8}",
-            "goal": "Run"
-          }
-        },
-        {
-          "commandLine": "mysql -u $MYSQL_USER -p$MYSQL_PASSWORD --database=$MYSQL_DATABASE",
-          "name": "open database command line",
-          "type": "custom",
-          "attributes": {
-            "machineName": "web/mysql",
-            "previewUrl": "",
-            "goal": "Run"
-          }
-        }
-      ],
-      "attributes": {
-        "plugins": "che-machine-exec-plugin:0.0.1",
-        "editor": "org.eclipse.che.editor.theia:1.0.0"
-      },
-      "links": []
-    },
-    "components": []
-  },
-  {
     "id": "java-theia-kubernetes",
     "creator": "ide",
     "name": "Java Theia on Kubernetes",
@@ -390,6 +250,152 @@
       "name": "type-theia.svg",
       "mediaType": "image/svg+xml"
     }
+  },
+  {
+    "id": "java-mysql-theia-kubernetes",
+    "creator": "ide",
+    "name": "Java and MySQL with Theia IDE on Kubernetes",
+    "description": "Multi Container Workspace - Java with MySQL database in Theia IDE",
+    "scope": "general",
+    "tags": [
+      "Java 1.8",
+      "Theia",
+      "MySQL"
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "contentType": "text/x-yaml",
+            "type": "kubernetes",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: web\n   labels:\n    type: db\n  spec:\n   containers:\n    - \n     image: eclipse/centos_jdk8\n     name: dev\n     ports:\n      - \n       containerPort: 8080\n       protocol: TCP\n     resources:\n      limits:\n       memory: 512Mi\n    - \n     image: centos/mysql-57-centos7\n     name: mysql\n     ports:\n      - \n       name: mysql\n       containerPort: 3306\n       protocol: TCP\n     env:\n      - \n       name: MYSQL_USER\n       value: petclinic\n      - \n       name: MYSQL_ROOT_PASSWORD\n       value: password\n      - \n       name: MYSQL_PASSWORD\n       value: password\n      - \n       name: MYSQL_DATABASE\n       value: petclinic\n     resources:\n      limits:\n       memory: 256Mi\n - \n  apiVersion: v1\n  kind: Service\n  metadata:\n   name: db\n  spec:\n   selector:\n    type: db\n   ports:\n    - \n     name: mysql\n     port: 3306\n     protocol: TCP\n     targetPort: mysql\n"
+          },
+          "machines": {
+            "web/dev": {
+              "servers": {
+                "tomcat8": {
+                  "attributes": {},
+                  "protocol": "http",
+                  "port": "8080/tcp"
+                }
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {},
+              "attributes": {}
+            },
+            "web/mysql": {
+              "servers": {
+                "mysql": {
+                  "attributes": {},
+                  "port": "3306",
+                  "protocol": "tcp"
+                }
+              },
+              "volumes": {},
+              "installers": [],
+              "env": {},
+              "attributes": {}
+            }
+          }
+        }
+      },
+      "defaultEnv": "default",
+      "name": "default",
+      "projects": [],
+      "commands": [
+        {
+          "commandLine": "cd /projects && git clone https://github.com/che-samples/web-java-spring-petclinic.git && cd web-java-spring-petclinic && git checkout mysql",
+          "name": "clone petclinic sample project",
+          "attributes": {
+            "machineName": "web/dev",
+            "previewUrl": "",
+            "goal": "Run"
+          },
+          "type": "custom"
+        },
+        {
+          "commandLine": "/opt/rh/rh-maven33/enable && mvn clean install -f ${current.project.path}",
+          "name": "build",
+          "type": "mvn",
+          "attributes": {
+            "machineName": "web/dev",
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        },
+        {
+          "commandLine": "cd ${current.project.path}/target/ && cp *.war ${TOMCAT_HOME}/webapps/ROOT.war",
+          "name": "deploy",
+          "type": "custom",
+          "attributes": {
+            "machineName": "web/dev",
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        },
+        {
+          "commandLine": "/opt/rh/rh-maven33/enable && mvn clean install -f ${current.project.path} && cd ${current.project.path}/target/ && cp *.war ${TOMCAT_HOME}/webapps/ROOT.war",
+          "name": "build and deploy",
+          "type": "custom",
+          "attributes": {
+            "machineName": "web/dev",
+            "previewUrl": "${server.tomcat8}",
+            "goal": "Build"
+          }
+        },
+        {
+          "commandLine": "${TOMCAT_HOME}/bin/catalina.sh run 2>&1",
+          "name": "start Tomcat",
+          "type": "custom",
+          "attributes": {
+            "machineName": "web/dev",
+            "previewUrl": "${server.tomcat8}",
+            "goal": "Run"
+          }
+        },
+        {
+          "commandLine": "${TOMCAT_HOME}/bin/catalina.sh stop",
+          "name": "stop Tomcat",
+          "type": "custom",
+          "attributes": {
+            "machineName": "web/dev",
+            "previewUrl": "",
+            "goal": "Run"
+          }
+        },
+        {
+          "commandLine": "/opt/rh/rh-maven33/enable && mvn clean install -f ${current.project.path} && cd ${current.project.path}/target/ && cp *.war ${TOMCAT_HOME}/webapps/ROOT.war && ${TOMCAT_HOME}/bin/catalina.sh run 2>&1",
+          "name": "build, deploy and start Tomcat",
+          "type": "custom",
+          "attributes": {
+            "machineName": "web/dev",
+            "previewUrl": "${server.tomcat8}",
+            "goal": "Run"
+          }
+        },
+        {
+          "commandLine": "mysql -u $MYSQL_USER -p$MYSQL_PASSWORD --database=$MYSQL_DATABASE",
+          "name": "open database command line",
+          "type": "custom",
+          "attributes": {
+            "machineName": "web/mysql",
+            "previewUrl": "",
+            "goal": "Run"
+          }
+        }
+      ],
+      "attributes": {
+        "plugins": "che-machine-exec-plugin:0.0.1",
+        "editor": "org.eclipse.che.editor.theia:1.0.0"
+      },
+      "links": []
+    },
+    "components": []
   },
   {
     "id": "che7-preview",
