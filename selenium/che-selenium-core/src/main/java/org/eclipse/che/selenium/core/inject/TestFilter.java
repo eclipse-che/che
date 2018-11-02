@@ -84,6 +84,7 @@ public class TestFilter {
     groups.remove(TestGroup.SINGLEUSER);
     groups.remove(TestGroup.MULTIUSER);
     groups.remove(TestGroup.GITHUB);
+    groups.remove(TestGroup.UNDER_REPAIR);
     if (!groups.isEmpty() && !groups.contains(infrastructure.toString().toLowerCase())) {
       annotation.setEnabled(false);
     }

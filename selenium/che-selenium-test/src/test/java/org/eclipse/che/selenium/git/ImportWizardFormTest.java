@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.BRANCHES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.IMPORT_PROJECT;
@@ -59,7 +60,6 @@ import org.testng.annotations.Test;
  * @author Aleksandr Shmaraev
  * @author Ihor Okhrimenko
  */
-@Test(groups = TestGroup.GITHUB)
 public class ImportWizardFormTest {
   private static final Logger LOG = LoggerFactory.getLogger(ImportWizardFormTest.class);
   private static final String GITHUB_COM = "github.com";
@@ -408,7 +408,7 @@ public class ImportWizardFormTest {
     editor.waitActive();
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkImportProjectSubmoduleByHttpsUrl() {
     projectExplorer.waitProjectExplorer();
     currentProjectName = multimoduleRepo.getName() + "Https";
@@ -418,7 +418,7 @@ public class ImportWizardFormTest {
     openAndCheckRegularSubmodule(currentProjectName);
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkImportProjectSubmoduleBySshUrl() {
     projectExplorer.waitProjectExplorer();
     currentProjectName = multimoduleRepo.getName() + "Ssh";
@@ -428,7 +428,7 @@ public class ImportWizardFormTest {
     openAndCheckRegularSubmodule(currentProjectName);
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkImportProjectSubmoduleFromGithub() throws Exception {
     projectExplorer.waitProjectExplorer();
     currentProjectName = multimoduleRepo.getName();
