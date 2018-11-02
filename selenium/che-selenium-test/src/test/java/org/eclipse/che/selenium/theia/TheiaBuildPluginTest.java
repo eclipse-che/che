@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.theia;
 
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 import static org.testng.Assert.fail;
@@ -22,7 +21,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -76,7 +74,7 @@ public class TheiaBuildPluginTest {
     workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
-  @Test(groups = {OPENSHIFT})
+  @Test(groups = OPENSHIFT)
   public void pluginShouldBeBuilt() {
     final String pluginNameSearchSequence = "hello-world";
     final String yeomanWizardSearchSequence = ">yeom";
@@ -125,7 +123,7 @@ public class TheiaBuildPluginTest {
     }
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = OPENSHIFT)
   public void hostedModeShouldWork() {
     final String projectName = "hello-world";
     final String hostedSearchSequence = ">hosted";
@@ -165,7 +163,7 @@ public class TheiaBuildPluginTest {
 
     // check hosted mode availability
     switchToNonParentWindow(parentWindow);
-    waitDevelopmentHostTitle();
+    waitHostedPageReady();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitOpenWorkspaceButton();
@@ -195,9 +193,9 @@ public class TheiaBuildPluginTest {
 
     // check applying of the changes in hosted mode window
     switchToNonParentWindow(parentWindow);
-    waitDevelopmentHostTitle();
+    waitHostedPageReady();
     seleniumWebDriver.navigate().refresh();
-    waitDevelopmentHostTitle();
+    waitHostedPageReady();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitOpenWorkspaceButton();
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
@@ -217,23 +215,20 @@ public class TheiaBuildPluginTest {
     theiaIde.switchToIdeFrame();
   }
 
-  private void waitDevelopmentHostTitle() {
+  private void waitHostedPageReady() {
     seleniumWebDriverHelper.waitSuccessCondition(
         driver -> {
-          String title = seleniumWebDriver.getTitle();
-
-          if (EXPECTED_DEVELOPMENT_HOST_TITLE.equals(title)) {
-            return true;
+          try {
+            theiaIde.waitTheiaIdeTopPanel();
+            theiaProjectTree.waitFilesTab();
+          } catch (TimeoutException ex) {
+            seleniumWebDriver.navigate().refresh();
+            return false;
           }
 
-          seleniumWebDriver.navigate().refresh();
-
-          // give a time for title refreshing
-          WaitUtils.sleepQuietly(3);
-
-          return false;
+          return true;
         },
-        ELEMENT_TIMEOUT_SEC);
+        LOADER_TIMEOUT_SEC);
   }
 
   private void openTerminal(String topMenuCommand, String commandName, String proposalText) {

@@ -40,6 +40,8 @@
             <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectoryTest"/>
             <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
+            <class name="org.eclipse.che.selenium.theia.TheiaBuildPluginTest"/>
+            <class name="org.eclipse.che.selenium.theia.Che7PreviewStackStartTest"/>
         </classes>
     </test>
 </suite>
