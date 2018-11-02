@@ -72,7 +72,12 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
 
     // there is cached runtime, restore cached one
     KubernetesRuntimeState runtimeState = runtimeStateOpt.get();
-    LOG.debug("Restoring runtime {} in workspace '{}'", runtimeState.getRuntimeId(), workspaceId);
+    RuntimeIdentity runtimeId = runtimeState.getRuntimeId();
+    LOG.debug(
+        "Restoring runtime `{}:{}:{}`",
+        runtimeId.getWorkspaceId(),
+        runtimeId.getEnvName(),
+        runtimeId.getOwnerId());
     OpenShiftInternalRuntime runtime =
         runtimeFactory.create(
             this,
