@@ -130,8 +130,8 @@ public class SubPanelPresenter implements SubPanel, SubPanelView.ActionDelegate 
   }
 
   @Override
-  public void removeWidget(WidgetToShow widget) {
-    view.removeWidget(widget);
+  public void removeWidget(WidgetToShow widget, ActiveTabClosedHandler handler) {
+    view.removeWidget(widget, handler);
     widgets.remove(widget);
     removingListeners.remove(widget.getWidget());
   }

@@ -177,7 +177,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
       editor.waitJavaDocPopUpOpened();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/11735", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/11735", ex);
     }
 
     editor.checkTextToBePresentInJavaDocPopUp(expectedTextInJavaDoc);
