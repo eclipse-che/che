@@ -182,7 +182,7 @@ public class TheiaIde {
   public void pressKeyCombination(CharSequence... combination) {
     final String keyCombination = chord(asList(combination));
 
-    // for ensure that events are end before pressing keys combination
+    // to ensure that events are ended before pressing keys combination
     WaitUtils.sleepQuietly(1);
 
     seleniumWebDriverHelper.sendKeys(keyCombination);

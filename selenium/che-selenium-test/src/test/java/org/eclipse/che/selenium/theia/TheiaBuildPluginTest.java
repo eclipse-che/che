@@ -39,6 +39,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = OPENSHIFT)
 public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
   private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";
@@ -74,7 +75,7 @@ public class TheiaBuildPluginTest {
     workspaceServiceClient.delete(WORKSPACE_NAME, defaultTestUser.getName());
   }
 
-  @Test(groups = OPENSHIFT)
+  @Test
   public void pluginShouldBeBuilt() {
     final String pluginNameSearchSequence = "hello-world";
     final String yeomanWizardSearchSequence = ">yeom";
@@ -123,7 +124,7 @@ public class TheiaBuildPluginTest {
     }
   }
 
-  @Test(priority = 1, groups = OPENSHIFT)
+  @Test(priority = 1)
   public void hostedModeShouldWork() {
     final String projectName = "hello-world";
     final String hostedSearchSequence = ">hosted";
@@ -222,6 +223,7 @@ public class TheiaBuildPluginTest {
             theiaIde.waitTheiaIdeTopPanel();
             theiaProjectTree.waitFilesTab();
           } catch (TimeoutException ex) {
+            // page should be refreshed for checking of the deploying
             seleniumWebDriver.navigate().refresh();
             return false;
           }
