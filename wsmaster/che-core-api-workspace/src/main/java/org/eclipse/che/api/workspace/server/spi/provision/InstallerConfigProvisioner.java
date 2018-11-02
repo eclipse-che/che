@@ -51,8 +51,9 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
   public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
     for (InternalMachineConfig machineConfig : internalEnvironment.getMachines().values()) {
+      LOG.debug("Start provisioning installer configs for workspace '{}'", id.getWorkspaceId());
       fillEnv(machineConfig.getEnv(), machineConfig.getInstallers());
-      fillServers(machineConfig.getServers(), machineConfig.getInstallers());
+      fillServers(id.getWorkspaceId(), machineConfig.getServers(), machineConfig.getInstallers());
     }
   }
 
@@ -86,16 +87,20 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
   /**
    * Fill the provided map with servers that are provided by installers.
    *
+   * @param workspaceId workspace id
    * @param servers map to fill
    * @param installers installers to retrieve servers
    * @throws InfrastructureException if any installer has server that conflicts with already
    *     configured one
    */
-  private void fillServers(Map<String, ServerConfig> servers, List<InstallerImpl> installers)
+  private void fillServers(String  workspaceId, Map<String, ServerConfig> servers,
+      List<InstallerImpl> installers)
       throws InfrastructureException {
     for (InstallerImpl installer : installers) {
       for (Map.Entry<String, ? extends ServerConfig> serverEntry :
           installer.getServers().entrySet()) {
+        LOG.debug("Provisioning installer config for workspace '{}' and installer '{}'", workspaceId,
+            installer.getId());
         if (servers.putIfAbsent(serverEntry.getKey(), serverEntry.getValue()) != null
             && !servers.get(serverEntry.getKey()).equals(serverEntry.getValue())) {
           throw new InfrastructureException(

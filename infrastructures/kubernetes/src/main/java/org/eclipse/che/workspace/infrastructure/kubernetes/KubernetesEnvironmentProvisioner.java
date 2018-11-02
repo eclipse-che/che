@@ -31,6 +31,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVars
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Applies the set of configurations to the Kubernetes environment and environment configuration
@@ -46,6 +48,9 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
   @Singleton
   class KubernetesEnvironmentProvisionerImpl
       implements KubernetesEnvironmentProvisioner<KubernetesEnvironment> {
+
+    private static final Logger LOG =
+        LoggerFactory.getLogger(KubernetesEnvironmentProvisionerImpl.class);
 
     private boolean pvcEnabled;
     private WorkspaceVolumesStrategy volumesStrategy;
@@ -99,13 +104,18 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
 
     public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
         throws InfrastructureException {
+      final String workspaceId = identity.getWorkspaceId();
+      LOG.debug("Start provisioning Kubernetes environment for workspace '{}'", workspaceId);
       // 1 stage - update environment according Infrastructure specific
+      LOG.debug("Provisioning installer server ports for workspace '{}'", workspaceId);
       installerServersPortProvisioner.provision(k8sEnv, identity);
       if (pvcEnabled) {
+        LOG.debug("Provisioning logs volume for workspace '{}'", workspaceId);
         logsVolumeMachineProvisioner.provision(k8sEnv, identity);
       }
 
       // 2 stage - converting Che model env to Kubernetes env
+      LOG.debug("Provisioning servers & env vars converters for workspace '{}'", workspaceId);
       serversConverter.provision(k8sEnv, identity);
       envVarsConverter.provision(k8sEnv, identity);
       if (pvcEnabled) {
@@ -113,6 +123,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       }
 
       // 3 stage - add Kubernetes env items
+      LOG.debug("Provisioning environment items for workspace '{}'", workspaceId);
       restartPolicyRewriter.provision(k8sEnv, identity);
       uniqueNamesProvisioner.provision(k8sEnv, identity);
       ramLimitProvisioner.provision(k8sEnv, identity);
@@ -122,6 +133,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       imagePullSecretProvisioner.provision(k8sEnv, identity);
       proxySettingsProvisioner.provision(k8sEnv, identity);
       serviceAccountProvisioner.provision(k8sEnv, identity);
+      LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }
 }

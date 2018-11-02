@@ -24,9 +24,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Sergii Leshchenko */
 public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftEnvironment> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftRuntimeContext.class);
+
   private final OpenShiftRuntimeFactory runtimeFactory;
   private final OpenShiftProjectFactory projectFactory;
   private final KubernetesRuntimeStateCache runtimeStatuses;
@@ -67,7 +72,12 @@ public class OpenShiftRuntimeContext extends KubernetesRuntimeContext<OpenShiftE
 
     // there is cached runtime, restore cached one
     KubernetesRuntimeState runtimeState = runtimeStateOpt.get();
-
+    RuntimeIdentity runtimeId = runtimeState.getRuntimeId();
+    LOG.debug(
+        "Restoring runtime `{}:{}:{}`",
+        runtimeId.getWorkspaceId(),
+        runtimeId.getEnvName(),
+        runtimeId.getOwnerId());
     OpenShiftInternalRuntime runtime =
         runtimeFactory.create(
             this,

@@ -20,6 +20,8 @@ import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Adds projects volumes to a machine with 'ws-agent' server.
@@ -27,6 +29,9 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
  * @author Alexander Garagatyi
  */
 public class ProjectsVolumeForWsAgentProvisioner implements InternalEnvironmentProvisioner {
+
+  private static final Logger LOG = LoggerFactory
+      .getLogger(ProjectsVolumeForWsAgentProvisioner.class);
   public static final String PROJECTS_VOLUME_NAME = "projects";
 
   private final String projectFolderPath;
@@ -41,7 +46,7 @@ public class ProjectsVolumeForWsAgentProvisioner implements InternalEnvironmentP
   @Override
   public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
-
+    LOG.debug("Provisioning project volumes for workspace '{}'", id.getWorkspaceId());
     Optional<String> wsAgentServerMachine =
         WsAgentMachineFinderUtil.getWsAgentServerMachine(internalEnvironment);
 
