@@ -23,6 +23,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -180,6 +181,9 @@ public class TheiaIde {
 
   public void pressKeyCombination(CharSequence... combination) {
     final String keyCombination = chord(asList(combination));
+
+    // to ensure that events are ended before pressing keys combination
+    WaitUtils.sleepQuietly(1);
 
     seleniumWebDriverHelper.sendKeys(keyCombination);
   }
