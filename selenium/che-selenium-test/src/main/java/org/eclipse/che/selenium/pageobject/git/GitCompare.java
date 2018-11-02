@@ -191,7 +191,7 @@ public class GitCompare {
    * @param status is expected line and column position
    */
   public void setCursorToLine(int positionLine, String status) {
-    codenvyEditor.goToLine(positionLine);
+    codenvyEditor.moveCursorToLine(positionLine);
     waitLineAndColumnInLeftCompare(status);
   }
 
