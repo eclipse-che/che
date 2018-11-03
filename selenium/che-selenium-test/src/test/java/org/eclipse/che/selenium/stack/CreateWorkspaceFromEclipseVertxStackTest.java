@@ -29,6 +29,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -60,6 +61,9 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
+
   @BeforeClass
   public void setUp() {
     dashboard.open();
@@ -72,13 +76,19 @@ public class CreateWorkspaceFromEclipseVertxStackTest {
 
   @Test
   public void checkWorkspaceCreationFromEclipseVertxStack() {
-    createWorkspaceHelper.createWorkspaceFromStackWithProjects(
-        ECLIPSE_VERTX, WORKSPACE_NAME, projects);
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithProjects(
+            ECLIPSE_VERTX, WORKSPACE_NAME, projects);
 
     currentWindow = ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
     projectExplorer.waitProjectInitialization(HEALTH_CHECKS_BOOSTER_PROJECT);
     projectExplorer.waitProjectInitialization(HEALTH_HTTP_BOOSTER_PROJECT);
+
+    consoles.waitJDTLSProjectResolveFinishedMessage(
+        HEALTH_CHECKS_BOOSTER_PROJECT, HEALTH_HTTP_BOOSTER_PROJECT);
   }
 
   @Test(priority = 1)

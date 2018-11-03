@@ -20,8 +20,8 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STA
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -99,10 +99,9 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
-import org.eclipse.che.api.workspace.shared.dto.event.MachineLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.UnrecoverablePodEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -125,6 +124,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -153,7 +153,7 @@ public class KubernetesInternalRuntimeTest {
   private static final String CONTAINER_NAME_1 = "test1";
   private static final String CONTAINER_NAME_2 = "test2";
   private static final String EVENT_CREATION_TIMESTAMP = "2018-05-15T16:17:54Z";
-  private static final String EVENT_LAST_TIMESTAMP_IN_PAST = "2018-05-15T16:18:54Z";
+
   /* Pods created by a deployment are created with a random suffix, so Pod names won't match
   exactly. */
   private static final String POD_NAME_RANDOM_SUFFIX = "-12345";
@@ -162,10 +162,6 @@ public class KubernetesInternalRuntimeTest {
 
   private static final String M1_NAME = WORKSPACE_POD_NAME + '/' + CONTAINER_NAME_1;
   private static final String M2_NAME = WORKSPACE_POD_NAME + '/' + CONTAINER_NAME_2;
-
-  private static final String[] EMPTY_UNRECOVERABLE_EVENTS = new String[0];
-  private static final String[] UNRECOVERABLE_EVENTS =
-      new String[] {"Failed Mount", "Failed Scheduling", "Failed to pull image"};
 
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
@@ -176,6 +172,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesRuntimeContext<KubernetesEnvironment> context;
   @Mock private ServersCheckerFactory serverCheckerFactory;
   @Mock private ServersChecker serversChecker;
+  @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
   @Mock private KubernetesBootstrapperFactory bootstrapperFactory;
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private KubernetesNamespace namespace;
@@ -191,11 +188,12 @@ public class KubernetesInternalRuntimeTest {
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private KubernetesServerResolver kubernetesServerResolver;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
+  @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
   @Mock
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> kubernetesEnvironmentProvisioner;
 
-  @Mock private SidecarToolingProvisioner toolingProvisioner;
+  @Mock private SidecarToolingProvisioner<KubernetesEnvironment> toolingProvisioner;
   private KubernetesRuntimeStateCache runtimeStatesCache;
   private KubernetesMachineCache machinesCache;
 
@@ -221,15 +219,15 @@ public class KubernetesInternalRuntimeTest {
     runtimeStatesCache = new MapBasedRuntimeStateCache();
     machinesCache = new MapBasedMachinesCache();
 
-    startSynchronizer = spy(new StartSynchronizer(eventService, IDENTITY));
+    startSynchronizer = spy(new StartSynchronizer(eventService, 5, IDENTITY));
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
 
     internalRuntime =
         new KubernetesInternalRuntime<>(
             13,
             5,
-            UNRECOVERABLE_EVENTS,
             new URLRewriter.NoOpURLRewriter(),
+            unrecoverablePodEventListenerFactory,
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
@@ -243,6 +241,7 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
+            runtimeHangingDetector,
             context,
             namespace,
             emptyList());
@@ -251,8 +250,8 @@ public class KubernetesInternalRuntimeTest {
         new KubernetesInternalRuntime<>(
             13,
             5,
-            EMPTY_UNRECOVERABLE_EVENTS,
             new URLRewriter.NoOpURLRewriter(),
+            unrecoverablePodEventListenerFactory,
             bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
@@ -266,6 +265,7 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
+            runtimeHangingDetector,
             context,
             namespace,
             emptyList());
@@ -294,7 +294,7 @@ public class KubernetesInternalRuntimeTest {
     final Map<String, Ingress> allIngresses = ImmutableMap.of(INGRESS_NAME, ingress);
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    when(ingresses.wait(any(), anyInt(), any())).thenReturn(ingress);
+    when(ingresses.wait(anyString(), anyLong(), any(), any())).thenReturn(ingress);
     when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
@@ -320,6 +320,27 @@ public class KubernetesInternalRuntimeTest {
     verify(services).create(any());
     verify(secrets).create(any());
     verify(configMaps).create(any());
+    verify(namespace.deployments(), times(1)).watchEvents(any());
+    verify(bootstrapper, times(2)).bootstrapAsync();
+    verify(eventService, times(4)).publish(any());
+    verifyOrderedEventsChains(
+        new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
+        new MachineStatusEvent[] {newEvent(M2_NAME, STARTING), newEvent(M2_NAME, RUNNING)});
+    verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
+    verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
+    verify(serversChecker, times(2)).startAsync(any());
+    verify(namespace.deployments(), times(1)).stopWatch();
+  }
+
+  @Test
+  public void startsKubernetesEnvironmentWithUnrecoverableHandler() throws Exception {
+    when(unrecoverablePodEventListenerFactory.isConfigured()).thenReturn(true);
+
+    internalRuntimeWithoutUnrecoverableHandler.internalStart(emptyMap());
+
+    verify(deployments).deploy(any());
+    verify(ingresses).create(any());
+    verify(services).create(any());
     verify(namespace.deployments(), times(2)).watchEvents(any());
     verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
@@ -334,6 +355,8 @@ public class KubernetesInternalRuntimeTest {
 
   @Test
   public void startsKubernetesEnvironmentWithoutUnrecoverableHandler() throws Exception {
+    when(unrecoverablePodEventListenerFactory.isConfigured()).thenReturn(false);
+
     internalRuntimeWithoutUnrecoverableHandler.internalStart(emptyMap());
 
     verify(deployments).deploy(any());
@@ -375,7 +398,7 @@ public class KubernetesInternalRuntimeTest {
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
     when(k8sEnv.getPods()).thenReturn(allPods);
-    doThrow(InfrastructureException.class).when(bootstrapper).bootstrapAsync();
+    doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
 
     try {
       internalRuntime.internalStart(emptyMap());
@@ -396,7 +419,7 @@ public class KubernetesInternalRuntimeTest {
     doNothing().doThrow(InfrastructureException.class).when(namespace).cleanUp();
     when(k8sEnv.getServices()).thenReturn(singletonMap("testService", mock(Service.class)));
     when(services.create(any())).thenThrow(new InfrastructureException("service creation failed"));
-    doThrow(InfrastructureException.class).when(namespace).services();
+    doThrow(IllegalStateException.class).when(namespace).services();
 
     try {
       internalRuntime.internalStart(emptyMap());
@@ -431,6 +454,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.internalStop(emptyMap());
 
+    verify(runtimeHangingDetector).stopTracking(IDENTITY);
     verify(namespace).cleanUp();
   }
 
@@ -458,87 +482,17 @@ public class KubernetesInternalRuntimeTest {
             "image pulled",
             EVENT_CREATION_TIMESTAMP,
             getCurrentTimestampWithOneHourShiftAhead());
-    final ArgumentCaptor<MachineLogEvent> captor = ArgumentCaptor.forClass(MachineLogEvent.class);
+    final ArgumentCaptor<RuntimeLogEvent> captor = ArgumentCaptor.forClass(RuntimeLogEvent.class);
 
     internalRuntime.doStartMachine(kubernetesServerResolver);
     logsPublisher.handle(out1);
     logsPublisher.handle(out2);
 
     verify(eventService, atLeastOnce()).publish(captor.capture());
-    final ImmutableList<MachineLogEvent> machineLogs =
-        ImmutableList.of(asMachineLogEvent(out1), asMachineLogEvent(out2));
+    final ImmutableList<RuntimeLogEvent> machineLogs =
+        ImmutableList.of(asRuntimeLogEvent(out1), asRuntimeLogEvent(out2));
 
     assertTrue(captor.getAllValues().containsAll(machineLogs));
-  }
-
-  @Test
-  public void testHandleUnrecoverableEventByReason() throws Exception {
-    final String unrecoverableEventReason = "Failed Mount";
-    final UnrecoverablePodEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
-    final PodEvent unrecoverableEvent =
-        mockContainerEvent(
-            WORKSPACE_POD_NAME,
-            unrecoverableEventReason,
-            "Failed to mount volume 'claim-che-workspace'",
-            EVENT_CREATION_TIMESTAMP,
-            getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHandler.handle(unrecoverableEvent);
-
-    verify(startSynchronizer).completeExceptionally(any(InfrastructureException.class));
-  }
-
-  @Test
-  public void testHandleUnrecoverableEventByMessage() throws Exception {
-    final String unrecoverableEventMessage =
-        "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverablePodEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
-    final PodEvent unrecoverableEvent =
-        mockContainerEvent(
-            WORKSPACE_POD_NAME,
-            "Pulling",
-            unrecoverableEventMessage,
-            EVENT_CREATION_TIMESTAMP,
-            getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHandler.handle(unrecoverableEvent);
-
-    verify(startSynchronizer).completeExceptionally(any(InfrastructureException.class));
-  }
-
-  @Test
-  public void testDoNotHandleUnrecoverableEventFromNonWorkspacePod() throws Exception {
-    final String unrecoverableEventMessage =
-        "Failed to pull image eclipse/che-server:nightly-centos";
-    final UnrecoverablePodEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
-    final PodEvent unrecoverableEvent =
-        mockContainerEvent(
-            "NonWorkspacePod",
-            "Pulling",
-            unrecoverableEventMessage,
-            EVENT_CREATION_TIMESTAMP,
-            getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHandler.handle(unrecoverableEvent);
-    // 'internalStop' is NOT expected to be called since event does not belong to the workspace
-    // pod.Cleanup will not be triggered
-    verify(namespace, never()).cleanUp();
-  }
-
-  @Test
-  public void testHandleRegularEvent() throws Exception {
-    final UnrecoverablePodEventHandler unrecoverableEventHandler =
-        internalRuntime.new UnrecoverablePodEventHandler(k8sEnv.getPods());
-    final PodEvent regularEvent =
-        mockContainerEvent(
-            WORKSPACE_POD_NAME,
-            "Pulling",
-            "pulling image",
-            EVENT_CREATION_TIMESTAMP,
-            getCurrentTimestampWithOneHourShiftAhead());
-    unrecoverableEventHandler.handle(regularEvent);
-    // 'internalStop' is NOT expected to be called and namespace cleanup will not be triggered
-    verify(namespace, never()).cleanUp();
   }
 
   @Test
@@ -887,8 +841,8 @@ public class KubernetesInternalRuntimeTest {
     return event;
   }
 
-  private static MachineLogEvent asMachineLogEvent(PodEvent event) {
-    return newDto(MachineLogEvent.class)
+  private static RuntimeLogEvent asRuntimeLogEvent(PodEvent event) {
+    return newDto(RuntimeLogEvent.class)
         .withRuntimeId(DtoConverter.asDto(IDENTITY))
         .withText(event.getMessage())
         .withTime(event.getCreationTimeStamp())

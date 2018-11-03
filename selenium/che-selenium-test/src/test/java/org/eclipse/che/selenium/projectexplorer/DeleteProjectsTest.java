@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.projectexplorer;
 
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.DELETE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -30,7 +29,6 @@ import org.eclipse.che.selenium.pageobject.IdeMainDockPanel;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -92,7 +90,6 @@ public class DeleteProjectsTest {
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAMES.get(0));
     projectExplorer.clickOnItemInContextMenu(DELETE);
     acceptDeletion(PROJECT_NAMES.get(0));
-    checkErrorMessageNotPresentInConsole();
   }
 
   @Test
@@ -101,7 +98,6 @@ public class DeleteProjectsTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAMES.get(1));
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     acceptDeletion(PROJECT_NAMES.get(1));
-    checkErrorMessageNotPresentInConsole();
   }
 
   @Test
@@ -114,7 +110,6 @@ public class DeleteProjectsTest {
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     acceptDeletion(PROJECT_NAMES.get(3));
     projectExplorer.waitDisappearItemByPath(PROJECT_NAMES.get(3));
-    checkErrorMessageNotPresentInConsole();
   }
 
   @Test
@@ -128,7 +123,6 @@ public class DeleteProjectsTest {
     projectExplorer.clickOnItemInContextMenu(DELETE);
     acceptDeletion(PROJECT_NAMES.get(4));
     projectExplorer.waitDisappearItemByPath(PROJECT_NAMES.get(4));
-    checkErrorMessageNotPresentInConsole();
   }
 
   private void deleteFromDeleteIcon(String pathToProject) {
@@ -144,14 +138,6 @@ public class DeleteProjectsTest {
     askDialog.waitFormToClose();
     loader.waitOnClosed();
     projectExplorer.waitDisappearItemByPath(projectName);
-  }
-
-  private void checkErrorMessageNotPresentInConsole() {
-    try {
-      consoles.waitExpectedTextIntoConsole("[ERROR]", 7);
-      fail("Error message is present in console");
-    } catch (TimeoutException ex) {
-    }
   }
 
   private void waitAllProjectsInProjectExplorer() {

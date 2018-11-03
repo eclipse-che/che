@@ -14,7 +14,7 @@ package org.eclipse.che.ide.ext.java.client.project.classpath.valueproviders.pag
 import com.google.inject.ImplementedBy;
 import java.util.Map;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
 /**
  * View interface for the information about JARs and class folders on the build path.
@@ -31,7 +31,7 @@ public interface LibEntryView extends View<LibEntryView.ActionDelegate> {
    *
    * @param data map which binds categories of the library
    */
-  void setData(Map<String, ClasspathEntryDto> data);
+  void setData(Map<String, ClasspathEntry> data);
 
   /** Sets enabled state of the 'Add Jar' button. */
   void setAddJarButtonState(boolean enabled);

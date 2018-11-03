@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.factory;
 
+import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -20,7 +21,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -36,7 +36,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = TestGroup.GITHUB)
+@Test(groups = {GITHUB})
 public class DirectUrlFactoryWithRootFolderTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private DefaultTestUser testUser;
@@ -99,7 +99,7 @@ public class DirectUrlFactoryWithRootFolderTest {
       events.waitExpectedMessage(expectedMessInTheEventsPanel);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/6440");
+      fail("Known random failure https://github.com/eclipse/che/issues/6440");
     }
     projectExplorer.openItemByPath(projectName);
 

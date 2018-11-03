@@ -20,39 +20,17 @@ public class FactoryConstants {
 
   public static final String INVALID_VERSION_MESSAGE =
       "You have provided an inaccurate or deprecated Factory Version. For more information, "
-          + "please visit http://docs.codenvy.com/user/project-lifecycle/#configuration-reference";
+          + "please visit https://www.eclipse.org/che/docs/factories_json_reference.html";
 
   public static final String UNPARSABLE_FACTORY_MESSAGE =
-      "We cannot parse the provided factory. For more information, please visit http://docs.codenvy"
-          + ".com/user/project-lifecycle/#configuration-reference";
+      "We cannot parse the provided factory. For more information, please visit https://www.eclipse.org/che/docs/factories_json_reference.html";
 
   public static final String MISSING_MANDATORY_MESSAGE =
-      "You are missing a mandatory parameter %s.  For more information, please visit http://docs.codenvy"
-          + ".com/user/project-lifecycle/#configuration-reference";
-
-  /* Used in factory servlet*/
-  public static final String ILLEGAL_HOSTNAME_MESSAGE =
-      "This Factory has its access restricted by certain hostname. Your client does not match the specified "
-          + "policy. Please contact the owner of this Factory for more information.";
+      "You are missing a mandatory parameter \"%s\".  For more information, please visit https://www.eclipse.org/che/docs/factories_json_reference.html";
 
   public static final String PARAMETRIZED_INVALID_PARAMETER_MESSAGE =
-      "You have provided an invalid parameter %s for this version of Factory parameters %s. For more "
-          + "information, please visit http://docs.codenvy.com/user/project-lifecycle/#configuration-reference";
-
-  public static final String PARAMETRIZED_ILLEGAL_ACCOUNTID_PARAMETER_MESSAGE =
-      "You do not have a valid accountId. You could have provided the wrong value, your subscription has expired, "
-          + "or you do not have a valid subscription account. "
-          + "Please contact info@codenvy.com with any questions. \n"
-          + "accountId Submitted: %s";
-
-  /* Used in factory servlet*/
-  public static final String PARAMETRIZED_ILLEGAL_TRACKED_PARAMETER_MESSAGE =
-      "You do not have a valid accountId. Your Factory configuration has a parameter that can only be used with a "
-          + "Tracked Factory subscription. You could have provided the wrong value, "
-          + "your subscription has expired, or you do not have a valid subscription account. "
-          + "Please contact info@codenvy.com with any questions. \n"
-          + "accountId Submitted: %s \n"
-          + "Invalid Parameter Name: %s";
+      "You have provided an invalid parameter \"%s\" for this version of Factory parameters \"%s\". For more "
+          + "information, please visit https://www.eclipse.org/che/docs/factories_json_reference.html";
 
   public static final String INVALID_SINCE_MESSAGE =
       "Since date cannot occur before the current date.";
@@ -77,9 +55,6 @@ public class FactoryConstants {
 
   public static final String INVALID_WELCOME_PAGE_ACTION =
       "The openWelcomePage action requires 'greetingContentUrl' property to be set.";
-
-  public static final String ILLEGAL_REQUIRE_AUTHENTICATION_FOR_NAMED_WORKSPACE_MESSAGE =
-      "This factory was improperly configured. The parameter 'workspace.type=named' requires 'policies.requireAuthentication=true'.";
 
   public static final String ILLEGAL_FACTORY_BY_SINCE_MESSAGE =
       "This Factory is not yet valid due to time restrictions applied by its owner. Please, "

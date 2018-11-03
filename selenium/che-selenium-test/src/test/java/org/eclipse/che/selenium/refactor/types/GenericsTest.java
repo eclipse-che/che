@@ -16,6 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.RENAME;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -28,11 +29,13 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -58,6 +61,7 @@ public class GenericsTest {
   @Inject private Menu menu;
   @Inject private AskDialog askDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -68,6 +72,8 @@ public class GenericsTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -93,7 +99,14 @@ public class GenericsTest {
         "Found potential matches. Please review changes on the preview page.");
     askDialog.waitFormToClose();
     projectExplorer.waitItem(pathToCurrentPackage + "/B.java");
-    assertEquals(editor.getVisibleTextFromEditor(), contentFromOutB);
+
+    try {
+      assertEquals(editor.getVisibleTextFromEditor(), contentFromOutB);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11779");
+    }
+
     editor.waitTextIntoEditor(contentFromOutB);
   }
 

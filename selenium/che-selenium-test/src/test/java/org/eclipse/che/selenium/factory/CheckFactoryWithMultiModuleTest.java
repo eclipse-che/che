@@ -22,10 +22,12 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
+import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
@@ -44,9 +46,12 @@ public class CheckFactoryWithMultiModuleTest {
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Dashboard dashboard;
   @Inject private PullRequestPanel pullRequestPanel;
+
+  @Inject private Consoles consoles;
   @Inject private TestGitHubRepository testRepo;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   private TestFactory testFactory;
 
@@ -68,8 +73,13 @@ public class CheckFactoryWithMultiModuleTest {
   }
 
   @AfterClass
-  public void tearDown() throws Exception {
+  public void deleteTestFactory() throws Exception {
     testFactory.delete();
+  }
+
+  @AfterClass
+  public void restoreContributionTabPreference() throws Exception {
+    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
   }
 
   @Test
@@ -84,9 +94,10 @@ public class CheckFactoryWithMultiModuleTest {
           "Project " + PROJECT_NAME + " imported");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/10728");
+      fail("Known random failure https://github.com/eclipse/che/issues/10728");
     }
 
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);

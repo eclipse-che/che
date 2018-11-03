@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
@@ -56,16 +55,10 @@ public class DockerfileEnvironmentFactoryTest {
   @Test
   public void testRamProvisionerIsInvoked() throws Exception {
     final Map<String, InternalMachineConfig> machines =
-        ImmutableMap.of(MACHINE_NAME, mockInternalMachineConfig(new HashMap<>()));
+        ImmutableMap.of(MACHINE_NAME, mock(InternalMachineConfig.class));
 
     factory.doCreate(recipe, machines, Collections.emptyList());
 
     verify(memoryProvisioner).provision(any(), eq(0L), eq(0L));
-  }
-
-  private static InternalMachineConfig mockInternalMachineConfig(Map<String, String> attributes) {
-    final InternalMachineConfig machineConfigMock = mock(InternalMachineConfig.class);
-    when(machineConfigMock.getAttributes()).thenReturn(attributes);
-    return machineConfigMock;
   }
 }

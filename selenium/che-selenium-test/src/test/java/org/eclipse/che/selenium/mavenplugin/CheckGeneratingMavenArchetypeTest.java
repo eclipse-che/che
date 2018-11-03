@@ -14,7 +14,6 @@ package org.eclipse.che.selenium.mavenplugin;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -41,6 +40,7 @@ public class CheckGeneratingMavenArchetypeTest {
   @Inject private TestWorkspace workspace;
   @Inject private ConfigureClasspath selectPath;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private Consoles consoles;
 
   @Test
   public void createMavenArchetypeStartProjectByWizard() throws Exception {
@@ -72,7 +72,7 @@ public class CheckGeneratingMavenArchetypeTest {
     projectWizard.checkVersionOnWizardContainsText("1.0-SNAPSHOT");
     projectWizard.clickCreateButton();
     projectExplorer.waitItem(PROJECT_NAME);
-    console.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     expectedItems.forEach(projectExplorer::waitItem);
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");

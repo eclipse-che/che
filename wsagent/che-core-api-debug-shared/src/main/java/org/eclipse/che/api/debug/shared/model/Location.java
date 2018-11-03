@@ -23,7 +23,7 @@ public interface Location {
   boolean isExternalResource();
 
   /** Returns external resource id in case if {@link #isExternalResource()} return true. */
-  int getExternalResourceId();
+  String getExternalResourceId();
 
   /** Returns project path, for resource which we are debugging now. */
   String getResourceProjectPath();

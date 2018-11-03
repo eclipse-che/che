@@ -11,14 +11,13 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.core.constant.TestCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -26,10 +25,8 @@ import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsToolbar;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -42,10 +39,9 @@ import org.testng.annotations.Test;
 public class CheckAutocompleteFeaturesInTheTestFolderTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate("CheckAuthoCompleteInTheTestFolder_", 4);
-  private static final String tesClass = "AppTest.java";
-  private static final String BUILD_COMMAND = "mvn clean install -f ${current.project.path}";
-  private static final String BUILD_COMMAND_NAME = "build";
-  private final String pathToClassInTstFolder =
+  private static final String TEST_CLASS = "AppTest.java";
+  private static final String TAB_TITLE = "AppTest";
+  private static final String PATH_TO_TEST_FOLDER =
       PROJECT_NAME + "/src/test/java/com/codenvy/example/java/";
 
   @Inject private TestWorkspace workspace;
@@ -54,11 +50,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private TestCommandServiceClient testCommandServiceClient;
-  @Inject private CommandsToolbar commandsToolbar;
   @Inject private Consoles consoles;
-  @Inject private CommandsExplorer commandsExplorer;
-  @Inject private CommandsEditor commandsEditor;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -69,10 +61,8 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
 
-    testCommandServiceClient.createCommand(
-        BUILD_COMMAND, BUILD_COMMAND_NAME, TestCommandsConstants.MAVEN, workspace.getId());
-
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -80,74 +70,116 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
 
-    commandsExplorer.openCommandsExplorer();
-    commandsExplorer.waitCommandExplorerIsOpened();
-    commandsExplorer.runCommandByName(BUILD_COMMAND_NAME);
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
-
     projectExplorer.clickOnProjectExplorerTab();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
 
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
-    projectExplorer.openItemByPath(pathToClassInTstFolder + tesClass);
+    projectExplorer.openItemByPath(PATH_TO_TEST_FOLDER + TEST_CLASS);
+    editor.waitTabIsPresent(TAB_TITLE);
+
     checkOpenDeclaration();
     checkAutocompletion();
     checkJavadoc();
   }
 
   private void checkOpenDeclaration() {
+    final String expectedTabTitle = "Test.class";
+    final String expectedContent =
+        "package junit.framework;\n"
+            + "\n"
+            + "/**\n"
+            + " * A <em>Test</em> can be run and collect its results.\n"
+            + " *\n"
+            + " * @see TestResult\n"
+            + " */\n"
+            + "public interface Test {\n"
+            + " /**\n"
+            + "  * Counts the number of test cases that will be run by this test.\n"
+            + "  */\n"
+            + " public abstract int countTestCases();\n"
+            + " /**\n"
+            + "  * Runs a test and collects its result in a TestResult instance.\n"
+            + "  */\n"
+            + " public abstract void run(TestResult result);\n"
+            + "}";
+
+    // prepare file
     editor.waitActive();
     editor.goToCursorPositionVisible(36, 21);
     editor.waitActive();
     editor.waitSpecifiedValueForLineAndChar(36, 21);
-    editor.typeTextIntoEditor(Keys.F4.toString());
-    editor.waitTabIsPresent("Test");
-    String expectedContent =
-        "\n"
-            + " // Failed to get sources. Instead, stub sources have been generated.\n"
-            + " // Implementation of methods is unavailable.\n"
-            + "package junit.framework;\n"
-            + "public interface Test {\n"
-            + "\n"
-            + "    public int countTestCases();\n"
-            + "\n"
-            + "    public void run(junit.framework.TestResult arg0);\n"
-            + "\n"
-            + "}\n";
 
+    // check open declaration
+    editor.typeTextIntoEditor(Keys.F4.toString());
+    editor.waitTabIsPresent(expectedTabTitle);
     editor.waitTextIntoEditor(expectedContent);
-    editor.closeFileByNameWithSaving("Test");
+    editor.closeFileByNameWithSaving(expectedTabTitle);
   }
 
   private void checkAutocompletion() {
+    final String[] autocompleteItems = {
+      "Test", "TestSuite", "TestCollector", "TestListener", "TestFailure"
+    };
+
+    final String textBeforeAutocomplete =
+        "    public AppTest(String testName) {\n"
+            + "        super(testName);\n"
+            + "        Test\n"
+            + "    }";
+
+    final String textAfterAutocomplete =
+        "    public AppTest(String testName) {\n"
+            + "        super(testName);\n"
+            + "        TestCase\n"
+            + "    }";
+
+    final String codeWithoutErrors =
+        "    public AppTest(String testName) {\n"
+            + "        super(testName);\n"
+            + "        TestCase testCase;\n"
+            + "    }";
+
+    // prepare text and launch autocomplete
+    editor.waitActive();
     editor.goToCursorPositionVisible(30, 25);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.waitSpecifiedValueForLineAndChar(31, 9);
     editor.typeTextIntoEditor("Test");
+    editor.waitTextIntoEditor(textBeforeAutocomplete);
     editor.launchAutocomplete();
-    String[] autocompleteItems = {
-      "Test", "TestSuite", "TestCollector", "TestListener", "TestFailure"
-    };
+
+    // check autocomplete proposals
     for (String autocompleteItem : autocompleteItems) {
       editor.waitProposalIntoAutocompleteContainer(autocompleteItem);
     }
-    editor.enterAutocompleteProposal("TestCase");
-    editor.waitTextIntoEditor(
-        "    public AppTest(String testName) {\n"
-            + "        super(testName);\n"
-            + "        TestCase\n"
-            + "    }");
+
+    // check applying of the autocomplete suggestion
+    editor.enterAutocompleteProposal("Case - junit.framework");
+    editor.waitTextIntoEditor(textAfterAutocomplete);
     editor.typeTextIntoEditor(" testCase;");
+    editor.waitTextIntoEditor(codeWithoutErrors);
   }
 
   private void checkJavadoc() {
+    final String tabTitle = "AppTest";
+    final String expectedTextInJavaDoc =
+        "The class String includes methods for examining individual characters of the sequence, for comparing strings, for searching strings, for extracting substrings, and for creating a copy of a string with all characters translated to uppercase or to lowercase.";
+
+    editor.waitTabIsPresent(tabTitle);
+    editor.selectTabByName(tabTitle);
+    editor.waitTabFocusing(0, tabTitle);
+    editor.waitActive();
     editor.goToCursorPositionVisible(29, 21);
     editor.openJavaDocPopUp();
-    String expectedTextInJavaDoc =
-        "The String class represents character strings. "
-            + "All string literals in Java programs, such as \"abc\", are implemented as instances of this class.";
+    try {
+      editor.waitJavaDocPopUpOpened();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11735", ex);
+    }
+
     editor.checkTextToBePresentInJavaDocPopUp(expectedTextInJavaDoc);
   }
 }

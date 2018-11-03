@@ -20,6 +20,7 @@ import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.ARROW_RIGHT;
 import static org.openqa.selenium.Keys.ARROW_UP;
 import static org.openqa.selenium.Keys.ENTER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -27,12 +28,14 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.FindUsages;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -76,6 +79,7 @@ public class FindUsagesBaseOperationTest {
   @Inject private TestWorkspace workspace;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -85,6 +89,7 @@ public class FindUsagesBaseOperationTest {
 
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -139,11 +144,15 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
 
     // Check nodes in the Find Usages panel by 'Enter' button
+    // Close node by ENTER button and check it closed
     findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel("org.eclipse.qa.examples");
+
+    // Open node and check that only "org.eclipse.qa.examples" node is opened
+    findUsages.selectNodeInFindUsagesPanel(PROJECT_NAME);
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_1);
+    findUsages.waitExpectedTextInFindUsagesPanel("org.eclipse.qa.examples");
     findUsages.selectNodeInFindUsagesPanel("org.eclipse.qa.examples");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.selectNodeInFindUsagesPanel("AppController");
@@ -152,11 +161,19 @@ public class FindUsagesBaseOperationTest {
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
     findUsages.waitExpectedTextInFindUsagesPanel(EXPECTED_TEXT_1);
+
+    // Close "AppController" node by ENTER button and check it closed
     findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(
+        "handleRequest(HttpServletRequest, HttpServletResponse)");
+
+    // Open "AppController" node and check that only "handleRequest(HttpServletRequest,
+    // HttpServletResponse)" node is opened
+    findUsages.selectNodeInFindUsagesPanel("AppController");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
-    findUsages.waitExpectedTextIsNotPresentInFindUsagesPanel(EXPECTED_TEXT_2);
+    findUsages.waitExpectedTextInFindUsagesPanel(
+        "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.selectNodeInFindUsagesPanel(
         "handleRequest(HttpServletRequest, HttpServletResponse)");
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
@@ -187,6 +204,7 @@ public class FindUsagesBaseOperationTest {
 
     // Check the found items in the editor
     findUsages.selectHighlightedItemInFindUsagesByDoubleClick(30);
+    editor.waitActive();
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.expectedNumberOfActiveLine(30);
     editor.waitTextElementsActiveLine("numGuessByUser");
@@ -197,8 +215,16 @@ public class FindUsagesBaseOperationTest {
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
+    editor.waitActive();
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
-    editor.expectedNumberOfActiveLine(34);
+
+    try {
+      editor.expectedNumberOfActiveLine(34);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11780", ex);
+    }
+
     editor.waitTextElementsActiveLine("numGuessByUser");
   }
 }

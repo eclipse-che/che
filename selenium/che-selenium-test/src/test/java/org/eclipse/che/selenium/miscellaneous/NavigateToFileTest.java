@@ -30,6 +30,7 @@ import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -63,6 +64,7 @@ public class NavigateToFileTest {
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private CommandsPalette commandsPalette;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -78,6 +80,7 @@ public class NavigateToFileTest {
         CUSTOM,
         workspace.getId());
     ide.open(workspace);
+    consoles.waitJDTLSStartedMessage();
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME_2);
@@ -163,7 +166,7 @@ public class NavigateToFileTest {
       navigateToFile.selectFileByName(dropdownVerificationPath);
     } catch (WebDriverException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/8465", ex);
+      fail("Known random failure https://github.com/eclipse/che/issues/8465", ex);
     }
 
     editor.waitActive();

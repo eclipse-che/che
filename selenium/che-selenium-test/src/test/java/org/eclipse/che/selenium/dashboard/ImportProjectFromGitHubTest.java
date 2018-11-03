@@ -15,7 +15,6 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
-import static org.testng.Assert.fail;
 import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.inject.Inject;
@@ -24,11 +23,12 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
@@ -36,12 +36,10 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.GITHUB})
 public class ImportProjectFromGitHubTest {
   private static final String WORKSPACE =
       generate(ImportProjectFromGitHubTest.class.getSimpleName(), 4);
@@ -69,7 +67,11 @@ public class ImportProjectFromGitHubTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubRepository testRepo;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() throws IOException {
@@ -85,7 +87,7 @@ public class ImportProjectFromGitHubTest {
   }
 
   @Test
-  public void checkAbilityImportProjectFromGithub() throws Exception {
+  public void checkAbilityImportProjectFromGithub() {
     testRepoName = testRepo.getName();
     projectName = String.format("%s-%s", gitHubUsername, testRepoName);
 
@@ -111,6 +113,9 @@ public class ImportProjectFromGitHubTest {
     projectSourcePage.selectProjectFromList(testRepoName);
     projectSourcePage.clickOnAddProjectButton();
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
@@ -132,13 +137,7 @@ public class ImportProjectFromGitHubTest {
     if (!projectSourcePage.isGithubProjectsListDisplayed()) {
       seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
-      try {
-        projectSourcePage.waitAuthorizeBtn();
-      } catch (WebDriverException ex) {
-        // remove try-catch block after issue has been resolved
-        fail("Known issue https://github.com/redhat-developer/rh-che/issues/621", ex);
-      }
-
+      projectSourcePage.waitAuthorizeBtn();
       projectSourcePage.clickOnAuthorizeBtn();
       seleniumWebDriver.switchTo().window(ideWin);
     }

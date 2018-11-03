@@ -253,6 +253,7 @@ parse_args() {
     --deploy-che - deploy che to ocp
     --project | -p - OpenShift namespace to deploy Che (defaults to eclipse-che). Example: --project=myproject
     --multiuser - deploy Che in multiuser mode
+    --postgres-debug - run PostgreSQL DB with Debug logging
     --no-pull - IfNotPresent pull policy for Che server deployment
     --rolling - rolling update strategy (Recreate is the default one)
     --debug - deploy Che in a debug mode, create and expose debug route
@@ -309,6 +310,10 @@ parse_args() {
                export CHE_MULTIUSER=true
                shift
            ;;
+           --postgres-debug)
+               export POSTGRESQL_LOG_DEBUG=true
+               shift
+           ;;
            --update)
                shift
            ;;
@@ -318,6 +323,7 @@ parse_args() {
            ;;
            --no-pull)
                export IMAGE_PULL_POLICY=IfNotPresent
+               export CHE_WORKSPACE_PLUGIN__BROKER_PULL__POLICY=IfNotPresent
                shift
            ;;
            --rolling)

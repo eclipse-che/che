@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.ACTION_NODE_ID_PATTERN;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.ALL_ACTIONS_XPATH;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.PANEL_ID;
@@ -19,9 +20,11 @@ import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.TE
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Collection;
 import java.util.List;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 @Singleton
@@ -99,23 +102,27 @@ public class AssistantFindPanel {
   }
 
   public void waitNode(String expectedText) {
-    seleniumWebDriverHelper.waitSuccessCondition(
-        driver -> {
-          for (int i = 0; i < getActionNodesCount(); i++) {
-            if (isActionNodeContainsText(i, expectedText)) {
-              return true;
-            }
-          }
-          return false;
-        });
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitSuccessCondition(
+                driver -> {
+                  for (int i = 0; i < getActionNodesCount(); i++) {
+                    if (isActionNodeContainsText(i, expectedText)) {
+                      return true;
+                    }
+                  }
+                  return false;
+                }),
+        WIDGET_TIMEOUT_SEC * 2,
+        StaleElementReferenceException.class);
   }
 
   public void waitAllNodes(String... expectedNodesText) {
     asList(expectedNodesText).forEach(nodeText -> waitNode(nodeText));
   }
 
-  public void waitAllNodes(List<String> expectedNodesText) {
-    expectedNodesText.forEach(nodeText -> waitNode(nodeText));
+  public void waitAllNodes(Collection<String> expectedNodesText) {
+    expectedNodesText.forEach(this::waitNode);
   }
 
   public void waitActionNodeTextEqualsTo(int nodeIndex, String expectedText) {
@@ -129,6 +136,19 @@ public class AssistantFindPanel {
   public void clickOnActionNodeWithTextContains(String visibleText) {
     for (int i = 0; i < getActionNodesCount(); i++) {
       if (getActionNodeText(i).contains(visibleText)) {
+        getActionNode(i).click();
+        return;
+      }
+    }
+
+    String exceptionMessage =
+        String.format("Item with expected visible text: \"%s\" has not been detected", visibleText);
+    throw new RuntimeException(exceptionMessage);
+  }
+
+  public void clickOnActionNodeWithTextEqualsTo(String visibleText) {
+    for (int i = 0; i < getActionNodesCount(); i++) {
+      if (getActionNodeText(i).equals(visibleText)) {
         getActionNode(i).click();
         return;
       }

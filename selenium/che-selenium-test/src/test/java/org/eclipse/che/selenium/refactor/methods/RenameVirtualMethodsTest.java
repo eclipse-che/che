@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.refactor.methods;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -28,6 +29,7 @@ import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -62,6 +64,7 @@ public class RenameVirtualMethodsTest {
   @Inject private AskDialog askDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriver seleniumWebDriver;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -72,6 +75,8 @@ public class RenameVirtualMethodsTest {
         nameOfProject,
         ProjectTemplates.MAVEN_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(nameOfProject);
     projectExplorer.waitItem(nameOfProject);
     projectExplorer.quickExpandWithJavaScript();
   }
@@ -128,9 +133,15 @@ public class RenameVirtualMethodsTest {
     doRefactorByWizardWithClosingWarnMess(14, 10, "k");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void testGeneric2() {
-    doRefactorByWizard(20, 20, "addIfPositive");
+    try {
+      doRefactorByWizard(20, 20, "addIfPositive");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10784", ex);
+    }
+
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
@@ -153,7 +164,7 @@ public class RenameVirtualMethodsTest {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
     editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
-    typeAndWaitNewName(newName);
+    refactor.typeAndWaitNewName(newName);
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     refactor.sendKeysIntoField(Keys.ARROW_LEFT.toString());
     // need for validation on server side
@@ -167,7 +178,7 @@ public class RenameVirtualMethodsTest {
     prepareProjectForRefactor(cursorPositionLine, cursorPositionChar);
     editor.launchRefactorForm();
     refactor.waitRenameMethodFormIsOpen();
-    typeAndWaitNewName(newName);
+    refactor.typeAndWaitNewName(newName);
     refactor.clickOkButtonRefactorForm();
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
@@ -211,14 +222,5 @@ public class RenameVirtualMethodsTest {
     }
 
     return result;
-  }
-
-  private void typeAndWaitNewName(String newName) {
-    try {
-      refactor.typeAndWaitNewName(newName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7500");
-    }
   }
 }

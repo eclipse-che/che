@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_
 import com.google.common.base.Supplier;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Collection;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.FluentWait;
@@ -56,12 +57,12 @@ public class WebDriverWaitFactory {
    * exception of {@code ignoringExceptionType}.
    *
    * @param timeoutInSec waiting time in seconds.
-   * @param ignoredExceptionType exception which is ignoring during timeout.
+   * @param ignoredExceptionTypes exceptions which are ignoring during timeout.
    * @return
    */
   public FluentWait<WebDriver> get(
-      int timeoutInSec, Class<? extends Throwable> ignoredExceptionType) {
-    return new WebDriverWait(seleniumWebDriver, timeoutInSec).ignoring(ignoredExceptionType);
+      int timeoutInSec, Collection<Class<? extends Throwable>> ignoredExceptionTypes) {
+    return new WebDriverWait(seleniumWebDriver, timeoutInSec).ignoreAll(ignoredExceptionTypes);
   }
 
   /**

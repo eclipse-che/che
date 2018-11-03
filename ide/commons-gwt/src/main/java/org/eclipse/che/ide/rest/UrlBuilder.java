@@ -12,7 +12,11 @@
 package org.eclipse.che.ide.rest;
 
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
+import com.google.gwt.json.client.JSONValue;
+import java.util.function.Function;
 
 /**
  * Extended {@link com.google.gwt.http.client.UrlBuilder} with constructor that consumes string url.
@@ -52,19 +56,19 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
   }
 
   public String getHost() {
-    return o.get("host").toString();
+    return String.valueOf(convert(o, "host", JSONValue::isNumber, JSONNumber::doubleValue));
   }
 
   public String getProtocol() {
-    return o.get("protocol").toString();
+    return convert(o, "protocol", JSONValue::isString, JSONString::stringValue);
   }
 
   public String getPort() {
-    return o.get("port").toString();
+    return convert(o, "port", JSONValue::isString, JSONString::stringValue);
   }
 
   public String getPath() {
-    return o.get("path").toString();
+    return convert(o, "path", JSONValue::isString, JSONString::stringValue);
   }
 
   public boolean containsPort() {
@@ -73,6 +77,18 @@ public class UrlBuilder extends com.google.gwt.http.client.UrlBuilder {
 
   public String getUrl() {
     return buildString();
+  }
+
+  private <T, V> V convert(JSONObject o, String key, Function<JSONValue, T> f, Function<T, V> g) {
+    if (!o.containsKey(key)) {
+      return null;
+    }
+    JSONValue v = o.get(key);
+    T value = f.apply(v);
+    if (value == null) {
+      return null;
+    }
+    return g.apply(value);
   }
 
   private native JavaScriptObject parseUrl(String url) /*-{

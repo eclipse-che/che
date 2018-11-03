@@ -19,6 +19,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.RENAME;
+import static org.testng.Assert.fail;
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
@@ -28,12 +29,14 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -56,6 +59,7 @@ public class TestAnnotationsTest {
   @Inject private Menu menu;
   @Inject private AskDialog askDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setup() throws Exception {
@@ -64,6 +68,8 @@ public class TestAnnotationsTest {
         workspace.getId(), get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SIMPLE);
 
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -91,7 +97,13 @@ public class TestAnnotationsTest {
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     projectExplorer.waitItem(pathToCurrentPackage + "/B.java");
-    editor.waitTextIntoEditor(contentFromInB);
+
+    try {
+      editor.waitTextIntoEditor(contentFromInB);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/11779");
+    }
   }
 
   private void setFieldsForTest(String nameCurrentTest) throws Exception {

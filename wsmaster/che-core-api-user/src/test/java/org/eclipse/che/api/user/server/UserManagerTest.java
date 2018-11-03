@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMapOf;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,7 +73,8 @@ public class UserManagerTest {
         new UserManager(
             userDao, profileDao, preferencesDao, eventService, new String[] {"reserved"});
 
-    when(eventService.publish(any()))
+    lenient()
+        .when(eventService.publish(any()))
         .thenAnswer(
             invocationOnMock -> {
               Object arg = invocationOnMock.getArguments()[0];

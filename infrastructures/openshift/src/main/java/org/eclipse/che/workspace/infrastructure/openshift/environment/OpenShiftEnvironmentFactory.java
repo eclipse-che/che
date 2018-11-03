@@ -49,7 +49,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  */
 public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<OpenShiftEnvironment> {
 
-  static final int ROUTE_IGNORED_WARNING_CODE = 4100;
+  static final int ROUTE_IGNORED_WARNING_CODE = 5100;
   static final String ROUTES_IGNORED_WARNING_MESSAGE =
       "Routes specified in OpenShift recipe are ignored. "
           + "To expose ports please define servers in machine configuration.";

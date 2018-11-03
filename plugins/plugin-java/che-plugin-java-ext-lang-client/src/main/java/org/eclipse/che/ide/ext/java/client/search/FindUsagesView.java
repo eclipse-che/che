@@ -11,22 +11,14 @@
  */
 package org.eclipse.che.ide.ext.java.client.search;
 
-import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
-import org.eclipse.che.ide.ext.java.shared.dto.search.FindUsagesResponse;
+import org.eclipse.che.jdt.ls.extension.api.dto.UsagesResponse;
 
 /**
- * View for find usages result
+ * This interface only exists to allow mocking of the view in regular unit tests.
  *
- * @author Evgen Vidolob
+ * @author Thomas Mäder
  */
-@ImplementedBy(FindUsagesViewImpl.class)
-public interface FindUsagesView extends View<FindUsagesView.ActionDelegate> {
-
-  void setVisible(boolean visible);
-
-  void showUsages(FindUsagesResponse usagesResponse);
-
-  interface ActionDelegate extends BaseActionDelegate {}
+public interface FindUsagesView extends View<FindUsagesPresenter> {
+  void showUsages(UsagesResponse response);
 }

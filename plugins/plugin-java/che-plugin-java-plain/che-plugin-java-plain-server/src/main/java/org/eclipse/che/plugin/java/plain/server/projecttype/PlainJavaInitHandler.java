@@ -11,80 +11,69 @@
  */
 package org.eclipse.che.plugin.java.plain.server.projecttype;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.ide.ext.java.shared.Constants.JAVAC;
 import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.LIBRARY_FOLDER;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import java.util.Arrays;
 import java.util.List;
+import org.eclipse.che.api.core.ConflictException;
+import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.ide.ext.java.shared.Constants;
-import org.eclipse.che.plugin.java.server.projecttype.AbstractJavaInitHandler;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.che.api.project.server.handlers.ProjectInitHandler;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
+import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerLauncher;
 
 /**
- * Init handler for simple java project. Initialize classpath with JRE classpath entry container and
- * 'src' source classpath entry.
+ * Init handler for simple java project.
  *
  * @author Evgen Vidolob
  * @author Valeriy Svydenko
  */
-public class PlainJavaInitHandler extends AbstractJavaInitHandler {
-
-  private static final Logger LOG = LoggerFactory.getLogger(PlainJavaInitHandler.class);
-  private final ClasspathBuilder classpathBuilder;
+public class PlainJavaInitHandler implements ProjectInitHandler {
+  private final Provider<JavaLanguageServerExtensionService> extensionService;
+  private final Provider<JavaLanguageServerLauncher> languageServerLauncher;
   private final Provider<ProjectManager> projectRegistryProvider;
 
   @Inject
   public PlainJavaInitHandler(
-      ClasspathBuilder classpathBuilder, Provider<ProjectManager> projectRegistryProvider) {
-    this.classpathBuilder = classpathBuilder;
+      Provider<JavaLanguageServerExtensionService> extensionService,
+      Provider<JavaLanguageServerLauncher> languageServerLauncher,
+      Provider<ProjectManager> projectRegistryProvider) {
+    this.extensionService = extensionService;
+    this.languageServerLauncher = languageServerLauncher;
     this.projectRegistryProvider = projectRegistryProvider;
   }
 
   @Override
-  protected void initializeClasspath(IJavaProject javaProject) throws ServerException {
-    IClasspathEntry[] projectClasspath;
-    try {
-      projectClasspath = javaProject.getRawClasspath();
-    } catch (JavaModelException e) {
-      LOG.warn(
-          "Can't get classpath for: " + javaProject.getProject().getFullPath().toOSString(), e);
-      throw new ServerException(e);
-    }
+  public String getProjectType() {
+    return JAVAC;
+  }
 
-    // default classpath
-    IClasspathEntry[] defaultClasspath =
-        new IClasspathEntry[] {JavaCore.newSourceEntry(javaProject.getPath())};
-    if (!Arrays.equals(defaultClasspath, projectClasspath)) {
-      // classpath is already initialized
+  @Override
+  public void onProjectInitialized(String projectFolder)
+      throws ServerException, ForbiddenException, ConflictException, NotFoundException {
+    if (!languageServerLauncher.get().isStarted()) {
       return;
     }
-
-    String wsPath = absolutize(javaProject.getPath().toOSString());
+    String wsPath = absolutize(projectFolder);
     ProjectConfig project =
         projectRegistryProvider
             .get()
             .get(wsPath)
             .orElseThrow(() -> new ServerException("Can't find a project: " + wsPath));
 
-    List<String> sourceFolders = project.getAttributes().get(Constants.SOURCE_FOLDER);
     List<String> library = project.getAttributes().get(LIBRARY_FOLDER);
-
-    classpathBuilder.generateClasspath(javaProject, sourceFolders, library);
-  }
-
-  @Override
-  public String getProjectType() {
-    return JAVAC;
+    if (library != null && !library.isEmpty()) {
+      String libraryFolder = library.get(0);
+      if (!isNullOrEmpty(libraryFolder)) {
+        extensionService.get().addJars(project.getPath(), libraryFolder);
+      }
+    }
   }
 }

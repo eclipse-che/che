@@ -38,11 +38,7 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * //
- *
- * @author Musienko Maxim
- */
+/** @author Musienko Maxim */
 public class RemoveFilesWithActiveTabs {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
   @Inject private TestWorkspace ws;
@@ -193,7 +189,7 @@ public class RemoveFilesWithActiveTabs {
       event.waitExpectedMessage(expectedMessage, LOAD_PAGE_TIMEOUT_SEC);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known issue https://github.com/eclipse/che/issues/7339");
+      fail("Known random failure https://github.com/eclipse/che/issues/7339");
     }
   }
 }

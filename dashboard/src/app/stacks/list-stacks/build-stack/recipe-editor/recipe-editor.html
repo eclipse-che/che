@@ -13,9 +13,9 @@
 -->
 <ng-form name="recipeEditorController.form" class="build-stack-recipe-editor">
 
-  <ui-codemirror ui-codemirror="recipeEditorController.editorOptions"
-                 ng-model-options="{ allowInvalid: true }"
-                 ng-model="recipeContent"></ui-codemirror>
+  <textarea ui-codemirror="recipeEditorController.editorOptions"
+            ng-model-options="{ allowInvalid: true }"
+            ng-model="recipeContent"></textarea>
 
   <che-input che-form="recipeEditorController.form"
              che-name="validator"

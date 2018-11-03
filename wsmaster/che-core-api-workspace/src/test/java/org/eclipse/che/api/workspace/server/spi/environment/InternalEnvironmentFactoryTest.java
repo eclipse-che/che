@@ -16,12 +16,12 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.shared.Constants.CHE_MACHINE_NAME_ENV_VAR;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -61,8 +61,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class InternalEnvironmentFactoryTest {
 
-  public static final long RAM_LIMIT = 3072;
-
   @Mock private InstallerRegistry installerRegistry;
   @Mock private RecipeRetriever recipeRetriever;
   @Mock private MachineConfigsValidator machinesValidator;
@@ -76,8 +74,8 @@ public class InternalEnvironmentFactoryTest {
     environmentFactory =
         spy(new TestEnvironmentFactory(installerRegistry, recipeRetriever, machinesValidator));
     final InternalEnvironment internalEnv = mock(InternalEnvironment.class);
-    when(internalEnv.getMachines()).thenReturn(Collections.emptyMap());
-    when(environmentFactory.doCreate(any(), anyMap(), anyList())).thenReturn(internalEnv);
+    lenient().when(internalEnv.getMachines()).thenReturn(Collections.emptyMap());
+    lenient().when(environmentFactory.doCreate(any(), anyMap(), anyList())).thenReturn(internalEnv);
   }
 
   @Test
@@ -116,27 +114,6 @@ public class InternalEnvironmentFactoryTest {
     verify(environmentFactory).doCreate(any(), machinesCaptor.capture(), any());
     Map<String, InternalMachineConfig> internalMachines = machinesCaptor.getValue();
     assertEquals(internalMachines.get("machine").getInstallers(), installersToRetrieve);
-  }
-
-  @Test
-  public void shouldAddMachineNameToEnvironmentVariablesDuringInternalEnvironmentCreation()
-      throws Exception {
-    // given
-    MachineConfigImpl machineConfig = new MachineConfigImpl().withEnv(new HashMap<>());
-    EnvironmentImpl env =
-        new EnvironmentImpl(
-            null, ImmutableMap.of("machine1", machineConfig, "machine2", machineConfig));
-
-    // when
-    environmentFactory.create(env);
-
-    // then
-    verify(environmentFactory).doCreate(any(), machinesCaptor.capture(), any());
-    Map<String, InternalMachineConfig> internalMachines = machinesCaptor.getValue();
-    assertEquals(
-        internalMachines.get("machine1").getEnv().get(CHE_MACHINE_NAME_ENV_VAR), "machine1");
-    assertEquals(
-        internalMachines.get("machine2").getEnv().get(CHE_MACHINE_NAME_ENV_VAR), "machine2");
   }
 
   @Test

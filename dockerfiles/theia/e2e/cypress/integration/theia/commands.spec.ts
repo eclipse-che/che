@@ -24,16 +24,16 @@ context('Check Extensions are installed', () => {
   // Search that deploying a plugin is there
   it('Command Palette include Plugin', () => {
     cy.theiaCommandPaletteItems('Plugin:').then((value) => {
-      expect(value).to.have.length(5);
+      expect(value).to.have.length(6);
       expect(value).to.have.members([
-        "Hosted Plugin: Restart Instance", "Hosted Plugin: Select Path", "Hosted Plugin: Start Instance", "Hosted Plugin: Stop Instance", "Plugin: Deploy a plugin's id"]);
+        "Hosted Plugin: Restart Instance", "Hosted Plugin: Select Path", "Hosted Plugin: Start Instance", "Hosted Plugin: Stop Instance", "Plugin: Deploy Plugin by Id", "Hosted Plugin: Debug Instance"]);
     })
   });
 
   // Search that all expected extensions are installed
   it('Expect some extensions are in installed theia', () => {
     cy.theiaExtensionsList().then((value) => {
-      expect(value).to.contains.members(['@theia/plugin-ext', '@theia/plugin-ext-vscode', '@theia/java', '@theia/typescript', 'che-theia-ssh-extension', 'theia-machines-extension', '@eclipse-che/theia-factory-extension', '@eclipse-che/che-theia-hosted-plugin-manager-extension', '@eclipse-che/theia-java-extension']);
+      expect(value).to.contains.members(['@theia/plugin-ext', '@theia/plugin-ext-vscode', '@theia/java', '@theia/typescript', 'che-theia-ssh-extension', 'theia-machines-extension', '@eclipse-che/che-theia-hosted-plugin-manager-extension', '@eclipse-che/theia-java-extension']);
     });
 
   })

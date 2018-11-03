@@ -15,8 +15,8 @@ import com.google.inject.ImplementedBy;
 import java.util.List;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ext.java.client.refactoring.RefactorInfo;
-import org.eclipse.che.ide.ext.java.shared.dto.model.JavaProject;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.JavaProjectStructure;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
 
 /**
  * The visual part of Move wizard that has an ability to show configuration of a refactoring
@@ -47,7 +47,7 @@ interface MoveView extends View<MoveView.ActionDelegate> {
    * @param projects list of projects from current workspace
    * @param refactorInfo information about refactoring operation
    */
-  void setTreeOfDestinations(RefactorInfo refactorInfo, List<JavaProject> projects);
+  void setTreeOfDestinations(RefactorInfo refactorInfo, List<JavaProjectStructure> projects);
 
   /**
    * Show information message into bottom of view.

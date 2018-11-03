@@ -4,27 +4,20 @@
             "name": "github-extension",
             "source": "https://github.com/eclipse/che-theia-github-plugin",
             "folder": "github-extension",
-            "checkoutTo": "master",
+            "checkoutTo": "0.0.1",
             "type": "git"
         },
         {
             "name": "che-theia-ssh-extension",
             "source": "https://github.com/eclipse/che-theia-ssh-plugin",
             "folder": "ssh-extension",
-            "checkoutTo": "master",
+            "checkoutTo": "0.0.1",
             "type": "git"
         },
         {
             "name": "theia-machines-extension",
             "source": "https://github.com/eclipse/che-theia-machines-plugin.git",
             "folder": "theia-machines-extension",
-            "checkoutTo": "master",
-            "type": "git"
-        },
-        {
-            "name": "@eclipse-che/theia-factory-extension",
-            "source": "https://github.com/eclipse/che-theia-factory-extension.git",
-            "folder": "che-theia-factory",
             "checkoutTo": "master",
             "type": "git"
         },
@@ -59,6 +52,19 @@
             "name": "@eclipse-che/theia-task-extension",
             "source": "https://github.com/eclipse/che-theia-task-plugin.git",
             "folder": "che-theia-task-extension",
+            "checkoutTo": "master",
+            "type": "git"
+        },
+        {
+            "name": "@eclipse-che/theia-activity-tracker",
+            "source": "https://github.com/eclipse/che-theia-activity-tracker.git",
+            "folder": "che-theia-activity-tracker",
+            "checkoutTo": "master",
+            "type": "git"
+        },
+        {
+            "name": "@eclipse-che/theia-remote-extension",
+            "source": "https://github.com/ws-skeleton/che-theia-remote-extension",
             "checkoutTo": "master",
             "type": "git"
         }

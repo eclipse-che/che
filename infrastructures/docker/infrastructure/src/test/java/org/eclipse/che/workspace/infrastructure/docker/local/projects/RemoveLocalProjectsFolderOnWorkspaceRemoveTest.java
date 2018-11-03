@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -57,11 +58,11 @@ public class RemoveLocalProjectsFolderOnWorkspaceRemoveTest {
         spy(new RemoveLocalProjectsFolderOnWorkspaceRemove(projectsFolderPathProvider));
 
     WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
-    when(workspaceConfig.getName()).thenReturn(WORKSPACE_NAME);
+    lenient().when(workspaceConfig.getName()).thenReturn(WORKSPACE_NAME);
 
-    when(workspace.getId()).thenReturn(WORKSPACE_ID);
-    when(workspace.getNamespace()).thenReturn(WORKSPACE_NAMESPACE);
-    when(workspace.getConfig()).thenReturn(workspaceConfig);
+    lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
+    lenient().when(workspace.getNamespace()).thenReturn(WORKSPACE_NAMESPACE);
+    lenient().when(workspace.getConfig()).thenReturn(workspaceConfig);
   }
 
   @Test

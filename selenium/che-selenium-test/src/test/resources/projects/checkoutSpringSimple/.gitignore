@@ -1,0 +1,7 @@
+# Eclipse  #
+###################
+
+.classpath
+.project
+.settings/
+target/

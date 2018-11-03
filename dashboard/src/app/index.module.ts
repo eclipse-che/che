@@ -42,8 +42,8 @@ import {ProfileConfig} from './profile/profile-config';
 
 // init module
 const initModule = angular.module('userDashboard', ['ngAnimate', 'ngCookies', 'ngTouch', 'ngSanitize', 'ngResource', 'ngRoute',
-  'angular-websocket', 'ui.bootstrap', 'ui.codemirror', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
-  'ngDropdowns', 'ngLodash', 'angularCharts', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
+  'angular-websocket', 'ui.bootstrap', 'ngMaterial', 'ngMessages', 'angularMoment', 'angular.filter',
+  'ngLodash', 'uuid4', 'angularFileUpload', 'ui.gravatar']);
 
 window.name = 'NG_DEFER_BOOTSTRAP!';
 
@@ -80,11 +80,17 @@ function keycloakLoad(keycloakSettings: any) {
     document.head.appendChild(script);
   });
 }
-function keycloakInit(keycloakConfig: any, theUseNonce: boolean) {
+
+function keycloakInit(keycloakConfig: any, initOptions: any) {
   return new Promise((resolve: IResolveFn<any>, reject: IRejectFn<any>) => {
     const keycloak = Keycloak(keycloakConfig);
+    window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
     keycloak.init({
-      onLoad: 'login-required', checkLoginIframe: false, useNonce: theUseNonce
+      onLoad: 'login-required',
+      checkLoginIframe: false,
+      useNonce: initOptions['useNonce'],
+      scope: 'email profile',
+      redirectUri: initOptions['redirectUrl'];
     }).success(() => {
       resolve(keycloak);
     }).error((error: any) => {
@@ -100,6 +106,7 @@ function setAuthorizationHeader(xhr: XMLHttpRequest, keycloak: any): Promise<any
         resolve(xhr);
       }).error(() => {
         console.log('Failed to refresh token');
+        window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
         keycloak.login();
         reject('Authorization is needed.');
       });
@@ -150,11 +157,15 @@ angular.element(document).ready(() => {
     // load Keycloak
     return keycloakLoad(keycloakSettings).then(() => {
       // init Keycloak
-      var useNonce: boolean;
+      var theUseNonce: boolean;
       if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
-        useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
+        theUseNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
       }
-      return keycloakInit(keycloakAuth.config, useNonce);
+      var initOptions = {
+        useNonce: theUseNonce,
+        redirectUrl: keycloakSettings['che.keycloak.redirect_url.dashboard']
+      }
+      return keycloakInit(keycloakAuth.config, initOptions);
     }).then((keycloak: any) => {
       keycloakAuth.isPresent = true;
       keycloakAuth.keycloak = keycloak;

@@ -14,7 +14,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.similarnam
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.similarnames.SimilarNamesConfigurationView.ActionDelegate;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RenameSettings.MachStrategy;
+import org.eclipse.che.jdt.ls.extension.api.MatchStrategy;
 
 /**
  * The class that manages similar name value.
@@ -36,8 +36,8 @@ public class SimilarNamesConfigurationPresenter implements ActionDelegate {
     view.showDialog();
   }
 
-  /** @return selected value of mach strategy. */
-  public MachStrategy getMachStrategy() {
-    return view.getMachStrategy();
+  /** @return selected value of match strategy. */
+  public MatchStrategy getMatchStrategy() {
+    return view.getMatchStrategy();
   }
 }

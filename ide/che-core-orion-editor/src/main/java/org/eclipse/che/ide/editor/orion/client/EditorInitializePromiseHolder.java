@@ -31,7 +31,6 @@ import org.eclipse.che.ide.api.editor.EditorLocalizationConstants;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.editor.orion.client.jso.OrionTextThemeOverlay;
-import org.eclipse.che.ide.editor.orion.client.signature.SignatureHelpResources;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
 import org.eclipse.che.ide.util.loging.Log;
@@ -61,14 +60,12 @@ public class EditorInitializePromiseHolder {
       final RequireJsLoader requireJsLoader,
       final OrionResource orionResource,
       final LoaderFactory loaderFactory,
-      final EditorLocalizationConstants constants,
-      final SignatureHelpResources signatureHelpResources) {
+      final EditorLocalizationConstants constants) {
     this.notificationManager = notificationManager;
     this.requireJsLoader = requireJsLoader;
     this.orionResource = orionResource;
     this.loader = loaderFactory.newLoader();
     this.waitEditorMessage = constants.waitEditorInitMessage();
-    signatureHelpResources.css().ensureInjected();
   }
 
   public Promise<Void> getInitializerPromise() {

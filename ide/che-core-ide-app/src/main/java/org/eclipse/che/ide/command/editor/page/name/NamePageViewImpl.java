@@ -19,6 +19,7 @@ import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -36,6 +37,8 @@ public class NamePageViewImpl extends Composite implements NamePageView {
   @UiField TextBox commandName;
 
   @UiField Button runButton;
+
+  @UiField Label warningLabel;
 
   private ActionDelegate delegate;
 
@@ -67,6 +70,11 @@ public class NamePageViewImpl extends Composite implements NamePageView {
   @UiHandler("runButton")
   public void handleRunButton(ClickEvent clickEvent) {
     delegate.onCommandRun();
+  }
+
+  @Override
+  public void showWarning(boolean show) {
+    warningLabel.setVisible(show);
   }
 
   interface NamePageViewImplUiBinder extends UiBinder<Widget, NamePageViewImpl> {}

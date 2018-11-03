@@ -126,7 +126,10 @@ public class PreferencesPresenter
     view.setPreferences(preferencesMap);
 
     view.enableSaveButton(false);
-    view.selectPreference(preferencesMap.entrySet().iterator().next().getValue().iterator().next());
+    PreferencePagePresenter preferencePagePresenter =
+        preferencesMap.entrySet().iterator().next().getValue().iterator().next();
+    view.selectPreference(preferencePagePresenter);
+    preferencePagePresenter.go(view.getContentPanel());
     view.showDialog();
   }
 

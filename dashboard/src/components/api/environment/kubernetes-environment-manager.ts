@@ -412,7 +412,6 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
 
     return {
       name: uniqueMachineName,
-      installers: [this.TERMINAL_AGENT_NAME],
       attributes: {
         memoryLimitBytes: this.DEFAULT_MEMORY_LIMIT
       },

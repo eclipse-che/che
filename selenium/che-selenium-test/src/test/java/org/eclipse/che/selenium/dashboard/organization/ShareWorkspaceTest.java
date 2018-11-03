@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
@@ -31,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -73,7 +75,14 @@ public class ShareWorkspaceTest {
     navigationBar.waitNavigationBar();
 
     dashboard.selectWorkspacesItemOnDashboard();
-    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
+
+    try {
+      workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
+    } catch (WebDriverException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/8594");
+    }
+
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(SHARE);
   }

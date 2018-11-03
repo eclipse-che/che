@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.plainjava;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
@@ -24,12 +25,12 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
@@ -48,12 +49,14 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = UNDER_REPAIR)
 public class RunPlainJavaProjectTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("RunningPlainJavaProject", 4);
+  private static final String PROJECT_NAME = "run-plain-java-project";
   private static final String NEW_PACKAGE = "base.test";
   private static final String NAME_COMMAND = "startApp";
   private static final String COMMAND =
@@ -94,6 +97,7 @@ public class RunPlainJavaProjectTest {
     testRepo.addContent(entryPath);
 
     ide.open(ws);
+    consoles.waitJDTLSStartedMessage();
   }
 
   @Test
@@ -109,7 +113,7 @@ public class RunPlainJavaProjectTest {
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.waitExpectedTextJarsAndFolderArea(
-        "testLibrary.jar - /projects/" + PROJECT_NAME + "/store");
+        "testLibrary.jar - /" + PROJECT_NAME + "/store");
     configureClasspath.closeConfigureClasspathFormByIcon();
 
     // create the instance of the library
@@ -210,13 +214,21 @@ public class RunPlainJavaProjectTest {
     projectWizard.clickSaveButton();
     projectWizard.waitCloseProjectConfigForm();
     projectExplorer.waitVisibilityByName(nameApp);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     // check that srs folder has been set properly
     menu.runCommand(PROJECT, CONFIGURATION);
     projectWizard.waitCreateProjectWizardForm();
     projectWizard.selectTypeProject(typeProject);
     projectWizard.clickNextButton();
-    projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
+
+    try {
+      projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11516");
+    }
+
     projectWizard.clickSaveButton();
     projectWizard.waitCloseProjectConfigForm();
   }

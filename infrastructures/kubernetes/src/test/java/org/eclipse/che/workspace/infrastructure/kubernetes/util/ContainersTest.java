@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -56,7 +57,8 @@ public class ContainersTest {
 
     limits.put("memory", new Quantity(String.valueOf(RAM_LIMIT)));
     limits.put("cpu", new Quantity("1.5"));
-    when(resource.getLimits())
+    lenient()
+        .when(resource.getLimits())
         .thenReturn(ImmutableMap.of("memory", new Quantity(String.valueOf(RAM_LIMIT))));
   }
 
@@ -153,5 +155,17 @@ public class ContainersTest {
       {"10Ki", null},
       {"10G", null},
     };
+  }
+
+  @Test(dataProvider = "k8sNotionRamLimitProvider")
+  public void testAddContainerRamRequestInK8sNotion(
+      String ramRequest, ResourceRequirements resources) {
+    when(container.getResources()).thenReturn(resources);
+
+    Containers.addRamRequest(container, ramRequest);
+
+    verify(container).setResources(resourceCaptor.capture());
+    ResourceRequirements captured = resourceCaptor.getValue();
+    assertEquals(captured.getRequests().get("memory").getAmount(), ramRequest);
   }
 }

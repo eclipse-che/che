@@ -17,18 +17,18 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.14.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-java-parent</artifactId>
     <packaging>pom</packaging>
     <name>Che Plugin :: Java :: Parent</name>
     <modules>
-        <module>che-plugin-java-ext-jdt</module>
         <module>che-plugin-java-ext-lang-shared</module>
         <module>che-plugin-java-ext-lang-server</module>
         <module>che-plugin-java-ext-lang-client</module>
         <module>che-plugin-java-plain</module>
+        <module>che-plugin-java-server</module>
     </modules>
     <build>
         <pluginManagement>

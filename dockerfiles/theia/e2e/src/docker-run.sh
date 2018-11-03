@@ -6,12 +6,12 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 
-cd /home/theia/ && bash start.sh&
+/entrypoint.sh&
 sleep 10s
 
 # Cleanup previous videos
 rm -rf /home/cypress/cypress/videos
 
 # Run tests
-cd /home/cypress && ./node_modules/.bin/cypress run
+cd /home/cypress && /node_modules/.bin/cypress run
  

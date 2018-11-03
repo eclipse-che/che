@@ -18,6 +18,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
@@ -98,6 +99,7 @@ public class StartSynchronizer {
   // future that holds error that occurs during runtime start
   // failure must be completed with null value when start is finished without any exception
   private final CompletableFuture<Void> startFailure;
+  private final long workspaceStartTimeoutMillis;
 
   // latch that indicates whether start is completed or not
   private CountDownLatch completionLatch;
@@ -108,12 +110,16 @@ public class StartSynchronizer {
 
   // flag that indicates whether start is in progress or not
   private boolean isStarting;
+  private long startTimeMillis;
 
   private final RuntimeStartInterrupter runtimeStartInterrupter;
   private final RuntimeStopWatcher runtimeStopWatcher;
 
   @Inject
-  public StartSynchronizer(EventService eventService, @Assisted RuntimeIdentity runtimeId) {
+  public StartSynchronizer(
+      EventService eventService,
+      @Named("che.infra.kubernetes.workspace_start_timeout_min") int workspaceStartTimeoutMin,
+      @Assisted RuntimeIdentity runtimeId) {
     this.eventService = eventService;
     this.startFailure = new CompletableFuture<>();
     this.completionLatch = new CountDownLatch(0);
@@ -121,12 +127,14 @@ public class StartSynchronizer {
     this.runtimeStartInterrupter = new RuntimeStartInterrupter();
     this.runtimeStopWatcher = new RuntimeStopWatcher();
     this.isStarting = false;
+    this.workspaceStartTimeoutMillis = TimeUnit.MINUTES.toMillis(workspaceStartTimeoutMin);
   }
 
   /** Registers a runtime start. */
   public synchronized void start() {
     if (!isStarting) {
       isStarting = true;
+      startTimeMillis = System.currentTimeMillis();
       completionLatch = new CountDownLatch(1);
       eventService.subscribe(runtimeStartInterrupter, KubernetesRuntimeStoppingEvent.class);
       eventService.subscribe(
@@ -285,6 +293,16 @@ public class StartSynchronizer {
     } catch (Throwable ex) {
       throw new InternalInfrastructureException(ex.getMessage(), ex);
     }
+  }
+
+  /**
+   * Returns time before workspace start should be interrupted or 0 if runtime start should be
+   * interrupted now.
+   */
+  public long getStartTimeoutMillis() {
+    long deadLine = startTimeMillis + workspaceStartTimeoutMillis;
+    long timeout = deadLine - System.currentTimeMillis();
+    return Math.max(0, timeout);
   }
 
   /**

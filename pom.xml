@@ -17,11 +17,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.14.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>6.12.0-SNAPSHOT</version>
+    <version>6.14.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -49,9 +49,11 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.docs.version>6.12.0-SNAPSHOT</che.docs.version>
-        <che.lib.version>6.12.0-SNAPSHOT</che.lib.version>
-        <che.version>6.12.0-SNAPSHOT</che.version>
+        <che.dashboard.version>6.14.0-SNAPSHOT</che.dashboard.version>
+        <che.docs.version>6.14.0-SNAPSHOT</che.docs.version>
+        <che.lib.version>6.14.0-SNAPSHOT</che.lib.version>
+        <che.ls.jdt.version>0.0.1</che.ls.jdt.version>
+        <che.version>6.14.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -213,6 +215,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
+                <artifactId>ls-java-agent</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che</groupId>
                 <artifactId>ls-json-agent</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -252,11 +259,6 @@
                 <version>${che.version}</version>
                 <type>tar.gz</type>
                 <classifier>linux_amd64</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che</groupId>
-                <artifactId>test-ls-agent</artifactId>
-                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
@@ -599,6 +601,12 @@
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-commons-gwt</artifactId>
                 <version>${che.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-commons-gwt</artifactId>
+                <version>${che.version}</version>
                 <classifier>sources</classifier>
             </dependency>
             <dependency>
@@ -649,6 +657,11 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-db-vendor-h2</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-db-vendor-mysql</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -792,7 +805,7 @@
             <dependency>
                 <groupId>org.eclipse.che.dashboard</groupId>
                 <artifactId>che-dashboard-war</artifactId>
-                <version>${che.version}</version>
+                <version>${che.dashboard.version}</version>
                 <type>war</type>
             </dependency>
             <dependency>
@@ -870,9 +883,21 @@
                 <type>zip</type>
             </dependency>
             <dependency>
-                <groupId>org.eclipse.che.lib</groupId>
-                <artifactId>org-eclipse-jdt-core-repack</artifactId>
-                <version>${che.lib.version}</version>
+                <groupId>org.eclipse.che.ls.jdt</groupId>
+                <artifactId>jdt.ls.extension.api</artifactId>
+                <version>${che.ls.jdt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.ls.jdt</groupId>
+                <artifactId>jdt.ls.extension.api</artifactId>
+                <version>${che.ls.jdt.version}</version>
+                <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.ls.jdt</groupId>
+                <artifactId>jdt.ls.extension.product</artifactId>
+                <version>${che.ls.jdt.version}</version>
+                <type>tar.gz</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>
@@ -1444,6 +1469,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
+                <artifactId>che-plugin-java-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-json-server</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1698,12 +1728,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-test-ls-server</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-testing-classpath</artifactId>
+                <artifactId>che-plugin-testing-base</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -1847,61 +1872,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>maven-server-api</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>maven-server-impl</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.core.filebuffers</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.core.filesystem</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.core.resources</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.jdt.ui</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.jface</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.jface.text</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.ltk.core.refactoring</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.search</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>org.eclipse.ui.ide</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -2000,12 +1970,14 @@
             <name>central public snapshots</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
-        <repository>
-            <id>codenvy-public-repo</id>
-            <name>codenvy public</name>
-            <url>https://maven.codenvycorp.com/content/groups/public/</url>
-        </repository>
     </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>ossrh</id>
+            <name>central public snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </pluginRepository>
+    </pluginRepositories>
     <build>
         <pluginManagement>
             <plugins>

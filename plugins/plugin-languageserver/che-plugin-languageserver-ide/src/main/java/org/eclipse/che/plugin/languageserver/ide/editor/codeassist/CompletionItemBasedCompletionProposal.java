@@ -32,18 +32,22 @@ import org.eclipse.che.ide.api.editor.link.LinkedModel;
 import org.eclipse.che.ide.api.editor.text.LinearRange;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.icon.Icon;
+import org.eclipse.che.ide.editor.orion.client.jso.MarkedOverlay;
 import org.eclipse.che.ide.filters.Match;
 import org.eclipse.che.ide.util.Pair;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerResources;
 import org.eclipse.che.plugin.languageserver.ide.editor.codeassist.snippet.SnippetResolver;
 import org.eclipse.che.plugin.languageserver.ide.editor.quickassist.ApplyWorkspaceEditAction;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.InsertTextFormat;
+import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 /**
  * @author Anatolii Bazko
@@ -86,27 +90,43 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
 
   @Override
   public void getAdditionalProposalInfo(final AsyncCallback<Widget> callback) {
-    if (completionItem.getItem().getDocumentation() == null && canResolve()) {
-      resolve()
-          .then(
-              item -> {
-                completionItem = item;
-                resolved = true;
-                callback.onSuccess(createAdditionalInfoWidget());
-              })
-          .catchError(
-              e -> {
-                callback.onFailure(e.getCause());
-              });
-    } else {
-      callback.onSuccess(createAdditionalInfoWidget());
-    }
+    MarkedOverlay.getMarkedPromise()
+        .then(
+            (marked) -> {
+              if (completionItem.getItem().getDocumentation() == null && canResolve()) {
+                resolve()
+                    .then(
+                        item -> {
+                          completionItem = item;
+                          resolved = true;
+                          callback.onSuccess(createAdditionalInfoWidget(marked));
+                        })
+                    .catchError(
+                        e -> {
+                          callback.onFailure(e.getCause());
+                        });
+              } else {
+                callback.onSuccess(createAdditionalInfoWidget(marked));
+              }
+            });
   }
 
-  private Widget createAdditionalInfoWidget() {
-    String documentation = completionItem.getItem().getDocumentation();
+  private Widget createAdditionalInfoWidget(MarkedOverlay marked) {
+    Either<String, MarkupContent> markup = completionItem.getItem().getDocumentation();
+    // markup type is plain text or markdown. Both are ok natively.
+    String documentation = null;
+    if (markup != null) {
+      documentation = markup.isLeft() ? markup.getLeft() : markup.getRight().getValue();
+    }
+
     if (documentation == null || documentation.trim().isEmpty()) {
       documentation = "No documentation found.";
+    }
+
+    try {
+      documentation = marked.toHTML(documentation);
+    } catch (Exception e) {
+      Log.error(getClass(), e);
     }
 
     HTML widget = new HTML(documentation);
@@ -246,32 +266,53 @@ public class CompletionItemBasedCompletionProposal implements CompletionProposal
       TextEdit firstEdit = edits.get(0);
       if (completionItem.getInsertTextFormat() == InsertTextFormat.Snippet) {
         Position startPos = firstEdit.getRange().getStart();
-        TextPosition startTextPosition =
-            new TextPosition(startPos.getLine(), startPos.getCharacter());
+        TextPosition startTextPosition = toTextPosition(startPos);
         int startOffset = document.getIndexFromPosition(startTextPosition);
         Pair<String, LinkedModel> resolved =
             new SnippetResolver(new DocumentVariableResolver(document, startTextPosition))
                 .resolve(firstEdit.getNewText(), editor, startOffset);
         firstEdit.setNewText(resolved.first);
-        ApplyWorkspaceEditAction.applyTextEdits(document, edits);
         if (resolved.second != null) {
+          ApplyWorkspaceEditAction.applyTextEdits(document, edits);
           editor.getLinkedMode().enterLinkedMode(resolved.second);
           lastSelection = null;
         } else {
-          lastSelection = computeLastSelection(document, firstEdit);
+          lastSelection = computeLastSelection(document, firstEdit, edits);
+          ApplyWorkspaceEditAction.applyTextEdits(document, edits);
         }
       } else {
+        lastSelection = computeLastSelection(document, firstEdit, edits);
         ApplyWorkspaceEditAction.applyTextEdits(document, edits);
-        lastSelection = computeLastSelection(document, firstEdit);
       }
     }
 
-    private LinearRange computeLastSelection(Document document, TextEdit textEdit) {
-      Range range = textEdit.getRange();
+    private TextPosition toTextPosition(Position startPos) {
+      return new TextPosition(startPos.getLine(), startPos.getCharacter());
+    }
+
+    private int offsetForEdit(Document document, TextEdit edit, TextPosition p) {
+      Position editStart = edit.getRange().getStart();
+      if (editStart.getLine() < p.getLine()
+          || (editStart.getLine() == p.getLine() && editStart.getCharacter() < p.getCharacter())) {
+        int startIndex = document.getIndexFromPosition(toTextPosition(editStart));
+        int endIndex = document.getIndexFromPosition(toTextPosition(edit.getRange().getEnd()));
+        int deleted = endIndex - startIndex;
+        return edit.getNewText().length() - deleted;
+      } else {
+        return 0;
+      }
+    }
+
+    private LinearRange computeLastSelection(
+        Document document, TextEdit mainEdit, List<TextEdit> allEdits) {
+      Range range = mainEdit.getRange();
       TextPosition textPosition =
           new TextPosition(range.getStart().getLine(), range.getStart().getCharacter());
       int startOffset =
-          document.getIndexFromPosition(textPosition) + textEdit.getNewText().length();
+          document.getIndexFromPosition(textPosition) + mainEdit.getNewText().length();
+      for (TextEdit textEdit : allEdits) {
+        startOffset += offsetForEdit(document, textEdit, textPosition);
+      }
       return LinearRange.createWithStart(startOffset).andLength(0);
     }
 

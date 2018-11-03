@@ -14,12 +14,14 @@ package org.eclipse.che.selenium.pageobject.ocp;
 import static org.eclipse.che.selenium.pageobject.ocp.AuthorizeOpenShiftAccessPage.Locators.ALLOW_PERMISSIONS_BUTTON_NAME;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
+@Singleton
 public class AuthorizeOpenShiftAccessPage {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 

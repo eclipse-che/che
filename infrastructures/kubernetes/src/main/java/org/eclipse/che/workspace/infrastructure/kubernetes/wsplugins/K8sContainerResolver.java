@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.Math.min;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
@@ -25,7 +26,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
@@ -37,11 +37,21 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  */
 public class K8sContainerResolver {
 
+  static final int MAX_CONTAINER_NAME_LENGTH = 63; // K8S container name limit
+
+  private final String pluginName;
+  private final String imagePullPolicy;
   private final CheContainer cheContainer;
   private final List<ChePluginEndpoint> containerEndpoints;
 
-  public K8sContainerResolver(CheContainer container, List<ChePluginEndpoint> containerEndpoints) {
+  public K8sContainerResolver(
+      String pluginName,
+      String imagePullPolicy,
+      CheContainer container,
+      List<ChePluginEndpoint> containerEndpoints) {
+    this.imagePullPolicy = imagePullPolicy;
     this.cheContainer = container;
+    this.pluginName = pluginName;
     this.containerEndpoints = containerEndpoints;
   }
 
@@ -53,7 +63,8 @@ public class K8sContainerResolver {
     Container container =
         new ContainerBuilder()
             .withImage(cheContainer.getImage())
-            .withName(Names.generateName("tooling"))
+            .withImagePullPolicy(imagePullPolicy)
+            .withName(buildContainerName(pluginName, cheContainer.getName()))
             .withEnv(toK8sEnv(cheContainer.getEnv()))
             .withPorts(getContainerPorts())
             .build();
@@ -78,6 +89,7 @@ public class K8sContainerResolver {
               memoryLimit, e.getMessage()));
     }
     Containers.addRamLimit(container, memoryLimit);
+    Containers.addRamRequest(container, memoryLimit);
   }
 
   private List<ContainerPort> getContainerPorts() {
@@ -99,5 +111,26 @@ public class K8sContainerResolver {
     return env.stream()
         .map(e -> new io.fabric8.kubernetes.api.model.EnvVar(e.getName(), e.getValue(), null))
         .collect(Collectors.toList());
+  }
+
+  private String buildContainerName(String pluginName, String cheContainerName) {
+    if (pluginName == null) {
+      return cheContainerName.substring(
+          0, min(cheContainerName.length(), MAX_CONTAINER_NAME_LENGTH));
+    }
+    String preliminaryName = (pluginName + "-" + cheContainerName).toLowerCase();
+    if (preliminaryName.length() <= MAX_CONTAINER_NAME_LENGTH) {
+      return preliminaryName;
+    }
+    final String limitedContainerName =
+        cheContainerName.substring(0, min(cheContainerName.length(), 49));
+    return (pluginName.substring(
+                0,
+                min(
+                    pluginName.length(),
+                    MAX_CONTAINER_NAME_LENGTH - limitedContainerName.length() - 1))
+            + "-"
+            + limitedContainerName)
+        .toLowerCase();
   }
 }

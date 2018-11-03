@@ -41,16 +41,14 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.ChangePreview;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringPreview;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatusEntry;
 import org.eclipse.che.ide.orion.compare.CompareConfig;
 import org.eclipse.che.ide.orion.compare.CompareFactory;
 import org.eclipse.che.ide.orion.compare.CompareInitializer;
 import org.eclipse.che.ide.orion.compare.FileOptions;
 import org.eclipse.che.ide.orion.compare.jso.GitCompareOverlay;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatusEntry;
 import org.eclipse.che.requirejs.ModuleHolder;
 
 /**
@@ -83,7 +81,7 @@ final class PreviewViewImpl extends Window implements PreviewView {
   private final CompareInitializer compareInitializer;
   private final ModuleHolder moduleHolder;
 
-  private Map<TreeItem, RefactoringPreview> containerChanges = new HashMap<>();
+  private Map<TreeItem, PreviewNode> containerChanges = new HashMap<>();
   private Element selectedElement;
 
   @Inject
@@ -145,8 +143,6 @@ final class PreviewViewImpl extends Window implements PreviewView {
     errorLabel.setText("");
     diff.clear();
     compare = null;
-    treePanel.clear();
-    containerChanges.clear();
   }
 
   @Override
@@ -155,20 +151,15 @@ final class PreviewViewImpl extends Window implements PreviewView {
   }
 
   @Override
-  protected void onHide() {
-    delegate.onCancelButtonClicked();
-  }
-
-  /** {@inheritDoc} */
-  @Override
-  public void setTreeOfChanges(final RefactoringPreview changes) {
+  public void setTreeOfChanges(Map<String, PreviewNode> nodes) {
+    containerChanges.clear();
     showDiffPanel(false);
 
-    final SelectionModel<RefactoringPreview> selectionModel = new SingleSelectionModel<>();
+    final SelectionModel<PreviewNode> selectionModel = new SingleSelectionModel<>();
     selectionModel.addSelectionChangeHandler(
         event -> {
-          RefactoringPreview selectedNode =
-              (RefactoringPreview) ((SingleSelectionModel) selectionModel).getSelectedObject();
+          PreviewNode selectedNode =
+              (PreviewNode) ((SingleSelectionModel) selectionModel).getSelectedObject();
           delegate.onSelectionChanged(selectedNode);
         });
 
@@ -176,10 +167,10 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
     tree.getElement().setId("tree-of-changes");
 
-    for (RefactoringPreview parentChange : changes.getChildrens()) {
+    for (PreviewNode parentChange : nodes.values()) {
       TreeItem treeItem = new TreeItem();
       containerChanges.put(treeItem, parentChange);
-      createTreeElement(treeItem, parentChange.getText(), parentChange.getChildrens());
+      createTreeElement(treeItem, parentChange.getDescription(), parentChange.getChildren());
       tree.addItem(treeItem);
     }
 
@@ -193,11 +184,12 @@ final class PreviewViewImpl extends Window implements PreviewView {
           selectedElement.getStyle().setProperty("background", getEditorSelectionColor());
         });
 
+    treePanel.clear();
     treePanel.add(tree);
   }
 
   private void createTreeElement(
-      final TreeItem root, String changeName, List<RefactoringPreview> children) {
+      final TreeItem root, String changeName, List<PreviewNode> children) {
     FlowPanel element = new FlowPanel();
     element.getElement().getStyle().setFloat(LEFT);
     CheckBox itemCheckBox = new CheckBox();
@@ -223,8 +215,8 @@ final class PreviewViewImpl extends Window implements PreviewView {
           checkChildrenState(root, event.getValue());
           checkParentState(root, event.getValue());
 
-          RefactoringPreview change = containerChanges.get(root);
-          change.setEnabled(event.getValue());
+          PreviewNode change = containerChanges.get(root);
+          change.setEnable(event.getValue());
 
           delegate.onEnabledStateChanged(change);
         });
@@ -233,10 +225,10 @@ final class PreviewViewImpl extends Window implements PreviewView {
       return;
     }
 
-    for (RefactoringPreview child : children) {
+    for (PreviewNode child : children) {
       TreeItem treeItem = new TreeItem();
       containerChanges.put(treeItem, child);
-      createTreeElement(treeItem, child.getText(), child.getChildrens());
+      createTreeElement(treeItem, child.getDescription(), child.getChildren());
       root.addItem(treeItem);
     }
   }
@@ -318,12 +310,10 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
   private void refreshComperingFiles(@NotNull ChangePreview preview) {
     newFile.setContent(preview.getNewContent());
-    newFile.setName(preview.getFileName());
     oldFile.setContent(preview.getOldContent());
-    oldFile.setName(preview.getFileName());
 
     if (compare != null) {
-      compare.update(newFile, oldFile);
+      compare.update(oldFile, newFile);
     }
   }
 
@@ -334,11 +324,14 @@ final class PreviewViewImpl extends Window implements PreviewView {
     oldFile = compareFactory.createFieOptions();
     oldFile.setReadOnly(true);
 
+    newFile.setName("Refactored Source");
+    oldFile.setName("Original Source");
+
     refreshComperingFiles(preview);
 
     CompareConfig compareConfig = compareFactory.createCompareConfig();
-    compareConfig.setNewFile(newFile);
-    compareConfig.setOldFile(oldFile);
+    compareConfig.setNewFile(oldFile);
+    compareConfig.setOldFile(newFile);
     compareConfig.setShowTitle(true);
     compareConfig.setShowLineStatus(true);
 
@@ -358,7 +351,8 @@ final class PreviewViewImpl extends Window implements PreviewView {
 
   private void showMessage(RefactoringStatus status) {
     RefactoringStatusEntry statusEntry =
-        getEntryMatchingSeverity(status.getSeverity(), status.getEntries());
+        getEntryMatchingSeverity(
+            status.getRefactoringSeverity().getValue(), status.getRefactoringStatusEntries());
     if (statusEntry != null) {
       errorLabel.setText(statusEntry.getMessage());
     } else {
@@ -379,7 +373,7 @@ final class PreviewViewImpl extends Window implements PreviewView {
   private RefactoringStatusEntry getEntryMatchingSeverity(
       int severity, List<RefactoringStatusEntry> entries) {
     for (RefactoringStatusEntry entry : entries) {
-      if (entry.getSeverity() >= severity) return entry;
+      if (entry.getRefactoringSeverity().getValue() >= severity) return entry;
     }
     return null;
   }

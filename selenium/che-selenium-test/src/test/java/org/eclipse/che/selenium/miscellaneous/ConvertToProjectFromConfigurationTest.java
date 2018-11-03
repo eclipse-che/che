@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FILE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVASCRIPT_FILE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 
 import com.google.common.base.Joiner;
@@ -159,7 +160,7 @@ public class ConvertToProjectFromConfigurationTest {
     askForValueDialog.typeAndWaitText(folderName);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-    projectExplorer.waitVisibilityByName(folderName);
+    projectExplorer.waitVisibilityByName(folderName, ELEMENT_TIMEOUT_SEC);
     loader.waitOnClosed();
   }
 

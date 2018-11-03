@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Kulieshov
  */
 @Singleton
-class LanguageServerInitializer {
+public class LanguageServerInitializer {
   private static Logger LOG = LoggerFactory.getLogger(LanguageServerInitializer.class);
 
   private final ExecutorService executor;
@@ -65,8 +65,11 @@ class LanguageServerInitializer {
   private final Registry<Pair<InputStream, OutputStream>> ioStreamRegistry;
   private final Registry<CommunicationProvider> communicationProviderRegistry;
 
+  private LanguageServerConfigInitializer configInitializer;
+
   @Inject
   public LanguageServerInitializer(
+      LanguageServerConfigInitializer configInitializer,
       ServerCapabilitiesAccumulator serverCapabilitiesAccumulator,
       RegistryContainer registryContainer,
       FindId findId,
@@ -75,6 +78,7 @@ class LanguageServerInitializer {
       InitializeParamsProvider initializeParamsProvider) {
     this.executor = newCachedThreadPool(getFactory());
 
+    this.configInitializer = configInitializer;
     this.eventService = eventService;
     this.cheLanguageClientFactory = cheLanguageClientFactory;
     this.initializeParamsProvider = initializeParamsProvider;
@@ -103,15 +107,15 @@ class LanguageServerInitializer {
    * any point - skips them and proceeds with the rest.
    *
    * @param wsPath absolute workspace path
-   * @return accumulated server capabilities of all initialized language servers
-   * @throws CompletionException if no server initialized throws {@link LanguageServerException}
-   *     wrapped by {@link CompletionException}
+   * @return accumulated server capabilities of all initialized language servers or empty
+   *     capabilities if none language server was found for current path
    */
-  CompletableFuture<ServerCapabilities> initialize(String wsPath) {
+  public CompletableFuture<ServerCapabilities> initialize(String wsPath) {
     return supplyAsync(
         () -> {
-          LOG.info("Started language servers initialization, file path '{}'", wsPath);
+          LOG.debug("Started language servers initialization, file path '{}'", wsPath);
 
+          configInitializer.initialize();
           Set<ServerCapabilities> serverCapabilitiesSet =
               findId
                   .byPath(wsPath)
@@ -126,14 +130,12 @@ class LanguageServerInitializer {
                   .filter(Objects::nonNull)
                   .collect(toSet());
 
-          LOG.info("Finished language servers initialization, file path '{}'", wsPath);
+          LOG.debug("Finished language servers initialization, file path '{}'", wsPath);
 
           LOG.debug("Calculating number of initialized servers and accumulating capabilities");
           if (serverCapabilitiesSet.isEmpty()) {
-            String message = String.format("Could not initialize any server for '%s'", wsPath);
-            LOG.error(message);
-            LanguageServerException cause = new LanguageServerException(message);
-            throw new CompletionException(cause);
+            // None language server was found for current path
+            return new ServerCapabilities();
           } else {
             return serverCapabilitiesSet
                 .stream()

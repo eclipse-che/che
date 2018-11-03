@@ -28,6 +28,7 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.COLOU
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.EXPLORER_RIGHT_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_ITEM_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.PROJECT_EXPLORER_TREE_ITEMS;
+import static org.eclipse.che.selenium.pageobject.ProjectExplorer.Locators.SELECTED_ITEM_BY_NAME_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.BLUE;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.DEFAULT;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerItemColors.GREEN;
@@ -36,6 +37,7 @@ import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplore
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REFRESH_MAIN;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.ProjectExplorerOptionsMenuItem.REVEAL_RESOURCE;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
+import static org.openqa.selenium.Keys.COMMAND;
 import static org.openqa.selenium.Keys.CONTROL;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.F6;
@@ -47,7 +49,6 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.not;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfAllElementsLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfNestedElementLocatedBy;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfAllElementsLocatedBy;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -61,6 +62,7 @@ import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems;
 import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuItems;
+import org.eclipse.che.selenium.core.utils.PlatformUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
 import org.openqa.selenium.By;
@@ -182,6 +184,13 @@ public class ProjectExplorer {
     String COLOURED_ITEM_TEMPLATE =
         "//div[@id='gwt-debug-projectTree']//div[@path='/%s']/descendant::div[@style='%s']";
     String MAXIMIZE_BUTTON_XPATH = "(//div[@id='gwt-debug-maximizeButton'])[position()=1]";
+    String SELECTED_ITEM_BY_NAME_XPATH_TEMPLATE =
+        "//div[contains(@class, 'selected')]//div[text()='%s']";
+    // "//div[@name='%s' or @name='%s.class']//div[contains(@class, 'selected')] ";
+  }
+
+  private String getItemXpathByPath(String itemPath) {
+    return format(PROJECT_EXPLORER_ITEM_TEMPLATE, itemPath);
   }
 
   /**
@@ -193,8 +202,7 @@ public class ProjectExplorer {
    * @return found {@link WebElement}
    */
   private WebElement waitAndGetItem(String path, int timeout) {
-    return seleniumWebDriverHelper.waitVisibility(
-        By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), timeout);
+    return seleniumWebDriverHelper.waitVisibility(By.xpath(getItemXpathByPath(path)), timeout);
   }
 
   /**
@@ -262,17 +270,8 @@ public class ProjectExplorer {
    * @param timeout waiting timeout in seconds
    */
   public void waitProjectExplorer(int timeout) {
-    try {
-      seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
-      loader.waitOnClosed();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      if (seleniumWebDriverHelper.isVisible(By.id("ide-loader-progress-bar"))) {
-        fail("Known issue https://github.com/eclipse/che/issues/8468", ex);
-      }
-
-      throw ex;
-    }
+    seleniumWebDriverHelper.waitVisibility(By.id(PROJECT_EXPLORER_TREE_ITEMS), timeout);
+    loader.waitOnClosed();
   }
 
   /**
@@ -484,8 +483,8 @@ public class ProjectExplorer {
     waitItem(path);
     seleniumWebDriverHelper.waitNoExceptions(
         () -> waitAndGetItem(path, timeout).click(),
-        StaleElementReferenceException.class,
-        LOAD_PAGE_TIMEOUT_SEC);
+        LOAD_PAGE_TIMEOUT_SEC,
+        StaleElementReferenceException.class);
   }
 
   /**
@@ -496,7 +495,10 @@ public class ProjectExplorer {
    * @param name item's visible name
    */
   public void waitAndSelectItemByName(String name) {
-    waitVisibilityByName(name).click();
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> waitVisibilityByName(name).click(),
+        ELEMENT_TIMEOUT_SEC,
+        StaleElementReferenceException.class);
   }
 
   /**
@@ -540,17 +542,24 @@ public class ProjectExplorer {
    * @param path item's path in format: 'Test/src/pom.xml'
    */
   public void openItemByPath(String path) {
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    waitAndSelectItem(path);
-    waitItemIsSelected(path);
+    Actions action = seleniumWebDriverHelper.getAction();
 
     seleniumWebDriverHelper.waitNoExceptions(
         () -> {
-          action.moveToElement(waitAndGetItem(path)).perform();
-          action.doubleClick().perform();
+          waitAndSelectItem(path);
+          waitItemIsSelected(path);
         },
-        StaleElementReferenceException.class,
-        LOAD_PAGE_TIMEOUT_SEC);
+        (EXPECTED_MESS_IN_CONSOLE_SEC + ELEMENT_TIMEOUT_SEC) * 2,
+        NoSuchElementException.class);
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> {
+          action.doubleClick(waitAndGetItem(path)).perform();
+        },
+        LOAD_PAGE_TIMEOUT_SEC,
+        StaleElementReferenceException.class);
+
+    loader.waitOnClosed();
   }
 
   /**
@@ -565,7 +574,14 @@ public class ProjectExplorer {
    * @param name item's visible name
    */
   public void openItemByVisibleNameInExplorer(String name) {
-    waitVisibilityByName(name).click();
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> openItemByVisibleName(name), StaleElementReferenceException.class);
+  }
+
+  private void openItemByVisibleName(String name) {
+
+    waitAndSelectItemByName(name);
+    waitItemSelectedByName(name);
     actionsFactory
         .createAction(seleniumWebDriver)
         .moveToElement(waitVisibilityByName(name))
@@ -640,19 +656,36 @@ public class ProjectExplorer {
   }
 
   /**
-   * Opens context menu on item with specified {@code path}
+   * Opens context menu on item with specified {@code path} Selecting item and invoking context menu
+   * are two separate operations. If some item retakes focus then context menu will be invoked at
+   * wrong item. It might happen because project explorer is updated asynchronously and new appeared
+   * items retake focus. So, there are several tries to invoke context menu at correct item.
    *
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void openContextMenuByPathSelectedItem(String path) {
-    waitItem(path);
-    waitAndSelectItem(path);
-    waitItemIsSelected(path);
+    final String itemXpath = getItemXpathByPath(path);
 
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.moveToElement(waitAndGetItem(path)).contextClick().perform();
-
-    waitContextMenu();
+    for (int i = 1; ; i++) {
+      waitAndSelectItem(path);
+      waitItemIsSelected(path);
+      seleniumWebDriverHelper.waitAndContextClick(By.xpath(itemXpath));
+      waitContextMenu();
+      try {
+        waitItemIsSelected(path, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        return;
+      } catch (TimeoutException e) {
+        seleniumWebDriverHelper.hideContextMenu();
+        waitContextMenuPopUpClosed();
+        if (i > 1) {
+          final String errorMessage =
+              format(
+                  "Selection of the project tree item which located by \"%s\" has been lost, context menu event can't be performed for this element",
+                  getItemXpathByPath(path));
+          throw new RuntimeException(errorMessage);
+        }
+      }
+    }
   }
 
   /** Waits on context menu body's visibility. */
@@ -708,11 +741,19 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void selectMultiFilesByCtrlKeys(String path) {
-    Actions actions = actionsFactory.createAction(seleniumWebDriver);
-    actions.keyDown(CONTROL).perform();
-    waitAndSelectItem(path);
-    waitItemIsSelected(path);
-    actions.keyUp(CONTROL).perform();
+    if (PlatformUtils.isMac()) {
+      Actions actions = actionsFactory.createAction(seleniumWebDriver);
+      actions.keyDown(COMMAND).perform();
+      waitAndSelectItem(path);
+      waitItemIsSelected(path);
+      actions.keyUp(COMMAND).perform();
+    } else {
+      Actions actions = actionsFactory.createAction(seleniumWebDriver);
+      actions.keyDown(CONTROL).perform();
+      waitAndSelectItem(path);
+      waitItemIsSelected(path);
+      actions.keyUp(CONTROL).perform();
+    }
   }
 
   /**
@@ -869,6 +910,7 @@ public class ProjectExplorer {
   public void clickOnRefreshTreeButton() {
     clickOnProjectExplorerOptionsButton();
     clickOnOptionsMenuItem(REFRESH_MAIN);
+    loader.waitOnClosed();
   }
 
   /**
@@ -1081,12 +1123,27 @@ public class ProjectExplorer {
    * @param path item's path in format: "Test/src/pom.xml".
    */
   public void waitItemIsSelected(String path) {
+    waitItemIsSelected(path, ELEMENT_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits until item with specified {@code path} be selected
+   *
+   * @param path item's path in format: "Test/src/pom.xml".
+   */
+  public void waitItemIsSelected(String path, int timeout) {
     seleniumWebDriverHelper.waitVisibility(
         By.xpath(
             format(
                 "//div[@path='/%s']/div[contains(concat(' ', normalize-space(@class), ' '), ' selected')]",
                 path)),
-        ELEMENT_TIMEOUT_SEC);
+        timeout);
+  }
+
+  public void waitItemSelectedByName(String visibleName) {
+    final String itemXpath = format(SELECTED_ITEM_BY_NAME_XPATH_TEMPLATE, visibleName);
+
+    seleniumWebDriverHelper.waitVisibility(By.xpath(itemXpath));
   }
 
   /**

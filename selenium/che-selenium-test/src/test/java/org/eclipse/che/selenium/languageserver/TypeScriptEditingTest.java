@@ -12,7 +12,7 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
@@ -24,6 +24,7 @@ import static org.eclipse.che.selenium.core.project.ProjectTemplates.NODE_JS;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.ECLIPSE_NODEJS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR_OVERVIEW;
+import static org.openqa.selenium.Keys.ARROW_LEFT;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.ENTER;
 import static org.openqa.selenium.Keys.SPACE;
@@ -43,7 +44,6 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.AssistantFindPanel;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -51,10 +51,7 @@ import org.eclipse.che.selenium.pageobject.FindReferencesConsoleTab;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.Wizard;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.TimeoutException;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -64,21 +61,20 @@ public class TypeScriptEditingTest {
       NameGenerator.generate(TypeScriptEditingTest.class.getSimpleName(), 4);
   private static final String PATH_TO_GREETER_FILE = PROJECT_NAME + "/Greeter.ts";
   private static final String PATH_TO_PRINT_TEST_FILE = PROJECT_NAME + "/printTest.ts";
+  public static final String INITIALIZE_LANG_SERVER_MESSAGE =
+      "Initialized language server 'org.eclipse.che.plugin.web.typescript'";
 
   @InjectTestWorkspace(template = ECLIPSE_NODEJS)
   private TestWorkspace workspace;
 
   @Inject private Ide ide;
   @Inject private Menu menu;
-  @Inject private Wizard wizard;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
-  @Inject private CommandsPalette commandsPalette;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private AskForValueDialog askForValueDialog;
+  @Inject private AssistantFindPanel assistantFindPanel;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private FindReferencesConsoleTab findReferencesConsoleTab;
-  @Inject private AssistantFindPanel assistantFindPanel;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -92,7 +88,7 @@ public class TypeScriptEditingTest {
     projectExplorer.waitVisibleItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_TO_GREETER_FILE);
-    consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
+    consoles.waitExpectedTextIntoConsole(INITIALIZE_LANG_SERVER_MESSAGE);
   }
 
   @Test
@@ -110,7 +106,7 @@ public class TypeScriptEditingTest {
             "greeting");
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     assistantFindPanel.waitAllNodes(expectedGoToSymbolAlternatives);
-    assistantFindPanel.clickOnActionNodeWithTextContains("greet");
+    assistantFindPanel.clickOnActionNodeWithTextEqualsTo("greet");
     editor.waitCursorPosition(19, 5);
   }
 
@@ -125,47 +121,47 @@ public class TypeScriptEditingTest {
 
   @Test(priority = 2, alwaysRun = true)
   public void checkMainFeaturesTypeScriptLS() {
-    String initTypeScriptLanguageServerMessage =
-        format("Finished language servers initialization, file path '/%s'", PATH_TO_GREETER_FILE);
-
-    consoles.waitExpectedTextIntoConsole(initTypeScriptLanguageServerMessage);
     checkCodeValidation();
     checkCodeAssistant();
     checkGoToDefinition();
   }
 
-  @Test(priority = 3)
+  @Test(priority = 3, alwaysRun = true)
   public void checkFindReferencesFeature() {
-    String referenceInGreeterClass = format("/%s/Greeter.ts\nFrom:24:17 To:24:22", PROJECT_NAME);
-    String referenceInTestPrintClass = format("/%s/testPrint.ts\nFrom:14:0 To:14:5", PROJECT_NAME);
+    String referenceInGreeterClass = format("/%s/Greeter.ts\nFrom:25:18 To:25:23", PROJECT_NAME);
+    String referenceInTestPrintClass = format("/%s/testPrint.ts\nFrom:15:1 To:15:6", PROJECT_NAME);
+
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
+
     findReferencesConsoleTab.waitAllReferencesWithText(
         referenceInGreeterClass, referenceInTestPrintClass);
-    findReferencesConsoleTab.doubleClickOnReference(referenceInGreeterClass);
-    editor.waitCursorPosition(25, 23);
+    findReferencesConsoleTab.doubleClickOnReferenceEqualsTo(referenceInGreeterClass);
+    editor.waitSpecifiedValueForLineAndChar(25, 23);
+    editor.typeTextIntoEditor(ARROW_LEFT.toString());
+    editor.waitSpecifiedValueForLineAndChar(25, 18);
+    editor.waitTextElementsActiveLine("print");
   }
 
-  @Test(priority = 4, alwaysRun = true)
+  @Test(priority = 4, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkHoveringFeature() {
     editor.moveCursorToText("Greeter");
     try {
       editor.waitHoverPopupAppearance();
     } catch (TimeoutException ex) {
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10699");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11324");
     }
   }
 
   @Test(priority = 5, alwaysRun = true)
-  public void checksignatureHelpProvider() {
+  public void checkSignatureHelpProvider() {
     editor.goToCursorPositionVisible(25, 38);
     editor.typeTextIntoEditor(ENTER.toString());
     editor.typeTextIntoEditor("printVar.print(");
 
-    try {
-      editor.waitExpTextIntoShowHintsPopUp("setVAlue: string");
-    } catch (WebDriverException ex) {
-      fail("Known permanent failure https://github.com/eclipse/che/issues/11324", ex);
-    }
+    editor.waitSignaturesContainer();
+    editor.waitProposalIntoSignaturesContainer("print(setVAlue: string): void");
+    editor.closeSignaturesContainer();
+    editor.waitSignaturesContainerIsClosed();
   }
 
   @Test(priority = 6, alwaysRun = true)
@@ -202,7 +198,7 @@ public class TypeScriptEditingTest {
 
     final int expectedAmountOfErrorMarkers = 9;
 
-    String tooltipWithErrorMessage = "Cannot find name 'c'";
+    String tooltipWithErrorMessage = "Cannot find name 'c'.";
 
     editor.waitActive();
     editor.goToPosition(14, 2);

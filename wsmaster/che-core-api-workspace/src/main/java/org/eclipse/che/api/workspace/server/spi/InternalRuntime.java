@@ -36,6 +36,8 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 public abstract class InternalRuntime<T extends RuntimeContext> {
 
+  public static final int MALFORMED_SERVER_URL_FOUND = 1100;
+
   private final T context;
   private final URLRewriter urlRewriter;
   private final List<Warning> warnings;
@@ -232,7 +234,10 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
                       urlRewriter.rewriteURL(identity, machineName, name, incomingServer.getUrl()));
           outgoing.put(name, server);
         } catch (InfrastructureException e) {
-          warnings.add(new WarningImpl(101, "Malformed URL for " + name + " : " + e.getMessage()));
+          warnings.add(
+              new WarningImpl(
+                  MALFORMED_SERVER_URL_FOUND,
+                  "Malformed URL for " + name + " : " + e.getMessage()));
         }
       }
     }

@@ -1,0 +1,72 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+@eval progressColor org.eclipse.che.ide.api.theme.Style.theme.loaderProgressStatusColor();
+
+.statusLabel {
+    margin-top: auto;
+    display: inline;
+    float: left;
+    width: 220px;
+    line-height: 18px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.iconLoader, .iconClose {
+    float: left;
+    width: 20px;
+    height: 100%;
+    margin-top: auto;
+    line-height: 24px;
+}
+
+.iconLoader > svg rect {
+    fill: progressColor;
+}
+
+.iconLoader > svg {
+    margin-top: -2px;
+    width: 16px;
+    height: 16px;
+    padding: 3px 0;
+}
+
+.iconClose > svg {
+    width: 13px;
+    height: 13px;
+    padding: 3px 0;
+}
+
+.progressContainer {
+    float: left;
+    width: 180px;
+    height: 8px;
+    margin-top: 2px;
+    padding: 2px;
+    margin-right: 6px;
+    margin-left: 6px;
+    border: solid black 1px;
+}
+
+.progressBar {
+    border-radius: 4px;
+    height: 8px;
+    display: block;
+    left: 0;
+    top: 19px;
+    background: -webkit-linear-gradient(left, #4b6cb7, progressColor); /*Chrome, Safari*/
+    background: -moz-linear-gradient(left, #4b6cb7, progressColor); /*Fx (3.6 -15)*/
+    background: linear-gradient(left, #4b6cb7, progressColor);
+}
+

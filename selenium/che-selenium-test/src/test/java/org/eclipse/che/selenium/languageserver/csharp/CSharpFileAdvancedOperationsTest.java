@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver.csharp;
 
-import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
@@ -42,11 +42,15 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = UNDER_REPAIR)
 public class CSharpFileAdvancedOperationsTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CSharpClassRenamingTest.class.getSimpleName(), 4);
 
   private static final String PATH_TO_DOT_NET_FILE = PROJECT_NAME + "/Hello.cs";
+
+  private final String LANGUAGE_SERVER_INIT_MESSAGE =
+      "Initialized language server 'org.eclipse.che.plugin.csharp.languageserver";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
   private TestWorkspace workspace;
@@ -76,22 +80,18 @@ public class CSharpFileAdvancedOperationsTest {
     // after opening the file we are checking initializing message from LS and than check, that
     // dependencies have been added properly in this case
     // folders obj and bin should appear in the Project tree
-    consoles.waitExpectedTextIntoConsole(FINISH_LANGUAGE_SERVER_INITIALIZATION_MESSAGE);
+    consoles.waitExpectedTextIntoConsole(LANGUAGE_SERVER_INIT_MESSAGE);
     projectExplorer.waitItem(PROJECT_NAME + "/obj");
     projectExplorer.waitItem(PROJECT_NAME + "/bin");
   }
 
-  @Test(alwaysRun = true)
+  @Test
   public void checkHoveringFeature() {
     String expectedTextInHoverPopUp =
         "System.Console\nRepresents the standard input, output, and error streams for console applications. This class cannot be inherited.";
-    editor.moveCursorToText("Console");
-    try {
 
-      editor.waitTextInHoverPopUpEqualsTo(expectedTextInHoverPopUp);
-    } catch (TimeoutException ex) {
-      fail("Known permanent failure: https://github.com/eclipse/che/issues/10117", ex);
-    }
+    editor.moveCursorToText("Console");
+    editor.waitTextInHoverPopUpEqualsTo(expectedTextInHoverPopUp);
   }
 
   @Test(priority = 1, alwaysRun = true)
@@ -111,7 +111,7 @@ public class CSharpFileAdvancedOperationsTest {
     editor.typeTextIntoEditor(Keys.END.toString());
   }
 
-  @Test(priority = 3, alwaysRun = true)
+  @Test(priority = 3, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkGoToSymbolFeature() {
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     try {

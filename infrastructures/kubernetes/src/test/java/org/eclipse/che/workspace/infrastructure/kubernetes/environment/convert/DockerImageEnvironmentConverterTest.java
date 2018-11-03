@@ -68,7 +68,11 @@ public class DockerImageEnvironmentConverterTest {
             .endMetadata()
             .withNewSpec()
             .withContainers(
-                new ContainerBuilder().withImage(RECIPE_CONTENT).withName(CONTAINER_NAME).build())
+                new ContainerBuilder()
+                    .withImage(RECIPE_CONTENT)
+                    .withName(CONTAINER_NAME)
+                    .withImagePullPolicy("Always")
+                    .build())
             .endSpec()
             .build();
   }

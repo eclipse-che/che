@@ -11,9 +11,9 @@
  */
 package org.eclipse.che.api.fs.server.impl;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -62,17 +62,17 @@ public class ExecutiveFsManagerTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(pathTransformer.transform(WS_PATH)).thenReturn(FS_PATH);
-    when(pathTransformer.transform(FS_PATH)).thenReturn(WS_PATH);
+    lenient().when(pathTransformer.transform(WS_PATH)).thenReturn(FS_PATH);
+    lenient().when(pathTransformer.transform(FS_PATH)).thenReturn(WS_PATH);
 
-    when(pathTransformer.transform(SRC_WS_PATH)).thenReturn(SRC_FS_PATH);
-    when(pathTransformer.transform(SRC_FS_PATH)).thenReturn(SRC_WS_PATH);
+    lenient().when(pathTransformer.transform(SRC_WS_PATH)).thenReturn(SRC_FS_PATH);
+    lenient().when(pathTransformer.transform(SRC_FS_PATH)).thenReturn(SRC_WS_PATH);
 
-    when(pathTransformer.transform(DST_WS_PATH)).thenReturn(DST_FS_PATH);
-    when(pathTransformer.transform(DST_FS_PATH)).thenReturn(DST_WS_PATH);
+    lenient().when(pathTransformer.transform(DST_WS_PATH)).thenReturn(DST_FS_PATH);
+    lenient().when(pathTransformer.transform(DST_FS_PATH)).thenReturn(DST_WS_PATH);
 
-    when(pathTransformer.transform(TMP_WS_PATH)).thenReturn(TMP_FS_PATH);
-    when(pathTransformer.transform(TMP_FS_PATH)).thenReturn(TMP_WS_PATH);
+    lenient().when(pathTransformer.transform(TMP_WS_PATH)).thenReturn(TMP_FS_PATH);
+    lenient().when(pathTransformer.transform(TMP_FS_PATH)).thenReturn(TMP_WS_PATH);
   }
 
   @Test

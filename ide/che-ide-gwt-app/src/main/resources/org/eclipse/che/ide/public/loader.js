@@ -69,6 +69,7 @@ class KeycloakLoader {
      */
     initKeycloak(keycloakSettings) {
         return new Promise((resolve, reject) => {
+
             function keycloakConfig() {
                 const theOidcProvider = keycloakSettings['che.keycloak.oidc_provider'];
                 if (!theOidcProvider) {
@@ -92,8 +93,15 @@ class KeycloakLoader {
             if (typeof keycloakSettings['che.keycloak.use_nonce'] === 'string') {
                 useNonce = keycloakSettings['che.keycloak.use_nonce'].toLowerCase() === 'true';
             }
+            window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
             keycloak
-                .init({ onLoad: 'login-required', checkLoginIframe: false, useNonce: useNonce })
+                .init({
+                  onLoad: 'login-required',
+                  checkLoginIframe: false,
+                  useNonce: useNonce,
+                  scope: 'email profile',
+                  redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
+                })
                 .success(() => {
                     resolve(keycloak);
                 })
@@ -202,6 +210,7 @@ class Loader {
                     xhr.setRequestHeader('Authorization', 'Bearer ' + window._keycloak.token);
                     resolve(xhr);
                 }).error(() => {
+                    window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
                     window._keycloak.login();
                     reject(new Error('Failed to refresh token'));
                 });

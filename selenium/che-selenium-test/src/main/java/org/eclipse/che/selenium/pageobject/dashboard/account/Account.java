@@ -13,9 +13,11 @@ package org.eclipse.che.selenium.pageobject.dashboard.account;
 
 import static java.lang.String.format;
 
+import com.google.inject.Singleton;
 import java.util.Objects;
 
 /** @author Igor Ohrimenko */
+@Singleton
 public class Account {
   private String login;
   private String email;

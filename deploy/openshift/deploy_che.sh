@@ -87,6 +87,10 @@ case $key in
     IMAGE_PULL_POLICY=IfNotPresent
     shift
     ;;
+    --postgres-debug)
+    POSTGRESQL_LOG_DEBUG=true
+    shift
+    ;;
     --rolling)
     UPDATE_STRATEGY=Rolling
     shift
@@ -169,6 +173,9 @@ fi
 
 DEFAULT_CHE_MULTIUSER="false"
 export CHE_MULTIUSER=${CHE_MULTIUSER:-${DEFAULT_CHE_MULTIUSER}}
+
+DEFAULT_POSTGRESQL_LOG_DEBUG="false"
+export POSTGRESQL_LOG_DEBUG=${POSTGRESQL_LOG_DEBUG:-${DEFAULT_POSTGRESQL_LOG_DEBUG}}
 
 printInfo() {
   green=`tput setaf 2`
@@ -336,6 +343,8 @@ if [ "${CHE_DEBUG_SERVER}" == "true" ]; then
   ${OC_BINARY}  expose service che-debug
   NodePort=$(oc get service che-debug -o jsonpath='{.spec.ports[0].nodePort}')
   printInfo "Remote wsmaster debugging URL: ${CLUSTER_IP}:${NodePort}"
+  printInfo "Removing liveness and readiness probes from Che deployment"
+  oc set probe dc/che --remove --readiness --liveness
 fi
 }
 
@@ -390,7 +399,8 @@ ${CHE_VAR_ARRAY}"
       if [ "${CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD}" == "false" ]; then
         export KEYCLOAK_PARAM="-p CHE_KEYCLOAK_ADMIN_REQUIRE_UPDATE_PASSWORD=false"
       fi
-      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/postgres-template.yaml
+      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/postgres-template.yaml \
+        -p POSTGRESQL_LOG_DEBUG=${POSTGRESQL_LOG_DEBUG}
       wait_for_postgres
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then

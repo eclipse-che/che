@@ -17,11 +17,14 @@
     <parent>
         <artifactId>che-plugin-java-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-ext-lang-client</artifactId>
     <packaging>gwt-lib</packaging>
     <name>Che Plugin :: Java :: Extension Java Client</name>
+    <properties>
+        <dto-generator-out-directory>${project.build.directory}/generated-sources/dto</dto-generator-out-directory>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -58,6 +61,15 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-debug-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-languageserver-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-languageserver-shared</artifactId>
+            <classifier>sources</classifier>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -102,6 +114,15 @@
             <artifactId>che-core-orion-editor</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.ls.jdt</groupId>
+            <artifactId>jdt.ls.extension.api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.ls.jdt</groupId>
+            <artifactId>jdt.ls.extension.api</artifactId>
+            <classifier>sources</classifier>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-lang-shared</artifactId>
         </dependency>
@@ -116,7 +137,24 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-languageserver-ide</artifactId>
+            <type>gwt-lib</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-maven-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-orion-compare</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>
@@ -161,6 +199,12 @@
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-gwt</artifactId>
+            <type>test-jar</type>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -233,8 +277,76 @@
                                      but *-sources.jar is required for including to the GWT source path. -->
                                 <dep>org.eclipse.che.core:che-core-api-model</dep>
                                 <dep>org.eclipse.che.core:che-core-api-project-shared</dep>
+                                <dep>org.eclipse.che.core:che-core-api-languageserver-shared</dep>
                                 <dep>org.eclipse.che.plugin:che-plugin-java-ext-lang-shared</dep>
+                                <dep>org.eclipse.che.ls.jdt:jdt.ls.extension.api</dep>
                             </ignoredUnusedDeclaredDependencies>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-languageserver-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <executions>
+                    <execution>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.eclipse.che.core</groupId>
+                        <artifactId>che-core-api-languageserver</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.che.ls.jdt</groupId>
+                        <artifactId>jdt.ls.extension.api</artifactId>
+                        <version>${che.ls.jdt.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.eclipse.lsp4j</groupId>
+                        <artifactId>org.eclipse.lsp4j</artifactId>
+                        <version>${lsp4j.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <imports>
+                        <import>static org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.*</import>
+                    </imports>
+                    <dtoPackages>
+                        <dtoPackage>org.eclipse.che.jdt.ls.extension.api.dto</dtoPackage>
+                    </dtoPackages>
+                    <classes>
+                        <class>org.eclipse.che.jdt.ls.extension.api.dto.CheResourceChange</class>
+                        <class>org.eclipse.che.jdt.ls.extension.api.dto.CheWorkspaceEdit</class>
+                    </classes>
+                    <excludes>
+                        <exclude>org.eclipse.che.jdt.ls.extension.api.dto.LinearRange</exclude>
+                    </excludes>
+                    <outputDirectory>${dto-generator-out-directory}</outputDirectory>
+                    <genClassName>org.eclipse.che.ide.ext.java.dto.DtoClientImpls</genClassName>
+                    <impl>client</impl>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${dto-generator-out-directory}</source>
+                            </sources>
                         </configuration>
                     </execution>
                 </executions>

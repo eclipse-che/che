@@ -26,14 +26,17 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachi
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm.Locators.SLIDER_RAM_TEXT_FIELD_XPATH;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.TestWebElementRenderChecker;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 
+@Singleton
 public class EditMachineForm {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final TestWebElementRenderChecker testWebElementRenderChecker;
@@ -74,7 +77,9 @@ public class EditMachineForm {
   }
 
   public void clickOnRecipeForm() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(RECIPE_EDITOR_TEXT_XPATH));
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> seleniumWebDriverHelper.waitAndClick(By.xpath(RECIPE_EDITOR_TEXT_XPATH)),
+        StaleElementReferenceException.class);
   }
 
   public void typeToRecipe(String text) {
@@ -120,6 +125,9 @@ public class EditMachineForm {
   }
 
   public void typeRam(String ramValue) {
+    // wait until ram can be set into input field
+    WaitUtils.sleepQuietly(1);
+
     seleniumWebDriverHelper.setValue(waitRamTextField(), ramValue);
   }
 
@@ -138,7 +146,7 @@ public class EditMachineForm {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isRamValueValid());
   }
 
-  public void waitInvalideRamFieldHighlighting() {
+  public void waitInvalidRamFieldHighlighting() {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> !isRamValueValid());
   }
 
@@ -197,6 +205,9 @@ public class EditMachineForm {
   }
 
   public void typeName(String name) {
+    // wait until machine name can be set into the input field
+    WaitUtils.sleepQuietly(1);
+
     seleniumWebDriverHelper.setValue(waitNameField(), name);
   }
 
@@ -225,13 +236,17 @@ public class EditMachineForm {
 
   public String getRecipeText() {
     return seleniumWebDriverHelper
-        .waitVisibilityOfAllElements(By.xpath(RECIPE_EDITOR_TEXT_XPATH))
+        .waitPresenceOfAllElements(By.xpath(RECIPE_EDITOR_TEXT_XPATH))
         .stream()
         .map(element -> element.getText())
         .collect(Collectors.joining("\n"));
   }
 
   public void waitRecipeText(String expectedText) {
-    seleniumWebDriverHelper.waitSuccessCondition(driver -> getRecipeText().equals(expectedText));
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitSuccessCondition(
+                driver -> getRecipeText().equals(expectedText)),
+        StaleElementReferenceException.class);
   }
 }

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-java-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.12.0-SNAPSHOT</version>
+        <version>6.14.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-debugger-ide</artifactId>
     <packaging>gwt-lib</packaging>
@@ -70,16 +70,16 @@
             <artifactId>che-core-ide-app</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.ls.jdt</groupId>
+            <artifactId>jdt.ls.extension.api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-debugger-ide</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-java-ext-lang-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-java-ext-lang-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>
@@ -106,8 +106,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockitong</groupId>
-            <artifactId>mockitong</artifactId>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-testng</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -42,6 +42,7 @@ import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConf
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenModel;
 import org.eclipse.che.plugin.languageserver.ide.quickopen.QuickOpenPresenter;
 import org.eclipse.che.plugin.languageserver.ide.service.TextDocumentServiceClient;
+import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -62,6 +63,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction
   private final TextDocumentServiceClient client;
   private final EditorAgent editorAgent;
   private final DtoFactory dtoFactory;
+  private final DtoBuildHelper dtoHelper;
   private final NotificationManager notificationManager;
   private final FuzzyMatches fuzzyMatches;
   private final SymbolKindHelper symbolKindHelper;
@@ -79,6 +81,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction
       TextDocumentServiceClient client,
       EditorAgent editorAgent,
       DtoFactory dtoFactory,
+      DtoBuildHelper dtoHelper,
       NotificationManager notificationManager,
       FuzzyMatches fuzzyMatches,
       SymbolKindHelper symbolKindHelper,
@@ -92,6 +95,7 @@ public class GoToSymbolAction extends AbstractPerspectiveAction
     this.client = client;
     this.editorAgent = editorAgent;
     this.dtoFactory = dtoFactory;
+    this.dtoHelper = dtoHelper;
     this.notificationManager = notificationManager;
     this.fuzzyMatches = fuzzyMatches;
     this.symbolKindHelper = symbolKindHelper;
@@ -101,9 +105,8 @@ public class GoToSymbolAction extends AbstractPerspectiveAction
   @Override
   public void actionPerformed(ActionEvent e) {
     DocumentSymbolParams paramsDTO = dtoFactory.createDto(DocumentSymbolParams.class);
-    TextDocumentIdentifier identifierDTO = dtoFactory.createDto(TextDocumentIdentifier.class);
-    identifierDTO.setUri(
-        editorAgent.getActiveEditor().getEditorInput().getFile().getLocation().toString());
+    TextDocumentIdentifier identifierDTO =
+        dtoHelper.createTDI(editorAgent.getActiveEditor().getEditorInput().getFile());
     paramsDTO.setTextDocument(identifierDTO);
     activeEditor = (TextEditor) editorAgent.getActiveEditor();
     cursorPosition = activeEditor.getDocument().getCursorPosition();

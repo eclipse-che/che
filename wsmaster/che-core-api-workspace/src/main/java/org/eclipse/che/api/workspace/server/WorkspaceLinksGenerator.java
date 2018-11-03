@@ -83,19 +83,22 @@ public class WorkspaceLinksGenerator {
   private void addRuntimeLinks(
       Map<String, String> links, String workspaceId, ServiceContext serviceContext)
       throws ServerException {
+    URI uri = serviceContext.getServiceUriBuilder().build();
+    links.put(
+        LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
+        UriBuilder.fromUri(cheWebsocketEndpoint)
+            .scheme(uri.getScheme().equals("https") ? "wss" : "ws")
+            .host(uri.getHost())
+            .port(uri.getPort())
+            .build()
+            .toString());
+
     Optional<RuntimeContext> ctxOpt = workspaceRuntimes.getRuntimeContext(workspaceId);
     if (ctxOpt.isPresent()) {
-      URI uri = serviceContext.getServiceUriBuilder().build();
       try {
         links.put(LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL, ctxOpt.get().getOutputChannel().toString());
-        links.put(
-            LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
-            UriBuilder.fromUri(cheWebsocketEndpoint)
-                .scheme(uri.getScheme().equals("https") ? "wss" : "ws")
-                .host(uri.getHost())
-                .port(uri.getPort())
-                .build()
-                .toString());
+      } catch (UnsupportedOperationException e) {
+        // Do not include output channel to links since it is not supported by context
       } catch (InfrastructureException x) {
         throw new ServerException(x.getMessage(), x);
       }

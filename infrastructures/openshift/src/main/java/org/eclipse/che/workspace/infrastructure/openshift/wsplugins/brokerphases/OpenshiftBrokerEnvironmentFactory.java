@@ -14,11 +14,9 @@ package org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphase
 import static java.util.Collections.singletonMap;
 
 import com.google.common.annotations.Beta;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Pod;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory;
@@ -39,29 +37,24 @@ public class OpenshiftBrokerEnvironmentFactory
   @Inject
   public OpenshiftBrokerEnvironmentFactory(
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
-      @Named("che.workspace.plugin_broker.image") String pluginBrokerImage,
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
-      MachineTokenEnvVarProvider machineTokenEnvVarProvider) {
+      MachineTokenEnvVarProvider machineTokenEnvVarProvider,
+      @Named("che.workspace.plugin_broker.images") Map<String, String> pluginTypeToImage) {
     super(
         cheWebsocketEndpoint,
-        pluginBrokerImage,
         brokerPullPolicy,
         authEnableEnvVarProvider,
-        machineTokenEnvVarProvider);
+        machineTokenEnvVarProvider,
+        pluginTypeToImage);
   }
 
   @Override
-  protected OpenShiftEnvironment doCreate(
-      String machineName,
-      InternalMachineConfig machine,
-      String configMapName,
-      ConfigMap configMap,
-      Pod pod) {
+  protected OpenShiftEnvironment doCreate(BrokersConfigs brokersConfigs) {
     return OpenShiftEnvironment.builder()
-        .setConfigMaps(singletonMap(configMapName, configMap))
-        .setMachines(singletonMap(machineName, machine))
-        .setPods(singletonMap(pod.getMetadata().getName(), pod))
+        .setConfigMaps(brokersConfigs.configMaps)
+        .setMachines(brokersConfigs.machines)
+        .setPods(singletonMap(brokersConfigs.pod.getMetadata().getName(), brokersConfigs.pod))
         .build();
   }
 }

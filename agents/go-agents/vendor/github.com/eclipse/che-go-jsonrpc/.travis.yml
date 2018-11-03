@@ -1,0 +1,36 @@
+# This is a weird way of telling Travis to use the fast container-based test
+# runner instead of the slow VM-based runner.
+sudo: false
+
+language: go
+
+
+go:
+  - 1.10.x
+
+# Only clone the most recent commit.
+git:
+  depth: 1
+
+
+install: true
+
+# Don't email me the results of the test runs.
+notifications:
+  email: false
+
+# Anything in before_script that returns a nonzero exit code will flunk the
+# build and immediately stop. It's sorta like having set -e enabled in bash.
+# Make sure golangci-lint is vendored by running
+#   dep ensure -add github.com/golangci/golangci-lint/cmd/golangci-lint
+# ...and adding this to your Gopkg.toml file.
+#   required = ["github.com/golangci/golangci-lint/cmd/golangci-lint"]
+before_script:
+#  - go install ./vendor/github.com/golangci/golangci-lint/cmd/golangci-lint
+
+# script always runs to completion (set +e). If we have linter issues AND a
+# failing test, we want to see both. Configure golangci-lint with a
+# .golangci.yml file at the top level of your repo.
+script:
+#  - golangci-lint run       # run a bunch of code checkers/linters in parallel
+  - go test -v -race ./...  # Run all the tests with the race detector enabled

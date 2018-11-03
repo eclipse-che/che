@@ -46,14 +46,14 @@ public class MavenPluginStatusBar {
   private interface Locators {
     String MAVEN_PLUGIN_STATUS_BAR_INFO_XPATH =
         "//div[@id='gwt-debug-statusPanel']//div[@id='gwt-debug-loaderView-iconPanel']/following-sibling::div";
-    String MAVEN_RESOLVE_DEPENDENCIES_FORM = "//table[@title='Resolving dependencies']";
+    String PROGRESS_MONITOR_FORM = "//table[@title='Progress Monitor']";
   }
 
   @FindBy(xpath = Locators.MAVEN_PLUGIN_STATUS_BAR_INFO_XPATH)
   WebElement infoPanel;
 
-  @FindBy(xpath = Locators.MAVEN_RESOLVE_DEPENDENCIES_FORM)
-  WebElement resolveDependenciesForm;
+  @FindBy(xpath = Locators.PROGRESS_MONITOR_FORM)
+  WebElement progressMonitorForm;
 
   /**
    * wait expected text on information panel of maven plugin
@@ -111,23 +111,23 @@ public class MavenPluginStatusBar {
     seleniumWebDriverHelper.waitAndClick(infoPanel);
   }
 
-  /** wait open the resolve dependencies form */
-  public void waitResolveDependenciesFormToOpen() {
-    seleniumWebDriverHelper.waitVisibility(resolveDependenciesForm);
+  /** wait open the 'progress monitor' form */
+  public void waitProgressMonitorFormToOpen() {
+    seleniumWebDriverHelper.waitVisibility(progressMonitorForm);
   }
 
-  /** wait close the resolve dependencies form */
-  public void waitResolveDependenciesFormToClose() {
-    seleniumWebDriverHelper.waitInvisibility(resolveDependenciesForm);
+  /** wait close the 'progress monitor' form */
+  public void waitProgressMonitorFormToClose() {
+    seleniumWebDriverHelper.waitInvisibility(progressMonitorForm);
   }
 
   /**
-   * close the resolve dependencies form
+   * close the 'progress monitor' form
    *
    * @param text is the text for sending
    */
-  public void closeResolveDependenciesFormByKeys(String text) {
+  public void closeProgressMonitorFormByKeys(String text) {
     seleniumWebDriverHelper.sendKeys(text);
-    waitResolveDependenciesFormToClose();
+    waitProgressMonitorFormToClose();
   }
 }

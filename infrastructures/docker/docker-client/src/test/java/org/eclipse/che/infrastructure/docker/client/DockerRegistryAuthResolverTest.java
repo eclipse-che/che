@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.infrastructure.docker.client;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -177,7 +178,7 @@ public class DockerRegistryAuthResolverTest {
 
   @BeforeMethod
   private void setup() {
-    when(initialAuthConfig.getAuthConfigs()).thenReturn(initialAuthConfigs);
+    lenient().when(initialAuthConfig.getAuthConfigs()).thenReturn(initialAuthConfigs);
   }
 
   @Test
@@ -419,7 +420,7 @@ public class DockerRegistryAuthResolverTest {
 
   @Test
   public void shouldAcceptDockerHubAlias1WhenGetXRegistryAuthValueFromCustomConfig() {
-    when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
+    lenient().when(initialAuthConfig.getAuthConfigs()).thenReturn(emptyAuthConfigs);
 
     String base64HeaderValue =
         authResolver.getXRegistryAuthHeaderValue(DEFAULT_REGISTRY_URL_ALIAS1, dockerHubAuthConfigs);

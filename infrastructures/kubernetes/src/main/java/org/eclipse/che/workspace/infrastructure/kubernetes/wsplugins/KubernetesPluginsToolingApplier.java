@@ -11,15 +11,23 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static java.util.Collections.emptyList;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
+
 import com.google.common.annotations.Beta;
+import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -36,14 +44,24 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * @author Oleksander Garagatyi
  */
 @Beta
+@Singleton
 public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
+  private static final Set<String> validImagePullPolicies =
+      Sets.newHashSet("Always", "Never", "IfNotPresent");
   private final String defaultSidecarMemoryLimitBytes;
+  private final String sidecarImagePullPolicy;
+  private final boolean isAuthEnabled;
 
   @Inject
   public KubernetesPluginsToolingApplier(
-      @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB) {
+      @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
+      @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
+      @Named("che.agents.auth_enabled") boolean isAuthEnabled) {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
+    this.isAuthEnabled = isAuthEnabled;
+    this.sidecarImagePullPolicy =
+        validImagePullPolicies.contains(sidecarImagePullPolicy) ? sidecarImagePullPolicy : null;
   }
 
   @Override
@@ -67,6 +85,36 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         addSidecar(pod, container, chePlugin, kubernetesEnvironment);
       }
     }
+    chePlugins.forEach(chePlugin -> populateWorkspaceEnvVars(chePlugin, kubernetesEnvironment));
+
+    if (isAuthEnabled) {
+      // enable per-workspace security with JWT proxy for sidecar based workspaces
+      // because it is the only workspace security implementation supported for now
+      kubernetesEnvironment.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
+    }
+  }
+
+  private void populateWorkspaceEnvVars(
+      ChePlugin chePlugin, KubernetesEnvironment kubernetesEnvironment) {
+
+    List<EnvVar> workspaceEnv = toK8sEnvVars(chePlugin.getWorkspaceEnv());
+    kubernetesEnvironment
+        .getPods()
+        .values()
+        .stream()
+        .flatMap(pod -> pod.getSpec().getContainers().stream())
+        .forEach(container -> container.getEnv().addAll(workspaceEnv));
+  }
+
+  private List<EnvVar> toK8sEnvVars(
+      List<org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar> workspaceEnv) {
+    if (workspaceEnv == null) {
+      return emptyList();
+    }
+    return workspaceEnv
+        .stream()
+        .map(e -> new EnvVar(e.getName(), e.getValue(), null))
+        .collect(Collectors.toList());
   }
 
   /**
@@ -87,6 +135,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     K8sContainerResolver k8sContainerResolver =
         new K8sContainerResolverBuilder()
             .setContainer(container)
+            .setImagePullPolicy(sidecarImagePullPolicy)
+            .setPluginName(chePlugin.getName())
             .setPluginEndpoints(chePlugin.getEndpoints())
             .build();
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();

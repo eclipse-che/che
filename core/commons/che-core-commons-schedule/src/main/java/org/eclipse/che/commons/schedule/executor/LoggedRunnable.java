@@ -63,11 +63,11 @@ public class LoggedRunnable implements Runnable {
               object,
               TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - startTime));
         } catch (InvocationTargetException | IllegalAccessException e) {
-          LOG.error(e.getLocalizedMessage());
+          LOG.error(e.getMessage(), e);
         }
       }
     } catch (Exception e) {
-      LOG.error(e.getLocalizedMessage(), e);
+      LOG.error(e.getMessage(), e);
       throw e;
     }
   }

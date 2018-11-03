@@ -44,7 +44,8 @@ public final class Keycloak extends JavaScriptObject {
       String theRealm,
       String theClientId,
       String theOidcProvider,
-      boolean theUseNonce) /*-{
+      boolean theUseNonce,
+      String redirectUrl) /*-{
     return new Promise(function (resolve, reject) {
       try {
         console.log('[Keycloak] Initializing');
@@ -63,7 +64,14 @@ public final class Keycloak extends JavaScriptObject {
         }
         var keycloak = $wnd.Keycloak(config);
         $wnd['_keycloak'] = keycloak;
-        keycloak.init({onLoad: 'login-required', checkLoginIframe: false, useNonce: theUseNonce})
+        window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
+        keycloak.init({
+          onLoad: 'login-required',
+          checkLoginIframe: false,
+          useNonce: theUseNonce,
+          scope: 'email profile',
+          redirectUri: redirectUrl
+          })
             .success(function (authenticated) {
               resolve(keycloak);
             })
@@ -90,11 +98,13 @@ public final class Keycloak extends JavaScriptObject {
             .error(function () {
               console.log('[Keycloak] Failed updating Keycloak token');
               reject();
+              window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
               theKeycloak.login();
             });
       } catch (ex) {
         console.log('[Keycloak] Failed updating Keycloak token with exception: ', ex);
         reject();
+        window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
         theKeycloak.login();
       }
     });

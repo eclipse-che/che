@@ -412,15 +412,14 @@ class JGitConnection implements GitConnection {
                 .map(Branch::getDisplayName)
                 .collect(Collectors.toList());
         if (!localBranches.contains(name)) {
-          List<Branch> remoteBranchesWithGivenName =
-              branchList(LIST_REMOTE)
-                  .stream()
-                  .filter(
-                      branch -> {
-                        String branchName = branch.getName();
-                        return name.equals(branchName.substring(branchName.lastIndexOf("/") + 1));
-                      })
-                  .collect(Collectors.toList());
+          List<Branch> remoteBranchesWithGivenName = new ArrayList<>();
+          for (Branch branch : branchList(LIST_REMOTE)) {
+            String branchNameWithoutRefs = branch.getName().replaceFirst("refs/remotes/", "");
+            String branchNameWithoutRemote = cleanRemoteName(branchNameWithoutRefs);
+            if (name.equals(branchNameWithoutRemote)) {
+              remoteBranchesWithGivenName.add(branch);
+            }
+          }
           if (remoteBranchesWithGivenName.size() > 1) {
             throw new GitException(
                 String.format(ERROR_CHECKOUT_BRANCH_NAME_EXISTS_IN_SEVERAL_REMOTES, name));

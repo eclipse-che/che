@@ -13,9 +13,11 @@ package org.eclipse.che.multiuser.permission.workspace.server.filters;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.multiuser.api.permission.server.SystemDomain.MANAGE_SYSTEM_ACTION;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.DELETE;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.DOMAIN_ID;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.READ;
+import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.SEARCH;
 import static org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain.UPDATE;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
@@ -26,6 +28,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -93,6 +96,9 @@ public class StackPermissionsFilterTest {
   @BeforeMethod
   public void beforeMethod() throws Exception {
     permissionsFilter = spy(new StackPermissionsFilter(permissionsManager));
+
+    lenient().doReturn(false).when(subject).hasPermission("stack", "stack123", SEARCH);
+    lenient().doReturn(false).when(subject).hasPermission("system", null, MANAGE_SYSTEM_ACTION);
   }
 
   @Test
@@ -283,11 +289,12 @@ public class StackPermissionsFilterTest {
   @Test(dataProvider = "coveredPaths")
   public void shouldAllowToAdminPerformAnyActionWithPredefinedStack(
       String path, String method, String action) throws Exception {
-    when(subject.hasPermission(eq(DOMAIN_ID), nullable(String.class), nullable(String.class)))
-        .thenReturn(false);
-    when(subject.hasPermission(
-            eq(SystemDomain.DOMAIN_ID), nullable(String.class), nullable(String.class)))
-        .thenReturn(true);
+    doReturn(false)
+        .when(subject)
+        .hasPermission(eq(DOMAIN_ID), nullable(String.class), nullable(String.class));
+    doReturn(true)
+        .when(subject)
+        .hasPermission(eq(SystemDomain.DOMAIN_ID), nullable(String.class), nullable(String.class));
     doReturn(true).when(permissionsFilter).isStackPredefined(nullable(String.class));
 
     Response response =
@@ -297,18 +304,18 @@ public class StackPermissionsFilterTest {
             method);
 
     assertEquals(response.getStatusCode() / 100, 2);
-    verify(subject)
-        .hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+    verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(MANAGE_SYSTEM_ACTION));
   }
 
   @Test(dataProvider = "coveredPaths")
   public void shouldNotAllowToAdminPerformAnyActionWithNonPredefinedStack(
       String path, String method, String action) throws Exception {
-    when(subject.hasPermission(eq(DOMAIN_ID), nullable(String.class), nullable(String.class)))
-        .thenReturn(false);
-    when(subject.hasPermission(
-            eq(SystemDomain.DOMAIN_ID), nullable(String.class), nullable(String.class)))
-        .thenReturn(true);
+    doReturn(false)
+        .when(subject)
+        .hasPermission(eq(DOMAIN_ID), nullable(String.class), nullable(String.class));
+    doReturn(true)
+        .when(subject)
+        .hasPermission(eq(SystemDomain.DOMAIN_ID), nullable(String.class), nullable(String.class));
     doReturn(false).when(permissionsFilter).isStackPredefined(nullable(String.class));
 
     Response response =
@@ -318,8 +325,7 @@ public class StackPermissionsFilterTest {
             method);
 
     assertEquals(response.getStatusCode(), 403);
-    verify(subject)
-        .hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MANAGE_SYSTEM_ACTION));
+    verify(subject).hasPermission(eq(SystemDomain.DOMAIN_ID), eq(null), eq(MANAGE_SYSTEM_ACTION));
   }
 
   @DataProvider(name = "coveredPaths")

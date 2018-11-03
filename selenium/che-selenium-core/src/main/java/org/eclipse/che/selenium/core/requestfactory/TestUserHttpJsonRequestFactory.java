@@ -34,8 +34,7 @@ public class TestUserHttpJsonRequestFactory extends TestHttpJsonRequestFactory {
   @Override
   protected String getAuthToken() {
     try {
-      return authServiceClient.login(
-          testUser.getName(), testUser.getPassword(), testUser.getOfflineToken());
+      return authServiceClient.login(testUser.getName(), testUser.getPassword());
     } catch (Exception ex) {
       throw new RuntimeException(
           format("Failed to get access token for user '%s'", testUser.getName()));

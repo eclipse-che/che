@@ -37,6 +37,9 @@ context('TypeScript', () => {
             }
 
         }).then(() => {
+            // wait the refresh after workspace is opened
+            cy.wait(6000);
+
             // open /tmp
             cy.get('#theia-top-panel').should('exist').then(() => {
 
@@ -86,9 +89,8 @@ context('TypeScript', () => {
             })
 
         }).then(() => {
-            // now, search the word and check there is an error
-            cy.get('.lines-content.monaco-editor-background').contains('invalid').should('have.class', 'mtk15');
-
+            // now, search if there is an invalid syntax
+            cy.get('.lines-content.monaco-editor-background').contains('invalid').should('have.class', 'mtk11');
         });
     })
 });

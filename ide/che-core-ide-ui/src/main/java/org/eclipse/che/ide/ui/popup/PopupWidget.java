@@ -100,7 +100,6 @@ public abstract class PopupWidget<T> {
       Element emptyElement = Elements.createLiElement(popupResources.popupStyle().item());
       emptyElement.setTextContent(getEmptyMessage());
       listElement.appendChild(emptyElement);
-      return;
     }
 
     /* Reset popup dimensions and show. */
@@ -111,16 +110,10 @@ public abstract class PopupWidget<T> {
     popupElement.getStyle().setOpacity(0);
     Elements.getDocument().getBody().appendChild(popupElement);
 
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                popupElement.getStyle().setOpacity(1);
-              }
-            });
+    Scheduler.get().scheduleDeferred(() -> popupElement.getStyle().setOpacity(1));
 
     Elements.getDocument().addEventListener(Event.MOUSEDOWN, popupListener, false);
+    Elements.getDocument().addEventListener(Event.KEYDOWN, keyboardListener, false);
 
     // does it fit inside the doc body?
     // This does exactly the same thing for height/top and width/left
@@ -208,7 +201,8 @@ public abstract class PopupWidget<T> {
     }.schedule(250);
 
     // remove the keyboard listener
-    listElement.removeEventListener(Event.KEYDOWN, keyboardListener, false);
+    listElement.removeEventListener(Event.KEYDOWN, keyboardListener);
+    Elements.getDocument().removeEventListener(Event.KEYDOWN, keyboardListener);
 
     // remove the mouse listener
     Elements.getDocument().removeEventListener(Event.MOUSEDOWN, popupListener);

@@ -24,7 +24,7 @@ import org.eclipse.lsp4j.services.WorkspaceService;
  * @author Dmytro Kulieshov
  */
 @Singleton
-class ExtendedLanguageServer {
+public class ExtendedLanguageServer {
   private final String id;
   private final ServerCapabilities serverCapabilities;
   private final LanguageServer languageServer;
@@ -40,15 +40,19 @@ class ExtendedLanguageServer {
     return id;
   }
 
-  ServerCapabilities getCapabilities() {
+  public ServerCapabilities getCapabilities() {
     return serverCapabilities;
   }
 
-  TextDocumentService getTextDocumentService() {
+  public TextDocumentService getTextDocumentService() {
     return languageServer.getTextDocumentService();
   }
 
-  WorkspaceService getWorkspaceService() {
+  public WorkspaceService getWorkspaceService() {
     return languageServer.getWorkspaceService();
+  }
+
+  public LanguageServer getServer() {
+    return languageServer;
   }
 }

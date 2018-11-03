@@ -23,6 +23,8 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -58,6 +60,10 @@ public class CreateWorkspaceOnDashboardTest {
   @Inject private Wizard wizard;
   @Inject private Menu menu;
   @Inject private Ide ide;
+  @Inject private TestWorkspaceProvider testWorkspaceProvider;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @AfterClass
   public void tearDown() throws Exception {
@@ -78,6 +84,10 @@ public class CreateWorkspaceOnDashboardTest {
     newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(JAVA);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
+
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 

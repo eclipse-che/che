@@ -26,12 +26,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettin
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
-import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Applies the set of configurations to the OpenShift environment and environment configuration with
@@ -44,6 +46,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProv
 public class OpenShiftEnvironmentProvisioner
     implements KubernetesEnvironmentProvisioner<OpenShiftEnvironment> {
 
+  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftEnvironmentProvisioner.class);
+
   private final boolean pvcEnabled;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final UniqueNamesProvisioner<OpenShiftEnvironment> uniqueNamesProvisioner;
@@ -51,7 +55,7 @@ public class OpenShiftEnvironmentProvisioner
   private final ServersConverter<OpenShiftEnvironment> serversConverter;
   private final EnvVarsConverter envVarsConverter;
   private final RestartPolicyRewriter restartPolicyRewriter;
-  private final RamLimitProvisioner ramLimitProvisioner;
+  private final RamLimitRequestProvisioner ramLimitProvisioner;
   private final InstallerServersPortProvisioner installerServersPortProvisioner;
   private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
   private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
@@ -68,7 +72,7 @@ public class OpenShiftEnvironmentProvisioner
       EnvVarsConverter envVarsConverter,
       RestartPolicyRewriter restartPolicyRewriter,
       WorkspaceVolumesStrategy volumesStrategy,
-      RamLimitProvisioner ramLimitProvisioner,
+      RamLimitRequestProvisioner ramLimitProvisioner,
       InstallerServersPortProvisioner installerServersPortProvisioner,
       LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
       PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
@@ -94,6 +98,9 @@ public class OpenShiftEnvironmentProvisioner
   @Override
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+
+    LOG.debug(
+        "Start provisioning OpenShift environment for workspace '{}'", identity.getWorkspaceId());
     // 1 stage - update environment according Infrastructure specific
     installerServersPortProvisioner.provision(osEnv, identity);
     if (pvcEnabled) {
@@ -116,5 +123,7 @@ public class OpenShiftEnvironmentProvisioner
     imagePullSecretProvisioner.provision(osEnv, identity);
     proxySettingsProvisioner.provision(osEnv, identity);
     serviceAccountProvisioner.provision(osEnv, identity);
+    LOG.debug(
+        "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }
 }

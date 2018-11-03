@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.stack;
 
-import static java.lang.String.format;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.BUILD_COMMAND;
@@ -23,6 +22,8 @@ import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
@@ -42,7 +43,7 @@ public class CreateWorkspaceFromCamelStackTest {
   private static final String PATH_TO_CAMEL_FILE =
       PROJECT_NAME + "/src/main/resources/spring/" + CAMEL_FILE_NAME;
   private static final String LS_INIT_MESSAGE =
-      format("Finished language servers initialization, file path '/%s'", PATH_TO_CAMEL_FILE);
+      "Initialized language server 'org.eclipse.che.plugin.camel.server.languageserver'";
 
   @Inject private Ide ide;
   @Inject private Dashboard dashboard;
@@ -52,6 +53,9 @@ public class CreateWorkspaceFromCamelStackTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private Consoles consoles;
+
+  // it is used to read workspace logs on test failure
+  private TestWorkspace testWorkspace;
 
   @BeforeClass
   public void setUp() {
@@ -65,8 +69,11 @@ public class CreateWorkspaceFromCamelStackTest {
 
   @Test
   public void createWorkspaceFromCamelStackTest() throws Exception {
-    createWorkspaceHelper.createWorkspaceFromStackWithProjects(
-        CAMEL_SPRINGBOOT, WORKSPACE_NAME, projects);
+    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
+    // possible to read logs in case of test failure
+    testWorkspace =
+        createWorkspaceHelper.createWorkspaceFromStackWithoutProject(
+            CAMEL_SPRINGBOOT, WORKSPACE_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 

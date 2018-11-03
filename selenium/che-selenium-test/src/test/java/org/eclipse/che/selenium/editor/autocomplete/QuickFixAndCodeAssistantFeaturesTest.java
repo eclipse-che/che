@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -28,10 +30,12 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrienko Alexander on 08.01.15. */
+@Test(groups = UNDER_REPAIR)
 public class QuickFixAndCodeAssistantFeaturesTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(QuickFixAndCodeAssistantFeaturesTest.class.getSimpleName(), 4);
@@ -56,6 +60,7 @@ public class QuickFixAndCodeAssistantFeaturesTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -77,8 +82,14 @@ public class QuickFixAndCodeAssistantFeaturesTest {
     editor.waitErrorPropositionPanelClosed();
 
     editor.launchPropositionAssistPanel();
-    editor.waitTextIntoFixErrorProposition("Convert local variable to field");
-    editor.waitTextIntoFixErrorProposition("Inline local variable");
+    try {
+      editor.waitTextIntoFixErrorProposition("Convert local variable to field");
+      editor.waitTextIntoFixErrorProposition("Inline local variable");
+    } catch (TimeoutException e) {
+      fail(
+          "Known permanent failure https://github.com/eclipse/eclipse.jdt.ls/issues/772, "
+              + "https://github.com/eclipse/eclipse.jdt.ls/issues/771");
+    }
     editor.typeTextIntoEditor(Keys.ESCAPE.toString());
     editor.waitErrorPropositionPanelClosed();
     loader.waitOnClosed();

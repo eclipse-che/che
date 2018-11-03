@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.core.jsonrpc.commons;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +37,7 @@ public class RequestDispatcherTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    when(request.getId()).thenReturn(REQUEST_ID);
+    lenient().when(request.getId()).thenReturn(REQUEST_ID);
     when(request.getMethod()).thenReturn(REQUEST_METHOD);
     when(request.getParams()).thenReturn(params);
     when(requestHandlerManager.isRegistered(REQUEST_METHOD)).thenReturn(true);

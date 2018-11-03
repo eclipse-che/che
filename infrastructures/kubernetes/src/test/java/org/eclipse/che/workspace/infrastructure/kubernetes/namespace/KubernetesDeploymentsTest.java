@@ -17,6 +17,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,20 +73,20 @@ public class KubernetesDeploymentsTest {
     when(earlyPod.getStatus()).thenReturn(earlyPodStatus);
     when(podResource.get()).thenReturn(earlyPod);
 
-    when(clientFactory.create()).thenReturn(kubernetesClient);
-    when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
+    lenient().when(clientFactory.create()).thenReturn(kubernetesClient);
+    lenient().when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
 
     final MixedOperation mixedOperation = mock(MixedOperation.class);
     final NonNamespaceOperation namespaceOperation = mock(NonNamespaceOperation.class);
     doReturn(mixedOperation).when(kubernetesClient).pods();
-    when(mixedOperation.withName(anyString())).thenReturn(podResource);
+    lenient().when(mixedOperation.withName(anyString())).thenReturn(podResource);
     when(mixedOperation.inNamespace(anyString())).thenReturn(namespaceOperation);
     when(namespaceOperation.withName(anyString())).thenReturn(podResource);
 
     when(pod.getStatus()).thenReturn(status);
     when(pod.getMetadata()).thenReturn(metadata);
     when(metadata.getName()).thenReturn(POD_NAME);
-    when(podResource.getLog()).thenReturn("Pod fail log");
+    lenient().when(podResource.getLog()).thenReturn("Pod fail log");
     watcherCaptor = ArgumentCaptor.forClass(Watcher.class);
 
     kubernetesDeployments = new KubernetesDeployments("namespace", "workspace123", clientFactory);

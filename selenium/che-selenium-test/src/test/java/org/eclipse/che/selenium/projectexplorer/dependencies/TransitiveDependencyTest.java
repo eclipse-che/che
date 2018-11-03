@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.selenium.projectexplorer.dependencies;
 
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.MAVEN;
-import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.REIMPORT;
 import static org.openqa.selenium.Keys.DELETE;
 import static org.openqa.selenium.Keys.DOWN;
 import static org.openqa.selenium.Keys.SHIFT;
@@ -26,6 +24,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.PopupDialogsBrowser;
@@ -54,6 +53,7 @@ public class TransitiveDependencyTest {
   @Inject private PopupDialogsBrowser popupDialogsBrowser;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -69,11 +69,9 @@ public class TransitiveDependencyTest {
   @Test
   public void transitiveDependencyTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorer(
-        PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples");
-    projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
-    projectExplorer.clickOnItemInContextMenu(MAVEN);
-    projectExplorer.clickOnNewContextMenuItem(REIMPORT);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
+    projectExplorer.openItemByPath(PROJECT_NAME);
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT_NAME + "/pom.xml");
     projectExplorer.openItemByPath(PROJECT_NAME + "/pom.xml");
@@ -95,7 +93,7 @@ public class TransitiveDependencyTest {
 
   private void deleteDependency() {
     editor.waitActive();
-    editor.setCursorToLine(36);
+    editor.setCursorToLine(34);
     seleniumWebDriverHelper
         .getAction()
         .keyDown(SHIFT)

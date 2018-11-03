@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.ide.workspace;
 
+import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.STOPPED;
 import static org.eclipse.che.ide.workspace.WorkspaceStatusNotification.Phase.WORKSPACE_AGENT_STOPPED;
 
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -23,8 +24,11 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.api.workspace.event.WsAgentServerStoppedEvent;
+import org.eclipse.che.ide.bootstrap.BasicIDEInitializedEvent;
 import org.eclipse.che.ide.ui.window.WindowClientBundle;
 
 /** Notification to show that workspace agent is shut down and may be restarted */
@@ -35,6 +39,7 @@ class StartWsAgentNotification {
   private final WorkspaceStatusNotification wsStatusNotification;
   private final Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider;
   private final EventBus eventBus;
+  private WsAgentServerUtil wsAgentServerUtil;
   private final RestartingStateHolder restartingStateHolder;
   private final WindowClientBundle windowClientBundle;
 
@@ -47,16 +52,20 @@ class StartWsAgentNotification {
       StartWsAgentNotificationUiBinder uiBinder,
       Provider<CurrentWorkspaceManager> currentWorkspaceManagerProvider,
       EventBus eventBus,
+      WsAgentServerUtil wsAgentServerUtil,
       RestartingStateHolder restartingStateHolder,
       WindowClientBundle windowClientBundle) {
     this.wsStatusNotification = wsStatusNotification;
     this.uiBinder = uiBinder;
     this.currentWorkspaceManagerProvider = currentWorkspaceManagerProvider;
     this.eventBus = eventBus;
+    this.wsAgentServerUtil = wsAgentServerUtil;
     this.restartingStateHolder = restartingStateHolder;
     this.windowClientBundle = windowClientBundle;
 
+    eventBus.addHandler(WsAgentServerRunningEvent.TYPE, e -> hide());
     eventBus.addHandler(WsAgentServerStoppedEvent.TYPE, e -> show());
+    eventBus.addHandler(BasicIDEInitializedEvent.TYPE, e -> handleWsAgentStatus());
   }
 
   void show() {
@@ -97,6 +106,17 @@ class StartWsAgentNotification {
                     });
           }
         });
+  }
+
+  private void handleWsAgentStatus() {
+    wsAgentServerUtil
+        .getWsAgentHttpServer()
+        .ifPresent(
+            server -> {
+              if (server.getStatus() == STOPPED) {
+                show();
+              }
+            });
   }
 
   interface StartWsAgentNotificationUiBinder extends UiBinder<Widget, StartWsAgentNotification> {}

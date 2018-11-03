@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 
 import com.google.common.base.Joiner;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -31,6 +32,7 @@ import org.openqa.selenium.support.PageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public class WorkspaceConfig {
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
   private final Logger LOG = LoggerFactory.getLogger(WorkspaceConfig.class);

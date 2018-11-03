@@ -45,12 +45,6 @@ public class WorkspaceSshKeysTest {
   /** The workspace ID that will be used in the test. */
   private static final String WORKSPACE_ID = "workspace123";
 
-  /** Name of the workspace returned through workspace.getConfig().getName() */
-  private static final String WORKSPACE_NAME = "myworkspace";
-
-  /** User namespace for the current @{link EnvironmentContext} */
-  private static final String NAMESPACE = "userNS";
-
   /** Dummy Owner identifier used This will be used for registering ssh keys. */
   private static final String OWNER_NAME = "userName";
 
@@ -104,8 +98,6 @@ public class WorkspaceSshKeysTest {
         (EventSubscriber<WorkspaceRemovedEvent>) subscriberCaptor.getAllValues().get(1);
 
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
-    when(workspace.getConfig()).thenReturn(workspaceConfig);
-    when(workspaceConfig.getName()).thenReturn(WORKSPACE_NAME);
     when(workspace.getNamespace()).thenReturn(OWNER_NAME);
 
     when(userManager.getByName(eq(OWNER_NAME))).thenReturn(user);
@@ -118,7 +110,6 @@ public class WorkspaceSshKeysTest {
    */
   @Test
   public void shouldGenerateSshKeyPairWhenWorkspaceIsCreated() throws Exception {
-
     // given
     workspaceCreatedEventEventSubscriber.onEvent(new WorkspaceCreatedEvent(this.workspace));
 

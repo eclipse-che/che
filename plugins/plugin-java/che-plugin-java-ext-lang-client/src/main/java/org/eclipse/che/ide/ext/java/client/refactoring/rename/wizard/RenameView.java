@@ -13,7 +13,7 @@ package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard;
 
 import com.google.inject.ImplementedBy;
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.java.shared.dto.refactoring.RefactoringStatus;
+import org.eclipse.che.jdt.ls.extension.api.dto.RefactoringStatus;
 
 /**
  * The visual part of Rename wizard that has an ability to show configuration of a refactoring

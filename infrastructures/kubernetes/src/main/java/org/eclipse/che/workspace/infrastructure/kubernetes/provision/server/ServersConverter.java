@@ -27,7 +27,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.Configurati
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
 
 /**
  * Converts {@link ServerConfig} to Kubernetes related objects to add a server into Kubernetes
@@ -42,20 +42,21 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureS
 public class ServersConverter<T extends KubernetesEnvironment>
     implements ConfigurationProvisioner<T> {
 
-  private final SecureServerExposerFactory<T> secureServerExposerFactory;
   private final ExternalServerExposerStrategy<T> externalServerExposerStrategy;
+  private final SecureServerExposerFactoryProvider<T> secureServerExposerFactoryProvider;
 
   @Inject
   public ServersConverter(
-      SecureServerExposerFactory<T> secureServerExposerFactory,
-      ExternalServerExposerStrategy<T> externalServerExposerStrategy) {
-    this.secureServerExposerFactory = secureServerExposerFactory;
+      ExternalServerExposerStrategy<T> externalServerExposerStrategy,
+      SecureServerExposerFactoryProvider<T> secureServerExposerFactoryProvider) {
     this.externalServerExposerStrategy = externalServerExposerStrategy;
+    this.secureServerExposerFactoryProvider = secureServerExposerFactoryProvider;
   }
 
   @Override
   public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
-    SecureServerExposer<T> secureServerExposer = secureServerExposerFactory.create(identity);
+    SecureServerExposer<T> secureServerExposer =
+        secureServerExposerFactoryProvider.get(k8sEnv).create(identity);
 
     for (Pod podConfig : k8sEnv.getPods().values()) {
       final PodSpec podSpec = podConfig.getSpec();

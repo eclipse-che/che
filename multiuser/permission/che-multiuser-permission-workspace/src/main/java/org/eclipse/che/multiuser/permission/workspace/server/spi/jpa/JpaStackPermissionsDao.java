@@ -105,12 +105,14 @@ public class JpaStackPermissionsDao extends AbstractJpaPermissionsDao<StackPermi
 
   @Override
   protected StackPermissionsImpl getEntity(String userId, String instanceId)
-      throws NotFoundException {
+      throws NotFoundException, ServerException {
     try {
       return doGet(userId, instanceId);
     } catch (NoResultException e) {
       throw new NotFoundException(
           format("Permissions on stack '%s' of user '%s' was not found.", instanceId, userId));
+    } catch (RuntimeException e) {
+      throw new ServerException(e.getMessage(), e);
     }
   }
 

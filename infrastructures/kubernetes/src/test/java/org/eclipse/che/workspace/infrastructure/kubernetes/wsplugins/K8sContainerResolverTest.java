@@ -11,9 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.K8sContainerResolver.MAX_CONTAINER_NAME_LENGTH;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -37,6 +37,7 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 public class K8sContainerResolverTest {
   private static final String IMAGE = "testImage:tag";
+  private static final String PLUGIN_NAME = "test_plugin_name";
 
   private CheContainer cheContainer;
   private K8sContainerResolver resolver;
@@ -46,7 +47,7 @@ public class K8sContainerResolverTest {
   public void setUp() {
     cheContainer = new CheContainer();
     endpoints = new ArrayList<>();
-    resolver = new K8sContainerResolver(cheContainer, endpoints);
+    resolver = new K8sContainerResolver(PLUGIN_NAME, "Always", cheContainer, endpoints);
   }
 
   @Test
@@ -60,9 +61,22 @@ public class K8sContainerResolverTest {
 
   @Test
   public void shouldSetName() throws Exception {
+
+    cheContainer.setName("cheContainerName");
+
     Container container = resolver.resolve();
 
-    assertTrue(container.getName().startsWith("tooling"));
+    assertEquals(container.getName(), (PLUGIN_NAME + "-" + cheContainer.getName()).toLowerCase());
+  }
+
+  @Test
+  public void shouldLimitNameByMaxAllowedLength() throws Exception {
+
+    cheContainer.setName("cheContainerNameWhichIsGreatlySucceedsMaxAllowedLengthByK8S");
+
+    Container container = resolver.resolve();
+
+    assertEquals(container.getName().length(), MAX_CONTAINER_NAME_LENGTH);
   }
 
   @Test
@@ -86,7 +100,7 @@ public class K8sContainerResolverTest {
   }
 
   @Test(dataProvider = "memLimitResourcesProvider")
-  public void shouldProvisionSidecarMemoryLimit(
+  public void shouldProvisionSidecarMemoryLimitAndRequest(
       String sidecarMemLimit, ResourceRequirements resources) throws Exception {
     cheContainer.setMemoryLimit(sidecarMemLimit);
 
@@ -100,9 +114,9 @@ public class K8sContainerResolverTest {
     return new Object[][] {
       {"", null},
       {null, null},
-      {"123456789", toK8sResources("123456789")},
-      {"1Ki", toK8sResources("1Ki")},
-      {"100M", toK8sResources("100M")},
+      {"123456789", toK8sLimitRequestResources("123456789")},
+      {"1Ki", toK8sLimitRequestResources("1Ki")},
+      {"100M", toK8sLimitRequestResources("100M")},
     };
   }
 
@@ -115,8 +129,11 @@ public class K8sContainerResolverTest {
     resolver.resolve();
   }
 
-  private static ResourceRequirements toK8sResources(String memLimit) {
-    return new ResourceRequirementsBuilder().addToLimits("memory", new Quantity(memLimit)).build();
+  private static ResourceRequirements toK8sLimitRequestResources(String memLimit) {
+    return new ResourceRequirementsBuilder()
+        .addToLimits("memory", new Quantity(memLimit))
+        .addToRequests("memory", new Quantity(memLimit))
+        .build();
   }
 
   private List<EnvVar> toSidecarEnvVars(Map<String, String> envVars) {

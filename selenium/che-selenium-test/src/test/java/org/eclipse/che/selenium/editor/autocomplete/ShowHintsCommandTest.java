@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
+import static org.testng.Assert.fail;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -25,32 +28,34 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = UNDER_REPAIR)
 public class ShowHintsCommandTest {
   private final Logger LOG = LoggerFactory.getLogger(ShowHintsCommandTest.class);
   private static final String PROJECT_NAME =
       NameGenerator.generate(ShowHintsCommandTest.class.getSimpleName(), 4);
 
   private static final String TEXT_IN_POP_UP_1 =
-      "<no parameters>\n"
-          + "int arg\n"
-          + "boolean arg\n"
-          + "String arg\n"
-          + "int arg, String arg2\n"
-          + "int arg, String arg2, boolean arg3";
+      "runCommand() : void\n"
+          + "runCommand(String arg) : void\n"
+          + "runCommand(boolean arg) : String\n"
+          + "runCommand(int arg) : void\n"
+          + "runCommand(int arg, String arg2) : void\n"
+          + "runCommand(int arg, String arg2, boolean arg3) : void";
 
   private static final String CONSTRUCTOR = "HintTestClass hintTestClass = new HintTestClass(11);";
 
   private static final String TEXT_IN_POP_UP_2 =
-      "<no parameters>\n"
-          + "int arg\n"
-          + "int arg, String arg2\n"
-          + "int arg, String arg2, boolean arg3";
+      "HintTestClass()\n"
+          + "HintTestClass(int arg)\n"
+          + "HintTestClass(int arg, String arg2)\n"
+          + "HintTestClass(int arg, String arg2, boolean arg3)";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -69,6 +74,7 @@ public class ShowHintsCommandTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    console.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -90,9 +96,16 @@ public class ShowHintsCommandTest {
     editor.typeTextIntoEditor("runCommand();");
     editor.waitTextIntoEditor("runCommand();");
     editor.waitMarkerInPosition(MarkerLocator.ERROR, 34);
-    editor.goToCursorPositionVisible(33, 5);
+    editor.goToCursorPositionVisible(33, 16);
     editor.callShowHintsPopUp();
-    editor.waitShowHintsPopUpOpened();
+
+    try {
+      editor.waitShowHintsPopUpOpened();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11747", ex);
+    }
+
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_1);
     editor.typeTextIntoEditor(Keys.ESCAPE.toString());
     editor.waitShowHintsPopUpClosed();
@@ -104,7 +117,7 @@ public class ShowHintsCommandTest {
     editor.typeTextIntoEditor(Keys.TAB.toString());
     editor.typeTextIntoEditor(CONSTRUCTOR);
     editor.waitTextIntoEditor(CONSTRUCTOR);
-    editor.goToCursorPositionVisible(29, 41);
+    editor.goToCursorPositionVisible(29, 53);
     editor.callShowHintsPopUp();
     editor.waitShowHintsPopUpOpened();
     editor.waitExpTextIntoShowHintsPopUp(TEXT_IN_POP_UP_2);

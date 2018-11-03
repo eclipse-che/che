@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
@@ -24,10 +25,12 @@ import static org.openqa.selenium.Keys.F4;
 import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -43,6 +46,7 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+import org.testng.internal.collections.Pair;
 
 /** @author Skoryk Serhii */
 public class GolangFileEditingTest {
@@ -76,9 +80,14 @@ public class GolangFileEditingTest {
     "mainsymbols (4)", "count", "hanoi", "main"
   };
 
-  private static final String[] PROJECT_SYMBOL_EXPECTED_TEXT = {
-    "print/desktop-go-simple/format.go", "Print/desktop-go-simple/print.go"
-  };
+  /** It is Map[node-name, Pair[tab-name, line-number]] */
+  private static final Map<String, Pair<String, Integer>> PROJECT_SYMBOL_EXPECTED_TEXT =
+      ImmutableMap.of(
+          "print/desktop-go-simple/format.go", Pair.of("format.go", 23),
+          "Print/desktop-go-simple/print.go", Pair.of("print.go", 24));
+
+  private String textFirstNode;
+  private String textSecondNode;
 
   private List<String> expectedProposals = ImmutableList.of("Print", "Println", "Printf");
 
@@ -123,7 +132,7 @@ public class GolangFileEditingTest {
     editor.typeTextIntoEditor("fmt.");
     editor.launchAutocompleteAndWaitContainer();
 
-    editor.checkProposalDocumentation("No documentation found.");
+    editor.waitProposalDocumentationHTML("<p>No documentation found.</p>\n");
     editor.waitProposalsIntoAutocompleteContainer(expectedProposals);
 
     editor.deleteCurrentLine();
@@ -175,7 +184,13 @@ public class GolangFileEditingTest {
 
     // check the 'Hover' popup
     editor.moveCursorToText("COLOR_YELLOW");
-    editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
+
+    try {
+      editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
 
     // check Find Definition feature from Assistant menu
     editor.goToPosition(24, 8);
@@ -193,7 +208,7 @@ public class GolangFileEditingTest {
     editor.clickOnCloseFileIcon("print.go");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkRenameFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
@@ -206,7 +221,7 @@ public class GolangFileEditingTest {
       editor.waitTextElementsActiveLine("if k == 1");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10524");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10524");
     }
   }
 
@@ -223,17 +238,10 @@ public class GolangFileEditingTest {
     // check element in the editor
     editor.goToPosition(19, 5);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-
-    // it is a workaround, need to fix after resolve the issue
-    try {
-      findReferencesConsoleTab.waitAllReferencesWithText(
-          "/desktop-go-simple/towers.go\nFrom:23:71 To:23:76");
-      findReferencesConsoleTab.doubleClickOnReference("From:23:71 To:23:76");
-    } catch (TimeoutException ex) {
-      fail(
-          "Need to delete 'try/catch' and change values of the parameters, because the known issue https://github.com/eclipse/che/issues/10698 is resolved");
-    }
-
+    findReferencesConsoleTab.waitAllReferencesWithText(
+        "/desktop-go-simple/towers.go\nFrom:24:72 To:24:77");
+    findReferencesConsoleTab.doubleClickOnReference("From:24:72 To:24:77");
+    editor.waitSpecifiedValueForLineAndChar(24, 77);
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
     editor.waitSpecifiedValueForLineAndChar(24, 72);
     editor.waitTextElementsActiveLine("count");
@@ -241,13 +249,7 @@ public class GolangFileEditingTest {
     // check the references expected text
     editor.goToPosition(19, 5);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-
-    try {
-      findReferencesConsoleTab.waitAllReferencesWithText(REFERENCES_EXPECTED_TEXT);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10698", ex);
-    }
+    findReferencesConsoleTab.waitAllReferencesWithText(REFERENCES_EXPECTED_TEXT);
   }
 
   @Test(priority = 1)
@@ -256,13 +258,12 @@ public class GolangFileEditingTest {
     editor.goToPosition(27, 1);
     editor.typeTextIntoEditor("    hanoi(");
 
-    try {
-      editor.waitExpTextIntoShowHintsPopUp("hanoi(n int, a, b, c string)");
-    } catch (TimeoutException ex) {
-      editor.deleteCurrentLineAndInsertNew();
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10699", ex);
-    }
+    editor.waitSignaturesContainer();
+    editor.waitProposalIntoSignaturesContainer("hanoi(n int, a, b, c string)");
+    editor.closeSignaturesContainer();
+    editor.waitSignaturesContainerIsClosed();
+
+    editor.deleteCurrentLineAndInsertNew();
   }
 
   @Test(priority = 1)
@@ -318,7 +319,7 @@ public class GolangFileEditingTest {
     assistantFindPanel.typeToInputField("hanoi");
     assistantFindPanel.waitAllNodes("hanoi/desktop-go-simple/towers.go");
     assistantFindPanel.typeToInputField("print");
-    assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT);
+    assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT.keySet());
 
     // select item in the find panel by clicking on node
     assistantFindPanel.clickOnActionNodeWithTextContains("print/desktop-go-simple/format.go");
@@ -327,16 +328,33 @@ public class GolangFileEditingTest {
     editor.waitCursorPosition(23, 1);
 
     // select item in the find panel by keyboard
+    openFindPanelAndPrintInputTetx("print");
+
+    // go to instantly
+    assistantFindPanel.waitActionNodeSelection(textFirstNode);
+    editor.pressEnter();
+    assistantFindPanel.waitFormIsClosed();
+    editor.waitTabVisibilityAndCheckFocus(PROJECT_SYMBOL_EXPECTED_TEXT.get(textFirstNode).first());
+    editor.waitCursorPosition(PROJECT_SYMBOL_EXPECTED_TEXT.get(textFirstNode).second(), 1);
+
+    // go to from second node
+    openFindPanelAndPrintInputTetx("print");
+    editor.pressArrowDown();
+    assistantFindPanel.waitActionNodeSelection(textSecondNode);
+    editor.pressEnter();
+    assistantFindPanel.waitFormIsClosed();
+    editor.waitTabVisibilityAndCheckFocus(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).first());
+    editor.waitCursorPosition(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).second(), 1);
+  }
+
+  private void openFindPanelAndPrintInputTetx(String inputText) {
     editor.selectTabByName("towers.go");
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
     assistantFindPanel.waitForm();
-    assistantFindPanel.typeToInputField("print");
-    assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT);
-    editor.pressArrowDown();
-    assistantFindPanel.waitActionNodeSelection("Print/desktop-go-simple/print.go");
-    editor.pressEnter();
-    assistantFindPanel.waitFormIsClosed();
-    editor.waitTabVisibilityAndCheckFocus("print.go");
-    editor.waitCursorPosition(24, 1);
+    assistantFindPanel.typeToInputField(inputText);
+    assistantFindPanel.waitAllNodes(PROJECT_SYMBOL_EXPECTED_TEXT.keySet());
+
+    textFirstNode = assistantFindPanel.getActionNodeText(0);
+    textSecondNode = assistantFindPanel.getActionNodeText(1);
   }
 }

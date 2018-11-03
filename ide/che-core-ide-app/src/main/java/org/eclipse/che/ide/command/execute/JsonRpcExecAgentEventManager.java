@@ -84,4 +84,12 @@ public class JsonRpcExecAgentEventManager implements ExecAgentEventManager {
     processStdErrEventHandler.unregisterConsumers(endpointId, pid);
     processStdOutEventHandler.unregisterConsumers(endpointId, pid);
   }
+
+  @Override
+  public void cleanAllConsumers() {
+    processDiedEventHandler.unregisterAllConsumers();
+    processStartedEventHandler.unregisterAllConsumers();
+    processStdErrEventHandler.unregisterAllConsumers();
+    processStdOutEventHandler.unregisterAllConsumers();
+  }
 }

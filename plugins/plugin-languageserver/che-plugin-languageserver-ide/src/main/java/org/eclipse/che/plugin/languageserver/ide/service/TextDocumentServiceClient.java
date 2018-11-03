@@ -12,16 +12,20 @@
 package org.eclipse.che.plugin.languageserver.ide.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
-import static org.eclipse.che.ide.jsonrpc.JsonRpcErrorUtils.getPromiseError;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcError;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionItem;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedCompletionList;
 import org.eclipse.che.api.languageserver.shared.model.RenameResult;
+import org.eclipse.che.api.languageserver.shared.model.SnippetParameters;
+import org.eclipse.che.api.languageserver.shared.model.SnippetResult;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.lsp4j.CodeActionParams;
 import org.eclipse.lsp4j.Command;
@@ -212,6 +216,7 @@ public class TextDocumentServiceClient {
     return transmitDtoAndReceiveDtoList(
         params, "textDocument/documentHighlight", DocumentHighlight.class);
   }
+
   /**
    * GWT client implementation of {@link TextDocumentService#rename(RenameParams)}
    *
@@ -261,5 +266,46 @@ public class TextDocumentServiceClient {
         .methodName(name)
         .paramsAsDto(jsonSerializable)
         .sendAndSkipResult();
+  }
+
+  private PromiseError getPromiseError(JsonRpcError jsonRpcError) {
+    return new PromiseError() {
+      @Override
+      public String getMessage() {
+        return jsonRpcError.getMessage();
+      }
+
+      @Override
+      public Throwable getCause() {
+        return new JsonRpcException(jsonRpcError.getCode(), jsonRpcError.getMessage());
+      }
+    };
+  }
+
+  public Promise<List<SnippetResult>> getSnippets(SnippetParameters params) {
+    return Promises.create(
+        (resolve, reject) -> {
+          requestTransmitter
+              .newRequest()
+              .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+              .methodName("textDocument/snippets")
+              .paramsAsDto(params)
+              .sendAndReceiveResultAsListOfDto(SnippetResult.class)
+              .onSuccess(resolve::apply)
+              .onFailure(error -> reject.apply(getPromiseError(error)));
+        });
+  }
+
+  public Promise<String> getFileContent(String uri) {
+    return Promises.create(
+        (resolve, reject) ->
+            requestTransmitter
+                .newRequest()
+                .endpointId(WS_AGENT_JSON_RPC_ENDPOINT_ID)
+                .methodName("textDocument/fileContent")
+                .paramsAsString(uri)
+                .sendAndReceiveResultAsString()
+                .onSuccess(resolve::apply)
+                .onFailure(error -> reject.apply(getPromiseError(error))));
   }
 }

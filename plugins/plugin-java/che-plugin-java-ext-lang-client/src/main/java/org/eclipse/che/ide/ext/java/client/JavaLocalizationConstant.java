@@ -70,12 +70,6 @@ public interface JavaLocalizationConstant extends Messages {
   @Key("action.quick.fix.description")
   String actionQuickFixDescription();
 
-  @Key("action.openDeclaration.title")
-  String actionOpenDeclarationTitle();
-
-  @Key("action.openDeclaration.description")
-  String actionOpenDeclarationDescription();
-
   @Key("compiler.error.warnings.setup")
   String compilerSetup();
 
@@ -418,12 +412,6 @@ public interface JavaLocalizationConstant extends Messages {
   @Key("unmark.directory.as.source.description")
   String unmarkDirectoryAsSourceDescription();
 
-  @Key("parameter.info")
-  String parameterInfo();
-
-  @Key("parameter.info.description")
-  String parameterInfoDescription();
-
   @Key("button.Save")
   String buttonSave();
 
@@ -487,4 +475,20 @@ public interface JavaLocalizationConstant extends Messages {
 
   @Key("formatter.preferences.import.button")
   String formatterPreferencesImportButton();
+
+  // Maven
+  @Key("action.effectivePom.title")
+  String actionGetEffectivePomTitle();
+
+  @Key("action.effectivePom.description")
+  String actionGetEffectivePomDescription();
+
+  @Key("action.reimportDependencies.title")
+  String actionReimportDependenciesTitle();
+
+  @Key("action.reimportDependencies.description")
+  String actionReimportDependenciesDescription();
+
+  @Key("progress.monitor.title")
+  String progressMonitorTitle();
 }

@@ -18,7 +18,6 @@ import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.LIBRARY;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.PROJECT;
 import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.SOURCE;
 
-import com.google.common.base.Optional;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
@@ -26,17 +25,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.che.api.promises.client.Operation;
-import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
-import org.eclipse.che.ide.ext.java.shared.dto.classpath.ClasspathEntryDto;
+import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
+import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.plugin.java.plain.client.service.ClasspathUpdaterServiceClient;
 
 /**
@@ -45,10 +44,13 @@ import org.eclipse.che.plugin.java.plain.client.service.ClasspathUpdaterServiceC
  * @author Valeriy Svydenko
  */
 @Singleton
-public class ClasspathResolver {
+public class ClasspathResolver
+    implements ProjectClasspathChangedEvent.ProjectClasspathChangedHandler {
   private static final String WORKSPACE_PATH = "/projects";
 
   private final ClasspathUpdaterServiceClient classpathUpdater;
+  private final JavaLanguageExtensionServiceClient extensionService;
+  private final PromiseProvider promiseProvider;
   private final NotificationManager notificationManager;
   private final EventBus eventBus;
   private final AppContext appContext;
@@ -57,29 +59,35 @@ public class ClasspathResolver {
   private Set<String> libs;
   private Set<String> sources;
   private Set<String> projects;
-  private Set<ClasspathEntryDto> containers;
+  private Set<ClasspathEntry> containers;
 
   @Inject
   public ClasspathResolver(
       ClasspathUpdaterServiceClient classpathUpdater,
+      JavaLanguageExtensionServiceClient extensionService,
+      PromiseProvider promiseProvider,
       NotificationManager notificationManager,
       EventBus eventBus,
       AppContext appContext,
       DtoFactory dtoFactory) {
     this.classpathUpdater = classpathUpdater;
+    this.extensionService = extensionService;
+    this.promiseProvider = promiseProvider;
     this.notificationManager = notificationManager;
     this.eventBus = eventBus;
     this.appContext = appContext;
     this.dtoFactory = dtoFactory;
+
+    this.eventBus.addHandler(ProjectClasspathChangedEvent.getType(), this);
   }
 
   /** Reads and parses classpath entries. */
-  public void resolveClasspathEntries(List<ClasspathEntryDto> entries) {
+  public void resolveClasspathEntries(List<ClasspathEntry> entries) {
     libs = new HashSet<>();
     containers = new HashSet<>();
     sources = new HashSet<>();
     projects = new HashSet<>();
-    for (ClasspathEntryDto entry : entries) {
+    for (ClasspathEntry entry : entries) {
       switch (entry.getEntryKind()) {
         case ClasspathEntryKind.LIBRARY:
           libs.add(entry.getPath());
@@ -106,59 +114,30 @@ public class ClasspathResolver {
 
     checkState(resource != null);
 
-    final Optional<Project> optProject = resource.getRelatedProject();
+    Project optProject = resource.getProject();
 
-    checkState(optProject.isPresent());
-
-    final List<ClasspathEntryDto> entries = new ArrayList<>();
+    final List<ClasspathEntry> entries = new ArrayList<>();
     for (String path : libs) {
-      entries.add(
-          dtoFactory.createDto(ClasspathEntryDto.class).withPath(path).withEntryKind(LIBRARY));
-    }
-    for (ClasspathEntryDto container : containers) {
-      entries.add(container);
-    }
-    for (String path : sources) {
-      entries.add(
-          dtoFactory.createDto(ClasspathEntryDto.class).withPath(path).withEntryKind(SOURCE));
-    }
-    for (String path : projects) {
-      entries.add(
-          dtoFactory.createDto(ClasspathEntryDto.class).withPath(path).withEntryKind(PROJECT));
+      entries.add(dtoFactory.createDto(ClasspathEntry.class).withPath(path).withEntryKind(LIBRARY));
     }
 
-    final Project project = optProject.get();
+    entries.addAll(containers);
+
+    for (String path : sources) {
+      entries.add(dtoFactory.createDto(ClasspathEntry.class).withPath(path).withEntryKind(SOURCE));
+    }
+
+    for (String path : projects) {
+      entries.add(dtoFactory.createDto(ClasspathEntry.class).withPath(path).withEntryKind(PROJECT));
+    }
 
     Promise<Void> promise =
-        classpathUpdater.setRawClasspath(project.getLocation().toString(), entries);
-
-    promise
-        .then(
-            new Operation<Void>() {
-              @Override
-              public void apply(Void arg) throws OperationException {
-                project
-                    .synchronize()
-                    .then(
-                        new Operation<Resource[]>() {
-                          @Override
-                          public void apply(Resource[] arg) throws OperationException {
-                            eventBus.fireEvent(
-                                new ClasspathChangedEvent(
-                                    project.getLocation().toString(), entries));
-                          }
-                        });
-              }
-            })
-        .catchError(
-            new Operation<PromiseError>() {
-              @Override
-              public void apply(PromiseError arg) throws OperationException {
-                notificationManager.notify(
-                    "Problems with updating classpath", arg.getMessage(), FAIL, EMERGE_MODE);
-              }
-            });
-
+        classpathUpdater.setRawClasspath(optProject.getLocation().toString(), entries);
+    promise.catchError(
+        error -> {
+          notificationManager.notify(
+              "Problems with updating classpath", error.getMessage(), FAIL, EMERGE_MODE);
+        });
     return promise;
   }
 
@@ -168,7 +147,7 @@ public class ClasspathResolver {
   }
 
   /** Returns list of containers from classpath. */
-  public Set<ClasspathEntryDto> getContainers() {
+  public Set<ClasspathEntry> getContainers() {
     return containers;
   }
 
@@ -180,5 +159,23 @@ public class ClasspathResolver {
   /** Returns list of projects from classpath. */
   public Set<String> getProjects() {
     return projects;
+  }
+
+  @Override
+  public void onProjectClasspathChanged(ProjectClasspathChangedEvent event) {
+    getEntriesFromServer(event.getProject())
+        .then(
+            entries -> {
+              eventBus.fireEvent(new ClasspathChangedEvent(event.getProject(), entries));
+            });
+  }
+
+  private Promise<List<ClasspathEntry>> getEntriesFromServer(String projectPath) {
+    return extensionService
+        .classpathTree(projectPath)
+        .catchErrorPromise(
+            error -> {
+              return promiseProvider.reject(error);
+            });
   }
 }

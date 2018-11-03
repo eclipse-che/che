@@ -22,10 +22,12 @@ import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -70,6 +72,7 @@ public class CommitFilesTest {
   @Named("github.username")
   private String gitHubUsername;
 
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
   @Inject private AskDialog askDialog;
@@ -81,6 +84,7 @@ public class CommitFilesTest {
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -89,6 +93,7 @@ public class CommitFilesTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
     ide.open(ws);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @AfterMethod
@@ -169,10 +174,22 @@ public class CommitFilesTest {
     refactor.typeAndWaitNewName(NEW_NAME_PACKAGE);
     refactor.clickOkButtonRefactorForm();
 
-    projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/dev/examples");
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
-    git.waitCommitMainFormIsOpened();
+    seleniumWebDriverHelper.performAndVerify(
+        aVoid -> {
+          projectExplorer.waitAndSelectItem(PROJECT_NAME);
+          menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+          git.waitCommitMainFormIsOpened();
+          return null;
+        },
+        aVoid -> {
+          projectExplorer.waitItemIsSelected(PROJECT_NAME);
+          return null;
+        },
+        aVoid -> {
+          git.clickOnCancelBtnCommitForm();
+          git.waitCommitFormClosed();
+          return null;
+        });
 
     git.waitItemCheckBoxToBeSelectedInCommitWindow(
         "src/main",

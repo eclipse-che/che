@@ -15,8 +15,8 @@ import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -85,7 +85,7 @@ public class OnWorkspaceRemoveDataVolumeRemoverTest {
     Volume volume2 = new Volume().withName(volume2Name);
     Volume volume3 = new Volume().withName(volume3Name);
     when(volumes.getVolumes()).thenReturn(asList(volume1, volume2, volume3));
-    doThrow(new IOException("test exc")).when(docker).removeVolume(eq(volume2Name));
+    lenient().doThrow(new IOException("test exc")).when(docker).removeVolume(eq(volume2Name));
 
     // when
     remover.onEvent(event);
