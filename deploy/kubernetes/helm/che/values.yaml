@@ -32,6 +32,8 @@ global:
   #  This value can be passed if custom Oidc provider is used, and there is no need to deploy keycloak in multiuser mode
   #  default (if empty) is true
   #cheDedicatedKeycloak: false
+  ingressClass: "ingress"
+  #ingressClass: "addon-http-application-routing" ## This may fix the issue around bootstraping your stacks on Azure AKS.
   ingressDomain: 192.168.99.100.nip.io
   # See --annotations-prefix flag (https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/cli-arguments.md)
   ingressAnnotationsPrefix: "nginx."
