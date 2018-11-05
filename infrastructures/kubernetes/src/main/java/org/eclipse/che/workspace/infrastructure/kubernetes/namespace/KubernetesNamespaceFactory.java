@@ -31,14 +31,17 @@ public class KubernetesNamespaceFactory {
 
   private final String namespaceName;
   private final boolean isPredefined;
+  private final String serviceAccountName;
   private final KubernetesClientFactory clientFactory;
 
   @Inject
   public KubernetesNamespaceFactory(
       @Nullable @Named("che.infra.kubernetes.namespace") String namespaceName,
+      @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
       KubernetesClientFactory clientFactory) {
     this.namespaceName = namespaceName;
     this.isPredefined = !isNullOrEmpty(namespaceName);
+    this.serviceAccountName = serviceAccountName;
     this.clientFactory = clientFactory;
   }
 
@@ -64,6 +67,16 @@ public class KubernetesNamespaceFactory {
     final String namespaceName = isPredefined ? this.namespaceName : workspaceId;
     KubernetesNamespace namespace = doCreateNamespace(workspaceId, namespaceName);
     namespace.prepare();
+
+    if (!isPredefined() && !isNullOrEmpty(serviceAccountName)) {
+      // prepare service account for workspace only if account name is configured
+      // and project is not predefined
+      // since predefined project should be prepared during Che deployment
+      KubernetesWorkspaceServiceAccount workspaceServiceAccount =
+          doCreateServiceAccount(workspaceId, namespaceName);
+      workspaceServiceAccount.prepare();
+    }
+
     return namespace;
   }
 
@@ -82,5 +95,12 @@ public class KubernetesNamespaceFactory {
   @VisibleForTesting
   KubernetesNamespace doCreateNamespace(String workspaceId, String name) {
     return new KubernetesNamespace(clientFactory, name, workspaceId);
+  }
+
+  @VisibleForTesting
+  KubernetesWorkspaceServiceAccount doCreateServiceAccount(
+      String workspaceId, String namespaceName) {
+    return new KubernetesWorkspaceServiceAccount(
+        workspaceId, namespaceName, serviceAccountName, clientFactory);
   }
 }
