@@ -24,7 +24,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.PluginMetaRetriever;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceAdapter;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,7 +70,7 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
           "Sidecar tooling configuration is not supported with environment type " + recipeType);
     }
 
-    boolean isEphemeral = EphemeralWorkspaceAdapter.isEphemeral(environment.getAttributes());
+    boolean isEphemeral = EphemeralWorkspaceUtility.isEphemeral(environment.getAttributes());
     List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta, isEphemeral);
 
     pluginsApplier.apply(environment, chePlugins);

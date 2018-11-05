@@ -104,7 +104,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
-    if (EphemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
+    if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
@@ -117,7 +117,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       List<Container> containers = new ArrayList<>();
       containers.addAll(podSpec.getContainers());
       containers.addAll(podSpec.getInitContainers());
-      for (Container container : podSpec.getContainers()) {
+      for (Container container : containers) {
         String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
         addMachineVolumes(workspaceId, subPaths, pod, container, machineConfig.getVolumes());
@@ -134,7 +134,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   @Override
   public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
       throws InfrastructureException {
-    if (EphemeralWorkspaceAdapter.isEphemeral(k8sEnv.getAttributes())) {
+    if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
       return;
     }
     final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
@@ -161,7 +161,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
   @Override
   public void cleanup(Workspace workspace) throws InfrastructureException {
-    if (EphemeralWorkspaceAdapter.isEphemeral(workspace)) {
+    if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
       return;
     }
     String workspaceId = workspace.getId();
