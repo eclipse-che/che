@@ -95,6 +95,7 @@ import org.eclipse.che.api.languageserver.LanguageServerInitializer;
 import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.Severity;
@@ -699,6 +700,9 @@ public class JavaLanguageServerExtensionService {
     String projectUri = prefixURI(projectPath);
     Type type = new TypeToken<ArrayList<ClasspathEntry>>() {}.getType();
     List<ClasspathEntry> result = doGetList(GET_CLASS_PATH_TREE_COMMAND, projectUri, type);
+    if (result == null) {
+      return emptyList();
+    }
     return result
         .stream()
         .map(
@@ -997,6 +1001,7 @@ public class JavaLanguageServerExtensionService {
     return removePrefixUri(projectsUri);
   }
 
+  @Nullable
   private <T, P> List<T> doGetList(String command, P params, Type type) {
     return doGetList(command, singletonList(params), type);
   }

@@ -308,7 +308,11 @@ public class ProjectImportManager {
     if (projectSynchronizer
         .getProjects()
         .stream()
-        .anyMatch(it -> Objects.equals(it.getPath(), wsPath))) {
+        .anyMatch(
+            it ->
+                Objects.equals(it.getPath(), wsPath)
+                    && it.getSource() != null
+                    && it.getSource().getLocation() != null)) {
       Set<ProjectConfig> newProjectConfigs =
           projectSynchronizer
               .getProjects()

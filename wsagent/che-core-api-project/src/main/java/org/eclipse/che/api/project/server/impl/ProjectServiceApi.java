@@ -67,7 +67,6 @@ import org.eclipse.che.api.project.server.ProjectService;
 import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
-import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -206,14 +205,13 @@ public class ProjectServiceApi {
 
   /** Update project specified by workspace path with new configuration */
   public ProjectConfigDto updateProject(String wsPath, ProjectConfigDto projectConfigDto)
-      throws NotFoundException, ConflictException, ForbiddenException, ServerException, IOException,
+      throws NotFoundException, ConflictException, ForbiddenException, ServerException,
           BadRequestException {
     if (wsPath != null) {
       wsPath = absolutize(wsPath);
       projectConfigDto.setPath(wsPath);
     }
     RegisteredProject updated = projectManager.update(projectConfigDto);
-    eventService.publish(new ProjectUpdatedEvent(updated.getPath()));
 
     return asDto(updated);
   }
