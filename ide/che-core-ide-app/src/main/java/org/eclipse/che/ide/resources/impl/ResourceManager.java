@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.COPIED_FROM;
@@ -42,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
@@ -882,7 +884,8 @@ public final class ResourceManager {
 
                       Resource[] resources = children.get();
 
-                      if (resources.length == loadedChildren.getChildren().size()) {
+                      if (resources.length == loadedChildren.getChildren().size()
+                          && hasSameVcsStatus(resources, loadedChildren.getChildren())) {
                         return promises.resolve(resources);
                       } else {
                         // situation, when we have outdated cached children
@@ -907,6 +910,45 @@ public final class ResourceManager {
                         return promises.resolve(updated.toArray(new Resource[updated.size()]));
                       }
                     }));
+  }
+
+  private boolean hasSameVcsStatus(Resource[] existed, List<TreeElement> loaded) {
+    return mapFrom(existed).equals(mapFrom(loaded));
+  }
+
+  private Map<String, VcsStatus> mapFrom(Resource[] resources) {
+    return mapFrom(java.util.Arrays.asList(resources));
+  }
+
+  private Map<String, VcsStatus> mapFrom(Iterable<?> items) {
+    return StreamSupport.stream(items.spliterator(), false)
+        .collect(
+            toMap(
+                key -> {
+                  if (key instanceof Resource) {
+                    return ((Resource) key).getName();
+                  } else if (key instanceof TreeElement) {
+                    return ((TreeElement) key).getNode().getName();
+                  }
+
+                  throw new IllegalArgumentException("Unknown iterable key type");
+                },
+                value -> {
+                  if (value instanceof File) {
+                    return ((File) value).getVcsStatus();
+                  } else if (value instanceof TreeElement) {
+                    ItemReference ref = ((TreeElement) value).getNode();
+
+                    if ("file".equals(ref.getType())
+                        && ref.getAttributes().containsKey("vcs.status")) {
+                      return VcsStatus.from(ref.getAttributes().get("vcs.status"));
+                    } else {
+                      return VcsStatus.UNTRACKED;
+                    }
+                  }
+
+                  return VcsStatus.UNTRACKED;
+                }));
   }
 
   private Promise<Optional<Resource>> doFindResource(Path path) {
