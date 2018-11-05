@@ -214,7 +214,8 @@ public class FindUsagesBaseOperationTest {
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ARROW_DOWN.toString());
     findUsages.sendCommandByKeyboardInFindUsagesPanel(ARROW_DOWN.toString());
-    findUsages.sendCommandByKeyboardInFindUsagesPanel(ENTER.toString());
+    findUsages.selectNodeInFindUsagesByDoubleClick("34:    else if (numGuessByUser != null) {");
+
     editor.waitActive();
     editor.typeTextIntoEditor(ARROW_LEFT.toString());
 
