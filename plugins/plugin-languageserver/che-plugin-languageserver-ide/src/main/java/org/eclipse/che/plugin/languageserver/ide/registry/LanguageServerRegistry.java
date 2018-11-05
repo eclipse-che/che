@@ -125,7 +125,8 @@ public class LanguageServerRegistry {
    * Provide ability to check if language is registered for given resource
    *
    * @param resource resource to check
-   * @return {@code true} if given resource is
+   * @return {@code true} if given resource is file and language is registered for given resource,
+   *     {@code false} otherwise
    */
   public boolean isLanguagePresentFor(Resource resource) {
     return resource.isFile() && getLanguageFilter(resource.asFile()) != null;
