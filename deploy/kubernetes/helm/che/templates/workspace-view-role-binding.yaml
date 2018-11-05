@@ -19,6 +19,6 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 subjects:
 - kind: ServiceAccount
-  name: che-workspace
+  name: {{ .Values.global.cheWorkspaceServiceAccount }}
   namespace: {{ .Values.global.cheWorkspacesNamespace }}
 {{- end }}
