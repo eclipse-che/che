@@ -37,13 +37,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphase
  * @author Angel Misevski
  */
 @Beta
-public class KubernetesBrokerInitContainerApplier<Environment extends KubernetesEnvironment> {
+public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironment> {
 
-  private final BrokerEnvironmentFactory<Environment> brokerEnvironmentFactory;
+  private final BrokerEnvironmentFactory<E> brokerEnvironmentFactory;
 
   @Inject
   public KubernetesBrokerInitContainerApplier(
-      BrokerEnvironmentFactory<Environment> brokerEnvironmentFactory) {
+      BrokerEnvironmentFactory<E> brokerEnvironmentFactory) {
     this.brokerEnvironmentFactory = brokerEnvironmentFactory;
   }
 
@@ -63,7 +63,7 @@ public class KubernetesBrokerInitContainerApplier<Environment extends Kubernetes
       throws InfrastructureException {
 
     KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) workspaceEnvironment;
-    Environment brokerEnvironment =
+    E brokerEnvironment =
         brokerEnvironmentFactory.create(pluginsMeta, runtimeID, new BrokersResult());
 
     Map<String, Pod> workspacePods = kubernetesEnvironment.getPods();

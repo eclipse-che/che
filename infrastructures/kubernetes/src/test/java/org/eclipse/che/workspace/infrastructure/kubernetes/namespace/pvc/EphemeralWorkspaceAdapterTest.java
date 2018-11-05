@@ -20,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -99,8 +100,8 @@ public class EphemeralWorkspaceAdapterTest {
 
   @Test
   public void testIsEphemeralWorkspace() throws Exception {
-    assertTrue(ephemeralWorkspaceAdapter.isEphemeral(ephemeralWorkspace));
-    assertFalse(ephemeralWorkspaceAdapter.isEphemeral(nonEphemeralWorkspace));
+    assertTrue(EphemeralWorkspaceUtility.isEphemeral(ephemeralWorkspace));
+    assertFalse(EphemeralWorkspaceUtility.isEphemeral(nonEphemeralWorkspace));
   }
 
   @Test
@@ -139,6 +140,24 @@ public class EphemeralWorkspaceAdapterTest {
             .stream()
             .map(mount -> mount.getName())
             .allMatch(volName -> podVolumeNames.contains(volName)));
+  }
+
+  @Test
+  public void testInitContainerMountsIncluded() throws Exception {
+    Container container1 = new Container();
+    Container container2 = new Container();
+    Container initContainer = new Container();
+    Pod pod = buildPod(POD_ID, container1, container2);
+    when(k8sEnv.getPods()).thenReturn(ImmutableMap.of(POD_ID, pod));
+    pod.getSpec().setInitContainers(ImmutableList.of(initContainer));
+
+    ephemeralWorkspaceAdapter.provision(k8sEnv, runtimeIdentity);
+
+    List<Container> podInitContainers = pod.getSpec().getInitContainers();
+    assertEquals(podInitContainers.size(), 1);
+    Container podInitContainer = podInitContainers.iterator().next();
+    List<VolumeMount> initContainerVolumeMounts = podInitContainer.getVolumeMounts();
+    assertEquals(initContainerVolumeMounts.size(), 2);
   }
 
   private Pod buildPod(String name, Container... containers) throws Exception {
