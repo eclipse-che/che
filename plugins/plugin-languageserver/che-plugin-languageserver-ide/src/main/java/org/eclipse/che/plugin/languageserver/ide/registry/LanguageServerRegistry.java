@@ -128,7 +128,7 @@ public class LanguageServerRegistry {
    * @return {@code true} if given resource is file and language is registered for given resource,
    *     {@code false} otherwise
    */
-  public boolean isLanguagePresentFor(Resource resource) {
+  public boolean isLsRegistered(Resource resource) {
     return resource.isFile() && getLanguageFilter(resource.asFile()) != null;
   }
 }

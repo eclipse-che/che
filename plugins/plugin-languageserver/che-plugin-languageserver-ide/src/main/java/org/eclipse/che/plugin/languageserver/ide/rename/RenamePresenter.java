@@ -127,7 +127,7 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
             return;
           }
 
-          if (!lsRegistry.isLanguagePresentFor(newResource)) {
+          if (!lsRegistry.isLsRegistered(newResource)) {
             return;
           }
 
