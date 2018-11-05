@@ -32,6 +32,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphase
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.ListenBrokerEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.PrepareStorage;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.WaitBrokerResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Deploys Che plugin broker in a workspace, receives result of its execution and return resolved
@@ -43,6 +45,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphase
  */
 @Beta
 public class PluginBrokerManager<E extends KubernetesEnvironment> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PluginBrokerManager.class);
 
   private final int pluginBrokerWaitingTimeout;
   private final KubernetesNamespaceFactory factory;
@@ -92,13 +96,12 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
 
     ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, brokersResult);
     PrepareStorage prepareStorage = getPrepareStoragePhase(workspaceId, brokerEnvironment);
-    WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(brokersResult);
+    WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(workspaceId, brokersResult);
     DeployBroker deployBroker =
         getDeployBrokerPhase(
             runtimeID.getWorkspaceId(), kubernetesNamespace, brokerEnvironment, brokersResult);
-
+    LOG.debug("Entering plugin brokers deployment chain workspace '{}'", workspaceId);
     listenBrokerEvents.then(prepareStorage).then(deployBroker).then(waitBrokerResult);
-
     return listenBrokerEvents.execute();
   }
 
@@ -124,7 +127,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
         unrecoverablePodEventListenerFactory);
   }
 
-  private WaitBrokerResult getWaitBrokerPhase(BrokersResult brokersResult) {
-    return new WaitBrokerResult(brokersResult, pluginBrokerWaitingTimeout);
+  private WaitBrokerResult getWaitBrokerPhase(String workspaceId, BrokersResult brokersResult) {
+    return new WaitBrokerResult(workspaceId, brokersResult, pluginBrokerWaitingTimeout);
   }
 }

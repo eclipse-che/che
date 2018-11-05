@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
@@ -141,7 +142,7 @@ public class TypeScriptEditingTest {
     editor.waitTextElementsActiveLine("print");
   }
 
-  @Test(priority = 4, alwaysRun = true)
+  @Test(priority = 4, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkHoveringFeature() {
     editor.moveCursorToText("Greeter");
     try {

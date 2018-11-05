@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.testng.Assert.fail;
@@ -34,6 +35,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrienko Alexander on 08.01.15. */
+@Test(groups = UNDER_REPAIR)
 public class QuickFixAndCodeAssistantFeaturesTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(QuickFixAndCodeAssistantFeaturesTest.class.getSimpleName(), 4);

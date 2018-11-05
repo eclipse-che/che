@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -34,6 +35,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = UNDER_REPAIR)
 public class ShowHintsCommandTest {
   private final Logger LOG = LoggerFactory.getLogger(ShowHintsCommandTest.class);
   private static final String PROJECT_NAME =
@@ -96,6 +98,7 @@ public class ShowHintsCommandTest {
     editor.waitMarkerInPosition(MarkerLocator.ERROR, 34);
     editor.goToCursorPositionVisible(33, 16);
     editor.callShowHintsPopUp();
+
     try {
       editor.waitShowHintsPopUpOpened();
     } catch (TimeoutException ex) {

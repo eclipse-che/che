@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.refactor.packages;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -352,7 +353,7 @@ public class RenamePackageTest {
     editor.closeFileByNameWithSaving("A");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkTest3() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/pack");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/mine/pack/Textfile.txt");
@@ -589,7 +590,7 @@ public class RenamePackageTest {
     editor.closeFileByNameWithSaving("MyA");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkTestHierarchical10() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/m_y/pack");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/m_y/pack/C.java");
@@ -623,7 +624,7 @@ public class RenamePackageTest {
     editor.closeFileByNameWithSaving("C");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkTestDisableImport11() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my_/pack");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/my_/pack/C.java");

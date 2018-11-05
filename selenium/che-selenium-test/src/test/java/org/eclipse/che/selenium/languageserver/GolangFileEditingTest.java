@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
@@ -207,7 +208,7 @@ public class GolangFileEditingTest {
     editor.clickOnCloseFileIcon("print.go");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkRenameFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
@@ -220,7 +221,7 @@ public class GolangFileEditingTest {
       editor.waitTextElementsActiveLine("if k == 1");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10524");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10524");
     }
   }
 

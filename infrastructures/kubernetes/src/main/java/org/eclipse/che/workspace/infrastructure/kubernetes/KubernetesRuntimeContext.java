@@ -26,9 +26,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** @author Sergii Leshchenko */
 public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends RuntimeContext<T> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(KubernetesRuntimeContext.class);
 
   private final KubernetesRuntimeFactory<T> runtimeFactory;
   private final KubernetesNamespaceFactory namespaceFactory;
@@ -75,6 +79,12 @@ public class KubernetesRuntimeContext<T extends KubernetesEnvironment> extends R
 
     // there is cached runtime, restore cached one
     KubernetesRuntimeState runtimeState = runtimeStateOpt.get();
+    RuntimeIdentity runtimeId = runtimeState.getRuntimeId();
+    LOG.debug(
+        "Restoring runtime `{}:{}:{}`",
+        runtimeId.getWorkspaceId(),
+        runtimeId.getEnvName(),
+        runtimeId.getOwnerId());
     KubernetesInternalRuntime runtime =
         runtimeFactory.create(
             this,

@@ -78,6 +78,7 @@ initVariables() {
     PRODUCT_PROTOCOL="http"
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
+    INCLUDE_TESTS_UNDER_REPAIR=false
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -149,6 +150,7 @@ checkParameters() {
         elif [[ "$var" == --skip-sources-validation ]]; then :
         elif [[ "$var" == --multiuser ]]; then :
         elif [[ "$var" =~ --exclude=.* ]]; then :
+        elif [[ "$var" =~ --include-tests-under-repair ]]; then :
 
         else
             printHelp
@@ -208,6 +210,9 @@ applyCustomOptions() {
 
         elif [[ "$var" =~ --exclude=.* ]]; then
             EXCLUDE_PARAM=$(echo "$var" | sed -e "s/--exclude=//g")
+
+        elif [[ "$var" == --include-tests-under-repair ]]; then
+            INCLUDE_TESTS_UNDER_REPAIR=true
 
         fi
     done
@@ -418,6 +423,7 @@ Other options:
     --skip-sources-validation           Fast build. Skips source validation and enforce plugins
     --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
                                         Default value is 0, that means that test workspaces are created on demand.
+    --include-tests-under-repair        Include tests which belong to group 'UNDER REPAIR'
 
 HOW TO of usage:
     Test Eclipse Che single user assembly:
@@ -434,6 +440,9 @@ HOW TO of usage:
 
     Run suite:
         ${CALLER} <...> --suite=<PATH_TO_SUITE>
+
+    Include tests which belong to group 'UNDER REPAIR'
+        ./selenium-tests.sh --include-tests-under-repair
 
     Rerun failed tests:
         ${CALLER} <...> --failed-tests
@@ -725,6 +734,11 @@ getProductConfig() {
 # Prepare list of test groups to exclude.
 getExcludedGroups() {
     local excludeParamArray=(${EXCLUDE_PARAM//,/ })
+
+    if [[ ${INCLUDE_TESTS_UNDER_REPAIR} == false ]]; then
+      excludeParamArray+=( 'under_repair' )
+    fi
+
     echo $(IFS=$','; echo "${excludeParamArray[*]}")
 }
 
@@ -780,8 +794,8 @@ generateTestNgFailedReport() {
 
 # generates and updates failsafe report
 generateFailSafeReport () {
-    mvn -q surefire-report:failsafe-report-only ${MAVEN_OPTIONS}
-    mvn -q site -DgenerateReports=false ${MAVEN_OPTIONS}
+    mvn -q surefire-report:failsafe-report-only
+    mvn -q site -DgenerateReports=false
 
     echo "[TEST]"
     echo -e "[TEST] ${YELLOW}REPORT:${NO_COLOUR}"

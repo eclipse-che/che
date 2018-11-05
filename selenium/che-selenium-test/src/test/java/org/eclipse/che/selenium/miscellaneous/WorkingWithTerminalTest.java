@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM_ID;
 import static org.testng.Assert.fail;
 
@@ -34,8 +35,6 @@ import org.eclipse.che.selenium.pageobject.PanelSelector;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,7 +45,6 @@ import org.testng.annotations.Test;
  */
 public class WorkingWithTerminalTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
-  private static final Logger LOG = LoggerFactory.getLogger(WorkingWithTerminalTest.class);
 
   private static final String[] CHECK_MC_OPENING = {
     "Left", "File", "Command", "Options", "Right", "Name", "bin", "dev", "etc", "home",
@@ -250,7 +248,7 @@ public class WorkingWithTerminalTest {
     terminal.waitTextInFirstTerminal("tomcat8");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void shouldCancelProcessByCtrlC() {
     terminal.typeIntoActiveTerminal("cd /" + Keys.ENTER);
 

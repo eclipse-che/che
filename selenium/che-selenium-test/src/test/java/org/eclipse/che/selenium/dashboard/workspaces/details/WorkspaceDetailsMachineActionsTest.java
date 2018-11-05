@@ -117,7 +117,7 @@ public class WorkspaceDetailsMachineActionsTest {
     checkRamSection(IMAGE_NAME);
   }
 
-  @Test(groups = DOCKER)
+  @Test(groups = {DOCKER})
   public void checkRamSectionDocker() {
     checkRamSection("FROM " + IMAGE_NAME + "\n");
   }

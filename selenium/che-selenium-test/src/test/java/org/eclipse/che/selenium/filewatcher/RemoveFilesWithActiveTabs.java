@@ -38,11 +38,7 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * //
- *
- * @author Musienko Maxim
- */
+/** @author Musienko Maxim */
 public class RemoveFilesWithActiveTabs {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
   @Inject private TestWorkspace ws;

@@ -66,6 +66,7 @@ public class DeployBroker extends BrokerPhase {
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
+    LOG.debug("Starting brokers deployment for workspace '{}'", workspaceId);
     KubernetesDeployments deployments = namespace.deployments();
     try {
       // Creates config map that can inject Che tooling plugins meta files into a Che plugin
@@ -87,7 +88,7 @@ public class DeployBroker extends BrokerPhase {
       Pod barePod = deployments.create(pluginBrokerPod);
 
       deployments.waitRunningAsync(barePod.getMetadata().getName());
-
+      LOG.debug("Brokers deployment finished for workspace '{}'", workspaceId);
       return nextPhase.execute();
     } finally {
       namespace.deployments().stopWatch();

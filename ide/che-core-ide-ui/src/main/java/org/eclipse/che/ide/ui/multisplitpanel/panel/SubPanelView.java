@@ -16,6 +16,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.ide.api.mvp.View;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
 import org.eclipse.che.ide.ui.multisplitpanel.WidgetToShow;
+import org.eclipse.che.ide.ui.multisplitpanel.tab.Tab;
 
 /**
  * View of {@link SubPanelPresenter}.
@@ -35,6 +36,9 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
    */
   void splitVertically(SubPanelView view);
 
+  /** Show (activate) the {@code tab} if it exists on this panel. */
+  void activateTab(Tab tab);
+
   /**
    * Add the given {@code widget} to this panel.
    *
@@ -47,11 +51,23 @@ public interface SubPanelView extends View<SubPanelView.ActionDelegate> {
   void activateWidget(WidgetToShow widget);
 
   /**
-   * Remove the given {@code widget} from this panel.
+   * Remove the given {@code widget} from this panel. Nearby widget will be activated if widget for
+   * removing is active {@link Tab}. To override this behavior use {@link
+   * #removeWidget(WidgetToShow, ActiveTabClosedHandler)}
    *
    * @param widget widget to remove
    */
-  void removeWidget(WidgetToShow widget);
+  default void removeWidget(WidgetToShow widget) {
+    removeWidget(widget, SubPanelView::activateTab);
+  }
+
+  /**
+   * Remove the given {@code widget} from this panel.
+   *
+   * @param widget widget to remove
+   * @param handler provides ability to process case when widget for removing is active {@link Tab}
+   */
+  void removeWidget(WidgetToShow widget, ActiveTabClosedHandler handler);
 
   /** Close panel. */
   void closePanel();

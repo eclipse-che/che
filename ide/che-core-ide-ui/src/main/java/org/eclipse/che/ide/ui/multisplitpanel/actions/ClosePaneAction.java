@@ -33,7 +33,7 @@ public class ClosePaneAction extends BaseAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     for (WidgetToShow widget : subPanel.getAllWidgets()) {
-      subPanel.removeWidget(widget);
+      subPanel.removeWidget(widget, (subPanel, tabToActivate) -> {});
     }
 
     subPanel.closePane();
