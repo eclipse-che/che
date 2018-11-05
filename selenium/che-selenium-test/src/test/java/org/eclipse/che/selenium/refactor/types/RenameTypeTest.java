@@ -37,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,7 +198,7 @@ public class RenameTypeTest {
 
     try {
       editor.waitTextIntoEditor(contentFromOutB);
-    } catch (AssertionError ex) {
+    } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known random failure https://github.com/eclipse/che/issues/11779");
     }

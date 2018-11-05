@@ -32,6 +32,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.Serv
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Applies the set of configurations to the OpenShift environment and environment configuration with
@@ -43,6 +45,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProv
 @Singleton
 public class OpenShiftEnvironmentProvisioner
     implements KubernetesEnvironmentProvisioner<OpenShiftEnvironment> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftEnvironmentProvisioner.class);
 
   private final boolean pvcEnabled;
   private final WorkspaceVolumesStrategy volumesStrategy;
@@ -94,6 +98,9 @@ public class OpenShiftEnvironmentProvisioner
   @Override
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+
+    LOG.debug(
+        "Start provisioning OpenShift environment for workspace '{}'", identity.getWorkspaceId());
     // 1 stage - update environment according Infrastructure specific
     installerServersPortProvisioner.provision(osEnv, identity);
     if (pvcEnabled) {
@@ -116,5 +123,7 @@ public class OpenShiftEnvironmentProvisioner
     imagePullSecretProvisioner.provision(osEnv, identity);
     proxySettingsProvisioner.provision(osEnv, identity);
     serviceAccountProvisioner.provision(osEnv, identity);
+    LOG.debug(
+        "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }
 }

@@ -18,6 +18,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provisions environment variable with machine name into each machine.
@@ -26,9 +28,12 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
  */
 public class MachineNameProvisioner implements InternalEnvironmentProvisioner {
 
+  private static final Logger LOG = LoggerFactory.getLogger(MachineNameProvisioner.class);
+
   @Override
   public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
+    LOG.debug("Provisioning machine names for workspace '{}'", id.getWorkspaceId());
     for (Entry<String, InternalMachineConfig> machineEntry :
         internalEnvironment.getMachines().entrySet()) {
       machineEntry.getValue().getEnv().put(CHE_MACHINE_NAME_ENV_VAR, machineEntry.getKey());

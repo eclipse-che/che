@@ -24,6 +24,8 @@ import org.eclipse.che.api.workspace.server.wsplugins.PluginMetaRetriever;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provisions sidecars-powered development tooling in a workspace.
@@ -32,6 +34,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 @Beta
 public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(SidecarToolingProvisioner.class);
 
   private final Map<String, ChePluginsApplier> workspaceNextAppliers;
   private final PluginMetaRetriever pluginMetaRetriever;
@@ -54,7 +58,7 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
     if (pluginsMeta.isEmpty()) {
       return;
     }
-
+    LOG.debug("Started sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
     String recipeType = environment.getType();
     ChePluginsApplier pluginsApplier = workspaceNextAppliers.get(recipeType);
     if (pluginsApplier == null) {
@@ -65,5 +69,6 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
     List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta);
 
     pluginsApplier.apply(environment, chePlugins);
+    LOG.debug("Finished sidecar tooling provisioning workspace '{}'", id.getWorkspaceId());
   }
 }

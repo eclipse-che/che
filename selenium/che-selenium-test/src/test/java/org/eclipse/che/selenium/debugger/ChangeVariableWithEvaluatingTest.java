@@ -45,7 +45,6 @@ import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class ChangeVariableWithEvaluatingTest {
@@ -112,7 +111,6 @@ public class ChangeVariableWithEvaluatingTest {
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME_CHANGE_VARIABLE);
   }
 
-  @Test
   public void changeVariableTest() throws Exception {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();

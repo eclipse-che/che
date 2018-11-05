@@ -19,6 +19,9 @@ import org.eclipse.che.ide.api.parts.base.BaseActionDelegate;
 import org.eclipse.che.ide.processes.ProcessTreeNode;
 import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 import org.eclipse.che.ide.ui.multisplitpanel.SubPanel;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.ActiveTabClosedHandler;
+import org.eclipse.che.ide.ui.multisplitpanel.panel.SubPanelView;
+import org.eclipse.che.ide.ui.multisplitpanel.tab.Tab;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
 /**
@@ -82,8 +85,21 @@ public interface ProcessesPanelView extends View<ProcessesPanelView.ActionDelega
   /** Hides output for process with given ID */
   void hideProcessOutput(String processId);
 
-  /** Removes widget for process with given ID */
-  void removeWidget(String processId);
+  /**
+   * Removes widget for process with given ID. Nearby widget will be activated if widget for
+   * removing is active {@link Tab}. To override this behavior use {@link #removeWidget(String,
+   * ActiveTabClosedHandler)}
+   */
+  default void removeWidget(String processId) {
+    removeWidget(processId, SubPanelView::activateTab);
+  }
+
+  /**
+   * Removes widget for process with given ID
+   *
+   * @param handler provides ability to process case when widget for removing is active {@link Tab}
+   */
+  void removeWidget(String processId, ActiveTabClosedHandler handler);
 
   /** Marks process with a badge in process tree */
   void markProcessHasOutput(String processId);

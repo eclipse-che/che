@@ -19,6 +19,8 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Wait until Che plugin broker future finishes and returns resulting workspace tooling or error.
@@ -31,11 +33,16 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResu
 @Beta
 public class WaitBrokerResult extends BrokerPhase {
 
+  private static final Logger LOG = LoggerFactory.getLogger(WaitBrokerResult.class);
+
   private final BrokersResult brokersResult;
+  private final String workspaceId;
 
   private final int resultWaitingTimeout;
 
-  public WaitBrokerResult(BrokersResult brokersResult, int resultWaitingTimeout) {
+  public WaitBrokerResult(
+      String workspaceId, BrokersResult brokersResult, int resultWaitingTimeout) {
+    this.workspaceId = workspaceId;
     this.brokersResult = brokersResult;
     this.resultWaitingTimeout = resultWaitingTimeout;
   }
@@ -43,6 +50,7 @@ public class WaitBrokerResult extends BrokerPhase {
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     try {
+      LOG.debug("Trying to get brokers result for workspace '{}'", workspaceId);
       return brokersResult.get(resultWaitingTimeout, TimeUnit.MINUTES);
     } catch (InterruptedException e) {
       throw new InfrastructureException(

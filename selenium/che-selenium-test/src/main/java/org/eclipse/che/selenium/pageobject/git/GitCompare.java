@@ -12,22 +12,20 @@
 package org.eclipse.che.selenium.pageobject.git;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.openqa.selenium.Keys.CONTROL;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
+import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.Loader;
-import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 /** @author Aleksandr Shmaraev on 10.02.16 */
 @Singleton
@@ -36,17 +34,20 @@ public class GitCompare {
   private final Loader loader;
   private final ActionsFactory actionsFactory;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
+  private final AskForValueDialog askForValueDialog;
 
   @Inject
   public GitCompare(
       SeleniumWebDriver seleniumWebDriver,
       Loader loader,
       ActionsFactory actionsFactory,
-      SeleniumWebDriverHelper seleniumWebDriverHelper) {
+      SeleniumWebDriverHelper seleniumWebDriverHelper,
+      AskForValueDialog askForValueDialog) {
     this.seleniumWebDriver = seleniumWebDriver;
     this.loader = loader;
     this.actionsFactory = actionsFactory;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
+    this.askForValueDialog = askForValueDialog;
     PageFactory.initElements(seleniumWebDriver, this);
   }
 
@@ -192,16 +193,13 @@ public class GitCompare {
    * @param status is expected line and column position
    */
   public void setCursorToLine(int positionLine, String status) {
+    seleniumWebDriverHelper.sendKeys(Keys.chord(CONTROL, "l"));
+    askForValueDialog.waitFormToOpen();
     loader.waitOnClosed();
-    Actions action = actionsFactory.createAction(seleniumWebDriver);
-    action.keyDown(Keys.CONTROL).sendKeys("l").perform();
-    Alert alert =
-        new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-            .until(ExpectedConditions.alertIsPresent());
-    seleniumWebDriver.switchTo().alert();
-    alert.sendKeys(String.valueOf(positionLine));
-    alert.accept();
-    action.keyUp(Keys.CONTROL).perform();
+    askForValueDialog.typeAndWaitText(String.valueOf(positionLine));
+    loader.waitOnClosed();
+    askForValueDialog.clickOkBtn();
+    askForValueDialog.waitFormToClose();
     waitLineAndColumnInLeftCompare(status);
   }
 

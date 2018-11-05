@@ -147,6 +147,7 @@ public class NewWorkspace {
     CENTOS_WILDFLY_SWARM("wildfly-swarm"),
     CEYLON_WITH_JAVA_JAVASCRIPT("ceylon-java-javascript-dart-centos"),
     CHE_7_PREVIEW("che7-preview"),
+    CHE_7_PREVIEW_DEV("che7-preview-plugin-dev"),
     DEBIAN("debian"),
     DEBIAN_LSP("debianlsp"),
     ECLIPSE_CHE("che-in-che"),

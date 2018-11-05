@@ -357,7 +357,8 @@ public class ProcessesPanelPresenter extends BasePresenter
   private void closeTerminal(ProcessTreeNode node) {
     String terminalId = node.getId();
     if (terminals.containsKey(terminalId)) {
-      onStopProcess(node);
+      removeChildFromMachineNode(node, node.getParent());
+
       terminals.get(terminalId).stopTerminal();
       terminals.remove(terminalId);
     }
@@ -723,7 +724,7 @@ public class ProcessesPanelPresenter extends BasePresenter
       // 'reuse' already existing console
       // actually - remove 'already used' console
       commandId = processTreeNode.getId();
-      view.hideProcessOutput(commandId);
+      view.removeWidget(commandId, (subPanel, tabToActivate) -> {});
     }
 
     ProcessTreeNode commandNode =
@@ -807,7 +808,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
   @Override
   public void onCloseCommandOutputClick(final ProcessTreeNode node) {
-    closeCommandOutput(node, () -> {});
+    closeCommandOutput(node, () -> view.removeWidget(node.getId()));
   }
 
   @Override
@@ -852,36 +853,17 @@ public class ProcessesPanelPresenter extends BasePresenter
       final ProcessTreeNode node,
       final SubPanel.RemoveCallback removeCallback) {
     console.close();
-    onStopProcess(node);
+
+    removeChildFromMachineNode(node, node.getParent());
 
     consoles.remove(node.getId());
     consoleCommands.remove(console);
-    view.removeWidget(node.getId());
 
     removeCallback.remove();
 
     if (console instanceof CommandOutputConsole) {
       eventBus.fireEvent(new ProcessOutputClosedEvent(((CommandOutputConsole) console).getPid()));
     }
-  }
-
-  private void onStopProcess(ProcessTreeNode node) {
-    String processId = node.getId();
-    ProcessTreeNode parentNode = node.getParent();
-
-    int processIndex = view.getNodeIndex(processId);
-    if (processIndex < 0) {
-      return;
-    }
-
-    int neighborIndex = processIndex > 0 ? processIndex - 1 : processIndex + 1;
-    ProcessTreeNode neighborNode = view.getNodeByIndex(neighborIndex);
-    if (neighborNode == null) {
-      neighborNode = parentNode;
-    }
-
-    removeChildFromMachineNode(node, parentNode);
-    notifyTreeNodeSelected(neighborNode);
   }
 
   private String getUniqueTerminalName(ProcessTreeNode machineNode) {
@@ -1335,7 +1317,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     }
 
     OutputConsole console = consoles.get(machineName);
-    if (console != null && console instanceof DefaultOutputConsole) {
+    if (console instanceof DefaultOutputConsole) {
       ((DefaultOutputConsole) console).printText(text);
     }
   }
@@ -1349,7 +1331,7 @@ public class ProcessesPanelPresenter extends BasePresenter
    */
   public void printMachineOutput(String machineName, String text, String color) {
     OutputConsole console = consoles.get(machineName);
-    if (console != null && console instanceof DefaultOutputConsole) {
+    if (console instanceof DefaultOutputConsole) {
       ((DefaultOutputConsole) console).printText(text, color);
     }
   }
@@ -1404,13 +1386,7 @@ public class ProcessesPanelPresenter extends BasePresenter
    */
   private void notifyTreeNodeSelected(final ProcessTreeNode node) {
     Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                eventBus.fireEvent(new ProcessTreeNodeSelectedEvent(node));
-              }
-            });
+        .scheduleDeferred(() -> eventBus.fireEvent(new ProcessTreeNodeSelectedEvent(node)));
   }
 
   @Override
@@ -1433,14 +1409,7 @@ public class ProcessesPanelPresenter extends BasePresenter
 
   @Override
   public void onAddTabButtonClicked(final int mouseX, final int mouseY) {
-    Scheduler.get()
-        .scheduleDeferred(
-            new Scheduler.ScheduledCommand() {
-              @Override
-              public void execute() {
-                addTabMenuFactory.newAddTabMenu().show(mouseX, mouseY);
-              }
-            });
+    Scheduler.get().scheduleDeferred(() -> addTabMenuFactory.newAddTabMenu().show(mouseX, mouseY));
   }
 
   @Override
