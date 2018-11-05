@@ -81,6 +81,7 @@ public class CheTestWorkspaceProvider implements TestWorkspaceProvider {
     }
   }
 
+  @Override
   public TestWorkspace getWorkspace(String workspaceName, TestUser owner) {
     return new CheTestWorkspace(
         workspaceName, owner, testWorkspaceServiceClientFactory.create(owner));
@@ -88,9 +89,9 @@ public class CheTestWorkspaceProvider implements TestWorkspaceProvider {
 
   @Override
   public TestWorkspace createWorkspace(
-      TestUser owner, int memoryGB, WorkspaceTemplate template, boolean startAfterCreation)
+      TestUser owner, int memoryGB, String templateFileName, boolean startAfterCreation)
       throws Exception {
-    if (poolSize > 0 && hasDefaultValues(owner, memoryGB, template, startAfterCreation)) {
+    if (poolSize > 0 && hasDefaultValues(owner, memoryGB, templateFileName, startAfterCreation)) {
       return doGetWorkspaceFromPool();
     }
 
@@ -99,7 +100,7 @@ public class CheTestWorkspaceProvider implements TestWorkspaceProvider {
         owner,
         memoryGB,
         startAfterCreation,
-        workspaceDtoDeserializer.deserializeWorkspaceTemplate(template));
+        workspaceDtoDeserializer.deserializeWorkspaceTemplate(templateFileName));
   }
 
   public TestWorkspace createWorkspace(
@@ -209,9 +210,9 @@ public class CheTestWorkspaceProvider implements TestWorkspaceProvider {
   }
 
   private boolean hasDefaultValues(
-      TestUser testUser, int memoryGB, WorkspaceTemplate template, boolean startAfterCreation) {
+      TestUser testUser, int memoryGB, String templateFileName, boolean startAfterCreation) {
     return memoryGB == defaultMemoryGb
-        && WorkspaceTemplate.DEFAULT == template
+        && WorkspaceTemplate.DEFAULT.equals(templateFileName)
         && testUser.getEmail().equals(defaultUser.getEmail())
         && startAfterCreation;
   }

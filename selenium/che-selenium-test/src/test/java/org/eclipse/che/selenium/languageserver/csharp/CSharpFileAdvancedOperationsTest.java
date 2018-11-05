@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver.csharp;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_DEFINITION;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
@@ -41,6 +42,7 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+@Test(groups = UNDER_REPAIR)
 public class CSharpFileAdvancedOperationsTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CSharpClassRenamingTest.class.getSimpleName(), 4);
@@ -83,7 +85,7 @@ public class CSharpFileAdvancedOperationsTest {
     projectExplorer.waitItem(PROJECT_NAME + "/bin");
   }
 
-  @Test(alwaysRun = true)
+  @Test
   public void checkHoveringFeature() {
     String expectedTextInHoverPopUp =
         "System.Console\nRepresents the standard input, output, and error streams for console applications. This class cannot be inherited.";
@@ -109,7 +111,7 @@ public class CSharpFileAdvancedOperationsTest {
     editor.typeTextIntoEditor(Keys.END.toString());
   }
 
-  @Test(priority = 3, alwaysRun = true)
+  @Test(priority = 3, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkGoToSymbolFeature() {
     menu.runCommand(ASSISTANT, GO_TO_SYMBOL);
     try {

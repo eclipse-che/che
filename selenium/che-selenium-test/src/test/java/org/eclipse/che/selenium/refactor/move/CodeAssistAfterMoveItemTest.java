@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.refactor.move;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
@@ -36,6 +37,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
+@Test(groups = UNDER_REPAIR)
 public class CodeAssistAfterMoveItemTest {
 
   private static final String APPLY_WORKSPACE_CHANGES = "Apply Workspace Changes\nDone";

@@ -39,6 +39,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides a unique PVC for each workspace.
@@ -63,6 +65,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesP
  */
 public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
 
+  private static final Logger LOG = LoggerFactory.getLogger(UniqueWorkspacePVCStrategy.class);
   public static final String UNIQUE_STRATEGY = "unique";
 
   private final String pvcNamePrefix;
@@ -93,6 +96,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
+    LOG.debug("Provisioning PVC strategy for workspace '{}'", workspaceId);
     final Map<String, PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims();
     // fetches all existing PVCs related to given workspace and groups them by volume name
     final Map<String, PersistentVolumeClaim> volumeName2PVC =
@@ -109,6 +113,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
         addMachineVolumes(workspaceId, claims, volumeName2PVC, pod, container, volumes);
       }
     }
+    LOG.debug("PVC strategy provisioning done for workspace '{}'", workspaceId);
   }
 
   @Override
@@ -118,11 +123,13 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       return;
     }
     if (!k8sEnv.getPersistentVolumeClaims().isEmpty()) {
+      LOG.debug("Preparing PVC started for workspace '{}'", workspaceId);
       final KubernetesPersistentVolumeClaims k8sClaims =
           factory.create(workspaceId).persistentVolumeClaims();
       for (PersistentVolumeClaim pvc : k8sEnv.getPersistentVolumeClaims().values()) {
         k8sClaims.create(pvc);
       }
+      LOG.debug("Preparing PVC done for workspace '{}'", workspaceId);
     }
   }
 

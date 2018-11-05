@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard.workspaces;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_JDK8;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
@@ -205,7 +206,7 @@ public class WorkspacesListTest {
     workspaces.waitDeleteWorkspaceBtnDisappearance();
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void checkSorting() {
     workspaces.waitPageLoading();
     workspaces.clickOnRamButton();
@@ -275,7 +276,7 @@ public class WorkspacesListTest {
     checkExpectedJavaWorkspaceDisplaying();
   }
 
-  @Test()
+  @Test
   public void checkWorkspaceActions() throws Exception {
     workspaces.waitPageLoading();
     String mainWindow = seleniumWebDriver.getWindowHandle();

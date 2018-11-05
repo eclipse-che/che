@@ -20,6 +20,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResu
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.BrokerStatusListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Subscribes to Che plugin broker events, passes future that should be completed upon broker result
@@ -31,6 +33,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events.Brok
  */
 @Beta
 public class ListenBrokerEvents extends BrokerPhase {
+
+  private static final Logger LOG = LoggerFactory.getLogger(ListenBrokerEvents.class);
 
   private final String workspaceId;
   private final BrokersResult brokersResult;
@@ -52,6 +56,7 @@ public class ListenBrokerEvents extends BrokerPhase {
     BrokerStatusListener brokerStatusListener =
         new BrokerStatusListener(workspaceId, pluginsValidator, brokersResult);
     try {
+      LOG.debug("Subscribing broker events listener for workspace '{}'", workspaceId);
       eventService.subscribe(brokerStatusListener, BrokerEvent.class);
 
       return nextPhase.execute();

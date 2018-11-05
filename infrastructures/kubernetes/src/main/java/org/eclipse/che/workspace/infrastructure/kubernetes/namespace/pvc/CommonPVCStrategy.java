@@ -39,6 +39,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provides common PVC for each workspace in one Kubernetes namespace.
@@ -59,6 +61,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesP
  */
 public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
+  private static final Logger LOG = LoggerFactory.getLogger(CommonPVCStrategy.class);
   public static final String COMMON_STRATEGY = "common";
 
   /**
@@ -103,6 +106,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
+    LOG.debug("Provisioning PVC strategy for workspace '{}'", workspaceId);
     final Set<String> subPaths = new HashSet<>();
     final PersistentVolumeClaim pvc = newPVC(pvcName, pvcAccessMode, pvcQuantity);
     k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
@@ -119,6 +123,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
           format(SUBPATHS_PROPERTY_FMT, workspaceId),
           subPaths.toArray(new String[subPaths.size()]));
     }
+    LOG.debug("PVC strategy provisioning done for workspace '{}'", workspaceId);
   }
 
   @Override
@@ -129,6 +134,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     }
     final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
     if (!claims.isEmpty()) {
+      LOG.debug("Preparing PVC started for workspace '{}'", workspaceId);
       final KubernetesNamespace namespace = factory.create(workspaceId);
       final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
       final Set<String> existing =
@@ -144,6 +150,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
           pvcSubPathHelper.createDirs(workspaceId, subpaths);
         }
       }
+      LOG.debug("Preparing PVC done for workspace '{}'", workspaceId);
     }
   }
 

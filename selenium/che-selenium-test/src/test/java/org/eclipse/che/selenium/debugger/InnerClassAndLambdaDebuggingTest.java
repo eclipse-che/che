@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.debugger;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.BTN_DISCONNECT;
 import static org.eclipse.che.selenium.pageobject.debug.DebugPanel.DebuggerActionButtons.RESUME_BTN_ID;
 import static org.testng.Assert.fail;
@@ -41,6 +42,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Dmytro Nochevnov */
+@Test(groups = UNDER_REPAIR)
 public class InnerClassAndLambdaDebuggingTest {
   private static final String PROJECT = "java-inner-lambda";
   private static final String PATH_TO_CLASS = PROJECT + "/src/main/java/test/App.java";

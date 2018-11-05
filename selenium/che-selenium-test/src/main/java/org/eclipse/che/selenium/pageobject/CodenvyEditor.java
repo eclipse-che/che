@@ -692,7 +692,7 @@ public class CodenvyEditor {
   }
 
   /**
-   * Sets cursor to specified {@code positionLine}.
+   * Sets cursor to specified {@code positionLine} and checks the result
    *
    * @param positionLine line's number where cursor should be placed
    */
