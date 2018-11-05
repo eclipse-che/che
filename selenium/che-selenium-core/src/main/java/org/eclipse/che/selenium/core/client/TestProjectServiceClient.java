@@ -163,7 +163,7 @@ public class TestProjectServiceClient {
             format(
                     Resources.toString(getResource("projects/jdt-ls-project-files/project"), UTF_8),
                     projectName)
-                .getBytes());
+                .getBytes(UTF_8));
         write(dotClasspath, toByteArray(getResource("projects/jdt-ls-project-files/classpath")));
         ZipUtils.add(out, dotClasspath);
         ZipUtils.add(out, dotProject);

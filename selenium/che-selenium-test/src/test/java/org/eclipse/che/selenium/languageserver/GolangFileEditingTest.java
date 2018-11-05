@@ -30,7 +30,6 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -81,7 +80,7 @@ public class GolangFileEditingTest {
   };
 
   /** It is Map[node-name, Pair[tab-name, line-number]] */
-  private static final Map<String, Pair<String, Integer>> PROJECT_SYMBOL_EXPECTED_TEXT =
+  private static final ImmutableMap<String, Pair<String, Integer>> PROJECT_SYMBOL_EXPECTED_TEXT =
       ImmutableMap.of(
           "print/desktop-go-simple/format.go", Pair.of("format.go", 23),
           "Print/desktop-go-simple/print.go", Pair.of("print.go", 24));
