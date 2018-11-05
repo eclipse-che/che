@@ -32,5 +32,5 @@ public final class WorkspaceTemplate {
   public static final String UBUNTU_LSP = "ubuntu_with_c_sharp_lsp.json";
   public static final String APACHE_CAMEL = "spring_boot_with_apache_camel_ls.json";
 
-  public WorkspaceTemplate() {}
+  private WorkspaceTemplate() {}
 }
