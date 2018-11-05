@@ -30,7 +30,7 @@ export class KeycloakLoader {
         return new Promise((resolve, reject) => {
             if (window.parent && window.parent['_keycloak']) {
                 window['_keycloak'] = window.parent['_keycloak'];
-                resolve(window.parent['_keycloak']);
+                resolve(window['_keycloak']);
                 return;
             }
             try {
