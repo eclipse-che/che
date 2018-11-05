@@ -17,6 +17,11 @@ class KeycloakLoader {
         const msg = "Cannot load keycloak settings. This is normal for single-user mode.";
 
         return new Promise((resolve, reject) => {
+            if (window.parent && window.parent['_keycloak']) {
+                window['_keycloak'] = window.parent['_keycloak'];
+                resolve(window['_keycloak']);
+                return;
+            }
             try {
                 const request = new XMLHttpRequest();
 
