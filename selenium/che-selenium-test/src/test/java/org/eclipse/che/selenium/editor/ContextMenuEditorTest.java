@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.editor;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.CLOSE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FIND;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FIND_DEFINITION;
@@ -212,7 +213,7 @@ public class ContextMenuEditorTest {
     editor.waitTabIsNotPresent("AppController");
   }
 
-  @Test(priority = 3, alwaysRun = true)
+  @Test(priority = 3, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkQuickDocumentation() {
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(
@@ -227,7 +228,7 @@ public class ContextMenuEditorTest {
       editor.waitJavaDocPopUpOpened();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11735", ex);
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11735", ex);
     }
 
     editor.checkTextToBePresentInJavaDocPopUp(QUICK_DOC_TEXT);
