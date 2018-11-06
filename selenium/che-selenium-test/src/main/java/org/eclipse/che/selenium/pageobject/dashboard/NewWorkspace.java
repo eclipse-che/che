@@ -156,6 +156,7 @@ public class NewWorkspace {
     JAVA_CENTOS("java-centos"),
     JAVA_THEIA_DOCKER("simple-theia-docker"),
     JAVA_THEIA_ON_KUBERNETES("java-theia-kubernetes"),
+    JAVA_MYSQL_THEIA_ON_KUBERNETES("java-mysql-theia-kubernetes"),
     JAVA_THEIA_OPENSHIFT("java-theia-openshift"),
     JAVA_MYSQL_CENTOS("java-centos-mysql"),
     JAVA_DEBIAN("java-debian"),
