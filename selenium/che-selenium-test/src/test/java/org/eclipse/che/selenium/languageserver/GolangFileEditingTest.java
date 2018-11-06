@@ -336,7 +336,7 @@ public class GolangFileEditingTest {
     editor.waitCursorPosition(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).second(), 1);
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkHoverFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
@@ -347,7 +347,7 @@ public class GolangFileEditingTest {
       editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10674", ex);
     }
   }
 
