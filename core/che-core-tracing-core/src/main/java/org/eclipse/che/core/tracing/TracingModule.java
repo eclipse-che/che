@@ -9,23 +9,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.deploy;
+package org.eclipse.che.core.tracing;
 
+import com.google.inject.AbstractModule;
 import io.opentracing.Tracer;
-import io.opentracing.contrib.tracerresolver.TracerResolver;
-import javax.inject.Provider;
-import javax.inject.Singleton;
 
-@Singleton
-public class TracerProvider implements Provider<Tracer> {
-  private final Tracer tracer;
-
-  public TracerProvider() {
-    this.tracer = TracerResolver.resolveTracer();
-  }
-
+public class TracingModule extends AbstractModule {
   @Override
-  public Tracer get() {
-    return tracer;
+  protected void configure() {
+    // tracing
+    bind(Tracer.class).toProvider(TracerProvider.class);
   }
 }

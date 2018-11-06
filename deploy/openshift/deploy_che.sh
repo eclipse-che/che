@@ -161,6 +161,9 @@ export PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${
 DEFAULT_PLUGIN__REGISTRY__URL="https://che-plugin-registry.openshift.io"
 export PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL:-${DEFAULT_PLUGIN__REGISTRY__URL}}
 
+DEFAULT_CHE_TRACING_ENABLED="false"
+export CHE_TRACING_ENABLED=${CHE_TRACING_ENABLED:-${DEFAULT_CHE_TRACING_ENABLED}}
+
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
     WS_PROTOCOL="wss"
@@ -376,11 +379,12 @@ fi
 }
 
 deployJaeger(){
+if [ "${CHE_TRACING_ENABLED}" == "true" ]; then
   echo "Deploying Jaeger..."
   ${OC_BINARY} new-app -f ${BASE_DIR}/templates/jaeger-all-in-one-template.yml
   JAEGER_ROUTE=$($OC_BINARY get route/jaeger-query --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
   echo "Jaeger deployment complete. $JAEGER_ROUTE"
-
+fi
 }
 
 

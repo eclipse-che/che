@@ -21,7 +21,6 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import io.opentracing.Tracer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -120,9 +119,6 @@ public class WsMasterModule extends AbstractModule {
     install(new org.eclipse.che.api.ssh.server.jpa.SshJpaModule());
     install(new org.eclipse.che.api.core.jsonrpc.impl.JsonRpcModule());
     install(new org.eclipse.che.api.core.websocket.impl.WebSocketModule());
-
-    // tracing
-    bind(Tracer.class).toProvider(TracerProvider.class);
 
     // db configuration
     bind(SchemaInitializer.class)
@@ -275,8 +271,11 @@ public class WsMasterModule extends AbstractModule {
     }
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
-
     MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
+
+    if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
+      install(new org.eclipse.che.core.tracing.TracingModule());
+    }
   }
 
   private void configureSingleUserMode(Map<String, String> persistenceProperties) {

@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.deploy;
+package org.eclipse.che.core.tracing.web;
 
 import io.opentracing.Tracer;
 import io.opentracing.contrib.web.servlet.filter.TracingFilter;
@@ -17,6 +17,10 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+/**
+ * Guice @{@link javax.inject.Provider} of @{@link
+ * io.opentracing.contrib.web.servlet.filter.TracingFilter} objects
+ */
 @Singleton
 public class TracingFilterProvider implements Provider<TracingFilter> {
 
