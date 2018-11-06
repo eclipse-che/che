@@ -181,16 +181,6 @@ public class GolangFileEditingTest {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
 
-    // check the 'Hover' popup
-    editor.moveCursorToText("COLOR_YELLOW");
-
-    try {
-      editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
-    }
-
     // check Find Definition feature from Assistant menu
     editor.goToPosition(24, 8);
     menu.runCommand(ASSISTANT, FIND_DEFINITION);
@@ -344,6 +334,21 @@ public class GolangFileEditingTest {
     assistantFindPanel.waitFormIsClosed();
     editor.waitTabVisibilityAndCheckFocus(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).first());
     editor.waitCursorPosition(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).second(), 1);
+  }
+
+  @Test(priority = 1)
+  public void checkHoverFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.waitTabIsPresent("towers.go");
+
+    editor.moveCursorToText("COLOR_YELLOW");
+
+    try {
+      editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   private void openFindPanelAndPrintInputTetx(String inputText) {
