@@ -10,8 +10,6 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 #
-set -u
-
 if [ -n "${POSTGRESQL_LOG_DEBUG+set}" ]; then
   if [ "${POSTGRESQL_LOG_DEBUG}" == "true" ]; then
     echo "POSTGRESQL_LOG_DEBUG is set, enabling additional logging configuration"
