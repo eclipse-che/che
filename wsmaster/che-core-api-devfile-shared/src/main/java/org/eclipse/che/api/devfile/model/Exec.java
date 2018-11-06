@@ -30,7 +30,7 @@ public class Exec {
   @JsonProperty("workdir")
   private String workdir;
 
-  @JsonIgnore private Map<String, Object> additionalProperties = new HashMap<>();
+  @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
 
   @JsonProperty("command")
   public String getCommand() {
@@ -53,12 +53,12 @@ public class Exec {
   }
 
   @JsonAnyGetter
-  public Map<String, Object> getAdditionalProperties() {
+  public Map<String, String> getAdditionalProperties() {
     return this.additionalProperties;
   }
 
   @JsonAnySetter
-  public void setAdditionalProperty(String name, Object value) {
+  public void setAdditionalProperty(String name, String value) {
     this.additionalProperties.put(name, value);
   }
 }
