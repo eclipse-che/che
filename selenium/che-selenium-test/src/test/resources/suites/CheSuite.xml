@@ -273,6 +273,6 @@
 
     <suite-files>
         <!-- that is the path where sub-suite file being looked at -->
-        <suite-file path="src/test/resources/suites/CheOneThreadTestsSuite.xml"/>
+        <suite-file path="target/test-classes/suites/CheOneThreadTestsSuite.xml"/>
     </suite-files>
 </suite>
