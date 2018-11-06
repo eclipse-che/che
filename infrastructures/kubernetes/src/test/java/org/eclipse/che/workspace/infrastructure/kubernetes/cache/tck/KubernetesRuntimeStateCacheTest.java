@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -32,7 +33,6 @@ import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
-import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -140,7 +140,7 @@ public class KubernetesRuntimeStateCacheTest {
   public void shouldThrowExceptionWhenThereIsNotRuntimeStateWhileStatusRetrieving()
       throws Exception {
     // when
-    runtimesStatesCache.getStatus(new RuntimeId("non-existent-ws", "defEnv", "acc1"));
+    runtimesStatesCache.getStatus(new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"));
   }
 
   @Test(dependsOnMethods = "shouldReturnRuntimeStatus")
@@ -203,7 +203,7 @@ public class KubernetesRuntimeStateCacheTest {
       throws Exception {
     // when
     runtimesStatesCache.updateStatus(
-        new RuntimeId("non-existent-ws", "defEnv", "acc1"), WorkspaceStatus.STOPPED);
+        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"), WorkspaceStatus.STOPPED);
   }
 
   @Test(
@@ -214,7 +214,7 @@ public class KubernetesRuntimeStateCacheTest {
       throws Exception {
     // when
     runtimesStatesCache.updateStatus(
-        new RuntimeId("non-existent-ws", "defEnv", "acc1"),
+        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"),
         s -> s.equals(WorkspaceStatus.STOPPING),
         WorkspaceStatus.STOPPED);
   }
@@ -255,7 +255,7 @@ public class KubernetesRuntimeStateCacheTest {
   public void shouldRemoveRuntimeState() throws Exception {
     // given
     KubernetesRuntimeState runtimeState = createRuntimeState(workspaces[0]);
-    RuntimeId toRemove = runtimeState.getRuntimeId();
+    RuntimeIdentity toRemove = runtimeState.getRuntimeId();
 
     // when
     runtimesStatesCache.remove(toRemove);
@@ -268,7 +268,7 @@ public class KubernetesRuntimeStateCacheTest {
   public void shouldDoNothingIfStateIsAlreadyRemove() throws Exception {
     // given
     KubernetesRuntimeState runtimeState = createRuntimeState(workspaces[2]);
-    RuntimeId toRemove = runtimeState.getRuntimeId();
+    RuntimeIdentity toRemove = runtimeState.getRuntimeId();
 
     // when
     runtimesStatesCache.remove(toRemove);

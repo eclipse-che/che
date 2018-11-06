@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.bootstrap;
 
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -55,7 +56,7 @@ public abstract class AbstractBootstrapper {
             // check bootstrapper belongs to current runtime and machine
             RuntimeIdentityDto runtimeId = event.getRuntimeId();
             if (event.getMachineName().equals(machineName)
-                && runtimeIdentity.getEnvName().equals(runtimeId.getEnvName())
+                && Objects.equals(runtimeIdentity.getEnvName(), runtimeId.getEnvName())
                 && runtimeIdentity.getWorkspaceId().equals(runtimeId.getWorkspaceId())) {
 
               finishEventFuture.complete(event);

@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.NoEnvironmentFactory.NoEnvInternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -70,10 +71,11 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
 
   private KubernetesEnvironment asKubernetesEnv(InternalEnvironment source)
       throws InfrastructureException {
-    if (source instanceof KubernetesEnvironment) {
+    if (source instanceof NoEnvInternalEnvironment) {
+      return KubernetesEnvironment.builder().build();
+    } else if (source instanceof KubernetesEnvironment) {
       return (KubernetesEnvironment) source;
-    }
-    if (source instanceof DockerImageEnvironment) {
+    } else if (source instanceof DockerImageEnvironment) {
       return dockerImageEnvConverter.convert((DockerImageEnvironment) source);
     }
 

@@ -89,7 +89,7 @@ public class DockerBootstrapper extends AbstractBootstrapper {
             + String.format(
                 "%s:%s:%s",
                 runtimeIdentity.getWorkspaceId(),
-                runtimeIdentity.getEnvName(),
+                runtimeIdentity.getEnvName(),// TODO what to do here?
                 runtimeIdentity.getOwnerId())
             + " -push-endpoint "
             + installerWebsocketEndpoint

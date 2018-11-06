@@ -111,6 +111,7 @@ import org.testng.annotations.Test;
  *
  * @author Yevhenii Voevodin
  */
+// todo check that it works with no envs
 public class CascadeRemovalTest {
 
   private Injector injector;
@@ -185,7 +186,6 @@ public class CascadeRemovalTest {
                             SshPairImpl.class,
                             VolumeImpl.class,
                             KubernetesRuntimeState.class,
-                            KubernetesRuntimeState.RuntimeId.class,
                             KubernetesMachineImpl.class,
                             KubernetesMachineImpl.MachineId.class,
                             KubernetesServerImpl.class,
@@ -233,7 +233,8 @@ public class CascadeRemovalTest {
                             mock(DBInitializer.class),
                             mock(ProbeScheduler.class),
                             new DefaultWorkspaceStatusCache(),
-                            new DefaultWorkspaceLockService()));
+                            new DefaultWorkspaceLockService(),
+                            null));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);

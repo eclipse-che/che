@@ -75,7 +75,7 @@ public class CheckSimpleGwtAppTest {
 
     WorkspaceConfigDto workspace =
         workspaceDtoDeserializer.deserializeWorkspaceTemplate(UBUNTU_JDK8);
-
+// todo check that it works with no envs
     workspace
         .getEnvironments()
         .get("replaced_name")

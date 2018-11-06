@@ -15,8 +15,8 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace;
 
-import com.google.common.base.Strings;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -31,7 +31,6 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.Recipe;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
-import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
  * Validator for {@link Workspace}.
@@ -69,23 +68,12 @@ public class WorkspaceValidator {
             + "latin letters, underscores, dots, dashes and must start and end only with digits, "
             + "latin letters or underscores");
 
-    // environments
-    check(!isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
-    checkNotNull(config.getEnvironments(), "Workspace must contain at least one environment");
-    check(
-        config.getEnvironments().containsKey(config.getDefaultEnv()),
-        "Workspace default environment configuration required");
-
-    for (Environment environment : config.getEnvironments().values()) {
-      checkNotNull(environment, "Environment must not be null");
-      Recipe recipe = environment.getRecipe();
-      checkNotNull(recipe, "Environment recipe must not be null");
-      checkNotNull(recipe.getType(), "Environment recipe type must not be null");
-
-      for (Entry<String, ? extends MachineConfig> machineEntry :
-          environment.getMachines().entrySet()) {
-        validateMachine(machineEntry.getKey(), machineEntry.getValue());
-      }
+    // if environments/default environment name are empty and it is sidecar-based workspace
+    // then do not check env since it is a workspace with tooling only
+    if ((config.getEnvironments() != null && !config.getEnvironments().isEmpty())
+        || !isNullOrEmpty(config.getDefaultEnv()) || !isSidecarBasedWorkspace(
+        config.getAttributes())) {
+      validateEnvironments(config);
     }
 
     // commands
@@ -124,6 +112,26 @@ public class WorkspaceValidator {
               && !attributeName.toLowerCase().startsWith("codenvy"),
           "Attribute name '%s' is not valid",
           attributeName);
+    }
+  }
+
+  private void validateEnvironments(WorkspaceConfig config) throws ValidationException {
+    check(!isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
+    checkNotNull(config.getEnvironments(), "Workspace must contain at least one environment");
+    check(
+        config.getEnvironments().containsKey(config.getDefaultEnv()),
+        "Workspace default environment configuration required");
+
+    for (Environment environment : config.getEnvironments().values()) {
+      checkNotNull(environment, "Environment must not be null");
+      Recipe recipe = environment.getRecipe();
+      checkNotNull(recipe, "Environment recipe must not be null");
+      checkNotNull(recipe.getType(), "Environment recipe type must not be null");
+
+      for (Entry<String, ? extends MachineConfig> machineEntry :
+          environment.getMachines().entrySet()) {
+        validateMachine(machineEntry.getKey(), machineEntry.getValue());
+      }
     }
   }
 
@@ -189,13 +197,7 @@ public class WorkspaceValidator {
             .flatMap(machine -> machine.getInstallers().stream())
             .findAny();
     Map<String, String> attributes = config.getAttributes();
-    boolean hasPlugins =
-        !Strings.isNullOrEmpty(
-            attributes.getOrDefault(Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, null));
-    boolean hasEditor =
-        !Strings.isNullOrEmpty(
-            attributes.getOrDefault(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, null));
-    if ((hasPlugins || hasEditor) && installers.isPresent()) {
+    if (isSidecarBasedWorkspace(attributes) && installers.isPresent()) {
       throw new ValidationException("Workspace config cannot have both plugins and installers.");
     }
   }

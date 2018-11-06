@@ -139,6 +139,7 @@ import org.testng.annotations.Test;
  *
  * @author Yevhenii Voevodin
  */
+//todo check that it can work with an empty environments field
 public class JpaEntitiesCascadeRemovalTest {
 
   private Injector injector;

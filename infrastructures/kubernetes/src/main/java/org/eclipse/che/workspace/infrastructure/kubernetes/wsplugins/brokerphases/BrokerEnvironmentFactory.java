@@ -16,6 +16,7 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
 
 import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.gson.Gson;
@@ -163,10 +164,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                 CONF_FOLDER + "/" + CONFIG_FILE,
                 "-push-endpoint",
                 cheWebsocketEndpoint,
-                "-runtime-id",
+                "-runtime-id",// TODO
                 String.format(
                     "%s:%s:%s",
-                    runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()))
+                    runtimeId.getWorkspaceId(), MoreObjects.firstNonNull(runtimeId.getEnvName(), ""), runtimeId.getOwnerId()))
             .withImagePullPolicy(brokerPullPolicy)
             .withVolumeMounts(
                 new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null))

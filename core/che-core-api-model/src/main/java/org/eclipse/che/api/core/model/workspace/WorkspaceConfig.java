@@ -37,6 +37,7 @@ public interface WorkspaceConfig {
    * Returns default environment name. It is mandatory, implementation should guarantee that
    * environment with returned name exists for current workspace config.
    */
+  @Nullable
   String getDefaultEnv();
 
   /**

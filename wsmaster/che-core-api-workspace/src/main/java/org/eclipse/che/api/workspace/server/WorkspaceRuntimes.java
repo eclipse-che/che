@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -71,6 +72,7 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
@@ -102,6 +104,7 @@ public class WorkspaceRuntimes {
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
   private final RuntimeInfrastructure infrastructure;
   private final ProbeScheduler probeScheduler;
+  private final NoEnvironmentFactory noEnvironmentFactory;
   // Unique identifier for this workspace runtimes
   private final String workspaceRuntimesId;
 
@@ -116,7 +119,8 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService) {
+      WorkspaceLockService lockService,
+      NoEnvironmentFactory noEnvironmentFactory) {
     this(
         eventService,
         envFactories,
@@ -126,7 +130,8 @@ public class WorkspaceRuntimes {
         ignored,
         probeScheduler,
         statuses,
-        lockService);
+        lockService,
+        noEnvironmentFactory);
     this.runtimes = runtimes;
   }
 
@@ -140,8 +145,10 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService) {
+      WorkspaceLockService lockService,
+      NoEnvironmentFactory noEnvironmentFactory) {
     this.probeScheduler = probeScheduler;
+    this.noEnvironmentFactory = noEnvironmentFactory;
     this.runtimes = new ConcurrentHashMap<>();
     this.statuses = statuses;
     this.eventService = eventService;
@@ -281,16 +288,19 @@ public class WorkspaceRuntimes {
    * @see WorkspaceStatus#RUNNING
    */
   public CompletableFuture<Void> startAsync(
-      Workspace workspace, String envName, Map<String, String> options)
+      Workspace workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
 
-    final EnvironmentImpl environment = copyEnv(workspace, envName);
     final String workspaceId = workspace.getId();
-
-    requireNonNull(environment, "Environment should not be null " + workspaceId);
-    requireNonNull(environment.getRecipe(), "Recipe should not be null " + workspaceId);
-    requireNonNull(
-        environment.getRecipe().getType(), "Recipe type should not be null " + workspaceId);
+    // Sidecar-based workspaces allowed not to have environments
+    EnvironmentImpl environment = null;
+    if (envName != null) {
+      environment = copyEnv(workspace, envName);
+      requireNonNull(environment, "Environment should not be null " + workspaceId);
+      requireNonNull(environment.getRecipe(), "Recipe should not be null " + workspaceId);
+      requireNonNull(
+          environment.getRecipe().getType(), "Recipe type should not be null " + workspaceId);
+    }
 
     if (isStartRefused.get()) {
       throw new ConflictException(
@@ -620,12 +630,15 @@ public class WorkspaceRuntimes {
               identity.getWorkspaceId(), identity.getEnvName()));
     }
 
-    Environment environment = workspace.getConfig().getEnvironments().get(identity.getEnvName());
-    if (environment == null) {
-      throw new ServerException(
-          format(
-              "Environment configuration is missing for the runtime '%s:%s'. Runtime won't be recovered",
-              identity.getWorkspaceId(), identity.getEnvName()));
+    Environment environment = null;
+    if (identity.getEnvName() != null) {
+      environment = workspace.getConfig().getEnvironments().get(identity.getEnvName());
+      if (environment == null) {
+        throw new ServerException(
+            format(
+                "Environment configuration is missing for the runtime '%s:%s'. Runtime won't be recovered",
+                identity.getWorkspaceId(), identity.getEnvName()));
+      }
     }
 
     InternalRuntime runtime;
@@ -782,17 +795,22 @@ public class WorkspaceRuntimes {
   }
 
   public Set<String> getSupportedRecipes() {
-    return environmentFactories.keySet();
+    return Sets.union(environmentFactories.keySet(), Collections.singleton("no-environment"));
   }
 
   private InternalEnvironment createInternalEnvironment(
-      Environment environment, Map<String, String> workspaceConfigAttributes)
+      @Nullable Environment environment, Map<String, String> workspaceConfigAttributes)
       throws InfrastructureException, ValidationException, NotFoundException {
-    String recipeType = environment.getRecipe().getType();
-    InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
-    if (factory == null) {
-      throw new NotFoundException(
-          format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
+    InternalEnvironmentFactory factory;
+    if (environment == null) {
+      factory = noEnvironmentFactory;
+    } else {
+      String recipeType = environment.getRecipe().getType();
+      factory = environmentFactories.get(recipeType);
+      if (factory == null) {
+        throw new NotFoundException(
+            format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
+      }
     }
     InternalEnvironment internalEnvironment = factory.create(environment);
     internalEnvironment.setAttributes(workspaceConfigAttributes);

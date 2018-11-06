@@ -351,24 +351,29 @@ public class WorkspaceManager {
   }
 
   /** Asynchronously starts given workspace. */
-  private void startAsync(WorkspaceImpl workspace, String envName, Map<String, String> options)
+  private void startAsync(WorkspaceImpl workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
-    if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
-      throw new NotFoundException(
-          format(
-              "Workspace '%s:%s' doesn't contain environment '%s'",
-              workspace.getNamespace(), workspace.getConfig().getName(), envName));
+    // Sidecar-based workspaces allowed not to have any environments
+    String env = null;
+    if (!SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(workspace.getConfig().getAttributes()) ||
+        envName != null || !workspace.getConfig().getEnvironments().isEmpty()) {
+
+      if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
+        throw new NotFoundException(
+            format(
+                "Workspace '%s:%s' doesn't contain environment '%s'",
+                workspace.getNamespace(), workspace.getConfig().getName(), envName));
+      }
+      env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
+
+      // validate environment in advance
+      try {
+        runtimes.validate(workspace.getConfig().getEnvironments().get(env));
+      } catch (InfrastructureException | ValidationException e) {
+        throw new ServerException(e);
+      }
     }
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-    final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
-
-    // validate environment in advance
-    try {
-      runtimes.validate(workspace.getConfig().getEnvironments().get(env));
-    } catch (InfrastructureException | ValidationException e) {
-      throw new ServerException(e);
-    }
-
     workspaceDao.update(workspace);
     runtimes
         .startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
