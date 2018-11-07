@@ -35,4 +35,16 @@ public interface LocalizationConstant extends Messages {
 
   @Key("support.title")
   String supportTitle();
+
+  @Key("support.public.chat")
+  String publicChat();
+
+  @Key("support.public.chat.url")
+  String publicChatUrl();
+
+  @Key("support.report.issue")
+  String issueTracker();
+
+  @Key("support.report.issue.url")
+  String issueTrackerUrl();
 }

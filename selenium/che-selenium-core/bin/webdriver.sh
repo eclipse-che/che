@@ -115,7 +115,7 @@ checkParameters() {
 
         elif [[ "$var" =~ --test=.* ]]; then
             local fileName=$(basename $(echo "$var" | sed -e "s/--test=//g"))
-            find ${CUR_DIR} | grep "${fileName}.[class|java]" > /dev/null
+            find "target/test-classes" | grep "${fileName}.[class|java]" > /dev/null
             [[ $? != 0 ]] && {
                 echo "[TEST] Test "${fileName}" not found";
                 echo "[TEST] Proper way to use --test parameter:";
@@ -127,7 +127,7 @@ checkParameters() {
 
         elif [[ "$var" =~ --suite=.* ]]; then
             local suite=$(basename $(echo "$var" | sed -e "s/--suite=//g"))
-            find ${CUR_DIR}/src/test/resources/suites | grep ${suite} > /dev/null
+            find "target/test-classes/suites" | grep ${suite} > /dev/null
             [[ $? != 0 ]] && {
                 echo "[TEST] Suite "${suite}" not found";
                 echo "[TEST] Proper way to use --suite parameter:";
@@ -238,7 +238,7 @@ defineTestsScope() {
             THREADS=1
 
         elif [[ "$var" =~ --suite=.* ]]; then
-            TESTS_SCOPE="-DrunSuite=src/test/resources/suites/"$(echo "$var" | sed -e "s/--suite=//g")
+            TESTS_SCOPE="-DrunSuite=target/test-classes/suites/"$(echo "$var" | sed -e "s/--suite=//g")
 
         elif [[ "$var" == --failed-tests ]]; then
             generateTestNgFailedReport $(fetchFailedTests)
@@ -405,8 +405,8 @@ Modes (defines environment to run tests):
 Define tests scope:
     --test=<TEST_CLASS>                 Single test/package to run.
                                         For example: '--test=DialogAboutTest', '--test=org.eclipse.che.selenium.git.**'.
-    --suite=<SUITE>                     Test suite to run, found:
-"$(for x in $(ls -1 src/test/resources/suites); do echo "                                            * "$x; done)"
+    --suite=<SUITE>                     Test suite to run, found ('CheSuite.xml' is default one):
+"$(for x in $(ls -1 target/test-classes/suites); do echo "                                            * "$x; done)"
     --exclude=<TEST_GROUPS_TO_EXCLUDE>  Comma-separated list of test groups to exclude from execution.
                                         For example, use '--exclude=github' to exclude GitHub-related tests.
 

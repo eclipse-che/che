@@ -32,7 +32,6 @@
           <class name="org.eclipse.che.selenium.languageserver.TypeScriptEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ClangFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest"/>
-          <class name="org.eclipse.che.selenium.languageserver.JsonFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.YamlFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.GolangFileEditingTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
@@ -268,11 +267,12 @@
 
           <!-- Next tests can unexpectedly affect on other tests and so should be executed at the end -->
           <class name="org.eclipse.che.selenium.dashboard.StacksListTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.JsonFileEditingTest"/>
         </classes>
     </test>
 
     <suite-files>
         <!-- that is the path where sub-suite file being looked at -->
-        <suite-file path="src/test/resources/suites/CheOneThreadTestsSuite.xml"/>
+        <suite-file path="target/test-classes/suites/CheOneThreadTestsSuite.xml"/>
     </suite-files>
 </suite>

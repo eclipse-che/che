@@ -26,6 +26,7 @@ import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.ui.loaders.request.LoaderFactory;
 import org.eclipse.che.ide.ui.loaders.request.MessageLoader;
@@ -118,5 +119,16 @@ public class LanguageServerRegistry {
   public LanguageRegex getLanguageFilter(VirtualFile file) {
     FileType fileType = fileTypeRegistry.getFileTypeByFileName(file.getName());
     return registeredFileTypes.get(fileType);
+  }
+
+  /**
+   * Provide ability to check if language is registered for given resource
+   *
+   * @param resource resource to check
+   * @return {@code true} if given resource is file and language is registered for given resource,
+   *     {@code false} otherwise
+   */
+  public boolean isLsRegistered(Resource resource) {
+    return resource.isFile() && getLanguageFilter(resource.asFile()) != null;
   }
 }
