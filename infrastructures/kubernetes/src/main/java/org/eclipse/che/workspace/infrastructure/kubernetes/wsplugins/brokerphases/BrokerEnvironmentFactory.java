@@ -168,7 +168,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                     "%s:%s:%s",
                     runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()))
             .withImagePullPolicy(brokerPullPolicy)
-            .withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", brokerVolumeName, true, null))
+            .withVolumeMounts(
+                new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null))
             .withEnv(envVars)
             .withNewResources()
             .endResources()
