@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.StreamSupport;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
@@ -884,8 +883,22 @@ public final class ResourceManager {
 
                       Resource[] resources = children.get();
 
-                      if (resources.length == loadedChildren.getChildren().size()
-                          && hasSameVcsStatus(resources, loadedChildren.getChildren())) {
+                      if (resources.length == loadedChildren.getChildren().size()) {
+
+                        Map<String, VcsStatus> vcsStatusMap =
+                            getVcsStatusesForFiles(loadedChildren.getChildren());
+
+                        for (Resource resource : resources) {
+                          if (resource.isFile()) {
+                            VcsStatus oldVcsStatus = resource.asFile().getVcsStatus();
+                            VcsStatus newVcsStatus = vcsStatusMap.remove(resource.getName());
+
+                            if (oldVcsStatus != newVcsStatus) {
+                              resource.asFile().setVcsStatus(newVcsStatus);
+                            }
+                          }
+                        }
+
                         return promises.resolve(resources);
                       } else {
                         // situation, when we have outdated cached children
@@ -912,43 +925,16 @@ public final class ResourceManager {
                     }));
   }
 
-  private boolean hasSameVcsStatus(Resource[] existed, List<TreeElement> loaded) {
-    return mapFrom(existed).equals(mapFrom(loaded));
-  }
-
-  private Map<String, VcsStatus> mapFrom(Resource[] resources) {
-    return mapFrom(java.util.Arrays.asList(resources));
-  }
-
-  private Map<String, VcsStatus> mapFrom(Iterable<?> items) {
-    return StreamSupport.stream(items.spliterator(), false)
+  private Map<String, VcsStatus> getVcsStatusesForFiles(List<TreeElement> elements) {
+    return elements
+        .stream()
+        .map(TreeElement::getNode)
+        .filter(ref -> ref.getType().equals("file"))
+        .filter(ref -> ref.getAttributes().containsKey("vcs.status"))
         .collect(
             toMap(
-                key -> {
-                  if (key instanceof Resource) {
-                    return ((Resource) key).getName();
-                  } else if (key instanceof TreeElement) {
-                    return ((TreeElement) key).getNode().getName();
-                  }
-
-                  throw new IllegalArgumentException("Unknown iterable key type");
-                },
-                value -> {
-                  if (value instanceof File) {
-                    return ((File) value).getVcsStatus();
-                  } else if (value instanceof TreeElement) {
-                    ItemReference ref = ((TreeElement) value).getNode();
-
-                    if ("file".equals(ref.getType())
-                        && ref.getAttributes().containsKey("vcs.status")) {
-                      return VcsStatus.from(ref.getAttributes().get("vcs.status"));
-                    } else {
-                      return VcsStatus.UNTRACKED;
-                    }
-                  }
-
-                  return VcsStatus.UNTRACKED;
-                }));
+                ItemReference::getName,
+                ref -> VcsStatus.from(ref.getAttributes().get("vcs.status"))));
   }
 
   private Promise<Optional<Resource>> doFindResource(Path path) {
