@@ -153,18 +153,6 @@ objects:
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
-          - name: JAEGER_SERVICE_NAME
-            value: "${JAEGER_SERVICE_NAME}"
-          - name: JAEGER_AGENT_HOST
-            value: "${JAEGER_AGENT_HOST}"
-          - name: JAEGER_SAMPLER_TYPE
-            value: "${JAEGER_SAMPLER_TYPE}"
-          - name: JAEGER_SAMPLER_PARAM
-            value: "${JAEGER_SAMPLER_PARAM}"
-          - name: JAEGER_REPORTER_MAX_QUEUE_SIZE
-            value: "${JAEGER_REPORTER_MAX_QUEUE_SIZE}"
-          - name: JAEGER_SAMPLER_MANAGER_HOST_PORT
-            value: "${JAEGER_SAMPLER_MANAGER_HOST_PORT}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -310,30 +298,6 @@ parameters:
   displayName: Eclipse Che tracing
   description: Enable or disable tracing in Eclipse Che
   value: 'false'
-- name: JAEGER_SERVICE_NAME
-  displayName: Jaeger service name
-  description: Jager service name
-  value: 'che'
-- name: JAEGER_AGENT_HOST
-  displayName: Jaeger agent host
-  description: The hostname for communicating with jager agent via UDP
-  value: 'jaeger-agent'
-- name: JAEGER_SAMPLER_TYPE
-  displayName: Jageer sampler type
-  description: Type of jager sampler can be - constant or probabilistic or ratelimiting or remote
-  value: 'const'
-- name: JAEGER_SAMPLER_PARAM
-  displayName: Jaeger sampler param
-  description: The sampler parameter (number)
-  value: '1'
-- name: JAEGER_REPORTER_MAX_QUEUE_SIZE
-  displayName: Jaeger reporter max queue size
-  description: The reporter's maximum queue size
-  value: '10000'
-- name: JAEGER_SAMPLER_MANAGER_HOST_PORT
-  displayName: Jaeger sampler manager host and port
-  description: The host name and port when using the remote controlled sampler
-  value: 'jaeger:5778'
 labels:
   app: che
   template: che
