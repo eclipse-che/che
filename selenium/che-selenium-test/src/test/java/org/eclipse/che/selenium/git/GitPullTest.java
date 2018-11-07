@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.git;
 
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.PULL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.Remotes.REMOTES_TOP;
@@ -37,7 +38,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-@Test(groups = {GITHUB})
+@Test(groups = {GITHUB, UNDER_REPAIR})
 public class GitPullTest {
   private static final String PROJECT_NAME = NameGenerator.generate("FirstProject-", 4);
 
@@ -136,7 +137,7 @@ public class GitPullTest {
       editor.waitTabIsNotPresent(tabNameOpenedFile);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11648");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11648");
     }
 
     projectExplorer.waitLibrariesAreNotPresent(pathToItemInProjectExplorer);

@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.editor.autocomplete;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
@@ -36,6 +37,7 @@ import org.testng.annotations.Test;
  * @author Musienko Maxim
  * @author Aleksandr Shmaraev
  */
+@Test(groups = UNDER_REPAIR)
 public class CheckAutocompleteFeaturesInTheTestFolderTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate("CheckAuthoCompleteInTheTestFolder_", 4);
@@ -177,7 +179,7 @@ public class CheckAutocompleteFeaturesInTheTestFolderTest {
       editor.waitJavaDocPopUpOpened();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11735", ex);
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11735", ex);
     }
 
     editor.checkTextToBePresentInJavaDocPopUp(expectedTextInJavaDoc);
