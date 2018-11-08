@@ -56,8 +56,6 @@ public class Menu {
     redrawMenuItemsWait = new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
   }
 
-  private static String ENABLED_CSS_VALUE = "rgba(255, 255, 255, 1)";
-
   public interface Locators {
     String DISABLED_ITEM = "//tr[@id='%s' and @item-enabled='false']";
     String ENABLED_ITEM = "//tr[@id='%s' and @item-enabled='true']";
