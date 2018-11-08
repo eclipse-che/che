@@ -59,22 +59,25 @@ public class ApacheCamelFileEditingTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/project-for-camel-ls");
-    testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CONSOLE_JAVA_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
-  public void checkLanguageServerInitialized() {
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
-    editor.waitTabIsPresent(CAMEL_FILE_NAME);
+  public void checkLanguageServerInitialized() throws Exception {
+    URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/project-for-camel-ls");
 
     // check Apache Camel language server initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
+
+    testProjectServiceClient.importProject(
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CONSOLE_JAVA_SIMPLE);
+
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
+    editor.waitTabIsPresent(CAMEL_FILE_NAME);
   }
 
   @Test(priority = 1)
