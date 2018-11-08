@@ -10,7 +10,7 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 #
-if [ "${POSTGRESQL_LOG_DEBUG}" == "true" ]; then
+if [ -n "${POSTGRESQL_LOG_DEBUG+set}" ] && [ "${POSTGRESQL_LOG_DEBUG}" == "true" ]; then
     echo "POSTGRESQL_LOG_DEBUG is set, enabling additional logging configuration"
 
     if [ ! -f /opt/app-root/src/postgresql-cfg/postgresql.log.debug.conf ]; then

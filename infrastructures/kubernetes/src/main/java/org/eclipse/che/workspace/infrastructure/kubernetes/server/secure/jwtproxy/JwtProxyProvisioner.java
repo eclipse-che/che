@@ -272,7 +272,7 @@ public class JwtProxyProvisioner {
                 .withImage(jwtProxyImage)
                 .withVolumeMounts(
                     new VolumeMount(
-                        JWT_PROXY_CONFIG_FOLDER + "/", "jwtproxy-config-volume", false, null))
+                        JWT_PROXY_CONFIG_FOLDER + "/", null, "jwtproxy-config-volume", false, null))
                 .withArgs("-config", JWT_PROXY_CONFIG_FOLDER + "/" + JWT_PROXY_CONFIG_FILE)
                 .build())
         .withVolumes(

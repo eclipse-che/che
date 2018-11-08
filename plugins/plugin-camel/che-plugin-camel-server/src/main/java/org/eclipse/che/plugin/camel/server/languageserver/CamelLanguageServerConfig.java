@@ -27,7 +27,7 @@ import org.eclipse.che.plugin.camel.server.inject.CamelModule;
 /** Launcher for Apache Camel Language Server */
 @Singleton
 public class CamelLanguageServerConfig implements LanguageServerConfig {
-  private static final String REGEX = ".*\\.(xml)";
+  private static final String REGEX = ".*\\.(xml|java)$";
 
   private final Path launchScript;
 

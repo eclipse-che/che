@@ -32,6 +32,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.J
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_THEIA_ON_KUBERNETES;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_DOCKER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_ON_KUBERNETES;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_OPENSHIFT;
@@ -87,6 +88,7 @@ public class NewWorkspacePageTest {
           CHE_7_PREVIEW_DEV,
           ECLIPSE_CHE,
           GO,
+          JAVA_MYSQL_THEIA_ON_KUBERNETES,
           JAVA_THEIA_ON_KUBERNETES,
           JAVA_THEIA_OPENSHIFT,
           NODE,
@@ -105,6 +107,7 @@ public class NewWorkspacePageTest {
           CHE_7_PREVIEW_DEV,
           ECLIPSE_CHE,
           GO,
+          JAVA_MYSQL_THEIA_ON_KUBERNETES,
           JAVA_THEIA_ON_KUBERNETES,
           NODE,
           PHP,
@@ -208,6 +211,7 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
       asList(
           JAVA_MYSQL,
+          JAVA_MYSQL_THEIA_ON_KUBERNETES,
           JAVA_THEIA_ON_KUBERNETES,
           JAVA_THEIA_OPENSHIFT,
           JAVA_MYSQL_CENTOS,
@@ -216,6 +220,7 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack> EXPECTED_K8S_MULTI_MACHINE_STACKS =
       asList(
           JAVA_MYSQL,
+          JAVA_MYSQL_THEIA_ON_KUBERNETES,
           JAVA_THEIA_ON_KUBERNETES,
           JAVA_THEIA_OPENSHIFT,
           JAVA_MYSQL_CENTOS,
@@ -224,6 +229,7 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
       asList(
           JAVA_MYSQL,
+          JAVA_MYSQL_THEIA_ON_KUBERNETES,
           JAVA_THEIA_ON_KUBERNETES,
           JAVA_THEIA_OPENSHIFT,
           JAVA_MYSQL_CENTOS,
@@ -240,6 +246,7 @@ public class NewWorkspacePageTest {
               NODE,
               JAVA_THEIA_OPENSHIFT,
               JAVA_THEIA_ON_KUBERNETES,
+              JAVA_MYSQL_THEIA_ON_KUBERNETES,
               GO,
               ECLIPSE_CHE,
               CHE_7_PREVIEW_DEV,
@@ -257,6 +264,7 @@ public class NewWorkspacePageTest {
           PHP,
           NODE,
           JAVA_THEIA_ON_KUBERNETES,
+          JAVA_MYSQL_THEIA_ON_KUBERNETES,
           GO,
           ECLIPSE_CHE,
           CHE_7_PREVIEW_DEV,

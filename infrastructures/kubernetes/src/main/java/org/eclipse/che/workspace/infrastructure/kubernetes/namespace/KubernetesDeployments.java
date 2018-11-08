@@ -28,8 +28,8 @@ import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.extensions.Deployment;
-import io.fabric8.kubernetes.api.model.extensions.DoneableDeployment;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
@@ -141,12 +141,15 @@ public class KubernetesDeployments {
     try {
       clientFactory
           .create(workspaceId)
-          .extensions()
+          .apps()
           .deployments()
           .inNamespace(namespace)
           .createNew()
           .withMetadata(metadata)
           .withNewSpec()
+          .withNewSelector()
+          .withMatchLabels(metadata.getLabels())
+          .endSelector()
           .withReplicas(1)
           .withNewTemplate()
           .withMetadata(metadata)
@@ -679,7 +682,7 @@ public class KubernetesDeployments {
       List<Deployment> deployments =
           clientFactory
               .create(workspaceId)
-              .extensions()
+              .apps()
               .deployments()
               .inNamespace(namespace)
               .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -740,7 +743,7 @@ public class KubernetesDeployments {
       ScalableResource<Deployment, DoneableDeployment> deploymentResource =
           clientFactory
               .create(workspaceId)
-              .extensions()
+              .apps()
               .deployments()
               .inNamespace(namespace)
               .withName(deploymentName);
@@ -857,7 +860,7 @@ public class KubernetesDeployments {
     Deployment deployment =
         clientFactory
             .create(workspaceId)
-            .extensions()
+            .apps()
             .deployments()
             .inNamespace(namespace)
             .withName(name)
