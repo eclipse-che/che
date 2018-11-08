@@ -124,11 +124,6 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
     WaitUtils.waitSuccessCondition(
         () -> {
           try {
-            LOG.info(
-                "Check workspace name='{}', id='{}', username='{}' existence",
-                workspaceName,
-                workspace.getId(),
-                userName);
             return !exists(workspaceName, userName);
           } catch (Exception e) {
             throw new RuntimeException(
@@ -139,7 +134,7 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
           }
         },
         TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC,
-        1000,
+        500,
         TimeUnit.SECONDS);
 
     LOG.info(
