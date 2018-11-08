@@ -398,12 +398,12 @@ fi
 }
 
 deployJaeger(){
-if [ "${CHE_TRACING_ENABLED}" == "true" ]; then
-  echo "Deploying Jaeger..."
-  ${OC_BINARY} new-app -f ${BASE_DIR}/templates/jaeger-all-in-one-template.yml
-  JAEGER_ROUTE=$($OC_BINARY get route/jaeger-query --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
-  echo "Jaeger deployment complete. $JAEGER_ROUTE"
-fi
+    if [ "${CHE_TRACING_ENABLED}" == "true" ]; then
+      echo "Deploying Jaeger..."
+      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/jaeger-all-in-one-template.yml
+      JAEGER_ROUTE=$($OC_BINARY get route/jaeger-query --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+      echo "Jaeger deployment complete. $JAEGER_ROUTE"
+    fi
 }
 
 
