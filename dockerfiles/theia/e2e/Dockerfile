@@ -6,26 +6,23 @@
 # SPDX-License-Identifier: EPL-2.0
 
 # Use upstream image
-FROM ${BUILD_ORGANIZATION}/${BUILD_PREFIX}-theia:${BUILD_TAG}
+FROM ${BUILD_ORGANIZATION}/${BUILD_PREFIX}-theia:${BUILD_TAG} as theia
+FROM cypress/base:8
 
 USER root
+ENV HOME=/root
 
-# Install packages used by Cypress
-RUN yum install -y gtk2-2.24.31-1.el7.x86_64 \
-                   libnotify-0.7.7-1.el7.x86_64 \
-                   GConf2 nss-3.36.0-5.el7_5.x86_64 \
-                   libXScrnSaver-1.2.2-6.1.el7.x86_64 \
-                   alsa-lib-1.1.4.1-2.el7.x86_64 \
-                   xorg-x11-server-Xvfb-1.19.5-5.el7.x86_64 \
-                   liberation-* && \
-    dbus-uuidgen > /var/lib/dbus/machine-id
+CMD /root/docker-run.sh
+RUN yarn global add typescript@2.9.2 node-gyp
 
 # Add cypress scripts and grab dependencies
-COPY src /home/cypress/
-RUN cd /home/cypress && yarn
+COPY src /root/
+RUN cd /root && yarn
 
 # Add tests
-ADD cypress /home/cypress/cypress/
-# Command to trigger the tests
-ENTRYPOINT [""]
-CMD /home/cypress/docker-run.sh
+ADD cypress /root/cypress/
+
+COPY --from=theia /home/theia /home/theia
+COPY --from=theia /entrypoint.sh /entrypoint.sh
+RUN find /home/theia/ -name "binding.gyp" |  xargs -i sh -c 'cd $(dirname {}) && node-gyp rebuild'
+ 

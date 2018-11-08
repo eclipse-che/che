@@ -6,12 +6,14 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 
-/entrypoint.sh&
+echo "Starting Theia..."
+rm -rf /root/logs/*
+HOME=/home/theia /entrypoint.sh > /root/logs/theia.log 2>/root/logs/theia-error.log&
 sleep 10s
-
+echo "Cleaning videos folder..."
 # Cleanup previous videos
-rm -rf /home/cypress/cypress/videos
+rm -rf /root/cypress/videos
 
 # Run tests
-cd /home/cypress && /node_modules/.bin/cypress run
- 
+echo "Run the tests"
+cd /root && unset LD_LIBRARY_PATH && /root/node_modules/.bin/cypress run -c trashAssetsBeforeRuns=false

@@ -11,23 +11,20 @@
 ###
 # Builder Image
 #
-FROM centos as builder
+FROM node:8.12.0-alpine as builder
 
 ARG GITHUB_TOKEN
 
 # Install basic software used for checking github API rate limit
-RUN yum install -y epel-release && yum -y install curl jq expect
+RUN apk add --update --no-cache curl jq expect
 
 # define in env variable GITHUB_TOKEN only if it is defined
 # else check if github rate limit is enough, else will abort requiring to set GITHUB_TOKEN value
 ADD src/builder/check-github-limit.sh /tmp/builder/scripts/check-github-limit.sh
 RUN /tmp/builder/scripts/check-github-limit.sh
 
-ADD src/builder/setup-nodejs.sh /tmp/builder/scripts/setup-nodejs.sh
-RUN /tmp/builder/scripts/setup-nodejs.sh
-
 # Install tools required to build theia
-RUN yum install -y gcc-c++ make python git
+RUN apk add make gcc g++ python git bash
 
 # Define upstream version of theia to use
 ARG THEIA_VERSION=0.3.16
@@ -84,34 +81,25 @@ RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 ###
 # Runtime Image
 #
-FROM centos as runtime
+# Use node image
+FROM node:8.12.0-alpine as runtime
 ENV USE_LOCAL_GIT=true \
     HOME=/home/theia \
     THEIA_DEFAULT_PLUGINS=local-dir:///default-theia-plugins \
-    PATH=/opt/rh/rh-git29/root/bin/:${PATH} \
-    LD_LIBRARY_PATH=/opt/rh/httpd24/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \
     # Specify the directory of git (avoid to search at init of Theia)
-    LOCAL_GIT_DIRECTORY=/opt/rh/rh-git29/root/ \
-    GIT_EXEC_PATH=/opt/rh/rh-git29/root/usr/libexec/git-core
+    LOCAL_GIT_DIRECTORY=/usr \
+    GIT_EXEC_PATH=/usr/libexec/git-core
 
 EXPOSE 3000 3030
 
-ADD src/builder/setup-nodejs.sh /tmp/builder/scripts/setup-nodejs.sh
-
 # Install sudo
 # Install Java for java extension
-# Install git (from software collection in order to have a recent version)
+# Install git
 # Install bzip2 to unpack files
 # Install which tool in order to search git
-RUN yum install -y centos-release-scl && \
-    yum install -y rh-git29 scl-utils sudo java-1.8.0-openjdk bzip2 which && \
-    /tmp/builder/scripts/setup-nodejs.sh && \
-    # cleanup cache
-    yum clean all && \
-    rm -rf /var/cache/yum
-
-RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
-    && usermod -p "*" theia \
+# Install curl and bash
+RUN apk add --update --no-cache sudo openjdk8-jre git bzip2 which bash curl
+RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh theia \
     && echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     # Create /projects for Che
     && mkdir /projects \
@@ -132,18 +120,16 @@ RUN useradd -u 1000 -G users,wheel,root -d ${HOME} --shell /bin/bash theia \
     && yarn global add yo @theia/generator-plugin@0.0.1-1540209403 typescript@2.9.2 \
     && mkdir -p ${HOME}/.config/insight-nodejs/ \
     && chmod -R 777 ${HOME}/.config/ \
+    # Defines the root /node_modules as the folder to use by yarn
+    && echo '"--*.modules-folder" "/node_modules"' > $HOME/.yarnrc \
     # Disable the statistics for yeoman
     && echo '{"optOut": true}' > $HOME/.config/insight-nodejs/insight-yo.json \
-    # Add software collection git to env
-    && echo 'source scl_source enable rh-git29' >> /home/theia/.bashrc \
     # Link yarn global modules for yeoman
-    && ln -s /usr/local/share/.config/yarn/global/node_modules /usr/local/lib/ \
+    && mv /usr/local/lib/node_modules/* /usr/local/share/.config/yarn/global/node_modules && rm -rf /usr/local/lib/node_modules && ln -s /usr/local/share/.config/yarn/global/node_modules /usr/local/lib/ \
     # Cleanup tmp folder
     && rm -rf /tmp/* \
     # Cleanup yarn cache
     && yarn cache clean \
-    # Defines the root /node_modules as the folder to use by yarn
-    && echo '"--*.modules-folder" "/node_modules"' > $HOME/.yarnrc \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
