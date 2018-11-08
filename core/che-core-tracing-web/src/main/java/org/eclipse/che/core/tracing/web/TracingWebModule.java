@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.core.tracing.web;
 
+import com.google.common.annotations.Beta;
 import com.google.inject.servlet.ServletModule;
 import io.opentracing.contrib.web.servlet.filter.TracingFilter;
 import javax.inject.Singleton;
 
+@Beta
 public class TracingWebModule extends ServletModule {
   @Override
   protected void configureServlets() {

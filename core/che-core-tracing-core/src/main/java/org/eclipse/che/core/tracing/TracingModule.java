@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.core.tracing;
 
+import com.google.common.annotations.Beta;
 import com.google.inject.AbstractModule;
 import io.opentracing.Tracer;
 
+@Beta
 public class TracingModule extends AbstractModule {
   @Override
   protected void configure() {

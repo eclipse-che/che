@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.core.tracing;
 
+import com.google.common.annotations.Beta;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.tracerresolver.TracerResolver;
 import io.opentracing.util.GlobalTracer;
@@ -22,6 +23,7 @@ import javax.inject.Singleton;
  * in @{@link io.opentracing.util.GlobalTracer} for future use by classes that has no access to
  * container like datasources, etc.
  */
+@Beta
 @Singleton
 public class TracerProvider implements Provider<Tracer> {
   private final Tracer tracer;

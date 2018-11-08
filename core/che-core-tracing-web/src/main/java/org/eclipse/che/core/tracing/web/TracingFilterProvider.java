@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.core.tracing.web;
 
+import com.google.common.annotations.Beta;
 import io.opentracing.Tracer;
 import io.opentracing.contrib.web.servlet.filter.TracingFilter;
 import javax.inject.Inject;
@@ -21,6 +22,7 @@ import javax.inject.Singleton;
  * Guice @{@link javax.inject.Provider} of @{@link
  * io.opentracing.contrib.web.servlet.filter.TracingFilter} objects
  */
+@Beta
 @Singleton
 public class TracingFilterProvider implements Provider<TracingFilter> {
 
