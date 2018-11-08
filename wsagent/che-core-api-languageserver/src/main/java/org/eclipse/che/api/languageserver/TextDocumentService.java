@@ -478,7 +478,7 @@ public class TextDocumentService {
               // getContents() method can return null, in spite of @NonNull annotation,
               // see https://github.com/eclipse/lsp4j/issues/284
               if (contents == null) {
-                return true;
+                return false;
               }
               if (contents.isLeft()) {
                 for (Either<String, MarkedString> part : contents.getLeft()) {
