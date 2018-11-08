@@ -22,7 +22,6 @@ import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.filetypes.FileType;
 import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
-import org.eclipse.che.plugin.web.client.CamelLanguageDescriptionProvider;
 import org.eclipse.che.plugin.web.client.JsonLanguageDescriptionProvider;
 import org.eclipse.che.plugin.web.client.TypeScriptLanguageDescriptionProvider;
 import org.eclipse.che.plugin.web.client.WebExtensionResource;
@@ -49,9 +48,6 @@ public class WebModule extends AbstractGinModule {
     newSetBinder(binder(), LanguageDescription.class)
         .addBinding()
         .toProvider(JsonLanguageDescriptionProvider.class);
-    newSetBinder(binder(), LanguageDescription.class)
-        .addBinding()
-        .toProvider(CamelLanguageDescriptionProvider.class);
   }
 
   @Provides
