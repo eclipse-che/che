@@ -240,7 +240,7 @@ remove_che_from_ocp() {
 }
 
 detectIP() {
-    docker run --rm --net host eclipse/che-ip:6.13.0
+    docker run --rm --net host eclipse/che-ip:6.13.1
 }
 
 parse_args() {
