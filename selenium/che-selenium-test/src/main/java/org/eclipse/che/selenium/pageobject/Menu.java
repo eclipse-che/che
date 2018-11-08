@@ -19,29 +19,21 @@ import static org.eclipse.che.selenium.pageobject.Menu.Locators.ENABLED_ITEM;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.support.PageFactory;
 
 /** @author Musienko Maxim */
 @Singleton
 public class Menu {
-  private final SeleniumWebDriver seleniumWebDriver;
   private final Loader loader;
   private final SeleniumWebDriverHelper seleniumWebDriverHelper;
 
   @Inject
-  public Menu(
-      SeleniumWebDriver seleniumWebDriver,
-      Loader loader,
-      SeleniumWebDriverHelper seleniumWebDriverHelper) {
-    this.seleniumWebDriver = seleniumWebDriver;
+  public Menu(Loader loader, SeleniumWebDriverHelper seleniumWebDriverHelper) {
     this.loader = loader;
     this.seleniumWebDriverHelper = seleniumWebDriverHelper;
-    PageFactory.initElements(seleniumWebDriver, this);
   }
 
   public interface Locators {
