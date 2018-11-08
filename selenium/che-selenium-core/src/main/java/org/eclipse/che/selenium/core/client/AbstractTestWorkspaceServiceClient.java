@@ -128,7 +128,7 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
           } catch (Exception e) {
             throw new RuntimeException(
                 format(
-                    "Error of waiting on workspace of name='%s', id='%s', username='%s' is removed.",
+                    "Error of waiting on workspace name='%s', id='%s', username='%s' removal.",
                     workspaceName, workspace.getId(), userName),
                 e);
           }
