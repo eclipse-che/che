@@ -19,6 +19,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Arrays.copyOf;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.ide.api.resources.Resource.FILE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.COPIED_FROM;
@@ -883,6 +884,21 @@ public final class ResourceManager {
                       Resource[] resources = children.get();
 
                       if (resources.length == loadedChildren.getChildren().size()) {
+
+                        Map<String, VcsStatus> vcsStatusMap =
+                            getVcsStatusesForFiles(loadedChildren.getChildren());
+
+                        for (Resource resource : resources) {
+                          if (resource.isFile()) {
+                            VcsStatus oldVcsStatus = resource.asFile().getVcsStatus();
+                            VcsStatus newVcsStatus = vcsStatusMap.remove(resource.getName());
+
+                            if (oldVcsStatus != newVcsStatus) {
+                              resource.asFile().setVcsStatus(newVcsStatus);
+                            }
+                          }
+                        }
+
                         return promises.resolve(resources);
                       } else {
                         // situation, when we have outdated cached children
@@ -907,6 +923,18 @@ public final class ResourceManager {
                         return promises.resolve(updated.toArray(new Resource[updated.size()]));
                       }
                     }));
+  }
+
+  private Map<String, VcsStatus> getVcsStatusesForFiles(List<TreeElement> elements) {
+    return elements
+        .stream()
+        .map(TreeElement::getNode)
+        .filter(ref -> ref.getType().equals("file"))
+        .filter(ref -> ref.getAttributes().containsKey("vcs.status"))
+        .collect(
+            toMap(
+                ItemReference::getName,
+                ref -> VcsStatus.from(ref.getAttributes().get("vcs.status"))));
   }
 
   private Promise<Optional<Resource>> doFindResource(Path path) {
