@@ -19,7 +19,6 @@ import io.opentracing.Tracer;
 public class TracingModule extends AbstractModule {
   @Override
   protected void configure() {
-    // tracing
     bind(Tracer.class).toProvider(TracerProvider.class);
   }
 }
