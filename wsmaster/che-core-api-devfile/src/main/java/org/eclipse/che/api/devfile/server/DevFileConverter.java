@@ -11,16 +11,19 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.devfile.Constants.SPEC_VERSION;
+import static org.eclipse.che.api.devfile.Constants.CURRENT_SPEC_VERSION;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import org.eclipse.che.api.devfile.model.Action;
+import org.eclipse.che.api.devfile.model.CheEditor;
 import org.eclipse.che.api.devfile.model.ChePlugin;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Definition;
@@ -42,7 +45,7 @@ public class DevFileConverter {
 
   static DevFile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
     DevFile devFile = new DevFile();
-    devFile.setSpecVersion(SPEC_VERSION);
+    devFile.setSpecVersion(CURRENT_SPEC_VERSION);
     devFile.setName(wsConfig.getName());
 
     // Manage projects
@@ -67,11 +70,15 @@ public class DevFileConverter {
       Command devCommand = new Command();
       devCommand.setName(command.getName());
       ToolsCommand toolsCommand = new ToolsCommand();
-      toolsCommand.setTool("???");
+      if (!isNullOrEmpty(command.getAttributes().get("machineName"))) {
+        toolsCommand.setTool(command.getAttributes().get("machineName"));
+      }
       Action action = new Action();
       Exec exec = new Exec();
       exec.setCommand(command.getCommandLine());
-      exec.setWorkdir("???");
+      if (!isNullOrEmpty(command.getAttributes().get("machineName"))) {
+        exec.setWorkdir(command.getAttributes().get("workingDir"));
+      }
       action.setExec(exec);
       toolsCommand.setAction(action);
       devCommand.setToolsCommands(Collections.singletonList(toolsCommand));
@@ -85,9 +92,9 @@ public class DevFileConverter {
       Tool editorTool = new Tool();
       editorTool.setName("editor");
       Definition definition = new Definition();
-      ChePlugin chePlugin = new ChePlugin();
-      chePlugin.setName(wsConfig.getAttributes().get("editor"));
-      definition.setChePlugin(chePlugin);
+      CheEditor cheEditor = new CheEditor();
+      cheEditor.setName(wsConfig.getAttributes().get("editor"));
+      definition.setCheEditor(cheEditor);
       editorTool.setDefinition(definition);
       tools.add(editorTool);
     }
@@ -98,7 +105,7 @@ public class DevFileConverter {
         pluginTool.setName(plugin.substring(0, plugin.indexOf(":")));
         Definition definition = new Definition();
         ChePlugin chePlugin = new ChePlugin();
-        chePlugin.setName(plugin);
+        chePlugin.setId(plugin);
         definition.setChePlugin(chePlugin);
         pluginTool.setDefinition(definition);
         tools.add(pluginTool);
@@ -134,20 +141,29 @@ public class DevFileConverter {
     // Manage commands
     List<CommandImpl> commands = new ArrayList<>();
     for (Command devCommand : devFile.getCommands()) {
-      CommandImpl command = new CommandImpl();
-      command.setName(devCommand.getName());
-      // TODO: convert rest
-      commands.add(command);
+      for (ToolsCommand toolCommand : devCommand.getToolsCommands()) {
+        CommandImpl command = new CommandImpl();
+        command.setName(devCommand.getName() + ":" + toolCommand.getTool());
+        command.setCommandLine(toolCommand.getAction().getExec().getCommand());
+        command.getAttributes().put("machineName", toolCommand.getTool());
+        command.getAttributes().put("workingDir", toolCommand.getAction().getExec().getWorkdir());
+        commands.add(command);
+      }
     }
 
     config.setCommands(commands);
 
     // Manage tools
     Map<String, String> attributes = new HashMap<>();
-
+    StringJoiner pluginsStringJoiner = new StringJoiner(",");
     for (Tool tool : devFile.getTools()) {
-      attributes.put(tool.getName(), tool.getDefinition().getChePlugin().getName());
+      if (tool.getDefinition().getCheEditor() != null) {
+        attributes.put("editor", tool.getDefinition().getCheEditor().getId());
+      } else {
+        pluginsStringJoiner.add(tool.getDefinition().getChePlugin().getId());
+      }
     }
+    attributes.put("plugins", pluginsStringJoiner.toString());
     config.setAttributes(attributes);
 
     // TODO: Add default environment. Remove when it will be possible
@@ -165,7 +181,7 @@ public class DevFileConverter {
   }
 
   private static void validateDevFile(DevFile devFile) throws DevFileFormatException {
-    if (!SPEC_VERSION.equals(devFile.getSpecVersion())) {
+    if (!CURRENT_SPEC_VERSION.equals(devFile.getSpecVersion())) {
       throw new DevFileFormatException(
           format("Provided devfile has unsupported version %s", devFile.getSpecVersion()));
     }

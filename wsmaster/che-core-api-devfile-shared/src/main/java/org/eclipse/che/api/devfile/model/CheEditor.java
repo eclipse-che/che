@@ -22,7 +22,7 @@ import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"id"})
-public class ChePlugin {
+public class CheEditor {
 
   @JsonProperty("id")
   private String id;
@@ -35,7 +35,7 @@ public class ChePlugin {
   }
 
   @JsonProperty("id")
-  public void setId(String id) {
+  public void setName(String id) {
     this.id = id;
   }
 

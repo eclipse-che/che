@@ -27,6 +27,9 @@ public class Definition {
   @JsonProperty("chePlugin")
   private ChePlugin chePlugin;
 
+  @JsonProperty("cheEditor")
+  private CheEditor cheEditor;
+
   @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
 
   @JsonProperty("chePlugin")
@@ -37,6 +40,16 @@ public class Definition {
   @JsonProperty("chePlugin")
   public void setChePlugin(ChePlugin chePlugin) {
     this.chePlugin = chePlugin;
+  }
+
+  @JsonProperty("cheEditor")
+  public CheEditor getCheEditor() {
+    return cheEditor;
+  }
+
+  @JsonProperty("cheEditor")
+  public void setCheEditor(CheEditor cheEditor) {
+    this.cheEditor = cheEditor;
   }
 
   @JsonAnyGetter

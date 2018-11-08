@@ -13,5 +13,5 @@ package org.eclipse.che.api.devfile;
 
 public class Constants {
 
-  public static final String SPEC_VERSION = "0.0.1";
+  public static final String CURRENT_SPEC_VERSION = "0.0.1";
 }

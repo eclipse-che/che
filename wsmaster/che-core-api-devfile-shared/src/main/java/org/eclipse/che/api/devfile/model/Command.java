@@ -22,13 +22,13 @@ import java.util.List;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"name", "toolsCommands"})
+@JsonPropertyOrder({"name", "tools"})
 public class Command {
 
   @JsonProperty("name")
   private String name;
 
-  @JsonProperty("toolsCommands")
+  @JsonProperty("tools")
   private List<ToolsCommand> toolsCommands = null;
 
   @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
@@ -43,12 +43,12 @@ public class Command {
     this.name = name;
   }
 
-  @JsonProperty("toolsCommands")
+  @JsonProperty("tools")
   public List<ToolsCommand> getToolsCommands() {
     return toolsCommands;
   }
 
-  @JsonProperty("toolsCommands")
+  @JsonProperty("tools")
   public void setToolsCommands(List<ToolsCommand> toolsCommands) {
     this.toolsCommands = toolsCommands;
   }
