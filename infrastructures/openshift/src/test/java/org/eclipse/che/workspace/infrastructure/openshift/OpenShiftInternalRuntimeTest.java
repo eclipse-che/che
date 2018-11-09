@@ -49,6 +49,7 @@ import io.fabric8.kubernetes.api.model.ServiceSpec;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteSpec;
 import io.fabric8.openshift.api.model.RouteTargetReference;
+import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -144,6 +145,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
+  @Mock private Tracer tracer;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -179,6 +181,7 @@ public class OpenShiftInternalRuntimeTest {
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
             runtimeHangingDetector,
+            tracer,
             context,
             project,
             emptyList());
@@ -203,6 +206,7 @@ public class OpenShiftInternalRuntimeTest {
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
             runtimeHangingDetector,
+            tracer,
             context,
             project,
             emptyList());

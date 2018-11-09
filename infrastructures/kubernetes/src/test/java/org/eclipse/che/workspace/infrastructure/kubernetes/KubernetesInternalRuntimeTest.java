@@ -62,6 +62,7 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
+import io.opentracing.Tracer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -212,6 +213,8 @@ public class KubernetesInternalRuntimeTest {
                   mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
                   mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
 
+  @Mock private Tracer tracer;
+
   @BeforeMethod
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
@@ -242,6 +245,7 @@ public class KubernetesInternalRuntimeTest {
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
             runtimeHangingDetector,
+            tracer,
             context,
             namespace,
             emptyList());
@@ -266,6 +270,7 @@ public class KubernetesInternalRuntimeTest {
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
             runtimeHangingDetector,
+            tracer,
             context,
             namespace,
             emptyList());

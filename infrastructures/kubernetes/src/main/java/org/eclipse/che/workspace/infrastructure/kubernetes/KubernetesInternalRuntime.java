@@ -25,14 +25,18 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.Watcher.Action;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
@@ -110,6 +114,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
   private final RuntimeHangingDetector runtimeHangingDetector;
+  protected final Tracer tracer;
+  private Map<String, Span> machineStartupTraces;
 
   @Inject
   public KubernetesInternalRuntime(
@@ -131,6 +137,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
+      Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace,
       @Assisted List<Warning> warnings) {
@@ -153,6 +160,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
+    this.tracer = tracer;
   }
 
   @Override
@@ -192,7 +200,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
       startSynchronizer.checkFailure();
 
-      final List<CompletableFuture<Void>> machinesFutures = new ArrayList<>();
+      final Map<String, CompletableFuture<Void>> machinesFutures = new LinkedHashMap<>();
       // futures that must be cancelled explicitly
       final List<CompletableFuture<?>> toCancelFutures = new CopyOnWriteArrayList<>();
       final EnvironmentContext currentContext = EnvironmentContext.getCurrent();
@@ -213,7 +221,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                 .thenComposeAsync(checkFailure(startFailure), executor)
                 .thenCompose(setContext(currentContext, checkServers(toCancelFutures, machine)))
                 .exceptionally(publishFailedStatus(startFailure, machineName));
-        machinesFutures.add(machineBootChain);
+        machinesFutures.put(machineName, machineBootChain);
       }
 
       waitMachines(machinesFutures, toCancelFutures, startFailure);
@@ -308,7 +316,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    * @throws RuntimeStartInterruptedException when the thread is interrupted while waiting machines
    */
   private void waitMachines(
-      List<CompletableFuture<Void>> machinesFutures,
+      Map<String, CompletableFuture<Void>> machinesFutures,
       List<CompletableFuture<?>> toCancelFutures,
       CompletableFuture<Void> failure)
       throws InfrastructureException {
@@ -316,14 +324,30 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       LOG.debug(
           "Waiting to start machines of workspace '{}'",
           getContext().getIdentity().getWorkspaceId());
-      final CompletableFuture<Void> allDone =
-          CompletableFuture.allOf(
-              machinesFutures.toArray(new CompletableFuture[machinesFutures.size()]));
+
+      CompletableFuture<?>[] tracedMachineFutures =
+          machinesFutures
+              .entrySet()
+              .stream()
+              .map(
+                  e ->
+                      e.getValue()
+                          .thenRun(
+                              () -> {
+                                Span span = machineStartupTraces.remove(e.getKey());
+                                if (span != null) {
+                                  span.finish();
+                                }
+                              }))
+              .toArray(CompletableFuture[]::new);
+
+      final CompletableFuture<Void> allDone = CompletableFuture.allOf(tracedMachineFutures);
       CompletableFuture.anyOf(allDone, failure)
           .get(startSynchronizer.getStartTimeoutMillis(), TimeUnit.MILLISECONDS);
 
       if (failure.isCompletedExceptionally()) {
         cancelAll(toCancelFutures);
+        finishAllStartupTraces();
         // rethrow the failure cause
         failure.get();
       }
@@ -338,18 +362,31 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                   + "' reached timeout");
       failure.completeExceptionally(ie);
       cancelAll(toCancelFutures);
+      finishAllStartupTraces();
       throw ie;
     } catch (InterruptedException ex) {
       RuntimeStartInterruptedException runtimeInterruptedEx =
           new RuntimeStartInterruptedException(getContext().getIdentity());
       failure.completeExceptionally(runtimeInterruptedEx);
       cancelAll(toCancelFutures);
+      finishAllStartupTraces();
       throw runtimeInterruptedEx;
     } catch (ExecutionException ex) {
       failure.completeExceptionally(ex.getCause());
       cancelAll(toCancelFutures);
+      finishAllStartupTraces();
       wrapAndRethrow(ex.getCause());
     }
+  }
+
+  private void finishAllStartupTraces() {
+    machineStartupTraces
+        .entrySet()
+        .removeIf(
+            e -> {
+              e.getValue().finish();
+              return true;
+            });
   }
 
   /**
@@ -599,6 +636,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    */
   protected void doStartMachine(KubernetesServerResolver serverResolver)
       throws InfrastructureException {
+    machineStartupTraces = new ConcurrentHashMap<>(getContext().getEnvironment().getPods().size());
+
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
@@ -610,6 +649,19 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
         String machineName = Names.machineName(toCreate, container);
+
+        // we are tracking the startup of the machines asynchronously #waitMachines. Here we set up
+        // the spans that will be finished in that method.
+        // Note that this is not completely precise, because we're starting the span only after the
+        // pod has already started deploying, but I see no earlier time to set this up...
+        machineStartupTraces.put(
+            machineName,
+            tracer
+                .buildSpan("container-create")
+                .asChildOf(tracer.activeSpan())
+                .withTag("machineName", machineName)
+                .start());
+
         LOG.debug("Creating machine '{}' in workspace '{}'", machineName, workspaceId);
         machines.put(
             getContext().getIdentity(),
