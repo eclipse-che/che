@@ -81,15 +81,17 @@ public class CreateWorkspaceFromCamelStackTest {
 
   private void checkLanguageServerInitialized() throws Exception {
     URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/project-for-camel-ls");
+
+    consoles.selectProcessByTabName("dev-machine");
+    consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
+
     Workspace ws = workspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CONSOLE_JAVA_SIMPLE);
+
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
     editor.waitTabIsPresent(CAMEL_FILE_NAME);
-
-    consoles.selectProcessByTabName("dev-machine");
-    consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 }
