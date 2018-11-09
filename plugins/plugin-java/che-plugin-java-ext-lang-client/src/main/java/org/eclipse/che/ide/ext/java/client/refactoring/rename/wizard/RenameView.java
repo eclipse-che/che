@@ -115,6 +115,13 @@ interface RenameView extends View<RenameView.ActionDelegate> {
    */
   void setEnableAcceptButton(boolean isEnable);
 
+  /**
+   * Set the visibility state of the loader for 'OK' button.
+   *
+   * @param isVisible <code>true</code> if visible, <code>false</code> otherwise.
+   */
+  void setLoaderVisibility(boolean isVisible);
+
   /** returns <code>true<code/> if update reference is checked, <code>false<code/> update reference is unchecked. */
   boolean isUpdateReferences();
 

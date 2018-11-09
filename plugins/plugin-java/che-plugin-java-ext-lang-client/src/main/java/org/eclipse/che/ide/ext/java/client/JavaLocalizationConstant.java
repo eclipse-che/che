@@ -313,6 +313,12 @@ public interface JavaLocalizationConstant extends Messages {
   @Key("failed.to.rename")
   String failedToRename();
 
+  @Key("rename.is.cancelled.title")
+  String renameIsCancelledTitle();
+
+  @Key("rename.is.cancelled.message")
+  String renameIsCancelledMessage();
+
   @Key("failed.to.process.refactoring.operation")
   String failedToProcessRefactoringOperation();
 
