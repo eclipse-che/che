@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ATTACHING_ELEM_TO_DOM_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.Menu.Locators.DISABLED_ITEM;
@@ -19,10 +20,10 @@ import static org.eclipse.che.selenium.pageobject.Menu.Locators.ENABLED_ITEM;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 
 /** @author Musienko Maxim */
 @Singleton
@@ -64,6 +65,17 @@ public class Menu {
   }
 
   /**
+   * Runs command by specified {@code itemLocator}.
+   *
+   * @param itemLocator locator of the menu item
+   */
+  public void runCommand(By itemLocator) {
+    seleniumWebDriverHelper.waitNoExceptions(
+        () -> seleniumWebDriverHelper.waitAndClick(itemLocator),
+        StaleElementReferenceException.class);
+  }
+
+  /**
    * Run command from sub menu.
    *
    * @param idTopMenuCommand
@@ -74,10 +86,7 @@ public class Menu {
         driver -> {
           runCommand(idTopMenuCommand);
 
-          // Time for submenu opening
-          WaitUtils.sleepQuietly(1);
-
-          if (isMenuItemVisible(idCommandName)) {
+          if (isMenuItemVisible(By.id(idCommandName))) {
             runCommand(idCommandName);
             return true;
           }
@@ -99,10 +108,7 @@ public class Menu {
         driver -> {
           runCommand(idTopMenuCommand, idCommandName);
 
-          // Time for submenu opening
-          WaitUtils.sleepQuietly(1);
-
-          if (isMenuItemVisible(idSubCommandName)) {
+          if (isMenuItemVisible(By.id(idSubCommandName))) {
             runCommand(idSubCommandName);
             return true;
           }
@@ -126,11 +132,8 @@ public class Menu {
         driver -> {
           runCommand(idTopMenuCommand, idCommandName);
 
-          // Time for submenu opening
-          WaitUtils.sleepQuietly(1);
-
-          if (seleniumWebDriverHelper.isVisible(By.xpath(xpathSubCommandName))) {
-            seleniumWebDriverHelper.waitAndClick(By.xpath(xpathSubCommandName));
+          if (isMenuItemVisible(By.xpath(xpathSubCommandName))) {
+            runCommand(By.xpath(xpathSubCommandName));
             return true;
           }
 
@@ -177,7 +180,12 @@ public class Menu {
     seleniumWebDriverHelper.waitVisibility(By.id(idCommand));
   }
 
-  private boolean isMenuItemVisible(String itemId) {
-    return seleniumWebDriverHelper.isVisible(By.id(itemId));
+  private boolean isMenuItemVisible(By itemLocator) {
+    try {
+      seleniumWebDriverHelper.waitVisibility(itemLocator, ATTACHING_ELEM_TO_DOM_SEC);
+      return true;
+    } catch (TimeoutException ex) {
+      return false;
+    }
   }
 }
