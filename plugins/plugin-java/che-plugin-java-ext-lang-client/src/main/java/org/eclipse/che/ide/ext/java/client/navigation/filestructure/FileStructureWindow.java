@@ -35,9 +35,6 @@ import org.eclipse.che.ide.util.input.CharCodeWithModifiers;
 import org.eclipse.che.ide.util.input.SignalEvent;
 import org.eclipse.che.ide.util.input.SignalEventUtils;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
-import org.eclipse.che.plugin.languageserver.ide.filestructure.ElementSelectionDelegate;
-import org.eclipse.che.plugin.languageserver.ide.filestructure.FileStructureView;
-import org.eclipse.che.plugin.languageserver.ide.filestructure.NodeFactory;
 
 /**
  * A window showing a java specific file structure

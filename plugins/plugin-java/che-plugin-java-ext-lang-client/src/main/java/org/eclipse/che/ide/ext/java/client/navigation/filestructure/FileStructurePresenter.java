@@ -21,7 +21,6 @@ import org.eclipse.che.ide.ext.java.dto.DtoClientImpls;
 import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 import org.eclipse.che.jdt.ls.extension.api.dto.FileStructureCommandParameters;
-import org.eclipse.che.plugin.languageserver.ide.filestructure.ElementSelectionDelegate;
 import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.che.plugin.languageserver.ide.util.OpenFileInEditorHelper;
 
