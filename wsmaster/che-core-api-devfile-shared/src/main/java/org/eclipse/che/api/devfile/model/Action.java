@@ -21,22 +21,61 @@ import java.util.HashMap;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"exec"})
+@JsonPropertyOrder({"type", "tool", "command", "workdir"})
 public class Action {
 
-  @JsonProperty("exec")
-  private Exec exec;
+  @JsonProperty("tool")
+  private String tool;
+
+  @JsonProperty("type")
+  private String type;
+
+  @JsonProperty("command")
+  private String command;
+
+  @JsonProperty("workdir")
+  private String workdir;
 
   @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
 
-  @JsonProperty("exec")
-  public Exec getExec() {
-    return exec;
+  @JsonProperty("command")
+  public String getCommand() {
+    return command;
   }
 
-  @JsonProperty("exec")
-  public void setExec(Exec exec) {
-    this.exec = exec;
+  @JsonProperty("command")
+  public void setCommand(String command) {
+    this.command = command;
+  }
+
+  @JsonProperty("workdir")
+  public String getWorkdir() {
+    return workdir;
+  }
+
+  @JsonProperty("workdir")
+  public void setWorkdir(String workdir) {
+    this.workdir = workdir;
+  }
+
+  @JsonProperty("type")
+  public String getType() {
+    return type;
+  }
+
+  @JsonProperty("type")
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  @JsonProperty("tool")
+  public String getTool() {
+    return tool;
+  }
+
+  @JsonProperty("tool")
+  public void setTool(String tool) {
+    this.tool = tool;
   }
 
   @JsonAnyGetter

@@ -21,14 +21,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"name", "definition"})
+@JsonPropertyOrder({"name", "type", "id"})
 public class Tool {
 
   @JsonProperty("name")
   private String name;
 
-  @JsonProperty("definition")
-  private Definition definition;
+  @JsonProperty("id")
+  private String id;
+
+  @JsonProperty("type")
+  private String type;
 
   @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
 
@@ -42,14 +45,24 @@ public class Tool {
     this.name = name;
   }
 
-  @JsonProperty("definition")
-  public Definition getDefinition() {
-    return definition;
+  @JsonProperty("type")
+  public String getType() {
+    return type;
   }
 
-  @JsonProperty("definition")
-  public void setDefinition(Definition definition) {
-    this.definition = definition;
+  @JsonProperty("type")
+  public void setType(String type) {
+    this.type = type;
+  }
+
+  @JsonProperty("id")
+  public String getId() {
+    return id;
+  }
+
+  @JsonProperty("id")
+  public void setId(String id) {
+    this.id = id;
   }
 
   @JsonAnyGetter

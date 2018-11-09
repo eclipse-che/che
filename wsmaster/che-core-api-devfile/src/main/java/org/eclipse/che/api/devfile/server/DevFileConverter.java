@@ -17,22 +17,17 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.devfile.Constants.CURRENT_SPEC_VERSION;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringJoiner;
 import org.eclipse.che.api.devfile.model.Action;
-import org.eclipse.che.api.devfile.model.CheEditor;
-import org.eclipse.che.api.devfile.model.ChePlugin;
 import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.Definition;
 import org.eclipse.che.api.devfile.model.DevFile;
-import org.eclipse.che.api.devfile.model.Exec;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
 import org.eclipse.che.api.devfile.model.Tool;
-import org.eclipse.che.api.devfile.model.ToolsCommand;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -69,19 +64,11 @@ public class DevFileConverter {
     for (CommandImpl command : wsConfig.getCommands()) {
       Command devCommand = new Command();
       devCommand.setName(command.getName());
-      ToolsCommand toolsCommand = new ToolsCommand();
-      if (!isNullOrEmpty(command.getAttributes().get("machineName"))) {
-        toolsCommand.setTool(command.getAttributes().get("machineName"));
-      }
       Action action = new Action();
-      Exec exec = new Exec();
-      exec.setCommand(command.getCommandLine());
-      if (!isNullOrEmpty(command.getAttributes().get("machineName"))) {
-        exec.setWorkdir(command.getAttributes().get("workingDir"));
+      action.setCommand(command.getCommandLine());
+      if (!isNullOrEmpty(command.getAttributes().get("workingDir"))) {
+        action.setWorkdir(command.getAttributes().get("workingDir"));
       }
-      action.setExec(exec);
-      toolsCommand.setAction(action);
-      devCommand.setToolsCommands(Collections.singletonList(toolsCommand));
       commands.add(devCommand);
     }
     devFile.setCommands(commands);
@@ -90,24 +77,19 @@ public class DevFileConverter {
     List<Tool> tools = new ArrayList<>();
     if (wsConfig.getAttributes().containsKey("editor")) {
       Tool editorTool = new Tool();
-      editorTool.setName("editor");
-      Definition definition = new Definition();
-      CheEditor cheEditor = new CheEditor();
-      cheEditor.setName(wsConfig.getAttributes().get("editor"));
-      definition.setCheEditor(cheEditor);
-      editorTool.setDefinition(definition);
+      editorTool.setType("cheEditor");
+      String editorId = wsConfig.getAttributes().get("editor");
+      editorTool.setId(editorId);
+      editorTool.setName(editorId.substring(0, editorId.indexOf(":")));
       tools.add(editorTool);
     }
 
     if (wsConfig.getAttributes().containsKey("plugins")) {
-      for (String plugin : wsConfig.getAttributes().get("plugins").split(",")) {
+      for (String pluginId : wsConfig.getAttributes().get("plugins").split(",")) {
         Tool pluginTool = new Tool();
-        pluginTool.setName(plugin.substring(0, plugin.indexOf(":")));
-        Definition definition = new Definition();
-        ChePlugin chePlugin = new ChePlugin();
-        chePlugin.setId(plugin);
-        definition.setChePlugin(chePlugin);
-        pluginTool.setDefinition(definition);
+        pluginTool.setName(pluginId.substring(0, pluginId.indexOf(":")));
+        pluginTool.setId(pluginId);
+        pluginTool.setType("chePlugin");
         tools.add(pluginTool);
       }
     }
@@ -138,33 +120,41 @@ public class DevFileConverter {
     }
     config.setProjects(projects);
 
+    // Manage tools
+    Map<String, String> attributes = new HashMap<>();
+    StringJoiner pluginsStringJoiner = new StringJoiner(",");
+    for (Tool tool : devFile.getTools()) {
+      if (tool.getType().equals("cheEditor")) {
+        attributes.put("editor", tool.getId());
+      } else {
+        pluginsStringJoiner.add(tool.getId());
+      }
+    }
+    attributes.put("plugins", pluginsStringJoiner.toString());
+    config.setAttributes(attributes);
+
     // Manage commands
     List<CommandImpl> commands = new ArrayList<>();
     for (Command devCommand : devFile.getCommands()) {
-      for (ToolsCommand toolCommand : devCommand.getToolsCommands()) {
+      for (Action devAction : devCommand.getActions()) {
         CommandImpl command = new CommandImpl();
-        command.setName(devCommand.getName() + ":" + toolCommand.getTool());
-        command.setCommandLine(toolCommand.getAction().getExec().getCommand());
-        command.getAttributes().put("machineName", toolCommand.getTool());
-        command.getAttributes().put("workingDir", toolCommand.getAction().getExec().getWorkdir());
+        command.setName(devCommand.getName() + ":" + devAction.getTool());
+        command.setCommandLine(devAction.getCommand());
+        command.getAttributes().put("workingDir", devAction.getWorkdir());
+        Optional<Tool> toolOfCommand =
+            devFile
+                .getTools()
+                .stream()
+                .filter(tool -> tool.getName().equals(devAction.getTool()))
+                .findFirst();
+        if (toolOfCommand.isPresent()) {
+          command.getAttributes().put("pluginId", toolOfCommand.get().getId());
+        }
         commands.add(command);
       }
     }
 
     config.setCommands(commands);
-
-    // Manage tools
-    Map<String, String> attributes = new HashMap<>();
-    StringJoiner pluginsStringJoiner = new StringJoiner(",");
-    for (Tool tool : devFile.getTools()) {
-      if (tool.getDefinition().getCheEditor() != null) {
-        attributes.put("editor", tool.getDefinition().getCheEditor().getId());
-      } else {
-        pluginsStringJoiner.add(tool.getDefinition().getChePlugin().getId());
-      }
-    }
-    attributes.put("plugins", pluginsStringJoiner.toString());
-    config.setAttributes(attributes);
 
     // TODO: Add default environment. Remove when it will be possible
     config.setDefaultEnv("default");
