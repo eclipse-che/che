@@ -50,23 +50,15 @@ public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironmen
   /**
    * Apply plugin broker as init container to workspace environment. Workspace environment will have
    * broker's configmap, machines, and volumes added in addition to the init container
-   *
-   * @param workspaceEnvironment
-   * @param runtimeID
-   * @param pluginsMeta
-   * @throws InfrastructureException
    */
   public void apply(
-      InternalEnvironment workspaceEnvironment,
-      RuntimeIdentity runtimeID,
-      Collection<PluginMeta> pluginsMeta)
+      E workspaceEnvironment, RuntimeIdentity runtimeID, Collection<PluginMeta> pluginsMeta)
       throws InfrastructureException {
 
-    KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) workspaceEnvironment;
     E brokerEnvironment =
         brokerEnvironmentFactory.create(pluginsMeta, runtimeID, new BrokersResult());
 
-    Map<String, Pod> workspacePods = kubernetesEnvironment.getPods();
+    Map<String, Pod> workspacePods = workspaceEnvironment.getPods();
     if (workspacePods.size() != 1) {
       throw new InfrastructureException(
           "Che plugins tooling configuration can be applied to a workspace with one pod only.");
@@ -88,12 +80,12 @@ public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironmen
         throw new InfrastructureException(
             String.format("Could not find machine for broker container %s", container.getName()));
       }
-      kubernetesEnvironment
+      workspaceEnvironment
           .getMachines()
           .put(Names.machineName(workspacePod, container), brokerMachine);
     }
 
-    kubernetesEnvironment.getConfigMaps().putAll(brokerEnvironment.getConfigMaps());
+    workspaceEnvironment.getConfigMaps().putAll(brokerEnvironment.getConfigMaps());
     workspacePod.getSpec().setInitContainers(brokerPod.getSpec().getContainers());
     workspacePod.getSpec().getVolumes().addAll(brokerPod.getSpec().getVolumes());
   }
