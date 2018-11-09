@@ -127,8 +127,7 @@ public class DeletePackageTest {
    * @param expectedMessage warning message about delete package
    */
   private void deletePackage(String expectedMessage) {
-    menu.runAndWaitCommand(
-        TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
+    menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     askDialog.waitFormToOpen();
     askDialog.containsText(expectedMessage);
     askDialog.clickOkBtn();

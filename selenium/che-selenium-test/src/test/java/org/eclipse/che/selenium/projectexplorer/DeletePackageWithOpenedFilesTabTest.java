@@ -118,8 +118,7 @@ public class DeletePackageWithOpenedFilesTabTest {
 
   /** delete package for menu File */
   private void deletePackage() {
-    menu.runAndWaitCommand(
-        TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
+    menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.DELETE);
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
