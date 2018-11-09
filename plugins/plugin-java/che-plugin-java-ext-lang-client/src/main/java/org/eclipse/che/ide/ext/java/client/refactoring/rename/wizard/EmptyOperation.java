@@ -17,8 +17,8 @@ import static org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.Oper
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.js.Promises;
 
-/** Dummy implementation of {@link Operation} */
-public class DummyOperation implements Operation {
+/** Empty implementation of {@link Operation} */
+public class EmptyOperation implements Operation {
 
   @Override
   public Status getStatus() {

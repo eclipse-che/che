@@ -198,7 +198,7 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
   }
 
   private void prepareWizard(String oldName) {
-    currentOperation = new DummyOperation();
+    currentOperation = new EmptyOperation();
     view.setLoaderVisibility(false);
     view.clearErrorLabel();
     view.setOldName(oldName);
@@ -439,7 +439,7 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
     private void onComplete(Status status) {
       this.status = status;
 
-      currentOperation = new DummyOperation();
+      currentOperation = new EmptyOperation();
 
       view.setLoaderVisibility(false);
     }
