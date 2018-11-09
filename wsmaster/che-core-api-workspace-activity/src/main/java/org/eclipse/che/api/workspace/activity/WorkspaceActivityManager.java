@@ -46,11 +46,11 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class WorkspaceActivityManager {
+  public static final long MINIMAL_TIMEOUT = 300_000L;
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
 
   private static final String ACTIVITY_CHECKER = "activity-checker";
-  private static final long MINIMAL_TIMEOUT = 300_000L;
 
   private final long defaultTimeout;
   private final WorkspaceActivityDao activityDao;
@@ -71,9 +71,9 @@ public class WorkspaceActivityManager {
     this.defaultTimeout = timeout;
     if (timeout < MINIMAL_TIMEOUT) {
       LOG.warn(
-          "Default workspace idle timeout has a value of less than "
+          "Value of property \"che.limits.workspace.idle.timeout\" is below recommended minimum ("
               + TimeUnit.MILLISECONDS.toMinutes(MINIMAL_TIMEOUT)
-              + " minutes.");
+              + " minutes). This may cause problems with workspace components startup and can cause premature workspace shutdown.");
     }
 
     this.workspaceEventsSubscriber =
@@ -117,14 +117,6 @@ public class WorkspaceActivityManager {
   public void update(String wsId, long activityTime) {
     try {
       long timeout = getIdleTimeout(wsId);
-      if (timeout < MINIMAL_TIMEOUT) {
-        LOG.warn(
-            "Workspace '"
-                + wsId
-                + "' idle timeout has a value of less than "
-                + TimeUnit.MILLISECONDS.toMinutes(MINIMAL_TIMEOUT)
-                + " minutes.");
-      }
       if (timeout > 0) {
         activityDao.setExpiration(new WorkspaceExpiration(wsId, activityTime + timeout));
       }
