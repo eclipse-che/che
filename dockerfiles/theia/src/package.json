@@ -37,9 +37,7 @@
         "@theia/typescript": "latest",
         "@theia/userstorage": "latest",
         "@theia/variable-resolver": "latest",
-        "@theia/workspace": "latest"
-    },
-    "devDependencies": {
+        "@theia/workspace": "latest",
         "@theia/cli": "latest"
     }
 }
