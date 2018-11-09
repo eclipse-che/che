@@ -271,8 +271,11 @@ public class WsMasterModule extends AbstractModule {
     }
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
-
     MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
+
+    if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
+      install(new org.eclipse.che.core.tracing.TracingModule());
+    }
   }
 
   private void configureSingleUserMode(Map<String, String> persistenceProperties) {

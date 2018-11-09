@@ -261,6 +261,7 @@ parse_args() {
     --remove-che - remove existing che project
     --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
     --deploy-che-plugin-registry - deploy Che plugin registry
+    --enable-tracing - Enable tracing and deploy Jaeger
     ===================================
     ENV vars
     CHE_IMAGE_TAG - set che-server image tag, default: nightly
@@ -352,6 +353,10 @@ parse_args() {
            ;;
            --deploy-che-plugin-registry)
                export DEPLOY_CHE_PLUGIN_REGISTRY=true
+               shift
+           ;;
+           --enable-tracing)
+               export CHE_TRACING_ENABLED=true
                shift
            ;;
            *)
