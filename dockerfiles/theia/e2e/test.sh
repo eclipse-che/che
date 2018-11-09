@@ -20,7 +20,8 @@ fi
 # Runs E2E tests in a docker container.
 run_test_in_docker_container() {
   docker_exec run --rm ${DOCKER_RUN_OPTIONS} \
-       -v "${base_dir}/videos":/home/cypress/cypress/videos \
+       -v "${base_dir}/videos":/root/cypress/videos \
+       -v "${base_dir}/logs":/root/logs \
        -v /var/run/docker.sock:/var/run/docker.sock \
            $IMAGE_NAME
 }

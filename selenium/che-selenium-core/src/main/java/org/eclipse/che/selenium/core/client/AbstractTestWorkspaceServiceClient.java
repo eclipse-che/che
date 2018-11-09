@@ -31,6 +31,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.provider.TestApiEndpointUrlProvider;
 import org.eclipse.che.selenium.core.requestfactory.TestUserHttpJsonRequestFactoryCreator;
 import org.eclipse.che.selenium.core.user.TestUser;
@@ -119,6 +120,22 @@ public abstract class AbstractTestWorkspaceServiceClient implements TestWorkspac
     }
 
     requestFactory.fromUrl(getIdBasedUrl(workspace.getId())).useDeleteMethod().request();
+
+    WaitUtils.waitSuccessCondition(
+        () -> {
+          try {
+            return !exists(workspaceName, userName);
+          } catch (Exception e) {
+            throw new RuntimeException(
+                format(
+                    "Error of waiting on workspace name='%s', id='%s', username='%s' removal.",
+                    workspaceName, workspace.getId(), userName),
+                e);
+          }
+        },
+        TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC,
+        500,
+        TimeUnit.SECONDS);
 
     LOG.info(
         "Workspace name='{}', id='{}', username='{}' removed",
