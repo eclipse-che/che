@@ -27,15 +27,17 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  * <p>It checks that required service account, roles and role bindings exist and creates if needed.
  *
  * @author Sergii Leshchenko
+ * @see
+ *     org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesWorkspaceServiceAccount
  */
-class WorkspaceServiceAccount {
+class OpenShiftWorkspaceServiceAccount {
 
   private final String projectName;
   private final String serviceAccountName;
   private final OpenShiftClientFactory clientFactory;
   private final String workspaceId;
 
-  WorkspaceServiceAccount(
+  OpenShiftWorkspaceServiceAccount(
       String workspaceId,
       String projectName,
       String serviceAccountName,

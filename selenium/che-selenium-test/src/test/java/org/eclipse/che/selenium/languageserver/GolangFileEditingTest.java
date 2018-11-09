@@ -30,7 +30,6 @@ import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Map;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
@@ -81,7 +80,7 @@ public class GolangFileEditingTest {
   };
 
   /** It is Map[node-name, Pair[tab-name, line-number]] */
-  private static final Map<String, Pair<String, Integer>> PROJECT_SYMBOL_EXPECTED_TEXT =
+  private static final ImmutableMap<String, Pair<String, Integer>> PROJECT_SYMBOL_EXPECTED_TEXT =
       ImmutableMap.of(
           "print/desktop-go-simple/format.go", Pair.of("format.go", 23),
           "Print/desktop-go-simple/print.go", Pair.of("print.go", 24));
@@ -181,16 +180,6 @@ public class GolangFileEditingTest {
   public void checkFindDefinitionFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
     editor.waitTabIsPresent("towers.go");
-
-    // check the 'Hover' popup
-    editor.moveCursorToText("COLOR_YELLOW");
-
-    try {
-      editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
-    }
 
     // check Find Definition feature from Assistant menu
     editor.goToPosition(24, 8);
@@ -345,6 +334,21 @@ public class GolangFileEditingTest {
     assistantFindPanel.waitFormIsClosed();
     editor.waitTabVisibilityAndCheckFocus(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).first());
     editor.waitCursorPosition(PROJECT_SYMBOL_EXPECTED_TEXT.get(textSecondNode).second(), 1);
+  }
+
+  @Test(priority = 1, groups = UNDER_REPAIR)
+  public void checkHoverFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.waitTabIsPresent("towers.go");
+
+    editor.moveCursorToText("COLOR_YELLOW");
+
+    try {
+      editor.waitTextInHoverPopup("const COLOR_YELLOW string = \"\\x1b[33;1m \"");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10674", ex);
+    }
   }
 
   private void openFindPanelAndPrintInputTetx(String inputText) {

@@ -39,7 +39,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       @Nullable @Named("che.infra.openshift.project") String projectName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
       OpenShiftClientFactory clientFactory) {
-    super(projectName, clientFactory);
+    super(projectName, serviceAccountName, clientFactory);
     this.projectName = projectName;
     this.serviceAccountName = serviceAccountName;
     this.clientFactory = clientFactory;
@@ -64,9 +64,9 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
       // prepare service account for workspace only if account name is configured
       // and project is not predefined
       // since predefined project should be prepared during Che deployment
-      WorkspaceServiceAccount workspaceServiceAccount =
+      OpenShiftWorkspaceServiceAccount osWorkspaceServiceAccount =
           doCreateServiceAccount(workspaceId, projectName);
-      workspaceServiceAccount.prepare();
+      osWorkspaceServiceAccount.prepare();
     }
 
     return osProject;
@@ -90,7 +90,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   }
 
   @VisibleForTesting
-  WorkspaceServiceAccount doCreateServiceAccount(String workspaceId, String projectName) {
-    return new WorkspaceServiceAccount(workspaceId, projectName, serviceAccountName, clientFactory);
+  OpenShiftWorkspaceServiceAccount doCreateServiceAccount(String workspaceId, String projectName) {
+    return new OpenShiftWorkspaceServiceAccount(
+        workspaceId, projectName, serviceAccountName, clientFactory);
   }
 }

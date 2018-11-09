@@ -161,6 +161,28 @@ export PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${
 DEFAULT_PLUGIN__REGISTRY__URL="https://che-plugin-registry.openshift.io"
 export PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL:-${DEFAULT_PLUGIN__REGISTRY__URL}}
 
+DEFAULT_CHE_TRACING_ENABLED="false"
+export CHE_TRACING_ENABLED=${CHE_TRACING_ENABLED:-${DEFAULT_CHE_TRACING_ENABLED}}
+
+DEFAULT_JAEGER_ENDPOINT="http://jaeger-collector:14268/api/traces"
+export JAEGER_ENDPOINT=${JAEGER_ENDPOINT:-${DEFAULT_JAEGER_ENDPOINT}}
+
+DEFAULT_JAEGER_SERVICE_NAME="che-server"
+export JAEGER_SERVICE_NAME=${JAEGER_SERVICE_NAME:-${DEFAULT_JAEGER_SERVICE_NAME}}
+
+DEFAULT_JAEGER_SAMPLER_MANAGER_HOST_PORT="jaeger:5778"
+export JAEGER_SAMPLER_MANAGER_HOST_PORT=${JAEGER_SAMPLER_MANAGER_HOST_PORT:-${DEFAULT_JAEGER_SAMPLER_MANAGER_HOST_PORT}}
+
+DEFAULT_JAEGER_SAMPLER_TYPE="const"
+export JAEGER_SAMPLER_TYPE=${JAEGER_SAMPLER_TYPE:-${DEFAULT_JAEGER_SAMPLER_TYPE}}
+
+DEFAULT_JAEGER_SAMPLER_PARAM="1"
+export JAEGER_SAMPLER_PARAM=${JAEGER_SAMPLER_PARAM:-${DEFAULT_JAEGER_SAMPLER_PARAM}}
+
+DEFAULT_JAEGER_REPORTER_MAX_QUEUE_SIZE="10000"
+export JAEGER_REPORTER_MAX_QUEUE_SIZE=${JAEGER_REPORTER_MAX_QUEUE_SIZE:-${DEFAULT_JAEGER_REPORTER_MAX_QUEUE_SIZE}}
+
+
 if [ "${ENABLE_SSL}" == "true" ]; then
     HTTP_PROTOCOL="https"
     WS_PROTOCOL="wss"
@@ -375,9 +397,22 @@ if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
 fi
 }
 
+deployJaeger(){
+    if [ "${CHE_TRACING_ENABLED}" == "true" ]; then
+      echo "Deploying Jaeger..."
+      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/jaeger-all-in-one-template.yml
+      JAEGER_ROUTE=$($OC_BINARY get route/jaeger-query --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+      echo "Jaeger deployment complete. $JAEGER_ROUTE"
+    fi
+}
+
 
 deployChe() {
-    CHE_VAR_ARRAY=$(env | grep "^CHE_.")
+    if [ "${CHE_TRACING_ENABLED}" == "true" ]; then
+      CHE_VAR_ARRAY=$(env | grep -e "^CHE_." -e "^JAEGER_.")
+    else
+      CHE_VAR_ARRAY=$(env | grep "^CHE_.")
+    fi
     if [ ${#CHE_VAR_ARRAY[@]} -gt 0 ]; then
       ENV="-e ${CHE_VAR_ARRAY}"
     fi
@@ -390,6 +425,7 @@ Image: ${CHE_IMAGE_REPO}
 Pull policy: ${IMAGE_PULL_POLICY}
 Update strategy: ${UPDATE_STRATEGY}
 Setup OpenShift oAuth: ${SETUP_OCP_OAUTH}
+Enable Jaeger based tracing: ${CHE_TRACING_ENABLED}
 Environment variables:
 ${CHE_VAR_ARRAY}"
     CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
@@ -477,6 +513,7 @@ ${CHE_VAR_ARRAY}"
                          -p TLS=${TLS} \
                          -p CHE_WORKSPACE_PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL} \
                          -p CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME=${WORKSPACE_SERVICE_ACCOUNT_NAME} \
+                         -p CHE_TRACING_ENABLED=${CHE_TRACING_ENABLED} \
                          ${ENV}
 
     if [ ${UPDATE_STRATEGY} == "Recreate" ]; then
@@ -503,4 +540,5 @@ isLoggedIn
 createNewProject
 getRoutingSuffix
 deployChePluginRegistry
+deployJaeger
 deployChe

@@ -49,7 +49,7 @@ data:
   CHE_KEYCLOAK_USERNAME__CLAIM: {{ .Values.customOidcUsernameClaim }}
 {{- end }}
   CHE_INFRA_KUBERNETES_NAMESPACE: {{ .Values.global.cheWorkspacesNamespace }}
-  CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME: {{ template "workspaceServiceAccountName" . }}
+  CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME: {{ .Values.global.cheWorkspaceServiceAccount }}
   CHE_INFRA_KUBERNETES_TRUST__CERTS: "false"
   CHE_INFRA_KUBERNETES_PVC_STRATEGY: "common"
   CHE_INFRA_KUBERNETES_PVC_QUANTITY: {{ .Values.global.pvcClaim }}

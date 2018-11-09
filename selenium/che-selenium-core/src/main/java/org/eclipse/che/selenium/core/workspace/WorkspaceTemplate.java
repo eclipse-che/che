@@ -16,29 +16,21 @@ package org.eclipse.che.selenium.core.workspace;
  *
  * @author Dmytro Nochevnov
  */
-public enum WorkspaceTemplate {
-  BROKEN("broken_workspace.json"),
-  DEFAULT("default.json"),
-  DEFAULT_WITH_GITHUB_PROJECTS("default_with_github_projects.json"),
-  ECLIPSE_PHP("eclipse_php.json"),
-  ECLIPSE_NODEJS("eclipse_nodejs.json"),
-  ECLIPSE_CPP_GCC("eclipse_cpp_gcc.json"),
-  ECLIPSE_NODEJS_YAML("eclipse_nodejs_with_yaml_ls.json"),
-  PYTHON("ubuntu_python.json"),
-  NODEJS_WITH_JSON_LS("nodejs_with_json_ls.json"),
-  UBUNTU("ubuntu.json"),
-  UBUNTU_GO("ubuntu_go.json"),
-  UBUNTU_JDK8("ubuntu_jdk8.json"),
-  UBUNTU_LSP("ubuntu_with_c_sharp_lsp.json"),
-  APACHE_CAMEL("spring_boot_with_apache_camel_ls.json");
+public final class WorkspaceTemplate {
+  public static final String BROKEN = "broken_workspace.json";
+  public static final String DEFAULT = "default.json";
+  public static final String DEFAULT_WITH_GITHUB_PROJECTS = "default_with_github_projects.json";
+  public static final String ECLIPSE_PHP = "eclipse_php.json";
+  public static final String ECLIPSE_NODEJS = "eclipse_nodejs.json";
+  public static final String ECLIPSE_CPP_GCC = "eclipse_cpp_gcc.json";
+  public static final String ECLIPSE_NODEJS_YAML = "eclipse_nodejs_with_yaml_ls.json";
+  public static final String PYTHON = "ubuntu_python.json";
+  public static final String NODEJS_WITH_JSON_LS = "nodejs_with_json_ls.json";
+  public static final String UBUNTU = "ubuntu.json";
+  public static final String UBUNTU_GO = "ubuntu_go.json";
+  public static final String UBUNTU_JDK8 = "ubuntu_jdk8.json";
+  public static final String UBUNTU_LSP = "ubuntu_with_c_sharp_lsp.json";
+  public static final String APACHE_CAMEL = "spring_boot_with_apache_camel_ls.json";
 
-  private final String templateFileName;
-
-  WorkspaceTemplate(String templateFileName) {
-    this.templateFileName = templateFileName;
-  }
-
-  public String getTemplateFileName() {
-    return templateFileName;
-  }
+  private WorkspaceTemplate() {}
 }

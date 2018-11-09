@@ -55,7 +55,11 @@ class GoalPopUpGroup extends DefaultActionGroup {
 
   @Override
   public void update(ActionEvent e) {
-    e.getPresentation().setText(commandGoal.getId() + " (" + getChildrenCount() + ")");
+    if (getChildrenCount() > 0) {
+      e.getPresentation().setText(commandGoal.getId() + " (" + getChildrenCount() + ")");
+    } else {
+      e.getPresentation().setEnabledAndVisible(false);
+    }
   }
 
   private SVGResource getCommandGoalIcon() {

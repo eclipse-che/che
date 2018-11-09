@@ -55,7 +55,7 @@ context('TypeScript', () => {
             });
         }).then(() => {
             // wait the refresh after workspace is opened
-            cy.wait(6000);
+            cy.wait(10000);
 
             cy.get('#theia-top-panel').should('exist').then(() => {
                 cy.theiaCommandPaletteClick('New Folder').then(() => {

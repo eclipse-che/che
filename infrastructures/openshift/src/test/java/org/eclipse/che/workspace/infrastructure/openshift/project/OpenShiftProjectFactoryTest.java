@@ -77,7 +77,7 @@ public class OpenShiftProjectFactoryTest {
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
-    WorkspaceServiceAccount serviceAccount = mock(WorkspaceServiceAccount.class);
+    OpenShiftWorkspaceServiceAccount serviceAccount = mock(OpenShiftWorkspaceServiceAccount.class);
     doReturn(serviceAccount).when(projectFactory).doCreateServiceAccount(any(), any());
 
     // when

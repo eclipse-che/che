@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.CONSOLE_JAVA_SIMPLE;
@@ -58,22 +59,25 @@ public class ApacheCamelFileEditingTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/project-for-camel-ls");
-    testProjectServiceClient.importProject(
-        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CONSOLE_JAVA_SIMPLE);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
-  public void checkLanguageServerInitialized() {
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
-    editor.waitTabIsPresent(CAMEL_FILE_NAME);
+  public void checkLanguageServerInitialized() throws Exception {
+    URL resource = ApacheCamelFileEditingTest.class.getResource("/projects/project-for-camel-ls");
 
     // check Apache Camel language server initialized
     consoles.selectProcessByTabName("dev-machine");
     consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
+
+    testProjectServiceClient.importProject(
+        workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CONSOLE_JAVA_SIMPLE);
+
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.openItemByPath(PATH_TO_CAMEL_FILE);
+    editor.waitTabIsPresent(CAMEL_FILE_NAME);
   }
 
   @Test(priority = 1)
@@ -104,7 +108,7 @@ public class ApacheCamelFileEditingTest {
     editor.waitTextIntoEditor("timer:timerName?fixedRate=false&amp;exchangePattern=InOnly");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkHoverFeature() {
     // move cursor on text and check expected text in hover popup
     editor.moveCursorToText("velocity");
@@ -113,7 +117,7 @@ public class ApacheCamelFileEditingTest {
       editor.waitTextInHoverPopup("Transforms the message using a Velocity template.");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/10674", ex);
+      fail("Known permanent failure https://github.com/eclipse/che/issues/10674", ex);
     }
   }
 
