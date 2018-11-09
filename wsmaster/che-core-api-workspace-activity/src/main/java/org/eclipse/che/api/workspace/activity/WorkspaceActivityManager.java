@@ -73,7 +73,7 @@ public class WorkspaceActivityManager {
       LOG.warn(
           "Value of property \"che.limits.workspace.idle.timeout\" is below recommended minimum ("
               + TimeUnit.MILLISECONDS.toMinutes(MINIMAL_TIMEOUT)
-              + " minutes). This may cause problems with workspace components startup and can cause premature workspace shutdown.");
+              + " minutes). This may cause problems with workspace components startup and/or premature workspace shutdown.");
     }
 
     this.workspaceEventsSubscriber =
