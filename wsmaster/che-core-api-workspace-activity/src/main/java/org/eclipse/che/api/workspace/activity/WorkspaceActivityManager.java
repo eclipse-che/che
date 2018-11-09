@@ -16,6 +16,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_B
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -49,6 +50,7 @@ public class WorkspaceActivityManager {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
 
   private static final String ACTIVITY_CHECKER = "activity-checker";
+  private static final long MINIMAL_TIMEOUT = 300_000L;
 
   private final long defaultTimeout;
   private final WorkspaceActivityDao activityDao;
@@ -67,6 +69,13 @@ public class WorkspaceActivityManager {
     this.eventService = eventService;
     this.activityDao = activityDao;
     this.defaultTimeout = timeout;
+    if (timeout < MINIMAL_TIMEOUT) {
+      LOG.warn(
+          "Default workspace idle timeout has a value of less than "
+              + TimeUnit.MILLISECONDS.toMinutes(MINIMAL_TIMEOUT)
+              + " minutes.");
+    }
+
     this.workspaceEventsSubscriber =
         new EventSubscriber<WorkspaceStatusEvent>() {
           @Override
@@ -108,6 +117,14 @@ public class WorkspaceActivityManager {
   public void update(String wsId, long activityTime) {
     try {
       long timeout = getIdleTimeout(wsId);
+      if (timeout < MINIMAL_TIMEOUT) {
+        LOG.warn(
+            "Workspace '"
+                + wsId
+                + "' idle timeout has a value of less than "
+                + TimeUnit.MILLISECONDS.toMinutes(MINIMAL_TIMEOUT)
+                + " minutes.");
+      }
       if (timeout > 0) {
         activityDao.setExpiration(new WorkspaceExpiration(wsId, activityTime + timeout));
       }
