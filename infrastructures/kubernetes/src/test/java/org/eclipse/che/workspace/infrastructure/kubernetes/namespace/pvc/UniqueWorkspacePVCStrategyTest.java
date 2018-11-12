@@ -224,9 +224,10 @@ public class UniqueWorkspacePVCStrategyTest {
     when(k8sEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID);
+    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
 
     verify(pvcs).create(any());
+    verify(pvcs).waitBound(uniqueName, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -235,7 +236,7 @@ public class UniqueWorkspacePVCStrategyTest {
     when(k8sEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME_PREFIX, pvc));
     doThrow(InfrastructureException.class).when(pvcs).create(any(PersistentVolumeClaim.class));
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID);
+    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
   }
 
   @Test
