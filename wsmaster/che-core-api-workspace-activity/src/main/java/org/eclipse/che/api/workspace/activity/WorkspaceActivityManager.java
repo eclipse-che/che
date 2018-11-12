@@ -16,6 +16,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_B
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class WorkspaceActivityManager {
+  public static final long MINIMAL_TIMEOUT = 300_000L;
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
 
@@ -67,6 +69,13 @@ public class WorkspaceActivityManager {
     this.eventService = eventService;
     this.activityDao = activityDao;
     this.defaultTimeout = timeout;
+    if (timeout < MINIMAL_TIMEOUT) {
+      LOG.warn(
+          "Value of property \"che.limits.workspace.idle.timeout\" is below recommended minimum ("
+              + TimeUnit.MILLISECONDS.toMinutes(MINIMAL_TIMEOUT)
+              + " minutes). This may cause problems with workspace components startup and/or premature workspace shutdown.");
+    }
+
     this.workspaceEventsSubscriber =
         new EventSubscriber<WorkspaceStatusEvent>() {
           @Override
