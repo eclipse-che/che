@@ -69,6 +69,8 @@ public class CreateNamedFactoryFromDashboardTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);

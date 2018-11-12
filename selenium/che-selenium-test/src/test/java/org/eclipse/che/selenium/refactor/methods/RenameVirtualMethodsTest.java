@@ -11,9 +11,6 @@
  */
 package org.eclipse.che.selenium.refactor.methods;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -35,7 +32,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
@@ -133,15 +129,9 @@ public class RenameVirtualMethodsTest {
     doRefactorByWizardWithClosingWarnMess(14, 10, "k");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void testGeneric2() {
-    try {
-      doRefactorByWizard(20, 20, "addIfPositive");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10784", ex);
-    }
-
+    doRefactorByWizard(20, 20, "addIfPositive");
     editor.waitTextIntoEditor(contentFromOutA);
   }
 
