@@ -35,6 +35,10 @@
             <artifactId>guice-persist</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-jdbc</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
         </dependency>

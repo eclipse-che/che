@@ -64,6 +64,11 @@
                 <version>${version.jsr305.plugin}</version>
             </dependency>
             <dependency>
+                <groupId>io.opentracing.contrib</groupId>
+                <artifactId>opentracing-jdbc</artifactId>
+                <version>0.0.9</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-catalina</artifactId>
                 <version>${org.apache.tomcat.version}</version>
