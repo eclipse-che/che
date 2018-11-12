@@ -40,6 +40,5 @@
         <module>che-core-db-vendor-postgresql</module>
         <module>che-core-tracing-core</module>
         <module>che-core-tracing-web</module>
-        <module>che-core-tracing-jdbc</module>
     </modules>
 </project>

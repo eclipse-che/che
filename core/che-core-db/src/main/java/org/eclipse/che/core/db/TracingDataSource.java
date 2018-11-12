@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.core.db;
 
+import com.google.common.annotations.Beta;
 import io.opentracing.contrib.jdbc.TracingConnection;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -20,6 +21,14 @@ import java.util.Collections;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 
+/**
+ * Adding tracing support for existing @{@link javax.sql.DataSource}. DbType and DbUser information
+ * omitted in traces. Traced are made only if active span exists. Prerequisites of using this class
+ * is that @{@link io.opentracing.Tracer} should be set in @{@link io.opentracing.util.GlobalTracer}
+ *
+ * @author Sergii Kabashniuk
+ */
+@Beta
 public class TracingDataSource implements DataSource {
 
   private final DataSource delegate;
