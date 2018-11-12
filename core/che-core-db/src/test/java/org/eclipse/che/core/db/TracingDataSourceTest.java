@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.core.db;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import io.opentracing.contrib.jdbc.TracingConnection;
@@ -44,7 +44,7 @@ public class TracingDataSourceTest {
   }
 
   @Test
-  public void testGetConnection() throws SQLException {
+  public void shouldBeAbleToGetConnection() throws SQLException {
     TracingDataSource ds = new TracingDataSource(dataSource);
 
     Connection actual = ds.getConnection();
@@ -53,7 +53,7 @@ public class TracingDataSourceTest {
   }
 
   @Test
-  public void testGetConnection1() throws SQLException {
+  public void shouldBeAbleToGetConnectionWithEmailAndPassword() throws SQLException {
     TracingDataSource ds = new TracingDataSource(dataSource);
 
     Connection actual = ds.getConnection("user", "password");
@@ -62,7 +62,7 @@ public class TracingDataSourceTest {
   }
 
   @Test
-  public void testWrapWithTracingIfEnabled() throws Exception {
+  public void shouldBeAbleTogetTracingDataSource() throws Exception {
     setEnv(ImmutableMap.of("CHE_TRACING_ENABLED", "true"));
 
     DataSource actual = TracingDataSource.wrapWithTracingIfEnabled(dataSource);
@@ -71,7 +71,7 @@ public class TracingDataSourceTest {
   }
 
   @Test
-  public void testShouldNotWrapWithTracingIfEnabled() throws Exception {
+  public void shouldNotWrapDatasourceIfEnvSetToFalseØ() throws Exception {
     setEnv(ImmutableMap.of("CHE_TRACING_ENABLED", "false"));
 
     DataSource actual = TracingDataSource.wrapWithTracingIfEnabled(dataSource);
@@ -80,7 +80,7 @@ public class TracingDataSourceTest {
   }
 
   @Test
-  public void testShouldNot2WrapWithTracingIfEnabled() throws Exception {
+  public void shouldNotWrapDatasourceIfEnvIsNotSet() throws Exception {
     DataSource actual = TracingDataSource.wrapWithTracingIfEnabled(dataSource);
 
     assertEquals(actual, dataSource);
