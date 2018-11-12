@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebElement;
 
 @Singleton
@@ -68,11 +69,14 @@ public class FindReferencesConsoleTab {
   }
 
   private void waitReferenceWithText(String expectedText) {
-    seleniumWebDriverHelper.waitSuccessCondition(
-        driver ->
-            getReferences()
-                .stream()
-                .anyMatch(reference -> isReferenceContainsText(reference, expectedText)));
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitSuccessCondition(
+                driver ->
+                    getReferences()
+                        .stream()
+                        .anyMatch(reference -> isReferenceContainsText(reference, expectedText))),
+        StaleElementReferenceException.class);
   }
 
   public void waitAllReferencesWithText(String... expectedText) {
