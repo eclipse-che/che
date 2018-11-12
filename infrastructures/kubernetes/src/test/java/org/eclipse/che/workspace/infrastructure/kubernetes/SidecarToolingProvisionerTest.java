@@ -48,6 +48,7 @@ public class SidecarToolingProvisionerTest {
   private static final String RECIPE_TYPE = "TestingRecipe";
   private static final String PLUGIN_META_NAME = "TestPluginMeta";
 
+  @Mock private StartSynchronizer startSynchronizer;
   @Mock private KubernetesBrokerInitContainerApplier<KubernetesEnvironment> brokerApplier;
   @Mock private PluginMetaRetriever pluginMetaRetriever;
   @Mock private PluginBrokerManager<KubernetesEnvironment> brokerManager;
@@ -91,7 +92,7 @@ public class SidecarToolingProvisionerTest {
 
   @Test
   public void shouldNotAddInitContainerWhenWorkspaceIsNotEphemeral() throws Exception {
-    provisioner.provision(runtimeId, nonEphemeralEnvironment);
+    provisioner.provision(runtimeId, startSynchronizer, nonEphemeralEnvironment);
 
     verify(chePluginsApplier, times(1)).apply(any(), any());
     verify(brokerApplier, times(0)).apply(any(), any(), any());
@@ -99,7 +100,7 @@ public class SidecarToolingProvisionerTest {
 
   @Test
   public void shouldIncludeInitContainerWhenWorkspaceIsEphemeral() throws Exception {
-    provisioner.provision(runtimeId, ephemeralEnvironment);
+    provisioner.provision(runtimeId, startSynchronizer, ephemeralEnvironment);
 
     verify(chePluginsApplier, times(1)).apply(any(), any());
     verify(brokerApplier, times(1)).apply(any(), any(), any());

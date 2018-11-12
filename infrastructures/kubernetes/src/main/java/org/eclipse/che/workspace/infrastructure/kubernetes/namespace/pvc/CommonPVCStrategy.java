@@ -132,7 +132,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   @Override
-  public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
+  public void prepare(KubernetesEnvironment k8sEnv, String workspaceId, long timeoutMillis)
       throws InfrastructureException {
     if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
       return;
@@ -149,7 +149,10 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
             (String[])
                 pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
         if (!existing.contains(pvc.getMetadata().getName())) {
+          LOG.debug("Creating PVC for workspace '{}'", workspaceId);
           pvcs.create(pvc);
+          LOG.debug("Waiting PVC for workspace '{}' to be bound", workspaceId);
+          pvcs.waitBound(pvc.getMetadata().getName(), timeoutMillis);
         }
         if (preCreateDirs && subpaths != null) {
           pvcSubPathHelper.createDirs(workspaceId, subpaths);
