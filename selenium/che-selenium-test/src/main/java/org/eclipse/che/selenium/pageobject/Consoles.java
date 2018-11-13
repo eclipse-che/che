@@ -572,7 +572,6 @@ public class Consoles {
   public void startTerminalFromProcessesArea(String machineName) {
     final String machineXpath = format(MACHINE_NAME, machineName);
 
-    seleniumWebDriverHelper.waitAndClick(By.xpath(machineXpath));
     seleniumWebDriverHelper.moveCursorToAndContextClick(By.xpath(machineXpath));
     clickOnTerminalItemInContextMenu();
   }
