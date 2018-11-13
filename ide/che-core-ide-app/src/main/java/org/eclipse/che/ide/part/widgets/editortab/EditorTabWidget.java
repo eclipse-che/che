@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.ide.part.widgets.editortab;
 
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static org.eclipse.che.ide.api.editor.events.FileEvent.FileOperation.CLOSE;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.ADDED;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.MOVED_FROM;
@@ -36,6 +37,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.Date;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
@@ -53,6 +55,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.part.editor.EditorTabContextMenuFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.util.UUID;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -128,7 +131,14 @@ public class EditorTabWidget extends Composite
     sinkEvents(Event.ONMOUSEDOWN);
 
     closeButton.addDomHandler(
-        event -> editorAgent.closeEditor(relatedEditorPart), ClickEvent.getType());
+        event -> {
+          editorAgent.closeEditor(relatedEditorPart);
+          Log.info(
+              this.getClass(),
+              "closeButton() line 135, time: "
+                  + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+        },
+        ClickEvent.getType());
 
     relatedEditorPart.addPropertyListener(
         (source, propId) -> {
@@ -144,6 +154,10 @@ public class EditorTabWidget extends Composite
     if (event.getTypeInt() == Event.ONMOUSEDOWN && event.getButton() == NativeEvent.BUTTON_MIDDLE) {
       if (editorAgent.getOpenedEditors().size() == 1) {
         editorAgent.closeEditor(relatedEditorPart);
+        Log.info(
+            this.getClass(),
+            "onBrowserEvent() line 153, time: "
+                + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
       } else {
         // In some OS paste action is assigned to middle mouse key by default. 'closeEditor'
         // command restores cursor position in a new editor in the same time when the paste
@@ -152,6 +166,9 @@ public class EditorTabWidget extends Composite
           @Override
           public void run() {
             editorAgent.closeEditor(relatedEditorPart);
+            Log.info(
+                this.getClass(),
+                "run() line 165, time: " + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
           }
         }.schedule(150);
       }

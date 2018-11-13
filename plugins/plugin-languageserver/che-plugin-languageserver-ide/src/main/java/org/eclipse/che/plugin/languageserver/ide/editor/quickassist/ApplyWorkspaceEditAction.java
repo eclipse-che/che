@@ -12,6 +12,7 @@
 package org.eclipse.che.plugin.languageserver.ide.editor.quickassist;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
@@ -19,6 +20,7 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -360,6 +362,10 @@ public class ApplyWorkspaceEditAction extends BaseAction {
     for (EditorPartPresenter editor : openedEditors) {
       if (resource.getLocation().isPrefixOf(editor.getEditorInput().getFile().getLocation())) {
         editorAgent.closeEditor(editor);
+        Log.info(
+            this.getClass(),
+            "closeRelatedEditors line 359, time: "
+                + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
       }
     }
   }

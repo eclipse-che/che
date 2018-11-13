@@ -11,11 +11,13 @@
  */
 package org.eclipse.che.ide.editor;
 
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.NOT_EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.SUCCESS;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.Date;
 import java.util.List;
 import java.util.function.BiConsumer;
 import javax.inject.Inject;
@@ -131,6 +133,10 @@ public class EditorFileStatusNotificationOperation
     for (EditorPartPresenter openEditor : openedEditors) {
       if (openEditor.getEditorInput().getFile().getLocation().equals(path)) {
         editorAgent.closeEditor(openEditor);
+        Log.info(
+            this.getClass(),
+            "actionPerformed() line 57, time: "
+                + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
       }
     }
   }

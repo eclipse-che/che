@@ -11,16 +11,19 @@
  */
 package org.eclipse.che.ide.actions;
 
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Date;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * General action which listens current active editor and closes it if need.
@@ -51,5 +54,8 @@ public class CloseActiveEditorAction extends AbstractPerspectiveAction {
   @Override
   public void actionPerformed(ActionEvent e) {
     editorAgent.closeEditor(editorAgent.getActiveEditor());
+    Log.info(
+        this.getClass(),
+        "actionPerformed() line 57, time: " + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
   }
 }

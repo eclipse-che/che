@@ -13,6 +13,7 @@ package org.eclipse.che.ide.ext.java.client.action;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
@@ -20,6 +21,7 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collections;
+import java.util.Date;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.action.AbstractPerspectiveAction;
 import org.eclipse.che.ide.api.action.ActionEvent;
@@ -36,6 +38,7 @@ import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.MavenResources;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.resource.Path;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.plugin.maven.shared.MavenAttributes;
 
 /**
@@ -137,6 +140,10 @@ public class GetEffectivePomAction extends AbstractPerspectiveAction {
         editorAgent.activateEditor(effectivePomTab);
       } else {
         editorAgent.closeEditor(effectivePomTab);
+        Log.info(
+            this.getClass(),
+            "showEffectivePomEditor() line 142, time: "
+                + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
         editorAgent.openEditor(
             new SyntheticFile(effectivePomPath, artifactId + " [effective pom]", content));
       }

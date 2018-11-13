@@ -11,15 +11,19 @@
  */
 package org.eclipse.che.ide.part.editor.actions;
 
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.web.bindery.event.shared.EventBus;
+import java.util.Date;
 import org.eclipse.che.ide.CoreLocalizationConstant;
 import org.eclipse.che.ide.api.action.ActionEvent;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.parts.EditorTab;
 import org.eclipse.che.ide.api.resources.VirtualFile;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Performs closing selected editor. Note: the pane which contains this editor will be closed when
@@ -47,5 +51,8 @@ public class CloseAction extends EditorAbstractAction {
     final EditorPartPresenter openedEditor = editorAgent.getOpenedEditor(editorFile.getLocation());
 
     editorAgent.closeEditor(openedEditor);
+    Log.info(
+        this.getClass(),
+        "actionPerformed() line 54, time: " + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
   }
 }

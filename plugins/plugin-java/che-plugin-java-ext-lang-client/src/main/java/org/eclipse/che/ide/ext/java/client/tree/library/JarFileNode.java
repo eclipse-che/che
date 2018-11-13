@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.ide.ext.java.client.tree.library;
 
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.resources.ResourceDelta.REMOVED;
 
@@ -20,6 +21,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.debug.shared.model.Location;
@@ -46,6 +48,7 @@ import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.data.settings.NodeSettings;
 import org.eclipse.che.ide.ui.smartTree.presentation.NodePresentation;
+import org.eclipse.che.ide.util.loging.Log;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExternalLibrariesParameters;
 import org.eclipse.che.jdt.ls.extension.api.dto.JarEntry;
 import org.eclipse.che.plugin.languageserver.ide.location.HasURI;
@@ -252,6 +255,10 @@ public class JarFileNode extends SyntheticNode<JarEntry>
     if (REMOVED == delta.getKind() && project.equals(resourceLocation)) {
       EditorPartPresenter editorPart = editorAgent.getOpenedEditor(getLocation());
       editorAgent.closeEditor(editorPart);
+      Log.info(
+          this.getClass(),
+          "showEffectivePomEditor() line 142, time: "
+              + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
 
       removeHandlers();
     }

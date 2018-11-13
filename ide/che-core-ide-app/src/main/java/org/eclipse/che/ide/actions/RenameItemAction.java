@@ -13,6 +13,7 @@ package org.eclipse.che.ide.actions;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
@@ -23,6 +24,7 @@ import static org.eclipse.che.ide.part.perspectives.project.ProjectPerspective.P
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -48,6 +50,7 @@ import org.eclipse.che.ide.ui.dialogs.input.InputCallback;
 import org.eclipse.che.ide.ui.dialogs.input.InputDialog;
 import org.eclipse.che.ide.ui.dialogs.input.InputValidator;
 import org.eclipse.che.ide.util.NameUtils;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * Rename selected resource in the application context.
@@ -180,6 +183,10 @@ public class RenameItemAction extends AbstractPerspectiveAction {
     for (EditorPartPresenter editor : openedEditors) {
       if (resource.getLocation().isPrefixOf(editor.getEditorInput().getFile().getLocation())) {
         editorAgent.closeEditor(editor);
+        Log.info(
+            this.getClass(),
+            "closeRelatedEditors() line 186, time: "
+                + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
       }
     }
   }

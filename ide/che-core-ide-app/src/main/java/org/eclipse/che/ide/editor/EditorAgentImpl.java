@@ -13,6 +13,7 @@ package org.eclipse.che.ide.editor;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static java.lang.Boolean.parseBoolean;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
@@ -30,6 +31,7 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.util.ArrayOf;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -226,6 +228,9 @@ public class EditorAgentImpl
 
   @Override
   public void closeEditor(final EditorPartPresenter editor) {
+    Log.info(
+        this.getClass(),
+        "closeEditor() line 231, time: " + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
     if (editor == null) {
       return;
     }
@@ -819,6 +824,10 @@ public class EditorAgentImpl
   public void onWorkspaceStopped(WorkspaceStoppedEvent event) {
     for (EditorPartPresenter editor : getOpenedEditors()) {
       closeEditor(editor);
+      Log.info(
+          this.getClass(),
+          "onWorkspaceStopped() line 826, time: "
+              + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
     }
   }
 

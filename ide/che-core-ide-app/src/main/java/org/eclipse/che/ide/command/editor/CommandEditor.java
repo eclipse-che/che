@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.ide.command.editor;
 
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 
@@ -21,6 +22,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Operation;
@@ -49,6 +51,7 @@ import org.eclipse.che.ide.command.editor.page.project.ProjectsPage;
 import org.eclipse.che.ide.command.node.CommandFileNode;
 import org.eclipse.che.ide.command.node.NodeFactory;
 import org.eclipse.che.ide.ui.dialogs.DialogFactory;
+import org.eclipse.che.ide.util.loging.Log;
 import org.vectomatic.dom.svg.ui.SVGImage;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
@@ -333,6 +336,10 @@ public class CommandEditor extends AbstractEditorPresenter
   public void onCommandRemoved(CommandRemovedEvent event) {
     if (event.getCommand().getName().equals(editedCommand.getName())) {
       editorAgent.closeEditor(this);
+      Log.info(
+          this.getClass(),
+          "onCommandRemoved() line 339, time: "
+              + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
       commandRemovedHandlerRegistration.removeHandler();
     }
   }

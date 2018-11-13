@@ -13,6 +13,7 @@ package org.eclipse.che.ide.part.editor;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Iterables.filter;
+import static com.google.gwt.i18n.client.DateTimeFormat.getFormat;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_HORIZONTALLY;
 import static org.eclipse.che.ide.actions.EditorActions.SPLIT_VERTICALLY;
 import static org.eclipse.che.ide.api.editor.EditorWithErrors.EditorState.ERROR;
@@ -28,11 +29,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -72,6 +69,7 @@ import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenuItem;
 import org.eclipse.che.ide.part.widgets.panemenu.EditorPaneMenuItemFactory;
 import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.ide.ui.toolbar.PresentationFactory;
+import org.eclipse.che.ide.util.loging.Log;
 
 /**
  * EditorPartStackPresenter is a special PartStackPresenter that is shared among all Perspectives
@@ -405,6 +403,10 @@ public class EditorPartStackPresenter extends PartStackPresenter
                 @Override
                 public void execute() {
                   editorAgent.closeEditor(((EditorTab) tabItem).getRelativeEditorPart());
+                  Log.info(
+                      this.getClass(),
+                      "onCloseNonPinnedEditors() line 57, time: "
+                          + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
                 }
               });
     }
@@ -567,6 +569,10 @@ public class EditorPartStackPresenter extends PartStackPresenter
       if (tabItem instanceof EditorTab) {
         EditorTab editorTab = (EditorTab) tabItem;
         editorAgent.closeEditor(editorTab.getRelativeEditorPart());
+        Log.info(
+            this.getClass(),
+            "onCloseButtonClicked() line 571, time: "
+                + getFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
       }
     }
   }
