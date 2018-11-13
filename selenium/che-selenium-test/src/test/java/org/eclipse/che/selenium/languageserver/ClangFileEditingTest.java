@@ -62,18 +62,12 @@ public class ClangFileEditingTest {
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CPP);
 
     ide.open(workspace);
-  }
+    ide.waitOpenedWorkspaceIsReadyToUse();
 
-  @Test
-  public void checkLanguageServerInitialized() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_CPP_FILE);
     editor.waitTabIsPresent(CPP_FILE_NAME);
-
-    // check Clang language server initialized
-    consoles.selectProcessByTabName("dev-machine");
-    consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
   @Test(priority = 1)
