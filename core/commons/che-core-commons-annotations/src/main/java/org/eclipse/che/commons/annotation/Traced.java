@@ -21,7 +21,17 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
-/** Annotates a method as traced. This means that the method */
+/**
+ * Annotates a method as traced.
+ *
+ * <p>If the method is declared in a Guice-managed class and the Guice environment is equipped with
+ * an interceptor for handling this annotation (which should be the case at least in the workspace
+ * server), each call of such method will create a new span declared as a child of some current
+ * span, if any, with the provided name (or the default name).
+ *
+ * <p>The method can declare additional tags in its body that will be applied to the span, see
+ * {@link Tags}.
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Traced {
@@ -65,6 +75,7 @@ public @interface Traced {
    * annotated methods.
    */
   final class TagsStack {
+
     private static final ThreadLocal<Deque<Map<String, String>>> TAGS =
         ThreadLocal.withInitial(ArrayDeque::new);
 
