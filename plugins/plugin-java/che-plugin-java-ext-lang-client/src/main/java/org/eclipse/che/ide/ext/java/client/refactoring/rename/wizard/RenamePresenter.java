@@ -11,20 +11,25 @@
  */
 package org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard;
 
+import static org.eclipse.che.api.promises.client.js.JsPromiseError.create;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.FLOAT_MODE;
-import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
-import static org.eclipse.che.jdt.ls.extension.api.RefactoringSeverity.INFO;
-import static org.eclipse.che.jdt.ls.extension.api.RefactoringSeverity.OK;
+import static org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.Operation.Status.CANCELLED;
+import static org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.Operation.Status.FAIL;
+import static org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.Operation.Status.INITIAL;
+import static org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.Operation.Status.IN_PROGRESS;
+import static org.eclipse.che.ide.ext.java.client.refactoring.rename.wizard.Operation.Status.SUCCESS;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
+import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.ide.api.editor.EditorAgent;
 import org.eclipse.che.ide.api.editor.EditorPartPresenter;
 import org.eclipse.che.ide.api.editor.text.TextPosition;
 import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.notification.NotificationManager;
+import org.eclipse.che.ide.api.notification.StatusNotification;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.api.resources.VirtualFile;
 import org.eclipse.che.ide.dto.DtoFactory;
@@ -71,6 +76,8 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
   private final DtoFactory dtoFactory;
 
   private RefactorInfo refactorInfo;
+
+  private Operation currentOperation;
 
   @Inject
   public RenamePresenter(
@@ -137,7 +144,10 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
         .catchError(
             error -> {
               notificationManager.notify(
-                  locale.failedToRename(), error.getMessage(), FAIL, FLOAT_MODE);
+                  locale.failedToRename(),
+                  error.getMessage(),
+                  StatusNotification.Status.FAIL,
+                  FLOAT_MODE);
             });
   }
 
@@ -188,6 +198,8 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
   }
 
   private void prepareWizard(String oldName) {
+    currentOperation = new EmptyOperation();
+    view.setLoaderVisibility(false);
     view.clearErrorLabel();
     view.setOldName(oldName);
     view.setVisiblePatternsPanel(false);
@@ -208,7 +220,17 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
   /** {@inheritDoc} */
   @Override
   public void onAcceptButtonClicked() {
-    getChanges()
+    Operation<RefactoringResult> getChangesOperation = new GetRefactoringChangesOperation();
+    currentOperation = getChangesOperation;
+
+    getChangesOperation
+        .perform(
+            () ->
+                notificationManager.notify(
+                    locale.renameIsCancelledTitle(),
+                    locale.renameIsCancelledMessage(),
+                    StatusNotification.Status.SUCCESS,
+                    FLOAT_MODE))
         .then(
             refactoringResult -> {
               RefactoringSeverity severity =
@@ -230,6 +252,8 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
   /** {@inheritDoc} */
   @Override
   public void onCancelButtonClicked() {
+    currentOperation.cancel();
+
     setEditorFocus();
   }
 
@@ -294,12 +318,20 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
         .catchError(
             error -> {
               notificationManager.notify(
-                  locale.failedToRename(), error.getMessage(), FAIL, FLOAT_MODE);
+                  locale.failedToRename(),
+                  error.getMessage(),
+                  StatusNotification.Status.FAIL,
+                  FLOAT_MODE);
             });
   }
 
   private void showPreview() {
-    getChanges()
+    GetRefactoringChangesOperation getRefactoringChangesOperation =
+        new GetRefactoringChangesOperation();
+    currentOperation = getRefactoringChangesOperation;
+
+    getRefactoringChangesOperation
+        .perform()
         .then(
             refactoringResult -> {
               CheWorkspaceEdit edit = refactoringResult.getCheWorkspaceEdit();
@@ -309,53 +341,6 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
               previewPresenter.show(edit, this);
               previewPresenter.setTitle(locale.renameItemTitle());
             });
-  }
-
-  private Promise<RefactoringResult> getChanges() {
-    RenameSettings renameSettings = createRenameSettings();
-    RenameParams renameParams = createRenameParams(renameSettings);
-
-    renameSettings.setRenameParams(renameParams);
-
-    return extensionServiceClient
-        .rename(renameSettings)
-        .catchError(
-            arg -> {
-              notificationManager.notify(
-                  locale.failedToRename(), arg.getMessage(), FAIL, FLOAT_MODE);
-            });
-  }
-
-  private RenameParams createRenameParams(RenameSettings renameSettings) {
-    RenameParams renameParams = dtoFactory.createDto(RenameParams.class);
-    renameParams.setNewName(view.getNewName());
-
-    if (RefactoredItemType.JAVA_ELEMENT.equals(refactorInfo.getRefactoredItemType())) {
-      EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
-      VirtualFile file = activeEditor.getEditorInput().getFile();
-      TextDocumentIdentifier textDocumentIdentifier = dtoBuildHelper.createTDI(file);
-      renameParams.setTextDocument(textDocumentIdentifier);
-
-      TextPosition cursorPosition = ((TextEditor) activeEditor).getCursorPosition();
-      org.eclipse.lsp4j.Position position = dtoFactory.createDto(org.eclipse.lsp4j.Position.class);
-      position.setCharacter(cursorPosition.getCharacter());
-      position.setLine(cursorPosition.getLine());
-      renameParams.setPosition(position);
-      renameSettings.setRenameKind(RenameKind.JAVA_ELEMENT);
-    } else if (RefactoredItemType.COMPILATION_UNIT.equals(refactorInfo.getRefactoredItemType())) {
-      renameSettings.setRenameKind(RenameKind.COMPILATION_UNIT);
-      TextDocumentIdentifier textDocumentIdentifier =
-          dtoFactory.createDto(TextDocumentIdentifier.class);
-      textDocumentIdentifier.setUri(refactorInfo.getResources()[0].getLocation().toString());
-      renameParams.setTextDocument(textDocumentIdentifier);
-    } else if (RefactoredItemType.PACKAGE.equals(refactorInfo.getRefactoredItemType())) {
-      renameSettings.setRenameKind(RenameKind.PACKAGE);
-      TextDocumentIdentifier textDocumentIdentifier =
-          dtoFactory.createDto(TextDocumentIdentifier.class);
-      textDocumentIdentifier.setUri(refactorInfo.getResources()[0].getLocation().toString());
-      renameParams.setTextDocument(textDocumentIdentifier);
-    }
-    return renameParams;
   }
 
   private void applyRefactoring(CheWorkspaceEdit workspaceEdit) {
@@ -382,30 +367,135 @@ public class RenamePresenter implements ActionDelegate, RefactoringActionDelegat
         .show();
   }
 
-  private RenameSettings createRenameSettings() {
-    RenameSettings renameSettings = dtoFactory.createDto(RenameSettings.class);
-    renameSettings.setDelegateUpdating(view.isUpdateDelegateUpdating());
-    if (view.isUpdateDelegateUpdating()) {
-      renameSettings.setDeprecateDelegates(view.isUpdateMarkDeprecated());
-    }
-    renameSettings.setUpdateSubpackages(view.isUpdateSubpackages());
-    renameSettings.setUpdateReferences(view.isUpdateReferences());
-    renameSettings.setUpdateQualifiedNames(view.isUpdateQualifiedNames());
-    if (view.isUpdateQualifiedNames()) {
-      renameSettings.setFilePatterns(view.getFilePatterns());
-    }
-    renameSettings.setUpdateTextualMatches(view.isUpdateTextualOccurrences());
-    renameSettings.setUpdateSimilarDeclarations(view.isUpdateSimilarlyVariables());
-    if (view.isUpdateSimilarlyVariables()) {
-      renameSettings.setMatchStrategy(similarNamesConfigurationPresenter.getMatchStrategy());
-    }
-
-    return renameSettings;
-  }
-
   @Override
   public void closeWizard() {
     view.close();
     setEditorFocus();
+  }
+
+  private class GetRefactoringChangesOperation implements Operation<RefactoringResult> {
+
+    private Status status = INITIAL;
+    private CancelOperationHandler cancelOperationHandler;
+
+    public Promise<RefactoringResult> perform(CancelOperationHandler cancelOperationHandler) {
+      this.cancelOperationHandler = cancelOperationHandler;
+
+      view.setLoaderVisibility(true);
+
+      RenameSettings renameSettings = createRenameSettings();
+      RenameParams renameParams = createRenameParams(renameSettings);
+      renameSettings.setRenameParams(renameParams);
+
+      status = IN_PROGRESS;
+
+      return Promises.create(
+          (resolve, reject) ->
+              extensionServiceClient
+                  .rename(renameSettings)
+                  .then(
+                      result -> {
+                        if (status != CANCELLED) {
+                          onComplete(SUCCESS);
+
+                          resolve.apply(result);
+                        }
+                      })
+                  .catchError(
+                      arg -> {
+                        if (status != CANCELLED) {
+                          onComplete(FAIL);
+
+                          notificationManager.notify(
+                              locale.failedToRename(),
+                              arg.getMessage(),
+                              StatusNotification.Status.FAIL,
+                              FLOAT_MODE);
+                        }
+                      }));
+    }
+
+    public Promise<Void> cancel() {
+      return Promises.create(
+          (resolve, reject) -> {
+            if (status != SUCCESS && status != FAIL) {
+              onComplete(CANCELLED);
+
+              cancelOperationHandler.onCancelled();
+
+              resolve.apply(null);
+              return;
+            }
+
+            reject.apply(create("Can not cancel operation, current status is " + status));
+          });
+    }
+
+    @Override
+    public Status getStatus() {
+      return status;
+    }
+
+    private void onComplete(Status status) {
+      this.status = status;
+
+      currentOperation = new EmptyOperation();
+
+      view.setLoaderVisibility(false);
+    }
+
+    private RenameSettings createRenameSettings() {
+      RenameSettings renameSettings = dtoFactory.createDto(RenameSettings.class);
+      renameSettings.setDelegateUpdating(view.isUpdateDelegateUpdating());
+      if (view.isUpdateDelegateUpdating()) {
+        renameSettings.setDeprecateDelegates(view.isUpdateMarkDeprecated());
+      }
+      renameSettings.setUpdateSubpackages(view.isUpdateSubpackages());
+      renameSettings.setUpdateReferences(view.isUpdateReferences());
+      renameSettings.setUpdateQualifiedNames(view.isUpdateQualifiedNames());
+      if (view.isUpdateQualifiedNames()) {
+        renameSettings.setFilePatterns(view.getFilePatterns());
+      }
+      renameSettings.setUpdateTextualMatches(view.isUpdateTextualOccurrences());
+      renameSettings.setUpdateSimilarDeclarations(view.isUpdateSimilarlyVariables());
+      if (view.isUpdateSimilarlyVariables()) {
+        renameSettings.setMatchStrategy(similarNamesConfigurationPresenter.getMatchStrategy());
+      }
+
+      return renameSettings;
+    }
+
+    private RenameParams createRenameParams(RenameSettings renameSettings) {
+      RenameParams renameParams = dtoFactory.createDto(RenameParams.class);
+      renameParams.setNewName(view.getNewName());
+
+      if (RefactoredItemType.JAVA_ELEMENT.equals(refactorInfo.getRefactoredItemType())) {
+        EditorPartPresenter activeEditor = editorAgent.getActiveEditor();
+        VirtualFile file = activeEditor.getEditorInput().getFile();
+        TextDocumentIdentifier textDocumentIdentifier = dtoBuildHelper.createTDI(file);
+        renameParams.setTextDocument(textDocumentIdentifier);
+
+        TextPosition cursorPosition = ((TextEditor) activeEditor).getCursorPosition();
+        org.eclipse.lsp4j.Position position =
+            dtoFactory.createDto(org.eclipse.lsp4j.Position.class);
+        position.setCharacter(cursorPosition.getCharacter());
+        position.setLine(cursorPosition.getLine());
+        renameParams.setPosition(position);
+        renameSettings.setRenameKind(RenameKind.JAVA_ELEMENT);
+      } else if (RefactoredItemType.COMPILATION_UNIT.equals(refactorInfo.getRefactoredItemType())) {
+        renameSettings.setRenameKind(RenameKind.COMPILATION_UNIT);
+        TextDocumentIdentifier textDocumentIdentifier =
+            dtoFactory.createDto(TextDocumentIdentifier.class);
+        textDocumentIdentifier.setUri(refactorInfo.getResources()[0].getLocation().toString());
+        renameParams.setTextDocument(textDocumentIdentifier);
+      } else if (RefactoredItemType.PACKAGE.equals(refactorInfo.getRefactoredItemType())) {
+        renameSettings.setRenameKind(RenameKind.PACKAGE);
+        TextDocumentIdentifier textDocumentIdentifier =
+            dtoFactory.createDto(TextDocumentIdentifier.class);
+        textDocumentIdentifier.setUri(refactorInfo.getResources()[0].getLocation().toString());
+        renameParams.setTextDocument(textDocumentIdentifier);
+      }
+      return renameParams;
+    }
   }
 }

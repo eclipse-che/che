@@ -69,6 +69,8 @@ public class NodeJsDebugTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.NODE_JS);
     ide.open(ws);
+
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
