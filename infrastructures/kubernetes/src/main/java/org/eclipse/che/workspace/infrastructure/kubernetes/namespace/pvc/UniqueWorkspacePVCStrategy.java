@@ -37,6 +37,7 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -122,8 +123,11 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   @Override
+  @Traced
   public void prepare(KubernetesEnvironment k8sEnv, String workspaceId, long timeoutMillis)
       throws InfrastructureException {
+    Traced.Tags.add("workspaceId", workspaceId);
+
     if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
       return;
     }

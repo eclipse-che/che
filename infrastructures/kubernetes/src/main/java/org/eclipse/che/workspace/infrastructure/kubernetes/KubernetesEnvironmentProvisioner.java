@@ -16,6 +16,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
@@ -102,8 +103,11 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.serviceAccountProvisioner = serviceAccountProvisioner;
     }
 
+    @Traced
     public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
         throws InfrastructureException {
+      Traced.Tags.add("workspaceId", identity.getWorkspaceId());
+
       final String workspaceId = identity.getWorkspaceId();
       LOG.debug("Start provisioning Kubernetes environment for workspace '{}'", workspaceId);
       // 1 stage - update environment according Infrastructure specific
