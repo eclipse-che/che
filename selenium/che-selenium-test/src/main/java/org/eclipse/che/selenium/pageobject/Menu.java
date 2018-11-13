@@ -82,18 +82,21 @@ public class Menu {
    * @param idCommandName
    */
   public void runCommand(final String idTopMenuCommand, final String idCommandName) {
-    seleniumWebDriverHelper.waitSuccessCondition(
-        driver -> {
-          runCommand(idTopMenuCommand);
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            seleniumWebDriverHelper.waitSuccessCondition(
+                driver -> {
+                  runCommand(idTopMenuCommand);
 
-          if (isMenuItemVisible(By.id(idCommandName))) {
-            runCommand(idCommandName);
-            return true;
-          }
+                  if (isMenuItemVisible(By.id(idCommandName))) {
+                    runCommand(idCommandName);
+                    return true;
+                  }
 
-          return false;
-        },
-        ELEMENT_TIMEOUT_SEC);
+                  return false;
+                },
+                ELEMENT_TIMEOUT_SEC),
+        StaleElementReferenceException.class);
   }
 
   /**
@@ -178,6 +181,10 @@ public class Menu {
    */
   public void waitMenuItemIsEnabled(String idCommand) {
     seleniumWebDriverHelper.waitVisibility(By.id(idCommand));
+  }
+
+  public void waitMenuItemIsEnabled(String idCommand, int timeout) {
+    seleniumWebDriverHelper.waitVisibility(By.id(idCommand), timeout);
   }
 
   private boolean isMenuItemVisible(By itemLocator) {
