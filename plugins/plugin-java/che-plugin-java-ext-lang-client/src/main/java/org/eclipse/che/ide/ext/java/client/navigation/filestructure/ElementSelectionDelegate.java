@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.languageserver.ide.filestructure;
+package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
 /**
  * Interface to signal selection of an element

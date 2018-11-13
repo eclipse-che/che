@@ -69,7 +69,7 @@ public class WorkspaceActivityManager {
     this.eventService = eventService;
     this.activityDao = activityDao;
     this.defaultTimeout = timeout;
-    if (timeout < MINIMAL_TIMEOUT) {
+    if (timeout > 0 && timeout < MINIMAL_TIMEOUT) {
       LOG.warn(
           "Value of property \"che.limits.workspace.idle.timeout\" is below recommended minimum ("
               + TimeUnit.MILLISECONDS.toMinutes(MINIMAL_TIMEOUT)
