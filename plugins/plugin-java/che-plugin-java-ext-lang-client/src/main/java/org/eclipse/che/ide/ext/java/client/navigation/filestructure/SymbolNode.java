@@ -38,11 +38,11 @@ public class SymbolNode extends AbstractTreeNode implements HasNewPresentation, 
 
   @Inject
   public SymbolNode(
-      SymbolIcons symbolHelper,
+      SymbolIcons symbolIcons,
       PromiseProvider promiseProvider,
       @Assisted ElementSelectionDelegate<ExtendedSymbolInformation> delegate,
       @Assisted ExtendedSymbolInformation symbol) {
-    this.symbolIcons = symbolHelper;
+    this.symbolIcons = symbolIcons;
     this.promiseProvider = promiseProvider;
     this.delegate = delegate;
     this.symbol = symbol;
