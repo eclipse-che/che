@@ -123,6 +123,9 @@ public class JavaGinModule extends AbstractGinModule {
         GinMapBinder.newMapBinder(binder(), String.class, FqnProvider.class);
     fqnProviders.addBinding("maven").to(JavaFqnProvider.class);
 
+    install(
+        new GinFactoryModuleBuilder()
+            .build(org.eclipse.che.ide.ext.java.client.navigation.filestructure.NodeFactory.class));
     install(new GinFactoryModuleBuilder().build(JavaNodeFactory.class));
     install(
         new GinFactoryModuleBuilder()

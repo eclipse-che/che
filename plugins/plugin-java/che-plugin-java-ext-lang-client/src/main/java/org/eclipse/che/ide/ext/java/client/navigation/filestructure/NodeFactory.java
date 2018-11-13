@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.languageserver.ide.filestructure;
+package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 
