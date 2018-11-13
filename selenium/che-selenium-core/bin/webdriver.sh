@@ -190,13 +190,13 @@ applyCustomOptions() {
         elif [[ "$var" =~ --workspace-pool-size=.* ]]; then
             WORKSPACE_POOL_SIZE=$(echo "$var" | sed -e "s/--workspace-pool-size=//g")
 
-        elif [[ "$var" =~ --rerun ]]; then
-            local rerunAttempts=$(echo $@ | sed 's/.*--rerun\W\+\([0-9]\+\).*/\1/')
-            if [[ "$rerunAttempts" =~ ^[0-9]+$ ]]; then
-              RERUN_ATTEMPTS=$rerunAttempts
-            else
-              RERUN_ATTEMPTS=1
-            fi
+#        elif [[ "$var" =~ --rerun ]]; then
+#            local rerunAttempts=$(echo $@ | sed 's/.*--rerun\W\+\([0-9]\+\).*/\1/')
+#            if [[ "$rerunAttempts" =~ ^[0-9]+$ ]]; then
+#              RERUN_ATTEMPTS=$rerunAttempts
+#            else
+#              RERUN_ATTEMPTS=1
+#            fi
 
         elif [[ "$var" == --debug ]]; then
             DEBUG_OPTIONS="-Dmaven.failsafe.debug"

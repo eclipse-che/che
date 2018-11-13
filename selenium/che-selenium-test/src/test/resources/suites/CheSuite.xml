@@ -89,7 +89,7 @@
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithMultiModuleTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerUserCreatePolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithPerClickCreatePolicyTest"/>
-          <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSincePolicyTest"/>
+        <!--  <class name="org.eclipse.che.selenium.factory.CheckFactoryWithSincePolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckFactoryWithUntilPolicyTest"/>
           <class name="org.eclipse.che.selenium.factory.CreateFactoryFromUiWithKeepDirTest"/>
           <class name="org.eclipse.che.selenium.factory.CheckOpenFileFeatureTest"/>
@@ -265,9 +265,9 @@
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>
           <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>
 
-          <!-- Next tests can unexpectedly affect on other tests and so should be executed at the end -->
+          &lt;!&ndash; Next tests can unexpectedly affect on other tests and so should be executed at the end &ndash;&gt;
           <class name="org.eclipse.che.selenium.dashboard.StacksListTest"/>
-          <class name="org.eclipse.che.selenium.languageserver.JsonFileEditingTest"/>
+          <class name="org.eclipse.che.selenium.languageserver.JsonFileEditingTest"/>-->
         </classes>
     </test>
 
