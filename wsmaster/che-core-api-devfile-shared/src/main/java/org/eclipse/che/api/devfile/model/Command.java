@@ -13,7 +13,6 @@ package org.eclipse.che.api.devfile.model;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -31,7 +30,8 @@ public class Command {
   @JsonProperty("actions")
   private List<Action> actions = null;
 
-  @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
+  @JsonProperty("attributes")
+  private Map<String, String> attributes = new HashMap<>();
 
   @JsonProperty("name")
   public String getName() {
@@ -54,12 +54,12 @@ public class Command {
   }
 
   @JsonAnyGetter
-  public Map<String, String> getAdditionalProperties() {
-    return this.additionalProperties;
+  public Map<String, String> getAttributes() {
+    return this.attributes;
   }
 
   @JsonAnySetter
-  public void setAdditionalProperty(String name, String value) {
-    this.additionalProperties.put(name, value);
+  public void getAttribute(String name, String value) {
+    this.attributes.put(name, value);
   }
 }

@@ -11,22 +11,17 @@
  */
 package org.eclipse.che.api.devfile.model;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"specVersion", "name", "projects", "tools", "commands"})
+@JsonPropertyOrder({"version", "name", "projects", "tools", "commands"})
 public class DevFile {
 
-  @JsonProperty("specVersion")
-  private String specVersion;
+  @JsonProperty("version")
+  private String version;
 
   @JsonProperty("name")
   private String name;
@@ -40,16 +35,14 @@ public class DevFile {
   @JsonProperty("commands")
   private List<Command> commands = null;
 
-  @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
-
-  @JsonProperty("specVersion")
-  public String getSpecVersion() {
-    return specVersion;
+  @JsonProperty("version")
+  public String getVersion() {
+    return version;
   }
 
-  @JsonProperty("specVersion")
-  public void setSpecVersion(String specVersion) {
-    this.specVersion = specVersion;
+  @JsonProperty("version")
+  public void setVersion(String version) {
+    this.version = version;
   }
 
   @JsonProperty("name")
@@ -90,15 +83,5 @@ public class DevFile {
   @JsonProperty("commands")
   public void setCommands(List<Command> commands) {
     this.commands = commands;
-  }
-
-  @JsonAnyGetter
-  public Map<String, String> getAdditionalProperties() {
-    return this.additionalProperties;
-  }
-
-  @JsonAnySetter
-  public void setAdditionalProperty(String name, String value) {
-    this.additionalProperties.put(name, value);
   }
 }

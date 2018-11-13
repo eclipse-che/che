@@ -11,14 +11,9 @@
  */
 package org.eclipse.che.api.devfile.model;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import java.util.HashMap;
-import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"type", "location"})
@@ -29,8 +24,6 @@ public class Source {
 
   @JsonProperty("location")
   private String location;
-
-  @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
 
   @JsonProperty("type")
   public String getType() {
@@ -50,15 +43,5 @@ public class Source {
   @JsonProperty("location")
   public void setLocation(String location) {
     this.location = location;
-  }
-
-  @JsonAnyGetter
-  public Map<String, String> getAdditionalProperties() {
-    return this.additionalProperties;
-  }
-
-  @JsonAnySetter
-  public void setAdditionalProperty(String name, String value) {
-    this.additionalProperties.put(name, value);
   }
 }

@@ -40,7 +40,7 @@ public class DevFileConverter {
 
   static DevFile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
     DevFile devFile = new DevFile();
-    devFile.setSpecVersion(CURRENT_SPEC_VERSION);
+    devFile.setVersion(CURRENT_SPEC_VERSION);
     devFile.setName(wsConfig.getName());
 
     // Manage projects
@@ -51,9 +51,6 @@ public class DevFileConverter {
       Source source = new Source();
       source.setType(project.getSource().getType());
       source.setLocation(project.getSource().getLocation());
-      for (Map.Entry<String, String> entry : project.getSource().getParameters().entrySet()) {
-        source.setAdditionalProperty(entry.getKey(), entry.getValue());
-      }
       devProject.setSource(source);
       projects.add(devProject);
     }
@@ -69,28 +66,33 @@ public class DevFileConverter {
       if (!isNullOrEmpty(command.getAttributes().get("workingDir"))) {
         action.setWorkdir(command.getAttributes().get("workingDir"));
       }
+      // Remove internal attributes
+      command.getAttributes().remove("workingDir");
+      command.getAttributes().remove("pluginId");
+      // Put others
+      devCommand.getAttributes().putAll(command.getAttributes());
       commands.add(devCommand);
     }
     devFile.setCommands(commands);
 
     // Manage tools
     List<Tool> tools = new ArrayList<>();
-    if (wsConfig.getAttributes().containsKey("editor")) {
-      Tool editorTool = new Tool();
-      editorTool.setType("cheEditor");
-      String editorId = wsConfig.getAttributes().get("editor");
-      editorTool.setId(editorId);
-      editorTool.setName(editorId.substring(0, editorId.indexOf(":")));
-      tools.add(editorTool);
-    }
-
-    if (wsConfig.getAttributes().containsKey("plugins")) {
-      for (String pluginId : wsConfig.getAttributes().get("plugins").split(",")) {
-        Tool pluginTool = new Tool();
-        pluginTool.setName(pluginId.substring(0, pluginId.indexOf(":")));
-        pluginTool.setId(pluginId);
-        pluginTool.setType("chePlugin");
-        tools.add(pluginTool);
+    for (Map.Entry entry : wsConfig.getAttributes().entrySet()) {
+      if (entry.getKey().equals("editor")) {
+        Tool editorTool = new Tool();
+        editorTool.setType("cheEditor");
+        String editorId = wsConfig.getAttributes().get("editor");
+        editorTool.setId(editorId);
+        editorTool.setName(wsConfig.getAttributes().get(editorId));
+        tools.add(editorTool);
+      } else if (entry.getKey().equals("plugins")) {
+        for (String pluginId : wsConfig.getAttributes().get("plugins").split(",")) {
+          Tool pluginTool = new Tool();
+          pluginTool.setId(pluginId);
+          pluginTool.setType("chePlugin");
+          pluginTool.setName(wsConfig.getAttributes().get(pluginId));
+          tools.add(pluginTool);
+        }
       }
     }
 
@@ -114,7 +116,6 @@ public class DevFileConverter {
       SourceStorageImpl sourceStorage = new SourceStorageImpl();
       sourceStorage.setType(devProject.getSource().getType());
       sourceStorage.setLocation(devProject.getSource().getLocation());
-      sourceStorage.setParameters(devProject.getAdditionalProperties());
       projectConfig.setSource(sourceStorage);
       projects.add(projectConfig);
     }
@@ -126,9 +127,10 @@ public class DevFileConverter {
     for (Tool tool : devFile.getTools()) {
       if (tool.getType().equals("cheEditor")) {
         attributes.put("editor", tool.getId());
-      } else {
+      } else if (tool.getType().equals("chePlugin")) {
         pluginsStringJoiner.add(tool.getId());
       }
+      attributes.put(tool.getId(), tool.getName());
     }
     attributes.put("plugins", pluginsStringJoiner.toString());
     config.setAttributes(attributes);
@@ -140,16 +142,19 @@ public class DevFileConverter {
         CommandImpl command = new CommandImpl();
         command.setName(devCommand.getName() + ":" + devAction.getTool());
         command.setCommandLine(devAction.getCommand());
-        command.getAttributes().put("workingDir", devAction.getWorkdir());
+        if (devAction.getWorkdir() != null) {
+          command.getAttributes().put("workingDir", devAction.getWorkdir());
+        }
         Optional<Tool> toolOfCommand =
             devFile
                 .getTools()
                 .stream()
                 .filter(tool -> tool.getName().equals(devAction.getTool()))
                 .findFirst();
-        if (toolOfCommand.isPresent()) {
+        if (toolOfCommand.isPresent() && !isNullOrEmpty(toolOfCommand.get().getId())) {
           command.getAttributes().put("pluginId", toolOfCommand.get().getId());
         }
+        command.getAttributes().putAll(devCommand.getAttributes());
         commands.add(command);
       }
     }
@@ -171,9 +176,9 @@ public class DevFileConverter {
   }
 
   private static void validateDevFile(DevFile devFile) throws DevFileFormatException {
-    if (!CURRENT_SPEC_VERSION.equals(devFile.getSpecVersion())) {
+    if (!CURRENT_SPEC_VERSION.equals(devFile.getVersion())) {
       throw new DevFileFormatException(
-          format("Provided devfile has unsupported version %s", devFile.getSpecVersion()));
+          format("Provided devfile has unsupported version %s", devFile.getVersion()));
     }
   }
 }

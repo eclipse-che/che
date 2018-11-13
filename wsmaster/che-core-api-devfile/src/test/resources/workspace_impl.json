@@ -1,0 +1,69 @@
+{
+  "projects": [
+    {
+      "source": {
+        "location": "git@github.com:spring-projects/spring-petclinic.git",
+        "type": "git",
+        "parameters": {}
+      },
+      "mixins": [],
+      "name": "petclinic",
+      "path": "/petclinic",
+      "attributes": {}
+    }
+  ],
+  "commands": [
+    {
+      "commandLine": "mvn package",
+      "name": "build:mvn-stack",
+      "attributes": {
+        "pluginId": "eclipse/maven-jdk8:1.0.0",
+        "workingDir": "/projects/spring-petclinic"
+      }
+    },
+    {
+      "commandLine": "mvn spring-boot:run",
+      "name": "run:mvn-stack",
+      "attributes": {
+        "pluginId": "eclipse/maven-jdk8:1.0.0",
+        "runType": "sequential",
+        "workingDir": "/projects/spring-petclinic"
+      }
+    },
+    {
+      "commandLine": "run.sh",
+      "name": "other:jdt.ls",
+      "attributes": {
+        "pluginId": "eclipse/theia-jdtls:0.0.3"
+      }
+    }
+  ],
+  "defaultEnv": "default",
+  "environments": {
+    "default": {
+      "recipe": {
+        "type": "dockerimage",
+        "content": "eclipse/ubuntu_jdk8"
+      },
+      "machines": {
+        "dev-machine": {
+          "installers": [],
+          "servers": {},
+          "env": {},
+          "volumes": {},
+          "attributes": {
+            "memoryLimitBytes": "2147483648"
+          }
+        }
+      }
+    }
+  },
+  "name": "petclinic-dev-environment",
+  "attributes": {
+    "eclipse/maven-jdk8:1.0.0": "mvn-stack",
+    "editor": "eclipse/theia:0.0.3",
+    "eclipse/theia-jdtls:0.0.3": "jdt.ls",
+    "plugins": "eclipse/maven-jdk8:1.0.0,eclipse/theia-jdtls:0.0.3",
+    "eclipse/theia:0.0.3": "theia-ide"
+  }
+}

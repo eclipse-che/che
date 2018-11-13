@@ -11,14 +11,9 @@
  */
 package org.eclipse.che.api.devfile.model;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import java.util.HashMap;
-import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"type", "tool", "command", "workdir"})
@@ -35,8 +30,6 @@ public class Action {
 
   @JsonProperty("workdir")
   private String workdir;
-
-  @JsonIgnore private Map<String, String> additionalProperties = new HashMap<>();
 
   @JsonProperty("command")
   public String getCommand() {
@@ -68,6 +61,7 @@ public class Action {
     this.type = type;
   }
 
+
   @JsonProperty("tool")
   public String getTool() {
     return tool;
@@ -76,15 +70,5 @@ public class Action {
   @JsonProperty("tool")
   public void setTool(String tool) {
     this.tool = tool;
-  }
-
-  @JsonAnyGetter
-  public Map<String, String> getAdditionalProperties() {
-    return this.additionalProperties;
-  }
-
-  @JsonAnySetter
-  public void setAdditionalProperty(String name, String value) {
-    this.additionalProperties.put(name, value);
   }
 }
