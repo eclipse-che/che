@@ -127,6 +127,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -213,7 +214,8 @@ public class KubernetesInternalRuntimeTest {
                   mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
                   mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
 
-  @Mock private Tracer tracer;
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private Tracer tracer;
 
   @BeforeMethod
   public void setup() throws Exception {

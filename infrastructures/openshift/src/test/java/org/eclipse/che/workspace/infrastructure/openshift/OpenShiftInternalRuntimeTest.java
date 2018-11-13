@@ -88,6 +88,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarTool
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -145,7 +146,9 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
-  @Mock private Tracer tracer;
+
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private Tracer tracer;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
