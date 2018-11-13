@@ -1,5 +1,14 @@
 # Change Log
 
+## [6.13.1](https://github.com/eclipse/che/tree/6.13.1) (2018-11-08)
+[Full Changelog](https://github.com/eclipse/che/compare/6.13.0...6.13.1)
+
+**Merged pull requests:**
+
+- The PVC cleaning on workspace deletion is done in the wrong condition [\#11840](https://github.com/eclipse/che/pull/11840) ([davidfestal](https://github.com/davidfestal))
+- Reuse the Dashboard Keycloak instance in IDE frames when possible [\#11794](https://github.com/eclipse/che/pull/11794) ([davidfestal](https://github.com/davidfestal))
+
+
 ## [6.13.0](https://github.com/eclipse/che/tree/6.13.0) (2018-10-24)
 [Full Changelog](https://github.com/eclipse/che/compare/6.12.2...6.13.0)
 
