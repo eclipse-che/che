@@ -68,6 +68,7 @@ import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.tracing.Traces;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
@@ -594,21 +595,42 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   protected void startMachines() throws InfrastructureException {
     KubernetesEnvironment k8sEnv = getContext().getEnvironment();
 
-    for (Secret secret : k8sEnv.getSecrets().values()) {
-      namespace.secrets().create(secret);
-    }
+    String[] tags = new String[] {"workspaceId", getContext().getIdentity().getWorkspaceId()};
 
-    for (ConfigMap configMap : k8sEnv.getConfigMaps().values()) {
-      namespace.configMaps().create(configMap);
-    }
+    Traces.using(tracer)
+        .create("create-secrets", tags)
+        .calling(
+            () -> {
+              for (Secret secret : k8sEnv.getSecrets().values()) {
+                namespace.secrets().create(secret);
+              }
+            });
+
+    Traces.using(tracer)
+        .create("create-config-maps", tags)
+        .calling(
+            () -> {
+              for (ConfigMap configMap : k8sEnv.getConfigMaps().values()) {
+                namespace.configMaps().create(configMap);
+              }
+            });
 
     List<Service> createdServices = new ArrayList<>();
-    for (Service service : k8sEnv.getServices().values()) {
-      createdServices.add(namespace.services().create(service));
-    }
+    Traces.using(tracer)
+        .create("create-services", tags)
+        .calling(
+            () -> {
+              for (Service service : k8sEnv.getServices().values()) {
+                createdServices.add(namespace.services().create(service));
+              }
+            });
+
     // needed for resolution later on, even though n routes are actually created by ingress
     // /workspace{wsid}/server-{port} => service({wsid}):server-port => pod({wsid}):{port}
-    List<Ingress> readyIngresses = createAndWaitReady(k8sEnv.getIngresses().values());
+    List<Ingress> readyIngresses =
+        Traces.using(tracer)
+            .create("create-ingresses", tags)
+            .calling(() -> createAndWaitReady(k8sEnv.getIngresses().values()));
 
     // TODO https://github.com/eclipse/che/issues/7653
     // namespace.pods().watch(new AbnormalStopHandler());

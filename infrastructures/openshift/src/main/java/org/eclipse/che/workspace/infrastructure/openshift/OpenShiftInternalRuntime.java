@@ -31,6 +31,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.commons.tracing.Traces;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -111,23 +112,46 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   protected void startMachines() throws InfrastructureException {
     OpenShiftEnvironment osEnv = getContext().getEnvironment();
 
-    for (Secret secret : osEnv.getSecrets().values()) {
-      project.secrets().create(secret);
-    }
+    String[] tags = new String[] {"workspaceId", getContext().getIdentity().getWorkspaceId()};
 
-    for (ConfigMap configMap : osEnv.getConfigMaps().values()) {
-      project.configMaps().create(configMap);
-    }
+    Traces.using(tracer)
+        .create("create-secrets", tags)
+        .calling(
+            () -> {
+              for (Secret secret : osEnv.getSecrets().values()) {
+                project.secrets().create(secret);
+              }
+            });
+
+    Traces.using(tracer)
+        .create("create-config-maps", tags)
+        .calling(
+            () -> {
+              for (ConfigMap configMap : osEnv.getConfigMaps().values()) {
+                project.configMaps().create(configMap);
+              }
+            });
 
     List<Service> createdServices = new ArrayList<>();
-    for (Service service : osEnv.getServices().values()) {
-      createdServices.add(project.services().create(service));
-    }
+    Traces.using(tracer)
+        .create("create-services", tags)
+        .calling(
+            () -> {
+              for (Service service : osEnv.getServices().values()) {
+                createdServices.add(project.services().create(service));
+              }
+            });
 
     List<Route> createdRoutes = new ArrayList<>();
-    for (Route route : osEnv.getRoutes().values()) {
-      createdRoutes.add(project.routes().create(route));
-    }
+    Traces.using(tracer)
+        .create("create-routes", tags)
+        .calling(
+            () -> {
+              for (Route route : osEnv.getRoutes().values()) {
+                createdRoutes.add(project.routes().create(route));
+              }
+            });
+
     // TODO https://github.com/eclipse/che/issues/7653
     // project.pods().watch(new AbnormalStopHandler());
 
