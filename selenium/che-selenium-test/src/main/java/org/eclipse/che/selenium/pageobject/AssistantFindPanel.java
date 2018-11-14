@@ -23,8 +23,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Collection;
 import java.util.List;
-
-import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
@@ -89,10 +87,10 @@ public class AssistantFindPanel {
     return getActionNodesCount(LOAD_PAGE_TIMEOUT_SEC);
   }
 
-  public int getActionNodesCount(int timeout){
+  public int getActionNodesCount(int timeout) {
     try {
       return getActionNodesList(timeout).size();
-    }catch (TimeoutException ex){
+    } catch (TimeoutException ex) {
       return 0;
     }
   }
