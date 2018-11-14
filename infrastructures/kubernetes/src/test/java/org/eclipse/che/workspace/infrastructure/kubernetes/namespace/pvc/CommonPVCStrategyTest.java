@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -163,6 +164,10 @@ public class CommonPVCStrategyTest {
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
+    Map<String, String> workspaceAttributes = new HashMap<>();
+    WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
+    when(workspace.getConfig()).thenReturn(workspaceConfig);
+    when(workspaceConfig.getAttributes()).thenReturn(workspaceAttributes);
   }
 
   @Test

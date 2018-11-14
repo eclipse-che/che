@@ -11,13 +11,16 @@
  */
 package org.eclipse.che.core.db;
 
+import static org.apache.tomcat.dbcp.dbcp2.BasicDataSourceFactory.createDataSource;
+import static org.eclipse.che.core.db.TracingDataSource.wrapWithTracingIfEnabled;
+
 import java.util.Hashtable;
 import java.util.Properties;
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.spi.ObjectFactory;
+import javax.sql.DataSource;
 import org.apache.tomcat.dbcp.dbcp2.BasicDataSource;
-import org.apache.tomcat.dbcp.dbcp2.BasicDataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +35,7 @@ public abstract class JNDIDataSourceFactory implements ObjectFactory {
 
   private static final Logger LOG = LoggerFactory.getLogger(JNDIDataSourceFactory.class);
 
-  private final BasicDataSource dataSource;
+  private final DataSource dataSource;
 
   public JNDIDataSourceFactory(
       String userName,
@@ -51,7 +54,7 @@ public abstract class JNDIDataSourceFactory implements ObjectFactory {
     poolConfigurationProperties.setProperty("maxTotal", maxTotal);
     poolConfigurationProperties.setProperty("maxIdle", maxIdle);
     poolConfigurationProperties.setProperty("maxWaitMillis", maxWaitMillis);
-    dataSource = BasicDataSourceFactory.createDataSource(poolConfigurationProperties);
+    dataSource = wrapWithTracingIfEnabled(createDataSource(poolConfigurationProperties));
   }
 
   @Override

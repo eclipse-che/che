@@ -12,6 +12,6 @@
 
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g="urn:import:org.eclipse.che.plugin.languageserver.ide.filestructure">
+             xmlns:g="urn:import:org.eclipse.che.ide.ext.java.client.navigation.filestructure">
     <g:FileStructureTree ui:field="tree" debugId="file-structure-mainPanel" />
 </ui:UiBinder>

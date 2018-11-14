@@ -718,10 +718,10 @@ public class Refactor {
   }
 
   private WebElement waitElementVisibility(WebElement element) {
-    return loadPageWait.until(visibilityOf(element));
+    return elementWait.until(visibilityOf(element));
   }
 
   private WebElement waitElementVisibility(By locator) {
-    return loadPageWait.until(visibilityOfElementLocated(locator));
+    return elementWait.until(visibilityOfElementLocated(locator));
   }
 }

@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.projectexplorer;
 
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.DELETE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -72,6 +73,12 @@ public class DeleteProjectsTest {
     waitAllProjectsInProjectExplorer();
     loader.waitOnClosed();
     consoles.selectProcessByTabName("dev-machine");
+    consoles.waitJDTLSProjectResolveFinishedMessage(
+        PROJECT_NAMES.get(0),
+        PROJECT_NAMES.get(1),
+        PROJECT_NAMES.get(2),
+        PROJECT_NAMES.get(3),
+        PROJECT_NAMES.get(4));
   }
 
   @BeforeMethod
@@ -82,7 +89,7 @@ public class DeleteProjectsTest {
       loader.waitOnClosed();
     }
     consoles.clickOnClearOutputButton();
-    consoles.waitExpectedTextIntoConsole("", 20);
+    consoles.waitEmptyConsole(ELEMENT_TIMEOUT_SEC);
   }
 
   @Test
