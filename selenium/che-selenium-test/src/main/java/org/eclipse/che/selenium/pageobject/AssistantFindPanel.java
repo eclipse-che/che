@@ -105,7 +105,12 @@ public class AssistantFindPanel {
   }
 
   public void waitActionNodesCount(int expectedCount) {
-    seleniumWebDriverHelper.waitSuccessCondition(driver -> getActionNodesCount() == expectedCount);
+    waitActionNodesCount(expectedCount, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public void waitActionNodesCount(int expectedCount, int timeout) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> getActionNodesCount(timeout) == expectedCount, timeout);
   }
 
   public String getActionNodeText(int index) {
