@@ -18,7 +18,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
-import com.fasterxml.jackson.dataformat.yaml.snakeyaml.reader.ReaderException;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
@@ -35,6 +34,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
+import org.yaml.snakeyaml.error.YAMLException;
 
 /**
  * Test deserialization field {@link ComposeService#command} by {@link CommandDeserializer} in the
@@ -188,7 +188,7 @@ public class CommandDeserializerTest {
       factory.doParse(content);
       // it should fail.
       fail("The command " + command.getCommand() + " has invalid symbol and it should fail");
-    } catch (ReaderException e) {
+    } catch (YAMLException e) {
       // we're checking the exception there without throwing it, else it will print to
       // testng-results.xml file an invalid symbol, thus the xml will be invalid.
       assertEquals(e.getMessage(), "special characters are not allowed");
