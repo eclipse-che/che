@@ -19,6 +19,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -87,7 +88,9 @@ public class UserServiceTest {
     userValidator = new UserValidator(new AccountValidator(accountManager));
 
     // Return the incoming instance when injectLinks is called
-    when(linksInjector.injectLinks(any(), any())).thenAnswer(inv -> inv.getArguments()[0]);
+    lenient()
+        .when(linksInjector.injectLinks(any(), any()))
+        .thenAnswer(inv -> inv.getArguments()[0]);
 
     userService = new UserService(userManager, tokenValidator, userValidator, linksInjector, true);
   }
