@@ -56,7 +56,7 @@ HELP="
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
-CHE_IMAGE_TAG - Set che-server image tag, defaults to "nightly"
+CHE_IMAGE_TAG - Set che-server image tag, defaults to "6.14.0"
 CHE_INFRA_OPENSHIFT_PROJECT - namespace for workspace objects (defaults to current namespace of Che pod (CHE_OPENSHIFT_PROJECT which defaults to eclipse-che)). It can be overriden with -p|--project param. A separate ws namespace can be used only if username/password or token is provided
 CHE_INFRA_KUBERNETES_PVC_STRATEGY - One PVC per workspace (unique) or one PVC shared by all workspaced (common). Defaults to unique
 CHE_INFRA_KUBERNETES_PVC_QUANTITY - PVC default claim. Set to 1Gi.
@@ -134,13 +134,13 @@ export CHE_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT:-${DEFAULT_CHE_OPENSHIFT_PR
 DEFAULT_CHE_IMAGE_REPO="eclipse/che-server"
 export CHE_IMAGE_REPO=${CHE_IMAGE_REPO:-${DEFAULT_CHE_IMAGE_REPO}}
 
-DEFAULT_CHE_IMAGE_TAG="nightly"
+DEFAULT_CHE_IMAGE_TAG="6.14.0"
 export CHE_IMAGE_TAG=${CHE_IMAGE_TAG:-${DEFAULT_CHE_IMAGE_TAG}}
 
 DEFAULT_IMAGE_KEYCLOAK="eclipse/che-keycloak"
 export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-${DEFAULT_IMAGE_KEYCLOAK}}
 
-DEFAULT_KEYCLOAK_IMAGE_TAG="nightly"
+DEFAULT_KEYCLOAK_IMAGE_TAG="6.14.0"
 export KEYCLOAK_IMAGE_TAG=${KEYCLOAK_IMAGE_TAG:-${DEFAULT_KEYCLOAK_IMAGE_TAG}}
 
 KEYCLOAK_IMAGE_PULL_POLICY="Always"
