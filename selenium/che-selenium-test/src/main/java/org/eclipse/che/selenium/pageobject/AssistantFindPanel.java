@@ -118,22 +118,30 @@ public class AssistantFindPanel {
   }
 
   public void waitNode(int index, String expectedText) {
-    seleniumWebDriverHelper.waitTextContains(getActionNode(index), expectedText);
+    waitNode(index, expectedText, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public void waitNode(int index, String expectedText, int timeout) {
+    seleniumWebDriverHelper.waitTextContains(getActionNode(index), expectedText, timeout);
   }
 
   public void waitNode(String expectedText) {
+    waitNode(expectedText, WIDGET_TIMEOUT_SEC * 2);
+  }
+
+  public void waitNode(String expectedText, int timeout) {
     seleniumWebDriverHelper.waitNoExceptions(
         () ->
             seleniumWebDriverHelper.waitSuccessCondition(
                 driver -> {
-                  for (int i = 0; i < getActionNodesCount(); i++) {
+                  for (int i = 0; i < getActionNodesCount(timeout); i++) {
                     if (isActionNodeContainsText(i, expectedText)) {
                       return true;
                     }
                   }
                   return false;
                 }),
-        WIDGET_TIMEOUT_SEC * 2,
+        timeout,
         StaleElementReferenceException.class);
   }
 
