@@ -174,7 +174,7 @@ public class TheiaBuildPluginTest {
     waitHostedPageReady();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
-    theiaProjectTree.waitOpenWorkspaceButton();
+    theiaProjectTree.waitItem(projectName);
 
     // check plugin output
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
@@ -205,7 +205,7 @@ public class TheiaBuildPluginTest {
     seleniumWebDriver.navigate().refresh();
     waitHostedPageReady();
     theiaProjectTree.waitProjectAreaOpened();
-    theiaProjectTree.waitOpenWorkspaceButton();
+    theiaProjectTree.waitItem(projectName);
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitSearchField();
     theiaProposalForm.enterTextToSearchField(helloWorldSearchSequence);
