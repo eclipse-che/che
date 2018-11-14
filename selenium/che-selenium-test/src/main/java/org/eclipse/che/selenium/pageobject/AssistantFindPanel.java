@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.ACTION_NODE_ID_PATTERN;
 import static org.eclipse.che.selenium.pageobject.AssistantFindPanel.Locators.ALL_ACTIONS_XPATH;
@@ -25,6 +26,7 @@ import java.util.List;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 @Singleton
@@ -82,15 +84,33 @@ public class AssistantFindPanel {
   }
 
   public int getActionNodesCount() {
-    return getActionNodesList().size();
+    return getActionNodesCount(LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public int getActionNodesCount(int timeout) {
+    try {
+      return getActionNodesList(timeout).size();
+    } catch (TimeoutException ex) {
+      return 0;
+    }
   }
 
   public List<WebElement> getActionNodesList() {
-    return seleniumWebDriverHelper.waitVisibilityOfAllElements(By.xpath(ALL_ACTIONS_XPATH));
+    return getActionNodesList(LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public List<WebElement> getActionNodesList(int timeout) {
+    return seleniumWebDriverHelper.waitVisibilityOfAllElements(
+        By.xpath(ALL_ACTIONS_XPATH), timeout);
   }
 
   public void waitActionNodesCount(int expectedCount) {
-    seleniumWebDriverHelper.waitSuccessCondition(driver -> getActionNodesCount() == expectedCount);
+    waitActionNodesCount(expectedCount, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public void waitActionNodesCount(int expectedCount, int timeout) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> getActionNodesCount(timeout) == expectedCount, timeout);
   }
 
   public String getActionNodeText(int index) {
