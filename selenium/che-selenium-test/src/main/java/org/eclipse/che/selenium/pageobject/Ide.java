@@ -73,7 +73,7 @@ public class Ide {
   public void waitOpenedWorkspaceIsReadyToUse(int timeout) {
     projectExplorer.waitProjectExplorer(timeout);
     terminal.waitFirstTerminalTab(timeout);
-    menu.waitMenuItemIsEnabled(PROFILE_MENU);
+    menu.waitMenuItemIsEnabled(PROFILE_MENU, timeout);
   }
 
   public String switchToIdeAndWaitWorkspaceIsReadyToUse() {
