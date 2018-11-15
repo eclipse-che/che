@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.commons.annotation;
 
+import com.google.common.annotations.Beta;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -34,6 +35,7 @@ import java.util.Map;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
+@Beta
 public @interface Traced {
 
   /**

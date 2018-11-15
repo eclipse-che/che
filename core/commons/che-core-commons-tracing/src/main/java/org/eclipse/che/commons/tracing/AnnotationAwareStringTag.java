@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.commons.tracing;
 
+import com.google.common.annotations.Beta;
 import io.opentracing.tag.StringTag;
 import org.eclipse.che.commons.annotation.Traced;
 
+@Beta
 public class AnnotationAwareStringTag extends StringTag {
 
   public AnnotationAwareStringTag(String key) {

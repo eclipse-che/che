@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.commons.tracing;
 
+import com.google.common.annotations.Beta;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -34,6 +35,7 @@ import java.util.List;
  *     });
  * }</pre>
  */
+@Beta
 public class Traces {
 
   private Traces() {

@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.commons.tracing;
 
+import com.google.common.annotations.Beta;
 import io.opentracing.tag.Tags;
 
 /** The standard tags used in Che server. */
+@Beta
 public final class CheTags {
 
   /** The id of the workspace the span is related to. */

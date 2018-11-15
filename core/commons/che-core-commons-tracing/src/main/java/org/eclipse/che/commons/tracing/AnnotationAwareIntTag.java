@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.commons.tracing;
 
+import com.google.common.annotations.Beta;
 import io.opentracing.tag.IntTag;
 import org.eclipse.che.commons.annotation.Traced;
 
+@Beta
 public class AnnotationAwareIntTag extends IntTag {
 
   public AnnotationAwareIntTag(String key) {

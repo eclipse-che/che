@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.core.tracing;
 
+import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
 import io.opentracing.Scope;
 import io.opentracing.Tracer;
@@ -21,6 +22,7 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.commons.annotation.Traced;
 
+@Beta
 public class TracingInterceptor implements MethodInterceptor {
 
   private Tracer tracer;

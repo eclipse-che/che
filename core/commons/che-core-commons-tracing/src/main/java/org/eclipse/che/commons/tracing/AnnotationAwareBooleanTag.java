@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.commons.tracing;
 
+import com.google.common.annotations.Beta;
 import io.opentracing.tag.BooleanTag;
 import org.eclipse.che.commons.annotation.Traced;
 
+@Beta
 public class AnnotationAwareBooleanTag extends BooleanTag {
 
   public AnnotationAwareBooleanTag(String key) {
