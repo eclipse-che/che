@@ -42,8 +42,15 @@ public class TracingInterceptor implements MethodInterceptor {
       try {
         return invocation.proceed();
       } finally {
-        for (Map.Entry<String, String> e : Traced.TagsStack.pop().entrySet()) {
-          scope.span().setTag(e.getKey(), e.getValue());
+        for (Map.Entry<String, Object> e : Traced.TagsStack.pop().entrySet()) {
+          Object val = e.getValue();
+          if (val instanceof String) {
+            scope.span().setTag(e.getKey(), (String) val);
+          } else if (val instanceof Boolean) {
+            scope.span().setTag(e.getKey(), (Boolean) val);
+          } else if (val instanceof Number) {
+            scope.span().setTag(e.getKey(), (Number) val);
+          }
         }
       }
     }

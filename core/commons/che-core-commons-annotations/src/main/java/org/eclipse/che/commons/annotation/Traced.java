@@ -50,19 +50,23 @@ public @interface Traced {
 
     /** Adds a new tag. If the tag already exists, it is NOT updated. */
     public static void add(String tagName, String value) {
-      Map<String, String> tags = TagsStack.TAGS.get().peek();
-      if (tags != null) {
-        tags.putIfAbsent(tagName, value);
-      }
+      add(tagName, (Object) value);
     }
 
-    /** Adds new tags. The values of existing tags are not updated. */
-    public static void addAll(Map<String, String> keyValues) {
-      Map<String, String> map = TagsStack.TAGS.get().peek();
-      if (map != null) {
-        for (Map.Entry<String, String> e : keyValues.entrySet()) {
-          map.putIfAbsent(e.getKey(), e.getValue());
-        }
+    /** Adds a new tag. If the tag already exists, it is NOT updated. */
+    public static void add(String tagName, Boolean value) {
+      add(tagName, (Object) value);
+    }
+
+    /** Adds a new tag. If the tag already exists, it is NOT updated. */
+    public static void add(String tagName, Integer value) {
+      add(tagName, (Object) value);
+    }
+
+    private static void add(String tagName, Object value) {
+      Map<String, Object> tags = TagsStack.TAGS.get().peek();
+      if (tags != null) {
+        tags.putIfAbsent(tagName, value);
       }
     }
   }
@@ -76,20 +80,20 @@ public @interface Traced {
    */
   final class TagsStack {
 
-    private static final ThreadLocal<Deque<Map<String, String>>> TAGS =
+    private static final ThreadLocal<Deque<Map<String, Object>>> TAGS =
         ThreadLocal.withInitial(ArrayDeque::new);
 
     private TagsStack() {
       throw new AssertionError("I shall not be instantiated.");
     }
 
-    public static Map<String, String> pop() {
-      Deque<Map<String, String>> tagsStack = TAGS.get();
+    public static Map<String, Object> pop() {
+      Deque<Map<String, Object>> tagsStack = TAGS.get();
       if (tagsStack.isEmpty()) {
         return Collections.emptyMap();
       }
 
-      Map<String, String> tags = tagsStack.pop();
+      Map<String, Object> tags = tagsStack.pop();
 
       return Collections.unmodifiableMap(tags);
     }
