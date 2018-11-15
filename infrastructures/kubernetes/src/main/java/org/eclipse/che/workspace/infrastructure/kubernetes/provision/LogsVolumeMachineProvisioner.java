@@ -41,7 +41,7 @@ public class LogsVolumeMachineProvisioner implements ConfigurationProvisioner {
   public void provision(KubernetesEnvironment environment, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     for (InternalMachineConfig machine : environment.getMachines().values()) {
       machine.getVolumes().put(LOGS_VOLUME_NAME, new VolumeImpl().withPath(logsRootPath));

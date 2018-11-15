@@ -102,7 +102,7 @@ public class OpenShiftEnvironmentProvisioner
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     LOG.debug(
         "Start provisioning OpenShift environment for workspace '{}'", identity.getWorkspaceId());

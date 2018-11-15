@@ -49,7 +49,7 @@ public class RamLimitRequestProvisioner implements ConfigurationProvisioner {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     final Map<String, InternalMachineConfig> machines = k8sEnv.getMachines();
     for (Pod pod : k8sEnv.getPods().values()) {

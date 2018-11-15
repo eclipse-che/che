@@ -66,7 +66,7 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     AuthConfigs credentials = credentialsProvider.getCredentials();
     if (credentials == null) {

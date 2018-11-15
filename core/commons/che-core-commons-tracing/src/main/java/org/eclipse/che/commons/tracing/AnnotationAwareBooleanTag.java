@@ -13,6 +13,7 @@ package org.eclipse.che.commons.tracing;
 
 import com.google.common.annotations.Beta;
 import io.opentracing.tag.BooleanTag;
+import java.util.function.Supplier;
 import org.eclipse.che.commons.annotation.Traced;
 
 @Beta
@@ -22,7 +23,11 @@ public class AnnotationAwareBooleanTag extends BooleanTag {
     super(key);
   }
 
-  public void set(boolean value) {
-    Traced.Tags.add(getKey(), value);
+  public void set(Boolean value) {
+    set(() -> value);
+  }
+
+  public void set(Supplier<Boolean> value) {
+    Traced.Tags.addBoolean(getKey(), value);
   }
 }

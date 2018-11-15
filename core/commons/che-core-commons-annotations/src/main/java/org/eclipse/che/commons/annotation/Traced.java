@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * Annotates a method as traced.
@@ -51,22 +52,22 @@ public @interface Traced {
   final class Tags {
 
     /** Adds a new tag. If the tag already exists, it is NOT updated. */
-    public static void add(String tagName, String value) {
-      add(tagName, (Object) value);
+    public static void addString(String tagName, Supplier<String> valueSupplier) {
+      internalAdd(tagName, valueSupplier);
     }
 
     /** Adds a new tag. If the tag already exists, it is NOT updated. */
-    public static void add(String tagName, Boolean value) {
-      add(tagName, (Object) value);
+    public static void addBoolean(String tagName, Supplier<Boolean> valueSupplier) {
+      internalAdd(tagName, valueSupplier);
     }
 
     /** Adds a new tag. If the tag already exists, it is NOT updated. */
-    public static void add(String tagName, Integer value) {
-      add(tagName, (Object) value);
+    public static void addInteger(String tagName, Supplier<Integer> valueSupplier) {
+      internalAdd(tagName, valueSupplier);
     }
 
-    private static void add(String tagName, Object value) {
-      Map<String, Object> tags = TagsStack.TAGS.get().peek();
+    private static void internalAdd(String tagName, Supplier<?> value) {
+      Map<String, Supplier<?>> tags = TagsStack.TAGS.get().peek();
       if (tags != null) {
         tags.putIfAbsent(tagName, value);
       }
@@ -82,20 +83,20 @@ public @interface Traced {
    */
   final class TagsStack {
 
-    private static final ThreadLocal<Deque<Map<String, Object>>> TAGS =
+    private static final ThreadLocal<Deque<Map<String, Supplier<?>>>> TAGS =
         ThreadLocal.withInitial(ArrayDeque::new);
 
     private TagsStack() {
       throw new AssertionError("I shall not be instantiated.");
     }
 
-    public static Map<String, Object> pop() {
-      Deque<Map<String, Object>> tagsStack = TAGS.get();
+    public static Map<String, Supplier<?>> pop() {
+      Deque<Map<String, Supplier<?>>> tagsStack = TAGS.get();
       if (tagsStack.isEmpty()) {
         return Collections.emptyMap();
       }
 
-      Map<String, Object> tags = tagsStack.pop();
+      Map<String, Supplier<?>> tags = tagsStack.pop();
 
       return Collections.unmodifiableMap(tags);
     }

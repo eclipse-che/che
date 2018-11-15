@@ -48,7 +48,7 @@ public class ServiceAccountProvisioner implements ConfigurationProvisioner {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!isNullOrEmpty(serviceAccount)) {
       for (Pod pod : k8sEnv.getPods().values()) {

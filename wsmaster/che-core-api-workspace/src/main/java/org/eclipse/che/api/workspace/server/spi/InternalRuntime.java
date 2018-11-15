@@ -146,7 +146,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    */
   @Traced
   public void start(Map<String, String> startOptions) throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(getContext().getIdentity().getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(getContext().getIdentity()::getWorkspaceId);
 
     markStarting();
     try {
@@ -183,7 +183,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    */
   @Traced
   public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
-    TracingTags.WORKSPACE_ID.set(getContext().getIdentity().getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(getContext().getIdentity()::getWorkspaceId);
 
     markStopping();
     try {

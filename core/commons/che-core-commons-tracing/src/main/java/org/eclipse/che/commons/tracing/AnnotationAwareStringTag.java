@@ -13,6 +13,7 @@ package org.eclipse.che.commons.tracing;
 
 import com.google.common.annotations.Beta;
 import io.opentracing.tag.StringTag;
+import java.util.function.Supplier;
 import org.eclipse.che.commons.annotation.Traced;
 
 @Beta
@@ -23,6 +24,10 @@ public class AnnotationAwareStringTag extends StringTag {
   }
 
   public void set(String value) {
-    Traced.Tags.add(getKey(), value);
+    set(() -> value);
+  }
+
+  public void set(Supplier<String> value) {
+    Traced.Tags.addString(getKey(), value);
   }
 }

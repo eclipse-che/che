@@ -57,7 +57,7 @@ public class ProxySettingsProvisioner implements ConfigurationProvisioner {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!proxyEnvVars.isEmpty()) {
       for (Pod pod : k8sEnv.getPods().values()) {

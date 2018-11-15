@@ -59,7 +59,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
   @Traced
   public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     SecureServerExposer<T> secureServerExposer =
         secureServerExposerFactoryProvider.get(k8sEnv).create(identity);

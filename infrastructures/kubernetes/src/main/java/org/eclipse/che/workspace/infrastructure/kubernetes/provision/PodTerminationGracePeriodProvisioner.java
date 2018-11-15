@@ -43,7 +43,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     for (Pod pod : k8sEnv.getPods().values()) {
       if (!isTerminationGracePeriodSet(pod)) {

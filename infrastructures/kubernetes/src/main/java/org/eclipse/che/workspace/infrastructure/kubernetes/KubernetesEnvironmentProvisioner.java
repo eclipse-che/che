@@ -107,9 +107,10 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     @Traced
     public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
         throws InfrastructureException {
-      TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
-
       final String workspaceId = identity.getWorkspaceId();
+
+      TracingTags.WORKSPACE_ID.set(workspaceId);
+
       LOG.debug("Start provisioning Kubernetes environment for workspace '{}'", workspaceId);
       // 1 stage - update environment according Infrastructure specific
       LOG.debug("Provisioning installer server ports for workspace '{}'", workspaceId);

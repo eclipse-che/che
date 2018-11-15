@@ -13,6 +13,7 @@ package org.eclipse.che.commons.tracing;
 
 import com.google.common.annotations.Beta;
 import io.opentracing.tag.IntTag;
+import java.util.function.Supplier;
 import org.eclipse.che.commons.annotation.Traced;
 
 @Beta
@@ -23,6 +24,10 @@ public class AnnotationAwareIntTag extends IntTag {
   }
 
   public void set(Integer value) {
-    Traced.Tags.add(getKey(), value);
+    set(() -> value);
+  }
+
+  public void set(Supplier<Integer> value) {
+    Traced.Tags.addInteger(getKey(), value);
   }
 }

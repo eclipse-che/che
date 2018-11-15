@@ -74,7 +74,7 @@ public class InstallerServersPortProvisioner implements ConfigurationProvisioner
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     for (Pod pod : k8sEnv.getPods().values()) {
       // it is needed to detect conflicts between all containers in a pod

@@ -18,12 +18,17 @@ import io.opentracing.Tracer;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.Supplier;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.eclipse.che.commons.annotation.Traced;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Beta
 public class TracingInterceptor implements MethodInterceptor {
+
+  private static final Logger LOG = LoggerFactory.getLogger(TracingInterceptor.class);
 
   private Tracer tracer;
   private WeakHashMap<Class<?>, WeakHashMap<Method, String>> spanNames = new WeakHashMap<>();
@@ -44,8 +49,26 @@ public class TracingInterceptor implements MethodInterceptor {
       try {
         return invocation.proceed();
       } finally {
-        for (Map.Entry<String, Object> e : Traced.TagsStack.pop().entrySet()) {
-          Object val = e.getValue();
+        for (Map.Entry<String, Supplier<?>> e : Traced.TagsStack.pop().entrySet()) {
+          Object val;
+          try {
+            val = e.getValue().get();
+          } catch (Exception ex) {
+            if (LOG.isDebugEnabled()) {
+              // we want to know the exception in case the tag extraction failed.
+              // Slf4j doesn't seem to provide a method overload that could both provide formatting
+              // arguments and the cause.
+              LOG.debug(
+                  "Could not get the value for a tag called "
+                      + e.getKey()
+                      + " when tracing "
+                      + spanName
+                      + ".",
+                  ex);
+            }
+            continue;
+          }
+
           if (val instanceof String) {
             scope.span().setTag(e.getKey(), (String) val);
           } else if (val instanceof Boolean) {
