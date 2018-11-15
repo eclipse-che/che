@@ -64,7 +64,7 @@ public class OpenShiftCliCommandExecutor implements CommandExecutor {
   @Inject(optional = true)
   @Named("env.openshift.token")
   private String openShiftToken;
-  
+
   @Inject(optional = true)
   @Named("che.openshift.project")
   private String cheProjectName;
