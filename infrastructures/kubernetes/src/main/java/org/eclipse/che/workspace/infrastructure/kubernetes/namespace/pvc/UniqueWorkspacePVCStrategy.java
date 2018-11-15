@@ -122,19 +122,24 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   @Override
-  public void prepare(KubernetesEnvironment k8sEnv, String workspaceId)
+  public void prepare(KubernetesEnvironment k8sEnv, String workspaceId, long timeoutMillis)
       throws InfrastructureException {
     if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
       return;
     }
     if (!k8sEnv.getPersistentVolumeClaims().isEmpty()) {
-      LOG.debug("Preparing PVC started for workspace '{}'", workspaceId);
       final KubernetesPersistentVolumeClaims k8sClaims =
           factory.create(workspaceId).persistentVolumeClaims();
+      LOG.debug("Creating PVCs for workspace '{}'", workspaceId);
       for (PersistentVolumeClaim pvc : k8sEnv.getPersistentVolumeClaims().values()) {
         k8sClaims.create(pvc);
       }
-      LOG.debug("Preparing PVC done for workspace '{}'", workspaceId);
+
+      LOG.debug("Waiting PVCs for workspace '{}' to be bound", workspaceId);
+      for (PersistentVolumeClaim pvc : k8sEnv.getPersistentVolumeClaims().values()) {
+        k8sClaims.waitBound(pvc.getMetadata().getName(), timeoutMillis);
+      }
+      LOG.debug("Preparing PVCs done for workspace '{}'", workspaceId);
     }
   }
 
