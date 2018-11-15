@@ -34,6 +34,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.commons.tracing.CheTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
@@ -73,7 +74,7 @@ public class InstallerServersPortProvisioner implements ConfigurationProvisioner
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    Traced.Tags.add("workspaceId", identity.getWorkspaceId());
+    CheTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     for (Pod pod : k8sEnv.getPods().values()) {
       // it is needed to detect conflicts between all containers in a pod

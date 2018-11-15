@@ -28,6 +28,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.CheTags;
 import org.eclipse.che.infrastructure.docker.auth.UserSpecificDockerRegistryCredentialsProvider;
 import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfig;
 import org.eclipse.che.infrastructure.docker.auth.dto.AuthConfigs;
@@ -65,7 +66,7 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    Traced.Tags.add("workspaceId", identity.getWorkspaceId());
+    CheTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     AuthConfigs credentials = credentialsProvider.getCredentials();
     if (credentials == null) {

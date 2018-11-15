@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.commons.tracing.Traces.tag;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 
 import com.google.common.collect.ImmutableMap;
@@ -68,7 +69,9 @@ import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.tracing.CheTags;
 import org.eclipse.che.commons.tracing.Traces;
+import org.eclipse.che.commons.tracing.Traces.TagValue;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
@@ -348,7 +351,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
       if (failure.isCompletedExceptionally()) {
         cancelAll(toCancelFutures);
-        finishAllStartupTraces();
+        finishAndMarkFailedAllStartupTraces();
         // rethrow the failure cause
         failure.get();
       }
@@ -363,24 +366,24 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                   + "' reached timeout");
       failure.completeExceptionally(ie);
       cancelAll(toCancelFutures);
-      finishAllStartupTraces();
+      finishAndMarkFailedAllStartupTraces();
       throw ie;
     } catch (InterruptedException ex) {
       RuntimeStartInterruptedException runtimeInterruptedEx =
           new RuntimeStartInterruptedException(getContext().getIdentity());
       failure.completeExceptionally(runtimeInterruptedEx);
       cancelAll(toCancelFutures);
-      finishAllStartupTraces();
+      finishAndMarkFailedAllStartupTraces();
       throw runtimeInterruptedEx;
     } catch (ExecutionException ex) {
       failure.completeExceptionally(ex.getCause());
       cancelAll(toCancelFutures);
-      finishAllStartupTraces();
+      finishAndMarkFailedAllStartupTraces();
       wrapAndRethrow(ex.getCause());
     }
   }
 
-  private void finishAllStartupTraces() {
+  private void finishAndMarkFailedAllStartupTraces() {
     machineStartupTraces
         .entrySet()
         .removeIf(
@@ -595,7 +598,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   protected void startMachines() throws InfrastructureException {
     KubernetesEnvironment k8sEnv = getContext().getEnvironment();
 
-    String[] tags = new String[] {"workspaceId", getContext().getIdentity().getWorkspaceId()};
+    TagValue[] tags = new TagValue[] {tag(CheTags.WORKSPACE_ID, getContext().getIdentity().getWorkspaceId())};
 
     Traces.using(tracer)
         .create("create-secrets", tags)
@@ -665,24 +668,13 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
     LOG.debug("Begin pods creation for workspace '{}'", workspaceId);
     for (Pod toCreate : environment.getPods().values()) {
+      startTracingContainersStartup(toCreate);
       final Pod createdPod = namespace.deployments().deploy(toCreate);
       LOG.debug(
           "Creating pod '{}' in workspace '{}'", toCreate.getMetadata().getName(), workspaceId);
       final ObjectMeta podMetadata = createdPod.getMetadata();
       for (Container container : createdPod.getSpec().getContainers()) {
         String machineName = Names.machineName(toCreate, container);
-
-        // we are tracking the startup of the machines asynchronously #waitMachines. Here we set up
-        // the spans that will be finished in that method.
-        // Note that this is not completely precise, because we're starting the span only after the
-        // pod has already started deploying, but I see no earlier time to set this up...
-        machineStartupTraces.put(
-            machineName,
-            tracer
-                .buildSpan("container-create")
-                .asChildOf(tracer.activeSpan())
-                .withTag("machineName", machineName)
-                .start());
 
         LOG.debug("Creating machine '{}' in workspace '{}'", machineName, workspaceId);
         machines.put(
@@ -699,6 +691,20 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       }
     }
     LOG.debug("Pods creation finished in workspace '{}'", workspaceId);
+  }
+
+  private void startTracingContainersStartup(Pod pod) {
+    for (Container container : pod.getSpec().getContainers()) {
+      String machineName = Names.machineName(pod, container);
+
+      machineStartupTraces.put(
+          machineName,
+          tracer
+              .buildSpan("container-create")
+              .asChildOf(tracer.activeSpan())
+              .withTag(CheTags.MACHINE_NAME.getKey(), machineName)
+              .start());
+    }
   }
 
   @Override

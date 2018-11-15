@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.CheTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -50,7 +51,7 @@ public class RouteTlsProvisioner implements ConfigurationProvisioner<OpenShiftEn
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    Traced.Tags.add("workspaceId", identity.getWorkspaceId());
+    CheTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     if (!isTlsEnabled) {
       return;

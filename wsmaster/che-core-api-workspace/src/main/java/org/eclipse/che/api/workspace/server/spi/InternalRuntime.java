@@ -29,6 +29,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.CheTags;
 
 /**
  * Implementation of concrete Runtime.
@@ -145,7 +146,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    */
   @Traced
   public void start(Map<String, String> startOptions) throws InfrastructureException {
-    Traced.Tags.add("workspaceId", getContext().getIdentity().getWorkspaceId());
+    CheTags.WORKSPACE_ID.set(getContext().getIdentity().getWorkspaceId());
 
     markStarting();
     try {
@@ -182,7 +183,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    */
   @Traced
   public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
-    Traced.Tags.add("workspaceId", getContext().getIdentity().getWorkspaceId());
+    CheTags.WORKSPACE_ID.set(getContext().getIdentity().getWorkspaceId());
 
     markStopping();
     try {

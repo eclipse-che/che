@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static org.eclipse.che.commons.tracing.Traces.tag;
+
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -31,7 +33,9 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.commons.tracing.CheTags;
 import org.eclipse.che.commons.tracing.Traces;
+import org.eclipse.che.commons.tracing.Traces.TagValue;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -112,7 +116,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   protected void startMachines() throws InfrastructureException {
     OpenShiftEnvironment osEnv = getContext().getEnvironment();
 
-    String[] tags = new String[] {"workspaceId", getContext().getIdentity().getWorkspaceId()};
+    TagValue[] tags = new TagValue[] {tag(CheTags.WORKSPACE_ID, getContext().getIdentity().getWorkspaceId())};
 
     Traces.using(tracer)
         .create("create-secrets", tags)
