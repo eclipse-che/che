@@ -38,6 +38,11 @@ public class Tool {
     this.name = name;
   }
 
+  public Tool withName(String name) {
+    this.name = name;
+    return this;
+  }
+
   @JsonProperty("type")
   public String getType() {
     return type;
@@ -48,6 +53,11 @@ public class Tool {
     this.type = type;
   }
 
+  public Tool withType(String type) {
+    this.type = type;
+    return this;
+  }
+
   @JsonProperty("id")
   public String getId() {
     return id;
@@ -56,5 +66,10 @@ public class Tool {
   @JsonProperty("id")
   public void setId(String id) {
     this.id = id;
+  }
+
+  public Tool withId(String id) {
+    this.id = id;
+    return this;
   }
 }

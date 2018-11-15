@@ -43,6 +43,11 @@ public class Command {
     this.name = name;
   }
 
+  public Command withName(String name) {
+    this.name = name;
+    return this;
+  }
+
   @JsonProperty("actions")
   public List<Action> getActions() {
     return actions;
@@ -53,6 +58,11 @@ public class Command {
     this.actions = actions;
   }
 
+  public Command withActions(List<Action> actions) {
+    this.actions = actions;
+    return this;
+  }
+
   @JsonAnyGetter
   public Map<String, String> getAttributes() {
     return this.attributes;
@@ -61,5 +71,10 @@ public class Command {
   @JsonAnySetter
   public void getAttribute(String name, String value) {
     this.attributes.put(name, value);
+  }
+
+  public Command withAttributes(Map<String, String> attributes) {
+    this.attributes = attributes;
+    return this;
   }
 }

@@ -45,6 +45,11 @@ public class DevFile {
     this.version = version;
   }
 
+  public DevFile withVersion(String version) {
+    this.version = version;
+    return this;
+  }
+
   @JsonProperty("name")
   public String getName() {
     return name;
@@ -53,6 +58,11 @@ public class DevFile {
   @JsonProperty("name")
   public void setName(String name) {
     this.name = name;
+  }
+
+  public DevFile withName(String name) {
+    this.name = name;
+    return this;
   }
 
   @JsonProperty("projects")
@@ -65,6 +75,11 @@ public class DevFile {
     this.projects = projects;
   }
 
+  public DevFile withProjects(List<Project> projects) {
+    this.projects = projects;
+    return this;
+  }
+
   @JsonProperty("tools")
   public List<Tool> getTools() {
     return tools;
@@ -75,6 +90,11 @@ public class DevFile {
     this.tools = tools;
   }
 
+  public DevFile withTools(List<Tool> tools) {
+    this.tools = tools;
+    return this;
+  }
+
   @JsonProperty("commands")
   public List<Command> getCommands() {
     return commands;
@@ -83,5 +103,10 @@ public class DevFile {
   @JsonProperty("commands")
   public void setCommands(List<Command> commands) {
     this.commands = commands;
+  }
+
+  public DevFile withCommands(List<Command> commands) {
+    this.commands = commands;
+    return this;
   }
 }

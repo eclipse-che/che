@@ -39,19 +39,17 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 public class DevFileConverter {
 
   static DevFile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
-    DevFile devFile = new DevFile();
-    devFile.setVersion(CURRENT_SPEC_VERSION);
-    devFile.setName(wsConfig.getName());
+
+    DevFile devFile = new DevFile().withVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
     // Manage projects
     List<Project> projects = new ArrayList<>();
     for (ProjectConfigImpl project : wsConfig.getProjects()) {
-      Project devProject = new Project();
-      devProject.setName(project.getName());
-      Source source = new Source();
-      source.setType(project.getSource().getType());
-      source.setLocation(project.getSource().getLocation());
-      devProject.setSource(source);
+      Source source =
+          new Source()
+              .withType(project.getSource().getType())
+              .withLocation(project.getSource().getLocation());
+      Project devProject = new Project().withName(project.getName()).withSource(source);
       projects.add(devProject);
     }
     devFile.setProjects(projects);
@@ -59,10 +57,9 @@ public class DevFileConverter {
     // Manage commands
     List<Command> commands = new ArrayList<>();
     for (CommandImpl command : wsConfig.getCommands()) {
-      Command devCommand = new Command();
-      devCommand.setName(command.getName());
-      Action action = new Action();
-      action.setCommand(command.getCommandLine());
+      Command devCommand = new Command().withName(command.getName());
+      Action action =
+          new Action().withCommand(command.getCommandLine()).withType(command.getType());
       if (!isNullOrEmpty(command.getAttributes().get("workingDir"))) {
         action.setWorkdir(command.getAttributes().get("workingDir"));
       }
@@ -79,18 +76,20 @@ public class DevFileConverter {
     List<Tool> tools = new ArrayList<>();
     for (Map.Entry entry : wsConfig.getAttributes().entrySet()) {
       if (entry.getKey().equals("editor")) {
-        Tool editorTool = new Tool();
-        editorTool.setType("cheEditor");
         String editorId = wsConfig.getAttributes().get("editor");
-        editorTool.setId(editorId);
-        editorTool.setName(wsConfig.getAttributes().get(editorId));
+        Tool editorTool =
+            new Tool()
+                .withType("cheEditor")
+                .withId(editorId)
+                .withName(wsConfig.getAttributes().get(editorId));
         tools.add(editorTool);
       } else if (entry.getKey().equals("plugins")) {
         for (String pluginId : wsConfig.getAttributes().get("plugins").split(",")) {
-          Tool pluginTool = new Tool();
-          pluginTool.setId(pluginId);
-          pluginTool.setType("chePlugin");
-          pluginTool.setName(wsConfig.getAttributes().get(pluginId));
+          Tool pluginTool =
+              new Tool()
+                  .withId(pluginId)
+                  .withType("chePlugin")
+                  .withName(wsConfig.getAttributes().get(pluginId));
           tools.add(pluginTool);
         }
       }
@@ -141,6 +140,7 @@ public class DevFileConverter {
       for (Action devAction : devCommand.getActions()) {
         CommandImpl command = new CommandImpl();
         command.setName(devCommand.getName() + ":" + devAction.getTool());
+        command.setType(devAction.getType());
         command.setCommandLine(devAction.getCommand());
         if (devAction.getWorkdir() != null) {
           command.getAttributes().put("workingDir", devAction.getWorkdir());

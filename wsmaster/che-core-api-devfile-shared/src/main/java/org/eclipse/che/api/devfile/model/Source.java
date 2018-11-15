@@ -35,6 +35,11 @@ public class Source {
     this.type = type;
   }
 
+  public Source withType(String type) {
+    this.type = type;
+    return this;
+  }
+
   @JsonProperty("location")
   public String getLocation() {
     return location;
@@ -43,5 +48,10 @@ public class Source {
   @JsonProperty("location")
   public void setLocation(String location) {
     this.location = location;
+  }
+
+  public Source withLocation(String location) {
+    this.location = location;
+    return this;
   }
 }

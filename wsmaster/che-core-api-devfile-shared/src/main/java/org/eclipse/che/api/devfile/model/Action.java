@@ -41,6 +41,11 @@ public class Action {
     this.command = command;
   }
 
+  public Action withCommand(String command) {
+    this.command = command;
+    return this;
+  }
+
   @JsonProperty("workdir")
   public String getWorkdir() {
     return workdir;
@@ -49,6 +54,11 @@ public class Action {
   @JsonProperty("workdir")
   public void setWorkdir(String workdir) {
     this.workdir = workdir;
+  }
+
+  public Action withWorkdir(String workdir) {
+    this.workdir = workdir;
+    return this;
   }
 
   @JsonProperty("type")
@@ -61,6 +71,10 @@ public class Action {
     this.type = type;
   }
 
+  public Action withType(String type) {
+    this.type = type;
+    return this;
+  }
 
   @JsonProperty("tool")
   public String getTool() {
@@ -70,5 +84,10 @@ public class Action {
   @JsonProperty("tool")
   public void setTool(String tool) {
     this.tool = tool;
+  }
+
+  public Action withTool(String tool) {
+    this.tool = tool;
+    return this;
   }
 }

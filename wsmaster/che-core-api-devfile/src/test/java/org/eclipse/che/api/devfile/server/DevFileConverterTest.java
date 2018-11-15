@@ -42,6 +42,7 @@ public class DevFileConverterTest {
 
     String jsonContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_impl.json"));
+    System.out.println(JsonHelper.toJson(wsConfigImpl));
 
     assertEquals(wsConfigImpl, JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null));
   }

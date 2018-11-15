@@ -35,6 +35,11 @@ public class Project {
     this.name = name;
   }
 
+  public Project withName(String name) {
+    this.name = name;
+    return this;
+  }
+
   @JsonProperty("source")
   public Source getSource() {
     return source;
@@ -45,4 +50,8 @@ public class Project {
     this.source = source;
   }
 
+  public Project withSource(Source source) {
+    this.source = source;
+    return this;
+  }
 }
