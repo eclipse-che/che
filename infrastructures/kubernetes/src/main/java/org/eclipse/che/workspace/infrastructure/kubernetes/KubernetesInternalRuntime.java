@@ -69,7 +69,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.tracing.CheTags;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
@@ -626,7 +626,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   @Traced
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   void createSecrets(KubernetesEnvironment env, String workspaceId) throws InfrastructureException {
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
     for (Secret secret : env.getSecrets().values()) {
       namespace.secrets().create(secret);
     }
@@ -636,7 +636,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   void createConfigMaps(KubernetesEnvironment env, String workspaceId)
       throws InfrastructureException {
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
     for (ConfigMap configMap : env.getConfigMaps().values()) {
       namespace.configMaps().create(configMap);
     }
@@ -646,7 +646,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   List<Service> createServices(KubernetesEnvironment env, String workspaceId)
       throws InfrastructureException {
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
 
     Collection<Service> servicesToCreate = env.getServices().values();
     List<Service> createdServices = new ArrayList<>(servicesToCreate.size());
@@ -661,7 +661,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   List<Ingress> createIngresses(KubernetesEnvironment env, String workspaceId)
       throws InfrastructureException {
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
     return createAndWaitReady(env.getIngresses().values());
   }
 
@@ -714,7 +714,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           tracer
               .buildSpan("container-create")
               .asChildOf(tracer.activeSpan())
-              .withTag(CheTags.MACHINE_NAME.getKey(), machineName)
+              .withTag(TracingTags.MACHINE_NAME.getKey(), machineName)
               .start());
     }
   }

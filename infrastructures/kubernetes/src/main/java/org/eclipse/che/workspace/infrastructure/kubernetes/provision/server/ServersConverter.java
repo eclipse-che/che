@@ -22,7 +22,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Traced;
-import org.eclipse.che.commons.tracing.CheTags;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
@@ -59,7 +59,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
   @Traced
   public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
 
-    CheTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     SecureServerExposer<T> secureServerExposer =
         secureServerExposerFactoryProvider.get(k8sEnv).create(identity);

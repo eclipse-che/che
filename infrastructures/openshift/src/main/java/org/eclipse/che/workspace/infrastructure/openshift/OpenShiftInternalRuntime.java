@@ -33,7 +33,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.commons.annotation.Traced;
-import org.eclipse.che.commons.tracing.CheTags;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -138,7 +138,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   @Traced
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   void createSecrets(OpenShiftEnvironment env, String workspaceId) throws InfrastructureException {
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
     for (Secret secret : env.getSecrets().values()) {
       project.secrets().create(secret);
     }
@@ -148,7 +148,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   void createConfigMaps(OpenShiftEnvironment env, String workspaceId)
       throws InfrastructureException {
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
     for (ConfigMap configMap : env.getConfigMaps().values()) {
       project.configMaps().create(configMap);
     }
@@ -158,7 +158,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   List<Service> createServices(OpenShiftEnvironment env, String workspaceId)
       throws InfrastructureException {
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
     Collection<Service> servicesToCreate = env.getServices().values();
     List<Service> createdServices = new ArrayList<>(servicesToCreate.size());
     for (Service service : servicesToCreate) {
@@ -172,7 +172,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
   List<Route> createRoutes(OpenShiftEnvironment env, String workspaceId)
       throws InfrastructureException {
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
     Collection<Route> routesToCreate = env.getRoutes().values();
     List<Route> createdRoutes = new ArrayList<>(routesToCreate.size());
     for (Route route : routesToCreate) {

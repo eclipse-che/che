@@ -17,7 +17,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
-import org.eclipse.che.commons.tracing.CheTags;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -43,7 +43,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    CheTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     for (Pod pod : k8sEnv.getPods().values()) {
       if (!isTerminationGracePeriodSet(pod)) {

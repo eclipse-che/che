@@ -16,7 +16,7 @@ import io.opentracing.tag.Tags;
 
 /** The standard tags used in Che server. */
 @Beta
-public final class CheTags {
+public final class TracingTags {
 
   /** The id of the workspace the span is related to. */
   public static final AnnotationAwareStringTag WORKSPACE_ID =
@@ -41,5 +41,5 @@ public final class CheTags {
   public static final AnnotationAwareIntTag SAMPLING_PRIORITY =
       new AnnotationAwareIntTag(Tags.SAMPLING_PRIORITY.getKey());
 
-  private CheTags() {}
+  private TracingTags() {}
 }

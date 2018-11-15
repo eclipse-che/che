@@ -17,7 +17,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
-import org.eclipse.che.commons.tracing.CheTags;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
@@ -102,7 +102,7 @@ public class OpenShiftEnvironmentProvisioner
   public void provision(OpenShiftEnvironment osEnv, RuntimeIdentity identity)
       throws InfrastructureException {
 
-    CheTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
 
     LOG.debug(
         "Start provisioning OpenShift environment for workspace '{}'", identity.getWorkspaceId());

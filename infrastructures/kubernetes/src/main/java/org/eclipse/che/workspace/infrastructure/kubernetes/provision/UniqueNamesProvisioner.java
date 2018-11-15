@@ -22,7 +22,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
-import org.eclipse.che.commons.tracing.CheTags;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -46,7 +46,7 @@ public class UniqueNamesProvisioner<T extends KubernetesEnvironment>
   public void provision(T k8sEnv, RuntimeIdentity identity) throws InfrastructureException {
     final String workspaceId = identity.getWorkspaceId();
 
-    CheTags.WORKSPACE_ID.set(workspaceId);
+    TracingTags.WORKSPACE_ID.set(workspaceId);
 
     final Set<Pod> pods = new HashSet<>(k8sEnv.getPods().values());
     k8sEnv.getPods().clear();
