@@ -83,7 +83,8 @@ public class ProfileServiceTest {
         .when(linksInjector.injectLinks(any(), any()))
         .thenAnswer(inv -> inv.getArguments()[0]);
 
-    when(profileManager.getById(SUBJECT.getUserId()))
+    lenient()
+        .when(profileManager.getById(SUBJECT.getUserId()))
         .thenReturn(new ProfileImpl(SUBJECT.getUserId()));
   }
 
