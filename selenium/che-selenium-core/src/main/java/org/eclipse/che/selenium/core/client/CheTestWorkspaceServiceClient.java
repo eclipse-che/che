@@ -65,7 +65,6 @@ public class CheTestWorkspaceServiceClient extends AbstractTestWorkspaceServiceC
     workspace.getEnvironments().put(workspaceName, environment);
     workspace.setName(workspaceName);
     workspace.setDefaultEnv(workspaceName);
-// todo check that it works with no envs
     WorkspaceDto workspaceDto =
         requestFactory
             .fromUrl(getBaseUrl())

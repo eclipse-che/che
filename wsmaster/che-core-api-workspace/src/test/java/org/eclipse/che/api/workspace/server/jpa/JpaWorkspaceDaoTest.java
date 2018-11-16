@@ -35,7 +35,6 @@ import org.testng.annotations.Test;
  *
  * @author Yevhenii Voevodin
  */
-// todo check that it works with no envs
 public class JpaWorkspaceDaoTest {
 
   private TckResourcesCleaner tckResourcesCleaner;

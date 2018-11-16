@@ -32,7 +32,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -71,6 +70,7 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -104,7 +104,6 @@ public class WorkspaceRuntimes {
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
   private final RuntimeInfrastructure infrastructure;
   private final ProbeScheduler probeScheduler;
-  private final NoEnvironmentFactory noEnvironmentFactory;
   // Unique identifier for this workspace runtimes
   private final String workspaceRuntimesId;
 
@@ -119,8 +118,7 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService,
-      NoEnvironmentFactory noEnvironmentFactory) {
+      WorkspaceLockService lockService) {
     this(
         eventService,
         envFactories,
@@ -130,8 +128,7 @@ public class WorkspaceRuntimes {
         ignored,
         probeScheduler,
         statuses,
-        lockService,
-        noEnvironmentFactory);
+        lockService);
     this.runtimes = runtimes;
   }
 
@@ -145,10 +142,8 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService,
-      NoEnvironmentFactory noEnvironmentFactory) {
+      WorkspaceLockService lockService) {
     this.probeScheduler = probeScheduler;
-    this.noEnvironmentFactory = noEnvironmentFactory;
     this.runtimes = new ConcurrentHashMap<>();
     this.statuses = statuses;
     this.eventService = eventService;
@@ -795,22 +790,22 @@ public class WorkspaceRuntimes {
   }
 
   public Set<String> getSupportedRecipes() {
-    return Sets.union(environmentFactories.keySet(), Collections.singleton("no-environment"));
+    return environmentFactories.keySet();
   }
 
   private InternalEnvironment createInternalEnvironment(
       @Nullable Environment environment, Map<String, String> workspaceConfigAttributes)
       throws InfrastructureException, ValidationException, NotFoundException {
-    InternalEnvironmentFactory factory;
+    String recipeType;
     if (environment == null) {
-      factory = noEnvironmentFactory;
+      recipeType = Constants.NO_ENVIRONMENT_RECIPE_TYPE;
     } else {
-      String recipeType = environment.getRecipe().getType();
-      factory = environmentFactories.get(recipeType);
-      if (factory == null) {
-        throw new NotFoundException(
-            format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
-      }
+      recipeType = environment.getRecipe().getType();
+    }
+    InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
+    if (factory == null) {
+      throw new NotFoundException(
+          format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
     }
     InternalEnvironment internalEnvironment = factory.create(environment);
     internalEnvironment.setAttributes(workspaceConfigAttributes);

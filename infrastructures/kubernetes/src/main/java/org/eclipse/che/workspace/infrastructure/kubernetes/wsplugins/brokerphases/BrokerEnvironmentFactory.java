@@ -164,7 +164,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                 CONF_FOLDER + "/" + CONFIG_FILE,
                 "-push-endpoint",
                 cheWebsocketEndpoint,
-                "-runtime-id",// TODO
+                "-runtime-id",
                 String.format(
                     "%s:%s:%s",
                     runtimeId.getWorkspaceId(), MoreObjects.firstNonNull(runtimeId.getEnvName(), ""), runtimeId.getOwnerId()))

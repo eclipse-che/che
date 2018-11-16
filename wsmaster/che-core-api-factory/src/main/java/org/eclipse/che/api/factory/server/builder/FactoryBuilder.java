@@ -51,7 +51,6 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Kabashniuk
  * @author Alexander Garagatyi
  */
-// todo check that it works with no envs
 @Singleton
 public class FactoryBuilder {
   private static final Logger LOG = LoggerFactory.getLogger(FactoryBuilder.class);

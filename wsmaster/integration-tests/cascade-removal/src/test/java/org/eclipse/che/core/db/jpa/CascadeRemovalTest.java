@@ -111,7 +111,6 @@ import org.testng.annotations.Test;
  *
  * @author Yevhenii Voevodin
  */
-// todo check that it works with no envs
 public class CascadeRemovalTest {
 
   private Injector injector;
@@ -233,8 +232,7 @@ public class CascadeRemovalTest {
                             mock(DBInitializer.class),
                             mock(ProbeScheduler.class),
                             new DefaultWorkspaceStatusCache(),
-                            new DefaultWorkspaceLockService(),
-                            null));
+                            new DefaultWorkspaceLockService()));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);

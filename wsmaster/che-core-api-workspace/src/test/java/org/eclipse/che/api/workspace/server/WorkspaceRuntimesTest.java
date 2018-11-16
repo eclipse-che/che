@@ -116,8 +116,7 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            null);
+            lockService);
   }
 
   @Test
@@ -262,8 +261,7 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            null);
+            lockService);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)
@@ -304,8 +302,7 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            null);
+            lockService);
     localRuntimes.init();
     RuntimeIdentityDto identity =
         DtoFactory.newDto(RuntimeIdentityDto.class)
@@ -354,8 +351,7 @@ public class WorkspaceRuntimesTest {
             dbInitializer,
             probeScheduler,
             statuses,
-            lockService,
-            null);
+            lockService);
 
     // when
     localRuntimes.injectRuntime(workspace);
