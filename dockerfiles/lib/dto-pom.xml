@@ -24,7 +24,7 @@
     <packaging>pom</packaging>
     <name>Che TypeScript DTO</name>
     <properties>
-        <che.version>6.14.0</che.version>
+        <che.version>6.14.1</che.version>
     </properties>
     <repositories>
         <repository>
