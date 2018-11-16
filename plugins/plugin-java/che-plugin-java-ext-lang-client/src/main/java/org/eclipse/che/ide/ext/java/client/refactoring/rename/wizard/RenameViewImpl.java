@@ -28,6 +28,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.List;
+import org.eclipse.che.ide.Resources;
 import org.eclipse.che.ide.api.theme.Style;
 import org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
@@ -43,7 +44,17 @@ final class RenameViewImpl extends Window implements RenameView {
 
   private static RenameViewImplUiBinder UI_BINDER = GWT.create(RenameViewImplUiBinder.class);
 
-  private final JavaResources javaResources;
+  private static final int VALIDATE_NAME_DELAY = 300;
+
+  private JavaResources javaResources;
+  private Resources ideResources;
+  private final Timer validateNameTimer =
+      new Timer() {
+        @Override
+        public void run() {
+          delegate.validateName();
+        }
+      };
 
   @UiField(provided = true)
   final JavaLocalizationConstant locale;
@@ -73,9 +84,11 @@ final class RenameViewImpl extends Window implements RenameView {
   public RenameViewImpl(
       JavaLocalizationConstant locale,
       JavaResources javaResources,
+      Resources ideResources,
       final SimilarNamesConfigurationPresenter similarNamesConfigurationPresenter) {
     this.locale = locale;
     this.javaResources = javaResources;
+    this.ideResources = ideResources;
 
     setWidget(UI_BINDER.createAndBindUi(this));
 
@@ -98,12 +111,8 @@ final class RenameViewImpl extends Window implements RenameView {
           // here need some delay to be sure input box initiated with given value
           // in manually testing hard to reproduce this problem but it reproduced with selenium
           // tests
-          new Timer() {
-            @Override
-            public void run() {
-              delegate.validateName();
-            }
-          }.schedule(300);
+          validateNameTimer.cancel();
+          validateNameTimer.schedule(VALIDATE_NAME_DELAY);
         });
 
     updateSimilarlyVariables.addValueChangeHandler(
@@ -138,6 +147,7 @@ final class RenameViewImpl extends Window implements RenameView {
             locale.moveDialogButtonOk(),
             "move-accept-button",
             event -> delegate.onAcceptButtonClicked());
+    accept.addStyleName(ideResources.buttonLoaderCss().buttonLoader());
   }
 
   /** {@inheritDoc} */
@@ -255,13 +265,24 @@ final class RenameViewImpl extends Window implements RenameView {
   /** {@inheritDoc} */
   @Override
   public void setEnablePreviewButton(boolean isEnable) {
-    accept.setEnabled(isEnable);
+    preview.setEnabled(isEnable);
   }
 
   /** {@inheritDoc} */
   @Override
   public void setEnableAcceptButton(boolean isEnable) {
-    preview.setEnabled(isEnable);
+    accept.setEnabled(isEnable);
+  }
+
+  @Override
+  public void setLoaderVisibility(boolean isVisible) {
+    if (isVisible) {
+      accept.setHTML("<i></i>");
+      accept.setEnabled(false);
+    } else {
+      accept.setText(locale.moveDialogButtonOk());
+      accept.setEnabled(true);
+    }
   }
 
   /** {@inheritDoc} */

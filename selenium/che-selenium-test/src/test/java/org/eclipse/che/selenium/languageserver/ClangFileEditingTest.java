@@ -62,21 +62,15 @@ public class ClangFileEditingTest {
         workspace.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CPP);
 
     ide.open(workspace);
-  }
+    ide.waitOpenedWorkspaceIsReadyToUse();
 
-  @Test
-  public void checkLanguageServerInitialized() {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_CPP_FILE);
     editor.waitTabIsPresent(CPP_FILE_NAME);
-
-    // check Clang language server initialized
-    consoles.selectProcessByTabName("dev-machine");
-    consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkCodeValidation() {
     projectExplorer.openItemByPath(PATH_TO_CPP_FILE);
     editor.waitActive();
@@ -120,7 +114,7 @@ public class ClangFileEditingTest {
     editor.deleteCurrentLineAndInsertNew();
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkAutocompleteFeature() {
     projectExplorer.openItemByPath(PATH_TO_CPP_FILE);
     editor.waitActive();
@@ -137,7 +131,7 @@ public class ClangFileEditingTest {
     editor.deleteCurrentLineAndInsertNew();
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkFindDefinitionFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cpp");
     editor.waitActive();
@@ -155,7 +149,7 @@ public class ClangFileEditingTest {
     editor.waitTabIsPresent(H_FILE_NAME);
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkRenameFieldFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.h");
     editor.waitActive();
@@ -168,7 +162,7 @@ public class ClangFileEditingTest {
     editor.waitAllMarkersInvisibility(ERROR);
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkSelectedCodeFormatFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/hello.cpp");
     editor.waitActive();
@@ -180,7 +174,7 @@ public class ClangFileEditingTest {
     editor.waitTextIntoEditor("  int x = 4;");
   }
 
-  @Test(priority = 1)
+  @Test
   public void checkFormatCodeFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/iseven.cpp");
     editor.waitActive();

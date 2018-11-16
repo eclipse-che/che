@@ -9,12 +9,16 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.languageserver.ide.filestructure;
+package org.eclipse.che.core.tracing;
 
-import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
+import com.google.common.annotations.Beta;
+import com.google.inject.AbstractModule;
+import io.opentracing.Tracer;
 
-public interface NodeFactory {
-  SymbolNode create(
-      ElementSelectionDelegate<ExtendedSymbolInformation> delegate,
-      ExtendedSymbolInformation symbol);
+@Beta
+public class TracingModule extends AbstractModule {
+  @Override
+  protected void configure() {
+    bind(Tracer.class).toProvider(TracerProvider.class);
+  }
 }

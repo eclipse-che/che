@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.languageserver.ide.filestructure;
+package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
@@ -17,13 +17,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
+import org.eclipse.che.ide.ext.java.client.util.SymbolIcons;
 import org.eclipse.che.ide.ui.smartTree.data.AbstractTreeNode;
 import org.eclipse.che.ide.ui.smartTree.data.HasAction;
 import org.eclipse.che.ide.ui.smartTree.data.Node;
 import org.eclipse.che.ide.ui.smartTree.presentation.HasNewPresentation;
 import org.eclipse.che.ide.ui.smartTree.presentation.NewNodePresentation;
 import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
-import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKindHelper;
 
 /**
  * A node presenting {@link ExtendedSymbolInformation} objects
@@ -31,18 +31,18 @@ import org.eclipse.che.plugin.languageserver.ide.navigation.symbol.SymbolKindHel
  * @author Thomas Mäder
  */
 public class SymbolNode extends AbstractTreeNode implements HasNewPresentation, HasAction {
-  private SymbolKindHelper symbolHelper;
+  private SymbolIcons symbolIcons;
   private PromiseProvider promiseProvider;
   private ElementSelectionDelegate<ExtendedSymbolInformation> delegate;
   private ExtendedSymbolInformation symbol;
 
   @Inject
   public SymbolNode(
-      SymbolKindHelper symbolHelper,
+      SymbolIcons symbolIcons,
       PromiseProvider promiseProvider,
       @Assisted ElementSelectionDelegate<ExtendedSymbolInformation> delegate,
       @Assisted ExtendedSymbolInformation symbol) {
-    this.symbolHelper = symbolHelper;
+    this.symbolIcons = symbolIcons;
     this.promiseProvider = promiseProvider;
     this.delegate = delegate;
     this.symbol = symbol;
@@ -64,7 +64,7 @@ public class SymbolNode extends AbstractTreeNode implements HasNewPresentation, 
         symbol
             .getChildren()
             .stream()
-            .map(child -> new SymbolNode(symbolHelper, promiseProvider, delegate, child))
+            .map(child -> new SymbolNode(symbolIcons, promiseProvider, delegate, child))
             .collect(Collectors.toList()));
   }
 
@@ -72,7 +72,7 @@ public class SymbolNode extends AbstractTreeNode implements HasNewPresentation, 
   public NewNodePresentation getPresentation() {
     String name = symbol.getInfo().getName();
     return new NewNodePresentation.Builder()
-        .withIcon(symbolHelper.getIcon(symbol.getInfo().getKind()))
+        .withIcon(symbolIcons.get(symbol))
         .withNodeText(name)
         .build();
   }

@@ -9,16 +9,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.languageserver.ide.filestructure;
+package org.eclipse.che.ide.ext.java.client.navigation.filestructure;
 
-/**
- * Interface to signal selection of an element
- *
- * @author Thomas Mäder
- * @param <T> the type of element selected.
- */
-public interface ElementSelectionDelegate<T> {
-  void onSelect(T element);
+import org.eclipse.che.jdt.ls.extension.api.dto.ExtendedSymbolInformation;
 
-  void onCancel();
+public interface NodeFactory {
+  SymbolNode create(
+      ElementSelectionDelegate<ExtendedSymbolInformation> delegate,
+      ExtendedSymbolInformation symbol);
 }

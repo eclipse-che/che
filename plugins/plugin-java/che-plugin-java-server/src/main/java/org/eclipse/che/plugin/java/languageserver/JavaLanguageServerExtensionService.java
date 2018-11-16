@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.fixJdtUri;
@@ -720,7 +721,7 @@ public class JavaLanguageServerExtensionService {
     renameSettings.getRenameParams().getTextDocument().setUri(prefixURI(uri));
 
     RefactoringResult refactoringResult =
-        doGetOne(RENAME_COMMAND, singletonList(renameSettings), type);
+        doGetOne(RENAME_COMMAND, singletonList(renameSettings), type, 30, TimeUnit.SECONDS);
     CheWorkspaceEdit cheWorkspaceEdit = refactoringResult.getCheWorkspaceEdit();
     List<CheResourceChange> resourceChanges = getResourceChanges(cheWorkspaceEdit);
     cheWorkspaceEdit.setCheResourceChanges(resourceChanges);
@@ -1019,7 +1020,12 @@ public class JavaLanguageServerExtensionService {
     CompletableFuture<Object> result = executeCommand(command, params);
     try {
       return gson.fromJson(gson.toJson(result.get(timeoutInSeconds, timeUnit)), type);
-    } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
+    } catch (TimeoutException e) {
+      String errorMessage = e.getLocalizedMessage();
+      throw new JsonRpcException(
+          -27000,
+          isNullOrEmpty(errorMessage) ? "Operation was interrupted by timeout" : errorMessage);
+    } catch (JsonSyntaxException | InterruptedException | ExecutionException e) {
       throw new JsonRpcException(-27000, e.getMessage());
     }
   }

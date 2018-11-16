@@ -151,6 +151,8 @@ objects:
                 optional: true
           - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
+          - name: CHE_TRACING_ENABLED
+            value: "${CHE_TRACING_ENABLED}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -292,6 +294,10 @@ parameters:
   displayName: Plugin sidecar default memory limit
   description: Plugin sidecar default memory limit in megabytes
   value: '128'
+- name: CHE_TRACING_ENABLED
+  displayName: Eclipse Che tracing
+  description: Enable or disable tracing in Eclipse Che
+  value: 'false'
 labels:
   app: che
   template: che
