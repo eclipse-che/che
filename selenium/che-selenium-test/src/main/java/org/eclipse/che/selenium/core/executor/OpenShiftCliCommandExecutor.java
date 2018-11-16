@@ -65,6 +65,10 @@ public class OpenShiftCliCommandExecutor implements CommandExecutor {
   @Named("env.openshift.token")
   private String openShiftToken;
 
+  @Inject(optional = true)
+  @Named("che.openshift.project")
+  private String cheProjectName;
+
   @Inject private OpenShiftWebConsoleUrlProvider openShiftWebConsoleUrlProvider;
 
   @Override
@@ -90,7 +94,9 @@ public class OpenShiftCliCommandExecutor implements CommandExecutor {
       }
     }
 
-    String openShiftCliCommand = format("%s %s", PATH_TO_OPENSHIFT_CLI, command);
+    String projectArgument = cheProjectName != null ? "-n " + cheProjectName : "";
+    String openShiftCliCommand =
+        format("%s %s %s", PATH_TO_OPENSHIFT_CLI, projectArgument, command);
 
     return processAgent.process(openShiftCliCommand);
   }

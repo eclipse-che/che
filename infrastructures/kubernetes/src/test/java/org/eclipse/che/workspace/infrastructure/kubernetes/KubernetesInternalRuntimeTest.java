@@ -312,7 +312,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.internalStart(emptyMap());
 
-    verify(toolingProvisioner).provision(IDENTITY, k8sEnv);
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
     verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
     verify(deployments).deploy(any());

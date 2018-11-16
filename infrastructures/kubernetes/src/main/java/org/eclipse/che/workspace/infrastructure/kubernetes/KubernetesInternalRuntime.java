@@ -165,7 +165,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
       // Tooling side car provisioner should be applied before other provisioners
       // because new machines may be provisioned there
-      toolingProvisioner.provision(context.getIdentity(), context.getEnvironment());
+      toolingProvisioner.provision(
+          context.getIdentity(), startSynchronizer, context.getEnvironment());
 
       startSynchronizer.checkFailure();
 
@@ -182,7 +183,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
       LOG.debug("Provisioning of workspace '{}' completed.", workspaceId);
 
-      volumesStrategy.prepare(context.getEnvironment(), workspaceId);
+      volumesStrategy.prepare(
+          context.getEnvironment(), workspaceId, startSynchronizer.getStartTimeoutMillis());
 
       startSynchronizer.checkFailure();
 

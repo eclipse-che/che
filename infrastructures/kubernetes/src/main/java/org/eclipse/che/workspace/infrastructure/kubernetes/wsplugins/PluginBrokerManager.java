@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
@@ -86,7 +87,10 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
    */
   @Beta
   public List<ChePlugin> getTooling(
-      RuntimeIdentity runtimeID, Collection<PluginMeta> pluginsMeta, boolean isEphemeral)
+      RuntimeIdentity runtimeID,
+      StartSynchronizer startSynchronizer,
+      Collection<PluginMeta> pluginsMeta,
+      boolean isEphemeral)
       throws InfrastructureException {
 
     String workspaceId = runtimeID.getWorkspaceId();
@@ -100,7 +104,8 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     environmentProvisioner.provision(brokerEnvironment, runtimeID);
 
     ListenBrokerEvents listenBrokerEvents = getListenEventPhase(workspaceId, brokersResult);
-    PrepareStorage prepareStorage = getPrepareStoragePhase(workspaceId, brokerEnvironment);
+    PrepareStorage prepareStorage =
+        getPrepareStoragePhase(workspaceId, startSynchronizer, brokerEnvironment);
     WaitBrokerResult waitBrokerResult = getWaitBrokerPhase(workspaceId, brokersResult);
     DeployBroker deployBroker =
         getDeployBrokerPhase(
@@ -115,8 +120,10 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   }
 
   private PrepareStorage getPrepareStoragePhase(
-      String workspaceId, KubernetesEnvironment brokerEnvironment) {
-    return new PrepareStorage(workspaceId, brokerEnvironment, volumesStrategy);
+      String workspaceId,
+      StartSynchronizer startSynchronizer,
+      KubernetesEnvironment brokerEnvironment) {
+    return new PrepareStorage(workspaceId, brokerEnvironment, volumesStrategy, startSynchronizer);
   }
 
   private DeployBroker getDeployBrokerPhase(
