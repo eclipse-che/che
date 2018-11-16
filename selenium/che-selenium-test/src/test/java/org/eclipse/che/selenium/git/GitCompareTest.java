@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.git;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.DELETE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.EDIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.ADD_TO_INDEX;
@@ -207,7 +208,7 @@ public class GitCompareTest {
     git.closeGroupGitCompareForm();
   }
 
-  @Test(priority = 3)
+  @Test(priority = 3, groups = UNDER_REPAIR)
   public void checkCompareWithRevision() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PATH_TO_APP_CONTROLLER);
