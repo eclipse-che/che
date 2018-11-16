@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.DELETE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.EDIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.ADD_TO_INDEX;
@@ -208,7 +207,7 @@ public class GitCompareTest {
     git.closeGroupGitCompareForm();
   }
 
-  @Test(priority = 3, groups = UNDER_REPAIR)
+  @Test(priority = 3)
   public void checkCompareWithRevision() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PATH_TO_APP_CONTROLLER);
@@ -231,14 +230,7 @@ public class GitCompareTest {
     git.setFocusOnLeftGitCompareEditor();
     git.setCursorToLine(2, LEFT_COMPARE_ST);
     git.typeTextIntoGitCompareEditor("//change content from compare editor");
-
-    try {
-      git.waitExpTextIntoCompareLeftEditor("//change content from compare editor");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/11791");
-    }
-
+    git.waitExpTextIntoCompareLeftEditor("//change content from compare editor");
     git.clickOnGitCompareCloseButton();
 
     try {
