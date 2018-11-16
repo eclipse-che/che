@@ -793,7 +793,8 @@ public class WorkspaceRuntimes {
     return environmentFactories.keySet();
   }
 
-  private InternalEnvironment createInternalEnvironment(
+  @VisibleForTesting
+  InternalEnvironment createInternalEnvironment(
       @Nullable Environment environment, Map<String, String> workspaceConfigAttributes)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType;
