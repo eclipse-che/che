@@ -115,7 +115,7 @@ public class TheiaBuildPluginTest {
     theiaIde.waitNotificationDisappearance(expectedYaomanMessage, UPDATING_PROJECT_TIMEOUT_SEC);
 
     // build plugin
-    openTerminal("File", "Open new multi-machine terminal", "ws/theia-ide");
+    openTerminal("File", "Open Terminal in specific container", "ws/theia-ide");
     theiaTerminal.waitTab(wsTheiaIdeTerminalTitle);
     theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
     theiaTerminal.performCommand(goToDirectoryCommand);
