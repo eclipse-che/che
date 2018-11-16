@@ -8,7 +8,6 @@
 - Update CentOS Java image [\#11966](https://github.com/eclipse/che/pull/11966) ([l0rd](https://github.com/l0rd))
 - Clangd fixes [\#11958](https://github.com/eclipse/che/pull/11958) ([eivantsov](https://github.com/eivantsov))
 - RELEASE: Update CHANGELOG [\#11950](https://github.com/eclipse/che/pull/11950) ([riuvshin](https://github.com/riuvshin))
-- \[ Selenium \] Add an ability to manage timeouts in the 'AssistantFindPanel\#waitNode' method [\#11942](https://github.com/eclipse/che/pull/11942) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
 - Add che.openshift.project parameter for oc usage. [\#11933](https://github.com/eclipse/che/pull/11933) ([Katka92](https://github.com/Katka92))
 - Made PVC Strategies wait until PVCs are bound during preparing [\#11920](https://github.com/eclipse/che/pull/11920) ([sleshchenko](https://github.com/sleshchenko))
 
