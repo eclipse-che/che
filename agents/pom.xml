@@ -17,11 +17,11 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.14.1</version>
+        <version>6.14.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-agents-parent</artifactId>
-    <version>6.14.1</version>
+    <version>6.14.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Agents Parent</name>
     <modules>
