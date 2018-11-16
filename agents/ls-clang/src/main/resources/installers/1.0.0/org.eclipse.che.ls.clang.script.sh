@@ -32,7 +32,7 @@ CHE_DIR=$HOME/che
 LS_DIR=${CHE_DIR}/ls-clangd
 LS_LAUNCHER=${LS_DIR}/launch.sh
 CLANGD_VERSION=6.0
-CLANGD_BINARY=clangd-${CLANGD_VERSION}
+CLANGD_BINARY=clangd
 
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"
@@ -170,4 +170,4 @@ fi
 
 touch ${LS_LAUNCHER}
 chmod +x ${LS_LAUNCHER}
-echo "tee -a /home/user/clangd-input.log | clangd -disable-symbolication -pretty -resource-dir=/usr/include/ -enable-snippets | tee -a /home/user/clangd-output.log" > ${LS_LAUNCHER}
+echo "tee -a ${HOME}/clangd-input.log | clangd -disable-symbolication -pretty -resource-dir=/usr/include/ -enable-snippets | tee -a ${HOME}/clangd-output.log" > ${LS_LAUNCHER}
