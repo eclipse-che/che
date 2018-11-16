@@ -71,8 +71,8 @@ public class WorkspaceValidator {
     // if environments/default environment name are empty and it is sidecar-based workspace
     // then do not check env since it is a workspace with tooling only
     if ((config.getEnvironments() != null && !config.getEnvironments().isEmpty())
-        || !isNullOrEmpty(config.getDefaultEnv()) || !isSidecarBasedWorkspace(
-        config.getAttributes())) {
+        || !isNullOrEmpty(config.getDefaultEnv())
+        || !isSidecarBasedWorkspace(config.getAttributes())) {
       validateEnvironments(config);
     }
 

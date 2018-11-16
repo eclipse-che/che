@@ -104,13 +104,14 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   }
 
   private void addToolingPod(KubernetesEnvironment kubernetesEnvironment) {
-    Pod pod = new PodBuilder()
-        .withNewMetadata()
-        .withName(CHE_WORKSPACE_POD)
-        .endMetadata()
-        .withNewSpec()
-        .endSpec()
-        .build();
+    Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName(CHE_WORKSPACE_POD)
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
 
     kubernetesEnvironment.getPods().put(CHE_WORKSPACE_POD, pod);
   }

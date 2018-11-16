@@ -90,11 +90,11 @@ public class KubernetesRuntimeState {
       return false;
     }
     KubernetesRuntimeState that = (KubernetesRuntimeState) o;
-    return Objects.equals(workspaceId, that.workspaceId) &&
-        Objects.equals(envName, that.envName) &&
-        Objects.equals(ownerId, that.ownerId) &&
-        Objects.equals(getNamespace(), that.getNamespace()) &&
-        getStatus() == that.getStatus();
+    return Objects.equals(workspaceId, that.workspaceId)
+        && Objects.equals(envName, that.envName)
+        && Objects.equals(ownerId, that.ownerId)
+        && Objects.equals(getNamespace(), that.getNamespace())
+        && getStatus() == that.getStatus();
   }
 
   @Override
@@ -104,12 +104,21 @@ public class KubernetesRuntimeState {
 
   @Override
   public String toString() {
-    return "KubernetesRuntimeState{" +
-        "workspaceId='" + workspaceId + '\'' +
-        ", envName='" + envName + '\'' +
-        ", ownerId='" + ownerId + '\'' +
-        ", namespace='" + namespace + '\'' +
-        ", status=" + status +
-        '}';
+    return "KubernetesRuntimeState{"
+        + "workspaceId='"
+        + workspaceId
+        + '\''
+        + ", envName='"
+        + envName
+        + '\''
+        + ", ownerId='"
+        + ownerId
+        + '\''
+        + ", namespace='"
+        + namespace
+        + '\''
+        + ", status="
+        + status
+        + '}';
   }
 }

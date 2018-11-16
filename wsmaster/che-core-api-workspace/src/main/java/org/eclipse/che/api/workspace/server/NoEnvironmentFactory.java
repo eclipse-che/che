@@ -39,12 +39,10 @@ public class NoEnvironmentFactory extends InternalEnvironmentFactory<InternalEnv
   }
 
   @Override
-  protected InternalEnvironment doCreate(InternalRecipe recipe,
-      Map<String, InternalMachineConfig> machines, List<Warning> warnings) {
+  protected InternalEnvironment doCreate(
+      InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings) {
     return new NoEnvInternalEnvironment();
   }
 
-  public static class NoEnvInternalEnvironment extends InternalEnvironment {
-
-  }
+  public static class NoEnvInternalEnvironment extends InternalEnvironment {}
 }

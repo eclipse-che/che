@@ -55,9 +55,9 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
   public boolean equals(Object obj) {
     if (!(obj instanceof RuntimeIdentityImpl)) return false;
     RuntimeIdentityImpl other = (RuntimeIdentityImpl) obj;
-    return workspaceId.equals(other.workspaceId) &&
-        Objects.equals(envName, other.envName) &&
-        Objects.equals(ownerId, other.ownerId);
+    return workspaceId.equals(other.workspaceId)
+        && Objects.equals(envName, other.envName)
+        && Objects.equals(ownerId, other.ownerId);
   }
 
   @Override

@@ -79,7 +79,8 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
    * @throws InfrastructureException if infrastructure specific error occurs
    * @throws ValidationException if validation fails
    */
-  public T create(@Nullable final Environment sourceEnv) throws InfrastructureException, ValidationException {
+  public T create(@Nullable final Environment sourceEnv)
+      throws InfrastructureException, ValidationException {
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Warning> warnings = new ArrayList<>();

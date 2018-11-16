@@ -287,15 +287,10 @@ public class AppContextImpl
           wsAgentServerUtilProvider.get().getWsAgentServerMachine().get().getName();
       String activeEnv = workspace.getRuntime().getActiveEnv();
 
-      EnvironmentImpl environment = workspace
-          .getConfig()
-          .getEnvironments()
-          .get(activeEnv);
+      EnvironmentImpl environment = workspace.getConfig().getEnvironments().get(activeEnv);
       VolumeImpl vol = null;
       if (environment != null) {
-        vol = environment.getMachines()
-            .get(machineName)
-            .getVolume("projects");
+        vol = environment.getMachines().get(machineName).getVolume("projects");
       }
 
       // if voulme exists return its path, otherwise use backward compatible path (/projects)

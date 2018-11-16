@@ -351,12 +351,14 @@ public class WorkspaceManager {
   }
 
   /** Asynchronously starts given workspace. */
-  private void startAsync(WorkspaceImpl workspace, @Nullable String envName, Map<String, String> options)
+  private void startAsync(
+      WorkspaceImpl workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
     // Sidecar-based workspaces allowed not to have any environments
     String env = null;
-    if (!SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(workspace.getConfig().getAttributes()) ||
-        envName != null || !workspace.getConfig().getEnvironments().isEmpty()) {
+    if (!SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(workspace.getConfig().getAttributes())
+        || envName != null
+        || !workspace.getConfig().getEnvironments().isEmpty()) {
 
       if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
         throw new NotFoundException(

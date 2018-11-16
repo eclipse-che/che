@@ -25,8 +25,8 @@ public class SidecarToolingWorkspaceUtil {
 
   /**
    * Checks whether provided workspace config attributes {@link WorkspaceConfig#getAttributes()}
-   * contains configuration of sidecars.
-   * <br>This indicates whether this workspace is Che6 or Che7 compatible.
+   * contains configuration of sidecars. <br>
+   * This indicates whether this workspace is Che6 or Che7 compatible.
    */
   public static boolean isSidecarBasedWorkspace(Map<String, String> attributes) {
     boolean hasPlugins =
