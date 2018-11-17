@@ -45,7 +45,7 @@ class CopyThreadLocalCallable<T> implements Callable<T> {
 
   @Override
   public String toString() {
-    return "CopyThreadLocalCallable{ " + wrapped.toString() + " )";
+    return "CopyThreadLocalCallable{ " + wrapped.toString() + " }";
   }
 
   public Callable<? extends T> getWrapped() {
