@@ -38,6 +38,10 @@ objects:
       port: 8080
       protocol: TCP
       targetPort: 8080
+    - name: metrics
+      port: 8087
+      protocol: TCP
+      targetPort: 8087
     selector:
       app: che
 - apiVersion: v1
@@ -48,6 +52,18 @@ objects:
     to:
       kind: Service
       name: che-host
+    port:
+      targetPort: http
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: metrics
+  spec:
+    to:
+      kind: Service
+      name: che-host
+    port:
+      targetPort: metrics
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -153,6 +169,8 @@ objects:
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
+          - name: CHE_METRICS_ENABLED
+            value: "true"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -175,6 +193,9 @@ objects:
           ports:
           - containerPort: 8080
             name: http
+            protocol: TCP
+          - containerPort: 8087
+            name: metrics
             protocol: TCP
           - containerPort: 8000
             name: http-debug

@@ -276,6 +276,9 @@ public class WsMasterModule extends AbstractModule {
     if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
       install(new org.eclipse.che.core.tracing.TracingModule());
     }
+    if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
+      install(new org.eclipse.che.core.metrics.MetricsModule());
+    }
   }
 
   private void configureSingleUserMode(Map<String, String> persistenceProperties) {
