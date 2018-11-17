@@ -23,6 +23,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginMetaRetriever;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
 import org.slf4j.Logger;
@@ -56,7 +57,8 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
   }
 
   @Beta
-  public void provision(RuntimeIdentity id, E environment) throws InfrastructureException {
+  public void provision(RuntimeIdentity id, StartSynchronizer startSynchronizer, E environment)
+      throws InfrastructureException {
 
     Collection<PluginMeta> pluginsMeta = pluginMetaRetriever.get(environment.getAttributes());
     if (pluginsMeta.isEmpty()) {
@@ -71,7 +73,8 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
     }
 
     boolean isEphemeral = EphemeralWorkspaceUtility.isEphemeral(environment.getAttributes());
-    List<ChePlugin> chePlugins = pluginBrokerManager.getTooling(id, pluginsMeta, isEphemeral);
+    List<ChePlugin> chePlugins =
+        pluginBrokerManager.getTooling(id, startSynchronizer, pluginsMeta, isEphemeral);
 
     pluginsApplier.apply(environment, chePlugins);
     if (isEphemeral) {
