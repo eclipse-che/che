@@ -161,8 +161,7 @@
               "required": [
                 "type",
                 "tool",
-                "command",
-                "workdir"
+                "command"
               ],
               "properties": {
                 "type": {
