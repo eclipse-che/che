@@ -17,8 +17,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.apache.catalina.Manager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TomcatMetricsProvider implements Provider<TomcatMetrics> {
