@@ -14,8 +14,10 @@ package org.eclipse.che.ide.orion.compare;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -111,7 +113,7 @@ public class CompareInitializer {
 
     @Override
     public void accepted(String value) {
-      acceptedNative(value);
+      Scheduler.get().scheduleDeferred((Command) () -> acceptedNative(value));
     }
 
     private native void acceptedNative(String value) /*-{
