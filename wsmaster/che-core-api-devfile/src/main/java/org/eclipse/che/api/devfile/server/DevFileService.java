@@ -36,7 +36,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.devfile.model.DevFile;
+import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -76,10 +76,10 @@ public class DevFileService extends Service {
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
-    DevFile devFile;
+    Devfile devFile;
     WorkspaceConfig workspaceConfig;
     try {
-      devFile = objectMapper.readValue(data, DevFile.class);
+      devFile = objectMapper.readValue(data, Devfile.class);
       workspaceConfig = devFileToWorkspaceConfig(devFile);
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
@@ -108,7 +108,7 @@ public class DevFileService extends Service {
       throws NotFoundException, ServerException {
     // TODO: validate key
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-    DevFile workspaceDevFile = workspaceToDevFile(workspace.getConfig());
+    Devfile workspaceDevFile = workspaceToDevFile(workspace.getConfig());
     // Write object as YAML
     try {
       return Response.ok().entity(objectMapper.writeValueAsString(workspaceDevFile)).build();

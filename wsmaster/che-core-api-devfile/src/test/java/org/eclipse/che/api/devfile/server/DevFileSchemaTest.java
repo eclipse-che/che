@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
 package org.eclipse.che.api.devfile.server;
 
 import static org.testng.Assert.assertTrue;
@@ -28,10 +39,10 @@ public class DevFileSchemaTest {
   @Test
   public void shouldValidateSchema() throws Exception {
 
-    String devFileYamlContent = Files
-        .readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-    String devFileSchemaContent = Files
-        .readFile(getClass().getClassLoader().getResourceAsStream("devfile_schema.json"));
+    String devFileYamlContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
+    String devFileSchemaContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("schema/devfile.json"));
 
     final JsonNode data = yamlReader.readTree(devFileYamlContent);
     final JsonNode schema = JsonLoader.fromString(devFileSchemaContent);

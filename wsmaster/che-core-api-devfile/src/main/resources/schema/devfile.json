@@ -1,5 +1,11 @@
 {
-  "definitions": {},
+  "definitions": {
+    "attributes" : {
+      "id": "propertyList",
+      "type": "object",
+      "javaType": "java.util.Map<String, String>"
+    }
+  },
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "http://example.com/root.json",
   "type": "object",
@@ -16,7 +22,6 @@
       "$id": "#/properties/version",
       "type": "string",
       "title": "The Version Schema",
-      "default": "",
       "examples": [
         "0.0.1"
       ]
@@ -25,7 +30,6 @@
       "$id": "#/properties/name",
       "type": "string",
       "title": "The Name Schema",
-      "default": "",
       "examples": [
         "petclinic-dev-environment"
       ]
@@ -47,7 +51,6 @@
             "$id": "#/properties/projects/items/properties/name",
             "type": "string",
             "title": "The Project Name Schema",
-            "default": "",
             "examples": [
               "petclinic"
             ]
@@ -65,7 +68,6 @@
                 "$id": "#/properties/projects/items/properties/source/properties/type",
                 "type": "string",
                 "title": "The Project Source Type Schema",
-                "default": "",
                 "examples": [
                   "git"
                 ]
@@ -74,7 +76,6 @@
                 "$id": "#/properties/projects/items/properties/source/properties/location",
                 "type": "string",
                 "title": "The Project Source Location Schema",
-                "default": "",
                 "examples": [
                   "git@github.com:spring-projects/spring-petclinic.git"
                 ]
@@ -102,7 +103,6 @@
             "$id": "#/properties/tools/items/properties/name",
             "type": "string",
             "title": "The Tool Name Schema",
-            "default": "",
             "examples": [
               "mvn-stack"
             ]
@@ -111,7 +111,6 @@
             "$id": "#/properties/tools/items/properties/type",
             "type": "string",
             "title": "The Tool Type Schema",
-            "default": "",
             "examples": [
               "chePlugin"
             ]
@@ -120,7 +119,6 @@
             "$id": "#/properties/tools/items/properties/id",
             "type": "string",
             "title": "The Tool Id Schema",
-            "default": "",
             "examples": [
               "eclipse/maven-jdk8:1.0.0"
             ]
@@ -145,10 +143,12 @@
             "$id": "#/properties/commands/items/properties/name",
             "type": "string",
             "title": "The Command Name Schema",
-            "default": "",
             "examples": [
               "build"
             ]
+          },
+          "attributes": {
+            "$ref": "#/definitions/attributes"
           },
           "actions": {
             "$id": "#/properties/commands/items/properties/actions",
@@ -168,7 +168,6 @@
                   "$id": "#/properties/commands/items/properties/actions/items/properties/type",
                   "type": "string",
                   "title": "The Action Type Schema",
-                  "default": "",
                   "examples": [
                     "exec"
                   ]
@@ -177,7 +176,6 @@
                   "$id": "#/properties/commands/items/properties/actions/items/properties/tool",
                   "type": "string",
                   "title": "The Action Tool Schema",
-                  "default": "",
                   "examples": [
                     "mvn-stack"
                   ]
@@ -186,7 +184,6 @@
                   "$id": "#/properties/commands/items/properties/actions/items/properties/command",
                   "type": "string",
                   "title": "The Action Command Schema",
-                  "default": "",
                   "examples": [
                     "mvn package"
                   ]
@@ -195,7 +192,6 @@
                   "$id": "#/properties/commands/items/properties/actions/items/properties/workdir",
                   "type": "string",
                   "title": "The Action Workdir Schema",
-                  "default": "",
                   "examples": [
                     "/projects/spring-petclinic"
                   ]

@@ -14,7 +14,7 @@ package org.eclipse.che.api.devfile.server;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.devfile.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.DevFile;
+import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
 import org.eclipse.che.api.devfile.model.Tool;
@@ -38,9 +38,9 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
 public class DevFileConverter {
 
-  static DevFile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
+  static Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
 
-    DevFile devFile = new DevFile().withVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
+    Devfile devFile = new Devfile().withVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
     // Manage projects
     List<Project> projects = new ArrayList<>();
@@ -67,7 +67,12 @@ public class DevFileConverter {
       command.getAttributes().remove("workingDir");
       command.getAttributes().remove("pluginId");
       // Put others
-      devCommand.getAttributes().putAll(command.getAttributes());
+      if (devCommand.getAttributes() == null) {
+        devCommand.withAttributes(command.getAttributes());
+      } else {
+        devCommand.getAttributes().putAll(command.getAttributes());
+      }
+
       commands.add(devCommand);
     }
     devFile.setCommands(commands);
@@ -99,7 +104,7 @@ public class DevFileConverter {
     return devFile;
   }
 
-  static WorkspaceConfigImpl devFileToWorkspaceConfig(DevFile devFile)
+  static WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devFile)
       throws DevFileFormatException {
     validateDevFile(devFile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
@@ -154,7 +159,9 @@ public class DevFileConverter {
         if (toolOfCommand.isPresent() && !isNullOrEmpty(toolOfCommand.get().getId())) {
           command.getAttributes().put("pluginId", toolOfCommand.get().getId());
         }
-        command.getAttributes().putAll(devCommand.getAttributes());
+        if (devCommand.getAttributes() != null) {
+          command.getAttributes().putAll(devCommand.getAttributes());
+        }
         commands.add(command);
       }
     }
@@ -175,7 +182,7 @@ public class DevFileConverter {
     return config;
   }
 
-  private static void validateDevFile(DevFile devFile) throws DevFileFormatException {
+  private static void validateDevFile(Devfile devFile) throws DevFileFormatException {
     if (!CURRENT_SPEC_VERSION.equals(devFile.getVersion())) {
       throw new DevFileFormatException(
           format("Provided devfile has unsupported version %s", devFile.getVersion()));

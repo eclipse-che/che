@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile;
+package org.eclipse.che.api.devfile.server;
 
 public class Constants {
 

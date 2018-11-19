@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.DevFile;
+import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -36,7 +36,7 @@ public class DevFileConverterTest {
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
 
-    DevFile devFile = objectMapper.readValue(yamlContent, DevFile.class);
+    Devfile devFile = objectMapper.readValue(yamlContent, Devfile.class);
 
     WorkspaceConfigImpl wsConfigImpl = DevFileConverter.devFileToWorkspaceConfig(devFile);
 
@@ -54,12 +54,12 @@ public class DevFileConverterTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_impl.json"));
     WorkspaceConfigImpl workspaceConfig =
         JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
-    DevFile devFile = DevFileConverter.workspaceToDevFile(workspaceConfig);
+    Devfile devFile = DevFileConverter.workspaceToDevFile(workspaceConfig);
 
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
 
-    DevFile expectedDevFile = objectMapper.readValue(yamlContent, DevFile.class);
+    Devfile expectedDevFile = objectMapper.readValue(yamlContent, Devfile.class);
 
     // Recursively compare
     assertEquals(devFile.getVersion(), expectedDevFile.getVersion());
@@ -98,11 +98,13 @@ public class DevFileConverterTest {
         assertEquals(action.getType(), expectedAction.getType());
         assertEquals(action.getWorkdir(), expectedAction.getWorkdir());
       }
-      assertTrue(
-          command
-              .getAttributes()
-              .entrySet()
-              .containsAll(expectedCommand.getAttributes().entrySet()));
+      if (command.getAttributes() != null && expectedCommand.getAttributes() != null) {
+        assertTrue(
+            command
+                .getAttributes()
+                .entrySet()
+                .containsAll(expectedCommand.getAttributes().entrySet()));
+      }
     }
 
     assertEquals(devFile.getTools().size(), expectedDevFile.getTools().size());
