@@ -424,7 +424,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} \nnode app/app.js",
+        "commandLine": "cd ${current.project.path} \n node .",
         "attributes": {
           "previewUrl": "${server.3000/tcp}",
           "goal": "Run"
