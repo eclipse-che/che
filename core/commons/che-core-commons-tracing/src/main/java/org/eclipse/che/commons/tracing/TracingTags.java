@@ -33,6 +33,21 @@ public final class TracingTags {
   public static final AnnotationAwareBooleanTag ERROR =
       new AnnotationAwareBooleanTag(Tags.ERROR.getKey());
 
+  /** We can record the reason for an error in this tag. */
+  public static final AnnotationAwareStringTag ERROR_REASON =
+      new AnnotationAwareStringTag("error.reason");
+
+  /**
+   * If some asynchronous job has been cancelled due to some reason (but itself didn't fail) one can
+   * use this tag instead of the "error" tag.
+   */
+  public static final AnnotationAwareBooleanTag CANCELLED =
+      new AnnotationAwareBooleanTag("cancelled");
+
+  /** A place to report the reason for the cancellation as a tag on a span */
+  public static final AnnotationAwareStringTag CANCELLED_REASON =
+      new AnnotationAwareStringTag("cancelled.reason");
+
   /**
    * This is the standard {@link Tags#SAMPLING_PRIORITY} "reexported" as an annotation aware tag so
    * that it can be easily set in the {@link org.eclipse.che.commons.annotation.Traced @Traced}

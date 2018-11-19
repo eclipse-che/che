@@ -222,7 +222,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                 // see comments above why executor is explicitly put into arguments
                 .thenComposeAsync(checkFailure(startFailure), executor)
                 .thenCompose(setContext(currentContext, checkServers(toCancelFutures, machine)))
-                .exceptionally(publishFailedStatus(startFailure, machineName));
+                .thenRun(finishStartupTracingSpan(machineName))
+                .exceptionally(publishFailedStatusAndRecordFailureTrace(startFailure, machineName));
         machinesFutures.put(machineName, machineBootChain);
       }
 
@@ -295,6 +296,15 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     }
   }
 
+  private Runnable finishStartupTracingSpan(String machineName) {
+    return () -> {
+      Span span = machineStartupTraces.remove(machineName);
+      if (span != null) {
+        span.finish();
+      }
+    };
+  }
+
   /** Returns new function that wraps given with set/unset context logic */
   private <T, R> Function<T, R> setContext(EnvironmentContext context, Function<T, R> func) {
     return funcArgument -> {
@@ -326,30 +336,15 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       LOG.debug(
           "Waiting to start machines of workspace '{}'",
           getContext().getIdentity().getWorkspaceId());
+      final CompletableFuture<Void> allDone =
+          CompletableFuture.allOf(
+              machinesFutures.values().toArray(new CompletableFuture[machinesFutures.size()]));
 
-      CompletableFuture<?>[] tracedMachineFutures =
-          machinesFutures
-              .entrySet()
-              .stream()
-              .map(
-                  e ->
-                      e.getValue()
-                          .thenRun(
-                              () -> {
-                                Span span = machineStartupTraces.remove(e.getKey());
-                                if (span != null) {
-                                  span.finish();
-                                }
-                              }))
-              .toArray(CompletableFuture[]::new);
-
-      final CompletableFuture<Void> allDone = CompletableFuture.allOf(tracedMachineFutures);
       CompletableFuture.anyOf(allDone, failure)
           .get(startSynchronizer.getStartTimeoutMillis(), TimeUnit.MILLISECONDS);
 
       if (failure.isCompletedExceptionally()) {
         cancelAll(toCancelFutures);
-        finishAndMarkFailedAllStartupTraces();
         // rethrow the failure cause
         failure.get();
       }
@@ -364,29 +359,30 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                   + "' reached timeout");
       failure.completeExceptionally(ie);
       cancelAll(toCancelFutures);
-      finishAndMarkFailedAllStartupTraces();
+      finishAllStartupTracesAsFailures(ie);
       throw ie;
     } catch (InterruptedException ex) {
       RuntimeStartInterruptedException runtimeInterruptedEx =
           new RuntimeStartInterruptedException(getContext().getIdentity());
       failure.completeExceptionally(runtimeInterruptedEx);
       cancelAll(toCancelFutures);
-      finishAndMarkFailedAllStartupTraces();
+      finishAllStartupTracesAsFailures(ex);
       throw runtimeInterruptedEx;
     } catch (ExecutionException ex) {
       failure.completeExceptionally(ex.getCause());
       cancelAll(toCancelFutures);
-      finishAndMarkFailedAllStartupTraces();
       wrapAndRethrow(ex.getCause());
+      // note that we do NOT finish the startup traces here, because execution exception is
+      // handled by the "exceptional" parts of the completable chain.
     }
   }
 
-  private void finishAndMarkFailedAllStartupTraces() {
+  private void finishAllStartupTracesAsFailures(Throwable reason) {
     machineStartupTraces
         .entrySet()
         .removeIf(
             e -> {
-              e.getValue().finish();
+              finishSpanAsFailure(e.getValue(), reason.getMessage());
               return true;
             });
   }
@@ -482,10 +478,12 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    * Note that if this invocation caused a transition of failure to a completed state then
    * notification about machine start failed will be published.
    */
-  private Function<Throwable, Void> publishFailedStatus(
+  private Function<Throwable, Void> publishFailedStatusAndRecordFailureTrace(
       CompletableFuture<Void> failure, String machineName) {
     return ex -> {
       if (failure.completeExceptionally(ex)) {
+        finishSpanAsFailure(machineStartupTraces.remove(machineName), ex.getMessage());
+
         try {
           machines.updateMachineStatus(
               getContext().getIdentity(), machineName, MachineStatus.FAILED);
@@ -497,9 +495,31 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
               e.getMessage());
         }
         eventPublisher.sendFailedEvent(machineName, ex.getMessage(), getContext().getIdentity());
+      } else {
+        String message =
+            ex.getMessage() + " (happened elsewhere)";
+        finishSpanAsCancelled(machineStartupTraces.remove(machineName), message);
       }
       return null;
     };
+  }
+
+  private void finishSpanAsFailure(Span span, String reason) {
+    if (span != null) {
+      // record the startup as a failure and set the priority so that this span is not throttled
+      TracingTags.ERROR.set(span, true);
+      TracingTags.SAMPLING_PRIORITY.set(span, 1);
+      TracingTags.ERROR_REASON.set(span, reason);
+      span.finish();
+    }
+  }
+
+  private void finishSpanAsCancelled(Span span, String reason) {
+    if (span != null) {
+      TracingTags.CANCELLED.set(span, true);
+      TracingTags.CANCELLED_REASON.set(span, reason);
+      span.finish();
+    }
   }
 
   /**
