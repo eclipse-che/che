@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
-import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolumeMount;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
 
@@ -19,11 +18,12 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -44,28 +44,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class EphemeralWorkspaceAdapter {
   private static final String EPHEMERAL_VOLUME_NAME_PREFIX = "ephemeral-che-workspace-";
 
-  /**
-   * @param workspace
-   * @return true if workspace config contains `persistVolumes` attribute which is set to false. In
-   *     this case regardless of the PVC strategy, workspace volumes would be created as `emptyDir`.
-   *     When a workspace Pod is removed for any reason, the data in the `emptyDir` volume is
-   *     deleted forever
-   */
-  public boolean isEphemeral(Workspace workspace) {
-    return isEphemeral(workspace.getConfig().getAttributes());
-  }
-
-  /**
-   * @param workspaceAttributes
-   * @return true if `persistVolumes` attribute exists and set to 'false'. In this case regardless
-   *     of the PVC strategy, workspace volumes would be created as `emptyDir`. When a workspace Pod
-   *     is removed for any reason, the data in the `emptyDir` volume is deleted forever
-   */
-  public boolean isEphemeral(Map<String, String> workspaceAttributes) {
-    String persistVolumes = workspaceAttributes.get(PERSIST_VOLUMES_ATTRIBUTE);
-    return "false".equals(persistVolumes);
-  }
-
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     for (Pod pod : k8sEnv.getPods().values()) {
@@ -75,7 +53,10 @@ public class EphemeralWorkspaceAdapter {
       // which volumes have been "created"
       Map<String, String> volumeKeyToNameCache = new HashMap<>();
 
-      for (Container container : podSpec.getContainers()) {
+      List<Container> containers = new ArrayList<>();
+      containers.addAll(podSpec.getContainers());
+      containers.addAll(podSpec.getInitContainers());
+      for (Container container : containers) {
         String machineName = Names.machineName(pod, container);
         Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
         if (volumes.isEmpty()) {

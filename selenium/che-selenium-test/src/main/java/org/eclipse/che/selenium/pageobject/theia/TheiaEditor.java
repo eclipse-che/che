@@ -16,6 +16,7 @@ import static java.lang.String.join;
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaEditor.Locators.ACTIVE_LINE_XPATH;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaEditor.Locators.EDITOR_LINE_BY_INDEX_XPATH_TEMPLATE;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaEditor.Locators.EDITOR_LINE_BY_PIXEL_COORDINATES_XPATH_TEMPLATE;
@@ -31,12 +32,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
+import org.openqa.selenium.StaleElementReferenceException;
 
 @Singleton
 public class TheiaEditor {
@@ -147,10 +150,7 @@ public class TheiaEditor {
   public List<String> getEditorText() {
     // In this realization each line element will be found exactly before using
     // This realization allows us to avoid "StaleElementReferenceException"
-    final int editorLinesCount =
-        seleniumWebDriverHelper
-            .waitVisibilityOfAllElements(By.xpath(EDITOR_LINE_XPATH), ELEMENT_TIMEOUT_SEC)
-            .size();
+    final int editorLinesCount = getLinesCount();
 
     List<Integer> linePixelCoordinates = getEditorLinePixelCoordinates(editorLinesCount);
 
@@ -167,6 +167,25 @@ public class TheiaEditor {
             .collect(Collectors.toList());
 
     return linesText;
+  }
+
+  private int getLinesCount() {
+    AtomicInteger linesCount = new AtomicInteger(0);
+
+    seleniumWebDriverHelper.waitNoExceptions(
+        () ->
+            linesCount.set(
+                seleniumWebDriverHelper
+                    .waitVisibilityOfAllElements(By.xpath(EDITOR_LINE_XPATH), ELEMENT_TIMEOUT_SEC)
+                    .size()),
+        WIDGET_TIMEOUT_SEC,
+        StaleElementReferenceException.class);
+
+    if (linesCount.get() == 0) {
+      throw new RuntimeException("The lines count is \"0\". Lines count can't be less than 1");
+    }
+
+    return linesCount.get();
   }
 
   private String getEditorLineByPixelCoordinateXpath(int pixelCoordinate) {

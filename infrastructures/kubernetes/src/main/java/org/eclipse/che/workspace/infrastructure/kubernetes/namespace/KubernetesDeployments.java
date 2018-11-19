@@ -239,7 +239,7 @@ public class KubernetesDeployments {
    * @param name name of pod or deployment containing pod that should be watched
    * @param timeoutMin waiting timeout in minutes
    * @param predicate predicate to perform state check
-   * @return pod that satisifes the specified predicate
+   * @return pod that satisfies the specified predicate
    * @throws InfrastructureException when specified timeout is reached
    * @throws InfrastructureException when {@link Thread} is interrupted while waiting
    * @throws InfrastructureException when any other exception occurs

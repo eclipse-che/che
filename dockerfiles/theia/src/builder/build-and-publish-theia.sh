@@ -18,9 +18,9 @@ set -u
 git clone --branch v${THEIA_VERSION} https://github.com/theia-ide/theia ${HOME}/theia-source-code
 
 # Apply patches (if any)
-if [ -d "${HOME}/patches/${THEIA_VERSION}" ]; then
+if [ -d "/home/theia-build/patches/${THEIA_VERSION}" ]; then
     echo "Applying patches for Theia version ${THEIA_VERSION}";
-    for file in $(find "${HOME}/patches/${THEIA_VERSION}" -name '*.patch'); do
+    for file in $(find "/home/theia-build/patches/${THEIA_VERSION}" -name '*.patch'); do
         echo "Patching with ${file}";
         cd ${HOME}/theia-source-code && patch -p1 < ${file};
     done
