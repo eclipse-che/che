@@ -1,10 +1,10 @@
 This package distributes OpenJDK binaries that are licensed under the GPL.
 The source code and build scripts used to create this binary are available for download at:
 
-* eclipse che image parent: `FROM openjdk:8u131-jre-alpine`
+* eclipse che image parent: `FROM openjdk:8u181-jre-alpine`
    * official openjdk image parent: `FROM alpine:3.6`
-    * summary of alpine `openjdk8-jre v8.131.11-r2` package  reference - https://pkgs.alpinelinux.org/package/v3.6/community/x86_64/openjdk8-jre
-        * alpine build scripts for `openjdk8-jre v8.131.11-r2` reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8?h=3.6-stable
+    * summary of alpine `openjdk8-jre v8.181.13-r0` package  reference - https://pkgs.alpinelinux.org/package/v3.6/community/x86_64/openjdk8-jre
+        * alpine build scripts for `openjdk8-jre v8.181.13-r0` reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8?h=3.6-stable
             * build performed by running `APKBUILD` script which will:
                  * define jdk version reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8/APKBUILD?h=3.6-stable#n8
                  * grab official jdk sources by version from "http://icedtea.classpath.org/" reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8/APKBUILD?id=027d8ceca1422c0ffc3fe3a22523f22abedd694c#n43
