@@ -102,6 +102,10 @@ public @interface Traced {
     }
 
     public static void push() {
+      // we're assuming max 4 tags per span is gonna be the usual case. Saving 12 entries per method
+      // invocation will make a GC difference. If there are more than 4 tags, we're adding runtime
+      // overhead of enlarging the hash map but that's not gonna be a usual occurrence (currently,
+      // we have at most 3 tags on a span).
       TAGS.get().push(new HashMap<>(4));
     }
   }

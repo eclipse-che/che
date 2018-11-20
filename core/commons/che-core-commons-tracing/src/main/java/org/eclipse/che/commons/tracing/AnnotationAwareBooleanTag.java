@@ -16,6 +16,10 @@ import io.opentracing.tag.BooleanTag;
 import java.util.function.Supplier;
 import org.eclipse.che.commons.annotation.Traced;
 
+/**
+ * A specialization of the {@link BooleanTag} that adds support for setting a tag in
+ * a {@link Traced @Traced} method.
+ */
 @Beta
 public class AnnotationAwareBooleanTag extends BooleanTag {
 
@@ -23,10 +27,20 @@ public class AnnotationAwareBooleanTag extends BooleanTag {
     super(key);
   }
 
+  /**
+   * Sets the value of the tag for the span of the {@link Traced @Traced} method.
+   *
+   * @param value the value to set
+   */
   public void set(Boolean value) {
     set(() -> value);
   }
 
+  /**
+   * Sets the value of the tag for the span of the {@link Traced @Traced} method.
+   *
+   * @param value the supplier of the value to set
+   */
   public void set(Supplier<Boolean> value) {
     Traced.Tags.addBoolean(getKey(), value);
   }

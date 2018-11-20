@@ -25,6 +25,11 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A Guice interceptor that interprets the {@link Traced @Traced} annotations on methods and creates
+ * tracing spans for the annotated method calls. It also captures the {@link Traced.Tags} and adds
+ * them to the created spans.
+ */
 @Beta
 public class TracingInterceptor implements MethodInterceptor {
 
@@ -85,6 +90,9 @@ public class TracingInterceptor implements MethodInterceptor {
     Class<?> objectType = invocation.getThis().getClass();
     Method method = invocation.getMethod();
 
+    // we assume that there won't be more than 4 traced methods on a type. If there are, we're
+    // adding a little bit of runtime overhead of enlarging the hashmap's capacity, but in the usual
+    // case we're saving 12 entries in the map (16 is the default capacity).
     String ret = spanNames.computeIfAbsent(objectType, __ -> new WeakHashMap<>(4)).get(method);
 
     if (ret != null) {
@@ -116,9 +124,9 @@ public class TracingInterceptor implements MethodInterceptor {
 
     // if there is '$$' in the class name, it is most probably a marker of a Guice or Hibernate
     // generated class... Let's just not pollute the name with generated subclass name garbage
-    int $$idx = simpleName.indexOf("$$");
-    if ($$idx > 0) {
-      simpleName = simpleName.substring(0, $$idx);
+    int doubleDollarIdx = simpleName.indexOf("$$");
+    if (doubleDollarIdx > 0) {
+      simpleName = simpleName.substring(0, doubleDollarIdx);
     }
 
     return simpleName;

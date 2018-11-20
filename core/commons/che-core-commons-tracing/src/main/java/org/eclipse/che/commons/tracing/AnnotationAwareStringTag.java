@@ -16,6 +16,10 @@ import io.opentracing.tag.StringTag;
 import java.util.function.Supplier;
 import org.eclipse.che.commons.annotation.Traced;
 
+/**
+ * A specialization of the {@link StringTag} that adds support for setting a tag in
+ * a {@link Traced @Traced} method.
+ */
 @Beta
 public class AnnotationAwareStringTag extends StringTag {
 
@@ -23,10 +27,20 @@ public class AnnotationAwareStringTag extends StringTag {
     super(key);
   }
 
+  /**
+   * Sets the value of the tag for the span of the {@link Traced @Traced} method.
+   *
+   * @param value the value to set
+   */
   public void set(String value) {
     set(() -> value);
   }
 
+  /**
+   * Sets the value of the tag for the span of the {@link Traced @Traced} method.
+   *
+   * @param value the supplier of the value to set
+   */
   public void set(Supplier<String> value) {
     Traced.Tags.addString(getKey(), value);
   }
