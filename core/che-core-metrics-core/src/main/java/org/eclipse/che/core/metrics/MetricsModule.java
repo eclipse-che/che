@@ -46,5 +46,6 @@ public class MetricsModule extends AbstractModule {
     meterMultibinder.addBinding().to(FileDescriptorMetrics.class);
     meterMultibinder.addBinding().to(ProcessorMetrics.class);
     meterMultibinder.addBinding().to(UptimeMetrics.class);
+    meterMultibinder.addBinding().to(FileStoresMeterBinder.class);
   }
 }
