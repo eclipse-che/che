@@ -16,12 +16,14 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Fake environment factory for a case when sidecar-based workspace has no environment.
@@ -40,7 +42,14 @@ public class NoEnvironmentFactory extends InternalEnvironmentFactory<InternalEnv
 
   @Override
   protected InternalEnvironment doCreate(
-      InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings) {
+      @Nullable InternalRecipe recipe,
+      Map<String, InternalMachineConfig> machines,
+      List<Warning> warnings)
+      throws InternalInfrastructureException {
+    if (recipe != null) {
+      throw new InternalInfrastructureException(
+          "No environment factory doesn't accept non-null workspace recipes");
+    }
     return new NoEnvInternalEnvironment();
   }
 

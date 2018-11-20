@@ -36,6 +36,7 @@ import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
@@ -85,10 +86,11 @@ public class KubernetesEnvironmentFactory
 
   @Override
   protected KubernetesEnvironment doCreate(
-      InternalRecipe recipe,
+      @Nullable InternalRecipe recipe,
       Map<String, InternalMachineConfig> machines,
       List<Warning> sourceWarnings)
       throws InfrastructureException, ValidationException {
+    checkNotNull(recipe, "Null recipe is not supported by kubernetes environment factory");
     List<Warning> warnings = new ArrayList<>();
     if (sourceWarnings != null) {
       warnings.addAll(sourceWarnings);

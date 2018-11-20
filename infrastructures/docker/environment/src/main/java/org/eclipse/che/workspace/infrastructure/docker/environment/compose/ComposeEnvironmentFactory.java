@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.docker.environment.compose;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
@@ -30,7 +29,13 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
+import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.compose.model.ComposeService;
 
@@ -63,8 +68,11 @@ public class ComposeEnvironmentFactory extends InternalEnvironmentFactory<Compos
 
   @Override
   protected ComposeEnvironment doCreate(
-      InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings)
+      @Nullable InternalRecipe recipe,
+      Map<String, InternalMachineConfig> machines,
+      List<Warning> warnings)
       throws InfrastructureException, ValidationException {
+    checkNotNull(recipe, "Null recipe is not supported by compose environment factory");
     String contentType = recipe.getContentType();
     checkNotNull(contentType, "Recipe content type should not be null");
 

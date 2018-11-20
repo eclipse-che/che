@@ -110,8 +110,9 @@ public class WorkspaceValidator {
   }
 
   private void validateEnvironments(WorkspaceConfig config) throws ValidationException {
-    boolean environmentIsNotSet = (config.getEnvironments() == null ||
-        config.getEnvironments().isEmpty()) && isNullOrEmpty(config.getDefaultEnv());
+    boolean environmentIsNotSet =
+        (config.getEnvironments() == null || config.getEnvironments().isEmpty())
+            && isNullOrEmpty(config.getDefaultEnv());
     boolean isSidecarWorkspace = isSidecarBasedWorkspace(config.getAttributes());
     if (environmentIsNotSet && isSidecarWorkspace) {
       // sidecar based workspaces allowed not to have environment

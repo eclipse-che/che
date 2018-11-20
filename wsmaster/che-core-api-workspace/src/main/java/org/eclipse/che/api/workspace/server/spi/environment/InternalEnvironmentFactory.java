@@ -132,7 +132,9 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
    * @throws ValidationException if validation fails
    */
   protected abstract T doCreate(
-      InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings)
+      @Nullable InternalRecipe recipe,
+      Map<String, InternalMachineConfig> machines,
+      List<Warning> warnings)
       throws InfrastructureException, ValidationException;
 
   @VisibleForTesting
