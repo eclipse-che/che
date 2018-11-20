@@ -131,7 +131,6 @@ public class PostgreSqlTckModule extends TckModule {
                 VolumeImpl.class,
                 // k8s-runtimes
                 KubernetesRuntimeState.class,
-                KubernetesRuntimeState.RuntimeId.class,
                 KubernetesMachineImpl.class,
                 KubernetesMachineImpl.MachineId.class,
                 KubernetesServerImpl.class,

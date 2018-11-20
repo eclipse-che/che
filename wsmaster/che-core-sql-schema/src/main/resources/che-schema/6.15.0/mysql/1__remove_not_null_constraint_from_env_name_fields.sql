@@ -11,10 +11,10 @@
 --
 
 -- Allow null as defaultEnv field in workspace config
-ALTER TABLE workspaceconfig ALTER COLUMN defaultenv DROP NOT NULL;
+ALTER TABLE workspaceconfig MODIFY COLUMN defaultenv VARCHAR(255);
 
 ALTER TABLE che_k8s_runtime DROP PRIMARY KEY;
 ALTER TABLE che_k8s_runtime ADD PRIMARY KEY (workspace_id);
 
 -- Allow null as env_name field in kubernetes runtime
-ALTER TABLE che_k8s_runtime ALTER COLUMN env_name DROP NOT NULL;
+ALTER TABLE che_k8s_runtime MODIFY COLUMN env_name VARCHAR(255);
