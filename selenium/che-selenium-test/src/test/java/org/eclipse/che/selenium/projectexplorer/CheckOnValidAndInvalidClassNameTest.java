@@ -11,9 +11,10 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.NEW;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.JAVA_CLASS;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -33,11 +34,11 @@ import org.testng.annotations.Test;
  * Test tries to create classes with valid and invalid names inside source root folder and inside
  * another package.
  *
- * @author Igor Ohrimenko
+ * @author Ihor Okhrimenko
  */
 public class CheckOnValidAndInvalidClassNameTest {
-  private static final String PROJECT_NAME = "classNameTest";
-  private static final String PATH_TO_JAVA_FOLDER = "/src/main/java";
+  private static final String PROJECT_NAME = generate("classNameTest", 4);
+  private static final String PATH_TO_JAVA_FOLDER = PROJECT_NAME + "/src/main/java";
   private static final String ROOT_PACKAGE = "/org/eclipse/qa/examples";
   private static final String TYPE = ".java";
 
@@ -58,37 +59,33 @@ public class CheckOnValidAndInvalidClassNameTest {
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
     projectExplorer.waitItem(PROJECT_NAME);
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test(dataProvider = "validClassNames")
   public void shouldCreateClassWithValidNameInJavaFolder(String className) {
-    createJavaClassByPath(PROJECT_NAME + PATH_TO_JAVA_FOLDER, className);
+    createJavaClassByPath(PATH_TO_JAVA_FOLDER, className);
 
-    projectExplorer.waitItem(
-        PROJECT_NAME + PATH_TO_JAVA_FOLDER + "/" + className + TYPE,
-        REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+    projectExplorer.waitItem(PATH_TO_JAVA_FOLDER + "/" + className + TYPE, ELEMENT_TIMEOUT_SEC);
   }
 
   @Test(priority = 1, dataProvider = "validClassNames")
   public void shouldCreateClassWithValidNameInRootPackage(String className) {
-    createJavaClassByPath(PROJECT_NAME + PATH_TO_JAVA_FOLDER + ROOT_PACKAGE, className);
+    createJavaClassByPath(PATH_TO_JAVA_FOLDER + ROOT_PACKAGE, className);
 
     projectExplorer.waitItem(
-        PROJECT_NAME + PATH_TO_JAVA_FOLDER + ROOT_PACKAGE + "/" + className + TYPE,
-        REDRAW_UI_ELEMENTS_TIMEOUT_SEC);
+        PATH_TO_JAVA_FOLDER + ROOT_PACKAGE + "/" + className + TYPE, ELEMENT_TIMEOUT_SEC);
   }
 
   @Test(priority = 2, dataProvider = "invalidClassNames")
   public void shouldNotCreateClassWithInvalidNameInJavaFolder(String className) {
-    tryToCreateJavaClassWithNotValidNameByPath(PROJECT_NAME + PATH_TO_JAVA_FOLDER, className);
+    tryToCreateJavaClassWithNotValidNameByPath(PATH_TO_JAVA_FOLDER, className);
   }
 
   @Test(priority = 3, dataProvider = "invalidClassNames")
   public void shouldNotCreateClassWithInvalidNameInRootPackage(String className) {
-    tryToCreateJavaClassWithNotValidNameByPath(
-        PROJECT_NAME + PATH_TO_JAVA_FOLDER + ROOT_PACKAGE, className);
+    tryToCreateJavaClassWithNotValidNameByPath(PATH_TO_JAVA_FOLDER + ROOT_PACKAGE, className);
   }
 
   private void createJavaClassByPath(String classPath, String className) {
