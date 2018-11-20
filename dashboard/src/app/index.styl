@@ -229,9 +229,11 @@ md-option:hover
 .noselect
   user-select none
 
-md-tabs-canvas md-tab-item.md-tab.md-active
-  border-bottom 5px solid #fdb940
-  height 100%
+md-tabs-canvas md-tab-item
+  margin-right -1px
+  .md-tab.md-active
+    border-bottom 5px solid #fdb940
+    height 100%
 
 .error
   color $error-color
@@ -248,11 +250,11 @@ md-tabs-wrapper
       margin-left -15px
     .error-state
       color $error-color !important
-      
+
     .warning-state
       color $warning-color !important
       margin-left -18px
-      
+
 .popover
   font-family 'Open Sans'
   font-size 12px
