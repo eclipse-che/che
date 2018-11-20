@@ -732,7 +732,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       machineStartupTraces.put(
           machineName,
           tracer
-              .buildSpan("container-create")
+              .buildSpan("machine.create")
               .asChildOf(tracer.activeSpan())
               .withTag(TracingTags.MACHINE_NAME.getKey(), machineName)
               .start());
