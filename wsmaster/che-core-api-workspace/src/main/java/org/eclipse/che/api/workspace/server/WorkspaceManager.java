@@ -371,7 +371,7 @@ public class WorkspaceManager {
             });
   }
 
-  private String getValidatedEnvironmentName(WorkspaceImpl workspace, String envName)
+  private String getValidatedEnvironmentName(WorkspaceImpl workspace, @Nullable String envName)
       throws NotFoundException, ServerException {
     envName = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
     if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
@@ -389,6 +389,12 @@ public class WorkspaceManager {
     }
 
     // validate environment in advance
+    if (envName == null) {
+      throw new NotFoundException(
+          format(
+              "Workspace %s:%s can't use null environment",
+              workspace.getNamespace(), workspace.getConfig().getName()));
+    }
     try {
       runtimes.validate(workspace.getConfig().getEnvironments().get(envName));
     } catch (InfrastructureException | ValidationException e) {
