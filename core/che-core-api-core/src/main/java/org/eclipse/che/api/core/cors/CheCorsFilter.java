@@ -85,7 +85,7 @@ public class CheCorsFilter implements Filter {
               + "Access-Control-Request-Method,"
               + "Access-Control-Request-Headers");
       filterParams.put(PARAM_CORS_EXPOSED_HEADERS, "JAXRS-Body-Provided");
-      filterParams.put(PARAM_CORS_SUPPORT_CREDENTIALS, "false");
+      filterParams.put(PARAM_CORS_SUPPORT_CREDENTIALS, "true");
       // preflight cache is available for 10 minutes
       filterParams.put(PARAM_CORS_PREFLIGHT_MAXAGE, "10");
     }

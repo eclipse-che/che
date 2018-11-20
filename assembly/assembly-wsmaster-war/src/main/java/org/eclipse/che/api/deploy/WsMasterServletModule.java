@@ -50,7 +50,6 @@ public class WsMasterServletModule extends ServletModule {
     bind(CorsFilter.class).in(Singleton.class);
 
     filter("/*").through(CorsFilter.class, corsFilterParams);
-
     filter("/*").through(RequestIdLoggerFilter.class);
 
     // Matching group SHOULD contain forward slash.
