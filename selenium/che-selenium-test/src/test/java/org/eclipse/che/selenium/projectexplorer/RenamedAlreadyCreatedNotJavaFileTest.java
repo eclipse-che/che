@@ -11,33 +11,34 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.List;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/**
- * @author Andrienko Alexander
- * @author Andrey Chizhikov
- */
 public class RenamedAlreadyCreatedNotJavaFileTest {
 
-  private static final String PROJECT_NAME = "RenameProject1";
+  private static final String PROJECT_NAME = generate("RenameProject1", 4);
+  private static final String INDEX_FILE = "index.jsp";
+  private static final String RENAMED_FILE = "Renamed.jsp";
   private static final String PATH_TO_WEB_APP = PROJECT_NAME + "/src/main/webapp";
-  private static final String PATH_TO_FILE = PROJECT_NAME + "/src/main/webapp/index.jsp";
+  private static final String PATH_TO_FILE = PATH_TO_WEB_APP + "/" + INDEX_FILE;
+  private static final String PATH_TO_RENAMED_FILE = PATH_TO_WEB_APP + "/" + RENAMED_FILE;
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
@@ -47,6 +48,7 @@ public class RenamedAlreadyCreatedNotJavaFileTest {
   @Inject private Menu menu;
   @Inject private Loader loader;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -61,16 +63,22 @@ public class RenamedAlreadyCreatedNotJavaFileTest {
 
   @Test
   public void renameWhenFileIsOpenedIntoEditor() throws Exception {
+    // preparation
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
+    // open file and check editor tab appears
+    projectExplorer.openItemByPath(PATH_TO_FILE);
+    editor.waitTabIsPresent(INDEX_FILE);
+    editor.waitTabSelection(0, INDEX_FILE);
     editor.waitActive();
-    projectExplorer.waitAndSelectItem(PATH_TO_FILE);
-    loader.waitOnClosed();
-    editor.waitTabIsPresent("index.jsp");
-    loader.waitOnClosed();
+
     renameFile(PATH_TO_FILE);
-    checkFileIsRenamedIntoProjectExplorerAndEditor("Renamed.jsp");
+
+    // check renaming
+    projectExplorer.waitItem(PATH_TO_RENAMED_FILE, ELEMENT_TIMEOUT_SEC);
+    editor.waitTabIsPresent(RENAMED_FILE);
   }
 
   private void renameFile(String pathToFile) {
@@ -78,21 +86,8 @@ public class RenamedAlreadyCreatedNotJavaFileTest {
     menu.runCommand(TestMenuCommandsConstants.Edit.EDIT, TestMenuCommandsConstants.Edit.RENAME);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.clearInput();
-    askForValueDialog.typeAndWaitText("Renamed.jsp");
+    askForValueDialog.typeAndWaitText(RENAMED_FILE);
     askForValueDialog.clickOkBtn();
     askForValueDialog.waitFormToClose();
-  }
-
-  private void checkFileIsRenamedIntoProjectExplorerAndEditor(String filename) {
-    boolean isItemPresent = false;
-    List<String> listOfItems = projectExplorer.getNamesOfAllOpenItems();
-    for (String item : listOfItems) {
-      if (item.equals(filename)) {
-        isItemPresent = true;
-      }
-    }
-    Assert.assertEquals(isItemPresent, true);
-    loader.waitOnClosed();
-    editor.waitTabIsPresent(filename);
   }
 }
