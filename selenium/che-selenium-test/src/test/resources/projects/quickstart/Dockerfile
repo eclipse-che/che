@@ -10,5 +10,5 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
-FROM openjdk:8u181-jre-alpine
+FROM openjdk:8u131-jre-alpine
 
