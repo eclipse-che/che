@@ -86,6 +86,7 @@ import java.util.function.Supplier;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.action.ActionsFactory;
+import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.webdriver.WebDriverWaitFactory;
@@ -1968,6 +1969,61 @@ public class CodenvyEditor {
   }
 
   /**
+   * Waits {@code quantity} of specified {@code markerLocator} during {@code timeout}.
+   *
+   * @param markerLocator type of the expected markers
+   * @param quantity expected quantity of the markers
+   * @param timeout time in seconds for waiting expected quantity of the markers
+   */
+  public void waitMarkersQuantity(MarkerLocator markerLocator, int quantity, int timeout) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> quantity == getMarkersQuantity(markerLocator), timeout);
+  }
+
+  /**
+   * Waits {@code quantity} of specified {@code markerLocator}.
+   *
+   * @param markerLocator type of the expected markers
+   * @param quantity expected quantity of the markers
+   */
+  public void waitMarkersQuantity(MarkerLocator markerLocator, int quantity) {
+    waitMarkersQuantity(markerLocator, quantity, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits quantity of specified {@code markerLocator} between {@code lowerBound} and {@code
+   * upperBound} values during {@code timeout}.
+   *
+   * @param markerLocator type of the expected markers
+   * @param lowerBound the lower bound of the markers quantity (including specified value)
+   * @param upperBound the upper bound of the markers quantity (including specified value)
+   * @param timeout time in seconds for waiting expected quantity of the markers
+   */
+  public void waitMarkersQuantityBetween(
+      MarkerLocator markerLocator, int lowerBound, int upperBound, int timeout) {
+    seleniumWebDriverHelper.waitSuccessCondition(
+        driver -> {
+          final int markersQuantity = getMarkersQuantity(markerLocator);
+
+          return lowerBound <= markersQuantity && upperBound >= markersQuantity;
+        });
+  }
+
+  /**
+   * Waits quantity of specified {@code markerLocator} between {@code lowerBound} and {@code
+   * upperBound} values.
+   *
+   * @param markerLocator type of the expected markers
+   * @param lowerBound the lower bound of the markers quantity
+   * @param upperBound the upper bound of the markers quantity
+   */
+  public void waitMarkersQuantityBetween(
+      MarkerLocator markerLocator, int lowerBound, int upperBound) {
+    waitMarkersQuantityBetween(
+        markerLocator, lowerBound, upperBound, TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  /**
    * Waits until annotations with specified {@code markerLocator} visible
    *
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
@@ -2149,6 +2205,10 @@ public class CodenvyEditor {
 
   public void waitTabSelection(int editorIndex, String tabTitle) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isTabSelected(editorIndex, tabTitle));
+  }
+
+  public void waitTabSelection(String tabTitle) {
+    waitTabSelection(0, tabTitle);
   }
 
   public void waitTabFocusing(int editorIndex, String tabTitle) {
