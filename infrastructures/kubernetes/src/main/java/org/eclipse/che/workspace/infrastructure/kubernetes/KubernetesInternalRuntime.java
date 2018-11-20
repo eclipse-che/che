@@ -692,7 +692,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    */
   protected void doStartMachine(KubernetesServerResolver serverResolver)
       throws InfrastructureException {
-    machineStartupTraces = new ConcurrentHashMap<>(getContext().getEnvironment().getPods().size());
+    machineStartupTraces =
+        new ConcurrentHashMap<>(getContext().getEnvironment().getMachines().size());
 
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
