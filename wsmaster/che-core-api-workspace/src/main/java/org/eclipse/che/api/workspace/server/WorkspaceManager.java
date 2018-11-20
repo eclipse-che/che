@@ -354,27 +354,7 @@ public class WorkspaceManager {
   private void startAsync(
       WorkspaceImpl workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
-    // Sidecar-based workspaces allowed not to have any environments
-    String env = null;
-    if (!SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(workspace.getConfig().getAttributes())
-        || envName != null
-        || !workspace.getConfig().getEnvironments().isEmpty()) {
-
-      if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
-        throw new NotFoundException(
-            format(
-                "Workspace '%s:%s' doesn't contain environment '%s'",
-                workspace.getNamespace(), workspace.getConfig().getName(), envName));
-      }
-      env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
-
-      // validate environment in advance
-      try {
-        runtimes.validate(workspace.getConfig().getEnvironments().get(env));
-      } catch (InfrastructureException | ValidationException e) {
-        throw new ServerException(e);
-      }
-    }
+    String env = getValidatedEnvironmentName(workspace, envName);
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
     workspaceDao.update(workspace);
     runtimes
@@ -389,6 +369,33 @@ public class WorkspaceManager {
               }
               return null;
             });
+  }
+
+  private String getValidatedEnvironmentName(WorkspaceImpl workspace, String envName)
+      throws NotFoundException, ServerException {
+    envName = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
+    if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
+      throw new NotFoundException(
+          format(
+              "Workspace '%s:%s' doesn't contain environment '%s'",
+              workspace.getNamespace(), workspace.getConfig().getName(), envName));
+    }
+
+    if (envName == null
+        && SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(
+            workspace.getConfig().getAttributes())) {
+      // Sidecar-based workspaces are allowed not to have any environments
+      return null;
+    }
+
+    // validate environment in advance
+    try {
+      runtimes.validate(workspace.getConfig().getEnvironments().get(envName));
+    } catch (InfrastructureException | ValidationException e) {
+      throw new ServerException(e);
+    }
+
+    return envName;
   }
 
   private void checkWorkspaceIsRunningOrStarting(WorkspaceImpl workspace) throws ConflictException {
