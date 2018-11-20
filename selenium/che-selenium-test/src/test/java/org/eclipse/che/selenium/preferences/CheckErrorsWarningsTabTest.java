@@ -44,7 +44,6 @@ import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Andrey Chizhikov */
 public class CheckErrorsWarningsTabTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CheckErrorsWarningsTabTest.class.getSimpleName(), 4);
@@ -75,6 +74,7 @@ public class CheckErrorsWarningsTabTest {
 
   @Test
   public void errorsWarningTest() throws Exception {
+    final String expectedTabTitle = "AppController";
     final URL errorsWarningFilePath = getClass().getResource("errors-warnings");
     final URL embedCodeFilePath = getClass().getResource("embed-code");
 
@@ -82,15 +82,16 @@ public class CheckErrorsWarningsTabTest {
     String embedCode = readFileToString(embedCodeFilePath);
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
+
+    testProjectServiceClient.updateFile(
+        workspace.getId(), PATH_TO_CLASS_IN_SPRING_PACKAGE, embedCode);
+
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
-    editor.waitActive();
     loader.waitOnClosed();
+    projectExplorer.openItemByVisibleNameInExplorer(expectedTabTitle + ".java");
+    editor.waitTabIsPresent(expectedTabTitle);
+    editor.waitTabSelection(0, expectedTabTitle);
     editor.waitActive();
-    editor.deleteAllContent();
-    editor.typeTextIntoEditorWithoutDelayForSaving(embedCode);
-    loader.waitOnClosed();
-    editor.removeLineAndAllAfterIt(105);
 
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
