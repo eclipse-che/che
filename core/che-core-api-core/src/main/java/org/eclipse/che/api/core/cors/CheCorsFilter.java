@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.core.cors;
 
+import static org.apache.catalina.filters.CorsFilter.DEFAULT_ALLOWED_ORIGINS;
 import static org.apache.catalina.filters.CorsFilter.PARAM_CORS_ALLOWED_HEADERS;
 import static org.apache.catalina.filters.CorsFilter.PARAM_CORS_ALLOWED_METHODS;
 import static org.apache.catalina.filters.CorsFilter.PARAM_CORS_ALLOWED_ORIGINS;
@@ -69,11 +70,8 @@ public class CheCorsFilter implements Filter {
     private final Map<String, String> filterParams;
 
     public CheCorsFilterConfig() {
-      final String cheApi = System.getenv("CHE_API");
-      final String cheServerOrigin = cheApi.substring(0, cheApi.length() - 4);
-
       filterParams = new HashMap<>();
-      filterParams.put(PARAM_CORS_ALLOWED_ORIGINS, cheServerOrigin);
+      filterParams.put(PARAM_CORS_ALLOWED_ORIGINS, DEFAULT_ALLOWED_ORIGINS);
       filterParams.put(
           PARAM_CORS_ALLOWED_METHODS, "GET," + "POST," + "HEAD," + "OPTIONS," + "PUT," + "DELETE");
       filterParams.put(
