@@ -152,6 +152,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
+    bind(org.eclipse.che.api.devfile.server.DevFileSchemaValidator.class);
     bind(org.eclipse.che.api.devfile.server.DevFileService.class);
 
     MapBinder<String, String> stacks =

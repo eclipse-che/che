@@ -46,13 +46,18 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 @Path("/devfile")
 public class DevFileService extends Service {
 
-  private final WorkspaceLinksGenerator linksGenerator;
+  private WorkspaceLinksGenerator linksGenerator;
+  private DevFileSchemaValidator schemaValidator;
   private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
 
   @Inject
-  public DevFileService(WorkspaceLinksGenerator linksGenerator, WorkspaceManager workspaceManager) {
+  public DevFileService(
+      WorkspaceLinksGenerator linksGenerator,
+      DevFileSchemaValidator schemaValidator,
+      WorkspaceManager workspaceManager) {
     this.linksGenerator = linksGenerator;
+    this.schemaValidator = schemaValidator;
     this.workspaceManager = workspaceManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
   }
@@ -79,6 +84,7 @@ public class DevFileService extends Service {
     Devfile devFile;
     WorkspaceConfig workspaceConfig;
     try {
+      schemaValidator.validateBySchema(data);
       devFile = objectMapper.readValue(data, Devfile.class);
       workspaceConfig = devFileToWorkspaceConfig(devFile);
     } catch (IOException e) {

@@ -106,7 +106,7 @@ public class DevFileConverter {
 
   static WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devFile)
       throws DevFileFormatException {
-    validateDevFile(devFile);
+    validateCurrentVersion(devFile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
     config.setName(devFile.getName());
@@ -182,7 +182,7 @@ public class DevFileConverter {
     return config;
   }
 
-  private static void validateDevFile(Devfile devFile) throws DevFileFormatException {
+  private static void validateCurrentVersion(Devfile devFile) throws DevFileFormatException {
     if (!CURRENT_SPEC_VERSION.equals(devFile.getVersion())) {
       throw new DevFileFormatException(
           format("Provided devfile has unsupported version %s", devFile.getVersion()));
