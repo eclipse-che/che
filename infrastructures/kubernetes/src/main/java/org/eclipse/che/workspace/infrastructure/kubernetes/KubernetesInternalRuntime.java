@@ -496,8 +496,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         }
         eventPublisher.sendFailedEvent(machineName, ex.getMessage(), getContext().getIdentity());
       } else {
-        String message =
-            ex.getMessage() + " (happened elsewhere)";
+        String message = ex.getMessage() + " (happened elsewhere)";
         finishSpanAsCancelled(machineStartupTraces.remove(machineName), message);
       }
       return null;

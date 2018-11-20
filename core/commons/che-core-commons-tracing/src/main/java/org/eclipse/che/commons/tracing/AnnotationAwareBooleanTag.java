@@ -17,8 +17,8 @@ import java.util.function.Supplier;
 import org.eclipse.che.commons.annotation.Traced;
 
 /**
- * A specialization of the {@link BooleanTag} that adds support for setting a tag in
- * a {@link Traced @Traced} method.
+ * A specialization of the {@link BooleanTag} that adds support for setting a tag in a {@link
+ * Traced @Traced} method.
  */
 @Beta
 public class AnnotationAwareBooleanTag extends BooleanTag {
