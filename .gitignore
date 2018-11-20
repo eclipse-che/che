@@ -65,6 +65,7 @@ Thumbs.db
 .che
 dockerfiles/che/eclipse-che.tar.gz
 dockerfiles/che/eclipse-che/
+dockerfiles/theia/e2e/.Dockerfile
 .unison*
 docs/_site
 docs/.sass-cache
