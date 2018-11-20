@@ -55,16 +55,6 @@ objects:
     port:
       targetPort: http
 - apiVersion: v1
-  kind: Route
-  metadata:
-    name: metrics
-  spec:
-    to:
-      kind: Service
-      name: che-host
-    port:
-      targetPort: metrics
-- apiVersion: v1
   kind: DeploymentConfig
   metadata:
     name: che
@@ -170,7 +160,7 @@ objects:
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
           - name: CHE_METRICS_ENABLED
-            value: "true"
+            value: "false"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
