@@ -68,13 +68,7 @@ public class WorkspaceValidator {
             + "latin letters, underscores, dots, dashes and must start and end only with digits, "
             + "latin letters or underscores");
 
-    // if environments/default environment name are empty and it is sidecar-based workspace
-    // then do not check env since it is a workspace with tooling only
-    if ((config.getEnvironments() != null && !config.getEnvironments().isEmpty())
-        || !isNullOrEmpty(config.getDefaultEnv())
-        || !isSidecarBasedWorkspace(config.getAttributes())) {
-      validateEnvironments(config);
-    }
+    validateEnvironments(config);
 
     // commands
     for (Command command : config.getCommands()) {
@@ -116,6 +110,13 @@ public class WorkspaceValidator {
   }
 
   private void validateEnvironments(WorkspaceConfig config) throws ValidationException {
+    boolean environmentIsNotSet = (config.getEnvironments() == null ||
+        config.getEnvironments().isEmpty()) && isNullOrEmpty(config.getDefaultEnv());
+    boolean isSidecarWorkspace = isSidecarBasedWorkspace(config.getAttributes());
+    if (environmentIsNotSet && isSidecarWorkspace) {
+      // sidecar based workspaces allowed not to have environment
+      return;
+    }
     check(!isNullOrEmpty(config.getDefaultEnv()), "Workspace default environment name required");
     checkNotNull(config.getEnvironments(), "Workspace must contain at least one environment");
     check(
