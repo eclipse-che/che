@@ -66,7 +66,7 @@ public class DeployBroker extends BrokerPhase {
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
-    LOG.debug("Starting brokers deployment for workspace '{}'", workspaceId);
+    LOG.debug("Starting brokers pod for workspace '{}'", workspaceId);
     KubernetesDeployments deployments = namespace.deployments();
     try {
       // Creates config map that can inject Che tooling plugins meta files into a Che plugin
@@ -85,23 +85,21 @@ public class DeployBroker extends BrokerPhase {
         namespace.deployments().watchEvents(unrecoverableEventListener);
       }
 
-      Pod barePod = deployments.create(pluginBrokerPod);
+      deployments.create(pluginBrokerPod);
 
-      deployments.waitRunningAsync(barePod.getMetadata().getName());
-      LOG.debug("Brokers deployment finished for workspace '{}'", workspaceId);
+      LOG.debug("Brokers pod is created for workspace '{}'", workspaceId);
       return nextPhase.execute();
     } finally {
       namespace.deployments().stopWatch();
       try {
         deployments.delete();
       } catch (InfrastructureException e) {
-        LOG.error("Broker deployment removal failed. Error: " + e.getLocalizedMessage(), e);
+        LOG.error("Brokers pod removal failed. Error: " + e.getLocalizedMessage(), e);
       }
       try {
         namespace.configMaps().delete();
       } catch (InfrastructureException ex) {
-        LOG.error(
-            "Broker deployment config map removal failed. Error: " + ex.getLocalizedMessage(), ex);
+        LOG.error("Brokers config map removal failed. Error: " + ex.getLocalizedMessage(), ex);
       }
     }
   }
