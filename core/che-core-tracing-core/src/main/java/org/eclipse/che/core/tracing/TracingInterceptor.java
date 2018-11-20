@@ -63,13 +63,8 @@ public class TracingInterceptor implements MethodInterceptor {
               // we want to know the exception in case the tag extraction failed.
               // Slf4j doesn't seem to provide a method overload that could both provide formatting
               // arguments and the cause.
-              LOG.debug(
-                  "Could not get the value for a tag called "
-                      + e.getKey()
-                      + " when tracing "
-                      + spanName
-                      + ".",
-                  ex);
+              LOG.debug("Could not get the value for a tag called {} when tracing {}.", e.getKey(),
+                  spanName, ex);
             }
             continue;
           }
