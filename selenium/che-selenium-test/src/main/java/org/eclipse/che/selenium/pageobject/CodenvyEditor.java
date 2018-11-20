@@ -1995,8 +1995,8 @@ public class CodenvyEditor {
    * upperBound} values during {@code timeout}.
    *
    * @param markerLocator type of the expected markers
-   * @param lowerBound the lower bound of the markers quantity
-   * @param upperBound the upper bound of the markers quantity
+   * @param lowerBound the lower bound of the markers quantity (including specified value)
+   * @param upperBound the upper bound of the markers quantity (including specified value)
    * @param timeout time in seconds for waiting expected quantity of the markers
    */
   public void waitMarkersQuantityBetween(
@@ -2005,10 +2005,7 @@ public class CodenvyEditor {
         driver -> {
           final int markersQuantity = getMarkersQuantity(markerLocator);
 
-          final boolean isQuantityInLowerBound = lowerBound <= markersQuantity;
-          final boolean isQuantityInUpperBound = upperBound >= markersQuantity;
-
-          return isQuantityInLowerBound && isQuantityInUpperBound;
+          return lowerBound <= markersQuantity && upperBound >= markersQuantity;
         });
   }
 

@@ -112,13 +112,13 @@ public class CheckErrorsWarningsTabTest {
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.WARNING);
     editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
-    waitWarningMarkersCount();
+    waitWarningMarkersQuantity();
 
     // change and check markers settings for displaying errors
     editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.ERROR);
-    waitErrorMarkersCount();
+    waitErrorMarkersQuantity();
 
     // change and check markers settings for ignoring all markers
     editor.waitAnnotationsAreNotPresent(WARNING_OVERVIEW);
@@ -128,14 +128,14 @@ public class CheckErrorsWarningsTabTest {
     editor.waitAnnotationsAreNotPresent(WARNING_OVERVIEW);
   }
 
-  private void waitWarningMarkersCount() {
+  private void waitWarningMarkersQuantity() {
     // browser window resolution a bit different on local mode and on CI
     // according to this different count of markers are displayed
     editor.waitMarkersQuantityBetween(WARNING_OVERVIEW, 12, 13);
     editor.waitMarkersQuantityBetween(WARNING, 22, 24);
   }
 
-  private void waitErrorMarkersCount() {
+  private void waitErrorMarkersQuantity() {
     // browser window resolution a bit different on local mode and on CI
     // according to this different count of markers are displayed
     editor.waitMarkersQuantityBetween(ERROR_OVERVIEW, 12, 13);
