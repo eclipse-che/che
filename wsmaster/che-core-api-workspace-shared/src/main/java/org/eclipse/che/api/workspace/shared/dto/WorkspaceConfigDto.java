@@ -67,7 +67,7 @@ public interface WorkspaceConfigDto extends WorkspaceConfig, Hyperlinks {
   WorkspaceConfigDto withProjects(List<ProjectConfigDto> projects);
 
   @Override
-  @FactoryParameter(obligation = MANDATORY)
+  @FactoryParameter(obligation = OPTIONAL)
   Map<String, EnvironmentDto> getEnvironments();
 
   void setEnvironments(Map<String, EnvironmentDto> environments);
