@@ -73,4 +73,24 @@ class LsRootAwarePathTransformer {
 
     return projectsRootPath.resolve(wsPath).normalize().toAbsolutePath();
   }
+
+  /**
+   * Transform file system path represented by a URI into workspace path. Transformation respects
+   * langauge server project root location
+   *
+   * @param lsId - language server ID
+   * @param uri - file system item URI
+   * @return workspace path
+   */
+  String toWsPath(String lsId, URI uri) {
+    String projectsRoot = projectsRootRegistry.getOrNull(lsId);
+    if (projectsRoot == null) {
+      LOG.error("There is no root path for a language with id: {}", lsId);
+      return null;
+    }
+
+    Path path = Paths.get(uri);
+
+    return ROOT + Paths.get(projectsRoot).relativize(path);
+  }
 }
