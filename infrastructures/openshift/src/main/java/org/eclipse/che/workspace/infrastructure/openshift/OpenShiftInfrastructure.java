@@ -26,6 +26,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -52,7 +53,10 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     super(
         NAME,
         ImmutableSet.of(
-            OpenShiftEnvironment.TYPE, KubernetesEnvironment.TYPE, DockerImageEnvironment.TYPE),
+            OpenShiftEnvironment.TYPE,
+            KubernetesEnvironment.TYPE,
+            DockerImageEnvironment.TYPE,
+            Constants.NO_ENVIRONMENT_RECIPE_TYPE),
         eventService,
         internalEnvProvisioners);
     this.runtimeContextFactory = runtimeContextFactory;
