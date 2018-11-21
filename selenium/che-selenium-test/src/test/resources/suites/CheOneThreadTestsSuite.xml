@@ -29,9 +29,9 @@
             <class name="org.eclipse.che.selenium.dashboard.organization.MemberOrganizationTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.OrganizationMembersTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.RenameOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceTabTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceOwnerTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.SystemAdminOrganizationTest"/>
-            <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceMemberTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
             <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>

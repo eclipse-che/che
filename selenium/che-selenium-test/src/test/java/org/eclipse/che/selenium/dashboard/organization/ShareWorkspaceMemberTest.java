@@ -48,7 +48,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
-public class ShareWorkspaceTest {
+public class ShareWorkspaceMemberTest {
 
   private static final String WORKSPACE_NAME = generate("workspace", 4);
   private static final String ADMIN_PERMISSIONS =
