@@ -12,29 +12,39 @@
 package org.eclipse.che.selenium.dashboard.organization;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.SHARE;
+import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.STOPPED;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
 import org.eclipse.che.selenium.core.user.TestUser;
+import org.eclipse.che.selenium.pageobject.AskForValueDialog;
+import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
+import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceShare;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
-import org.openqa.selenium.WebDriverException;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
@@ -44,20 +54,32 @@ public class ShareWorkspaceTest {
   private static final String ADMIN_PERMISSIONS =
       "read, use, run, configure, setPermissions, delete";
   private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
+  private static final String PROJECT_NAME = "web-java-spring";
+  private static final String FILE_NAME = "readme.txt";
+  private static final String FILE_CONTENT = generate("", 10);
 
   private String systemAdminName;
   private String memberName;
 
   @InjectTestOrganization private TestOrganization org;
 
-  @Inject private CheMultiuserAdminDashboard dashboard;
-  @Inject private WorkspaceDetails workspaceDetails;
+  @Inject private Ide ide;
+  @Inject private Menu menu;
+  @Inject private TestUser testUser;
+  @Inject private Consoles consoles;
+  @Inject private CodenvyEditor editor;
+  @Inject private Workspaces workspaces;
   @Inject private NavigationBar navigationBar;
   @Inject private AdminTestUser adminTestUser;
-  @Inject private NewWorkspace newWorkspace;
-  @Inject private Workspaces workspaces;
-  @Inject private TestUser testUser;
   @Inject private WorkspaceShare workspaceShare;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private WorkspaceDetails workspaceDetails;
+  @Inject private AskForValueDialog askForValueDialog;
+  @Inject private WorkspaceOverview workspaceOverview;
+  @Inject private CheMultiuserAdminDashboard dashboard;
+  @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
+  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -67,99 +89,111 @@ public class ShareWorkspaceTest {
     memberName = testUser.getEmail();
 
     dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
-    createWorkspace(org.getName(), WORKSPACE_NAME);
+    createWorkspace(WORKSPACE_NAME);
   }
 
-  @BeforeMethod
-  public void openShareWorkspaceTab() {
-    navigationBar.waitNavigationBar();
+  @AfterClass
+  public void tearDown() throws Exception {
+    workspaceServiceClient.delete(WORKSPACE_NAME, adminTestUser.getName());
+    org.delete();
+  }
 
+  @Test
+  public void checkSharingByWorkspaceOwner() {
+    dashboard.open();
+    dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
-
-    try {
-      workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/8594");
-    }
-
+    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
     workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
     workspaceDetails.selectTabInWorkspaceMenu(SHARE);
-  }
 
-  @Test
-  public void checkShareWorkspaceTab() {
-    // check workspace owner permissions
-    workspaceShare.waitMemberNameInShareList(systemAdminName);
-    assertEquals(workspaceShare.getMemberPermissions(systemAdminName), ADMIN_PERMISSIONS);
-  }
-
-  @Test
-  public void checkMembersSelectingByCheckbox() {
-    // check selecting member by checkbox
-    workspaceShare.clickOnMemberCheckbox(systemAdminName);
-    assertTrue(workspaceShare.isMemberCheckedInList(systemAdminName));
-    workspaceShare.clickOnMemberCheckbox(systemAdminName);
-    assertFalse(workspaceShare.isMemberCheckedInList(systemAdminName));
-
-    // check selecting members by Bulk
-    workspaceShare.clickOnBulkSelection();
-    assertTrue(workspaceShare.isMemberCheckedInList(systemAdminName));
-    workspaceShare.clickOnBulkSelection();
-    assertFalse(workspaceShare.isMemberCheckedInList(systemAdminName));
-  }
-
-  @Test
-  public void checkMembersFiltering() {
-    // filter members by a full name
-    workspaceShare.filterMembers(systemAdminName);
-    workspaceShare.waitMemberNameInShareList(systemAdminName);
-
-    // filter members by a part name
-    workspaceShare.filterMembers(systemAdminName.substring(systemAdminName.length() / 2));
-    workspaceShare.waitMemberNameInShareList(systemAdminName);
-
-    // filter members by a nonexistent name
-    workspaceShare.filterMembers(NameGenerator.generate("", 8));
-    workspaceShare.waitMemberNameNotExistsInShareList(systemAdminName);
-  }
-
-  @Test
-  public void checkSharingWorkspaceWithMember() {
-    // invite a member to workspace
+    // invite a member to workspace and check permission
     workspaceShare.clickOnAddDeveloperButton();
     workspaceShare.waitInviteMemberDialog();
     workspaceShare.selectAllMembersInDialogByBulk();
     workspaceShare.clickOnShareWorkspaceButton();
-
-    // check the added member permission
+    workspaceShare.waitMemberNameInShareList(systemAdminName);
+    assertEquals(workspaceShare.getMemberPermissions(systemAdminName), ADMIN_PERMISSIONS);
     workspaceShare.waitMemberNameInShareList(memberName);
     assertEquals(workspaceShare.getMemberPermissions(memberName), MEMBER_PERMISSIONS);
-
-    // check the 'No members in team' dialog
-    workspaceShare.clickOnAddDeveloperButton();
-    workspaceShare.waitNoMembersDialog();
-    workspaceDetails.clickOnCloseButtonInDialogWindow();
-
-    // remove the added member from the members list
-    workspaceShare.waitInviteMemberDialogClosed();
-    workspaceShare.waitMemberNameInShareList(memberName);
-    workspaceShare.clickOnRemoveMemberButton(memberName);
-    workspaceDetails.clickOnDeleteButtonInDialogWindow();
-    workspaceShare.waitMemberNameNotExistsInShareList(memberName);
   }
 
-  private void createWorkspace(String organizationName, String workspaceName) {
-    dashboard.selectWorkspacesItemOnDashboard();
-    dashboard.waitToolbarTitleName("Workspaces");
+  @Test(priority = 1)
+  public void checkSharingByAddedMember() {
+    dashboard.logout();
 
-    workspaces.clickOnAddWorkspaceBtn();
-    newWorkspace.waitToolbar();
-    newWorkspace.openOrganizationsList();
-    newWorkspace.selectOrganizationFromList(organizationName);
-    newWorkspace.selectStack(JAVA);
-    newWorkspace.typeWorkspaceName(workspaceName);
-    newWorkspace.clickOnCreateButtonAndEditWorkspace();
-    workspaceDetails.waitToolbarTitleName(workspaceName);
+    // login as developer and check that the shared workspace exists in Workspaces list
+    dashboard.open(testUser.getName(), testUser.getPassword());
+    dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
+    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
+    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
+
+    // check all members permission
+    workspaceDetails.selectTabInWorkspaceMenu(SHARE);
+    workspaceShare.waitMemberNameInShareList(memberName);
+    assertEquals(workspaceShare.getMemberPermissions(memberName), MEMBER_PERMISSIONS);
+    workspaceShare.waitMemberNameInShareList(systemAdminName);
+    assertEquals(workspaceShare.getMemberPermissions(systemAdminName), ADMIN_PERMISSIONS);
+
+    // try to remove the workspace owner from the members list
+    workspaceShare.waitInviteMemberDialogClosed();
+    workspaceShare.waitMemberNameInShareList(systemAdminName);
+    workspaceShare.clickOnRemoveMemberButton(systemAdminName);
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
+    dashboard.waitNotificationMessage("User can't edit permissions for this instance");
+    dashboard.waitNotificationIsClosed();
+
+    // open workspace and check
+    workspaceDetails.clickOpenInIdeWsBtn();
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME + "/" + FILE_NAME);
+    editor.waitActive();
+    editor.selectTabByName(FILE_NAME);
+    editor.waitTextIntoEditor(FILE_CONTENT);
+
+    // try to delete the workspace
+    dashboard.open();
+    navigationBar.waitNavigationBar();
+    dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.selectWorkspaceItemName(WORKSPACE_NAME);
+    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
+    workspaceDetails.selectTabInWorkspaceMenu(OVERVIEW);
+
+    workspaceOverview.clickOnDeleteWorkspace();
+    workspaceDetails.clickOnDeleteButtonInDialogWindow();
+    dashboard.waitNotificationMessage(
+        "The user does not have permission to delete workspace with id ");
+    dashboard.waitNotificationIsClosed();
+    workspaceDetails.checkStateOfWorkspace(StateWorkspace.STOPPED);
+
+    dashboard.logout();
+
+    dashboard.open(adminTestUser.getName(), adminTestUser.getPassword());
+    dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.waitWorkspaceIsPresent(WORKSPACE_NAME);
+    workspaces.waitWorkspaceStatus(WORKSPACE_NAME, STOPPED);
+  }
+
+  private void createWorkspace(String workspaceName) {
+    createWorkspaceHelper.createWorkspaceFromStackWithProject(JAVA, workspaceName, PROJECT_NAME);
+
+    ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
+
+    projectExplorer.waitProjectInitialization(PROJECT_NAME);
+
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME);
+    menu.runCommand(PROJECT, NEW, FILE);
+    askForValueDialog.createNotJavaFileByName(FILE_NAME);
+    editor.waitActive();
+    editor.selectTabByName(FILE_NAME);
+    editor.typeTextIntoEditor(FILE_CONTENT);
+    editor.waitTabFileWithSavedStatus(FILE_NAME);
   }
 }
