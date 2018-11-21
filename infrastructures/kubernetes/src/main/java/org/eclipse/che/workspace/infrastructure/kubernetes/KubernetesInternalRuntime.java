@@ -575,8 +575,13 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     return ImmutableMap.copyOf(machines.getMachines(getContext().getIdentity()));
   }
 
+  @Traced
   @Override
   protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
+    RuntimeIdentity identity = getContext().getIdentity();
+
+    TracingTags.WORKSPACE_ID.set(identity.getWorkspaceId());
+
     runtimeHangingDetector.stopTracking(getContext().getIdentity());
     if (startSynchronizer.interrupt()) {
       // runtime is STARTING. Need to wait until start will be interrupted properly
@@ -585,7 +590,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           // Runtime is not interrupted yet. It may occur when start was performing by another
           // Che Server that is crashed so start is hung up in STOPPING phase.
           // Need to clean up runtime resources
-          RuntimeIdentity identity = getContext().getIdentity();
           probeScheduler.cancel(identity.getWorkspaceId());
           namespace.cleanUp();
         }
@@ -595,7 +599,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       }
     } else {
       // runtime is RUNNING. Clean up used resources
-      RuntimeIdentity identity = getContext().getIdentity();
       // Cancels workspace servers probes if any
       probeScheduler.cancel(identity.getWorkspaceId());
       namespace.cleanUp();
