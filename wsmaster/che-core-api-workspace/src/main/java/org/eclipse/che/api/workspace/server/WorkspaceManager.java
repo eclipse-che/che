@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
@@ -373,13 +372,14 @@ public class WorkspaceManager {
 
   private String getValidatedEnvironmentName(WorkspaceImpl workspace, @Nullable String envName)
       throws NotFoundException, ServerException {
-    envName = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
     if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
       throw new NotFoundException(
           format(
               "Workspace '%s:%s' doesn't contain environment '%s'",
               workspace.getNamespace(), workspace.getConfig().getName(), envName));
     }
+
+    envName = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
 
     if (envName == null
         && SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(
@@ -402,6 +402,11 @@ public class WorkspaceManager {
     }
 
     return envName;
+  }
+
+  /** Returns first non-null argument or null if both are null. */
+  private <T> T firstNonNull(T first, T second) {
+    return first != null ? first : second;
   }
 
   private void checkWorkspaceIsRunningOrStarting(WorkspaceImpl workspace) throws ConflictException {
