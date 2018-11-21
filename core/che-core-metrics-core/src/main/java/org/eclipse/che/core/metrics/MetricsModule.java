@@ -24,14 +24,15 @@ import io.micrometer.core.instrument.binder.system.FileDescriptorMetrics;
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import io.micrometer.core.instrument.binder.system.UptimeMetrics;
 import io.micrometer.prometheus.PrometheusMeterRegistry;
-import io.prometheus.client.exporter.HTTPServer;
+import io.prometheus.client.CollectorRegistry;
 
 @Beta
 public class MetricsModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(HTTPServer.class).toProvider(MetricsServerProvider.class).asEagerSingleton();
+    bind(MetricsServer.class).asEagerSingleton();
     bind(MetricsBinder.class).asEagerSingleton();
+    bind(CollectorRegistry.class).toInstance(CollectorRegistry.defaultRegistry);
     bind(PrometheusMeterRegistry.class)
         .toProvider(PrometheusMeterRegistryProvider.class)
         .asEagerSingleton();

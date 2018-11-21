@@ -11,35 +11,26 @@
  */
 package org.eclipse.che.core.metrics;
 
-import io.micrometer.prometheus.PrometheusMeterRegistry;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Bind on 8087 port http endpoint with prometheus metrics. */
 @Singleton
-public class MetricsServerProvider implements Provider<HTTPServer> {
+public class MetricsServer {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MetricsServerProvider.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MetricsServer.class);
 
   private HTTPServer server;
 
-  private final CollectorRegistry collectorRegistry;
-
-  @Inject
-  public MetricsServerProvider(PrometheusMeterRegistry prometheusMeterRegistry) {
-    this.collectorRegistry = prometheusMeterRegistry.getPrometheusRegistry();
-  }
-
   @PostConstruct
-  public void startServer() throws IOException {
+  public void startServer(CollectorRegistry collectorRegistry) throws IOException {
     this.server = new HTTPServer(new InetSocketAddress(8087), collectorRegistry, true);
     LOG.info("Metrics server started at port {} successfully ", 8087);
   }
@@ -50,10 +41,5 @@ public class MetricsServerProvider implements Provider<HTTPServer> {
       server.stop();
       LOG.info("Metrics server suspended at port {} successfully ", 8087);
     }
-  }
-
-  @Override
-  public HTTPServer get() {
-    return server;
   }
 }
