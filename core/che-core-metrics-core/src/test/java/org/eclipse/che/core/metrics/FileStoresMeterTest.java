@@ -13,15 +13,20 @@ package org.eclipse.che.core.metrics;
 
 import static org.testng.Assert.*;
 
-import com.google.common.collect.Iterators;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
 import java.util.Collection;
+import java.util.Iterator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 public class FileStoresMeterTest {
+
+  private static final Logger LOG = LoggerFactory.getLogger(FileStoresMeterTest.class);
 
   @Test
   public void shouldBindFileStores() {
@@ -31,9 +36,19 @@ public class FileStoresMeterTest {
     Collection<Gauge> dd = registry.get("disk.free").gauges();
 
     assertNotNull(dd);
-    assertEquals(dd.size(), Iterators.size(FileSystems.getDefault().getFileStores().iterator()));
+    assertEquals(dd.size(), getSize());
     assertTrue(registry.get("disk.free").gauge().value() >= 0);
     assertTrue(registry.get("disk.total").gauge().value() >= 0);
     assertTrue(registry.get("disk.usable").gauge().value() >= 0);
+  }
+
+  private int getSize() {
+    int i = 0;
+    Iterator<FileStore> it = FileSystems.getDefault().getFileStores().iterator();
+    while (it.hasNext()) {
+      LOG.debug("Found {} meter ", it.next().name());
+      i++;
+    }
+    return i;
   }
 }

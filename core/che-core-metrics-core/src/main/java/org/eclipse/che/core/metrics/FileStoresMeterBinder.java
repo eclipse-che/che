@@ -21,14 +21,19 @@ import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
 import java.util.function.ToDoubleFunction;
 import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Bind disk usage metrics for for every @{@link java.nio.file.FileStore}. */
 @Singleton
 public class FileStoresMeterBinder implements MeterBinder {
 
+  private static final Logger LOG = LoggerFactory.getLogger(FileStoresMeterBinder.class);
+
   @Override
   public void bindTo(MeterRegistry registry) {
     for (FileStore fileStore : FileSystems.getDefault().getFileStores()) {
+      LOG.debug("Add gauge metric for {}", fileStore.name());
       Iterable<Tag> tagsWithPath = Tags.concat(Tags.empty(), "path", fileStore.name());
 
       Gauge.builder("disk.free", fileStore, exceptionToNonWrapper(FileStore::getUnallocatedSpace))
@@ -65,7 +70,7 @@ public class FileStoresMeterBinder implements MeterBinder {
   }
 
   @FunctionalInterface
-  public interface ThrowingToDoubleFunction<T> {
+  interface ThrowingToDoubleFunction<T> {
     double applyAsDouble(T t) throws IOException;
   }
 }
