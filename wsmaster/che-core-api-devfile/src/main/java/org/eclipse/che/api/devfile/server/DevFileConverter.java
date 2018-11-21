@@ -36,52 +36,29 @@ import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
+/** Helps to convert Devfile into workspace config and back. */
 public class DevFileConverter {
 
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
-
     Devfile devFile = new Devfile().withVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
     // Manage projects
     List<Project> projects = new ArrayList<>();
-    for (ProjectConfigImpl project : wsConfig.getProjects()) {
-      Source source =
-          new Source()
-              .withType(project.getSource().getType())
-              .withLocation(project.getSource().getLocation());
-      Project devProject = new Project().withName(project.getName()).withSource(source);
-      projects.add(devProject);
-    }
+    wsConfig
+        .getProjects()
+        .forEach(projectConfig -> projects.add(projectConfigToDevProject(projectConfig)));
     devFile.setProjects(projects);
 
     // Manage commands
     List<Command> commands = new ArrayList<>();
-    for (CommandImpl command : wsConfig.getCommands()) {
-      Command devCommand = new Command().withName(command.getName());
-      Action action =
-          new Action().withCommand(command.getCommandLine()).withType(command.getType());
-      if (!isNullOrEmpty(command.getAttributes().get("workingDir"))) {
-        action.setWorkdir(command.getAttributes().get("workingDir"));
-      }
-      // Remove internal attributes
-      command.getAttributes().remove("workingDir");
-      command.getAttributes().remove("pluginId");
-      // Put others
-      if (devCommand.getAttributes() == null) {
-        devCommand.withAttributes(command.getAttributes());
-      } else {
-        devCommand.getAttributes().putAll(command.getAttributes());
-      }
-
-      commands.add(devCommand);
-    }
+    wsConfig.getCommands().forEach(command -> commands.add(commandImplToDevCommand(command)));
     devFile.setCommands(commands);
 
     // Manage tools
     List<Tool> tools = new ArrayList<>();
-    for (Map.Entry entry : wsConfig.getAttributes().entrySet()) {
+    for (Map.Entry<String, String> entry : wsConfig.getAttributes().entrySet()) {
       if (entry.getKey().equals("editor")) {
-        String editorId = wsConfig.getAttributes().get("editor");
+        String editorId = entry.getValue();
         Tool editorTool =
             new Tool()
                 .withType("cheEditor")
@@ -89,7 +66,7 @@ public class DevFileConverter {
                 .withName(wsConfig.getAttributes().get(editorId));
         tools.add(editorTool);
       } else if (entry.getKey().equals("plugins")) {
-        for (String pluginId : wsConfig.getAttributes().get("plugins").split(",")) {
+        for (String pluginId : entry.getValue().split(",")) {
           Tool pluginTool =
               new Tool()
                   .withId(pluginId)
@@ -99,7 +76,6 @@ public class DevFileConverter {
         }
       }
     }
-
     devFile.setTools(tools);
     return devFile;
   }
@@ -113,16 +89,7 @@ public class DevFileConverter {
 
     // Manage projects
     List<ProjectConfigImpl> projects = new ArrayList<>();
-    for (Project devProject : devFile.getProjects()) {
-      ProjectConfigImpl projectConfig = new ProjectConfigImpl();
-      projectConfig.setName(devProject.getName());
-      projectConfig.setPath("/" + projectConfig.getName());
-      SourceStorageImpl sourceStorage = new SourceStorageImpl();
-      sourceStorage.setType(devProject.getSource().getType());
-      sourceStorage.setLocation(devProject.getSource().getLocation());
-      projectConfig.setSource(sourceStorage);
-      projects.add(projectConfig);
-    }
+    devFile.getProjects().forEach(project -> projects.add(devProjectToProjectConfig(project)));
     config.setProjects(projects);
 
     // Manage tools
@@ -141,31 +108,9 @@ public class DevFileConverter {
 
     // Manage commands
     List<CommandImpl> commands = new ArrayList<>();
-    for (Command devCommand : devFile.getCommands()) {
-      for (Action devAction : devCommand.getActions()) {
-        CommandImpl command = new CommandImpl();
-        command.setName(devCommand.getName() + ":" + devAction.getTool());
-        command.setType(devAction.getType());
-        command.setCommandLine(devAction.getCommand());
-        if (devAction.getWorkdir() != null) {
-          command.getAttributes().put("workingDir", devAction.getWorkdir());
-        }
-        Optional<Tool> toolOfCommand =
-            devFile
-                .getTools()
-                .stream()
-                .filter(tool -> tool.getName().equals(devAction.getTool()))
-                .findFirst();
-        if (toolOfCommand.isPresent() && !isNullOrEmpty(toolOfCommand.get().getId())) {
-          command.getAttributes().put("pluginId", toolOfCommand.get().getId());
-        }
-        if (devCommand.getAttributes() != null) {
-          command.getAttributes().putAll(devCommand.getAttributes());
-        }
-        commands.add(command);
-      }
-    }
-
+    devFile
+        .getCommands()
+        .forEach(command -> commands.addAll(devCommandToCommandImpls(devFile, command)));
     config.setCommands(commands);
 
     // TODO: Add default environment. Remove when it will be possible
@@ -180,6 +125,70 @@ public class DevFileConverter {
     environment.setMachines(singletonMap("dev-machine", machine));
     config.setEnvironments(singletonMap("default", environment));
     return config;
+  }
+
+  private List<CommandImpl> devCommandToCommandImpls(Devfile devFile, Command devCommand) {
+    List<CommandImpl> commands = new ArrayList<>();
+    for (Action devAction : devCommand.getActions()) {
+      CommandImpl command = new CommandImpl();
+      command.setName(devCommand.getName() + ":" + devAction.getTool());
+      command.setType(devAction.getType());
+      command.setCommandLine(devAction.getCommand());
+      if (devAction.getWorkdir() != null) {
+        command.getAttributes().put("workingDir", devAction.getWorkdir());
+      }
+      Optional<Tool> toolOfCommand =
+          devFile
+              .getTools()
+              .stream()
+              .filter(tool -> tool.getName().equals(devAction.getTool()))
+              .findFirst();
+      if (toolOfCommand.isPresent() && !isNullOrEmpty(toolOfCommand.get().getId())) {
+        command.getAttributes().put("pluginId", toolOfCommand.get().getId());
+      }
+      if (devCommand.getAttributes() != null) {
+        command.getAttributes().putAll(devCommand.getAttributes());
+      }
+      commands.add(command);
+    }
+    return commands;
+  }
+
+  private Command commandImplToDevCommand(CommandImpl command) {
+    Command devCommand = new Command().withName(command.getName());
+    Action action = new Action().withCommand(command.getCommandLine()).withType(command.getType());
+    if (!isNullOrEmpty(command.getAttributes().get("workingDir"))) {
+      action.setWorkdir(command.getAttributes().get("workingDir"));
+    }
+    // Remove internal attributes
+    command.getAttributes().remove("workingDir");
+    command.getAttributes().remove("pluginId");
+    // Put others
+    if (devCommand.getAttributes() == null) {
+      devCommand.withAttributes(command.getAttributes());
+    } else {
+      devCommand.getAttributes().putAll(command.getAttributes());
+    }
+    return devCommand;
+  }
+
+  private Project projectConfigToDevProject(ProjectConfigImpl projectConfig) {
+    Source source =
+        new Source()
+            .withType(projectConfig.getSource().getType())
+            .withLocation(projectConfig.getSource().getLocation());
+    return new Project().withName(projectConfig.getName()).withSource(source);
+  }
+
+  private ProjectConfigImpl devProjectToProjectConfig(Project devProject) {
+    ProjectConfigImpl projectConfig = new ProjectConfigImpl();
+    projectConfig.setName(devProject.getName());
+    projectConfig.setPath("/" + projectConfig.getName());
+    SourceStorageImpl sourceStorage = new SourceStorageImpl();
+    sourceStorage.setType(devProject.getSource().getType());
+    sourceStorage.setLocation(devProject.getSource().getLocation());
+    projectConfig.setSource(sourceStorage);
+    return projectConfig;
   }
 
   private static void validateCurrentVersion(Devfile devFile) throws DevFileFormatException {

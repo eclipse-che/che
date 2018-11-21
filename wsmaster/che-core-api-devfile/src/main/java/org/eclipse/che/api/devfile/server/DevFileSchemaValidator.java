@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static java.lang.String.format;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -22,8 +24,12 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.fge.jsonschema.main.JsonValidator;
 import java.io.IOException;
 import java.net.URL;
+import java.util.stream.StreamSupport;
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 
+/** Validates YAML content against given JSON schema. */
 @Singleton
 public class DevFileSchemaValidator {
 
@@ -31,34 +37,35 @@ public class DevFileSchemaValidator {
   private JsonNode schema;
   private ObjectMapper yamlReader;
 
-  public DevFileSchemaValidator() throws IOException {
-    final JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
-    URL schemaURL = getClass().getClassLoader().getResource("schema/devfile.json");
+  @Inject
+  public DevFileSchemaValidator(@Named("che.devfile.schema.file_location") String schemaFile)
+      throws IOException {
+    final URL schemaURL = getClass().getClassLoader().getResource(schemaFile);
+    if (schemaURL == null) {
+      throw new IOException("Devfile schema is not found at specified path:" + schemaFile);
+    }
     this.schema = JsonLoader.fromURL(schemaURL);
-    this.validator = factory.getValidator();
+    this.validator = JsonSchemaFactory.byDefault().getValidator();
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
 
-  public void validateBySchema(String content) throws DevFileFormatException {
+  public void validateBySchema(String yamlContent) throws DevFileFormatException {
     ProcessingReport report;
     try {
-      final JsonNode data = yamlReader.readTree(content);
+      final JsonNode data = yamlReader.readTree(yamlContent);
       report = validator.validate(schema, data);
     } catch (IOException | ProcessingException e) {
-      throw new DevFileFormatException(
-          String.format("Unable to validate devfile. Error: %s" + e.getMessage()));
+      throw new DevFileFormatException("Unable to validate devfile. Error: " + e.getMessage());
     }
     if (!report.isSuccess()) {
       StringBuilder sb = new StringBuilder();
-      report.forEach(
-          jsonError -> {
-            if (jsonError.getLogLevel() == LogLevel.ERROR
-                || jsonError.getLogLevel() == LogLevel.FATAL) {
-              sb.append(String.format("[%s] ", jsonError.getMessage()));
-            }
-          });
-      throw new DevFileFormatException(
-          String.format("Devfile schema validation failed. Errors: %s", sb.toString()));
+      StreamSupport.stream(report.spliterator(), false)
+          .filter(
+              message ->
+                  message.getLogLevel() == LogLevel.ERROR
+                      || message.getLogLevel() == LogLevel.FATAL)
+          .forEach(message -> sb.append(format("[%s] ", message.getMessage())));
+      throw new DevFileFormatException(format("Devfile schema validation failed. Errors: %s", sb));
     }
   }
 }
