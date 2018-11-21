@@ -184,8 +184,14 @@ public class TheiaIde {
   }
 
   public void switchToIdeFrame() {
-    seleniumWebDriverHelper.waitAndSwitchToFrame(
-        By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+    final String ideWindowXpath = "//ide-iframe[@id='ide-iframe-window' and @aria-hidden='false']";
+    final String ideFrameId = "ide-application-iframe";
+
+    // wait until IDE window is opened
+    seleniumWebDriverHelper.waitVisibility(By.xpath(ideWindowXpath), PREPARING_WS_TIMEOUT_SEC);
+
+    // switch to IDE frame
+    seleniumWebDriverHelper.waitAndSwitchToFrame(By.id(ideFrameId), PREPARING_WS_TIMEOUT_SEC);
   }
 
   public void pressKeyCombination(CharSequence... combination) {
