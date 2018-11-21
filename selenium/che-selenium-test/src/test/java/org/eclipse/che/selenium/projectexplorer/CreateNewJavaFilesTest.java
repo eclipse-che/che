@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -20,6 +22,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -56,6 +59,7 @@ public class CreateNewJavaFilesTest {
   @Inject private Menu menu;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -66,13 +70,14 @@ public class CreateNewJavaFilesTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    projectExplorer.waitItem(PROJECT_NAME);
+    notificationsPopupPanel.waitProgressPopupPanelClose();
+    projectExplorer.quickExpandWithJavaScript();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void createNewJavaFilesTest() throws Exception {
-    projectExplorer.waitItem(PROJECT_NAME);
-    notificationsPopupPanel.waitProgressPopupPanelClose();
-    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitVisibilityByName("AppController.java");
     projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
     loader.waitOnClosed();
@@ -105,7 +110,7 @@ public class CreateNewJavaFilesTest {
     loader.waitOnClosed();
     askForValueDialog.createJavaFileByNameAndType(name, item);
     loader.waitOnClosed();
-    projectExplorer.waitVisibilityByName(name + fileExt);
+    projectExplorer.waitVisibilityByName(name + fileExt, ELEMENT_TIMEOUT_SEC);
   }
 
   private void checkDefaultTextInEditorForFile(String defaultText, String fileName) {
