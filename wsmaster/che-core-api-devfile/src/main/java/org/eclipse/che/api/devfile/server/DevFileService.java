@@ -13,8 +13,6 @@ package org.eclipse.che.api.devfile.server;
 
 import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.devfile.server.DevFileConverter.devFileToWorkspaceConfig;
-import static org.eclipse.che.api.devfile.server.DevFileConverter.workspaceToDevFile;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,6 +48,7 @@ public class DevFileService extends Service {
   private DevFileSchemaValidator schemaValidator;
   private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
+  private DevFileConverter devFileConverter;
 
   @Inject
   public DevFileService(
@@ -60,6 +59,7 @@ public class DevFileService extends Service {
     this.schemaValidator = schemaValidator;
     this.workspaceManager = workspaceManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
+    this.devFileConverter = new DevFileConverter();
   }
 
   //  Creates a workspace by providing the url to the repository
@@ -86,7 +86,7 @@ public class DevFileService extends Service {
     try {
       schemaValidator.validateBySchema(data);
       devFile = objectMapper.readValue(data, Devfile.class);
-      workspaceConfig = devFileToWorkspaceConfig(devFile);
+      workspaceConfig = devFileConverter.devFileToWorkspaceConfig(devFile);
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
     } catch (DevFileFormatException e) {
@@ -114,7 +114,7 @@ public class DevFileService extends Service {
       throws NotFoundException, ServerException {
     // TODO: validate key
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-    Devfile workspaceDevFile = workspaceToDevFile(workspace.getConfig());
+    Devfile workspaceDevFile = devFileConverter.workspaceToDevFile(workspace.getConfig());
     // Write object as YAML
     try {
       return Response.ok().entity(objectMapper.writeValueAsString(workspaceDevFile)).build();

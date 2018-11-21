@@ -29,6 +29,7 @@ import org.testng.reporters.Files;
 public class DevFileConverterTest {
 
   private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+  private DevFileConverter devFileConverter = new DevFileConverter();
 
   @Test
   public void shouldBuildWorkspaceConfigFromYamlDevFile() throws Exception {
@@ -38,7 +39,7 @@ public class DevFileConverterTest {
 
     Devfile devFile = objectMapper.readValue(yamlContent, Devfile.class);
 
-    WorkspaceConfigImpl wsConfigImpl = DevFileConverter.devFileToWorkspaceConfig(devFile);
+    WorkspaceConfigImpl wsConfigImpl = devFileConverter.devFileToWorkspaceConfig(devFile);
 
     String jsonContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_impl.json"));
@@ -54,7 +55,7 @@ public class DevFileConverterTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_impl.json"));
     WorkspaceConfigImpl workspaceConfig =
         JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
-    Devfile devFile = DevFileConverter.workspaceToDevFile(workspaceConfig);
+    Devfile devFile = devFileConverter.workspaceToDevFile(workspaceConfig);
 
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));

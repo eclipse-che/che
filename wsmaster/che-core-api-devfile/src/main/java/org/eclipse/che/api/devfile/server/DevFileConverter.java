@@ -38,7 +38,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
 public class DevFileConverter {
 
-  static Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
+  public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
 
     Devfile devFile = new Devfile().withVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
@@ -104,7 +104,7 @@ public class DevFileConverter {
     return devFile;
   }
 
-  static WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devFile)
+  public WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devFile)
       throws DevFileFormatException {
     validateCurrentVersion(devFile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
