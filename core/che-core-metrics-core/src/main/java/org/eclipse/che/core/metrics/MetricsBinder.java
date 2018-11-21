@@ -24,6 +24,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class MetricsBinder {
+
   @Inject
   public void bindToRegistry(
       PrometheusMeterRegistry meterRegistry, Set<MeterBinder> meterBinderList) {
