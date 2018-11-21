@@ -51,7 +51,7 @@
     ng-show="listOrganizationMembersController.cheListHelper.visibleItemsNumber > 0">
     <che-list-item
       ng-repeat="member in listOrganizationMembersController.cheListHelper.getVisibleItems() | orderBy:[listOrganizationMembersController.memberOrderBy, 'config.name']"
-      lex-gt-sm="100" flex="33" ng-mouseover="hover=true" ng-mouseout="hover=false">
+      flex="100" ng-mouseover="hover=true" ng-mouseout="hover=false">
       <div flex="100"
            layout="row"
            layout-align="start stretch"
