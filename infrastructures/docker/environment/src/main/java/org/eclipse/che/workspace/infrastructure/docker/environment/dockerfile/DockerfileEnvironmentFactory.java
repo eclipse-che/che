@@ -23,6 +23,7 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -43,8 +44,11 @@ public class DockerfileEnvironmentFactory
 
   @Override
   protected DockerfileEnvironment doCreate(
-      InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings)
+      @Nullable InternalRecipe recipe,
+      Map<String, InternalMachineConfig> machines,
+      List<Warning> warnings)
       throws InfrastructureException, ValidationException {
+    checkNotNull(recipe, "Null recipe is not supported by docker file environment factory");
     if (!DockerfileEnvironment.TYPE.equals(recipe.getType())) {
       throw new ValidationException(
           format(
@@ -64,6 +68,14 @@ public class DockerfileEnvironmentFactory
     // sets default ram limit and request attributes if not present
     for (InternalMachineConfig machineConfig : machines.values()) {
       memoryProvisioner.provision(machineConfig, 0L, 0L);
+    }
+  }
+
+  private static void checkNotNull(
+      Object object, String errorMessageTemplate, Object... errorMessageParams)
+      throws ValidationException {
+    if (object == null) {
+      throw new ValidationException(format(errorMessageTemplate, errorMessageParams));
     }
   }
 }

@@ -21,12 +21,12 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
-import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 
 /** @author Sergii Leshchenko */
 public class TestObjects {
@@ -51,7 +51,7 @@ public class TestObjects {
 
   public static KubernetesRuntimeState createRuntimeState(WorkspaceImpl workspace) {
     return new KubernetesRuntimeState(
-        new RuntimeId(workspace.getId(), "defEnv", workspace.getAccount().getId()),
+        new RuntimeIdentityImpl(workspace.getId(), "defEnv", workspace.getAccount().getId()),
         generate("namespace", 5),
         WorkspaceStatus.RUNNING);
   }

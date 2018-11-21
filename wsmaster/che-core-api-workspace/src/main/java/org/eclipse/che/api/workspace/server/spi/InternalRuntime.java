@@ -79,6 +79,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
   }
 
   /** Returns name of the active environment. */
+  @Nullable
   public String getActiveEnv() {
     return context.getIdentity().getEnvName();
   }

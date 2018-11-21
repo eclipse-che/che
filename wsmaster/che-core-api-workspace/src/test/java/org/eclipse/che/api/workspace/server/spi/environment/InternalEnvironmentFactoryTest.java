@@ -156,6 +156,20 @@ public class InternalEnvironmentFactoryTest {
   }
 
   @Test
+  public void shouldPassNullRecipeIfEnvironmentIsNull() throws Exception {
+    // given
+    InternalEnvironment expectedEnv = mock(InternalEnvironment.class);
+    when(environmentFactory.doCreate(any(), any(), any())).thenReturn(expectedEnv);
+
+    // when
+    InternalEnvironment createdEnv = environmentFactory.create(null);
+
+    // then
+    assertEquals(createdEnv, expectedEnv);
+    verify(environmentFactory).doCreate(eq(null), any(), any());
+  }
+
+  @Test
   public void normalizeServersProtocols() throws InfrastructureException {
     ServerConfigImpl serverWithoutProtocol =
         new ServerConfigImpl("8080", "http", "/api", singletonMap("key", "value"));

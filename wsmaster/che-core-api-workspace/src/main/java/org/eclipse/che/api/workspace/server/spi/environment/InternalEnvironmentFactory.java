@@ -28,6 +28,7 @@ import org.eclipse.che.api.installer.server.exception.InstallerException;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Creates a valid instance of InternalEnvironment.
@@ -78,35 +79,39 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
    * @throws InfrastructureException if infrastructure specific error occurs
    * @throws ValidationException if validation fails
    */
-  public T create(final Environment sourceEnv) throws InfrastructureException, ValidationException {
+  public T create(@Nullable final Environment sourceEnv)
+      throws InfrastructureException, ValidationException {
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     List<Warning> warnings = new ArrayList<>();
+    InternalRecipe recipe = null;
 
-    InternalRecipe recipe = recipeRetriever.getRecipe(sourceEnv.getRecipe());
+    if (sourceEnv != null) {
+      recipe = recipeRetriever.getRecipe(sourceEnv.getRecipe());
 
-    for (Map.Entry<String, ? extends MachineConfig> machineEntry :
-        sourceEnv.getMachines().entrySet()) {
-      MachineConfig machineConfig = machineEntry.getValue();
+      for (Map.Entry<String, ? extends MachineConfig> machineEntry :
+          sourceEnv.getMachines().entrySet()) {
+        MachineConfig machineConfig = machineEntry.getValue();
 
-      List<Installer> installers;
-      try {
-        installers = installerRegistry.getOrderedInstallers(machineConfig.getInstallers());
-      } catch (InstallerException e) {
-        throw new InfrastructureException(e);
+        List<Installer> installers;
+        try {
+          installers = installerRegistry.getOrderedInstallers(machineConfig.getInstallers());
+        } catch (InstallerException e) {
+          throw new InfrastructureException(e);
+        }
+
+        machines.put(
+            machineEntry.getKey(),
+            new InternalMachineConfig(
+                installers,
+                normalizeServers(machineConfig.getServers()),
+                machineConfig.getEnv(),
+                machineConfig.getAttributes(),
+                machineConfig.getVolumes()));
       }
 
-      machines.put(
-          machineEntry.getKey(),
-          new InternalMachineConfig(
-              installers,
-              normalizeServers(machineConfig.getServers()),
-              machineConfig.getEnv(),
-              machineConfig.getAttributes(),
-              machineConfig.getVolumes()));
+      machinesValidator.validate(machines);
     }
-
-    machinesValidator.validate(machines);
 
     return doCreate(recipe, machines, warnings);
   }
@@ -127,7 +132,9 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
    * @throws ValidationException if validation fails
    */
   protected abstract T doCreate(
-      InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings)
+      @Nullable InternalRecipe recipe,
+      Map<String, InternalMachineConfig> machines,
+      List<Warning> warnings)
       throws InfrastructureException, ValidationException;
 
   @VisibleForTesting

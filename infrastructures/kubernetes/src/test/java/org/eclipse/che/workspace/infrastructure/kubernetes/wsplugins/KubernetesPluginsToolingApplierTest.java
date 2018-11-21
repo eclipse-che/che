@@ -21,9 +21,8 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -83,40 +82,29 @@ public class KubernetesPluginsToolingApplierTest {
   @Mock Pod pod;
   @Mock PodSpec podSpec;
   @Mock ObjectMeta meta;
-  @Mock KubernetesEnvironment internalEnvironment;
   @Mock Container userContainer;
   @Mock InternalMachineConfig userMachineConfig;
 
-  List<Container> containers;
-  KubernetesPluginsToolingApplier applier;
+  private KubernetesEnvironment internalEnvironment;
+  private List<Container> containers;
+  private KubernetesPluginsToolingApplier applier;
 
   @BeforeMethod
   public void setUp() {
+    internalEnvironment = spy(KubernetesEnvironment.builder().build());
     applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, false);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     containers = new ArrayList<>();
-    Map<String, Service> services = new HashMap<>();
-
     containers.add(userContainer);
     machines.put(USER_MACHINE_NAME, userMachineConfig);
 
-    when(internalEnvironment.getPods()).thenReturn(of(POD_NAME, pod));
+    internalEnvironment.getPods().put(POD_NAME, pod);
     when(pod.getSpec()).thenReturn(podSpec);
     when(podSpec.getContainers()).thenReturn(containers);
     when(pod.getMetadata()).thenReturn(meta);
     when(meta.getName()).thenReturn(POD_NAME);
-    when(internalEnvironment.getMachines()).thenReturn(machines);
-    lenient().when(internalEnvironment.getServices()).thenReturn(services);
-    Map<String, String> attributes = new HashMap<>();
-    when(internalEnvironment.getAttributes()).thenReturn(attributes);
-  }
-
-  @Test
-  public void doesNothingIfChePluginsListIsEmpty() throws Exception {
-    applier.apply(internalEnvironment, emptyList());
-
-    verifyZeroInteractions(internalEnvironment);
+    internalEnvironment.getMachines().putAll(machines);
   }
 
   @Test(
@@ -134,6 +122,17 @@ public class KubernetesPluginsToolingApplierTest {
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
     verifyPodAndContainersNumber(2);
+    Container toolingContainer = getOneAndOnlyNonUserContainer(internalEnvironment);
+    verifyContainer(toolingContainer);
+  }
+
+  @Test
+  public void createsPodAndAddToolingIfNoPodIsPresent() throws Exception {
+    internalEnvironment.getPods().clear();
+
+    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+
+    verifyPodAndContainersNumber(1);
     Container toolingContainer = getOneAndOnlyNonUserContainer(internalEnvironment);
     verifyContainer(toolingContainer);
   }

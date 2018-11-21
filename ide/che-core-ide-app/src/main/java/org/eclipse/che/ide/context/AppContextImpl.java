@@ -52,6 +52,7 @@ import org.eclipse.che.ide.api.selection.SelectionChangedHandler;
 import org.eclipse.che.ide.api.workspace.WorkspaceReadyEvent;
 import org.eclipse.che.ide.api.workspace.WsAgentServerUtil;
 import org.eclipse.che.ide.api.workspace.event.WorkspaceStoppedEvent;
+import org.eclipse.che.ide.api.workspace.model.EnvironmentImpl;
 import org.eclipse.che.ide.api.workspace.model.ServerImpl;
 import org.eclipse.che.ide.api.workspace.model.VolumeImpl;
 import org.eclipse.che.ide.api.workspace.model.WorkspaceImpl;
@@ -286,17 +287,16 @@ public class AppContextImpl
           wsAgentServerUtilProvider.get().getWsAgentServerMachine().get().getName();
       String activeEnv = workspace.getRuntime().getActiveEnv();
 
-      VolumeImpl vol =
-          workspace
-              .getConfig()
-              .getEnvironments()
-              .get(activeEnv)
-              .getMachines()
-              .get(machineName)
-              .getVolume("projects");
+      EnvironmentImpl environment = workspace.getConfig().getEnvironments().get(activeEnv);
+      VolumeImpl vol = null;
+      if (environment != null) {
+        vol = environment.getMachines().get(machineName).getVolume("projects");
+      }
 
       // if voulme exists return its path, otherwise use backward compatible path (/projects)
-      if (vol != null) projectsRoot = Path.valueOf(vol.getPath());
+      if (vol != null) {
+        projectsRoot = Path.valueOf(vol.getPath());
+      }
     }
 
     Log.debug(
