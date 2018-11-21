@@ -25,27 +25,17 @@ import java.lang.ProcessBuilder.Redirect;
 import java.lang.reflect.Proxy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.*;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
 import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.jdt.ls.extension.api.Notifications;
 import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
@@ -68,6 +58,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private static final Logger LOG = LoggerFactory.getLogger(JavaLanguageServerLauncher.class);
 
   private final Path launchScript;
+  private final RootDirPathProvider rootDirPathProvider;
   private final ProcessorJsonRpcCommunication processorJsonRpcCommunication;
   private final ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter;
   private final NotifyJsonRpcTransmitter notifyTransmitter;
@@ -78,12 +69,14 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
 
   @Inject
   public JavaLanguageServerLauncher(
+      RootDirPathProvider rootDirPathProvider,
       ProcessorJsonRpcCommunication processorJsonRpcCommunication,
       ExecuteClientCommandJsonRpcTransmitter executeCliendCommandTransmitter,
       NotifyJsonRpcTransmitter notifyTransmitter,
       EventService eventService,
       ProjectManager projectManager,
       ProjectsSynchronizer projectSynchronizer) {
+    this.rootDirPathProvider = rootDirPathProvider;
     this.processorJsonRpcCommunication = processorJsonRpcCommunication;
     this.executeCliendCommandTransmitter = executeCliendCommandTransmitter;
     this.notifyTransmitter = notifyTransmitter;
@@ -249,6 +242,11 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
         return regex;
       }
     };
+  }
+
+  @Override
+  public String getProjectsRoot() {
+    return rootDirPathProvider.get();
   }
 
   @Override
