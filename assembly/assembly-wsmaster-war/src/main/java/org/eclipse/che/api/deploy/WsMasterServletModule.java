@@ -44,7 +44,7 @@ public class WsMasterServletModule extends ServletModule {
             + "Origin,"
             + "Access-Control-Request-Method,"
             + "Access-Control-Request-Headers");
-    corsFilterParams.put("cors.support.credentials", "true");
+    corsFilterParams.put("cors.support.credentials", "false");
     // preflight cache is available for 10 minutes
     corsFilterParams.put("cors.preflight.maxage", "10");
     bind(CorsFilter.class).in(Singleton.class);
