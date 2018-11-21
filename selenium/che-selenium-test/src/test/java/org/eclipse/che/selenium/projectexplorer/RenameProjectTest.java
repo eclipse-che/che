@@ -12,8 +12,10 @@
 package org.eclipse.che.selenium.projectexplorer;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuFirstLevelItems.RENAME;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -21,15 +23,18 @@ import java.nio.file.Paths;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Andrey Chizhikov */
+@Test(groups = UNDER_REPAIR)
 public class RenameProjectTest {
   private static final String PROJECT_NAME = generate("project", 5);
   private static final String NEW_PROJECT_NAME = generate("new-project", 5);
@@ -40,26 +45,31 @@ public class RenameProjectTest {
   @Inject private TestWorkspace testWorkspace;
   @Inject private Menu menu;
   @Inject private Ide ide;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
+    // create project
     URL resource = getClass().getResource("/projects/default-spring-project");
     testProjectServiceClient.importProject(
         testWorkspace.getId(),
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
+
+    // open workspace and wait LS initialization
     ide.open(testWorkspace);
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void renameProjectTest() {
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
-
     // Rename project from context menu
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME);
+    projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(RENAME);
     askForValueDialog.waitFormToOpen();
     askForValueDialog.clearInput();
@@ -69,7 +79,15 @@ public class RenameProjectTest {
 
     // Wait that project renamed and folder has project type
     projectExplorer.waitItem(NEW_PROJECT_NAME);
-    projectExplorer.waitItemInvisibility(PROJECT_NAME);
+
+    // For ensuring of #12000 bug checking, folder with old name does nor appear immediately
+    WaitUtils.sleepQuietly(20);
+
+    try {
+      projectExplorer.waitItemInvisibility(PROJECT_NAME);
+    } catch (TimeoutException ex) {
+      fail("Known permanent issue: https://github.com/eclipse/che/issues/12000");
+    }
     projectExplorer.waitDefinedTypeOfFolder(NEW_PROJECT_NAME, PROJECT_FOLDER);
 
     // Test that the Rename project dialog is started from menu

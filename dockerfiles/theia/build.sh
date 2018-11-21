@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2018 Red Hat, Inc.
 # This program and the accompanying materials are made
@@ -13,5 +13,5 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 init --name:theia "$@"
 build
 if ! skip_tests; then
-  sh "${base_dir}"/e2e/build.sh "$@"
+  bash "${base_dir}"/e2e/build.sh "$@"
 fi
