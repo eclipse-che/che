@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
@@ -124,6 +125,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    */
   protected abstract Map<String, ? extends Machine> getInternalMachines()
       throws InfrastructureException;
+
+  public abstract List<? extends Command> getCommands() throws InfrastructureException;
 
   /**
    * Returns runtime status.

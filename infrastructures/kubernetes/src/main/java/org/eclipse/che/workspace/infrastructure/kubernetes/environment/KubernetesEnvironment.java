@@ -44,16 +44,13 @@ public class KubernetesEnvironment extends InternalEnvironment {
 
   public KubernetesEnvironment(KubernetesEnvironment k8sEnv) {
     this(
-        k8sEnv.getRecipe(),
-        k8sEnv.getMachines(),
-        k8sEnv.getWarnings(),
+        k8sEnv,
         k8sEnv.getPods(),
         k8sEnv.getServices(),
         k8sEnv.getIngresses(),
         k8sEnv.getPersistentVolumeClaims(),
         k8sEnv.getSecrets(),
         k8sEnv.getConfigMaps());
-    setAttributes(k8sEnv.getAttributes());
   }
 
   @Override

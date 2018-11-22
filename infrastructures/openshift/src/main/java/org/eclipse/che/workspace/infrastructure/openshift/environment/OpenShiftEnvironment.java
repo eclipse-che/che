@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -41,7 +42,20 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
     super(k8sEnv);
     this.routes = new HashMap<>();
     setType(TYPE);
-    setAttributes(k8sEnv.getAttributes());
+  }
+
+  public OpenShiftEnvironment(
+      InternalEnvironment internalEnvironment,
+      Map<String, Pod> pods,
+      Map<String, Service> services,
+      Map<String, Ingress> ingresses,
+      Map<String, PersistentVolumeClaim> pvcs,
+      Map<String, Secret> secrets,
+      Map<String, ConfigMap> configMaps,
+      Map<String, Route> routes) {
+    super(internalEnvironment, pods, services, ingresses, pvcs, secrets, configMaps);
+    this.routes = routes;
+    setType(TYPE);
   }
 
   public OpenShiftEnvironment(

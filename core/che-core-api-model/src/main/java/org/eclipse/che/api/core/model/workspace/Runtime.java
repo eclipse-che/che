@@ -13,6 +13,7 @@ package org.eclipse.che.api.core.model.workspace;
 
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -53,4 +54,10 @@ public interface Runtime {
    * constraints or default configuration values are used to boot it.
    */
   List<? extends Warning> getWarnings();
+
+  /**
+   * Returns commands which are related to runtime, when runtime doesn't contain commands returns
+   * empty list. It is optional, workspace may contain 0 or N commands.
+   */
+  List<? extends Command> getCommands();
 }

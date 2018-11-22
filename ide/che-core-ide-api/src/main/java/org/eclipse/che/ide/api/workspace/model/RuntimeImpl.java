@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.ide.api.workspace.model;
 
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -22,7 +23,9 @@ import java.util.Objects;
 import java.util.Optional;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.ide.api.command.CommandImpl;
 
 /** Data object for {@link Runtime}. */
 public class RuntimeImpl implements Runtime {
@@ -31,6 +34,7 @@ public class RuntimeImpl implements Runtime {
   private final String owner;
   private final String machineToken;
   private Map<String, MachineImpl> machines;
+  private List<CommandImpl> commands;
   private List<Warning> warnings;
 
   public RuntimeImpl(
@@ -38,6 +42,7 @@ public class RuntimeImpl implements Runtime {
       Map<String, ? extends Machine> machines,
       String owner,
       String machineToken,
+      List<? extends Command> commands,
       List<? extends Warning> warnings) {
     this.activeEnv = activeEnv;
     if (machines != null) {
@@ -52,6 +57,9 @@ public class RuntimeImpl implements Runtime {
     }
     this.owner = owner;
     this.machineToken = machineToken;
+    if (commands != null) {
+      this.commands = commands.stream().map(CommandImpl::new).collect(toCollection(ArrayList::new));
+    }
     if (warnings != null) {
       this.warnings = warnings.stream().map(WarningImpl::new).collect(toList());
     }
@@ -92,6 +100,14 @@ public class RuntimeImpl implements Runtime {
   }
 
   @Override
+  public List<CommandImpl> getCommands() {
+    if (commands == null) {
+      commands = new ArrayList<>();
+    }
+    return commands;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) return true;
     if (!(o instanceof RuntimeImpl)) return false;
@@ -99,12 +115,13 @@ public class RuntimeImpl implements Runtime {
     return Objects.equals(activeEnv, that.activeEnv)
         && Objects.equals(machines, that.machines)
         && Objects.equals(owner, that.owner)
+        && Objects.equals(commands, that.commands)
         && Objects.equals(warnings, that.warnings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(activeEnv, machines, owner, warnings);
+    return Objects.hash(activeEnv, machines, owner, commands, warnings);
   }
 
   @Override
@@ -118,6 +135,8 @@ public class RuntimeImpl implements Runtime {
         + '\''
         + ", owner="
         + owner
+        + ", commands="
+        + commands
         + ", warnings="
         + warnings
         + '}';

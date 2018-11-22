@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -633,6 +634,11 @@ public class InternalRuntimeTest {
 
     @Override
     protected Map<String, ? extends Machine> getInternalMachines() {
+      return null;
+    }
+
+    @Override
+    public List<? extends Command> getCommands() throws InfrastructureException {
       return null;
     }
 

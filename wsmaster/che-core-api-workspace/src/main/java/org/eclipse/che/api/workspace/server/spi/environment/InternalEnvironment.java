@@ -16,9 +16,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -34,11 +37,12 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author gazarenkov
  */
 public abstract class InternalEnvironment {
+  private String type;
   private InternalRecipe recipe;
   private Map<String, InternalMachineConfig> machines;
   private List<Warning> warnings;
   private Map<String, String> attributes;
-  private String type;
+  private List<CommandImpl> commands;
 
   protected InternalEnvironment() {}
 
@@ -48,6 +52,15 @@ public abstract class InternalEnvironment {
     this.machines = machines;
     this.warnings = warnings;
     this.type = recipe != null ? recipe.getType() : null;
+  }
+
+  protected InternalEnvironment(InternalEnvironment internalEnvironment) {
+    this.recipe = internalEnvironment.getRecipe();
+    this.type = recipe != null ? recipe.getType() : null;
+    this.machines = internalEnvironment.getMachines();
+    this.warnings = internalEnvironment.getWarnings();
+    this.attributes = internalEnvironment.getAttributes();
+    this.commands = internalEnvironment.getCommands();
   }
 
   /**
@@ -143,6 +156,22 @@ public abstract class InternalEnvironment {
   @Beta
   public InternalEnvironment setAttributes(Map<String, String> attributes) {
     this.attributes = attributes;
+    return this;
+  }
+
+  @Beta
+  public List<CommandImpl> getCommands() {
+    if (commands == null) {
+      commands = new ArrayList<>();
+    }
+    return commands;
+  }
+
+  @Beta
+  public InternalEnvironment setCommands(List<? extends Command> commands) {
+    if (commands != null) {
+      this.commands = commands.stream().map(CommandImpl::new).collect(Collectors.toList());
+    }
     return this;
   }
 }
