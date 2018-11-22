@@ -41,26 +41,7 @@
       }
     }
   ],
-  "environments": {
-    "default": {
-      "recipe": {
-        "type": "dockerimage",
-        "content": "eclipse/ubuntu_jdk8"
-      },
-      "machines": {
-        "dev-machine": {
-          "installers": [],
-          "servers": {},
-          "env": {},
-          "volumes": {},
-          "attributes": {
-            "memoryLimitBytes": "2147483648"
-          }
-        }
-      }
-    }
-  },
-  "defaultEnv": "default",
+  "environments": {},
   "name": "petclinic-dev-environment",
   "attributes": {
     "eclipse/maven-jdk8:1.0.0": "mvn-stack",

@@ -13,7 +13,6 @@ package org.eclipse.che.api.devfile.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
 
 import java.util.ArrayList;
@@ -29,10 +28,7 @@ import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
@@ -112,18 +108,6 @@ public class DevFileConverter {
         .getCommands()
         .forEach(command -> commands.addAll(devCommandToCommandImpls(devFile, command)));
     config.setCommands(commands);
-
-    // TODO: Add default environment. Remove when it will be possible
-    config.setDefaultEnv("default");
-    EnvironmentImpl environment = new EnvironmentImpl();
-    RecipeImpl recipe = new RecipeImpl();
-    recipe.setType("dockerimage");
-    recipe.setContent("eclipse/ubuntu_jdk8");
-    environment.setRecipe(recipe);
-    MachineConfigImpl machine = new MachineConfigImpl();
-    machine.setAttributes(singletonMap("memoryLimitBytes", "2147483648"));
-    environment.setMachines(singletonMap("dev-machine", machine));
-    config.setEnvironments(singletonMap("default", environment));
     return config;
   }
 
