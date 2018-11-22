@@ -44,18 +44,19 @@ public class MetricsServletModule extends ServletModule {
     try {
 
       ApplicationContextFacade acf = (ApplicationContextFacade) servletContext;
-      Field privateField = ApplicationContextFacade.class.getDeclaredField("context");
-      privateField.setAccessible(true);
-      ApplicationContext appContext = (ApplicationContext) privateField.get(acf);
+      Field applicationContextFacadeField =
+          ApplicationContextFacade.class.getDeclaredField("context");
+      applicationContextFacadeField.setAccessible(true);
+      ApplicationContext appContext = (ApplicationContext) applicationContextFacadeField.get(acf);
 
-      Field privateField2 = ApplicationContext.class.getDeclaredField("context");
-      privateField2.setAccessible(true);
-      StandardContext stdContext = (StandardContext) privateField2.get(appContext);
+      Field applicationContextField = ApplicationContext.class.getDeclaredField("context");
+      applicationContextField.setAccessible(true);
+      StandardContext stdContext = (StandardContext) applicationContextField.get(appContext);
       return stdContext.getManager();
 
     } catch (Exception e) {
       // maybe not in Tomcat?
-      LOG.error(e.getMessage(), e);
+      LOG.error("Unable to get catalina manager. Cause: {}", e.getMessage(), e);
     }
     return null;
   }
