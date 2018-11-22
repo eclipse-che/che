@@ -157,6 +157,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
     if (maxRamPerEnvMB < 0) {
       return;
     }
+    if (config.getEnvironments().isEmpty()) {
+      return;
+    }
     for (Map.Entry<String, ? extends Environment> envEntry : config.getEnvironments().entrySet()) {
       Environment env = envEntry.getValue();
       final long workspaceRam = environmentRamCalculator.calculate(env);
@@ -181,6 +184,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       String accountId, String namespace, WorkspaceConfig config, @Nullable String envName)
       throws NotFoundException, ServerException, ConflictException {
 
+    if (config.getEnvironments().isEmpty()) {
+      return;
+    }
     final Environment environment =
         config.getEnvironments().get(firstNonNull(envName, config.getDefaultEnv()));
     final ResourceImpl ramToUse =

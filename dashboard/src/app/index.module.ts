@@ -90,7 +90,7 @@ function keycloakInit(keycloakConfig: any, initOptions: any) {
       checkLoginIframe: false,
       useNonce: initOptions['useNonce'],
       scope: 'email profile',
-      redirectUri: initOptions['redirectUrl'];
+      redirectUri: initOptions['redirectUrl']
     }).success(() => {
       resolve(keycloak);
     }).error((error: any) => {

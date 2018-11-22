@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Helps to calculate amount of RAM defined in {@link Environment environment}
@@ -46,7 +47,10 @@ public class EnvironmentRamCalculator {
    * Parses (and fetches if needed) recipe of environment and sums RAM size of all machines in
    * environment in megabytes.
    */
-  public long calculate(Environment environment) throws ServerException {
+  public long calculate(@Nullable Environment environment) throws ServerException {
+    if (environment == null) {
+      return 0;
+    }
     try {
       return getInternalEnvironment(environment)
               .getMachines()
