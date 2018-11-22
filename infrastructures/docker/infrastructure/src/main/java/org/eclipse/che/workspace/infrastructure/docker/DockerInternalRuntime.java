@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -288,6 +289,11 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
         .entrySet()
         .stream()
         .collect(toMap(Map.Entry::getKey, e -> new MachineImpl(e.getValue())));
+  }
+
+  @Override
+  public List<? extends Command> getCommands() throws InfrastructureException {
+    return getContext().getEnvironment().getCommands();
   }
 
   @Override
