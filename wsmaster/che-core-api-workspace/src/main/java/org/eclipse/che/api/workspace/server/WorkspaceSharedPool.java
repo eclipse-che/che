@@ -28,6 +28,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
+import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +47,8 @@ public class WorkspaceSharedPool {
       @Named("che.workspace.pool.type") String poolType,
       @Named("che.workspace.pool.exact_size") @Nullable String exactSizeProp,
       @Named("che.workspace.pool.cores_multiplier") @Nullable String coresMultiplierProp,
-      Tracer tracer) {
+      @Nullable OptionalTracer optionalTracer) {
+
     ThreadFactory factory =
         new ThreadFactoryBuilder()
             .setNameFormat("WorkspaceSharedPool-%d")
@@ -55,7 +57,7 @@ public class WorkspaceSharedPool {
             .build();
     switch (poolType.toLowerCase()) {
       case "cached":
-        executor = new TracedExecutorService(Executors.newCachedThreadPool(factory), tracer);
+        executor = tracedIfPossible(Executors.newCachedThreadPool(factory), optionalTracer);
         break;
       case "fixed":
         Integer exactSize = exactSizeProp == null ? null : Ints.tryParse(exactSizeProp);
@@ -70,12 +72,22 @@ public class WorkspaceSharedPool {
             size *= coresMultiplier;
           }
         }
-        executor = new TracedExecutorService(Executors.newFixedThreadPool(size, factory), tracer);
+        executor = tracedIfPossible(Executors.newFixedThreadPool(size, factory), optionalTracer);
         break;
       default:
         throw new IllegalArgumentException(
             "The type of the pool '" + poolType + "' is not supported");
     }
+  }
+
+  private static ExecutorService tracedIfPossible(
+      ExecutorService service, @Nullable OptionalTracer optionalTracer) {
+    Tracer tracer = OptionalTracer.fromNullable(optionalTracer);
+    if (tracer != null) {
+      service = new TracedExecutorService(service, tracer);
+    }
+
+    return service;
   }
 
   /**

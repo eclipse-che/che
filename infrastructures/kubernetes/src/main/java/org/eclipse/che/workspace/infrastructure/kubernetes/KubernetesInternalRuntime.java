@@ -67,8 +67,10 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -116,7 +118,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
   private final RuntimeHangingDetector runtimeHangingDetector;
-  protected final Tracer tracer;
+  @Nullable protected final Tracer tracer;
   private Map<String, Span> machineStartupTraces;
 
   @Inject
@@ -139,7 +141,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
-      Tracer tracer,
+      @Nullable OptionalTracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace,
       @Assisted List<Warning> warnings) {
@@ -162,7 +164,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
-    this.tracer = tracer;
+    this.tracer = OptionalTracer.fromNullable(tracer);
   }
 
   @Override
@@ -729,6 +731,10 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   private void startTracingContainersStartup(Pod pod) {
+    if (tracer == null) {
+      return;
+    }
+
     for (Container container : pod.getSpec().getContainers()) {
       String machineName = Names.machineName(pod, container);
 
