@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.NO_ENVIRONMENT_RECIPE_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.mockito.ArgumentMatchers.any;
@@ -117,6 +118,53 @@ public class WorkspaceRuntimesTest {
             probeScheduler,
             statuses,
             lockService);
+  }
+
+  @Test
+  public void internalEnvironmentCreationShouldRespectNoEnvironmentCase() throws Exception {
+    InternalEnvironmentFactory<InternalEnvironment> noEnvFactory =
+        mock(InternalEnvironmentFactory.class);
+    runtimes =
+        new WorkspaceRuntimes(
+            eventService,
+            ImmutableMap.of(
+                TEST_ENVIRONMENT_TYPE, testEnvFactory, NO_ENVIRONMENT_RECIPE_TYPE, noEnvFactory),
+            infrastructure,
+            sharedPool,
+            workspaceDao,
+            dbInitializer,
+            probeScheduler,
+            statuses,
+            lockService);
+    InternalEnvironment expectedEnvironment = mock(InternalEnvironment.class);
+    when(noEnvFactory.create(eq(null))).thenReturn(expectedEnvironment);
+
+    InternalEnvironment actualEnvironment = runtimes.createInternalEnvironment(null, emptyMap());
+
+    assertEquals(actualEnvironment, expectedEnvironment);
+  }
+
+  @Test(
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp =
+          "InternalEnvironmentFactory is not configured for recipe type: 'not-supported-type'")
+  public void internalEnvironmentShouldThrowExceptionWhenNoEnvironmentFactoryFoundForRecipeType()
+      throws Exception {
+    EnvironmentImpl environment = new EnvironmentImpl();
+    environment.setRecipe(new RecipeImpl("not-supported-type", "", "", null));
+    runtimes.createInternalEnvironment(environment, emptyMap());
+  }
+
+  @Test(
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp =
+          "InternalEnvironmentFactory is not configured for recipe type: '"
+              + NO_ENVIRONMENT_RECIPE_TYPE
+              + "'")
+  public void
+      internalEnvironmentShouldThrowExceptionWhenNoEnvironmentFactoryFoundForNoEnvironmentWorkspaceCase()
+          throws Exception {
+    runtimes.createInternalEnvironment(null, emptyMap());
   }
 
   @Test

@@ -20,11 +20,13 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.NoEnvironmentFactory.NoEnvInternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -51,7 +53,10 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
     super(
         NAME,
         ImmutableSet.of(
-            OpenShiftEnvironment.TYPE, KubernetesEnvironment.TYPE, DockerImageEnvironment.TYPE),
+            OpenShiftEnvironment.TYPE,
+            KubernetesEnvironment.TYPE,
+            DockerImageEnvironment.TYPE,
+            Constants.NO_ENVIRONMENT_RECIPE_TYPE),
         eventService,
         internalEnvProvisioners);
     this.runtimeContextFactory = runtimeContextFactory;
@@ -72,15 +77,16 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
 
   private OpenShiftEnvironment asOpenShiftEnv(InternalEnvironment source)
       throws InfrastructureException {
-    if (source instanceof OpenShiftEnvironment) {
+    if (source instanceof NoEnvInternalEnvironment) {
+      return OpenShiftEnvironment.builder()
+          .setAttributes(source.getAttributes())
+          .setWarnings(source.getWarnings())
+          .build();
+    } else if (source instanceof OpenShiftEnvironment) {
       return (OpenShiftEnvironment) source;
-    }
-
-    if (source instanceof KubernetesEnvironment) {
+    } else if (source instanceof KubernetesEnvironment) {
       return new OpenShiftEnvironment((KubernetesEnvironment) source);
-    }
-
-    if (source instanceof DockerImageEnvironment) {
+    } else if (source instanceof DockerImageEnvironment) {
       KubernetesEnvironment k8sEnv =
           dockerImageEnvConverter.convert((DockerImageEnvironment) source);
       return new OpenShiftEnvironment(k8sEnv);

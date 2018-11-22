@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Copyright (c) 2018 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
@@ -12,5 +12,5 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 init --name:theia-e2e "$@"
 build
 if ! skip_tests; then
-  sh "${base_dir}"/test.sh "$@"
+  bash "${base_dir}"/test.sh "$@"
 fi

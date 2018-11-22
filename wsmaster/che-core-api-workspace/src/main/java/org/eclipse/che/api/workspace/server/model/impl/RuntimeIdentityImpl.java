@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.model.impl;
 
+import java.util.Objects;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 
 /** @author gazarenkov */
@@ -19,6 +20,10 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
   private final String workspaceId;
   private final String envName;
   private final String ownerId;
+
+  public RuntimeIdentityImpl(RuntimeIdentity id) {
+    this(id.getWorkspaceId(), id.getEnvName(), id.getOwnerId());
+  }
 
   public RuntimeIdentityImpl(String workspaceId, String envName, String ownerId) {
     this.workspaceId = workspaceId;
@@ -43,14 +48,16 @@ public final class RuntimeIdentityImpl implements RuntimeIdentity {
 
   @Override
   public int hashCode() {
-    return (workspaceId + envName).hashCode();
+    return Objects.hash(workspaceId, envName, ownerId);
   }
 
   @Override
   public boolean equals(Object obj) {
     if (!(obj instanceof RuntimeIdentityImpl)) return false;
     RuntimeIdentityImpl other = (RuntimeIdentityImpl) obj;
-    return workspaceId.equals(other.workspaceId) && envName.equals(other.envName);
+    return workspaceId.equals(other.workspaceId)
+        && Objects.equals(envName, other.envName)
+        && Objects.equals(ownerId, other.ownerId);
   }
 
   @Override

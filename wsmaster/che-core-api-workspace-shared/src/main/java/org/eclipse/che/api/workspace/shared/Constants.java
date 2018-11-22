@@ -160,5 +160,7 @@ public final class Constants {
 
   public static final String SUPPORTED_RECIPE_TYPES = "supportedRecipeTypes";
 
+  public static final String NO_ENVIRONMENT_RECIPE_TYPE = "no-environment";
+
   private Constants() {}
 }

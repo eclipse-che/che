@@ -70,7 +70,9 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
@@ -281,16 +283,19 @@ public class WorkspaceRuntimes {
    * @see WorkspaceStatus#RUNNING
    */
   public CompletableFuture<Void> startAsync(
-      Workspace workspace, String envName, Map<String, String> options)
+      Workspace workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
 
-    final EnvironmentImpl environment = copyEnv(workspace, envName);
     final String workspaceId = workspace.getId();
-
-    requireNonNull(environment, "Environment should not be null " + workspaceId);
-    requireNonNull(environment.getRecipe(), "Recipe should not be null " + workspaceId);
-    requireNonNull(
-        environment.getRecipe().getType(), "Recipe type should not be null " + workspaceId);
+    // Sidecar-based workspaces allowed not to have environments
+    EnvironmentImpl environment = null;
+    if (envName != null) {
+      environment = copyEnv(workspace, envName);
+      requireNonNull(environment, "Environment should not be null " + workspaceId);
+      requireNonNull(environment.getRecipe(), "Recipe should not be null " + workspaceId);
+      requireNonNull(
+          environment.getRecipe().getType(), "Recipe type should not be null " + workspaceId);
+    }
 
     if (isStartRefused.get()) {
       throw new ConflictException(
@@ -620,12 +625,15 @@ public class WorkspaceRuntimes {
               identity.getWorkspaceId(), identity.getEnvName()));
     }
 
-    Environment environment = workspace.getConfig().getEnvironments().get(identity.getEnvName());
-    if (environment == null) {
-      throw new ServerException(
-          format(
-              "Environment configuration is missing for the runtime '%s:%s'. Runtime won't be recovered",
-              identity.getWorkspaceId(), identity.getEnvName()));
+    Environment environment = null;
+    if (identity.getEnvName() != null) {
+      environment = workspace.getConfig().getEnvironments().get(identity.getEnvName());
+      if (environment == null) {
+        throw new ServerException(
+            format(
+                "Environment configuration is missing for the runtime '%s:%s'. Runtime won't be recovered",
+                identity.getWorkspaceId(), identity.getEnvName()));
+      }
     }
 
     InternalRuntime runtime;
@@ -785,10 +793,16 @@ public class WorkspaceRuntimes {
     return environmentFactories.keySet();
   }
 
-  private InternalEnvironment createInternalEnvironment(
-      Environment environment, Map<String, String> workspaceConfigAttributes)
+  @VisibleForTesting
+  InternalEnvironment createInternalEnvironment(
+      @Nullable Environment environment, Map<String, String> workspaceConfigAttributes)
       throws InfrastructureException, ValidationException, NotFoundException {
-    String recipeType = environment.getRecipe().getType();
+    String recipeType;
+    if (environment == null) {
+      recipeType = Constants.NO_ENVIRONMENT_RECIPE_TYPE;
+    } else {
+      recipeType = environment.getRecipe().getType();
+    }
     InternalEnvironmentFactory factory = environmentFactories.get(recipeType);
     if (factory == null) {
       throw new NotFoundException(
