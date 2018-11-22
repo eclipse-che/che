@@ -63,7 +63,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
   @Column(name = "description", columnDefinition = "TEXT")
   private String description;
 
-  @Column(name = "defaultenv", nullable = false)
+  @Column(name = "defaultenv", nullable = true)
   private String defaultEnv;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

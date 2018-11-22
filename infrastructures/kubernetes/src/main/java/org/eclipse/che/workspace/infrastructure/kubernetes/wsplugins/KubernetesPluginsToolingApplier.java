@@ -19,6 +19,7 @@ import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import java.util.Collection;
 import java.util.List;
@@ -49,6 +50,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
   private static final Set<String> validImagePullPolicies =
       Sets.newHashSet("Always", "Never", "IfNotPresent");
+  private static final String CHE_WORKSPACE_POD = "che-workspace-pod";
+
   private final String defaultSidecarMemoryLimitBytes;
   private final String sidecarImagePullPolicy;
   private final boolean isAuthEnabled;
@@ -74,9 +77,15 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) internalEnvironment;
 
     Map<String, Pod> pods = kubernetesEnvironment.getPods();
-    if (pods.size() != 1) {
-      throw new InfrastructureException(
-          "Che plugins tooling configuration can be applied to a workspace with one pod only");
+    switch (pods.size()) {
+      case 0:
+        addToolingPod(kubernetesEnvironment);
+        break;
+      case 1:
+        break;
+      default:
+        throw new InfrastructureException(
+            "Che plugins tooling configuration can be applied to a workspace with one pod only");
     }
     Pod pod = pods.values().iterator().next();
 
@@ -92,6 +101,19 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       // because it is the only workspace security implementation supported for now
       kubernetesEnvironment.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
     }
+  }
+
+  private void addToolingPod(KubernetesEnvironment kubernetesEnvironment) {
+    Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName(CHE_WORKSPACE_POD)
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+
+    kubernetesEnvironment.getPods().put(CHE_WORKSPACE_POD, pod);
   }
 
   private void populateWorkspaceEnvVars(

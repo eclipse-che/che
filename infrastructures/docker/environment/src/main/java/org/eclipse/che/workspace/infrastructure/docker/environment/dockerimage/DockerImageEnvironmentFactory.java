@@ -25,6 +25,7 @@ import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /** @author Sergii Leshchenko */
 @Singleton
@@ -46,6 +47,8 @@ public class DockerImageEnvironmentFactory
   @Override
   public DockerImageEnvironment create(Environment sourceEnv)
       throws InfrastructureException, ValidationException {
+    checkNotNull(
+        sourceEnv, "Null environment is not supported by docker image environment factory");
     if (sourceEnv.getRecipe().getLocation() != null) {
       // move image from location to content
       EnvironmentImpl envCopy = new EnvironmentImpl(sourceEnv);
@@ -58,8 +61,11 @@ public class DockerImageEnvironmentFactory
 
   @Override
   protected DockerImageEnvironment doCreate(
-      InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings)
+      @Nullable InternalRecipe recipe,
+      Map<String, InternalMachineConfig> machines,
+      List<Warning> warnings)
       throws InfrastructureException, ValidationException {
+    checkNotNull(recipe, "Null recipe is not supported by docker image environment factory");
     if (!DockerImageEnvironment.TYPE.equals(recipe.getType())) {
       throw new ValidationException(
           format(
@@ -79,6 +85,14 @@ public class DockerImageEnvironmentFactory
   private void addRamAttributes(Map<String, InternalMachineConfig> machines) {
     for (InternalMachineConfig machineConfig : machines.values()) {
       memoryProvisioner.provision(machineConfig, 0L, 0L);
+    }
+  }
+
+  private static void checkNotNull(
+      Object object, String errorMessageTemplate, Object... errorMessageParams)
+      throws ValidationException {
+    if (object == null) {
+      throw new ValidationException(format(errorMessageTemplate, errorMessageParams));
     }
   }
 }

@@ -135,6 +135,12 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
       return this;
     }
 
+    @Override
+    public Builder setAttributes(Map<String, String> attributes) {
+      this.attributes.putAll(attributes);
+      return this;
+    }
+
     public Builder setRoutes(Map<String, Route> route) {
       this.routes.putAll(route);
       return this;

@@ -111,7 +111,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl.MachineId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
-import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
@@ -866,7 +865,7 @@ public class KubernetesInternalRuntimeTest {
   }
 
   private static class MapBasedRuntimeStateCache implements KubernetesRuntimeStateCache {
-    private Map<RuntimeId, KubernetesRuntimeState> runtimesStates = new HashMap<>();
+    private Map<RuntimeIdentity, KubernetesRuntimeState> runtimesStates = new HashMap<>();
 
     @Override
     public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
@@ -881,14 +880,14 @@ public class KubernetesInternalRuntimeTest {
     @Override
     public void updateStatus(RuntimeIdentity runtimeId, WorkspaceStatus newStatus)
         throws InfrastructureException {
-      runtimesStates.get(new RuntimeId(runtimeId)).setStatus(newStatus);
+      runtimesStates.get(new RuntimeIdentityImpl(runtimeId)).setStatus(newStatus);
     }
 
     @Override
     public boolean updateStatus(
         RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
         throws InfrastructureException {
-      KubernetesRuntimeState state = runtimesStates.get(new RuntimeId(identity));
+      KubernetesRuntimeState state = runtimesStates.get(new RuntimeIdentityImpl(identity));
       if (predicate.test(state.getStatus())) {
         state.setStatus(newStatus);
         return true;
@@ -898,18 +897,18 @@ public class KubernetesInternalRuntimeTest {
 
     @Override
     public WorkspaceStatus getStatus(RuntimeIdentity runtimeId) throws InfrastructureException {
-      return runtimesStates.get(new RuntimeId(runtimeId)).getStatus();
+      return runtimesStates.get(new RuntimeIdentityImpl(runtimeId)).getStatus();
     }
 
     @Override
     public Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId)
         throws InfrastructureException {
-      return Optional.ofNullable(runtimesStates.get(new RuntimeId(runtimeId)));
+      return Optional.ofNullable(runtimesStates.get(new RuntimeIdentityImpl(runtimeId)));
     }
 
     @Override
     public void remove(RuntimeIdentity runtimeId) throws InfrastructureException {
-      runtimesStates.remove(new RuntimeId(runtimeId));
+      runtimesStates.remove(new RuntimeIdentityImpl(runtimeId));
     }
   }
 
