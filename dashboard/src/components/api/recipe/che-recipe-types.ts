@@ -38,13 +38,18 @@ class CheRecipeTypesStatic {
     return 'openshift';
   }
 
+  static get NOENVIRONMENT(): string {
+    return 'no-environment';
+  }
+
   static getValues(): Array<string> {
     return [
       CheRecipeTypesStatic.DOCKERFILE,
       CheRecipeTypesStatic.DOCKERIMAGE,
       CheRecipeTypesStatic.COMPOSE,
       CheRecipeTypesStatic.KUBERNETES,
-      CheRecipeTypesStatic.OPENSHIFT
+      CheRecipeTypesStatic.OPENSHIFT,
+      CheRecipeTypesStatic.NOENVIRONMENT
     ];
   }
 
