@@ -1082,7 +1082,7 @@ public class SeleniumWebDriverHelper {
   public boolean isVisible(By elementLocator) {
     try {
       return seleniumWebDriver.findElement(elementLocator).isDisplayed();
-    } catch (NoSuchElementException ex) {
+    } catch (NoSuchElementException | StaleElementReferenceException ex) {
       return false;
     }
   }
@@ -1096,7 +1096,7 @@ public class SeleniumWebDriverHelper {
   public boolean isVisible(WebElement webElement) {
     try {
       return webElement.isDisplayed();
-    } catch (NoSuchElementException ex) {
+    } catch (NoSuchElementException | StaleElementReferenceException ex) {
       return false;
     }
   }
