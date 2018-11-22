@@ -11,8 +11,11 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.NO_ENVIRONMENT_RECIPE_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
@@ -36,15 +39,19 @@ import static org.testng.AssertJUnit.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.core.model.workspace.Runtime;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -53,11 +60,13 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -68,6 +77,7 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.shared.dto.RuntimeIdentityDto;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
@@ -139,7 +149,8 @@ public class WorkspaceRuntimesTest {
     InternalEnvironment expectedEnvironment = mock(InternalEnvironment.class);
     when(noEnvFactory.create(eq(null))).thenReturn(expectedEnvironment);
 
-    InternalEnvironment actualEnvironment = runtimes.createInternalEnvironment(null, emptyMap());
+    InternalEnvironment actualEnvironment =
+        runtimes.createInternalEnvironment(null, emptyMap(), emptyList());
 
     assertEquals(actualEnvironment, expectedEnvironment);
   }
@@ -152,7 +163,7 @@ public class WorkspaceRuntimesTest {
       throws Exception {
     EnvironmentImpl environment = new EnvironmentImpl();
     environment.setRecipe(new RecipeImpl("not-supported-type", "", "", null));
-    runtimes.createInternalEnvironment(environment, emptyMap());
+    runtimes.createInternalEnvironment(environment, emptyMap(), emptyList());
   }
 
   @Test(
@@ -164,7 +175,7 @@ public class WorkspaceRuntimesTest {
   public void
       internalEnvironmentShouldThrowExceptionWhenNoEnvironmentFactoryFoundForNoEnvironmentWorkspaceCase()
           throws Exception {
-    runtimes.createInternalEnvironment(null, emptyMap());
+    runtimes.createInternalEnvironment(null, emptyMap(), emptyList());
   }
 
   @Test
@@ -386,8 +397,9 @@ public class WorkspaceRuntimesTest {
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
 
     ConcurrentHashMap<String, InternalRuntime<?>> runtimesStorage = new ConcurrentHashMap<>();
-    runtimesStorage.put(
-        "ws123", new TestInternalRuntime(context, machines, WorkspaceStatus.STARTING));
+    TestInternalRuntime testRuntime =
+        new TestInternalRuntime(context, machines, WorkspaceStatus.STARTING);
+    runtimesStorage.put("ws123", testRuntime);
     WorkspaceRuntimes localRuntimes =
         new WorkspaceRuntimes(
             runtimesStorage,
@@ -406,7 +418,7 @@ public class WorkspaceRuntimesTest {
 
     // then
     assertEquals(workspace.getStatus(), WorkspaceStatus.RUNNING);
-    assertEquals(workspace.getRuntime(), new RuntimeImpl("my-env", machines, "myId"));
+    assertEquals(workspace.getRuntime(), asRuntime(testRuntime));
   }
 
   @Test
@@ -415,15 +427,15 @@ public class WorkspaceRuntimesTest {
     RuntimeIdentity identity = new RuntimeIdentityImpl("workspace123", "my-env", "myId");
     mockWorkspace(identity);
 
-    lenient().when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
+    when(statuses.get("workspace123")).thenReturn(WorkspaceStatus.STARTING);
     RuntimeContext context = mockContext(identity);
     doReturn(context).when(infrastructure).prepare(eq(identity), any());
     ImmutableMap<String, Machine> machines =
         ImmutableMap.of("machine", new MachineImpl(emptyMap(), emptyMap(), MachineStatus.STARTING));
-    when(context.getRuntime())
-        .thenReturn(new TestInternalRuntime(context, machines, WorkspaceStatus.STARTING));
+    TestInternalRuntime testRuntime =
+        new TestInternalRuntime(context, machines, WorkspaceStatus.STARTING);
+    when(context.getRuntime()).thenReturn(testRuntime);
     doReturn(mock(InternalEnvironment.class)).when(testEnvFactory).create(any());
-    when(statuses.get(anyString())).thenReturn(WorkspaceStatus.STARTING);
     doReturn(ImmutableSet.of(identity)).when(infrastructure).getIdentities();
 
     // when
@@ -433,7 +445,7 @@ public class WorkspaceRuntimesTest {
 
     // then
     assertEquals(workspace.getStatus(), WorkspaceStatus.STARTING);
-    assertEquals(workspace.getRuntime(), new RuntimeImpl("my-env", machines, "myId"));
+    assertEquals(workspace.getRuntime(), asRuntime(testRuntime));
   }
 
   @Test
@@ -535,7 +547,7 @@ public class WorkspaceRuntimesTest {
 
     // then
     assertEquals(active.size(), 3);
-    assertTrue(active.containsAll(Arrays.asList("ws1", "ws2", "ws3")));
+    assertTrue(active.containsAll(asList("ws1", "ws2", "ws3")));
   }
 
   private RuntimeContext mockContext(RuntimeIdentity identity)
@@ -568,6 +580,15 @@ public class WorkspaceRuntimesTest {
     return workspace;
   }
 
+  private Runtime asRuntime(TestInternalRuntime internalRuntime) throws InfrastructureException {
+    return new RuntimeImpl(
+        internalRuntime.getActiveEnv(),
+        internalRuntime.getMachines(),
+        internalRuntime.getOwner(),
+        internalRuntime.getCommands(),
+        internalRuntime.getWarnings());
+  }
+
   private static class TestInfrastructure extends RuntimeInfrastructure {
 
     public TestInfrastructure() {
@@ -575,7 +596,7 @@ public class WorkspaceRuntimesTest {
     }
 
     public TestInfrastructure(String... types) {
-      super("test", Arrays.asList(types), null, emptySet());
+      super("test", asList(types), null, emptySet());
     }
 
     @Override
@@ -587,11 +608,27 @@ public class WorkspaceRuntimesTest {
   private static class TestInternalRuntime extends InternalRuntime<RuntimeContext> {
 
     final Map<String, Machine> machines;
+    final List<? extends Command> commands;
+
+    TestInternalRuntime(
+        RuntimeContext context,
+        Map<String, Machine> machines,
+        List<? extends Command> commands,
+        List<? extends Warning> warnings,
+        WorkspaceStatus status) {
+      super(context, null, new ArrayList<>(warnings), status);
+      this.commands = commands;
+      this.machines = machines;
+    }
 
     TestInternalRuntime(
         RuntimeContext context, Map<String, Machine> machines, WorkspaceStatus status) {
-      super(context, null, null, status);
-      this.machines = machines;
+      this(
+          context,
+          machines,
+          singletonList(createCommand()),
+          singletonList(createWarning()),
+          status);
     }
 
     TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {
@@ -608,6 +645,11 @@ public class WorkspaceRuntimesTest {
     }
 
     @Override
+    public List<? extends Command> getCommands() throws InfrastructureException {
+      return commands;
+    }
+
+    @Override
     public Map<String, String> getProperties() {
       return emptyMap();
     }
@@ -621,5 +663,13 @@ public class WorkspaceRuntimesTest {
     protected void internalStart(Map startOptions) throws InfrastructureException {
       throw new UnsupportedOperationException();
     }
+  }
+
+  private static CommandImpl createCommand() {
+    return new CommandImpl(NameGenerator.generate("command-", 5), "echo Hello", "custom");
+  }
+
+  private static WarningImpl createWarning() {
+    return new WarningImpl(123, "configuration parameter `123` is ignored");
   }
 }
