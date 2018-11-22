@@ -38,7 +38,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl.MachineId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
-import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl.ServerId;
 import org.h2.Driver;
@@ -65,7 +64,6 @@ public class JpaTckModule extends TckModule {
                 CommandImpl.class,
                 AccountImpl.class,
                 KubernetesRuntimeState.class,
-                RuntimeId.class,
                 KubernetesMachineImpl.class,
                 MachineId.class,
                 KubernetesServerImpl.class,

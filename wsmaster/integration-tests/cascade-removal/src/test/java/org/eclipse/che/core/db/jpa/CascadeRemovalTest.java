@@ -185,7 +185,6 @@ public class CascadeRemovalTest {
                             SshPairImpl.class,
                             VolumeImpl.class,
                             KubernetesRuntimeState.class,
-                            KubernetesRuntimeState.RuntimeId.class,
                             KubernetesMachineImpl.class,
                             KubernetesMachineImpl.MachineId.class,
                             KubernetesServerImpl.class,

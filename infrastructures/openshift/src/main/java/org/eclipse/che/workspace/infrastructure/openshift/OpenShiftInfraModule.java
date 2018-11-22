@@ -22,12 +22,14 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import org.eclipse.che.api.system.server.ServiceTermination;
+import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
@@ -73,6 +75,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     factories.addBinding(OpenShiftEnvironment.TYPE).to(OpenShiftEnvironmentFactory.class);
     factories.addBinding(KubernetesEnvironment.TYPE).to(KubernetesEnvironmentFactory.class);
     factories.addBinding(DockerImageEnvironment.TYPE).to(DockerImageEnvironmentFactory.class);
+    factories.addBinding(Constants.NO_ENVIRONMENT_RECIPE_TYPE).to(NoEnvironmentFactory.class);
 
     bind(RuntimeInfrastructure.class).to(OpenShiftInfrastructure.class);
 

@@ -143,7 +143,7 @@ public class WorkspaceValidatorTest {
   @Test(
       expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp = "Workspace default environment name required")
-  public void shouldFailValidationIfDefaultEnvNameIsNull() throws Exception {
+  public void shouldFailValidationOfChe6WSIfDefaultEnvNameIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.setDefaultEnv(null);
 
@@ -153,9 +153,20 @@ public class WorkspaceValidatorTest {
   @Test(
       expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp = "Workspace default environment name required")
-  public void shouldFailValidationIfDefaultEnvNameIsEmpty() throws Exception {
+  public void shouldFailValidationOfChe6WSIfDefaultEnvNameIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.setDefaultEnv("");
+
+    wsValidator.validateConfig(config);
+  }
+
+  @Test
+  public void shouldNotFailValidationOfChe7WSIfDefaultEnvNameIsNullAndNoEnvIsPresent()
+      throws Exception {
+    final WorkspaceConfigDto config = createConfig();
+    config.setDefaultEnv(null);
+    config.getEnvironments().clear();
+    config.getAttributes().put(Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "something");
 
     wsValidator.validateConfig(config);
   }
@@ -370,7 +381,7 @@ public class WorkspaceValidatorTest {
                     .withType("type")
                     .withContent("content")
                     .withContentType("content type"));
-    workspaceConfigDto.setEnvironments(singletonMap("dev-env", env));
+    workspaceConfigDto.setEnvironments(new HashMap<>(singletonMap("dev-env", env)));
 
     List<CommandDto> commandDtos = new ArrayList<>();
     commandDtos.add(

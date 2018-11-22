@@ -20,7 +20,6 @@ import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ER
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.WARNING_OVERVIEW;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -44,7 +43,6 @@ import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Andrey Chizhikov */
 public class CheckErrorsWarningsTabTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CheckErrorsWarningsTabTest.class.getSimpleName(), 4);
@@ -63,63 +61,85 @@ public class CheckErrorsWarningsTabTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    URL resource = getClass().getResource("/projects/prefs-spring-project");
+    final URL resource = getClass().getResource("/projects/prefs-spring-project");
+    final URL embedCodeFilePath = getClass().getResource("embed-code");
+    final String embedCode = readFileToString(embedCodeFilePath);
+
+    // import project
     testProjectServiceClient.importProject(
         workspace.getId(),
         Paths.get(resource.toURI()),
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
+
+    // open workspace
     ide.open(workspace);
+    projectExplorer.waitItem(PROJECT_NAME);
+    notificationsPopupPanel.waitProgressPopupPanelClose();
+
+    // prepare file for testing
+    testProjectServiceClient.updateFile(
+        workspace.getId(), PATH_TO_CLASS_IN_SPRING_PACKAGE, embedCode);
+
+    // expand project explorer tree and wait LS init
+    projectExplorer.quickExpandWithJavaScript();
+    loader.waitOnClosed();
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void errorsWarningTest() throws Exception {
+    final String expectedTabTitle = "AppController";
     final URL errorsWarningFilePath = getClass().getResource("errors-warnings");
-    final URL embedCodeFilePath = getClass().getResource("embed-code");
+    final List<String> expectedErrorsWarningsList = readFile(errorsWarningFilePath);
 
-    List<String> expectedErrorsWarningsList = readFile(errorsWarningFilePath);
-    String embedCode = readFileToString(embedCodeFilePath);
-    projectExplorer.waitItem(PROJECT_NAME);
-    notificationsPopupPanel.waitProgressPopupPanelClose();
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
+    // open file
+    projectExplorer.openItemByVisibleNameInExplorer(expectedTabTitle + ".java");
+    editor.waitTabIsPresent(expectedTabTitle);
+    editor.waitTabSelection(0, expectedTabTitle);
     editor.waitActive();
-    loader.waitOnClosed();
-    editor.waitActive();
-    editor.deleteAllContent();
-    editor.typeTextIntoEditorWithoutDelayForSaving(embedCode);
-    loader.waitOnClosed();
-    editor.removeLineAndAllAfterIt(105);
 
+    // check markers default settings
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     preferences.waitPreferencesForm();
     preferences.waitMenuInCollapsedDropdown(Preferences.DropDownJavaCompilerMenu.ERRORS_WARNINGS);
     preferences.selectDroppedMenuByName(Preferences.DropDownJavaCompilerMenu.ERRORS_WARNINGS);
-    preferences.getItemsFromErrorWarningsWidget();
     assertEquals(preferences.getItemsFromErrorWarningsWidget(), expectedErrorsWarningsList);
-
     preferences.close();
     consoles.closeProcessesArea();
+
+    // change and check markers settings for displaying warnings
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.WARNING);
     editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
-    assertTrue(editor.getMarkersQuantity(WARNING_OVERVIEW) >= 12);
-    assertEquals(editor.getMarkersQuantity(WARNING), 22);
+    waitWarningMarkersQuantity();
 
+    // change and check markers settings for displaying errors
     editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.ERROR);
-    assertEquals(editor.getMarkersQuantity(ERROR_OVERVIEW), 12);
-    assertEquals(editor.getMarkersQuantity(ERROR), 22);
-    editor.waitAnnotationsAreNotPresent(WARNING_OVERVIEW);
-    assertTrue(editor.getMarkersQuantity(ERROR_OVERVIEW) >= 12);
-    assertEquals(editor.getMarkersQuantity(ERROR), 22);
+    waitErrorMarkersQuantity();
 
+    // change and check markers settings for ignoring all markers
+    editor.waitAnnotationsAreNotPresent(WARNING_OVERVIEW);
     menu.runCommand(TestMenuCommandsConstants.Profile.PROFILE_MENU, PREFERENCES);
     changeAllSettingsInErrorsWarningsTab(Preferences.DropDownValueForErrorWaitingWidget.IGNORE);
     editor.waitAnnotationsAreNotPresent(ERROR_OVERVIEW);
     editor.waitAnnotationsAreNotPresent(WARNING_OVERVIEW);
+  }
+
+  private void waitWarningMarkersQuantity() {
+    // browser window resolution a bit different on local mode and on CI
+    // according to this different count of markers are displayed
+    editor.waitMarkersQuantityBetween(WARNING_OVERVIEW, 12, 13);
+    editor.waitMarkersQuantityBetween(WARNING, 22, 24);
+  }
+
+  private void waitErrorMarkersQuantity() {
+    // browser window resolution a bit different on local mode and on CI
+    // according to this different count of markers are displayed
+    editor.waitMarkersQuantityBetween(ERROR_OVERVIEW, 12, 13);
+    editor.waitMarkersQuantityBetween(ERROR, 22, 24);
   }
 
   private void changeAllSettingsInErrorsWarningsTab(
