@@ -37,6 +37,7 @@ interface ICHELicenseResource<T> extends ng.resource.IResourceClass<T> {
   deleteProject: any;
   stopWorkspace: any;
   startWorkspace: any;
+  startWorkspaceWithNoEnvironment: any;
   startTemporaryWorkspace: any;
   addCommand: any;
   getSettings: () => ng.resource.IResource<IWorkspaceSettings>;
@@ -141,6 +142,7 @@ export class CheWorkspace {
         deleteProject: {method: 'DELETE', url: '/api/workspace/:workspaceId/project/:path'},
         stopWorkspace: {method: 'DELETE', url: '/api/workspace/:workspaceId/runtime'},
         startWorkspace: {method: 'POST', url: '/api/workspace/:workspaceId/runtime?environment=:envName'},
+        startWorkspaceWithNoEnvironment: {method: 'POST', url: '/api/workspace/:workspaceId/runtime'},
         startTemporaryWorkspace: {method: 'POST', url: '/api/workspace/runtime?temporary=true'},
         addCommand: {method: 'POST', url: '/api/workspace/:workspaceId/command'},
         getSettings: {method: 'GET', url: '/api/workspace/settings'}
@@ -534,16 +536,16 @@ export class CheWorkspace {
   /**
    * Starts the given workspace by specifying the ID and the environment name
    * @param workspaceId the workspace ID
-   * @param envName the name of the environment
+   * @param envName the name of the environment (optional)
    * @returns {ng.IPromise<any>} promise
    */
-  startWorkspace(workspaceId: string, envName: string): ng.IPromise<any> {
+  startWorkspace(workspaceId: string, envName?: string): ng.IPromise<any> {
     const workspacePromisesKey = 'startWorkspace' + workspaceId;
     if (this.workspacePromises.has(workspacePromisesKey)) {
       return this.workspacePromises.get(workspacePromisesKey);
     }
 
-    const promise = this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName: envName}, {}).$promise;
+    const promise = envName ? this.remoteWorkspaceAPI.startWorkspace({workspaceId: workspaceId, envName: envName}, {}).$promise : this.remoteWorkspaceAPI.startWorkspaceWithNoEnvironment({workspaceId: workspaceId}, {}).$promise;
     this.workspacePromises.set(workspacePromisesKey, promise);
     promise.finally(() => {
       this.workspacePromises.delete(workspacePromisesKey);

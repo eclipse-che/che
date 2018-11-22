@@ -46,7 +46,7 @@ export class WorkspacesService {
     envName = envName || workspace.config.defaultEnv;
 
     const supportedRecipeTypes = this.cheWorkspace.getSupportedRecipeTypes(),
-      envRecipeType = workspace.config.environments[envName].recipe.type;
+      envRecipeType = envName ? workspace.config.environments[envName].recipe.type : 'no-environment';
 
     return supportedRecipeTypes.indexOf(envRecipeType) !== -1;
   }
