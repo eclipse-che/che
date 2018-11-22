@@ -18,11 +18,27 @@ import static org.eclipse.che.api.languageserver.LanguageServiceUtils.*;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Singleton;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.*;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -111,7 +127,7 @@ public class TextDocumentService {
   private final FindServer findServer;
   private final RequestHandlerConfigurator requestHandler;
   private final FsManager fsManager;
-  private final LsRootAwarePathTransformer lsRootAwarePathTransformer;
+  private final LanguageServerPathTransformer languageServerPathTransformer;
   private final LsParamsCloner lsParamsCloner;
 
   @Inject
@@ -119,12 +135,12 @@ public class TextDocumentService {
       FindServer findServer,
       RequestHandlerConfigurator requestHandler,
       FsManager fsManager,
-      LsRootAwarePathTransformer lsRootAwarePathTransformer,
+      LanguageServerPathTransformer languageServerPathTransformer,
       LsParamsCloner lsParamsCloner) {
     this.findServer = findServer;
     this.requestHandler = requestHandler;
     this.fsManager = fsManager;
-    this.lsRootAwarePathTransformer = lsRootAwarePathTransformer;
+    this.languageServerPathTransformer = languageServerPathTransformer;
     this.lsParamsCloner = lsParamsCloner;
   }
 
@@ -208,7 +224,7 @@ public class TextDocumentService {
           public CompletableFuture<List<Either<Command, CodeAction>>> start(
               ExtendedLanguageServer element) {
             CodeActionParams clonedParams = lsParamsCloner.clone(params);
-            URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
             clonedParams.getTextDocument().setUri(uri.toString());
 
             return element.getTextDocumentService().codeAction(clonedParams);
@@ -252,7 +268,7 @@ public class TextDocumentService {
           public CompletableFuture<Either<List<CompletionItem>, CompletionList>> start(
               ExtendedLanguageServer element) {
             CompletionParams clonedCompletionParams = lsParamsCloner.clone(completionParams);
-            URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
             clonedCompletionParams.getTextDocument().setUri(uri.toString());
 
             return element.getTextDocumentService().completion(clonedCompletionParams);
@@ -308,7 +324,7 @@ public class TextDocumentService {
               ExtendedLanguageServer element) {
             DocumentSymbolParams clonedDocumentSymbolParams =
                 lsParamsCloner.clone(documentSymbolParams);
-            URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
             clonedDocumentSymbolParams.getTextDocument().setUri(uri.toString());
             return element.getTextDocumentService().documentSymbol(clonedDocumentSymbolParams);
           }
@@ -326,7 +342,7 @@ public class TextDocumentService {
                     si.getLocation().setUri(removePrefixUri(si.getLocation().getUri()));
                     result.add(new SymbolInformationDto(si));
                   } else {
-                    URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+                    URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
                     result.addAll(convertDocumentSymbol(o.getRight(), uri.toString()));
                   }
                 });
@@ -367,7 +383,7 @@ public class TextDocumentService {
           @Override
           public CompletableFuture<List<? extends Location>> start(ExtendedLanguageServer element) {
             ReferenceParams clonedReferenceParams = lsParamsCloner.clone(referenceParams);
-            URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
             clonedReferenceParams.getTextDocument().setUri(uri.toString());
             return element.getTextDocumentService().references(clonedReferenceParams);
           }
@@ -404,7 +420,7 @@ public class TextDocumentService {
           public CompletableFuture<List<? extends Location>> start(ExtendedLanguageServer element) {
             TextDocumentPositionParams clonedTextDocumentPositionParams =
                 lsParamsCloner.clone(textDocumentPositionParams);
-            URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
             clonedTextDocumentPositionParams.getTextDocument().setUri(uri.toString());
             return element.getTextDocumentService().definition(clonedTextDocumentPositionParams);
           }
@@ -464,7 +480,7 @@ public class TextDocumentService {
           @Override
           public CompletableFuture<Hover> start(ExtendedLanguageServer element) {
             TextDocumentPositionParams clonedPositionParams = lsParamsCloner.clone(positionParams);
-            URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
             clonedPositionParams.getTextDocument().setUri(uri.toString());
 
             return element.getTextDocumentService().hover(clonedPositionParams);
@@ -532,7 +548,7 @@ public class TextDocumentService {
           @Override
           public CompletableFuture<SignatureHelp> start(ExtendedLanguageServer element) {
             TextDocumentPositionParams clonedPositionParams = lsParamsCloner.clone(positionParams);
-            URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
             clonedPositionParams.getTextDocument().setUri(uri.toString());
 
             return element.getTextDocumentService().signatureHelp(clonedPositionParams);
@@ -563,7 +579,7 @@ public class TextDocumentService {
               .findFirst();
       if (serverOptional.isPresent()) {
         String lsId = serverOptional.get().getId();
-        URI uri = lsRootAwarePathTransformer.toFsUri(lsId, wsPath);
+        URI uri = languageServerPathTransformer.toFsURI(lsId, wsPath);
         documentFormattingParams.getTextDocument().setUri(uri.toString());
         return serverOptional
             .get()
@@ -593,7 +609,7 @@ public class TextDocumentService {
               .findFirst();
       if (serverOptional.isPresent()) {
         String lsId = serverOptional.get().getId();
-        URI uri = lsRootAwarePathTransformer.toFsUri(lsId, wsPath);
+        URI uri = languageServerPathTransformer.toFsURI(lsId, wsPath);
         documentRangeFormattingParams.getTextDocument().setUri(uri.toString());
 
         return serverOptional
@@ -625,7 +641,7 @@ public class TextDocumentService {
               .findFirst();
       if (serverOptional.isPresent()) {
         String lsId = serverOptional.get().getId();
-        URI uri = lsRootAwarePathTransformer.toFsUri(lsId, wsPath);
+        URI uri = languageServerPathTransformer.toFsURI(lsId, wsPath);
         documentOnTypeFormattingParams.getTextDocument().setUri(uri.toString());
 
         return serverOptional
@@ -650,7 +666,7 @@ public class TextDocumentService {
         .byPath(wsPath)
         .forEach(
             server -> {
-              URI uri = lsRootAwarePathTransformer.toFsUri(server.getId(), wsPath);
+              URI uri = languageServerPathTransformer.toFsURI(server.getId(), wsPath);
               DidChangeTextDocumentParams clonedDidChangeTextDocumentParams =
                   lsParamsCloner.clone(didChangeTextDocumentParams);
               clonedDidChangeTextDocumentParams.getTextDocument().setUri(uri.toString());
@@ -664,7 +680,7 @@ public class TextDocumentService {
         .byPath(wsPath)
         .forEach(
             server -> {
-              URI uri = lsRootAwarePathTransformer.toFsUri(server.getId(), wsPath);
+              URI uri = languageServerPathTransformer.toFsURI(server.getId(), wsPath);
               DidOpenTextDocumentParams clonedOpenTextDocumentParams =
                   lsParamsCloner.clone(openTextDocumentParams);
               clonedOpenTextDocumentParams.getTextDocument().setUri(uri.toString());
@@ -678,7 +694,7 @@ public class TextDocumentService {
         .byPath(wsPath)
         .forEach(
             server -> {
-              URI uri = lsRootAwarePathTransformer.toFsUri(server.getId(), wsPath);
+              URI uri = languageServerPathTransformer.toFsURI(server.getId(), wsPath);
               DidCloseTextDocumentParams clonedDidCloseTextDocumentParams =
                   lsParamsCloner.clone(didCloseTextDocumentParams);
               clonedDidCloseTextDocumentParams.getTextDocument().setUri(uri.toString());
@@ -692,7 +708,7 @@ public class TextDocumentService {
         .byPath(wsPath)
         .forEach(
             server -> {
-              URI uri = lsRootAwarePathTransformer.toFsUri(server.getId(), wsPath);
+              URI uri = languageServerPathTransformer.toFsURI(server.getId(), wsPath);
               DidSaveTextDocumentParams clonedDidSaveTextDocumentParams =
                   lsParamsCloner.clone(didSaveTextDocumentParams);
               clonedDidSaveTextDocumentParams.getTextDocument().setUri(uri.toString());
@@ -733,7 +749,7 @@ public class TextDocumentService {
                             ExtendedLanguageServer element) {
                           TextDocumentPositionParams clonedTextDocumentPositionParams =
                               lsParamsCloner.clone(textDocumentPositionParams);
-                          URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+                          URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
                           clonedTextDocumentPositionParams.getTextDocument().setUri(uri.toString());
 
                           return element
@@ -786,7 +802,7 @@ public class TextDocumentService {
           @Override
           public CompletableFuture<WorkspaceEdit> start(ExtendedLanguageServer element) {
             RenameParams clonedRenameParams = lsParamsCloner.clone(renameParams);
-            URI uri = lsRootAwarePathTransformer.toFsUri(element.getId(), wsPath);
+            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
             clonedRenameParams.getTextDocument().setUri(uri.toString());
 
             return element.getTextDocumentService().rename(clonedRenameParams);
@@ -918,7 +934,7 @@ public class TextDocumentService {
               .filter(s -> s.getServer() instanceof FileContentAccess)
               .findFirst();
       if (serverOptional.isPresent()) {
-        URI uri = lsRootAwarePathTransformer.toFsUri(serverOptional.get().getId(), wsPath);
+        URI uri = languageServerPathTransformer.toFsURI(serverOptional.get().getId(), wsPath);
 
         return ((FileContentAccess) serverOptional.get().getServer())
             .getFileContent(uri.toString())

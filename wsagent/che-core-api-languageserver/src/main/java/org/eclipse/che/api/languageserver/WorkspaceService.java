@@ -55,7 +55,7 @@ public class WorkspaceService {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceService.class);
   private final FsManager fsManager;
-  private LanguageServerPathTransformer languageServerPathTransformer;
+  private final LanguageServerPathTransformer languageServerPathTransformer;
   private final FindServer findServer;
   private final RequestHandlerConfigurator requestHandler;
 
@@ -153,7 +153,7 @@ public class WorkspaceService {
             locations.forEach(
                 location -> {
                   String uri = location.getLocation().getUri();
-                  String wsPath = languageServerPathTransformer.toWsPath(uri, server.getId());
+                  String wsPath = languageServerPathTransformer.toWsPath(server.getId(), uri);
                   location.getLocation().setUri(wsPath);
                   result.add(new SymbolInformationDto(location));
                 });

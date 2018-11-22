@@ -36,7 +36,7 @@ class PublishDiagnosticsParamsJsonRpcTransmitter {
 
   @Inject
   private void subscribe(
-      LsRootAwarePathTransformer lsRootAwarePathTransformer,
+      LanguageServerPathTransformer languageServerPathTransformer,
       EventService eventService,
       RequestTransmitter requestTransmitter) {
     eventService.subscribe(
@@ -45,7 +45,8 @@ class PublishDiagnosticsParamsJsonRpcTransmitter {
           if (params.getUri() != null) {
             try {
               URI uri = new URI(params.getUri());
-              String wsPath = lsRootAwarePathTransformer.toWsPath(event.getLanguageServerId(), uri);
+              String wsPath =
+                  languageServerPathTransformer.toWsPath(event.getLanguageServerId(), uri);
               params.setUri(wsPath);
               endpointIds.forEach(
                   endpointId ->

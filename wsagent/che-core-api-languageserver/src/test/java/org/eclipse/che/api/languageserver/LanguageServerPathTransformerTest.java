@@ -54,7 +54,7 @@ public class LanguageServerPathTransformerTest {
 
   @Test
   public void shouldResolveCustomUri() throws Exception {
-    URI actualUri = languageServerPathTransformer.resolve(PROJECT_NAME, CORRECT_ID);
+    URI actualUri = languageServerPathTransformer.toFsURI(CORRECT_ID, PROJECT_NAME);
 
     URI expectedURI = new URI("file:" + CUSTOM_PROJECTS_ROOT + "/" + PROJECT_NAME);
 
@@ -63,7 +63,7 @@ public class LanguageServerPathTransformerTest {
 
   @Test
   public void shouldResolveDefaultUri() throws Exception {
-    URI actualUri = languageServerPathTransformer.resolve("project", INCORRECT_ID);
+    URI actualUri = languageServerPathTransformer.toFsURI(INCORRECT_ID, "project");
 
     URI expectedURI = new URI("file:" + DEFAULT_PROJECTS_ROOT + "/" + PROJECT_NAME);
 
@@ -74,7 +74,7 @@ public class LanguageServerPathTransformerTest {
   public void shouldTransformUriToWsPathForCustomProjectsRoot() throws Exception {
     URI uri = new URI("file:" + CUSTOM_PROJECTS_ROOT + "/" + PROJECT_NAME);
 
-    String actualPath = languageServerPathTransformer.toWsPath(uri, CORRECT_ID);
+    String actualPath = languageServerPathTransformer.toWsPath(CORRECT_ID, uri);
 
     String expectedPath = "/" + PROJECT_NAME;
 
@@ -85,7 +85,7 @@ public class LanguageServerPathTransformerTest {
   public void shouldTransformUriToWsPathForDefaultProjectsRoot() throws Exception {
     URI uri = new URI("file:" + DEFAULT_PROJECTS_ROOT + "/" + PROJECT_NAME);
 
-    String actualPath = languageServerPathTransformer.toWsPath(uri, INCORRECT_ID);
+    String actualPath = languageServerPathTransformer.toWsPath(INCORRECT_ID, uri);
 
     String expectedPath = "/" + PROJECT_NAME;
 
@@ -106,56 +106,56 @@ public class LanguageServerPathTransformerTest {
   @Test
   public void shouldBeAbsoluteForAbsoluteStringPathsWithCustomRoot() {
     String path = CUSTOM_PROJECTS_ROOT + "/" + PROJECT_NAME;
-    boolean isAbsolute = languageServerPathTransformer.isAbsolute(path, CORRECT_ID);
+    boolean isAbsolute = languageServerPathTransformer.isAbsolute(CORRECT_ID, path);
     assertTrue(isAbsolute);
   }
 
   @Test
   public void shouldBeAbsoluteForAbsoluteUriPathsWithCustomRoot() throws Exception {
     URI uri = new URI("file:" + CUSTOM_PROJECTS_ROOT + "/" + PROJECT_NAME);
-    boolean isAbsolute = languageServerPathTransformer.isAbsolute(uri, CORRECT_ID);
+    boolean isAbsolute = languageServerPathTransformer.isAbsolute(CORRECT_ID, uri);
     assertTrue(isAbsolute);
   }
 
   @Test
   public void shouldBeAbsoluteForAbsoluteStringPathsWithDefaultRoot() {
     String path = DEFAULT_PROJECTS_ROOT + "/" + PROJECT_NAME;
-    boolean isAbsolute = languageServerPathTransformer.isAbsolute(path, INCORRECT_ID);
+    boolean isAbsolute = languageServerPathTransformer.isAbsolute(INCORRECT_ID, path);
     assertTrue(isAbsolute);
   }
 
   @Test
   public void shouldBeAbsoluteForAbsoluteUriPathsWithDefaultRoot() throws Exception {
     URI uri = new URI("file:" + DEFAULT_PROJECTS_ROOT + "/" + PROJECT_NAME);
-    boolean isAbsolute = languageServerPathTransformer.isAbsolute(uri, INCORRECT_ID);
+    boolean isAbsolute = languageServerPathTransformer.isAbsolute(INCORRECT_ID, uri);
     assertTrue(isAbsolute);
   }
 
   @Test
   public void shouldNotBeAbsoluteForAbsoluteStringPathsWithCustomRoot() {
     String path = "/user/projects/project";
-    boolean isAbsolute = languageServerPathTransformer.isAbsolute(path, CORRECT_ID);
+    boolean isAbsolute = languageServerPathTransformer.isAbsolute(CORRECT_ID, path);
     assertFalse(isAbsolute);
   }
 
   @Test
   public void shouldNotBeAbsoluteForAbsoluteUriPathsWithCustomRoot() throws Exception {
     URI uri = new URI("file:/user/projects/project");
-    boolean isAbsolute = languageServerPathTransformer.isAbsolute(uri, CORRECT_ID);
+    boolean isAbsolute = languageServerPathTransformer.isAbsolute(CORRECT_ID, uri);
     assertFalse(isAbsolute);
   }
 
   @Test
   public void shouldNotBeAbsoluteForAbsoluteStringPathsWithDefaultRoot() {
     String path = "/project";
-    boolean isAbsolute = languageServerPathTransformer.isAbsolute(path, INCORRECT_ID);
+    boolean isAbsolute = languageServerPathTransformer.isAbsolute(INCORRECT_ID, path);
     assertFalse(isAbsolute);
   }
 
   @Test
   public void shouldNotBeAbsoluteForAbsoluteUriPathsWithDefaultRoot() throws Exception {
     URI uri = new URI("file:/project");
-    boolean isAbsolute = languageServerPathTransformer.isAbsolute(uri, INCORRECT_ID);
+    boolean isAbsolute = languageServerPathTransformer.isAbsolute(INCORRECT_ID, uri);
     assertFalse(isAbsolute);
   }
 }

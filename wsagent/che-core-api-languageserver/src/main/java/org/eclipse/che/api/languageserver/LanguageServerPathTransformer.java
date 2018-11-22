@@ -11,12 +11,14 @@
  */
 package org.eclipse.che.api.languageserver;
 
+import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.fs.server.WsPathUtils;
 import org.eclipse.che.api.languageserver.RegistryContainer.Registry;
 import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.slf4j.Logger;
@@ -28,82 +30,121 @@ import org.slf4j.LoggerFactory;
  * @author Dmytro Kulieshov
  */
 @Singleton
-public class LanguageServerPathTransformer {
+class LanguageServerPathTransformer {
   private static final Logger LOG = LoggerFactory.getLogger(LanguageServerPathTransformer.class);
 
   private final RootDirPathProvider rootDirPathProvider;
   private final Registry<String> projectsRootRegistry;
 
   @Inject
-  public LanguageServerPathTransformer(
+  LanguageServerPathTransformer(
       RootDirPathProvider rootDirPathProvider, RegistryContainer registryContainer) {
     this.rootDirPathProvider = rootDirPathProvider;
     this.projectsRootRegistry = registryContainer.projectsRootRegistry;
   }
 
-  public URI resolve(String path, String id) {
-    if (path.startsWith("/")) {
-      path = path.substring(1);
+  /**
+   * Transform workspace path into language server URI represented path taking into account project
+   * root location for the specified language server.
+   *
+   * @param lsId - language server ID
+   * @param wsPath - workspace path
+   * @return path
+   */
+  URI toFsURI(String lsId, String wsPath) {
+    if (wsPath.startsWith(ROOT)) {
+      wsPath = wsPath.substring(1);
     }
 
-    String projectsRoot = projectsRootRegistry.getOrDefault(id, rootDirPathProvider.get());
+    String projectsRoot = projectsRootRegistry.getOrDefault(lsId, rootDirPathProvider.get());
 
-    return Paths.get(projectsRoot).resolve(path).toUri();
+    return Paths.get(projectsRoot).resolve(wsPath).toUri();
   }
 
-  public String toWsPath(String stringUri, String id) {
-    String projectsRoot = projectsRootRegistry.getOrDefault(id, rootDirPathProvider.get());
+  /**
+   * Transform workspace path into language server path represented path taking into account project
+   * root location for the specified language server.
+   *
+   * @param lsId - language server ID
+   * @param wsPath - workspace path
+   * @return path
+   */
+  Path toFsPath(String lsId, String wsPath) {
+    return Paths.get(toFsURI(lsId, wsPath));
+  }
+
+  /**
+   * Transform file system path represented by a URI into workspace path. Transformation respects
+   * language server project root location
+   *
+   * @param lsId - language server ID
+   * @param fsUri - file system item URI
+   * @return workspace path
+   */
+  String toWsPath(String lsId, String fsUri) {
+    String projectsRoot = projectsRootRegistry.getOrDefault(lsId, rootDirPathProvider.get());
 
     URI uri;
     try {
-      uri = new URI(stringUri);
+      uri = new URI(fsUri);
     } catch (URISyntaxException e) {
-      LOG.error("Can't parse uri: {}", stringUri, e);
+      LOG.error("Can't parse uri: {}", fsUri, e);
       return null;
     }
-    return "/" + Paths.get(projectsRoot).toUri().relativize(uri).getPath();
+    return ROOT + Paths.get(projectsRoot).toUri().relativize(uri).getPath();
   }
 
-  public String toWsPath(URI uri, String id) {
-    String projectsRoot = projectsRootRegistry.getOrDefault(id, rootDirPathProvider.get());
+  /**
+   * Transform file system path represented by a URI into workspace path. Transformation respects
+   * language server project root location
+   *
+   * @param lsId - language server ID
+   * @param fsUri - file system item URI
+   * @return workspace path
+   */
+  String toWsPath(String lsId, URI fsUri) {
+    String projectsRoot = projectsRootRegistry.getOrDefault(lsId, rootDirPathProvider.get());
 
-    return "/" + Paths.get(projectsRoot).toUri().relativize(uri).getPath();
+    return ROOT + Paths.get(projectsRoot).toUri().relativize(fsUri).getPath();
   }
 
-  public String toPath(URI uri) {
+  String toPath(URI uri) {
     return uri.getPath();
   }
 
-  public String toPath(String stringUri) {
-    URI uri;
+  String toPath(String stringUri) {
     try {
-      uri = new URI(stringUri);
+      URI uri = new URI(stringUri);
+      return toPath(uri);
     } catch (URISyntaxException e) {
-      LOG.error("Can't parse uri: {}", stringUri, e);
+      LOG.error("Can't parse URI: {}", stringUri, e);
       return null;
     }
-    return toPath(uri);
   }
 
-  public boolean isAbsolute(URI uri, String id) {
-    String projectsRoot = projectsRootRegistry.getOrDefault(id, rootDirPathProvider.get());
+  /**
+   * Check if location represented by a URI is absolute for specified language server
+   *
+   * @param lsId - language server ID
+   * @param fsUri - file system URI
+   * @return true if the path segment of the URI is absolute
+   */
+  boolean isAbsolute(String lsId, URI fsUri) {
+    String projectsRoot = projectsRootRegistry.getOrDefault(lsId, rootDirPathProvider.get());
 
-    return uri.getScheme().equals("file") && uri.getPath().startsWith(projectsRoot);
+    return fsUri.getScheme().equals("file") && fsUri.getPath().startsWith(projectsRoot);
   }
 
-  public boolean isAbsolute(String path, String id) {
-    String projectsRoot = projectsRootRegistry.getOrDefault(id, rootDirPathProvider.get());
+  /**
+   * Check if location represented by a stringified path is absolute for specified language server
+   *
+   * @param lsId - language server ID
+   * @param fsPath - stringified file system path
+   * @return true if the path segment of the path is absolute
+   */
+  boolean isAbsolute(String lsId, String fsPath) {
+    String projectsRoot = projectsRootRegistry.getOrDefault(lsId, rootDirPathProvider.get());
 
-    return path.startsWith(projectsRoot);
-  }
-
-  public String addProjectsRoot(String path, String id) {
-    if (path.startsWith("/")) {
-      path = path.substring(1);
-    }
-
-    String projectsRoot = projectsRootRegistry.getOrDefault(id, rootDirPathProvider.get());
-
-    return WsPathUtils.resolve(projectsRoot, path);
+    return fsPath.startsWith(projectsRoot);
   }
 }
