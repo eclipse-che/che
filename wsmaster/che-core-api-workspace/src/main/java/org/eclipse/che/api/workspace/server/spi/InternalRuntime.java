@@ -28,6 +28,8 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.TracingTags;
 
 /**
  * Implementation of concrete Runtime.
@@ -143,7 +145,10 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    * @throws RuntimeStartInterruptedException when start execution is cancelled
    * @throws InfrastructureException when any other error occurs
    */
+  @Traced
   public void start(Map<String, String> startOptions) throws InfrastructureException {
+    TracingTags.WORKSPACE_ID.set(getContext().getIdentity()::getWorkspaceId);
+
     markStarting();
     try {
       internalStart(startOptions);
@@ -178,6 +183,8 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    * @throws InfrastructureException when any other error occurs
    */
   public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
+    TracingTags.WORKSPACE_ID.set(getContext().getIdentity()::getWorkspaceId);
+
     markStopping();
     try {
       internalStop(stopOptions);

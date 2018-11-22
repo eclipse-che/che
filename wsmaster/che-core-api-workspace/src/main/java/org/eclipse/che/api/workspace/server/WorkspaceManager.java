@@ -45,6 +45,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.slf4j.Logger;
@@ -98,6 +99,7 @@ public class WorkspaceManager {
    * @throws ServerException when any other error occurs
    * @throws ValidationException when incoming configuration or attributes are not valid
    */
+  @Traced
   public WorkspaceImpl createWorkspace(
       WorkspaceConfig config, String namespace, @Nullable Map<String, String> attributes)
       throws ServerException, NotFoundException, ConflictException, ValidationException {
@@ -260,6 +262,7 @@ public class WorkspaceManager {
    * @throws ServerException when any server error occurs
    * @throws NullPointerException when {@code workspaceId} is null
    */
+  @Traced
   public void removeWorkspace(String workspaceId) throws ConflictException, ServerException {
     requireNonNull(workspaceId, "Required non-null workspace id");
     if (runtimes.hasRuntime(workspaceId)) {
