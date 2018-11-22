@@ -190,6 +190,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         envProvisioner.provision(context.getIdentity(), context.getEnvironment());
       }
 
+      // commands might be updated during provisioning
+      runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
+
       // Infrastructure specific provisioner should be applied last
       // because it converts all Workspace API model objects that comes
       // from previous provisioners into infrastructure specific objects

@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
 import com.google.common.annotations.Beta;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
@@ -29,6 +31,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -36,6 +40,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
@@ -43,6 +48,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * Applies Che plugins tooling configuration to a kubernetes internal runtime object.
  *
  * @author Oleksander Garagatyi
+ * @author Sergii Leshchenko
  */
 @Beta
 @Singleton
@@ -89,11 +95,15 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     }
     Pod pod = pods.values().iterator().next();
 
+    CommandsResolver commandsResolver = new CommandsResolver(kubernetesEnvironment);
     for (ChePlugin chePlugin : chePlugins) {
+      Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
+
       for (CheContainer container : chePlugin.getContainers()) {
-        addSidecar(pod, container, chePlugin, kubernetesEnvironment);
+        addSidecar(pod, container, chePlugin, kubernetesEnvironment, pluginRelatedCommands);
       }
     }
+
     chePlugins.forEach(chePlugin -> populateWorkspaceEnvVars(chePlugin, kubernetesEnvironment));
 
     if (isAuthEnabled) {
@@ -144,6 +154,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
    * <li>k8s container configuration {@link Container}
    * <li>k8s service configuration {@link Service}
    * <li>Che machine config {@link InternalMachineConfig}
+   * <li>Fill in machine name attribute in related commands
    *
    * @throws InfrastructureException when any error occurs
    */
@@ -151,7 +162,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       Pod pod,
       CheContainer container,
       ChePlugin chePlugin,
-      KubernetesEnvironment kubernetesEnvironment)
+      KubernetesEnvironment kubernetesEnvironment,
+      Collection<CommandImpl> sidecarRelatedCommands)
       throws InfrastructureException {
 
     K8sContainerResolver k8sContainerResolver =
@@ -180,8 +192,84 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     InternalMachineConfig machineConfig = machineResolver.resolve();
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
+    sidecarRelatedCommands.forEach(c -> c.getAttributes().put("machineName", machineName));
+
+    container
+        .getCommands()
+        .stream()
+        .map(c -> asCommand(machineName, c))
+        .forEach(c -> kubernetesEnvironment.getCommands().add(c));
+
     SidecarServicesProvisioner sidecarServicesProvisioner =
         new SidecarServicesProvisioner(containerEndpoints, pod.getMetadata().getName());
     sidecarServicesProvisioner.provision(kubernetesEnvironment);
+  }
+
+  private CommandImpl asCommand(String machineName, Command command) {
+    CommandImpl cmd =
+        new CommandImpl(
+            command.getName(),
+            command.getCommand().stream().collect(Collectors.joining(" ")),
+            "custom");
+    cmd.getAttributes().put("workDir", command.getWorkingDir());
+    cmd.getAttributes().put("machineName", machineName);
+    return cmd;
+  }
+
+  private static class CommandsResolver {
+    private final KubernetesEnvironment k8sEnvironment;
+    private final ArrayListMultimap<String, CommandImpl> pluginRefToCommand;
+
+    public CommandsResolver(KubernetesEnvironment k8sEnvironment) {
+      this.k8sEnvironment = k8sEnvironment;
+
+      pluginRefToCommand = ArrayListMultimap.create();
+      k8sEnvironment
+          .getCommands()
+          .forEach(
+              (c) -> {
+                String pluginRef = c.getAttributes().get("plugin");
+                if (pluginRef != null) {
+                  pluginRefToCommand.put(pluginRef, c);
+                }
+              });
+    }
+
+    private Collection<CommandImpl> resolve(ChePlugin chePlugin) {
+      List<CheContainer> containers = chePlugin.getContainers();
+
+      String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+      Collection<CommandImpl> pluginsCommands = pluginRefToCommand.removeAll(pluginRef);
+
+      if (pluginsCommands.isEmpty()) {
+        // specified plugin doesn't have configured commands
+        return emptyList();
+      }
+
+      if (containers.isEmpty()) {
+        k8sEnvironment
+            .getWarnings()
+            .add(
+                new WarningImpl(
+                    44012,
+                    format(
+                        "There are configured commands for plugin '%s' that doesn't have any containers",
+                        pluginRef)));
+        return emptyList();
+      }
+
+      if (containers.size() > 1) {
+        k8sEnvironment
+            .getWarnings()
+            .add(
+                new WarningImpl(
+                    44013,
+                    format(
+                        "There are configured commands for plugin '%s' that has multiply containers. Commands will be configured to be run in first container",
+                        pluginRef)));
+      }
+
+      return pluginsCommands;
+    }
   }
 }

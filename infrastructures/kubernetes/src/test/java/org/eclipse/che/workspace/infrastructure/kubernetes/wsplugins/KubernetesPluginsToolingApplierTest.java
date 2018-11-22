@@ -21,6 +21,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -40,13 +41,16 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -56,6 +60,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainerPort;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -79,11 +84,11 @@ public class KubernetesPluginsToolingApplierTest {
   private static final int MEMORY_LIMIT_MB = 200;
   private static final String CHE_PLUGIN_ENDPOINT_NAME = "test-endpoint-1";
 
-  @Mock Pod pod;
-  @Mock PodSpec podSpec;
-  @Mock ObjectMeta meta;
-  @Mock Container userContainer;
-  @Mock InternalMachineConfig userMachineConfig;
+  @Mock private Pod pod;
+  @Mock private PodSpec podSpec;
+  @Mock private ObjectMeta meta;
+  @Mock private Container userContainer;
+  @Mock private InternalMachineConfig userMachineConfig;
 
   private KubernetesEnvironment internalEnvironment;
   private List<Container> containers;
@@ -102,9 +107,135 @@ public class KubernetesPluginsToolingApplierTest {
     internalEnvironment.getPods().put(POD_NAME, pod);
     when(pod.getSpec()).thenReturn(podSpec);
     when(podSpec.getContainers()).thenReturn(containers);
-    when(pod.getMetadata()).thenReturn(meta);
-    when(meta.getName()).thenReturn(POD_NAME);
+    lenient().when(pod.getMetadata()).thenReturn(meta);
+    lenient().when(meta.getName()).thenReturn(POD_NAME);
     internalEnvironment.getMachines().putAll(machines);
+  }
+
+  @Test
+  public void shouldProvisionPluginsCommandsToEnvironment() throws Exception {
+    // given
+    Command pluginCommand =
+        new Command()
+            .name("test-command")
+            .workingDir("~")
+            .command(Arrays.asList("./build.sh", "--no-pull"));
+
+    // when
+    applier.apply(
+        internalEnvironment,
+        singletonList(createChePlugin("plugin", createContainer("container", pluginCommand))));
+
+    // then
+    List<CommandImpl> envCommands = internalEnvironment.getCommands();
+    assertEquals(envCommands.size(), 1);
+    CommandImpl envCommand = envCommands.get(0);
+    assertEquals(envCommand.getName(), pluginCommand.getName());
+    assertEquals(
+        envCommand.getCommandLine(),
+        pluginCommand.getCommand().stream().collect(Collectors.joining(" ")));
+    assertEquals(envCommand.getType(), "custom");
+    assertEquals(envCommand.getAttributes().get("workDir"), pluginCommand.getWorkingDir());
+    assertEquals(envCommand.getAttributes().get("machineName"), POD_NAME + "/plugin-container");
+  }
+
+  @Test
+  public void shouldResolveMachineNameForCommandsInEnvironment() throws Exception {
+    // given
+    ChePlugin chePlugin = createChePlugin("plugin", createContainer("container"));
+    String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+
+    CommandImpl pluginCommand = new CommandImpl("test-command", "echo Hello World!", "custom");
+    pluginCommand.getAttributes().put("plugin", pluginRef);
+    internalEnvironment.getCommands().add(pluginCommand);
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+
+    // then
+    List<CommandImpl> envCommands = internalEnvironment.getCommands();
+    assertEquals(envCommands.size(), 1);
+    CommandImpl envCommand = envCommands.get(0);
+    assertEquals(envCommand.getName(), pluginCommand.getName());
+    assertEquals(envCommand.getType(), pluginCommand.getType());
+    assertEquals(envCommand.getCommandLine(), pluginCommand.getCommandLine());
+    assertEquals(envCommand.getAttributes().get("plugin"), pluginRef);
+    assertEquals(envCommand.getAttributes().get("machineName"), POD_NAME + "/plugin-container");
+  }
+
+  @Test
+  public void shouldFillInWarningIfChePluginDoesNotHaveAnyContainersButThereAreRelatedCommands()
+      throws Exception {
+    // given
+    ChePlugin chePlugin = createChePlugin("plugin");
+    String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+
+    CommandImpl pluginCommand = new CommandImpl("test-command", "echo Hello World!", "custom");
+    pluginCommand.getAttributes().put("plugin", pluginRef);
+    internalEnvironment.getCommands().add(pluginCommand);
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+
+    // then
+    List<Warning> envWarnings = internalEnvironment.getWarnings();
+    assertEquals(envWarnings.size(), 1);
+    Warning warning = envWarnings.get(0);
+    assertEquals(warning.getCode(), 44012);
+    assertEquals(
+        warning.getMessage(),
+        "There are configured commands for plugin 'some-id:0.0.3' that doesn't have any containers");
+  }
+
+  @Test
+  public void
+      shouldNotFillInWarningIfChePluginDoesNotHaveAnyContainersAndThereAreNotRelatedCommands()
+          throws Exception {
+    // given
+    ChePlugin chePlugin = createChePlugin("plugin");
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+
+    // then
+    assertTrue(internalEnvironment.getWarnings().isEmpty());
+  }
+
+  @Test
+  public void shouldFillInWarningIfChePluginHasMultiplyContainersButThereAreRelatedCommands()
+      throws Exception {
+    // given
+    ChePlugin chePlugin = createChePlugin("plugin", createContainer(), createContainer());
+    String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+
+    CommandImpl pluginCommand = new CommandImpl("test-command", "echo Hello World!", "custom");
+    pluginCommand.getAttributes().put("plugin", pluginRef);
+    internalEnvironment.getCommands().add(pluginCommand);
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+
+    // then
+    List<Warning> envWarnings = internalEnvironment.getWarnings();
+    assertEquals(envWarnings.size(), 1);
+    Warning warning = envWarnings.get(0);
+    assertEquals(warning.getCode(), 44013);
+    assertEquals(
+        warning.getMessage(),
+        "There are configured commands for plugin 'some-id:0.0.3' that has multiply containers. Commands will be configured to be run in first container");
+  }
+
+  @Test
+  public void shouldNotFillInWarningIfChePluginHasMultiplyContainersAndThereAreNotRelatedCommands()
+      throws Exception {
+    // given
+    ChePlugin chePlugin = createChePlugin("plugin", createContainer(), createContainer());
+
+    // when
+    applier.apply(internalEnvironment, singletonList(chePlugin));
+
+    // then
+    assertTrue(internalEnvironment.getWarnings().isEmpty());
   }
 
   @Test(
@@ -139,7 +270,8 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void canAddMultipleToolingContainersToAPodFromOnePlugin() throws Exception {
-    applier.apply(internalEnvironment, singletonList(createChePluginWith2Containers()));
+    applier.apply(
+        internalEnvironment, singletonList(createChePlugin(createContainer(), createContainer())));
 
     verifyPodAndContainersNumber(3);
     List<Container> nonUserContainers = getNonUserContainers(internalEnvironment);
@@ -355,7 +487,8 @@ public class KubernetesPluginsToolingApplierTest {
 
     // when
     applier.apply(
-        internalEnvironment, ImmutableList.of(createChePlugin(), createChePluginWith2Containers()));
+        internalEnvironment,
+        ImmutableList.of(createChePlugin(), createChePlugin(createContainer(), createContainer())));
 
     // then
     assertEquals(internalEnvironment.getPods().size(), 1);
@@ -455,30 +588,34 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   private ChePlugin createChePlugin() {
+    return createChePlugin(createContainer());
+  }
+
+  private ChePlugin createChePlugin(CheContainer... containers) {
+    return createChePlugin("some-name", containers);
+  }
+
+  private ChePlugin createChePlugin(String name, CheContainer... containers) {
     ChePlugin plugin = new ChePlugin();
-    plugin.setName("some-name");
+    plugin.setName(name);
     plugin.setId("some-id");
     plugin.setVersion("0.0.3");
-    plugin.setContainers(singletonList(createContainer()));
+    plugin.setContainers(Arrays.asList(containers));
     return plugin;
   }
 
-  private ChePlugin createChePluginWith2Containers() {
-    ChePlugin plugin = new ChePlugin();
-    plugin.setName("some-name");
-    plugin.setId("some-id");
-    plugin.setVersion("0.0.3");
-    plugin.setContainers(asList(createContainer(), createContainer()));
-    return plugin;
+  private CheContainer createContainer(Command... commands) {
+    return createContainer(generate("container", 5), commands);
   }
 
-  private CheContainer createContainer() {
+  private CheContainer createContainer(String name, Command... commands) {
     CheContainer cheContainer = new CheContainer();
     cheContainer.setImage(TEST_IMAGE);
-    cheContainer.setName(generate("container", 5));
+    cheContainer.setName(name);
     cheContainer.setEnv(singletonList(new EnvVar().name(ENV_VAR).value(ENV_VAR_VALUE)));
     cheContainer.setVolumes(
         singletonList(new Volume().name(VOLUME_NAME).mountPath(VOLUME_MOUNT_PATH)));
+    cheContainer.setCommands(Arrays.asList(commands));
     return cheContainer;
   }
 
