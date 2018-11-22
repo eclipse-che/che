@@ -14,6 +14,7 @@ package org.eclipse.che.api.core.model.workspace;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Defines a contract for workspace runtime.
@@ -34,6 +35,7 @@ public interface Runtime {
    * Returns an active environment name. The environment with such name must exist in {@link
    * WorkspaceConfig#getEnvironments()}.
    */
+  @Nullable
   String getActiveEnv();
 
   /**

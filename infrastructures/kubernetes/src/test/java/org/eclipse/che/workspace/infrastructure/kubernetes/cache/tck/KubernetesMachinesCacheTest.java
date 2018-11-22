@@ -12,7 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.*;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.createMachine;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.createRuntimeState;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.createServer;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.createWorkspace;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -23,6 +26,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -32,7 +36,6 @@ import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
-import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -150,7 +153,7 @@ public class KubernetesMachinesCacheTest {
   @Test
   public void shouldGetMachines() throws Exception {
     // given
-    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    RuntimeIdentity runtimeId = runtimeStates[0].getRuntimeId();
 
     // when
     machineCache.getMachines(runtimeId);
@@ -165,7 +168,7 @@ public class KubernetesMachinesCacheTest {
   @Test
   public void shouldGetServer() throws Exception {
     // given
-    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    RuntimeIdentity runtimeId = runtimeStates[0].getRuntimeId();
     KubernetesMachineImpl machine = machines[0];
     Entry<String, KubernetesServerImpl> serverToFetch =
         machine.getServers().entrySet().iterator().next();
@@ -183,7 +186,7 @@ public class KubernetesMachinesCacheTest {
       expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found")
   public void shouldThrowExceptionWhenServerWasNotFoundOnGetting() throws Exception {
     // given
-    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    RuntimeIdentity runtimeId = runtimeStates[0].getRuntimeId();
     KubernetesMachineImpl machine = machines[0];
 
     // when
@@ -193,7 +196,7 @@ public class KubernetesMachinesCacheTest {
   @Test
   public void shouldUpdateMachineStatusServerStatus() throws Exception {
     // given
-    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    RuntimeIdentity runtimeId = runtimeStates[0].getRuntimeId();
 
     // when
     machineCache.updateServerStatus(
@@ -209,7 +212,7 @@ public class KubernetesMachinesCacheTest {
       expectedExceptionsMessageRegExp = "Server with name 'non-existing' was not found")
   public void shouldThrowExceptionWhenServerWasNotFoundOnStatusUpdating() throws Exception {
     // given
-    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    RuntimeIdentity runtimeId = runtimeStates[0].getRuntimeId();
     KubernetesMachineImpl machine = machines[0];
 
     // when
@@ -220,7 +223,7 @@ public class KubernetesMachinesCacheTest {
   @Test
   public void shouldUpdateMachineStatus() throws Exception {
     // given
-    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    RuntimeIdentity runtimeId = runtimeStates[0].getRuntimeId();
     KubernetesMachineImpl machine = machines[0];
     String machineName = machine.getName();
 
@@ -243,7 +246,7 @@ public class KubernetesMachinesCacheTest {
   @Test
   public void shouldUpdateServerStatus() throws Exception {
     // given
-    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    RuntimeIdentity runtimeId = runtimeStates[0].getRuntimeId();
 
     // when
     machineCache.updateServerStatus(
@@ -257,7 +260,7 @@ public class KubernetesMachinesCacheTest {
   @Test
   public void shouldRemoveMachines() throws Exception {
     // given
-    RuntimeId runtimeId = runtimeStates[0].getRuntimeId();
+    RuntimeIdentity runtimeId = runtimeStates[0].getRuntimeId();
 
     // when
     machineCache.remove(runtimeId);

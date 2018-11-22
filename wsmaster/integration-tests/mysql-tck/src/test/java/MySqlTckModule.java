@@ -136,7 +136,6 @@ public class MySqlTckModule extends TckModule {
                 SignatureKeyPairImpl.class,
                 // k8s-runtimes
                 KubernetesRuntimeState.class,
-                KubernetesRuntimeState.RuntimeId.class,
                 KubernetesMachineImpl.class,
                 KubernetesMachineImpl.MachineId.class,
                 KubernetesServerImpl.class,

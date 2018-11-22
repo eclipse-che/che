@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Objects.requireNonNull;
@@ -351,24 +350,11 @@ public class WorkspaceManager {
   }
 
   /** Asynchronously starts given workspace. */
-  private void startAsync(WorkspaceImpl workspace, String envName, Map<String, String> options)
+  private void startAsync(
+      WorkspaceImpl workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
-    if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
-      throw new NotFoundException(
-          format(
-              "Workspace '%s:%s' doesn't contain environment '%s'",
-              workspace.getNamespace(), workspace.getConfig().getName(), envName));
-    }
+    String env = getValidatedEnvironmentName(workspace, envName);
     workspace.getAttributes().put(UPDATED_ATTRIBUTE_NAME, Long.toString(currentTimeMillis()));
-    final String env = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
-
-    // validate environment in advance
-    try {
-      runtimes.validate(workspace.getConfig().getEnvironments().get(env));
-    } catch (InfrastructureException | ValidationException e) {
-      throw new ServerException(e);
-    }
-
     workspaceDao.update(workspace);
     runtimes
         .startAsync(workspace, env, firstNonNull(options, Collections.emptyMap()))
@@ -382,6 +368,45 @@ public class WorkspaceManager {
               }
               return null;
             });
+  }
+
+  private String getValidatedEnvironmentName(WorkspaceImpl workspace, @Nullable String envName)
+      throws NotFoundException, ServerException {
+    if (envName != null && !workspace.getConfig().getEnvironments().containsKey(envName)) {
+      throw new NotFoundException(
+          format(
+              "Workspace '%s:%s' doesn't contain environment '%s'",
+              workspace.getNamespace(), workspace.getConfig().getName(), envName));
+    }
+
+    envName = firstNonNull(envName, workspace.getConfig().getDefaultEnv());
+
+    if (envName == null
+        && SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(
+            workspace.getConfig().getAttributes())) {
+      // Sidecar-based workspaces are allowed not to have any environments
+      return null;
+    }
+
+    // validate environment in advance
+    if (envName == null) {
+      throw new NotFoundException(
+          format(
+              "Workspace %s:%s can't use null environment",
+              workspace.getNamespace(), workspace.getConfig().getName()));
+    }
+    try {
+      runtimes.validate(workspace.getConfig().getEnvironments().get(envName));
+    } catch (InfrastructureException | ValidationException e) {
+      throw new ServerException(e);
+    }
+
+    return envName;
+  }
+
+  /** Returns first non-null argument or null if both are null. */
+  private <T> T firstNonNull(T first, T second) {
+    return first != null ? first : second;
   }
 
   private void checkWorkspaceIsRunningOrStarting(WorkspaceImpl workspace) throws ConflictException {
