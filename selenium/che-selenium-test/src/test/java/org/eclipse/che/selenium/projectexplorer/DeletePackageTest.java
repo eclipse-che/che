@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.projectexplorer;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
@@ -20,6 +22,7 @@ import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -56,6 +59,7 @@ public class DeletePackageTest {
   @Inject private AskDialog askDialog;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -66,14 +70,14 @@ public class DeletePackageTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    projectExplorer.waitItem(PROJECT_NAME);
+    notificationsPopupPanel.waitProgressPopupPanelClose();
+    projectExplorer.quickExpandWithJavaScript();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void deletePackageTest() throws Exception {
-    projectExplorer.waitItem(PROJECT_NAME);
-    notificationsPopupPanel.waitProgressPopupPanelClose();
-
-    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PATH_FOR_EXPAND + "/AppController.java");
     editor.waitActive();
     projectExplorer.openItemByPath(PATH_TO_WEB_APP + "/index.jsp");
@@ -95,7 +99,7 @@ public class DeletePackageTest {
 
     // check that package disappeared in editor
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE1);
+    projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE1, ELEMENT_TIMEOUT_SEC);
 
     // select package2 for deletion
     projectExplorer.waitAndSelectItem(PATH_TO_PACKAGE2);
@@ -106,7 +110,7 @@ public class DeletePackageTest {
     editor.waitTabIsNotPresent("index.jsp");
     // check that package disappeared in editor
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE2);
+    projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE2, ELEMENT_TIMEOUT_SEC);
 
     // select package3 for deletion
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples");
@@ -118,7 +122,7 @@ public class DeletePackageTest {
 
     // check that package disappeared in editor
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE3);
+    projectExplorer.waitDisappearItemByPath(PATH_TO_PACKAGE3, ELEMENT_TIMEOUT_SEC);
   }
 
   /**
