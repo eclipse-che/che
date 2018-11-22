@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
@@ -42,6 +43,21 @@ public class KubernetesEnvironment extends InternalEnvironment {
   private final Map<String, Secret> secrets;
   private final Map<String, ConfigMap> configMaps;
 
+  /** Returns builder for creating environment from blank {@link KubernetesEnvironment}. */
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /**
+   * Returns builder for creating environment based on specified {@link InternalEnvironment}.
+   *
+   * <p>It means that {@link InternalEnvironment} specific fields like machines, warnings will be
+   * preconfigured in Builder.
+   */
+  public static Builder builder(InternalEnvironment internalEnvironment) {
+    return new Builder(internalEnvironment);
+  }
+
   public KubernetesEnvironment(KubernetesEnvironment k8sEnv) {
     this(
         k8sEnv,
@@ -53,13 +69,22 @@ public class KubernetesEnvironment extends InternalEnvironment {
         k8sEnv.getConfigMaps());
   }
 
-  @Override
-  public KubernetesEnvironment setType(String type) {
-    return (KubernetesEnvironment) super.setType(type);
-  }
-
-  public static Builder builder() {
-    return new Builder();
+  protected KubernetesEnvironment(
+      InternalEnvironment internalEnvironment,
+      Map<String, Pod> pods,
+      Map<String, Service> services,
+      Map<String, Ingress> ingresses,
+      Map<String, PersistentVolumeClaim> persistentVolumeClaims,
+      Map<String, Secret> secrets,
+      Map<String, ConfigMap> configMaps) {
+    super(internalEnvironment);
+    setType(TYPE);
+    this.pods = pods;
+    this.services = services;
+    this.ingresses = ingresses;
+    this.persistentVolumeClaims = persistentVolumeClaims;
+    this.secrets = secrets;
+    this.configMaps = configMaps;
   }
 
   protected KubernetesEnvironment(
@@ -73,12 +98,18 @@ public class KubernetesEnvironment extends InternalEnvironment {
       Map<String, Secret> secrets,
       Map<String, ConfigMap> configMaps) {
     super(internalRecipe, machines, warnings);
+    setType(TYPE);
     this.pods = pods;
     this.services = services;
     this.ingresses = ingresses;
     this.persistentVolumeClaims = persistentVolumeClaims;
     this.secrets = secrets;
     this.configMaps = configMaps;
+  }
+
+  @Override
+  public KubernetesEnvironment setType(String type) {
+    return (KubernetesEnvironment) super.setType(type);
   }
 
   /** Returns pods that should be created when environment starts. */
@@ -112,10 +143,8 @@ public class KubernetesEnvironment extends InternalEnvironment {
   }
 
   public static class Builder {
-    protected InternalRecipe internalRecipe;
-    protected String type = TYPE;
-    protected final Map<String, InternalMachineConfig> machines = new HashMap<>();
-    protected final List<Warning> warnings = new ArrayList<>();
+    protected final InternalEnvironment internalEnvironment;
+
     protected final Map<String, Pod> pods = new HashMap<>();
     protected final Map<String, Service> services = new HashMap<>();
     protected final Map<String, Ingress> ingresses = new HashMap<>();
@@ -124,20 +153,31 @@ public class KubernetesEnvironment extends InternalEnvironment {
     protected final Map<String, ConfigMap> configMaps = new HashMap<>();
     protected final Map<String, String> attributes = new HashMap<>();
 
-    protected Builder() {}
+    protected Builder() {
+      this.internalEnvironment = new InternalEnvironment() {};
+    }
+
+    public Builder(InternalEnvironment internalEnvironment) {
+      this.internalEnvironment = internalEnvironment;
+    }
 
     public Builder setInternalRecipe(InternalRecipe internalRecipe) {
-      this.internalRecipe = internalRecipe;
+      internalEnvironment.setRecipe(internalRecipe);
       return this;
     }
 
     public Builder setMachines(Map<String, InternalMachineConfig> machines) {
-      this.machines.putAll(machines);
+      internalEnvironment.setMachines(new HashMap<>(machines));
       return this;
     }
 
     public Builder setWarnings(List<Warning> warnings) {
-      this.warnings.addAll(warnings);
+      internalEnvironment.setWarnings(new ArrayList<>(warnings));
+      return this;
+    }
+
+    public Builder setCommands(List<? extends Command> commands) {
+      internalEnvironment.setCommands(new ArrayList<>(commands));
       return this;
     }
 
@@ -176,26 +216,9 @@ public class KubernetesEnvironment extends InternalEnvironment {
       return this;
     }
 
-    public Builder setType(String type) {
-      this.type = type;
-      return this;
-    }
-
     public KubernetesEnvironment build() {
-      KubernetesEnvironment kubernetesEnvironment =
-          new KubernetesEnvironment(
-              internalRecipe,
-              machines,
-              warnings,
-              pods,
-              services,
-              ingresses,
-              pvcs,
-              secrets,
-              configMaps);
-      kubernetesEnvironment.setAttributes(attributes);
-      kubernetesEnvironment.setType(type);
-      return kubernetesEnvironment;
+      return new KubernetesEnvironment(
+          internalEnvironment, pods, services, ingresses, pvcs, secrets, configMaps);
     }
   }
 }
