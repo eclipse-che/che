@@ -56,8 +56,11 @@ RUN if [ -d "${HOME}/patches/${THEIA_VERSION}" ]; then \
     fi
 
 # Generate che-theia
+ARG CDN_PREFIX=""
+ARG MONACO_CDN_PREFIX=""
 WORKDIR ${HOME}/theia-source-code
 RUN che:theia init
+RUN che:theia cdn --theia="${CDN_PREFIX}" --monaco="${MONACO_CDN_PREFIX}"
 
 # Compile Theia
 RUN yarn
