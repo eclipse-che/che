@@ -48,7 +48,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -145,9 +144,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       RuntimeHangingDetector runtimeHangingDetector,
       @Nullable OptionalTracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
-      @Assisted KubernetesNamespace namespace,
-      @Assisted List<Warning> warnings) {
-    super(context, urlRewriter, warnings);
+      @Assisted KubernetesNamespace namespace) {
+    super(context, urlRewriter);
     this.unrecoverableEventListenerFactory = unrecoverableEventListenerFactory;
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;

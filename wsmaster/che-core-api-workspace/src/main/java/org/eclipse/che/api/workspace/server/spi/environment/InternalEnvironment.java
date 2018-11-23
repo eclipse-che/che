@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -40,17 +41,22 @@ public abstract class InternalEnvironment {
   private String type;
   private InternalRecipe recipe;
   private Map<String, InternalMachineConfig> machines;
-  private List<Warning> warnings;
+  private final List<Warning> warnings;
   private Map<String, String> attributes;
   private List<CommandImpl> commands;
 
-  protected InternalEnvironment() {}
+  protected InternalEnvironment() {
+    this.warnings = new CopyOnWriteArrayList<>();
+  }
 
   protected InternalEnvironment(
       InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings) {
     this.recipe = recipe;
     this.machines = machines;
-    this.warnings = warnings;
+    this.warnings = new CopyOnWriteArrayList<>();
+    if (warnings != null) {
+      this.warnings.addAll(warnings);
+    }
     this.type = recipe != null ? recipe.getType() : null;
   }
 
@@ -58,7 +64,7 @@ public abstract class InternalEnvironment {
     this.recipe = internalEnvironment.getRecipe();
     this.type = recipe != null ? recipe.getType() : null;
     this.machines = internalEnvironment.getMachines();
-    this.warnings = internalEnvironment.getWarnings();
+    this.warnings = new CopyOnWriteArrayList<>(internalEnvironment.getWarnings());
     this.attributes = internalEnvironment.getAttributes();
     this.commands = internalEnvironment.getCommands();
   }
@@ -113,9 +119,6 @@ public abstract class InternalEnvironment {
    * constraints or some preferable configuration is missing so defaults are used.
    */
   public List<Warning> getWarnings() {
-    if (warnings == null) {
-      warnings = new ArrayList<>();
-    }
     return warnings;
   }
 
@@ -125,7 +128,10 @@ public abstract class InternalEnvironment {
   }
 
   public InternalEnvironment setWarnings(List<Warning> warnings) {
-    this.warnings = warnings;
+    this.warnings.clear();
+    if (warnings != null) {
+      this.warnings.addAll(warnings);
+    }
     return this;
   }
 

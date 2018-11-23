@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
@@ -91,7 +90,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   @AssistedInject
   public DockerInternalRuntime(
       @Assisted DockerRuntimeContext context,
-      @Assisted List<Warning> warnings,
       URLRewriter urlRewriter,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
@@ -106,7 +104,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     this(
         context,
         urlRewriter,
-        warnings,
         false, // <- non running
         networks,
         machineStarter,
@@ -122,13 +119,12 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
 
   /**
    * Creates a running runtime from the list of given containers. Normally created by {@link
-   * DockerRuntimeFactory#create(DockerRuntimeContext, List, List)}.
+   * DockerRuntimeFactory#create(DockerRuntimeContext, List)}.
    */
   @AssistedInject
   public DockerInternalRuntime(
       @Assisted DockerRuntimeContext context,
       @Assisted List<ContainerListEntry> containers,
-      @Assisted List<Warning> warnings,
       URLRewriter urlRewriter,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
@@ -146,7 +142,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
     this(
         context,
         urlRewriter,
-        warnings,
         true, // <- running
         networks,
         machineStarter,
@@ -172,7 +167,6 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
   private DockerInternalRuntime(
       DockerRuntimeContext context,
       URLRewriter urlRewriter,
-      List<Warning> warnings,
       boolean running,
       NetworkLifecycle networks,
       DockerMachineStarter machineStarter,
@@ -184,7 +178,7 @@ public class DockerInternalRuntime extends InternalRuntime<DockerRuntimeContext>
       WorkspaceProbesFactory probesFactory,
       ParallelDockerImagesBuilderFactory imagesBuilderFactory,
       int bootstrappingTimeoutMinutes) {
-    super(context, urlRewriter, warnings, running ? WorkspaceStatus.RUNNING : null);
+    super(context, urlRewriter, running ? WorkspaceStatus.RUNNING : null);
     this.networks = networks;
     this.containerStarter = machineStarter;
     this.eventService = eventService;

@@ -558,6 +558,12 @@ public class WorkspaceRuntimesTest {
     doReturn(context).when(infrastructure).prepare(eq(identity), eq(internalEnvironment));
     lenient().when(context.getInfrastructure()).thenReturn(infrastructure);
     lenient().when(context.getIdentity()).thenReturn(identity);
+    lenient().when(context.getEnvironment()).thenReturn(internalEnvironment);
+
+    List<Warning> warnings = new ArrayList<>();
+    warnings.add(createWarning());
+    lenient().when(internalEnvironment.getWarnings()).thenReturn(warnings);
+
     return context;
   }
 
@@ -614,21 +620,15 @@ public class WorkspaceRuntimesTest {
         RuntimeContext context,
         Map<String, Machine> machines,
         List<? extends Command> commands,
-        List<? extends Warning> warnings,
         WorkspaceStatus status) {
-      super(context, null, new ArrayList<>(warnings), status);
+      super(context, null, status);
       this.commands = commands;
       this.machines = machines;
     }
 
     TestInternalRuntime(
         RuntimeContext context, Map<String, Machine> machines, WorkspaceStatus status) {
-      this(
-          context,
-          machines,
-          singletonList(createCommand()),
-          singletonList(createWarning()),
-          status);
+      this(context, machines, singletonList(createCommand()), status);
     }
 
     TestInternalRuntime(RuntimeContext context, Map<String, Machine> machines) {

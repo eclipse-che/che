@@ -252,8 +252,7 @@ public class KubernetesInternalRuntimeTest {
             runtimeHangingDetector,
             tracer,
             context,
-            namespace,
-            emptyList());
+            namespace);
 
     when(context.getEnvironment()).thenReturn(k8sEnv);
     when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);

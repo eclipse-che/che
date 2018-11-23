@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
@@ -626,9 +625,9 @@ public class InternalRuntimeTest {
     public TestInternalRuntime(URLRewriter urlRewriter, boolean running)
         throws ValidationException, InfrastructureException {
       super(
-          new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "id"), null),
+          new TestRuntimeContext(
+              new InternalEnvironment() {}, new RuntimeIdentityImpl("ws", "env", "id"), null),
           urlRewriter,
-          emptyList(),
           running ? WorkspaceStatus.RUNNING : null);
     }
 
