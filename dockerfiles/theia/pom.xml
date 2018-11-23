@@ -17,11 +17,11 @@
     <parent>
         <artifactId>che-dockerfiles-parent</artifactId>
         <groupId>org.eclipse.che.dockerfiles</groupId>
-        <version>6.14.2-SNAPSHOT</version>
+        <version>6.14.2</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-dockerfiles-theia</artifactId>
-    <version>6.14.2-SNAPSHOT</version>
+    <version>6.14.2</version>
     <packaging>pom</packaging>
     <name>Che Dockerfiles :: Theia</name>
     <inceptionYear>2018</inceptionYear>
