@@ -19,6 +19,7 @@ import io.fabric8.kubernetes.client.ConfigBuilder;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.utils.HttpClientUtils;
+import io.fabric8.kubernetes.client.utils.ImpersonatorInterceptor;
 import io.fabric8.kubernetes.client.utils.Utils;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -196,7 +197,11 @@ public class KubernetesClientFactory {
         httpClient.newBuilder().authenticator(Authenticator.NONE).build();
     OkHttpClient.Builder builder = clientHttpClient.newBuilder();
     builder.interceptors().clear();
-    clientHttpClient = builder.addInterceptor(buildKubernetesInterceptor(config)).build();
+    clientHttpClient =
+        builder
+            .addInterceptor(buildKubernetesInterceptor(config))
+            .addInterceptor(new ImpersonatorInterceptor(config))
+            .build();
 
     return new UnclosableKubernetesClient(clientHttpClient, config);
   }

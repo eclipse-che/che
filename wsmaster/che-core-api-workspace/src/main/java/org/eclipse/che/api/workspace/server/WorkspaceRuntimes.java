@@ -73,6 +73,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentF
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
@@ -282,6 +283,7 @@ public class WorkspaceRuntimes {
    * @see WorkspaceStatus#STARTING
    * @see WorkspaceStatus#RUNNING
    */
+  @Traced
   public CompletableFuture<Void> startAsync(
       Workspace workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
@@ -417,6 +419,7 @@ public class WorkspaceRuntimes {
    *     WorkspaceStatus#RUNNING} or {@link WorkspaceStatus#STARTING}
    * @see WorkspaceStatus#STOPPING
    */
+  @Traced
   public CompletableFuture<Void> stopAsync(Workspace workspace, Map<String, String> options)
       throws NotFoundException, ConflictException {
     String workspaceId = workspace.getId();
