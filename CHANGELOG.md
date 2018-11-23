@@ -5,8 +5,8 @@
 
 **Merged pull requests:**
 
+- rh-che \#1075: Adding 'ImpersonatorInterceptor' during creation of KubernetesClient [\#12029](https://github.com/eclipse/che/pull/12029) ([ibuziuk](https://github.com/ibuziuk))
 - Add property to control ping interval in ServersChecker [\#11984](https://github.com/eclipse/che/pull/11984) ([amisevsk](https://github.com/amisevsk))
-
 
 ## [6.14.1](https://github.com/eclipse/che/tree/6.14.1) (2018-11-16)
 [Full Changelog](https://github.com/eclipse/che/compare/6.14.0...6.14.1)
