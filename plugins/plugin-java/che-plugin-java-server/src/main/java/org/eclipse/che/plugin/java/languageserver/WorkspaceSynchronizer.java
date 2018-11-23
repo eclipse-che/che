@@ -73,10 +73,6 @@ public class WorkspaceSynchronizer {
                   updateWorkspaceParameters.getRemovedProjectsUri().toString());
               break;
             default:
-              updateWorkspaceParameters
-                  .getAddedProjectsUri()
-                  .forEach(projectsSynchronizer::synchronize);
-
               LOG.info(
                   "Workspace updated. Result code: '{}', message: '{}'. Added projects: '{}', removed projects: '{}'",
                   jobResult.getResultCode(),

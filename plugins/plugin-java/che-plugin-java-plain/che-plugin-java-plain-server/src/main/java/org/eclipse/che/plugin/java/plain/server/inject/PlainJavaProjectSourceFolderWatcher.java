@@ -38,11 +38,11 @@ import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.languageserver.ExtendedLanguageServer;
 import org.eclipse.che.api.languageserver.FindServer;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.watcher.server.FileWatcherManager;
 import org.eclipse.che.api.watcher.server.impl.FileWatcherByPathMatcher;
 import org.eclipse.che.plugin.java.inject.JavaModule;
+import org.eclipse.che.plugin.java.languageserver.ProjectClassPathChangedEvent;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.FileChangeType;
@@ -93,7 +93,7 @@ public class PlainJavaProjectSourceFolderWatcher {
             s -> report(s, FileChangeType.Deleted));
 
     watcherIds.add(watcherId);
-    eventService.subscribe(this::onProjectUpdated, ProjectUpdatedEvent.class);
+    eventService.subscribe(this::onProjectUpdated, ProjectClassPathChangedEvent.class);
   }
 
   @PreDestroy
@@ -101,10 +101,10 @@ public class PlainJavaProjectSourceFolderWatcher {
     watcherIds.stream().forEach(id -> manager.unRegisterByMatcher(id));
   }
 
-  private void onProjectUpdated(ProjectUpdatedEvent event) {
+  private void onProjectUpdated(ProjectClassPathChangedEvent event) {
     ExecuteCommandParams params =
         new ExecuteCommandParams(
-            GET_PROJECT_SOURCE_LOCATIONS_COMMAND, singletonList(prefixURI(event.getProjectPath())));
+            GET_PROJECT_SOURCE_LOCATIONS_COMMAND, singletonList(prefixURI(event.getPath())));
 
     ExtendedLanguageServer languageServer = lsRegistry.byId(JavaModule.LS_ID);
     if (languageServer == null) {

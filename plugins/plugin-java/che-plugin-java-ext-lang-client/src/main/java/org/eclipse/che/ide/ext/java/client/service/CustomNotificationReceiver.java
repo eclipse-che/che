@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.languageserver.ide.service;
+package org.eclipse.che.ide.ext.java.client.service;
 
 import static org.eclipse.che.ide.api.jsonrpc.Constants.WS_AGENT_JSON_RPC_ENDPOINT_ID;
 
@@ -20,13 +20,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.resources.Container;
+import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathChangedEvent;
 import org.eclipse.che.ide.project.ProjectServiceClient;
-import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
-import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.jdt.ls.extension.api.Notifications;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 
@@ -73,32 +70,20 @@ public class CustomNotificationReceiver {
   private void handleNotification(ExecuteCommandParams params) {
     switch (params.getCommand()) {
       case Notifications.UPDATE_PROJECTS_CLASSPATH:
-        for (Object project : params.getArguments()) {
-          eventBus.fireEvent(new ProjectClasspathChangedEvent(stringValue(project)));
+        {
+          for (Object project : params.getArguments()) {
+            updateProjectConfig(stringValue(project));
+            eventBus.fireEvent(new ProjectClasspathChangedEvent(stringValue(project)));
+          }
+          break;
         }
-        break;
-      case Notifications.UPDATE_PROJECT:
-        for (Object project : params.getArguments()) {
-          updateProject(stringValue(project));
+      case Notifications.MAVEN_PROJECT_CREATED:
+        {
+          for (Object project : params.getArguments()) {
+            updateProjectConfig(stringValue(project));
+          }
+          break;
         }
-        break;
-      case Notifications.UPDATE_PROJECT_CONFIG:
-        updateProjectConfig(stringValue(params.getArguments()));
-        break;
-      case Notifications.UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
-        params
-            .getArguments()
-            .forEach(
-                project -> {
-                  updateProject(stringValue(project))
-                      .then(
-                          container -> {
-                            eventBus.fireEvent(
-                                new ProjectClasspathChangedEvent(
-                                    stringValue(container.getLocation().toString())));
-                          });
-                });
-        break;
       default:
         break;
     }
@@ -113,50 +98,15 @@ public class CustomNotificationReceiver {
         .sendAndSkipResult();
   }
 
-  private Promise<Container> updateProject(String project) {
-    return appContext
-        .getWorkspaceRoot()
-        .getContainer(project)
-        .thenPromise(
-            optContainer -> {
-              if (optContainer.isPresent()) {
-                Container container = optContainer.get();
-                return projectService
-                    .getProject(Path.valueOf(project))
-                    .thenPromise(
-                        projectConfigDto -> {
-                          return projectService
-                              .updateProject(projectConfigDto)
-                              .thenPromise(
-                                  arg -> {
-                                    container.synchronize();
-                                    return promises.resolve(container);
-                                  });
-                        });
-              }
-              return promises.resolve(null);
-            });
-  }
-
   private void updateProjectConfig(String project) {
     appContext
         .getWorkspaceRoot()
         .getContainer(project)
         .then(
             container -> {
-              projectService
-                  .getProject(Path.valueOf(project))
-                  .then(
-                      projectConfigDto -> {
-                        projectService
-                            .updateProject(projectConfigDto)
-                            .then(
-                                arg -> {
-                                  if (container.isPresent()) {
-                                    container.get().synchronize();
-                                  }
-                                });
-                      });
+              if (container.isPresent()) {
+                container.get().synchronize();
+              }
             });
   }
 
