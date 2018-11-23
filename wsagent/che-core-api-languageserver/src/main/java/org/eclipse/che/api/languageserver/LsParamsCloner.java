@@ -118,7 +118,7 @@ class LsParamsCloner {
       return null;
     }
 
-    int version = versionedTextDocumentIdentifier.getVersion();
+    Integer version = versionedTextDocumentIdentifier.getVersion();
     String uri = versionedTextDocumentIdentifier.getUri();
 
     VersionedTextDocumentIdentifier cloned = new VersionedTextDocumentIdentifier();
@@ -148,7 +148,7 @@ class LsParamsCloner {
     }
 
     Range range = textDocumentContentChangeEvent.getRange();
-    int rangeLength = textDocumentContentChangeEvent.getRangeLength();
+    Integer rangeLength = textDocumentContentChangeEvent.getRangeLength();
     String text = textDocumentContentChangeEvent.getText();
 
     TextDocumentContentChangeEvent cloned = new TextDocumentContentChangeEvent();
@@ -401,6 +401,7 @@ class LsParamsCloner {
     if (diagnosticRelatedInformations == null) {
       return null;
     }
+
     List<DiagnosticRelatedInformation> cloned =
         new ArrayList<>(diagnosticRelatedInformations.size());
     diagnosticRelatedInformations.stream().map(this::clone).forEach(cloned::add);
@@ -412,6 +413,7 @@ class LsParamsCloner {
     if (diagnosticRelatedInformation == null) {
       return null;
     }
+
     Location location = diagnosticRelatedInformation.getLocation();
     String message = diagnosticRelatedInformation.getMessage();
 
@@ -426,6 +428,7 @@ class LsParamsCloner {
     if (location == null) {
       return null;
     }
+
     Range range = location.getRange();
     String uri = location.getUri();
 
@@ -454,6 +457,7 @@ class LsParamsCloner {
     if (position == null) {
       return null;
     }
+
     int line = position.getLine();
     int character = position.getCharacter();
 
