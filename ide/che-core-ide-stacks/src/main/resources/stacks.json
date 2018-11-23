@@ -61,7 +61,7 @@
           "recipe": {
             "contentType": "application/x-yaml",
             "type": "compose",
-            "content": "services:\n  machine-exec:\n    image: 'wsskeleton/che-machine-exec:latest'\n    mem_limit: 536870912\n  theia:\n    image: 'eclipse/che-theia:0.3.16-6.14.1'\n    mem_limit: 1073741824\n    depends_on:\n      - machine-exec\n"
+            "content": "services:\n  machine-exec:\n    image: 'wsskeleton/che-machine-exec:latest'\n    mem_limit: 536870912\n  theia:\n    image: 'eclipse/che-theia:0.3.16-6.14.2'\n    mem_limit: 1073741824\n    depends_on:\n      - machine-exec\n"
           }
         }
       },
@@ -148,7 +148,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:0.3.16-6.14.1'\n     name: theia\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:6.14.1'\n     name: dev\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     mem_limit: 536870912\n     resources:\n      limits:\n       memory: 512Mi\n",
+            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:0.3.16-6.14.2'\n     name: theia\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:6.14.2'\n     name: dev\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     mem_limit: 536870912\n     resources:\n      limits:\n       memory: 512Mi\n",
             "contentType": "application/x-yaml"
           }
         }
@@ -236,7 +236,7 @@
           },
           "recipe": {
             "type": "kubernetes",
-            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:0.3.16-6.14.1'\n     name: theia\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:6.14.1'\n     name: dev\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     resources:\n      limits:\n       memory: 512Mi\n",
+            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:0.3.16-6.14.2'\n     name: theia\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:6.14.2'\n     name: dev\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     resources:\n      limits:\n       memory: 512Mi\n",
             "contentType": "application/x-yaml"
           }
         }
@@ -452,7 +452,7 @@
           },
           "recipe": {
             "type": "kubernetes",
-            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:6.14.1'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:6.14.2'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
             "contentType": "application/x-yaml"
           }
         }
