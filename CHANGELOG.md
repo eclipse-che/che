@@ -1,5 +1,34 @@
 # Change Log
 
+## [6.14.2](https://github.com/eclipse/che/tree/6.14.2) (2018-11-23)
+[Full Changelog](https://github.com/eclipse/che/compare/6.14.1...6.14.2)
+
+**Merged pull requests:**
+
+- Changes required for 6.14.2 version [\#12034](https://github.com/eclipse/che/pull/12034) ([ibuziuk](https://github.com/ibuziuk))
+- rh-che \#1075: Adding 'ImpersonatorInterceptor' during creation of KubernetesClient [\#12029](https://github.com/eclipse/che/pull/12029) ([ibuziuk](https://github.com/ibuziuk))
+- Use 'versions.sh' from proper place [\#12010](https://github.com/eclipse/che/pull/12010) ([evidolob](https://github.com/evidolob))
+- Selenium: cover workspace sharing feature by selenium test [\#12008](https://github.com/eclipse/che/pull/12008) ([SkorikSergey](https://github.com/SkorikSergey))
+- \[ Selenium \] Do minor fixing changes for stabilizing of "TheiaBuildPluginTest", "CreateNewJavaFilesTest", "DeletePackageTest" selenium tests [\#12007](https://github.com/eclipse/che/pull/12007) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- build.sh become working on Ubuntu / Linux Mint [\#12004](https://github.com/eclipse/che/pull/12004) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- \[ Selenium \] Fix of unexpected fail of "TheiaBuildPluginTest" and "RenameProjectTest" selenium tests [\#12001](https://github.com/eclipse/che/pull/12001) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Fix style bugs for UI [\#11999](https://github.com/eclipse/che/pull/11999) ([olexii4](https://github.com/olexii4))
+- \[ Selenium \] Fix of unexpected fail of "CheckErrorsWarningsTabTest" selenium test [\#11995](https://github.com/eclipse/che/pull/11995) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Add property to control ping interval in ServersChecker [\#11984](https://github.com/eclipse/che/pull/11984) ([amisevsk](https://github.com/amisevsk))
+- \[ Selenium \] Fix of unexpected fail of "CheckOnValidAndInvalidClassNameTest" and "RenamedAlreadyCreatedNotJavaFileTest" selenium tests [\#11979](https://github.com/eclipse/che/pull/11979) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Upgrade java8 version for workspace master [\#11977](https://github.com/eclipse/che/pull/11977) ([skabashnyuk](https://github.com/skabashnyuk))
+- Selenium: Delete try-catch from the 'GitCompareTest' related to resolve issue \#11791 [\#11974](https://github.com/eclipse/che/pull/11974) ([artaleks9](https://github.com/artaleks9))
+- RELEASE: Update CHANGELOG 6.14.1 [\#11971](https://github.com/eclipse/che/pull/11971) ([riuvshin](https://github.com/riuvshin))
+- Delegate toString to wrapped class [\#11959](https://github.com/eclipse/che/pull/11959) ([skabashnyuk](https://github.com/skabashnyuk))
+- Fix failed test due to the wrong mock reset [\#11957](https://github.com/eclipse/che/pull/11957) ([skabashnyuk](https://github.com/skabashnyuk))
+- Remove duplicate keys [\#11941](https://github.com/eclipse/che/pull/11941) ([tsmaeder](https://github.com/tsmaeder))
+- Remove unneeded listening of PluginBrokers Pod events [\#11940](https://github.com/eclipse/che/pull/11940) ([sleshchenko](https://github.com/sleshchenko))
+- Workspace tracing [\#11924](https://github.com/eclipse/che/pull/11924) ([metlos](https://github.com/metlos))
+- \[ Selenium \] Get rid of redundant methods in the "SeleniumWebDriverHelper" class [\#11913](https://github.com/eclipse/che/pull/11913) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Make a workspace run without any user env [\#11890](https://github.com/eclipse/che/pull/11890) ([garagatyi](https://github.com/garagatyi))
+- Use proxy forwarding [\#11137](https://github.com/eclipse/che/pull/11137) ([eivantsov](https://github.com/eivantsov))
+
+
 ## [6.14.1](https://github.com/eclipse/che/tree/6.14.1) (2018-11-16)
 [Full Changelog](https://github.com/eclipse/che/compare/6.14.0...6.14.1)
 
