@@ -193,7 +193,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   subscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
-    let statusHandler = (message: any) => {
+    const statusHandler = (message: any) => {
       if (workspaceId === message.workspaceId) {
         callback(message);
       }
@@ -239,8 +239,8 @@ export class CheJsonRpcMasterApi {
    * @param callback callback
    */
   private subscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
-    let method: string = channel.toString();
-    let params = {method: method, scope: {workspaceId: workspaceId}};
+    const method: string = channel.toString();
+    const params = {method: method, scope: {workspaceId: workspaceId}};
     this.cheJsonRpcApi.subscribe(SUBSCRIBE, method, callback, params);
   }
 
@@ -252,8 +252,8 @@ export class CheJsonRpcMasterApi {
    * @param callback callback
    */
   private unsubscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
-    let method: string = channel.toString();
-    let params = {method: method, scope: {workspaceId: workspaceId}};
+    const method: string = channel.toString();
+    const params = {method: method, scope: {workspaceId: workspaceId}};
     this.cheJsonRpcApi.unsubscribe(UNSUBSCRIBE, method, callback, params);
   }
 }
