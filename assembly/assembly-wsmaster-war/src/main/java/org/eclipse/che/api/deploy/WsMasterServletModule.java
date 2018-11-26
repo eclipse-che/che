@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Singleton;
 import org.apache.catalina.filters.CorsFilter;
+import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
@@ -32,28 +33,7 @@ public class WsMasterServletModule extends ServletModule {
       install(new org.eclipse.che.core.tracing.web.TracingWebModule());
     }
 
-    final Map<String, String> corsFilterParams = new HashMap<>();
-    corsFilterParams.put("cors.allowed.origins", "*");
-    corsFilterParams.put(
-        "cors.allowed.methods", "GET," + "POST," + "HEAD," + "OPTIONS," + "PUT," + "DELETE");
-    corsFilterParams.put(
-        "cors.allowed.headers",
-        "Content-Type,"
-            + "X-Requested-With,"
-            + "accept,"
-            + "Origin,"
-            + "Access-Control-Request-Method,"
-            + "Access-Control-Request-Headers");
-    if (Boolean.valueOf(System.getenv("CHE_CORS_ALLOW_CREDENTIALS"))) {
-      corsFilterParams.put("cors.support.credentials", "true");
-    } else {
-      corsFilterParams.put("cors.support.credentials", "false");
-    }
-    // preflight cache is available for 10 minutes
-    corsFilterParams.put("cors.preflight.maxage", "10");
-    bind(CorsFilter.class).in(Singleton.class);
-
-    filter("/*").through(CorsFilter.class, corsFilterParams);
+    filter("/*").through(CheCorsFilter.class);
     filter("/*").through(RequestIdLoggerFilter.class);
 
     // Matching group SHOULD contain forward slash.

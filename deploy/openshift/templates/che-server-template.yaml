@@ -300,8 +300,9 @@ parameters:
   displayName: Eclipse Che tracing
   description: Enable or disable tracing in Eclipse Che
   value: 'false'
-- name: CHE_CORS_ALLOW_CREDENTIALS
-  displayName: Allow requests with credentials for CORS filter on Che Server
+- name: CHE_CORS_ALLOW__CREDENTIALS
+  displayName: CORS filter on Che server
+  description: True to enable,
   value: 'true'
 labels:
   app: che
