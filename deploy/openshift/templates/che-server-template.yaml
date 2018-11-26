@@ -153,6 +153,8 @@ objects:
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
+          - name: CHE_WSMASTER_CORS_FILTER_ENABLED
+            value: "${CHE_WSMASTER_CORS_FILTER_ENABLED}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -298,6 +300,9 @@ parameters:
   displayName: Eclipse Che tracing
   description: Enable or disable tracing in Eclipse Che
   value: 'false'
+- name: CHE_WSMASTER_CORS_FILTER_ENABLED
+  displayName: CORS filter for Che Server
+  value: 'true'
 labels:
   app: che
   template: che
