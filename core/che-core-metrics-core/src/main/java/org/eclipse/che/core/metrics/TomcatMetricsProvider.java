@@ -20,8 +20,8 @@ import org.apache.catalina.Manager;
 
 /**
  * {@link javax.inject.Provider} of {@link
- * io.micrometer.core.instrument.binder.tomcat.TomcatMetrics} instance. Used constructor with
- * empty {@link io.micrometer.core.instrument.Tags}
+ * io.micrometer.core.instrument.binder.tomcat.TomcatMetrics} instance. Used constructor with empty
+ * {@link io.micrometer.core.instrument.Tags}
  */
 @Singleton
 public class TomcatMetricsProvider implements Provider<TomcatMetrics> {
