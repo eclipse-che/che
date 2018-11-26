@@ -256,7 +256,7 @@ public class JpaEntitiesCascadeRemovalTest {
                     .annotatedWith(Names.named("che.workspace.auto_restore"))
                     .toInstance(false);
                 bind(WorkspaceSharedPool.class)
-                    .toInstance(new WorkspaceSharedPool("cached", null, null));
+                    .toInstance(new WorkspaceSharedPool("cached", null, null, null));
 
                 bind(String[].class)
                     .annotatedWith(Names.named("che.auth.reserved_user_names"))

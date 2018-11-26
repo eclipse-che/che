@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +31,10 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.OptionalTracer;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -75,6 +80,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
+      @Nullable OptionalTracer tracer,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project,
       @Assisted List<Warning> warnings) {
@@ -97,6 +103,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         kubernetesEnvironmentProvisioner,
         toolingProvisioner,
         runtimeHangingDetector,
+        tracer,
         context,
         project,
         warnings);
@@ -107,24 +114,13 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   @Override
   protected void startMachines() throws InfrastructureException {
     OpenShiftEnvironment osEnv = getContext().getEnvironment();
+    String workspaceId = getContext().getIdentity().getWorkspaceId();
 
-    for (Secret secret : osEnv.getSecrets().values()) {
-      project.secrets().create(secret);
-    }
+    createSecrets(osEnv, workspaceId);
+    createConfigMaps(osEnv, workspaceId);
+    List<Service> createdServices = createServices(osEnv, workspaceId);
+    List<Route> createdRoutes = createRoutes(osEnv, workspaceId);
 
-    for (ConfigMap configMap : osEnv.getConfigMaps().values()) {
-      project.configMaps().create(configMap);
-    }
-
-    List<Service> createdServices = new ArrayList<>();
-    for (Service service : osEnv.getServices().values()) {
-      createdServices.add(project.services().create(service));
-    }
-
-    List<Route> createdRoutes = new ArrayList<>();
-    for (Route route : osEnv.getRoutes().values()) {
-      createdRoutes.add(project.routes().create(route));
-    }
     // TODO https://github.com/eclipse/che/issues/7653
     // project.pods().watch(new AbnormalStopHandler());
 
@@ -138,5 +134,52 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     }
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
+  }
+
+  @Traced
+  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
+  void createSecrets(OpenShiftEnvironment env, String workspaceId) throws InfrastructureException {
+    TracingTags.WORKSPACE_ID.set(workspaceId);
+    for (Secret secret : env.getSecrets().values()) {
+      project.secrets().create(secret);
+    }
+  }
+
+  @Traced
+  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
+  void createConfigMaps(OpenShiftEnvironment env, String workspaceId)
+      throws InfrastructureException {
+    TracingTags.WORKSPACE_ID.set(workspaceId);
+    for (ConfigMap configMap : env.getConfigMaps().values()) {
+      project.configMaps().create(configMap);
+    }
+  }
+
+  @Traced
+  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
+  List<Service> createServices(OpenShiftEnvironment env, String workspaceId)
+      throws InfrastructureException {
+    TracingTags.WORKSPACE_ID.set(workspaceId);
+    Collection<Service> servicesToCreate = env.getServices().values();
+    List<Service> createdServices = new ArrayList<>(servicesToCreate.size());
+    for (Service service : servicesToCreate) {
+      createdServices.add(project.services().create(service));
+    }
+
+    return createdServices;
+  }
+
+  @Traced
+  @SuppressWarnings("WeakerAccess") // package-private so that interception is possible
+  List<Route> createRoutes(OpenShiftEnvironment env, String workspaceId)
+      throws InfrastructureException {
+    TracingTags.WORKSPACE_ID.set(workspaceId);
+    Collection<Route> routesToCreate = env.getRoutes().values();
+    List<Route> createdRoutes = new ArrayList<>(routesToCreate.size());
+    for (Route route : routesToCreate) {
+      createdRoutes.add(project.routes().create(route));
+    }
+
+    return createdRoutes;
   }
 }

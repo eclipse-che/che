@@ -101,6 +101,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
+import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
@@ -125,6 +126,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -211,6 +213,9 @@ public class KubernetesInternalRuntimeTest {
                   mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
                   mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
 
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private OptionalTracer tracer;
+
   @BeforeMethod
   public void setup() throws Exception {
     MockitoAnnotations.initMocks(this);
@@ -241,6 +246,7 @@ public class KubernetesInternalRuntimeTest {
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
             runtimeHangingDetector,
+            tracer,
             context,
             namespace,
             emptyList());
@@ -265,6 +271,7 @@ public class KubernetesInternalRuntimeTest {
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
             runtimeHangingDetector,
+            tracer,
             context,
             namespace,
             emptyList());

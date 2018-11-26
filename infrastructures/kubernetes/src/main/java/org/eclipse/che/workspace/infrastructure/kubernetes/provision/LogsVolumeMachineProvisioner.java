@@ -17,6 +17,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -35,8 +37,12 @@ public class LogsVolumeMachineProvisioner implements ConfigurationProvisioner {
   }
 
   @Override
+  @Traced
   public void provision(KubernetesEnvironment environment, RuntimeIdentity identity)
       throws InfrastructureException {
+
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
+
     for (InternalMachineConfig machine : environment.getMachines().values()) {
       machine.getVolumes().put(LOGS_VOLUME_NAME, new VolumeImpl().withPath(logsRootPath));
     }

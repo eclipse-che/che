@@ -35,5 +35,6 @@
         <module>che-core-commons-test</module>
         <module>che-core-commons-j2ee</module>
         <module>che-core-commons-mail</module>
+        <module>che-core-commons-tracing</module>
     </modules>
 </project>
