@@ -63,6 +63,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -181,7 +182,9 @@ public class KubernetesPluginsToolingApplierTest {
     List<Warning> envWarnings = internalEnvironment.getWarnings();
     assertEquals(envWarnings.size(), 1);
     Warning warning = envWarnings.get(0);
-    assertEquals(warning.getCode(), 44012);
+    assertEquals(
+        warning.getCode(),
+        Warnings.COMMAND_IS_CONFIGURED_IN_PLUGIN_WITHOUT_CONTAINERS_WARNING_CODE);
     assertEquals(
         warning.getMessage(),
         "There are configured commands for plugin 'some-id:0.0.3' that doesn't have any containers");
@@ -219,7 +222,9 @@ public class KubernetesPluginsToolingApplierTest {
     List<Warning> envWarnings = internalEnvironment.getWarnings();
     assertEquals(envWarnings.size(), 1);
     Warning warning = envWarnings.get(0);
-    assertEquals(warning.getCode(), 44013);
+    assertEquals(
+        warning.getCode(),
+        Warnings.COMMAND_IS_CONFIGURED_IN_PLUGIN_WITH_MULTIPLY_CONTAINERS_WARNING_CODE);
     assertEquals(
         warning.getMessage(),
         "There are configured commands for plugin 'some-id:0.0.3' that has multiply containers. Commands will be configured to be run in first container");

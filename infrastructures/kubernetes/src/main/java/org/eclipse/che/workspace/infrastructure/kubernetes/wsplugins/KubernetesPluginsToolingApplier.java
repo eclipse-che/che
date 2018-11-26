@@ -42,6 +42,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -251,9 +252,10 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .getWarnings()
             .add(
                 new WarningImpl(
-                    44012,
+                    Warnings.COMMAND_IS_CONFIGURED_IN_PLUGIN_WITHOUT_CONTAINERS_WARNING_CODE,
                     format(
-                        "There are configured commands for plugin '%s' that doesn't have any containers",
+                        Warnings
+                            .COMMAND_IS_CONFIGURED_IN_PLUGIN_WITHOUT_CONTAINERS_WARNING_MESSAGE_FMT,
                         pluginRef)));
         return emptyList();
       }
@@ -263,9 +265,10 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .getWarnings()
             .add(
                 new WarningImpl(
-                    44013,
+                    Warnings.COMMAND_IS_CONFIGURED_IN_PLUGIN_WITH_MULTIPLY_CONTAINERS_WARNING_CODE,
                     format(
-                        "There are configured commands for plugin '%s' that has multiply containers. Commands will be configured to be run in first container",
+                        Warnings
+                            .COMMAND_IS_CONFIGURED_IN_PLUGIN_WITH_MULTIPLY_CONTAINERS_WARNING_MESSAGE_FMT,
                         pluginRef)));
       }
 
