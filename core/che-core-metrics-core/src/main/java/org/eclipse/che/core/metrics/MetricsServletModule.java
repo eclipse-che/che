@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * ServletModule is made to bind @{@link org.eclipse.che.core.metrics.TomcatMetricsProvider} in
+ * ServletModule is made to bind {@link org.eclipse.che.core.metrics.TomcatMetricsProvider} in
  * guice container.
  */
 public class MetricsServletModule extends ServletModule {
