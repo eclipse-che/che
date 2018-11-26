@@ -24,7 +24,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Bind disk usage metrics for for every @{@link java.nio.file.FileStore}. */
+/** Bind disk usage metrics for for every {@link java.nio.file.FileStore}. */
 @Singleton
 public class FileStoresMeterBinder implements MeterBinder {
 
