@@ -12,10 +12,6 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
-import java.util.HashMap;
-import java.util.Map;
-import javax.inject.Singleton;
-import org.apache.catalina.filters.CorsFilter;
 import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
