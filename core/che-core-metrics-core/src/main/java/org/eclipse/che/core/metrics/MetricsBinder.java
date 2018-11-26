@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Takes all @{@link io.micrometer.core.instrument.binder.MeterBinder} from guice container, binded
+ * Takes all {@link io.micrometer.core.instrument.binder.MeterBinder} from guice container, binded
  * with {@link com.google.inject.multibindings.Multibinder}, and bind them to {@link
  * io.micrometer.prometheus.PrometheusMeterRegistry} on PostConstruct.
  */
