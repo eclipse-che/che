@@ -18,6 +18,7 @@ import {StackSelectorSvc} from './stack-selector.service';
 import {CheBranding} from '../../../../components/branding/che-branding.factory';
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
+import {CheRecipeTypes} from '../../../../components/api/recipe/che-recipe-types';
 
 /**
  * @ngdoc controller
@@ -222,7 +223,7 @@ export class StackSelectorController {
       }
 
       this.stackMachines[stack.id] = [];
-      if (stack.workspaceConfig) {
+      if (stack.workspaceConfig && stack.workspaceConfig.defaultEnv) {
         // get machines memory limits
         const defaultEnv = stack.workspaceConfig.defaultEnv,
           environment = stack.workspaceConfig.environments[defaultEnv],
@@ -253,6 +254,10 @@ export class StackSelectorController {
 
     // for quickstart do not show stacks based on unsupported recipe types
     this.stacksByScope[StackSelectorScope.QUICK_START] = this.stacksByScope[StackSelectorScope.QUICK_START].filter((stack: che.IStack) => {
+      if (!stack.workspaceConfig.defaultEnv) {
+        return this.supportedRecipeTypes.indexOf(CheRecipeTypes.NOENVIRONMENT) !== -1;
+      }
+      
       const defaultEnvName = stack.workspaceConfig.defaultEnv,
         defaultEnv = stack.workspaceConfig.environments[defaultEnvName],
         recipeType = defaultEnv.recipe.type;
