@@ -539,7 +539,7 @@
         {
           "commandLine": "echo ${CHE_OSO_CLUSTER//api/console}",
           "name": "Get OpenShift Console URL",
-          "type": "",
+          "type": "custom",
           "attributes": {}
         }
       ],
