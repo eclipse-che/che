@@ -237,7 +237,7 @@ public class CascadeRemovalTest {
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
                 bind(WorkspaceSharedPool.class)
-                    .toInstance(new WorkspaceSharedPool("cached", null, null));
+                    .toInstance(new WorkspaceSharedPool("cached", null, null, null));
               }
             });
 
