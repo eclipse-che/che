@@ -77,8 +77,8 @@ export class StackValidationService {
    * @returns {IValidation}
    */
   getWorkspaceConfigValidation(workspaceConfig: che.IWorkspaceConfig): che.IValidation {
-    let mandatoryKeys: Array<string> = ['name', 'environments', 'defaultEnv'];
-    let additionalKeys: Array<string> = ['commands', 'projects', 'description', 'links', 'attributes'];
+    let mandatoryKeys: Array<string> = ['name', 'environments'];
+    let additionalKeys: Array<string> = ['commands', 'projects', 'description', 'links', 'attributes', 'defaultEnv'];
     let validKeys: Array<string> = mandatoryKeys.concat(additionalKeys);
     let errors: Array<string> = [];
     let isValid: boolean = true;
@@ -113,7 +113,7 @@ export class StackValidationService {
           errors = errors.concat(environmentValidation.errors);
         }
       });
-      if (!workspaceEnvironments[workspaceConfig.defaultEnv]) {
+      if (keys && keys.length > 0 && !workspaceEnvironments[workspaceConfig.defaultEnv]) {
         isValid = false;
         errors.push('Can\'t find default environment in environments.');
       }

@@ -307,7 +307,7 @@ export class FactoryInformationController {
    * @returns {any}
    */
   getRecipe(): string {
-    if (this.copyOriginFactory && this.copyOriginFactory.workspace) {
+    if (this.copyOriginFactory && this.copyOriginFactory.workspace && this.copyOriginFactory.workspace.defaultEnv) {
       let environement = this.copyOriginFactory.workspace.environments[this.copyOriginFactory.workspace.defaultEnv];
       return environement.recipe.location || environement.recipe.content;
     }
