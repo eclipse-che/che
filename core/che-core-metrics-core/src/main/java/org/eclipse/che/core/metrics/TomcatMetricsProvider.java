@@ -19,7 +19,7 @@ import javax.inject.Singleton;
 import org.apache.catalina.Manager;
 
 /**
- * {@link javax.inject.Provider} of @{@link
+ * {@link javax.inject.Provider} of {@link
  * io.micrometer.core.instrument.binder.tomcat.TomcatMetrics} instance. Used constructor with
  * empty {@link io.micrometer.core.instrument.Tags}
  */
