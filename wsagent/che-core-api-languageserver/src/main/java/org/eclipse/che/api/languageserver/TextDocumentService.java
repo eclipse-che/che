@@ -13,6 +13,7 @@ package org.eclipse.che.api.languageserver;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.fs.server.WsPathUtils.ROOT;
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.*;
 
@@ -934,10 +935,18 @@ public class TextDocumentService {
               .filter(s -> s.getServer() instanceof FileContentAccess)
               .findFirst();
       if (serverOptional.isPresent()) {
-        URI uri = languageServerPathTransformer.toFsURI(serverOptional.get().getId(), wsPath);
+        String uri;
+        if (wsPath.startsWith(ROOT)) {
+          uri =
+              languageServerPathTransformer
+                  .toFsURI(serverOptional.get().getId(), wsPath)
+                  .toString();
+        } else {
+          uri = wsPath;
+        }
 
         return ((FileContentAccess) serverOptional.get().getServer())
-            .getFileContent(uri.toString())
+            .getFileContent(uri)
             .get(5000, TimeUnit.MILLISECONDS);
       } else {
         return null;

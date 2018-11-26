@@ -356,7 +356,7 @@ class LsParamsCloner {
 
     CodeActionContext cloned = new CodeActionContext();
     cloned.setDiagnostics(cloneD(diagnostics));
-    cloned.setOnly(new ArrayList<>(only));
+    cloned.setOnly(only == null ? null : new ArrayList<>(only));
 
     return cloned;
   }
