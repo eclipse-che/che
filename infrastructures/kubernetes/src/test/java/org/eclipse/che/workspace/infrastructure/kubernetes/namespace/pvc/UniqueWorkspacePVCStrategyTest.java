@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -147,6 +148,10 @@ public class UniqueWorkspacePVCStrategyTest {
     mockName(pod2, POD_NAME_2);
 
     lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
+    Map<String, String> workspaceAttributes = new HashMap<>();
+    WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
+    lenient().when(workspace.getConfig()).thenReturn(workspaceConfig);
+    lenient().when(workspaceConfig.getAttributes()).thenReturn(workspaceAttributes);
   }
 
   @Test
@@ -219,9 +224,10 @@ public class UniqueWorkspacePVCStrategyTest {
     when(k8sEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID);
+    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
 
     verify(pvcs).create(any());
+    verify(pvcs).waitBound(uniqueName, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -230,7 +236,7 @@ public class UniqueWorkspacePVCStrategyTest {
     when(k8sEnv.getPersistentVolumeClaims()).thenReturn(singletonMap(PVC_NAME_PREFIX, pvc));
     doThrow(InfrastructureException.class).when(pvcs).create(any(PersistentVolumeClaim.class));
 
-    strategy.prepare(k8sEnv, WORKSPACE_ID);
+    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
   }
 
   @Test

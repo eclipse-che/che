@@ -100,7 +100,6 @@ public class DeployBrokerTest {
     assertSame(result, plugins);
     verify(k8sConfigMaps).create(configMap);
     verify(k8sDeployments).create(pod);
-    verify(k8sDeployments).waitRunningAsync(PLUGIN_BROKER_POD_NAME);
 
     verify(k8sDeployments).stopWatch();
     verify(k8sDeployments).delete();

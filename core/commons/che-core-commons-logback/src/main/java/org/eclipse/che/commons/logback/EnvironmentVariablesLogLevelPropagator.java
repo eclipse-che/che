@@ -18,6 +18,7 @@ import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.core.spi.ContextAwareBase;
 import ch.qos.logback.core.spi.LifeCycle;
 import java.util.Arrays;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class searches environment variable CHE_LOGGER_CONFIG Value of this variable is expected in such
@@ -29,15 +30,17 @@ import java.util.Arrays;
  */
 public class EnvironmentVariablesLogLevelPropagator extends ContextAwareBase
     implements LoggerContextListener, LifeCycle {
+  private static final org.slf4j.Logger LOG =
+      LoggerFactory.getLogger(EnvironmentVariablesLogLevelPropagator.class);
 
   private boolean isStarted;
 
   @Override
   public void start() {
-
     String config = System.getenv("CHE_LOGGER_CONFIG");
     if (config != null && !config.isEmpty()) {
       Arrays.stream(config.split(",")).map(String::trim).forEach(this::setLoggerLevel);
+      LOG.info("The following Che Logger Config is applied: {}", config);
     }
     isStarted = true;
   }

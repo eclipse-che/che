@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.theia;
 
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 import static org.testng.Assert.fail;
 
@@ -82,6 +83,7 @@ public class TheiaBuildPluginTest {
     final String helloWorldPluginProposal = "Hello World plug-in";
     final String goToDirectoryCommand = "cd hello-world";
     final String wsTheiaIdeTerminalTitle = "ws/theia-ide terminal 0";
+    final String expectedYaomanMessage = "Yeoman generator successfully ended";
     final String expectedTerminalSuccessOutput =
         "Packaging of plugin\n"
             + "\uD83D\uDD0D Validating...✔️\n"
@@ -93,8 +95,11 @@ public class TheiaBuildPluginTest {
     final String backendPluginDescription = "Backend plug-in, it will run on the server side.";
 
     // prepare project tree
+    theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
+    theiaIde.waitNotificationDisappearance(
+        "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
     // create project by "Yeoman Wizard"
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
@@ -106,6 +111,8 @@ public class TheiaBuildPluginTest {
     seleniumWebDriverHelper.pressEnter();
     theiaProposalForm.clickOnProposal(backendPluginDescription);
     theiaProposalForm.clickOnProposal(helloWorldPluginProposal);
+    theiaIde.waitNotificationMessageContains(expectedYaomanMessage, UPDATING_PROJECT_TIMEOUT_SEC);
+    theiaIde.waitNotificationDisappearance(expectedYaomanMessage, UPDATING_PROJECT_TIMEOUT_SEC);
 
     // build plugin
     openTerminal("File", "Open new multi-machine terminal", "ws/theia-ide");
@@ -167,7 +174,7 @@ public class TheiaBuildPluginTest {
     waitHostedPageReady();
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectAreaOpened();
-    theiaProjectTree.waitOpenWorkspaceButton();
+    theiaProjectTree.waitItem(projectName);
 
     // check plugin output
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
@@ -198,7 +205,7 @@ public class TheiaBuildPluginTest {
     seleniumWebDriver.navigate().refresh();
     waitHostedPageReady();
     theiaProjectTree.waitProjectAreaOpened();
-    theiaProjectTree.waitOpenWorkspaceButton();
+    theiaProjectTree.waitItem(projectName);
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitSearchField();
     theiaProposalForm.enterTextToSearchField(helloWorldSearchSequence);

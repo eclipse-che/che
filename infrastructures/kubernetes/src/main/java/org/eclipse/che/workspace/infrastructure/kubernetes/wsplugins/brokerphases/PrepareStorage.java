@@ -15,6 +15,7 @@ import com.google.common.annotations.Beta;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 
@@ -31,19 +32,23 @@ public class PrepareStorage extends BrokerPhase {
   private final String workspaceId;
   private final KubernetesEnvironment brokerEnvironment;
   private final WorkspaceVolumesStrategy volumesStrategy;
+  private final StartSynchronizer startSynchronizer;
 
   public PrepareStorage(
       String workspaceId,
       KubernetesEnvironment brokerEnvironment,
-      WorkspaceVolumesStrategy volumesStrategy) {
+      WorkspaceVolumesStrategy volumesStrategy,
+      StartSynchronizer startSynchronizer) {
     this.workspaceId = workspaceId;
     this.brokerEnvironment = brokerEnvironment;
     this.volumesStrategy = volumesStrategy;
+    this.startSynchronizer = startSynchronizer;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
-    volumesStrategy.prepare(brokerEnvironment, workspaceId);
+    volumesStrategy.prepare(
+        brokerEnvironment, workspaceId, startSynchronizer.getStartTimeoutMillis());
 
     return nextPhase.execute();
   }

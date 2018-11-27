@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STARTING;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
@@ -68,6 +67,7 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
+import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -87,6 +87,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarTool
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
+import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -100,6 +101,7 @@ import org.testng.annotations.Test;
  * @author Anton Korneta
  */
 public class OpenShiftInternalRuntimeTest {
+
   private static final int EXPOSED_PORT_1 = 4401;
   private static final int EXPOSED_PORT_2 = 8081;
   private static final int INTERNAL_PORT = 4411;
@@ -145,10 +147,12 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private OptionalTracer tracer;
+
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
   private OpenShiftInternalRuntime internalRuntime;
-  private OpenShiftInternalRuntime internalRuntimeWithoutUnrecoverableEventHandler;
 
   private Map<String, Service> allServices;
   private Map<String, Route> allRoutes;
@@ -179,33 +183,9 @@ public class OpenShiftInternalRuntimeTest {
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
             runtimeHangingDetector,
+            tracer,
             context,
-            project,
-            emptyList());
-
-    internalRuntimeWithoutUnrecoverableEventHandler =
-        new OpenShiftInternalRuntime(
-            13,
-            5,
-            new URLRewriter.NoOpURLRewriter(),
-            unrecoverablePodEventListenerFactory,
-            bootstrapperFactory,
-            serverCheckerFactory,
-            volumesStrategy,
-            probesScheduler,
-            workspaceProbesFactory,
-            new RuntimeEventsPublisher(eventService),
-            mock(KubernetesSharedPool.class),
-            runtimeStateCache,
-            machinesCache,
-            startSynchronizerFactory,
-            ImmutableSet.of(internalEnvironmentProvisioner),
-            kubernetesEnvironmentProvisioner,
-            toolingProvisioner,
-            runtimeHangingDetector,
-            context,
-            project,
-            emptyList());
+            project);
 
     when(context.getEnvironment()).thenReturn(osEnv);
     when(serverCheckerFactory.create(any(), anyString(), any())).thenReturn(serversChecker);
@@ -272,7 +252,7 @@ public class OpenShiftInternalRuntimeTest {
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
     when(osEnv.getPods()).thenReturn(allPods);
 
-    internalRuntimeWithoutUnrecoverableEventHandler.startMachines();
+    internalRuntime.startMachines();
 
     verify(deployments).deploy(any());
     verify(routes).create(any());

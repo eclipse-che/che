@@ -18,6 +18,9 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.TracingTags;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 
@@ -27,13 +30,15 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.Configurati
  * @author Alexander Garagatyi
  */
 public class RestartPolicyRewriter implements ConfigurationProvisioner {
-  public static final int RESTART_POLICY_SET_TO_NEVER = 4104;
 
   static final String DEFAULT_RESTART_POLICY = "Never";
 
   @Override
+  @Traced
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     for (Pod podConfig : k8sEnv.getPods().values()) {
       final String podName = podConfig.getMetadata().getName();
@@ -48,9 +53,11 @@ public class RestartPolicyRewriter implements ConfigurationProvisioner {
     if (restartPolicy != null && !DEFAULT_RESTART_POLICY.equalsIgnoreCase(restartPolicy)) {
       final String warnMsg =
           format(
-              "Restart policy '%s' for pod '%s' is rewritten with %s",
-              restartPolicy, podName, DEFAULT_RESTART_POLICY);
-      env.addWarning(new WarningImpl(RESTART_POLICY_SET_TO_NEVER, warnMsg));
+              Warnings.RESTART_POLICY_SET_TO_NEVER_WARNING_MESSAGE_FMT,
+              restartPolicy,
+              podName,
+              DEFAULT_RESTART_POLICY);
+      env.addWarning(new WarningImpl(Warnings.RESTART_POLICY_SET_TO_NEVER_WARNING_CODE, warnMsg));
     }
     podSpec.setRestartPolicy(DEFAULT_RESTART_POLICY);
   }

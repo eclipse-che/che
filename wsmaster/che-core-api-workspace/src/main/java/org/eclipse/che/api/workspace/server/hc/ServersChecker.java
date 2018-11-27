@@ -47,6 +47,7 @@ public class ServersChecker {
   private final Map<String, ? extends Server> servers;
   private final MachineTokenProvider machineTokenProvider;
   private final int serverPingSuccessThreshold;
+  private final long serverPingIntervalMillis;
   private final Set<String> livenessProbes;
 
   private Timer timer;
@@ -66,6 +67,7 @@ public class ServersChecker {
       @Assisted Map<String, ? extends Server> servers,
       MachineTokenProvider machineTokenProvider,
       @Named("che.workspace.server.ping_success_threshold") int serverPingSuccessThreshold,
+      @Named("che.workspace.server.ping_interval_milliseconds") long serverPingInterval,
       @Named("che.workspace.server.liveness_probes") String[] livenessProbes) {
     this.runtimeIdentity = runtimeIdentity;
     this.machineName = machineName;
@@ -73,6 +75,7 @@ public class ServersChecker {
     this.timer = new Timer("ServersChecker", true);
     this.machineTokenProvider = machineTokenProvider;
     this.serverPingSuccessThreshold = serverPingSuccessThreshold;
+    this.serverPingIntervalMillis = serverPingInterval;
     this.livenessProbes =
         Arrays.stream(livenessProbes).map(String::trim).collect(Collectors.toSet());
   }
@@ -211,10 +214,10 @@ public class ServersChecker {
           url,
           machineName,
           serverRef,
-          3,
-          180,
+          serverPingIntervalMillis,
+          TimeUnit.SECONDS.toMillis(180),
           serverPingSuccessThreshold,
-          TimeUnit.SECONDS,
+          TimeUnit.MILLISECONDS,
           timer,
           token);
     }
@@ -223,10 +226,10 @@ public class ServersChecker {
         url,
         machineName,
         serverRef,
-        3,
-        180,
+        serverPingIntervalMillis,
+        TimeUnit.SECONDS.toMillis(180),
         serverPingSuccessThreshold,
-        TimeUnit.SECONDS,
+        TimeUnit.MILLISECONDS,
         timer,
         token);
   }

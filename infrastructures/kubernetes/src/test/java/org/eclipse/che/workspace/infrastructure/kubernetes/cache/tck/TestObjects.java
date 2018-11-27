@@ -16,17 +16,19 @@ import static java.util.Collections.emptyMap;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
 import java.util.Map;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
-import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 
 /** @author Sergii Leshchenko */
 public class TestObjects {
@@ -51,9 +53,18 @@ public class TestObjects {
 
   public static KubernetesRuntimeState createRuntimeState(WorkspaceImpl workspace) {
     return new KubernetesRuntimeState(
-        new RuntimeId(workspace.getId(), "defEnv", workspace.getAccount().getId()),
+        new RuntimeIdentityImpl(workspace.getId(), "defEnv", workspace.getAccount().getId()),
         generate("namespace", 5),
-        WorkspaceStatus.RUNNING);
+        WorkspaceStatus.RUNNING,
+        Arrays.asList(createCommand(), createCommand()));
+  }
+
+  public static CommandImpl createCommand() {
+    CommandImpl cmd =
+        new CommandImpl(generate("command", 5), "echo " + generate("command", 5), "CUSTOM");
+    cmd.getAttributes().put("attr1", "val1");
+    cmd.getAttributes().put("attr2", "val2");
+    return cmd;
   }
 
   public static KubernetesMachineImpl createMachine(

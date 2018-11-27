@@ -42,6 +42,11 @@ class CopyThreadLocalRunnable implements Runnable {
     }
   }
 
+  @Override
+  public String toString() {
+    return "CopyThreadLocalRunnable{ " + wrapped.toString() + " }";
+  }
+
   public Runnable getWrapped() {
     return wrapped;
   }

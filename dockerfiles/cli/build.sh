@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Copyright (c) 2017 Red Hat, Inc.
 # This program and the accompanying materials are made
@@ -25,5 +25,5 @@ fi
 build
 
 if ! skip_tests; then
-  sh "${base_dir}"/test.sh "$@"
+  bash "${base_dir}"/test.sh "$@"
 fi

@@ -11,28 +11,40 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.model;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 
 /** @author Sergii Leshchenko */
 @Entity(name = "KubernetesRuntime")
 @Table(name = "che_k8s_runtime")
 @NamedQueries({
-  @NamedQuery(name = "KubernetesRuntime.getAll", query = "SELECT r FROM KubernetesRuntime r"),
-  @NamedQuery(
-      name = "KubernetesRuntime.getByWorkspaceId",
-      query = "SELECT r FROM KubernetesRuntime r WHERE r.runtimeId.workspaceId = :workspaceId")
+  @NamedQuery(name = "KubernetesRuntime.getAll", query = "SELECT r FROM KubernetesRuntime r")
 })
 public class KubernetesRuntimeState {
-  @EmbeddedId private RuntimeId runtimeId;
+  @Id
+  @Column(name = "workspace_id")
+  private String workspaceId;
+
+  @Column(name = "env_name")
+  private String envName;
+
+  @Column(name = "owner_id")
+  private String ownerId;
 
   @Column(name = "namespace")
   private String namespace;
@@ -40,29 +52,38 @@ public class KubernetesRuntimeState {
   @Column(name = "status")
   private WorkspaceStatus status;
 
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "workspace_id", referencedColumnName = "workspace_id")
+  private List<KubernetesRuntimeCommandImpl> commands;
+
   public KubernetesRuntimeState() {}
 
   public KubernetesRuntimeState(
-      RuntimeIdentity runtimeIdentity, String namespace, WorkspaceStatus status) {
-    this.runtimeId =
-        new RuntimeId(
-            runtimeIdentity.getWorkspaceId(),
-            runtimeIdentity.getEnvName(),
-            runtimeIdentity.getOwnerId());
+      RuntimeIdentity runtimeIdentity,
+      String namespace,
+      WorkspaceStatus status,
+      List<? extends Command> commands) {
+    this.envName = runtimeIdentity.getEnvName();
+    this.workspaceId = runtimeIdentity.getWorkspaceId();
+    this.ownerId = runtimeIdentity.getOwnerId();
     this.namespace = namespace;
     this.status = status;
+    if (commands != null) {
+      this.commands =
+          commands.stream().map(KubernetesRuntimeCommandImpl::new).collect(Collectors.toList());
+    }
   }
 
   public KubernetesRuntimeState(KubernetesRuntimeState entity) {
-    this(entity.getRuntimeId(), entity.getNamespace(), entity.getStatus());
+    this(entity.getRuntimeId(), entity.getNamespace(), entity.getStatus(), entity.getCommands());
   }
 
   public String getNamespace() {
     return namespace;
   }
 
-  public RuntimeId getRuntimeId() {
-    return runtimeId;
+  public RuntimeIdentity getRuntimeId() {
+    return new RuntimeIdentityImpl(workspaceId, envName, ownerId);
   }
 
   public WorkspaceStatus getStatus() {
@@ -78,117 +99,52 @@ public class KubernetesRuntimeState {
     return this;
   }
 
+  public List<KubernetesRuntimeCommandImpl> getCommands() {
+    return commands;
+  }
+
+  public void setCommands(List<KubernetesRuntimeCommandImpl> commands) {
+    this.commands = commands;
+  }
+
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (!(obj instanceof KubernetesRuntimeState)) {
+    if (!(o instanceof KubernetesRuntimeState)) {
       return false;
     }
-    final KubernetesRuntimeState that = (KubernetesRuntimeState) obj;
-    return Objects.equals(runtimeId, that.runtimeId)
-        && Objects.equals(namespace, that.namespace)
-        && Objects.equals(status, that.status);
+    KubernetesRuntimeState that = (KubernetesRuntimeState) o;
+    return Objects.equals(workspaceId, that.workspaceId)
+        && Objects.equals(envName, that.envName)
+        && Objects.equals(ownerId, that.ownerId)
+        && Objects.equals(getNamespace(), that.getNamespace())
+        && getStatus() == that.getStatus();
   }
 
   @Override
   public int hashCode() {
-    int hash = 7;
-    hash = 31 * hash + Objects.hashCode(runtimeId);
-    hash = 31 * hash + Objects.hashCode(namespace);
-    hash = 31 * hash + Objects.hashCode(status);
-    return hash;
+    return Objects.hash(workspaceId, envName, ownerId, getNamespace(), getStatus());
   }
 
   @Override
   public String toString() {
     return "KubernetesRuntimeState{"
-        + "runtimeId="
-        + runtimeId
+        + "workspaceId='"
+        + workspaceId
+        + '\''
+        + ", envName='"
+        + envName
+        + '\''
+        + ", ownerId='"
+        + ownerId
+        + '\''
         + ", namespace='"
         + namespace
         + '\''
         + ", status="
         + status
         + '}';
-  }
-
-  @Embeddable
-  public static class RuntimeId implements RuntimeIdentity {
-
-    @Column(name = "workspace_id")
-    private String workspaceId;
-
-    @Column(name = "env_name")
-    private String envName;
-
-    @Column(name = "owner_id")
-    private String ownerId;
-
-    public RuntimeId() {}
-
-    public RuntimeId(String workspaceId, String envName, String ownerId) {
-      this.workspaceId = workspaceId;
-      this.envName = envName;
-      this.ownerId = ownerId;
-    }
-
-    public RuntimeId(RuntimeIdentity identity) {
-      this(identity.getWorkspaceId(), identity.getEnvName(), identity.getOwnerId());
-    }
-
-    @Override
-    public String getWorkspaceId() {
-      return workspaceId;
-    }
-
-    @Override
-    public String getEnvName() {
-      return envName;
-    }
-
-    @Override
-    public String getOwnerId() {
-      return ownerId;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      }
-      if (!(obj instanceof RuntimeId)) {
-        return false;
-      }
-      final RuntimeId that = (RuntimeId) obj;
-      return Objects.equals(workspaceId, that.workspaceId)
-          && Objects.equals(envName, that.envName)
-          && Objects.equals(ownerId, that.ownerId);
-    }
-
-    @Override
-    public int hashCode() {
-      int hash = 7;
-      hash = 31 * hash + Objects.hashCode(workspaceId);
-      hash = 31 * hash + Objects.hashCode(envName);
-      hash = 31 * hash + Objects.hashCode(ownerId);
-      return hash;
-    }
-
-    @Override
-    public String toString() {
-      return "RuntimeId{"
-          + "workspaceId='"
-          + workspaceId
-          + '\''
-          + ", envName='"
-          + envName
-          + '\''
-          + ", ownerId='"
-          + ownerId
-          + '\''
-          + '}';
-    }
   }
 }

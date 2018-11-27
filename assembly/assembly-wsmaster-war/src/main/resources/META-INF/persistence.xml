@@ -70,7 +70,7 @@
         <class>org.eclipse.che.multiuser.machine.authentication.server.signature.model.impl.SignatureKeyPairImpl</class>
 
         <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState</class>
-        <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId</class>
+        <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl</class>
 
         <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl</class>
         <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl.MachineId</class>

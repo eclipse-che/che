@@ -118,7 +118,7 @@ function checkoutRepo(path, checkoutTarget) {
 function buildExtension(path, rootPath) {
     try {
         console.log('Generate versions for extension: ', path);
-        spawnSync(`${DEFAULT_THEIA_ROOT}/versions.sh`, [], {cwd: `${path}`});
+        spawnSync(`/home/theia-build/versions.sh`, [], { cwd: `${path}` });
         if (path !== rootPath) {
             console.log("Removing parent files");
             // cleanup files in root path

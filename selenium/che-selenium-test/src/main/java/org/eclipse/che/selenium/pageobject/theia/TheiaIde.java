@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_CLOSE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE;
@@ -113,15 +114,23 @@ public class TheiaIde {
   }
 
   public void waitNotificationMessageContains(String expectedText) {
+    waitNotificationMessageContains(expectedText, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public void waitNotificationMessageContains(String expectedText, int timeout) {
     final String notificationMessage = getNotificationContainsXpath(expectedText);
 
-    seleniumWebDriverHelper.waitVisibility(By.xpath(notificationMessage));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(notificationMessage), timeout);
   }
 
   public void waitNotificationDisappearance(String notificationText) {
+    waitNotificationDisappearance(notificationText, LOAD_PAGE_TIMEOUT_SEC);
+  }
+
+  public void waitNotificationDisappearance(String notificationText, int timeout) {
     final String notificationMessage = getNotificationContainsXpath(notificationText);
 
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(notificationMessage));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(notificationMessage), timeout);
   }
 
   public void waitTheiaIde() {
@@ -175,8 +184,14 @@ public class TheiaIde {
   }
 
   public void switchToIdeFrame() {
-    seleniumWebDriverHelper.waitAndSwitchToFrame(
-        By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+    final String ideWindowXpath = "//ide-iframe[@id='ide-iframe-window' and @aria-hidden='false']";
+    final String ideFrameId = "ide-application-iframe";
+
+    // wait until IDE window is opened
+    seleniumWebDriverHelper.waitVisibility(By.xpath(ideWindowXpath), PREPARING_WS_TIMEOUT_SEC);
+
+    // switch to IDE frame
+    seleniumWebDriverHelper.waitAndSwitchToFrame(By.id(ideFrameId), PREPARING_WS_TIMEOUT_SEC);
   }
 
   public void pressKeyCombination(CharSequence... combination) {

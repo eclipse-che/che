@@ -11,10 +11,13 @@
  */
 package org.eclipse.che.api.core.model.workspace.runtime;
 
+import org.eclipse.che.commons.annotation.Nullable;
+
 /** @author gazarenkov */
 public interface RuntimeIdentity {
   String getWorkspaceId();
 
+  @Nullable
   String getEnvName();
 
   String getOwnerId();

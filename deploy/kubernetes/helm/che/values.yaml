@@ -49,7 +49,7 @@ global:
   # Service account name that will be mounted to workspaces pods
   # Note that:
   # if `cheWorkspacesNamespace` is configured then service account with configured name will be created by helm chart during deploying Che
-  # if `cheWorkspacesNamespace` is empty then Che Server creates new namespace for each workspace and creates configured SA exists there
+  # if `cheWorkspacesNamespace` is empty then Che Server creates new namespace for each workspace and ensures that configured SA exists there
   cheWorkspaceServiceAccount: "che-workspace"
   workspaceIdleTimeout: "-1"
   log:

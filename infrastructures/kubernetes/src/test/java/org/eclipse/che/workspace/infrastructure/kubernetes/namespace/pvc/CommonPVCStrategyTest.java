@@ -42,6 +42,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
@@ -163,6 +164,10 @@ public class CommonPVCStrategyTest {
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
+    Map<String, String> workspaceAttributes = new HashMap<>();
+    WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
+    when(workspace.getConfig()).thenReturn(workspaceConfig);
+    when(workspaceConfig.getAttributes()).thenReturn(workspaceAttributes);
   }
 
   @Test
@@ -249,10 +254,11 @@ public class CommonPVCStrategyTest {
     when(pvc.getAdditionalProperties()).thenReturn(subPaths);
     doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, WORKSPACE_SUBPATHS);
 
-    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
 
     verify(pvcs).get();
     verify(pvcs).create(pvc);
+    verify(pvcs).waitBound(PVC_NAME, 100);
     verify(pvcSubPathHelper).createDirs(any(), any());
   }
 
@@ -262,7 +268,7 @@ public class CommonPVCStrategyTest {
         .thenReturn(singletonMap(PVC_NAME, mock(PersistentVolumeClaim.class)));
     doThrow(InfrastructureException.class).when(pvcs).get();
 
-    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -272,7 +278,7 @@ public class CommonPVCStrategyTest {
     when(pvcs.get()).thenReturn(emptyList());
     doThrow(InfrastructureException.class).when(pvcs).create(any());
 
-    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID);
+    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
   }
 
   @Test

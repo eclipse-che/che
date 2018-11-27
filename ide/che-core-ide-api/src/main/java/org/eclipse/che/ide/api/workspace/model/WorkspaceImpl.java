@@ -82,6 +82,7 @@ public class WorkspaceImpl implements Workspace {
               runtime.getMachines(),
               runtime.getOwner(),
               machineToken,
+              runtime.getCommands(),
               runtime.getWarnings());
     }
     if (attributes != null) {

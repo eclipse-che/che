@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
@@ -43,13 +45,22 @@ public interface KubernetesRuntimeStateCache {
   Set<RuntimeIdentity> getIdentities() throws InfrastructureException;
 
   /**
-   * Returns status of the runtime with specified identifier.
+   * Returns optional with status of the runtime with specified identifier or empty optional if
+   * there is not cached state.
    *
    * @param runtimeId runtime identifier
-   * @throws InfrastructureException if there is no cached state for the specified identifier.
    * @throws InfrastructureException if any exception occurs during status fetching
    */
-  WorkspaceStatus getStatus(RuntimeIdentity runtimeId) throws InfrastructureException;
+  Optional<WorkspaceStatus> getStatus(RuntimeIdentity runtimeId) throws InfrastructureException;
+
+  /**
+   * Returns commands of the runtime with specified identifier or empty list when state is not
+   * cached.
+   *
+   * @param runtimeId runtime identifier
+   * @throws InfrastructureException if any exception occurs during commands fetching
+   */
+  List<? extends Command> getCommands(RuntimeIdentity runtimeId) throws InfrastructureException;
 
   /**
    * Returns optional with state of the runtime with specified identifier.
@@ -62,7 +73,7 @@ public interface KubernetesRuntimeStateCache {
   /**
    * Updates status of cached runtime.
    *
-   * @param runtimeId runtime identified
+   * @param runtimeId runtime identifier
    * @param newStatus status to update
    * @throws InfrastructureException if any exception occurs during status updating
    */
@@ -80,6 +91,17 @@ public interface KubernetesRuntimeStateCache {
    */
   boolean updateStatus(
       RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
+      throws InfrastructureException;
+
+  /**
+   * Updates commands of cached runtime state.
+   *
+   * @param identity runtime identifier
+   * @param commands commands to store
+   * @throws InfrastructureException if there is no cached state for specified runtime identifier
+   * @throws InfrastructureException if any exception occurs during commands updating
+   */
+  void updateCommands(RuntimeIdentity identity, List<? extends Command> commands)
       throws InfrastructureException;
 
   /**

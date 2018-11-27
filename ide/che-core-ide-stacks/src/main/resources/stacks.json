@@ -268,7 +268,7 @@
           "recipe": {
             "contentType": "text/x-yaml",
             "type": "kubernetes",
-            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: web\n   labels:\n    type: db\n  spec:\n   containers:\n    - \n     image: eclipse/centos_jdk8\n     name: dev\n     ports:\n      - \n       containerPort: 8080\n       protocol: TCP\n     resources:\n      limits:\n       memory: 512Mi\n    - \n     image: centos/mysql-57-centos7\n     name: mysql\n     ports:\n      - \n       name: mysql\n       containerPort: 3306\n       protocol: TCP\n     env:\n      - \n       name: MYSQL_USER\n       value: petclinic\n      - \n       name: MYSQL_ROOT_PASSWORD\n       value: password\n      - \n       name: MYSQL_PASSWORD\n       value: password\n      - \n       name: MYSQL_DATABASE\n       value: petclinic\n     resources:\n      limits:\n       memory: 256Mi\n - \n  apiVersion: v1\n  kind: Service\n  metadata:\n   name: db\n  spec:\n   selector:\n    type: db\n   ports:\n    - \n     name: mysql\n     port: 3306\n     protocol: TCP\n     targetPort: mysql\n"
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: web\n   labels:\n    type: db\n  spec:\n   containers:\n    - \n     image: registry.centos.org/che-stacks/centos-jdk8\n     name: dev\n     ports:\n      - \n       containerPort: 8080\n       protocol: TCP\n     resources:\n      limits:\n       memory: 512Mi\n    - \n     image: centos/mysql-57-centos7\n     name: mysql\n     ports:\n      - \n       name: mysql\n       containerPort: 3306\n       protocol: TCP\n     env:\n      - \n       name: MYSQL_USER\n       value: petclinic\n      - \n       name: MYSQL_ROOT_PASSWORD\n       value: password\n      - \n       name: MYSQL_PASSWORD\n       value: password\n      - \n       name: MYSQL_DATABASE\n       value: petclinic\n     resources:\n      limits:\n       memory: 256Mi\n - \n  apiVersion: v1\n  kind: Service\n  metadata:\n   name: db\n  spec:\n   selector:\n    type: db\n   ports:\n    - \n     name: mysql\n     port: 3306\n     protocol: TCP\n     targetPort: mysql\n"
           },
           "machines": {
             "web/dev": {
@@ -606,7 +606,7 @@
             }
           },
           "recipe": {
-            "content": "services:\n db:\n  image: centos/mysql-57-centos7\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: eclipse/centos_jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
+            "content": "services:\n db:\n  image: centos/mysql-57-centos7\n  environment:\n   MYSQL_ROOT_PASSWORD: password\n   MYSQL_DATABASE: petclinic\n   MYSQL_USER: petclinic\n   MYSQL_PASSWORD: password\n  mem_limit: 1073741824\n dev-machine:\n  image: registry.centos.org/che-stacks/centos-jdk8\n  mem_limit: 2147483648\n  depends_on:\n    - db",
             "contentType": "application/x-yaml",
             "type": "compose"
           }
@@ -1628,7 +1628,7 @@
             }
           },
           "recipe": {
-            "content": "eclipse/centos_jdk8",
+            "content": "registry.centos.org/che-stacks/centos-jdk8",
             "type": "dockerimage"
           }
         }
@@ -2021,7 +2021,7 @@
             "goal": "Run",
             "previewUrl": "${server.8080/tcp}"
           },
-          "commandLine": "cd ${current.project.path} && scl enable rh-nodejs6 'node app.js'"
+          "commandLine": "cd ${current.project.path} && scl enable rh-nodejs6 'node .'"
         }
       ],
       "projects": [],

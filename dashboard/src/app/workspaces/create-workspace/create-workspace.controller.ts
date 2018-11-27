@@ -199,7 +199,7 @@ export class CreateWorkspaceController {
     this.stack = this.stackSelectorSvc.getStackById(stackId);
     this.workspaceConfig = angular.copy(this.stack.workspaceConfig);
 
-    if (!this.stack.workspaceConfig) {
+    if (!this.stack.workspaceConfig || !this.stack.workspaceConfig.defaultEnv) {
       this.memoryByMachine = {};
       this.stackMachines = [];
       return;
