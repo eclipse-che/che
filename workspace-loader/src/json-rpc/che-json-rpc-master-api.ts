@@ -16,7 +16,7 @@ import { ICommunicationClient, CODE_REQUEST_TIMEOUT, CommunicationClientEvent } 
 enum MasterChannels {
   ENVIRONMENT_OUTPUT = <any>'runtime/log',
   ENVIRONMENT_STATUS = <any>'machine/statusChanged',
-  WS_AGENT_OUTPUT = <any>'installer/log',
+  INSTALLER_OUTPUT = <any>'installer/log',
   WORKSPACE_STATUS = <any>'workspace/statusChanged'
 }
 const SUBSCRIBE: string = 'subscribe';
@@ -172,8 +172,8 @@ export class CheJsonRpcMasterApi {
    * @param workspaceId workspace's id
    * @param callback callback to process event
    */
-  subscribeWsAgentOutput(workspaceId: string, callback: Function): void {
-    this.subscribe(MasterChannels.WS_AGENT_OUTPUT, workspaceId, callback);
+  subscribeInstallerOutput(workspaceId: string, callback: Function): void {
+    this.subscribe(MasterChannels.INSTALLER_OUTPUT, workspaceId, callback);
   }
 
   /**
@@ -182,8 +182,8 @@ export class CheJsonRpcMasterApi {
    * @param workspaceId workspace's id
    * @param callback callback to process event
    */
-  unSubscribeWsAgentOutput(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.WS_AGENT_OUTPUT, workspaceId, callback);
+  unSubscribeInstallerOutput(workspaceId: string, callback: Function): void {
+    this.unsubscribe(MasterChannels.INSTALLER_OUTPUT, workspaceId, callback);
   }
 
   /**
