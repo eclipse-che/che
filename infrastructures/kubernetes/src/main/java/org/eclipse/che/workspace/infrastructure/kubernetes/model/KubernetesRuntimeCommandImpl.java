@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server.model.impl;
+package org.eclipse.che.workspace.infrastructure.kubernetes.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,11 +29,11 @@ import org.eclipse.che.api.core.model.workspace.config.Command;
 /**
  * Data object for {@link Command}.
  *
- * @author Eugene Voevodin
+ * @author Serhii Leshchenko
  */
-@Entity(name = "Command")
-@Table(name = "command")
-public class CommandImpl implements Command {
+@Entity(name = "KubernetesRuntimeCommand")
+@Table(name = "k8s_runtime_command")
+public class KubernetesRuntimeCommandImpl implements Command {
 
   @Id
   @GeneratedValue
@@ -50,24 +50,26 @@ public class CommandImpl implements Command {
   private String type;
 
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "command_attributes", joinColumns = @JoinColumn(name = "command_id"))
+  @CollectionTable(
+      name = "k8s_runtime_command_attributes",
+      joinColumns = @JoinColumn(name = "command_id"))
   @MapKeyColumn(name = "name")
   @Column(name = "value", columnDefinition = "TEXT")
   private Map<String, String> attributes;
 
-  public CommandImpl() {}
+  public KubernetesRuntimeCommandImpl() {}
 
-  public CommandImpl(String name, String commandLine, String type) {
+  public KubernetesRuntimeCommandImpl(String name, String commandLine, String type) {
     this.name = name;
     this.commandLine = commandLine;
     this.type = type;
   }
 
-  public CommandImpl(Command command) {
+  public KubernetesRuntimeCommandImpl(Command command) {
     this.name = command.getName();
     this.commandLine = command.getCommandLine();
     this.type = command.getType();
-    this.attributes = new HashMap<>(command.getAttributes());
+    this.attributes = command.getAttributes();
   }
 
   @Override
@@ -114,10 +116,10 @@ public class CommandImpl implements Command {
     if (this == obj) {
       return true;
     }
-    if (!(obj instanceof CommandImpl)) {
+    if (!(obj instanceof KubernetesRuntimeCommandImpl)) {
       return false;
     }
-    final CommandImpl that = (CommandImpl) obj;
+    final KubernetesRuntimeCommandImpl that = (KubernetesRuntimeCommandImpl) obj;
     return Objects.equals(id, that.id)
         && Objects.equals(name, that.name)
         && Objects.equals(commandLine, that.commandLine)
@@ -138,7 +140,7 @@ public class CommandImpl implements Command {
 
   @Override
   public String toString() {
-    return "CommandImpl{"
+    return "KubernetesRuntimeCommandImpl{"
         + "id="
         + id
         + ", name='"

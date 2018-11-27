@@ -11,14 +11,21 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.model;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 
@@ -45,19 +52,30 @@ public class KubernetesRuntimeState {
   @Column(name = "status")
   private WorkspaceStatus status;
 
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "workspace_id", referencedColumnName = "workspace_id")
+  private List<KubernetesRuntimeCommandImpl> commands;
+
   public KubernetesRuntimeState() {}
 
   public KubernetesRuntimeState(
-      RuntimeIdentity runtimeIdentity, String namespace, WorkspaceStatus status) {
+      RuntimeIdentity runtimeIdentity,
+      String namespace,
+      WorkspaceStatus status,
+      List<? extends Command> commands) {
     this.envName = runtimeIdentity.getEnvName();
     this.workspaceId = runtimeIdentity.getWorkspaceId();
     this.ownerId = runtimeIdentity.getOwnerId();
     this.namespace = namespace;
     this.status = status;
+    if (commands != null) {
+      this.commands =
+          commands.stream().map(KubernetesRuntimeCommandImpl::new).collect(Collectors.toList());
+    }
   }
 
   public KubernetesRuntimeState(KubernetesRuntimeState entity) {
-    this(entity.getRuntimeId(), entity.getNamespace(), entity.getStatus());
+    this(entity.getRuntimeId(), entity.getNamespace(), entity.getStatus(), entity.getCommands());
   }
 
   public String getNamespace() {
@@ -79,6 +97,14 @@ public class KubernetesRuntimeState {
   public KubernetesRuntimeState withStatus(WorkspaceStatus status) {
     this.status = status;
     return this;
+  }
+
+  public List<KubernetesRuntimeCommandImpl> getCommands() {
+    return commands;
+  }
+
+  public void setCommands(List<KubernetesRuntimeCommandImpl> commands) {
+    this.commands = commands;
   }
 
   @Override

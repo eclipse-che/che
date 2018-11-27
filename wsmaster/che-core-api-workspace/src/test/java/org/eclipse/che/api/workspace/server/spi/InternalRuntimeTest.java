@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.spi;
 
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.runtime.ServerStatus.RUNNING;
@@ -41,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
@@ -625,14 +625,19 @@ public class InternalRuntimeTest {
     public TestInternalRuntime(URLRewriter urlRewriter, boolean running)
         throws ValidationException, InfrastructureException {
       super(
-          new TestRuntimeContext(null, new RuntimeIdentityImpl("ws", "env", "id"), null),
+          new TestRuntimeContext(
+              new InternalEnvironment() {}, new RuntimeIdentityImpl("ws", "env", "id"), null),
           urlRewriter,
-          emptyList(),
           running ? WorkspaceStatus.RUNNING : null);
     }
 
     @Override
     protected Map<String, ? extends Machine> getInternalMachines() {
+      return null;
+    }
+
+    @Override
+    public List<? extends Command> getCommands() throws InfrastructureException {
       return null;
     }
 

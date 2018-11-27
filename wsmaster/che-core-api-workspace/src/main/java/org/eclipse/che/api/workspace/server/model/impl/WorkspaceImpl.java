@@ -130,7 +130,12 @@ public class WorkspaceImpl implements Workspace {
     }
     if (runtime != null) {
       this.runtime =
-          new RuntimeImpl(runtime.getActiveEnv(), runtime.getMachines(), runtime.getOwner());
+          new RuntimeImpl(
+              runtime.getActiveEnv(),
+              runtime.getMachines(),
+              runtime.getOwner(),
+              runtime.getCommands(),
+              runtime.getWarnings());
     }
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);

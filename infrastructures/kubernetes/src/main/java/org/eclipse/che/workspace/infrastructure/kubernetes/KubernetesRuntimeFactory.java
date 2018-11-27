@@ -11,13 +11,11 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
-import java.util.List;
-import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 
 /** @author Sergii Leshchenko */
 public interface KubernetesRuntimeFactory<E extends KubernetesEnvironment> {
   KubernetesInternalRuntime<E> create(
-      KubernetesRuntimeContext<E> context, KubernetesNamespace namespace, List<Warning> warnings);
+      KubernetesRuntimeContext<E> context, KubernetesNamespace namespace);
 }

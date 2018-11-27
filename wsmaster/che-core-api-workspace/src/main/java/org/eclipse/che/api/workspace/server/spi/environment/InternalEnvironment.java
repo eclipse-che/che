@@ -16,9 +16,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -34,20 +38,35 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author gazarenkov
  */
 public abstract class InternalEnvironment {
+  private String type;
   private InternalRecipe recipe;
   private Map<String, InternalMachineConfig> machines;
-  private List<Warning> warnings;
+  private final List<Warning> warnings;
   private Map<String, String> attributes;
-  private String type;
+  private List<CommandImpl> commands;
 
-  protected InternalEnvironment() {}
+  protected InternalEnvironment() {
+    this.warnings = new CopyOnWriteArrayList<>();
+  }
 
   protected InternalEnvironment(
       InternalRecipe recipe, Map<String, InternalMachineConfig> machines, List<Warning> warnings) {
     this.recipe = recipe;
     this.machines = machines;
-    this.warnings = warnings;
+    this.warnings = new CopyOnWriteArrayList<>();
+    if (warnings != null) {
+      this.warnings.addAll(warnings);
+    }
     this.type = recipe != null ? recipe.getType() : null;
+  }
+
+  protected InternalEnvironment(InternalEnvironment internalEnvironment) {
+    this.recipe = internalEnvironment.getRecipe();
+    this.type = recipe != null ? recipe.getType() : null;
+    this.machines = internalEnvironment.getMachines();
+    this.warnings = new CopyOnWriteArrayList<>(internalEnvironment.getWarnings());
+    this.attributes = internalEnvironment.getAttributes();
+    this.commands = internalEnvironment.getCommands();
   }
 
   /**
@@ -100,9 +119,6 @@ public abstract class InternalEnvironment {
    * constraints or some preferable configuration is missing so defaults are used.
    */
   public List<Warning> getWarnings() {
-    if (warnings == null) {
-      warnings = new ArrayList<>();
-    }
     return warnings;
   }
 
@@ -112,7 +128,10 @@ public abstract class InternalEnvironment {
   }
 
   public InternalEnvironment setWarnings(List<Warning> warnings) {
-    this.warnings = warnings;
+    this.warnings.clear();
+    if (warnings != null) {
+      this.warnings.addAll(warnings);
+    }
     return this;
   }
 
@@ -143,6 +162,22 @@ public abstract class InternalEnvironment {
   @Beta
   public InternalEnvironment setAttributes(Map<String, String> attributes) {
     this.attributes = attributes;
+    return this;
+  }
+
+  @Beta
+  public List<CommandImpl> getCommands() {
+    if (commands == null) {
+      commands = new ArrayList<>();
+    }
+    return commands;
+  }
+
+  @Beta
+  public InternalEnvironment setCommands(List<? extends Command> commands) {
+    if (commands != null) {
+      this.commands = commands.stream().map(CommandImpl::new).collect(Collectors.toList());
+    }
     return this;
   }
 }
