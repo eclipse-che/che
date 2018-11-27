@@ -26,6 +26,9 @@ import javax.inject.Named;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
+/**
+ * Basic configuration for {@link CheCorsFilter}. Allowed origings and credentials support are configurable through properties.
+ */
 public class CheCorsFilterConfig implements FilterConfig {
 
   private final Map<String, String> filterParams;
