@@ -2021,7 +2021,7 @@
             "goal": "Run",
             "previewUrl": "${server.8080/tcp}"
           },
-          "commandLine": "cd ${current.project.path} && scl enable rh-nodejs6 'node app.js'"
+          "commandLine": "cd ${current.project.path} && scl enable rh-nodejs6 'node .'"
         }
       ],
       "projects": [],

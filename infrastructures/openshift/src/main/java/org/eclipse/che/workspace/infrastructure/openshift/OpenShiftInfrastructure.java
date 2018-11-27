@@ -78,10 +78,7 @@ public class OpenShiftInfrastructure extends RuntimeInfrastructure {
   private OpenShiftEnvironment asOpenShiftEnv(InternalEnvironment source)
       throws InfrastructureException {
     if (source instanceof NoEnvInternalEnvironment) {
-      return OpenShiftEnvironment.builder()
-          .setAttributes(source.getAttributes())
-          .setWarnings(source.getWarnings())
-          .build();
+      return OpenShiftEnvironment.builder(source).build();
     } else if (source instanceof OpenShiftEnvironment) {
       return (OpenShiftEnvironment) source;
     } else if (source instanceof KubernetesEnvironment) {
