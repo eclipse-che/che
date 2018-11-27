@@ -460,7 +460,7 @@ ${CHE_VAR_ARRAY}"
         $OC_BINARY login -u "system:admin" > /dev/null
         KEYCLOAK_ROUTE=$($OC_BINARY get route/keycloak --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
         $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
-          -p REDIRECT_URI="http://${KEYCLOAK_ROUTE}/auth/realms/che/broker/${OCP_IDENTITY_PROVIDER_ID}/endpoint" \
+          -p REDIRECT_URI="${HTTP_PROTOCOL}://${KEYCLOAK_ROUTE}/auth/realms/che/broker/${OCP_IDENTITY_PROVIDER_ID}/endpoint" \
           -p OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID} \
           -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET}
 
