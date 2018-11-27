@@ -20,6 +20,8 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -42,8 +44,11 @@ public class ServiceAccountProvisioner implements ConfigurationProvisioner {
   }
 
   @Override
+  @Traced
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+
+    TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!isNullOrEmpty(serviceAccount)) {
       for (Pod pod : k8sEnv.getPods().values()) {

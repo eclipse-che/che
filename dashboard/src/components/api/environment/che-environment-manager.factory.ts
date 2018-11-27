@@ -19,6 +19,7 @@ import {ComposeEnvironmentManager} from './compose-environment-manager';
 import {OpenshiftEnvironmentManager} from './openshift-environment-manager';
 import {DefaultEnvironmentManager} from './default-environment-manager';
 import {KubernetesEnvironmentManager} from './kubernetes-environment-manager';
+import { NoEnvironmentManager } from './no-environment-manager';
 
 export class CheEnvironmentManager {
 
@@ -51,6 +52,8 @@ export class CheEnvironmentManager {
         return new KubernetesEnvironmentManager(this.$log);
       case CheRecipeTypes.OPENSHIFT:
         return new OpenshiftEnvironmentManager(this.$log);
+      case CheRecipeTypes.NOENVIRONMENT:
+        return new NoEnvironmentManager(this.$log);  
       default:
         return new DefaultEnvironmentManager(this.$log, environmentType);
     }

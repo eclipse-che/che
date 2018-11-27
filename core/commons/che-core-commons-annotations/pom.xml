@@ -22,4 +22,13 @@
     <artifactId>che-core-commons-annotations</artifactId>
     <packaging>jar</packaging>
     <name>Che Core :: Commons :: Annotations</name>
+
+    <dependencies>
+        <dependency>
+            <!-- for the @Beta annotation -->
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
