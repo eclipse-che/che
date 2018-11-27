@@ -283,9 +283,9 @@ init() {
 
 add_cert_to_truststore() {
 
-    if [ "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" != "" ]; then
+    if [ "${CHE_SELF__SIGNED__CERT}" != "" ]; then
         echo "Found a custom cert. Adding it to java trust store..."
-        echo "${OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE}" > /home/user/openshift.crt
+        echo "${CHE_SELF__SIGNED__CERT}" > /home/user/openshift.crt
         echo yes | keytool -keystore /home/user/openshift.jks -importcert -alias HOSTDOMAIN -file /home/user/openshift.crt -storepass minishift
         export JAVA_OPTS="${JAVA_OPTS} -Djavax.net.ssl.trustStore=/home/user/openshift.jks -Djavax.net.ssl.trustStorePassword=minishift"
     fi
