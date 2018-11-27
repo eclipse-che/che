@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,18 +29,26 @@ public class MetricsServer {
   private static final Logger LOG = LoggerFactory.getLogger(MetricsServer.class);
 
   private HTTPServer server;
+  private final CollectorRegistry collectorRegistry;
+  private final Integer metricsPort;
 
   @Inject
-  public void startServer(CollectorRegistry collectorRegistry) throws IOException {
-    this.server = new HTTPServer(new InetSocketAddress(8087), collectorRegistry, true);
-    LOG.info("Metrics server started at port {} successfully ", 8087);
+  public MetricsServer(
+      CollectorRegistry collectorRegistry, @Named("che.metrics.port") Integer metricsPort) {
+    this.collectorRegistry = collectorRegistry;
+    this.metricsPort = metricsPort;
+  }
+
+  public void startServer() throws IOException {
+    this.server = new HTTPServer(new InetSocketAddress(metricsPort), collectorRegistry, true);
+    LOG.info("Metrics server started at port {} successfully ", metricsPort);
   }
 
   @PreDestroy
   public void stopServer() {
     if (server != null) {
       server.stop();
-      LOG.info("Metrics server suspended at port {} successfully ", 8087);
+      LOG.info("Metrics server suspended at port {} successfully ", metricsPort);
     }
   }
 }
