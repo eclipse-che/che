@@ -20,6 +20,7 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
@@ -64,6 +65,7 @@ public class OpenShiftEnvironmentProvisioner
   private final ImagePullSecretProvisioner imagePullSecretProvisioner;
   private final ProxySettingsProvisioner proxySettingsProvisioner;
   private final ServiceAccountProvisioner serviceAccountProvisioner;
+  private final CertificateProvisioner certificateProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -80,7 +82,8 @@ public class OpenShiftEnvironmentProvisioner
       PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
       ImagePullSecretProvisioner imagePullSecretProvisioner,
       ProxySettingsProvisioner proxySettingsProvisioner,
-      ServiceAccountProvisioner serviceAccountProvisioner) {
+      ServiceAccountProvisioner serviceAccountProvisioner,
+      CertificateProvisioner certificateProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -95,6 +98,7 @@ public class OpenShiftEnvironmentProvisioner
     this.imagePullSecretProvisioner = imagePullSecretProvisioner;
     this.proxySettingsProvisioner = proxySettingsProvisioner;
     this.serviceAccountProvisioner = serviceAccountProvisioner;
+    this.certificateProvisioner = certificateProvisioner;
   }
 
   @Override
@@ -128,6 +132,7 @@ public class OpenShiftEnvironmentProvisioner
     imagePullSecretProvisioner.provision(osEnv, identity);
     proxySettingsProvisioner.provision(osEnv, identity);
     serviceAccountProvisioner.provision(osEnv, identity);
+    certificateProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }
