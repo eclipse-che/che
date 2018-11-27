@@ -14,6 +14,7 @@ package org.eclipse.che.core.db.jpa;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -84,14 +85,20 @@ public final class TestObjectsFactory {
         id + "_name",
         id + "description",
         "default-env",
-        asList(
-            new CommandImpl(id + "cmd1", "mvn clean install", "maven"),
-            new CommandImpl(id + "cmd2", "mvn clean install", "maven")),
+        asList(createCommand(), createCommand()),
         asList(createProjectConfig(id + "-project1"), createProjectConfig(id + "-project2")),
         ImmutableMap.of(
             id + "env1", createEnv(),
             id + "env2", createEnv()),
         ImmutableMap.of("attr1", "value1", "attr2", "value2"));
+  }
+
+  public static CommandImpl createCommand() {
+    CommandImpl cmd =
+        new CommandImpl(generate("command", 5), "echo " + generate("command", 5), "CUSTOM");
+    cmd.getAttributes().put("attr1", "val1");
+    cmd.getAttributes().put("attr2", "val2");
+    return cmd;
   }
 
   public static ProjectConfigImpl createProjectConfig(String name) {
@@ -167,7 +174,8 @@ public final class TestObjectsFactory {
     return new KubernetesRuntimeState(
         new RuntimeIdentityImpl(workspaceId, "envName", "ownerId"),
         "test-namespace",
-        WorkspaceStatus.RUNNING);
+        WorkspaceStatus.RUNNING,
+        asList(createCommand(), createCommand()));
   }
 
   public static KubernetesMachineImpl createK8sMachine(KubernetesRuntimeState k8sRuntimeState) {

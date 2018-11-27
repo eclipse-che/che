@@ -12,7 +12,6 @@
 package org.eclipse.che.api.workspace.server;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
@@ -46,6 +45,8 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.util.Strings.isNullOrEmpty;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,19 +62,23 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
@@ -102,7 +107,6 @@ public class WorkspaceManagerTest {
   @Mock private AccountManager accountManager;
   @Mock private EventService eventService;
   @Mock private WorkspaceValidator validator;
-  @Mock private RuntimeInfrastructure infrastructure;
 
   @Captor private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -534,7 +538,12 @@ public class WorkspaceManagerTest {
     Map<String, Machine> machines = new HashMap<>();
     machines.put("machine1", machine1);
     machines.put("machine2", machine2);
-    TestRuntime runtime = new TestRuntime(machines);
+
+    List<WarningImpl> warnings = new ArrayList<>();
+    warnings.add(new WarningImpl(103, "used default value"));
+    warnings.add(new WarningImpl(105, "specified configuration parameter is ignored"));
+
+    TestRuntime runtime = new TestRuntime(machines, workspace.getConfig().getCommands(), warnings);
     lenient()
         .doAnswer(
             inv -> {
@@ -544,6 +553,7 @@ public class WorkspaceManagerTest {
                       runtime.getActiveEnv(),
                       runtime.getMachines(),
                       runtime.getOwner(),
+                      runtime.getCommands(),
                       runtime.getWarnings()));
               return null;
             })
@@ -613,7 +623,7 @@ public class WorkspaceManagerTest {
     MachineConfigImpl machineConfig =
         new MachineConfigImpl(
             singletonList("org.eclipse.che.ws-agent"),
-            null,
+            singletonMap("server", createServerConfig()),
             singletonMap("CHE_ENV", "value"),
             singletonMap(MEMORY_LIMIT_ATTRIBUTE, "10000"),
             emptyMap());
@@ -625,7 +635,16 @@ public class WorkspaceManagerTest {
         .setName("dev-workspace")
         .setDefaultEnv("dev-env")
         .setEnvironments(singletonMap("dev-env", environment))
+        .setCommands(asList(createCommand(), createCommand()))
         .build();
+  }
+
+  private static ServerConfigImpl createServerConfig() {
+    return new ServerConfigImpl("8080/tcp", "http", "/api", ImmutableMap.of("attr", "val"));
+  }
+
+  private static CommandImpl createCommand() {
+    return new CommandImpl(NameGenerator.generate("command-", 5), "echo Hello", "custom");
   }
 
   private MachineImpl createMachine() {
@@ -635,9 +654,16 @@ public class WorkspaceManagerTest {
   private static class TestRuntime implements Runtime {
 
     final Map<String, Machine> machines;
+    final List<? extends Command> commands;
+    final List<? extends Warning> warnings;
 
-    TestRuntime(Map<String, Machine> machines) {
+    TestRuntime(
+        Map<String, Machine> machines,
+        List<? extends Command> commands,
+        List<? extends Warning> warnings) {
       this.machines = machines;
+      this.commands = commands;
+      this.warnings = warnings;
     }
 
     @Override
@@ -657,7 +683,12 @@ public class WorkspaceManagerTest {
 
     @Override
     public List<? extends Warning> getWarnings() {
-      return emptyList();
+      return warnings;
+    }
+
+    @Override
+    public List<? extends Command> getCommands() {
+      return commands;
     }
   }
 }
