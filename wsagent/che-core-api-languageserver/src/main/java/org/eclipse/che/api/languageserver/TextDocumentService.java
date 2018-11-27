@@ -421,8 +421,12 @@ public class TextDocumentService {
           public CompletableFuture<List<? extends Location>> start(ExtendedLanguageServer element) {
             TextDocumentPositionParams clonedTextDocumentPositionParams =
                 lsParamsCloner.clone(textDocumentPositionParams);
-            URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
-            clonedTextDocumentPositionParams.getTextDocument().setUri(uri.toString());
+            if (wsPath.startsWith(ROOT)) {
+              URI uri = languageServerPathTransformer.toFsURI(element.getId(), wsPath);
+              clonedTextDocumentPositionParams.getTextDocument().setUri(uri.toString());
+            } else {
+              clonedTextDocumentPositionParams.getTextDocument().setUri(wsPath);
+            }
             return element.getTextDocumentService().definition(clonedTextDocumentPositionParams);
           }
 
