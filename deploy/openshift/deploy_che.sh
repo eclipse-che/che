@@ -53,6 +53,7 @@ HELP="
 --rolling - Rolling update strategy (Recreate is the default one). With Rolling strategy Che server pvc and volume aren't created
 --debug - Deploy Che in a debug mode, create and expose debug route
 --image-che - Override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
+--secure | -s - Deploy Che with SSL enabled
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
