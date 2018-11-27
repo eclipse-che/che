@@ -7,7 +7,6 @@
     }
   },
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "http://example.com/root.json",
   "type": "object",
   "title": "The Root Schema of DevFile object",
   "required": [
@@ -19,44 +18,37 @@
   ],
   "properties": {
     "version": {
-      "$id": "#/properties/version",
       "type": "string",
-      "title": "The Version Schema",
+      "title": "Devfile Schema Version",
       "examples": [
         "0.0.1"
       ]
     },
     "name": {
-      "$id": "#/properties/name",
       "type": "string",
-      "title": "The Name Schema",
+      "title": "Devfile Name",
       "examples": [
         "petclinic-dev-environment"
       ]
     },
     "projects": {
-      "$id": "#/properties/projects",
       "type": "array",
       "title": "The Projects Schema",
+      "description" : "Description of the project sources location and type",
       "items": {
-        "$id": "#/properties/projects/items",
         "type": "object",
-        "title": "The Project Items Schema",
         "required": [
           "name",
           "source"
         ],
         "properties": {
           "name": {
-            "$id": "#/properties/projects/items/properties/name",
             "type": "string",
-            "title": "The Project Name Schema",
             "examples": [
               "petclinic"
             ]
           },
           "source": {
-            "$id": "#/properties/projects/items/properties/source",
             "type": "object",
             "title": "The Project Source Schema",
             "required": [
@@ -65,17 +57,17 @@
             ],
             "properties": {
               "type": {
-                "$id": "#/properties/projects/items/properties/source/properties/type",
                 "type": "string",
-                "title": "The Project Source Type Schema",
+                "description": "Project-s source type.",
                 "examples": [
-                  "git"
+                  "git",
+                  "github",
+                  "zip"
                 ]
               },
               "location": {
-                "$id": "#/properties/projects/items/properties/source/properties/location",
                 "type": "string",
-                "title": "The Project Source Location Schema",
+                "description": "Project-s source location address. Should be URL for git and github located projects, and file:// for zip.",
                 "examples": [
                   "git@github.com:spring-projects/spring-petclinic.git"
                 ]
@@ -86,13 +78,10 @@
       }
     },
     "tools": {
-      "$id": "#/properties/tools",
       "type": "array",
       "title": "The Tools Schema",
       "items": {
-        "$id": "#/properties/tools/items",
         "type": "object",
-        "title": "The Items Schema",
         "required": [
           "name",
           "type",
@@ -100,25 +89,22 @@
         ],
         "properties": {
           "name": {
-            "$id": "#/properties/tools/items/properties/name",
             "type": "string",
-            "title": "The Tool Name Schema",
             "examples": [
               "mvn-stack"
             ]
           },
           "type": {
-            "$id": "#/properties/tools/items/properties/type",
+            "description": "Describes type or tool, e.g. whether it is and plugin or editor or other type",
             "type": "string",
-            "title": "The Tool Type Schema",
             "examples": [
-              "chePlugin"
+              "chePlugin",
+              "cheEditor"
             ]
           },
           "id": {
-            "$id": "#/properties/tools/items/properties/id",
             "type": "string",
-            "title": "The Tool Id Schema",
+            "description": "Describes the tool FQN",
             "examples": [
               "eclipse/maven-jdk8:1.0.0"
             ]
@@ -127,22 +113,17 @@
       }
     },
     "commands": {
-      "$id": "#/properties/commands",
       "type": "array",
       "title": "The Commands Schema",
       "items": {
-        "$id": "#/properties/commands/items",
         "type": "object",
-        "title": "The Items Schema",
         "required": [
           "name",
           "actions"
         ],
         "properties": {
           "name": {
-            "$id": "#/properties/commands/items/properties/name",
             "type": "string",
-            "title": "The Command Name Schema",
             "examples": [
               "build"
             ]
@@ -151,13 +132,10 @@
             "$ref": "#/definitions/attributes"
           },
           "actions": {
-            "$id": "#/properties/commands/items/properties/actions",
             "type": "array",
             "title": "The Command Actions Schema",
             "items": {
-              "$id": "#/properties/commands/items/properties/actions/items",
               "type": "object",
-              "title": "The Command Items Schema",
               "required": [
                 "type",
                 "tool",
@@ -165,33 +143,29 @@
               ],
               "properties": {
                 "type": {
-                  "$id": "#/properties/commands/items/properties/actions/items/properties/type",
+                  "description": "Describes action type",
                   "type": "string",
-                  "title": "The Action Type Schema",
                   "examples": [
                     "exec"
                   ]
                 },
                 "tool": {
-                  "$id": "#/properties/commands/items/properties/actions/items/properties/tool",
                   "type": "string",
-                  "title": "The Action Tool Schema",
+                  "description": "Describes tool to which given action relates",
                   "examples": [
                     "mvn-stack"
                   ]
                 },
                 "command": {
-                  "$id": "#/properties/commands/items/properties/actions/items/properties/command",
                   "type": "string",
-                  "title": "The Action Command Schema",
+                  "description": "The actual action command-line string",
                   "examples": [
                     "mvn package"
                   ]
                 },
                 "workdir": {
-                  "$id": "#/properties/commands/items/properties/actions/items/properties/workdir",
                   "type": "string",
-                  "title": "The Action Workdir Schema",
+                  "description": "Working directory where the schema should be executed",
                   "examples": [
                     "/projects/spring-petclinic"
                   ]
