@@ -57,6 +57,7 @@ public class ServersCheckerTest {
   private static final String WORKSPACE_ID = "ws123";
   private static final String USER_ID = "0000-0000-0007";
   private static final int SERVER_PING_SUCCESS_THRESHOLD = 1;
+  private static final long SERVER_PING_INTERVAL_MILLIS = 3000;
 
   @Mock private Consumer<String> readinessHandler;
   @Mock private MachineTokenProvider machineTokenProvider;
@@ -91,6 +92,7 @@ public class ServersCheckerTest {
                 servers,
                 machineTokenProvider,
                 SERVER_PING_SUCCESS_THRESHOLD,
+                SERVER_PING_INTERVAL_MILLIS,
                 CONFIGURED_SERVERS));
     when(checker.doCreateChecker(any(URL.class), anyString(), anyString()))
         .thenReturn(connectionChecker);

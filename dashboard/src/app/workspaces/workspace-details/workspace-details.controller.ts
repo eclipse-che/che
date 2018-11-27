@@ -282,11 +282,14 @@ export class WorkspaceDetailsController {
     if (this.newName !== config.name) {
       this.newName = config.name;
     }
-    if (!config.environments[config.defaultEnv]) {
+
+    if (config.defaultEnv && config.environments[config.defaultEnv]) {
+      this.workspaceImportedRecipe = config.environments[config.defaultEnv].recipe;
+    } else if (Object.keys(config.environments).length > 0) {
       return;
     }
+
     this.workspaceDetails.config = config;
-    this.workspaceImportedRecipe = config.environments[config.defaultEnv].recipe;
     this.checkEditMode();
   }
 

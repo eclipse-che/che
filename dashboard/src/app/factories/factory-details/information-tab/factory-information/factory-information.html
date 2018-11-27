@@ -120,7 +120,7 @@
     </che-label-container>
 
     <!--Workspace RAM-->
-    <che-label-container che-label-name="RAM">
+    <che-label-container che-label-name="RAM" ng-if="factoryInformationController.copyOriginFactory.workspace.defaultEnv">
       <ng-form name="factoryInformationController.factoryInformationForm">
         <div data-ng-repeat="(environmentKey, environmentValue) in factoryInformationController.copyOriginFactory.workspace.environments">
           <span ng-if="factoryInformationController.getObjectKeys(factoryInformationController.copyOriginFactory.workspace.environments).length > 1"

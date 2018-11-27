@@ -118,7 +118,7 @@ export class WorkspaceDetailsSshCtrl {
     });
 
     let defaultEnv : string = this.workspace.config.defaultEnv;
-    let machines : any = this.workspace.config.environments[defaultEnv].machines;
+    let machines : any = defaultEnv ? this.workspace.config.environments[defaultEnv].machines : [];
     let machineNames : Array<string> = Object.keys(machines);
     this.machineSshAgents.length = 0;
     machineNames.forEach((machineName: string) => {

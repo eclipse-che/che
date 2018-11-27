@@ -15,8 +15,10 @@
   <md-progress-linear md-mode="indeterminate"
                       ng-show="workspaceDetailsSshCtrl.isLoading"></md-progress-linear>
 </div>
-<md-content flex class="workspace-ssh-content">
-
+<div class="che-list-empty" ng-if="!workspaceDetailsSshCtrl.workspace.config.defaultEnv">
+  <span>There are no machines to display.</span>
+</div>
+<md-content flex class="workspace-ssh-content" ng-if="workspaceDetailsSshCtrl.workspace.config.defaultEnv">
   <div layout="row" flex class="workspace-ssh-content-invalid-notification" ng-if="workspaceDetailsSshCtrl.workspace.status !== 'RUNNING'">
     <i class="fa fa-info-circle"></i>
     <div>Workspace is not running. SSH connections are unavailable.</div>
