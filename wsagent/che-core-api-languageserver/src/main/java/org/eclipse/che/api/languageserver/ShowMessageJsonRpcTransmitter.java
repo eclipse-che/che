@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.languageserver.messager;
+package org.eclipse.che.api.languageserver;
 
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;

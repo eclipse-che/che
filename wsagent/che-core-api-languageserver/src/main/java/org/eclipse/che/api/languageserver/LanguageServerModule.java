@@ -20,8 +20,6 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
 import java.nio.file.Path;
 import java.util.function.Consumer;
-import org.eclipse.che.api.languageserver.messager.PublishDiagnosticsParamsJsonRpcTransmitter;
-import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 
 public class LanguageServerModule extends AbstractModule {
 
