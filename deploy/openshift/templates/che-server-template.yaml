@@ -155,6 +155,8 @@ objects:
             value: "${CHE_TRACING_ENABLED}"
           - name: CHE_CORS_ALLOW__CREDENTIALS
             value: "${CHE_CORS_ALLOW__CREDENTIALS}"
+          - name: CHE_CORS_ALLOWED__ORIGINS
+            value: "${CHE_CORS_ALLOWED__ORIGINS}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -304,7 +306,7 @@ parameters:
   displayName: CORS credentials support
   description: Allow requests with credentials for CORS filter
   value: 'true'
-- name: CHE_CORS_ALLOWED_ORIGINS
+- name: CHE_CORS_ALLOWED__ORIGINS
   displayName: CORS allowed origins
   description: defines allowed origins in requests for CORS filter
   value: '*'
