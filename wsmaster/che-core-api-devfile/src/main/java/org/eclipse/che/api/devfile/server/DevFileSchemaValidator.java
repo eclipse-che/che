@@ -12,6 +12,7 @@
 package org.eclipse.che.api.devfile.server;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,8 +26,6 @@ import com.github.fge.jsonschema.main.JsonValidator;
 import java.io.IOException;
 import java.net.URL;
 import java.util.stream.StreamSupport;
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 /** Validates YAML content against given JSON schema. */
@@ -37,12 +36,10 @@ public class DevFileSchemaValidator {
   private JsonNode schema;
   private ObjectMapper yamlReader;
 
-  @Inject
-  public DevFileSchemaValidator(@Named("che.devfile.schema.file_location") String schemaFile)
-      throws IOException {
-    final URL schemaURL = getClass().getClassLoader().getResource(schemaFile);
+  public DevFileSchemaValidator() throws IOException {
+    final URL schemaURL = getClass().getClassLoader().getResource(SCHEMA_LOCATION);
     if (schemaURL == null) {
-      throw new IOException("Devfile schema is not found at specified path:" + schemaFile);
+      throw new IOException("Devfile schema is not found at specified path:" + SCHEMA_LOCATION);
     }
     this.schema = JsonLoader.fromURL(schemaURL);
     this.validator = JsonSchemaFactory.byDefault().getValidator();

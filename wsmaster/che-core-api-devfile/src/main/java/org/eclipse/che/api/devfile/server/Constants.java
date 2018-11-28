@@ -13,5 +13,7 @@ package org.eclipse.che.api.devfile.server;
 
 public class Constants {
 
+  public static final String SCHEMA_LOCATION = "schema/devfile.json";
+
   public static final String CURRENT_SPEC_VERSION = "0.0.1";
 }
