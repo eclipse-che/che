@@ -26,17 +26,18 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -73,18 +74,24 @@ public class DevFileService extends Service {
   //
   //
 
-  /** Generates a workspace from provided devfile to a rest API */
+  /**
+   * Creates workspace from provided devfile
+   *
+   * @param data devfile content
+   * @param verbose return more explained validation error messages if any
+   * @return created workspace configuration
+   */
   @POST
   @Consumes({"text/yaml", "text/x-yaml", "application/yaml"})
   @Produces(APPLICATION_JSON)
-  public WorkspaceDto createFromYaml(String data)
+  public WorkspaceDto createFromYaml(String data, @QueryParam("verbose") boolean verbose)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
     Devfile devFile;
-    WorkspaceConfig workspaceConfig;
+    WorkspaceConfigImpl workspaceConfig;
     try {
-      schemaValidator.validateBySchema(data);
+      schemaValidator.validateBySchema(data, verbose);
       devFile = objectMapper.readValue(data, Devfile.class);
       workspaceConfig = devFileConverter.devFileToWorkspaceConfig(devFile);
     } catch (IOException e) {
@@ -95,7 +102,7 @@ public class DevFileService extends Service {
 
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     WorkspaceImpl workspace =
-        workspaceManager.createWorkspace(workspaceConfig, namespace, emptyMap());
+        workspaceManager.createWorkspace(findAvailableName(workspaceConfig), namespace, emptyMap());
     WorkspaceDto workspaceDto =
         asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext()));
     return workspaceDto;
@@ -121,5 +128,21 @@ public class DevFileService extends Service {
     } catch (JsonProcessingException e) {
       throw new ServerException(e.getMessage(), e);
     }
+  }
+
+  private WorkspaceConfigImpl findAvailableName(WorkspaceConfigImpl config) throws ServerException {
+    String nameCandidate = config.getName();
+    String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+    int counter = 0;
+    while (true) {
+      try {
+        workspaceManager.getWorkspace(nameCandidate, namespace);
+        nameCandidate = config.getName() + "_" + ++counter;
+      } catch (NotFoundException nf) {
+        config.setName(nameCandidate);
+        break;
+      }
+    }
+    return config;
   }
 }

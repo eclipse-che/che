@@ -46,7 +46,7 @@ public class DevFileSchemaValidator {
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
 
-  public void validateBySchema(String yamlContent) throws DevFileFormatException {
+  public void validateBySchema(String yamlContent, boolean verbose) throws DevFileFormatException {
     ProcessingReport report;
     try {
       final JsonNode data = yamlReader.readTree(yamlContent);
@@ -61,7 +61,9 @@ public class DevFileSchemaValidator {
               message ->
                   message.getLogLevel() == LogLevel.ERROR
                       || message.getLogLevel() == LogLevel.FATAL)
-          .forEach(message -> sb.append(format("[%s] ", message.getMessage())));
+          .forEach(
+              message ->
+                  sb.append(format("[%s] ", verbose ? message.asJson() : message.getMessage())));
       throw new DevFileFormatException(format("Devfile schema validation failed. Errors: %s", sb));
     }
   }

@@ -29,7 +29,7 @@ public class DevFileSchemaValidatorTest {
     String devFileYamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
     // when
-    schemaValidator.validateBySchema(devFileYamlContent);
+    schemaValidator.validateBySchema(devFileYamlContent, false);
   }
 
   @Test(
@@ -40,6 +40,6 @@ public class DevFileSchemaValidatorTest {
     String devFileYamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile_bad.yaml"));
     // when
-    schemaValidator.validateBySchema(devFileYamlContent);
+    schemaValidator.validateBySchema(devFileYamlContent, false);
   }
 }
