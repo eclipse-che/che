@@ -124,10 +124,8 @@ public class CreateAndDeleteProjectsTest {
     notificationsPopupPanel.waitPopupPanelsAreClosed();
   }
 
-  @Test
+  @Test(priority = 1)
   public void deleteProjectsFromDashboardTest() {
-
-    // delete projects from workspace details page
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE);
