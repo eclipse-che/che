@@ -69,6 +69,7 @@ public class CreateWorkspaceFromJavaTheiaDockerStackTest {
     theiaIde.waitTheiaIde();
     theiaIde.waitTheiaIdeTopPanel();
     theiaIde.waitLoaderInvisibility();
+    theiaIde.waitNotificationPanelClosed();
 
     // run 'About' command from 'Help' menu
     theiaIde.runMenuCommand("Help", "About");
