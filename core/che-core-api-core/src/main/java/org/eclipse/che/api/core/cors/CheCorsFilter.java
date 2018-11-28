@@ -24,7 +24,7 @@ import org.apache.catalina.filters.CorsFilter;
 
 /**
  * The special filter which provides filtering requests in according to settings which are set to
- * {@link CorsFilter}.
+ * {@link CorsFilter}. Uses {@link CheCorsFilterConfig} for providing configuration.
  *
  * @author Dmitry Shnurenko
  * @author Mykhailo Kuznietsov
