@@ -87,3 +87,4 @@ data:
   CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit }}
 {{- end }}
   CHE_CORS_ALLOW__CREDENTIALS: "true"
+  CHE_CORS_ALLOWED_ORIGINS: "*"

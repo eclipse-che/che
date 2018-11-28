@@ -302,8 +302,12 @@ parameters:
   value: 'false'
 - name: CHE_CORS_ALLOW__CREDENTIALS
   displayName: CORS credentials support
-  description: Allow request with credentials to go through the CORS filter
+  description: Allow requests with credentials for CORS filter
   value: 'true'
+- name: CHE_CORS_ALLOWED_ORIGINS
+  displayName: CORS allowed origins
+  description: defines allowed origins in requests for CORS filter
+  value: '*'
 labels:
   app: che
   template: che

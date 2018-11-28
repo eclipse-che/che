@@ -275,6 +275,11 @@ spec:
             configMapKeyRef:
               key: CHE_CORS_ALLOW__CREDENTIALS
               name: che
+        - name: CHE_CORS_ALLOWED_ORIGINS
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_CORS_ALLOWED_ORIGINS
+              name: che
 {{- if .Values.workspaceDefaultRamRequest }}
         - name: CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB
           valueFrom:
