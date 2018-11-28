@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.languageserver.LanguageServerConfig.CommunicationProvider;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.server.impl.WorkspaceProjectSynchronizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,20 +46,24 @@ import org.slf4j.LoggerFactory;
 @Singleton
 class WorkspaceConfigProvider implements LanguageServerConfigProvider {
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceConfigProvider.class);
+  private static final String PROJECTS_ROOT_ATTR_NAME = "projectsRoot";
 
   private final Runtime workspaceRuntime;
   private final ConfigExtractor configExtractor;
+  private final RootDirPathProvider rootDirPathProvider;
   private final GuiceConfigProvider guiceConfigProvider;
 
   @Inject
   WorkspaceConfigProvider(
       WorkspaceProjectSynchronizer workspace,
       JsonParser jsonParser,
-      GuiceConfigProvider guiceConfigProvider)
+      GuiceConfigProvider guiceConfigProvider,
+      RootDirPathProvider rootDirPathProvider)
       throws ServerException {
 
     this.workspaceRuntime = workspace.getRuntime();
     this.configExtractor = new ConfigExtractor(jsonParser);
+    this.rootDirPathProvider = rootDirPathProvider;
     this.guiceConfigProvider = guiceConfigProvider;
   }
 
@@ -79,6 +84,8 @@ class WorkspaceConfigProvider implements LanguageServerConfigProvider {
         if (!"ls".equals(attributes.get("type"))) {
           continue;
         }
+
+        String projectsRoot = attributes.get(PROJECTS_ROOT_ATTR_NAME);
 
         try {
           String id = configExtractor.extractId(attributes);
@@ -117,6 +124,11 @@ class WorkspaceConfigProvider implements LanguageServerConfigProvider {
                     return guiceConfigProvider.getAll().get(id).getInstanceProvider();
                   }
                   return DefaultInstanceProvider.getInstance();
+                }
+
+                @Override
+                public String getProjectsRoot() {
+                  return projectsRoot == null ? rootDirPathProvider.get() : projectsRoot;
                 }
               });
 

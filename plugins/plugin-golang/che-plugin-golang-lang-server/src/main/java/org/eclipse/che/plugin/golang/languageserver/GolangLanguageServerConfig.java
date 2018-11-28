@@ -22,6 +22,7 @@ import java.util.Set;
 import org.eclipse.che.api.languageserver.DefaultInstanceProvider;
 import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.plugin.golang.inject.GolangModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +35,11 @@ public class GolangLanguageServerConfig implements LanguageServerConfig {
   private static final String REGEX = ".*\\.go";
 
   private final Path launchScript;
+  private final RootDirPathProvider rootDirPathProvider;
 
   @Inject
-  public GolangLanguageServerConfig() {
+  public GolangLanguageServerConfig(RootDirPathProvider rootDirPathProvider) {
+    this.rootDirPathProvider = rootDirPathProvider;
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-golang/launch.sh");
   }
 
@@ -84,5 +87,10 @@ public class GolangLanguageServerConfig implements LanguageServerConfig {
         return isSuccessfullyInstalled() ? null : "Launch script file does not exist";
       }
     };
+  }
+
+  @Override
+  public String getProjectsRoot() {
+    return rootDirPathProvider.get();
   }
 }

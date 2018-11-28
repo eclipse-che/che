@@ -31,6 +31,7 @@ import org.eclipse.che.api.languageserver.LanguageServerException;
 import org.eclipse.che.api.languageserver.LanguageServerInitializedEvent;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
 import org.eclipse.che.api.project.server.ProjectManager;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.commons.lang.IoUtil;
 import org.eclipse.che.plugin.csharp.inject.CSharpModule;
@@ -44,6 +45,7 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
 
   private static final String REGEX = ".*\\.(cs|csx)$";
 
+  private final RootDirPathProvider rootDirPathProvider;
   private final EventService eventService;
   private final PathTransformer pathTransformer;
   private final ProjectManager projectManager;
@@ -52,7 +54,11 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
 
   @Inject
   public CSharpLanguageServerConfig(
-      EventService eventService, PathTransformer pathTransformer, ProjectManager projectManager) {
+      RootDirPathProvider rootDirPathProvider,
+      EventService eventService,
+      PathTransformer pathTransformer,
+      ProjectManager projectManager) {
+    this.rootDirPathProvider = rootDirPathProvider;
     this.eventService = eventService;
     this.pathTransformer = pathTransformer;
     this.projectManager = projectManager;
@@ -112,6 +118,11 @@ public class CSharpLanguageServerConfig implements LanguageServerConfig {
         return ImmutableSet.of();
       }
     };
+  }
+
+  @Override
+  public String getProjectsRoot() {
+    return rootDirPathProvider.get();
   }
 
   @Override

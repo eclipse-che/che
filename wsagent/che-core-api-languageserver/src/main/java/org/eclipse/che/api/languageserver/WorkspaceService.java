@@ -12,7 +12,6 @@
 package org.eclipse.che.api.languageserver;
 
 import static org.eclipse.che.api.fs.server.WsPathUtils.absolutize;
-import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.truish;
 
 import com.google.inject.Inject;
@@ -56,15 +55,20 @@ public class WorkspaceService {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceService.class);
   private final FsManager fsManager;
+  private final LanguageServerPathTransformer languageServerPathTransformer;
   private final FindServer findServer;
   private final RequestHandlerConfigurator requestHandler;
 
   @Inject
   public WorkspaceService(
-      RequestHandlerConfigurator requestHandler, FsManager fsManager, FindServer findServer) {
+      RequestHandlerConfigurator requestHandler,
+      FsManager fsManager,
+      FindServer findServer,
+      LanguageServerPathTransformer languageServerPathTransformer) {
     this.findServer = findServer;
     this.requestHandler = requestHandler;
     this.fsManager = fsManager;
+    this.languageServerPathTransformer = languageServerPathTransformer;
   }
 
   @PostConstruct
@@ -92,8 +96,7 @@ public class WorkspaceService {
   @SuppressWarnings("deprecation")
   private List<TextEditDto> editFile(FileEditParams params) {
     try {
-      String path = removePrefixUri(params.getUri());
-      String wsPath = absolutize(path);
+      String wsPath = absolutize(params.getUri());
 
       if (fsManager.existsAsFile(wsPath)) {
         List<TextEdit> undo = new ArrayList<>();
@@ -146,11 +149,13 @@ public class WorkspaceService {
 
           @Override
           public boolean handleResult(
-              ExtendedLanguageServer element, List<? extends SymbolInformation> locations) {
+              ExtendedLanguageServer server, List<? extends SymbolInformation> locations) {
             locations.forEach(
-                o -> {
-                  o.getLocation().setUri(removePrefixUri(o.getLocation().getUri()));
-                  result.add(new SymbolInformationDto(o));
+                location -> {
+                  String uri = location.getLocation().getUri();
+                  String wsPath = languageServerPathTransformer.toWsPath(server.getId(), uri);
+                  location.getLocation().setUri(wsPath);
+                  result.add(new SymbolInformationDto(location));
                 });
             return true;
           }
