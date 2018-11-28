@@ -62,12 +62,13 @@ public class CheCorsFilterConfig implements FilterConfig {
 
   @Override
   public String getFilterName() {
-    return getClass().getName();
+    return CheCorsFilter.class.getName();
   }
 
   @Override
   public ServletContext getServletContext() {
-    throw new UnsupportedOperationException("The method does not supported in " + getClass());
+    throw new UnsupportedOperationException(
+        "The method is not supported in " + CheCorsFilter.class);
   }
 
   @Override
@@ -77,6 +78,7 @@ public class CheCorsFilterConfig implements FilterConfig {
 
   @Override
   public Enumeration<String> getInitParameterNames() {
-    throw new UnsupportedOperationException("The method does not supported in " + getClass());
+    throw new UnsupportedOperationException(
+        "The method is not supported in " + CheCorsFilter.class);
   }
 }
