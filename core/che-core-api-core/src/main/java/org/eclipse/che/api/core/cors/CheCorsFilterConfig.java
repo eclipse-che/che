@@ -28,6 +28,8 @@ import javax.servlet.ServletContext;
 
 /**
  * Basic configuration for {@link CheCorsFilter}. Allowed origings and credentials support are configurable through properties.
+ *
+ * @author Mykhailo Kuznietsov
  */
 public class CheCorsFilterConfig implements FilterConfig {
 
