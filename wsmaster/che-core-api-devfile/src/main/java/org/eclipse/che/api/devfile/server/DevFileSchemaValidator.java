@@ -25,6 +25,7 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.fge.jsonschema.main.JsonValidator;
 import java.io.IOException;
 import java.net.URL;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Singleton;
 
@@ -46,25 +47,25 @@ public class DevFileSchemaValidator {
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
 
-  public void validateBySchema(String yamlContent, boolean verbose) throws DevFileFormatException {
+  public JsonNode validateBySchema(String yamlContent, boolean verbose)
+      throws DevFileFormatException {
     ProcessingReport report;
+    JsonNode data;
     try {
-      final JsonNode data = yamlReader.readTree(yamlContent);
+      data = yamlReader.readTree(yamlContent);
       report = validator.validate(schema, data);
     } catch (IOException | ProcessingException e) {
-      throw new DevFileFormatException("Unable to validate devfile. Error: " + e.getMessage());
+      throw new DevFileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }
     if (!report.isSuccess()) {
-      StringBuilder sb = new StringBuilder();
-      StreamSupport.stream(report.spliterator(), false)
-          .filter(
-              message ->
-                  message.getLogLevel() == LogLevel.ERROR
-                      || message.getLogLevel() == LogLevel.FATAL)
-          .forEach(
-              message ->
-                  sb.append(format("[%s] ", verbose ? message.asJson() : message.getMessage())));
-      throw new DevFileFormatException(format("Devfile schema validation failed. Errors: %s", sb));
+      String error =
+          StreamSupport.stream(report.spliterator(), false)
+              .filter(m -> m.getLogLevel() == LogLevel.ERROR || m.getLogLevel() == LogLevel.FATAL)
+              .map(message -> verbose ? message.asJson().toString() : message.getMessage())
+              .collect(Collectors.joining(", ", "[", "]"));
+      throw new DevFileFormatException(
+          format("Devfile schema validation failed. Errors: %s", error));
     }
+    return data;
   }
 }

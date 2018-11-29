@@ -11,11 +11,13 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.io.IOException;
@@ -47,6 +49,7 @@ public class DevFileService extends Service {
 
   private WorkspaceLinksGenerator linksGenerator;
   private DevFileSchemaValidator schemaValidator;
+  private DevfileSchemaCachedProvider schemaCachedProvider;
   private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
   private DevFileConverter devFileConverter;
@@ -55,9 +58,11 @@ public class DevFileService extends Service {
   public DevFileService(
       WorkspaceLinksGenerator linksGenerator,
       DevFileSchemaValidator schemaValidator,
+      DevfileSchemaCachedProvider schemaCachedProvider,
       WorkspaceManager workspaceManager) {
     this.linksGenerator = linksGenerator;
     this.schemaValidator = schemaValidator;
+    this.schemaCachedProvider = schemaCachedProvider;
     this.workspaceManager = workspaceManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
     this.devFileConverter = new DevFileConverter();
@@ -73,6 +78,17 @@ public class DevFileService extends Service {
   //  }
   //
   //
+
+  /**
+   * Retrieves the json schema.
+   *
+   * @return json schema
+   */
+  @GET
+  @Produces(APPLICATION_JSON)
+  public Response getSchema() throws ServerException {
+    return Response.ok(schemaCachedProvider.getSchemaContent()).build();
+  }
 
   /**
    * Creates workspace from provided devfile
@@ -91,8 +107,8 @@ public class DevFileService extends Service {
     Devfile devFile;
     WorkspaceConfigImpl workspaceConfig;
     try {
-      schemaValidator.validateBySchema(data, verbose);
-      devFile = objectMapper.readValue(data, Devfile.class);
+      JsonNode parsed = schemaValidator.validateBySchema(data, verbose);
+      devFile = objectMapper.treeToValue(parsed, Devfile.class);
       workspaceConfig = devFileConverter.devFileToWorkspaceConfig(devFile);
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
@@ -118,8 +134,8 @@ public class DevFileService extends Service {
   @Path("/{key:.*}")
   @Produces("text/yml")
   public Response createFromWorkspace(@PathParam("key") String key)
-      throws NotFoundException, ServerException {
-    // TODO: validate key
+      throws NotFoundException, ServerException, BadRequestException {
+    validateKey(key);
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
     Devfile workspaceDevFile = devFileConverter.workspaceToDevFile(workspace.getConfig());
     // Write object as YAML
@@ -144,5 +160,28 @@ public class DevFileService extends Service {
       }
     }
     return config;
+  }
+
+  private void validateKey(String key) throws BadRequestException {
+    String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
+    switch (parts.length) {
+      case 1:
+        {
+          return; // consider it's id
+        }
+      case 2:
+        {
+          if (parts[1].isEmpty()) {
+            throw new BadRequestException(
+                "Wrong composite key format - workspace name required to be set.");
+          }
+          break;
+        }
+      default:
+        {
+          throw new BadRequestException(
+              format("Wrong composite key %s. Format should be 'username:workspace_name'. ", key));
+        }
+    }
   }
 }

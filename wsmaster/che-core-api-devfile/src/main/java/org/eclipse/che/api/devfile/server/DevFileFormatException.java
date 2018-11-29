@@ -11,9 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server;
 
-import org.eclipse.che.api.core.ApiException;
-
-public class DevFileFormatException extends ApiException {
+public class DevFileFormatException extends Exception {
 
   public DevFileFormatException(String serviceError) {
     super(serviceError);

@@ -27,8 +27,6 @@
         </encoder>
     </appender>
 
-    <!--logger name="com.codenvy.factory" level="DEBUG"/-->
-
     <root level="INFO">
         <appender-ref ref="stdout"/>
         <appender-ref ref="file"/>

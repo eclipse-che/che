@@ -44,10 +44,8 @@
   "environments": {},
   "name": "petclinic-dev-environment",
   "attributes": {
-    "eclipse/maven-jdk8:1.0.0": "mvn-stack",
+    "toolsAliases": "eclipse/maven-jdk8:1.0.0=mvn-stack,eclipse/theia:0.0.3=theia-ide,eclipse/theia-jdtls:0.0.3=jdt.ls",
     "editor": "eclipse/theia:0.0.3",
-    "eclipse/theia-jdtls:0.0.3": "jdt.ls",
-    "plugins": "eclipse/maven-jdk8:1.0.0,eclipse/theia-jdtls:0.0.3",
-    "eclipse/theia:0.0.3": "theia-ide"
+    "plugins": "eclipse/maven-jdk8:1.0.0,eclipse/theia-jdtls:0.0.3"
   }
 }

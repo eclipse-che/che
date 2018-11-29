@@ -35,7 +35,7 @@ public class DevFileSchemaValidatorTest {
   @Test(
       expectedExceptions = DevFileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[.+\\]\\)\\] $")
+          "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[\"name\"\\]\\)\\]$")
   public void shouldValidateIncorrectYamlBySchema() throws Exception {
     String devFileYamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile_bad.yaml"));

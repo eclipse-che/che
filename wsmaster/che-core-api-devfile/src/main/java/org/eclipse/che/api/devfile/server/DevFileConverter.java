@@ -11,11 +11,13 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +62,7 @@ public class DevFileConverter {
             new Tool()
                 .withType("cheEditor")
                 .withId(editorId)
-                .withName(wsConfig.getAttributes().get(editorId));
+                .withName(findToolName(wsConfig, editorId));
         tools.add(editorTool);
       } else if (entry.getKey().equals("plugins")) {
         for (String pluginId : entry.getValue().split(",")) {
@@ -68,7 +70,7 @@ public class DevFileConverter {
               new Tool()
                   .withId(pluginId)
                   .withType("chePlugin")
-                  .withName(wsConfig.getAttributes().get(pluginId));
+                  .withName(findToolName(wsConfig, pluginId));
           tools.add(pluginTool);
         }
       }
@@ -92,15 +94,17 @@ public class DevFileConverter {
     // Manage tools
     Map<String, String> attributes = new HashMap<>();
     StringJoiner pluginsStringJoiner = new StringJoiner(",");
+    StringJoiner toolIdToNameMappingStringJoiner = new StringJoiner(",");
     for (Tool tool : devFile.getTools()) {
       if (tool.getType().equals("cheEditor")) {
         attributes.put("editor", tool.getId());
       } else if (tool.getType().equals("chePlugin")) {
         pluginsStringJoiner.add(tool.getId());
       }
-      attributes.put(tool.getId(), tool.getName());
+      toolIdToNameMappingStringJoiner.add(tool.getId() + "=" + tool.getName());
     }
     attributes.put("plugins", pluginsStringJoiner.toString());
+    attributes.put("toolsAliases", toolIdToNameMappingStringJoiner.toString());
     config.setAttributes(attributes);
 
     // Manage commands
@@ -176,10 +180,20 @@ public class DevFileConverter {
     return projectConfig;
   }
 
+  private String findToolName(WorkspaceConfigImpl wsConfig, String toolId) {
+    String aliasesString = firstNonNull(wsConfig.getAttributes().get("toolsAliases"), "");
+    Optional<String> valueOpt =
+        Arrays.stream(aliasesString.split(","))
+            .filter(s -> s.split("=")[0].equals(toolId))
+            .map(s -> s.split("=")[1])
+            .findAny();
+    return valueOpt.isPresent() ? valueOpt.get() : toolId.substring(0, toolId.indexOf(":"));
+  }
+
   private static void validateCurrentVersion(Devfile devFile) throws DevFileFormatException {
     if (!CURRENT_SPEC_VERSION.equals(devFile.getSpecVersion())) {
       throw new DevFileFormatException(
-          format("Provided devfile has unsupported version %s", devFile.getSpecVersion()));
+          format("Provided Devfile has unsupported version %s", devFile.getSpecVersion()));
     }
   }
 }
