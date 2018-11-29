@@ -16,6 +16,7 @@ import static java.nio.charset.Charset.forName;
 import static java.nio.file.Files.readAllLines;
 import static java.nio.file.Paths.get;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.RENAME;
@@ -41,6 +42,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = UNDER_REPAIR)
 public class TestAnnotationsTest {
   private static final String PROJECT_NAME = generate("project", 4);
   private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
@@ -102,7 +104,7 @@ public class TestAnnotationsTest {
       editor.waitTextIntoEditor(contentFromInB);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11779");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11779");
     }
   }
 

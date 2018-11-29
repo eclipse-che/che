@@ -270,7 +270,7 @@ public class ContextMenuEditorTest {
     editor.closeFileByNameWithSaving("ModelAndView.class");
   }
 
-  @Test(priority = 6, alwaysRun = true)
+  @Test(priority = 6, alwaysRun = true, groups = UNDER_REPAIR)
   public void checkRefactoring() {
     final String editorTabName = "Test1";
     final String renamedEditorTabName = "Zclass";
@@ -295,7 +295,7 @@ public class ContextMenuEditorTest {
       editor.waitTabIsPresent(editorTabName);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11697");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11697");
     }
 
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Test1.java");
@@ -311,7 +311,7 @@ public class ContextMenuEditorTest {
       editor.waitTabIsPresent(renamedEditorTabName);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11697");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11697");
     }
     editor.waitTextIntoEditor("public class Zclass");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Zclass.java");

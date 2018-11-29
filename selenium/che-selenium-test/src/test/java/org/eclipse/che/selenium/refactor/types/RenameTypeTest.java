@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.refactor.types;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.RENAME;
@@ -47,6 +48,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = UNDER_REPAIR)
 public class RenameTypeTest {
   private static final Logger LOG = LoggerFactory.getLogger(RenameTypeTest.class);
   private static final String PROJECT_NAME = generate("project", 4);
@@ -200,7 +202,7 @@ public class RenameTypeTest {
       editor.waitTextIntoEditor(contentFromOutB);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11779");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11779");
     }
   }
 }
