@@ -10,16 +10,16 @@
   "type": "object",
   "title": "The Root Schema of DevFile object",
   "required": [
-    "version",
+    "specVersion",
     "name",
     "projects",
     "tools",
     "commands"
   ],
   "properties": {
-    "version": {
+    "specVersion": {
       "type": "string",
-      "title": "Devfile Schema Version",
+      "title": "Devfile Schema Specification Version",
       "examples": [
         "0.0.1"
       ]

@@ -62,7 +62,7 @@ public class DevFileConverterTest {
     Devfile expectedDevFile = objectMapper.readValue(yamlContent, Devfile.class);
 
     // Recursively compare
-    assertEquals(devFile.getVersion(), expectedDevFile.getVersion());
+    assertEquals(devFile.getSpecVersion(), expectedDevFile.getSpecVersion());
     assertEquals(devFile.getName(), expectedDevFile.getName());
     assertEquals(devFile.getProjects().size(), expectedDevFile.getProjects().size());
     for (Project project : devFile.getProjects()) {

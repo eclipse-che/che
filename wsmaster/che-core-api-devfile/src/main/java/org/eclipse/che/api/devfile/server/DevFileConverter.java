@@ -36,7 +36,8 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 public class DevFileConverter {
 
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
-    Devfile devFile = new Devfile().withVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
+    Devfile devFile =
+        new Devfile().withSpecVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
     // Manage projects
     List<Project> projects = new ArrayList<>();
@@ -176,9 +177,9 @@ public class DevFileConverter {
   }
 
   private static void validateCurrentVersion(Devfile devFile) throws DevFileFormatException {
-    if (!CURRENT_SPEC_VERSION.equals(devFile.getVersion())) {
+    if (!CURRENT_SPEC_VERSION.equals(devFile.getSpecVersion())) {
       throw new DevFileFormatException(
-          format("Provided devfile has unsupported version %s", devFile.getVersion()));
+          format("Provided devfile has unsupported version %s", devFile.getSpecVersion()));
     }
   }
 }
