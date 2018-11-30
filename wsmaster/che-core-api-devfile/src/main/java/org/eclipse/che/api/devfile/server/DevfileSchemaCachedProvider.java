@@ -46,12 +46,10 @@ public class DevfileSchemaCachedProvider {
   }
 
   private String loadFile() throws IOException {
-
     try (InputStream schemaStream =
         getClass().getClassLoader().getResourceAsStream(SCHEMA_LOCATION)) {
       return new BufferedReader(new InputStreamReader(schemaStream))
           .lines()
-          .parallel()
           .collect(Collectors.joining("\n"));
     }
   }
