@@ -26,6 +26,7 @@
     <name>Che Dockerfiles</name>
     <inceptionYear>2018</inceptionYear>
     <modules>
+        <module>theia-dev</module>
         <module>theia</module>
     </modules>
 </project>
