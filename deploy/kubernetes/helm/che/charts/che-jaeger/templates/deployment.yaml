@@ -30,10 +30,7 @@ spec:
         prometheus.io/port: "16686"
     spec:
       containers:
-        - env:
-          - name: COLLECTOR_ZIPKIN_HTTP_PORT
-            value: "9411"
-          image: {{ .Values.image }}
+        - image: {{ .Values.image }}
           name: jaeger
           ports:
             - containerPort: 5775
@@ -43,8 +40,6 @@ spec:
             - containerPort: 6832
               protocol: UDP
             - containerPort: 16686
-              protocol: TCP
-            - containerPort: 9411
               protocol: TCP
             - containerPort: 5778
               protocol: TCP

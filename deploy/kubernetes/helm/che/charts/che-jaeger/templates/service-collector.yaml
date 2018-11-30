@@ -24,10 +24,5 @@ spec:
     port: 14268
     protocol: TCP
     targetPort: 14268
-  - name: jaeger-collector-zipkin
-    port: 9411
-    protocol: TCP
-    targetPort: 9411
   selector:
     jaeger-infra: jaeger-pod
-  type: ClusterIP
