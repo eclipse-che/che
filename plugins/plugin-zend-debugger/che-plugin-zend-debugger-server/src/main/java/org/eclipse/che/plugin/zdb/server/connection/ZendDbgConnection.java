@@ -52,6 +52,17 @@ import org.eclipse.che.plugin.zdb.server.exceptions.ZendDbgTimeoutException;
  */
 public class ZendDbgConnection {
 
+  private EngineConnectionRunnable engineConnectionRunnable;
+  private ExecutorService engineConnectionRunnableExecutor;
+  private EngineMessageRunnable engineMessageRunnable;
+  private ExecutorService engineMessageRunnableExecutor;
+  private Map<Integer, EngineSyncResponse<IDbgEngineResponse>> engineSyncResponses =
+      new HashMap<>();
+  private final ZendDbgSettings debugSettings;
+  private IEngineMessageHandler engineMessageHandler;
+  private int debugRequestId = 1000;
+  private boolean isConnected = false;
+
   private final class EngineConnectionRunnable implements Runnable {
 
     private ServerSocket debugSocket;
@@ -244,17 +255,6 @@ public class ZendDbgConnection {
 
     <T extends IDbgClientResponse> T handleRequest(IDbgEngineRequest<T> request);
   }
-
-  private EngineConnectionRunnable engineConnectionRunnable;
-  private ExecutorService engineConnectionRunnableExecutor;
-  private EngineMessageRunnable engineMessageRunnable;
-  private ExecutorService engineMessageRunnableExecutor;
-  private Map<Integer, EngineSyncResponse<IDbgEngineResponse>> engineSyncResponses =
-      new HashMap<>();
-  private final ZendDbgSettings debugSettings;
-  private IEngineMessageHandler engineMessageHandler;
-  private int debugRequestId = 1000;
-  private boolean isConnected = false;
 
   /**
    * Constructs a new DebugConnectionThread with a given Socket.
