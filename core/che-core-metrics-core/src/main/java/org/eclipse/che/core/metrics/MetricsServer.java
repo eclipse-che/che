@@ -15,6 +15,7 @@ import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -39,6 +40,7 @@ public class MetricsServer {
     this.metricsPort = metricsPort;
   }
 
+  @PostConstruct
   public void startServer() throws IOException {
     this.server = new HTTPServer(new InetSocketAddress(metricsPort), collectorRegistry, true);
     LOG.info("Metrics server started at port {} successfully ", metricsPort);

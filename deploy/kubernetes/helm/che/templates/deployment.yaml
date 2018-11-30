@@ -291,6 +291,11 @@ spec:
               key: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
               name: che
 {{- end }}
+        - name: CHE_METRICS_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              key: CHE_METRICS_ENABLED
+              name: che
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         livenessProbe:
@@ -308,6 +313,8 @@ spec:
           name: http-debug
         - containerPort: 8888
           name: jgroups-ping
+        - containerPort: 8087
+          name: http-metrics
         readinessProbe:
           httpGet:
             path: /api/system/state

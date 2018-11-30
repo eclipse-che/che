@@ -9,10 +9,18 @@
 
 dependencies:
   - name: che-postgres
-    repository: file://./charts/che-postgres/
+    repository: file://./custom-charts/che-postgres/
     version: 1.0.0
     condition: global.multiuser
   - name: che-keycloak
-    repository: file://./charts/che-keycloak/
+    repository: file://./custom-charts/che-keycloak/
     version: 1.0.0
     condition: global.cheDedicatedKeycloak,global.multiuser
+  - name: prometheus
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    version: ^7.4.5
+    condition: global.metricsEnabled
+  - name: grafana
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    version: ^1.19.0
+    condition: global.metricsEnabled
