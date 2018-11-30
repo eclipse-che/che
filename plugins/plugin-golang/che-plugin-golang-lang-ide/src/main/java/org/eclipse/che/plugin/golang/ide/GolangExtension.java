@@ -22,6 +22,8 @@ import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
 
+import static org.eclipse.che.plugin.golang.shared.Constants.GOLANG_FILE_EXT;
+
 /** @author Eugene Ivantsov */
 @Extension(title = "Golang")
 public class GolangExtension {
@@ -45,7 +47,7 @@ public class GolangExtension {
             return;
           }
 
-          if (!"go"
+          if (!GOLANG_FILE_EXT
               .equals(
                   ((TextEditor) activePart)
                       .getEditorInput()
