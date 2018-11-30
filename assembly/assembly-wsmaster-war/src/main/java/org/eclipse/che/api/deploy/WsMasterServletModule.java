@@ -28,8 +28,10 @@ public class WsMasterServletModule extends ServletModule {
     if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
       install(new org.eclipse.che.core.tracing.web.TracingWebModule());
     }
+    if (isCheCorsEnabled()) {
+      filter("/*").through(CheCorsFilter.class);
+    }
 
-    filter("/*").through(CheCorsFilter.class);
     filter("/*").through(RequestIdLoggerFilter.class);
 
     // Matching group SHOULD contain forward slash.
@@ -40,6 +42,16 @@ public class WsMasterServletModule extends ServletModule {
       configureMultiUserMode();
     } else {
       configureSingleUserMode();
+    }
+  }
+
+  private boolean isCheCorsEnabled() {
+    String cheCorsEnabledEnvVar = System.getenv("CHE_CORS_ENABLED");
+    if (cheCorsEnabledEnvVar == null) {
+      // by default CORS should be enabled
+      return true;
+    } else {
+      return Boolean.valueOf(cheCorsEnabledEnvVar);
     }
   }
 

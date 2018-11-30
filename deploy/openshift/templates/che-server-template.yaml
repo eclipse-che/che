@@ -153,6 +153,8 @@ objects:
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
+          - name: CHE_CORS_ENABLED
+            value: "${CHE_CORS_ENABLED}"
           - name: CHE_CORS_ALLOW__CREDENTIALS
             value: "${CHE_CORS_ALLOW__CREDENTIALS}"
           - name: CHE_CORS_ALLOWED__ORIGINS
@@ -302,6 +304,10 @@ parameters:
   displayName: Eclipse Che tracing
   description: Enable or disable tracing in Eclipse Che
   value: 'false'
+- name: CHE_CORS_ENABLED
+  displayName: CORS filter for WS Master
+  description: Enable or disable CORS filter for Eclipse Che WS Master
+  value: 'true'
 - name: CHE_CORS_ALLOW__CREDENTIALS
   displayName: CORS credentials support
   description: Allow requests with credentials for CORS filter
