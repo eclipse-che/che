@@ -45,6 +45,16 @@ public class GolangExtension {
             return;
           }
 
+          if (!"go"
+              .equals(
+                  ((TextEditor) activePart)
+                      .getEditorInput()
+                      .getFile()
+                      .getLocation()
+                      .getFileExtension())) {
+            return;
+          }
+
           TextEditorConfiguration configuration = ((TextEditor) activePart).getConfiguration();
           if (!(configuration instanceof LanguageServerEditorConfiguration)) {
             return;
