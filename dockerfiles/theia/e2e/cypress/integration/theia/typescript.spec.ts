@@ -82,7 +82,7 @@ context('TypeScript', () => {
             });
 
         }).then(() => {
-            cy.get('.p-Widget.p-TabBar.theia-app-centers.theia-app-main.ps').contains(FILENAME).click({ force: true });
+            cy.get('.p-Widget.p-TabBar.theia-app-centers.theia-app-main').contains(FILENAME).click({ force: true });
         }).then(() => {
             cy.window().then((win: any) => {
                 win.monaco.editor.getModels()[0].setValue('export class HelloWorld {\n  constructor() {}\n foo(): invalid {\n }\n}\n');
