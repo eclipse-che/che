@@ -17,7 +17,6 @@ import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.github.fge.jackson.JsonLoader;
 import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.core.report.LogLevel;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
@@ -27,6 +26,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /** Validates YAML content against given JSON schema. */
@@ -34,15 +34,16 @@ import javax.inject.Singleton;
 public class DevFileSchemaValidator {
 
   private JsonValidator validator;
-  private JsonNode schema;
   private ObjectMapper yamlReader;
+  private DevFileSchemaCachedProvider schemaProvider;
 
-  public DevFileSchemaValidator() throws IOException {
+  @Inject
+  public DevFileSchemaValidator(DevFileSchemaCachedProvider schemaProvider) throws IOException {
     final URL schemaURL = getClass().getClassLoader().getResource(SCHEMA_LOCATION);
     if (schemaURL == null) {
       throw new IOException("Devfile schema is not found at specified path:" + SCHEMA_LOCATION);
     }
-    this.schema = JsonLoader.fromURL(schemaURL);
+    this.schemaProvider = schemaProvider;
     this.validator = JsonSchemaFactory.byDefault().getValidator();
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
@@ -53,7 +54,7 @@ public class DevFileSchemaValidator {
     JsonNode data;
     try {
       data = yamlReader.readTree(yamlContent);
-      report = validator.validate(schema, data);
+      report = validator.validate(schemaProvider.getJsoneNode(), data);
     } catch (IOException | ProcessingException e) {
       throw new DevFileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }

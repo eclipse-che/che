@@ -13,6 +13,8 @@ package org.eclipse.che.api.devfile.server;
 
 import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jackson.JsonLoader;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,29 +22,24 @@ import java.io.InputStreamReader;
 import java.lang.ref.SoftReference;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ServerException;
 
 /** Loads a schema content and stores it in soft reference. */
 @Singleton
-public class DevfileSchemaCachedProvider {
+public class DevFileSchemaCachedProvider {
 
-  private SoftReference<String> schemaRef;
+  private SoftReference<String> schemaRef = new SoftReference(null);
 
-  public DevfileSchemaCachedProvider() throws IOException {
-    this.schemaRef = new SoftReference<>(loadFile());
+  public String getSchemaContent() throws IOException {
+    String schema = schemaRef.get();
+    if (schema == null) {
+      schema = loadFile();
+      schemaRef = new SoftReference<>(schema);
+    }
+    return schema;
   }
 
-  public String getSchemaContent() throws ServerException {
-    String schemaStream = schemaRef.get();
-    if (schemaStream == null) {
-      try {
-        schemaStream = loadFile();
-      } catch (IOException e) {
-        throw new ServerException(e);
-      }
-      schemaRef = new SoftReference<>(schemaStream);
-    }
-    return schemaStream;
+  public JsonNode getJsoneNode() throws IOException {
+    return JsonLoader.fromString(getSchemaContent());
   }
 
   private String loadFile() throws IOException {

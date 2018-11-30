@@ -49,7 +49,7 @@ public class DevFileService extends Service {
 
   private WorkspaceLinksGenerator linksGenerator;
   private DevFileSchemaValidator schemaValidator;
-  private DevfileSchemaCachedProvider schemaCachedProvider;
+  private DevFileSchemaCachedProvider schemaCachedProvider;
   private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
   private DevFileConverter devFileConverter;
@@ -58,7 +58,7 @@ public class DevFileService extends Service {
   public DevFileService(
       WorkspaceLinksGenerator linksGenerator,
       DevFileSchemaValidator schemaValidator,
-      DevfileSchemaCachedProvider schemaCachedProvider,
+      DevFileSchemaCachedProvider schemaCachedProvider,
       WorkspaceManager workspaceManager) {
     this.linksGenerator = linksGenerator;
     this.schemaValidator = schemaValidator;
@@ -87,7 +87,11 @@ public class DevFileService extends Service {
   @GET
   @Produces(APPLICATION_JSON)
   public Response getSchema() throws ServerException {
-    return Response.ok(schemaCachedProvider.getSchemaContent()).build();
+    try {
+      return Response.ok(schemaCachedProvider.getSchemaContent()).build();
+    } catch (IOException e) {
+      throw new ServerException(e);
+    }
   }
 
   /**
