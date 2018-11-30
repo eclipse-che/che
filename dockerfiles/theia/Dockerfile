@@ -27,14 +27,15 @@ RUN /tmp/builder/scripts/check-github-limit.sh
 RUN apk add make gcc g++ python git bash
 
 # Define upstream version of theia to use
-ARG THEIA_VERSION=0.3.16
+ARG THEIA_VERSION=0.3.17
 
 ENV THEIA_VERSION=${THEIA_VERSION} \
     HOME=/home/theia
 WORKDIR ${HOME}
 
 # add eclipse che theia generator
-RUN yarn global add @eclipse-che/theia-generator@0.0.1-1543478099
+RUN yarn global add @eclipse-che/theia-generator@0.0.1-1543568125
+
 
 # Add patches
 ADD src/patches /home/theia-build/patches
