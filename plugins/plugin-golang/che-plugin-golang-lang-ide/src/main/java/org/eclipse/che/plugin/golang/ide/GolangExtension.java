@@ -34,17 +34,25 @@ public class GolangExtension {
         new Icon(GOLANG_CATEGORY + ".samples.category.icon", resources.golangIcon()));
   }
 
-  // TODO(vzhukovskyi): fix for https://github.com/eclipse/che/issues/11907, has to be removed when issue is resolved
+  // TODO(vzhukovskyi): has to be removed when https://github.com/eclipse/che/issues/11907 resolved
   @Inject
   private void temporaryDisableRenameAction(EventBus eventBus) {
-    eventBus.addHandler(ActivePartChangedEvent.TYPE, event -> {
-      PartPresenter activePart = event.getActivePart();
-      if (activePart instanceof TextEditor) {
-        TextEditorConfiguration configuration = ((TextEditor) activePart).getConfiguration();
-        if (configuration instanceof LanguageServerEditorConfiguration) {
-          ((LanguageServerEditorConfiguration) configuration).getServerCapabilities().setRenameProvider(false);
-        }
-      }
-    });
+    eventBus.addHandler(
+        ActivePartChangedEvent.TYPE,
+        event -> {
+          PartPresenter activePart = event.getActivePart();
+          if (!(activePart instanceof TextEditor)) {
+            return;
+          }
+
+          TextEditorConfiguration configuration = ((TextEditor) activePart).getConfiguration();
+          if (!(configuration instanceof LanguageServerEditorConfiguration)) {
+            return;
+          }
+
+          ((LanguageServerEditorConfiguration) configuration)
+              .getServerCapabilities()
+              .setRenameProvider(false);
+        });
   }
 }
