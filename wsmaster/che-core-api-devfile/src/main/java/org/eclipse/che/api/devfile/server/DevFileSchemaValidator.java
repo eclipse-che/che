@@ -35,10 +35,10 @@ public class DevFileSchemaValidator {
 
   private JsonValidator validator;
   private ObjectMapper yamlReader;
-  private DevFileSchemaCachedProvider schemaProvider;
+  private DevFileSchemaProvider schemaProvider;
 
   @Inject
-  public DevFileSchemaValidator(DevFileSchemaCachedProvider schemaProvider) throws IOException {
+  public DevFileSchemaValidator(DevFileSchemaProvider schemaProvider) throws IOException {
     final URL schemaURL = getClass().getClassLoader().getResource(SCHEMA_LOCATION);
     if (schemaURL == null) {
       throw new IOException("Devfile schema is not found at specified path:" + SCHEMA_LOCATION);

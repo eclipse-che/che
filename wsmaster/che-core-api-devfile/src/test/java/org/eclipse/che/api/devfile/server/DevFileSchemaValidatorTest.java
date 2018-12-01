@@ -21,7 +21,7 @@ public class DevFileSchemaValidatorTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    schemaValidator = new DevFileSchemaValidator(new DevFileSchemaCachedProvider());
+    schemaValidator = new DevFileSchemaValidator(new DevFileSchemaProvider());
   }
 
   @Test

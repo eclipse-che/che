@@ -42,7 +42,7 @@ public class DevFileConverterTest {
     WorkspaceConfigImpl wsConfigImpl = devFileConverter.devFileToWorkspaceConfig(devFile);
 
     String jsonContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_impl.json"));
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
 
     assertEquals(wsConfigImpl, JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null));
   }
@@ -51,7 +51,7 @@ public class DevFileConverterTest {
   public void shouldBuildYamlDevFileFromWorkspaceConfig() throws Exception {
 
     String jsonContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_impl.json"));
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
     WorkspaceConfigImpl workspaceConfig =
         JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
     Devfile devFile = devFileConverter.workspaceToDevFile(workspaceConfig);

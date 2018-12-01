@@ -49,7 +49,7 @@ public class DevFileService extends Service {
 
   private WorkspaceLinksGenerator linksGenerator;
   private DevFileSchemaValidator schemaValidator;
-  private DevFileSchemaCachedProvider schemaCachedProvider;
+  private DevFileSchemaProvider schemaCachedProvider;
   private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
   private DevFileConverter devFileConverter;
@@ -58,7 +58,7 @@ public class DevFileService extends Service {
   public DevFileService(
       WorkspaceLinksGenerator linksGenerator,
       DevFileSchemaValidator schemaValidator,
-      DevFileSchemaCachedProvider schemaCachedProvider,
+      DevFileSchemaProvider schemaCachedProvider,
       WorkspaceManager workspaceManager) {
     this.linksGenerator = linksGenerator;
     this.schemaValidator = schemaValidator;
@@ -102,7 +102,7 @@ public class DevFileService extends Service {
    * @return created workspace configuration
    */
   @POST
-  @Consumes({"text/yaml", "text/x-yaml", "application/yaml"})
+  @Consumes({"text/yaml", "text/x-yaml", "application/yaml", "application/json"})
   @Produces(APPLICATION_JSON)
   public WorkspaceDto createFromYaml(String data, @QueryParam("verbose") boolean verbose)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
@@ -123,9 +123,7 @@ public class DevFileService extends Service {
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     WorkspaceImpl workspace =
         workspaceManager.createWorkspace(findAvailableName(workspaceConfig), namespace, emptyMap());
-    WorkspaceDto workspaceDto =
-        asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext()));
-    return workspaceDto;
+    return asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext()));
   }
 
   /**
