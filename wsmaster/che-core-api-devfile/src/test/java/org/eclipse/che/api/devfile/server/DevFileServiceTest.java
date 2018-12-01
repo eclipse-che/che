@@ -69,6 +69,7 @@ public class DevFileServiceTest {
 
   @SuppressWarnings("unused")
   private static final EnvironmentFilter FILTER = new EnvironmentFilter();
+
   private static final Subject SUBJECT = new SubjectImpl("user", "user123", "token", false);
 
   @SuppressWarnings("unused")
