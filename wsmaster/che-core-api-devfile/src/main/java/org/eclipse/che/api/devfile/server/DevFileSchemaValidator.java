@@ -12,7 +12,6 @@
 package org.eclipse.che.api.devfile.server;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,7 +22,6 @@ import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import com.github.fge.jsonschema.main.JsonValidator;
 import java.io.IOException;
-import java.net.URL;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Inject;
@@ -39,10 +37,6 @@ public class DevFileSchemaValidator {
 
   @Inject
   public DevFileSchemaValidator(DevFileSchemaProvider schemaProvider) throws IOException {
-    final URL schemaURL = getClass().getClassLoader().getResource(SCHEMA_LOCATION);
-    if (schemaURL == null) {
-      throw new IOException("Devfile schema is not found at specified path:" + SCHEMA_LOCATION);
-    }
     this.schemaProvider = schemaProvider;
     this.validator = JsonSchemaFactory.byDefault().getValidator();
     this.yamlReader = new ObjectMapper(new YAMLFactory());
