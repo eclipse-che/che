@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.inject.Singleton;
@@ -25,7 +26,7 @@ import javax.inject.Singleton;
 @Singleton
 public class DevFileSchemaProvider {
 
-  private SoftReference<String> schemaRef = new SoftReference(null);
+  private SoftReference<String> schemaRef = new SoftReference<>(null);
 
   public String getSchemaContent() throws IOException {
     String schema = schemaRef.get();
@@ -41,8 +42,10 @@ public class DevFileSchemaProvider {
   }
 
   private String loadFile() throws IOException {
-    return new String(
-        Files.readAllBytes(
-            Paths.get(getClass().getClassLoader().getResource(SCHEMA_LOCATION).getFile())));
+    URL schemaURL = getClass().getClassLoader().getResource(SCHEMA_LOCATION);
+    if (schemaURL != null) {
+      return new String(Files.readAllBytes(Paths.get(schemaURL.getFile())));
+    }
+    throw new IOException("Schema file cannot be found");
   }
 }
