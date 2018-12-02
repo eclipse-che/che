@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -46,6 +47,6 @@ public class DevFileSchemaProvider {
     if (schemaURL != null) {
       return new String(Files.readAllBytes(Paths.get(schemaURL.getFile())));
     }
-    throw new IOException("Schema file cannot be found");
+    throw new IOException(format("Schema file %s cannot be found", SCHEMA_LOCATION));
   }
 }
