@@ -47,6 +47,6 @@ public class DevFileSchemaProvider {
     if (schemaURL != null) {
       return new String(Files.readAllBytes(Paths.get(schemaURL.getFile())));
     }
-    throw new IOException(format("Schema file %s cannot be found", SCHEMA_LOCATION));
+    throw new IllegalStateException(format("Schema file %s cannot be found", SCHEMA_LOCATION));
   }
 }
