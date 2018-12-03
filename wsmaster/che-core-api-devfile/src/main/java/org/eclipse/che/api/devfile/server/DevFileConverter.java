@@ -14,6 +14,7 @@ package org.eclipse.che.api.devfile.server;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_WORKSPACE_ATTRIBUTE_NAME;
@@ -41,6 +42,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 public class DevFileConverter {
 
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
+
     Devfile devFile =
         new Devfile().withSpecVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
@@ -127,7 +129,7 @@ public class DevFileConverter {
       command.setType(devAction.getType());
       command.setCommandLine(devAction.getCommand());
       if (devAction.getWorkdir() != null) {
-        command.getAttributes().put("workingDir", devAction.getWorkdir());
+        command.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, devAction.getWorkdir());
       }
       Optional<Tool> toolOfCommand =
           devFile
@@ -149,13 +151,13 @@ public class DevFileConverter {
   private Command commandImplToDevCommand(CommandImpl command) {
     Command devCommand = new Command().withName(command.getName());
     Action action = new Action().withCommand(command.getCommandLine()).withType(command.getType());
-    String workingDir = command.getAttributes().get("workingDir");
+    String workingDir = command.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE);
     if (!isNullOrEmpty(workingDir)) {
       action.setWorkdir(workingDir);
     }
     devCommand.setAttributes(command.getAttributes());
     // Remove internal attributes
-    devCommand.getAttributes().remove("workingDir");
+    devCommand.getAttributes().remove(WORKING_DIRECTORY_ATTRIBUTE);
     devCommand.getAttributes().remove("pluginId");
     return devCommand;
   }
@@ -180,7 +182,7 @@ public class DevFileConverter {
   }
 
   private String findToolName(WorkspaceConfigImpl wsConfig, String toolId) {
-    String aliasesString = firstNonNull(wsConfig.getAttributes().get("toolsAliases"), "");
+    String aliasesString = firstNonNull(wsConfig.getAttributes().get(ALIASES_WORKSPACE_ATTRIBUTE_NAME), "");
     Optional<String> valueOpt =
         Arrays.stream(aliasesString.split(","))
             .filter(s -> s.split("=")[0].equals(toolId))
