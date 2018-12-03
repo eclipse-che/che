@@ -68,13 +68,6 @@ prometheus:
     enabled: false
   rbac:
     enabled: false
-  server:
-    ingress:
-      enabled: true
-      hosts:
-        # not sure how to do this in the templatized way - template such as keycloakHost cannot
-        # be used in values.yaml :(
-      - prometheus.192.168.99.100.nip.io
   serverFiles:
     prometheus.yml:
       scrape_configs:
@@ -84,10 +77,6 @@ prometheus:
           - che-host:8087
 
 grafana:
-  ingress:
-    enabled: true
-    hosts:
-    - grafana.192.168.99.100.nip.io
   adminUser: admin
   adminPassword: admin
   datasources:
@@ -113,16 +102,6 @@ grafana:
   dashboards:
     default:
       chejvm:
-#        panels:
-#        - datasource: che
-#          lines: true
-#          title: Che JVM
-#          type: graph
-#          gnetId: 1
-#          targets:
-#            - expr: jvm_memory_used_bytes{job="che"}
-#              format: time_series
-#              legendFormat: "{{ id }}"
         json: |
           {
             "annotations": {
@@ -236,10 +215,6 @@ grafana:
             "tags": [],
             "templating": {
               "list": []
-            },
-            "time": {
-              "from": "2018-11-30T14:28:05.144Z",
-              "to": "2018-11-30T14:36:34.110Z"
             },
             "timepicker": {
               "refresh_intervals": [
