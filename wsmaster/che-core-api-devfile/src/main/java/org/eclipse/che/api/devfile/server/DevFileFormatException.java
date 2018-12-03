@@ -11,9 +11,10 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+/** Thrown when Devfile schema or integrity validation is failed. */
 public class DevFileFormatException extends Exception {
 
-  public DevFileFormatException(String serviceError) {
-    super(serviceError);
+  public DevFileFormatException(String formatError) {
+    super(formatError);
   }
 }

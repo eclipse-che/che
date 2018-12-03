@@ -19,6 +19,7 @@ import com.github.fge.jackson.JsonLoader;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.inject.Singleton;
@@ -45,7 +46,8 @@ public class DevFileSchemaProvider {
   private String loadFile() throws IOException {
     URL schemaURL = getClass().getClassLoader().getResource(SCHEMA_LOCATION);
     if (schemaURL != null) {
-      return new String(Files.readAllBytes(Paths.get(schemaURL.getFile())));
+      return new String(
+          Files.readAllBytes(Paths.get(schemaURL.getFile())), Charset.defaultCharset());
     }
     throw new IllegalStateException(format("Schema file %s cannot be found", SCHEMA_LOCATION));
   }

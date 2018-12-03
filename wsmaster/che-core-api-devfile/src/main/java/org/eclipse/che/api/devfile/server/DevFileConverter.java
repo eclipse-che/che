@@ -146,18 +146,14 @@ public class DevFileConverter {
   private Command commandImplToDevCommand(CommandImpl command) {
     Command devCommand = new Command().withName(command.getName());
     Action action = new Action().withCommand(command.getCommandLine()).withType(command.getType());
-    if (!isNullOrEmpty(command.getAttributes().get("workingDir"))) {
-      action.setWorkdir(command.getAttributes().get("workingDir"));
+    String workingDir = command.getAttributes().get("workingDir");
+    if (!isNullOrEmpty(workingDir)) {
+      action.setWorkdir(workingDir);
     }
+    devCommand.setAttributes(command.getAttributes());
     // Remove internal attributes
-    command.getAttributes().remove("workingDir");
-    command.getAttributes().remove("pluginId");
-    // Put others
-    if (devCommand.getAttributes() == null) {
-      devCommand.withAttributes(command.getAttributes());
-    } else {
-      devCommand.getAttributes().putAll(command.getAttributes());
-    }
+    devCommand.getAttributes().remove("workingDir");
+    devCommand.getAttributes().remove("pluginId");
     return devCommand;
   }
 

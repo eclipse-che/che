@@ -68,17 +68,6 @@ public class DevFileService extends Service {
     this.devFileConverter = new DevFileConverter();
   }
 
-  //  Creates a workspace by providing the url to the repository
-  //  Initially this method will return
-  //  empty workspace configuration. And will start che-devfile-broker on a background to clone
-  //  sources and get devfile.
-  //  @POST
-  //  @Produces(APPLICATION_JSON)
-  //  public Response create(@QueryParam("repo_url") String repo_url){
-  //  }
-  //
-  //
-
   /**
    * Retrieves the json schema.
    *
