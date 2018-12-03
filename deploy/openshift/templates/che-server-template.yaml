@@ -159,6 +159,8 @@ objects:
             value: "${CHE_CORS_ALLOW__CREDENTIALS}"
           - name: CHE_CORS_ALLOWED__ORIGINS
             value: "${CHE_CORS_ALLOWED__ORIGINS}"
+          - name: CHE_WSAGENT_CORS_ALLOWED__ORIGINS
+            value: "${CHE_WSAGENT_CORS_ALLOWED__ORIGINS}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -309,13 +311,17 @@ parameters:
   description: Enable or disable CORS filter for Eclipse Che WS Master
   value: 'true'
 - name: CHE_CORS_ALLOW__CREDENTIALS
-  displayName: CORS credentials support
+  displayName: CORS credentials support for WS Master
   description: Allow requests with credentials for CORS filter
   value: 'true'
 - name: CHE_CORS_ALLOWED__ORIGINS
-  displayName: CORS allowed origins
+  displayName: CORS allowed origins for WS Master
   description: defines allowed origins in requests for CORS filter
   value: '*'
+- name: CHE_WSAGENT_CORS_ALLOWED__ORIGINS
+  displayName: CORS allowed origins for WS Agent
+  description: defines allowed origins in requests for CORS filter, that will be propagated as corresponding env variable on WS Agent. Only if it's value is not null or empty
+  value: ''
 labels:
   app: che
   template: che
