@@ -66,13 +66,10 @@ public class DockerImageEnvironmentConverter {
                     .build())
             .endSpec()
             .build();
-    return KubernetesEnvironment.builder()
+    return KubernetesEnvironment.builder(environment)
         .setMachines(environment.getMachines())
         .setInternalRecipe(environment.getRecipe())
-        .setWarnings(environment.getWarnings())
         .setPods(ImmutableMap.of(POD_NAME, pod))
-        .setAttributes(environment.getAttributes())
-        .setType(KubernetesEnvironment.TYPE)
         .build();
   }
 }

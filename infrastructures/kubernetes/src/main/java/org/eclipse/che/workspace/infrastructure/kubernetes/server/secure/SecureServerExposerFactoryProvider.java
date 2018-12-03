@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.inject.ConfigurationException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -29,7 +30,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * @author Oleksandr Garagatyi
  */
 public class SecureServerExposerFactoryProvider<T extends KubernetesEnvironment> {
-  public static final int UNKNOWN_SECURE_SERVER_EXPOSER_CONFIGURED_IN_WS = 4105;
 
   public static final String SECURE_EXPOSER_IMPL_PROPERTY = "che.server.secure_exposer";
   public static final String UNKNOWN_EXPOSER_ERROR_TEMPLATE =
@@ -69,7 +69,7 @@ public class SecureServerExposerFactoryProvider<T extends KubernetesEnvironment>
           .getWarnings()
           .add(
               new WarningImpl(
-                  UNKNOWN_SECURE_SERVER_EXPOSER_CONFIGURED_IN_WS,
+                  Warnings.UNKNOWN_SECURE_SERVER_EXPOSER_CONFIGURED_IN_WS_WARNING_CODE,
                   format(unknownExposerErrorTemplate, envExposerImpl)));
     }
 

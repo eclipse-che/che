@@ -39,6 +39,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
@@ -48,23 +49,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
  */
 public class KubernetesEnvironmentFactory
     extends InternalEnvironmentFactory<KubernetesEnvironment> {
-
-  static final int INGRESSES_IGNORED_WARNING_CODE = 4100;
-  static final String INGRESSES_IGNORED_WARNING_MESSAGE =
-      "Ingresses specified in Kubernetes recipe are ignored. "
-          + "To expose ports please define servers in machine configuration.";
-
-  static final int PVC_IGNORED_WARNING_CODE = 4101;
-  static final String PVC_IGNORED_WARNING_MESSAGE =
-      "Persistent volume claims specified in Kubernetes recipe are ignored.";
-
-  static final int SECRET_IGNORED_WARNING_CODE = 4102;
-  static final String SECRET_IGNORED_WARNING_MESSAGE =
-      "Secrets specified in Kubernetes recipe are ignored.";
-
-  static final int CONFIG_MAP_IGNORED_WARNING_CODE = 4103;
-  static final String CONFIG_MAP_IGNORED_WARNING_MESSAGE =
-      "Config maps specified in Kubernetes recipe are ignored.";
 
   private final KubernetesClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
@@ -144,20 +128,26 @@ public class KubernetesEnvironmentFactory
 
     if (isAnyIngressPresent) {
       warnings.add(
-          new WarningImpl(INGRESSES_IGNORED_WARNING_CODE, INGRESSES_IGNORED_WARNING_MESSAGE));
+          new WarningImpl(
+              Warnings.INGRESSES_IGNORED_WARNING_CODE, Warnings.INGRESSES_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnyPVCPresent) {
-      warnings.add(new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
+      warnings.add(
+          new WarningImpl(Warnings.PVC_IGNORED_WARNING_CODE, Warnings.PVC_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnySecretPresent) {
-      warnings.add(new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
+      warnings.add(
+          new WarningImpl(
+              Warnings.SECRET_IGNORED_WARNING_CODE, Warnings.SECRET_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnyConfigMapPresent) {
       warnings.add(
-          new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
+          new WarningImpl(
+              Warnings.CONFIG_MAP_IGNORED_WARNING_CODE,
+              Warnings.CONFIG_MAP_IGNORED_WARNING_MESSAGE));
     }
 
     addRamAttributes(machines, pods.values());

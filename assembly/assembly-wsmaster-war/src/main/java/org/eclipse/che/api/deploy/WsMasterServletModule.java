@@ -61,6 +61,10 @@ public class WsMasterServletModule extends ServletModule {
     } else {
       configureSingleUserMode();
     }
+
+    if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
+      install(new org.eclipse.che.core.metrics.MetricsServletModule());
+    }
   }
 
   private void configureSingleUserMode() {

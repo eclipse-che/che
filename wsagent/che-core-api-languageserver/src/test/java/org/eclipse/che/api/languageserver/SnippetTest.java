@@ -39,7 +39,7 @@ public class SnippetTest {
     when(fsManager.existsAsFile(any())).thenReturn(true);
     when(fsManager.read(anyString()))
         .thenReturn(getClass().getResourceAsStream("/snippettest/File1.txt"));
-    service = new TextDocumentService(null, null, fsManager);
+    service = new TextDocumentService(null, null, fsManager, null, null);
   }
 
   @Test

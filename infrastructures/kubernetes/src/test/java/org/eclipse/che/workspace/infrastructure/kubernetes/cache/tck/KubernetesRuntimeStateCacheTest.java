@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.createRuntimeState;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.cache.tck.TestObjects.createWorkspace;
 import static org.testng.Assert.assertEquals;
@@ -19,12 +20,16 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -98,6 +103,58 @@ public class KubernetesRuntimeStateCacheTest {
   }
 
   @Test
+  public void shouldReturnCommands() throws Exception {
+    // when
+    List<? extends Command> commands =
+        runtimesStatesCache.getCommands(runtimesStates[0].getRuntimeId());
+
+    // then
+    assertEquals(commands.size(), runtimesStates[0].getCommands().size());
+    assertTrue(commands.containsAll(runtimesStates[0].getCommands()));
+  }
+
+  @Test
+  public void shouldReturnEmptyCommandsListIfStateDoesNotExist() throws Exception {
+    // when
+    List<? extends Command> commands =
+        runtimesStatesCache.getCommands(
+            new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"));
+
+    // then
+    assertTrue(commands.isEmpty());
+  }
+
+  @Test(dependsOnMethods = "shouldReturnCommands")
+  public void shouldUpdateCommands() throws Exception {
+    // given
+    List<CommandImpl> newCommands = new ArrayList<>();
+    CommandImpl newCommand = new CommandImpl("new", "build", "custom");
+    newCommands.add(newCommand);
+
+    // when
+    runtimesStatesCache.updateCommands(runtimesStates[0].getRuntimeId(), newCommands);
+
+    // then
+    List<? extends Command> updatedCommands =
+        runtimesStatesCache.getCommands(runtimesStates[0].getRuntimeId());
+    assertEquals(updatedCommands.size(), 1);
+    assertEquals(new CommandImpl(updatedCommands.get(0)), newCommand);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Runtime state for workspace with id 'non-existent-ws' was not found")
+  public void shouldThrowExceptionUpdateCommands() throws Exception {
+    // given
+    CommandImpl newCommand = new CommandImpl("new", "build", "custom");
+
+    // when
+    runtimesStatesCache.updateCommands(
+        new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"), singletonList(newCommand));
+  }
+
+  @Test
   public void shouldReturnRuntimeStateByRuntimeId() throws Exception {
     // given
     KubernetesRuntimeState expectedState = runtimesStates[1];
@@ -127,20 +184,23 @@ public class KubernetesRuntimeStateCacheTest {
   @Test
   public void shouldReturnRuntimeStatus() throws Exception {
     // when
-    WorkspaceStatus status = runtimesStatesCache.getStatus(runtimesStates[0].getRuntimeId());
+    Optional<WorkspaceStatus> statusOpt =
+        runtimesStatesCache.getStatus(runtimesStates[0].getRuntimeId());
 
     // then
-    assertEquals(runtimesStates[0].getStatus(), status);
+    assertTrue(statusOpt.isPresent());
+    assertEquals(runtimesStates[0].getStatus(), statusOpt.get());
   }
 
-  @Test(
-      expectedExceptions = InfrastructureException.class,
-      expectedExceptionsMessageRegExp =
-          "Runtime state for workspace with id 'non-existent-ws' was not found")
-  public void shouldThrowExceptionWhenThereIsNotRuntimeStateWhileStatusRetrieving()
+  @Test
+  public void shouldReturnEmptyOptionalWhenThereIsNotRuntimeStateWhileStatusRetrieving()
       throws Exception {
     // when
-    runtimesStatesCache.getStatus(new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"));
+    Optional<WorkspaceStatus> statusOpt =
+        runtimesStatesCache.getStatus(new RuntimeIdentityImpl("non-existent-ws", "defEnv", "acc1"));
+
+    // then
+    assertFalse(statusOpt.isPresent());
   }
 
   @Test(dependsOnMethods = "shouldReturnRuntimeStatus")
@@ -152,8 +212,10 @@ public class KubernetesRuntimeStateCacheTest {
     runtimesStatesCache.updateStatus(stateToUpdate.getRuntimeId(), WorkspaceStatus.STOPPED);
 
     // then
-    WorkspaceStatus updatedStatus = runtimesStatesCache.getStatus(stateToUpdate.getRuntimeId());
-    assertEquals(updatedStatus, WorkspaceStatus.STOPPED);
+    Optional<WorkspaceStatus> updatedStatusOpt =
+        runtimesStatesCache.getStatus(stateToUpdate.getRuntimeId());
+    assertTrue(updatedStatusOpt.isPresent());
+    assertEquals(updatedStatusOpt.get(), WorkspaceStatus.STOPPED);
     assertNotEquals(stateToUpdate, WorkspaceStatus.STOPPED);
   }
 
@@ -171,8 +233,10 @@ public class KubernetesRuntimeStateCacheTest {
 
     // then
     assertTrue(isUpdated);
-    WorkspaceStatus updatedStatus = runtimesStatesCache.getStatus(stateToUpdate.getRuntimeId());
-    assertEquals(updatedStatus, WorkspaceStatus.STOPPED);
+    Optional<WorkspaceStatus> updatedStatusOpt =
+        runtimesStatesCache.getStatus(stateToUpdate.getRuntimeId());
+    assertTrue(updatedStatusOpt.isPresent());
+    assertEquals(updatedStatusOpt.get(), WorkspaceStatus.STOPPED);
     assertNotEquals(stateToUpdate, WorkspaceStatus.STOPPED);
   }
 
@@ -190,8 +254,10 @@ public class KubernetesRuntimeStateCacheTest {
 
     // then
     assertFalse(isUpdated);
-    WorkspaceStatus updatedStatus = runtimesStatesCache.getStatus(stateToUpdate.getRuntimeId());
-    assertEquals(updatedStatus, WorkspaceStatus.RUNNING);
+    Optional<WorkspaceStatus> updatedStatusOpt =
+        runtimesStatesCache.getStatus(stateToUpdate.getRuntimeId());
+    assertTrue(updatedStatusOpt.isPresent());
+    assertEquals(updatedStatusOpt.get(), WorkspaceStatus.RUNNING);
     assertEquals(stateToUpdate.getStatus(), WorkspaceStatus.RUNNING);
   }
 

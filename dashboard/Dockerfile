@@ -19,6 +19,7 @@ RUN apt-get update && \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/*
 COPY package.json /dashboard/
+COPY yarn.lock /dashboard/
 RUN cd /dashboard && npm i yarn && npx yarn install --ignore-scripts
 COPY . /dashboard/
 RUN cd /dashboard  && npx yarn

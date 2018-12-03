@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.workspace.server.URLRewriter.NoOpURLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
@@ -82,8 +81,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       RuntimeHangingDetector runtimeHangingDetector,
       @Nullable OptionalTracer tracer,
       @Assisted OpenShiftRuntimeContext context,
-      @Assisted OpenShiftProject project,
-      @Assisted List<Warning> warnings) {
+      @Assisted OpenShiftProject project) {
     super(
         workspaceStartTimeout,
         ingressStartTimeout,
@@ -105,8 +103,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         runtimeHangingDetector,
         tracer,
         context,
-        project,
-        warnings);
+        project);
     this.project = project;
     this.unrecoverablePodEventListenerFactory = unrecoverablePodEventListenerFactory;
   }

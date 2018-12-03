@@ -48,6 +48,8 @@ public class CreateAndDeleteProjectsTest {
   private static final String WORKSPACE = generate("workspace", 4);
   private static final String SECOND_WEB_JAVA_SPRING_PROJECT_NAME = WEB_JAVA_SPRING + "-1";
 
+  private String dashboardWindow;
+
   @Inject private Dashboard dashboard;
   @Inject private WorkspaceProjects workspaceProjects;
   @Inject private WorkspaceDetails workspaceDetails;
@@ -79,7 +81,7 @@ public class CreateAndDeleteProjectsTest {
   }
 
   @Test
-  public void createAndDeleteProjectTest() {
+  public void createProjectTest() {
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
@@ -107,7 +109,7 @@ public class CreateAndDeleteProjectsTest {
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     // switch to the IDE and wait for workspace is ready to use
-    String dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+    dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     toastLoader.waitToastLoaderAndClickStartButton();
     ide.waitOpenedWorkspaceIsReadyToUse();
 
@@ -120,8 +122,10 @@ public class CreateAndDeleteProjectsTest {
     explorer.waitDefinedTypeOfFolder(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
     explorer.waitDefinedTypeOfFolder(WEB_JAVA_SPRING, PROJECT_FOLDER);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
+  }
 
-    // delete projects from workspace details page
+  @Test(priority = 1)
+  public void deleteProjectsFromDashboardTest() {
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.selectWorkspaceItemName(WORKSPACE);

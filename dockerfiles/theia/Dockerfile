@@ -33,8 +33,8 @@ ENV THEIA_VERSION=${THEIA_VERSION} \
     HOME=/home/theia
 WORKDIR ${HOME}
 
-# Add verdaccio config
-ADD src/config.yaml ${HOME}/.config/verdaccio/
+# add eclipse che theia generator
+RUN yarn global add @eclipse-che/theia-generator@0.0.1-1543478099
 
 # Add patches
 ADD src/patches /home/theia-build/patches
@@ -42,41 +42,22 @@ ADD src/patches /home/theia-build/patches
 # Invalidate cache if there is a new commit
 ADD https://api.github.com/repos/theia-ide/theia/git/refs/tags/v${THEIA_VERSION} /tmp/sha1-repository
 # Build theia from source code and publish artifacts locally
-ADD src/builder/build-and-publish-theia.sh /tmp/builder/scripts/build-and-publish-theia.sh
-RUN /tmp/builder/scripts/build-and-publish-theia.sh
+ADD src/builder/clone.sh /tmp/builder/scripts/clone.sh
+RUN /tmp/builder/scripts/clone.sh
 
-# Now, add the extensions
-ADD src/add-extensions.js /home/theia-build/add-extensions.js
-ADD src/versions.sh /home/theia-build/versions.sh
-ADD src/resolutions-provider.js /home/theia-build/resolutions-provider.js
+# Generate che-theia
+RUN cd ${HOME}/theia-source-code && che:theia init
 
-ADD src/extensions.json ${HOME}/extensions.json
-ADD src/package.json ${HOME}/package.json
-ADD src/builder/add-extensions.sh /tmp/builder/scripts/add-extensions.sh
-RUN /tmp/builder/scripts/add-extensions.sh
+# Compile Theia
+RUN cd ${HOME}/theia-source-code && yarn
 
-# Assemble theia
-ADD src/builder/assemble-theia.sh /tmp/builder/scripts/assemble-theia.sh
-RUN /tmp/builder/scripts/assemble-theia.sh
 
 # Run into production mode
 ADD src/builder/production-mode.sh /tmp/builder/scripts/production-mode.sh
 RUN /tmp/builder/scripts/production-mode.sh
 
-# Clean
-RUN yarn cache clean
-
-# Restore registry setting
-RUN npm config set registry https://registry.npmjs.org && yarn config set registry https://registry.npmjs.org
-
-# Do cleanup with yarn autoclean and on some folders
-ADD src/.yarnclean ${HOME}/.yarnclean
-RUN yarn autoclean --force
-ADD src/cleanup* /tmp/builder/scripts/
-RUN /tmp/builder/scripts/cleanup.sh
-
 # change permissions
-RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
+RUN find ${HOME}/theia-source-code/production -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; 2>log.txt
 
 ###
 # Runtime Image
@@ -109,7 +90,7 @@ RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh theia \
     && mkdir /default-theia-plugins \
     # Download yeoman generator plug-in
     && curl -L -o /default-theia-plugins/theia_yeoman_plugin.theia https://github.com/eclipse/theia-yeoman-plugin/releases/download/untagged-04f28ee329e479cc465b/theia_yeoman_plugin.theia \
-    && curl -L -o /default-theia-plugins/eclipse_che_theia_factory_plugin.theia https://github.com/eclipse/che-theia-factory-extension/releases/download/untagged-a4d21245a02d69278ea5/eclipse_che_theia_factory_plugin.theia \
+    && curl -L -o /default-theia-plugins/eclipse_che_theia_factory_plugin.theia https://github.com/eclipse/che-theia-factory-extension/releases/download/untagged-20251ef0ab72d8db49ca/eclipse_che_theia_factory_plugin.theia \
     && for f in "${HOME}" "/etc/passwd" "/etc/group /node_modules /default-theia-plugins /projects"; do\
            sudo chgrp -R 0 ${f} && \
            sudo chmod -R g+rwX ${f}; \
@@ -133,7 +114,7 @@ RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh theia \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
-COPY --chown=theia:root --from=builder /home/theia /home/theia
+COPY --chown=theia:root --from=builder /home/theia/theia-source-code/production /home/theia
 USER theia
 WORKDIR /projects
 ADD src/entrypoint.sh /entrypoint.sh

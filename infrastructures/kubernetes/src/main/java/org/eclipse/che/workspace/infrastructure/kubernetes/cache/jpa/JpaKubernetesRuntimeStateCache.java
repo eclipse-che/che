@@ -12,8 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 
 import com.google.inject.persist.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -26,6 +28,7 @@ import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
@@ -34,6 +37,7 @@ import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.BeforeKubernetesRuntimeStateRemovedEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,18 +90,24 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
 
   @Transactional(rollbackOn = InfrastructureException.class)
   @Override
-  public WorkspaceStatus getStatus(RuntimeIdentity id) throws InfrastructureException {
+  public Optional<WorkspaceStatus> getStatus(RuntimeIdentity id) throws InfrastructureException {
     try {
       Optional<KubernetesRuntimeState> runtimeStateOpt = get(id);
-
-      if (!runtimeStateOpt.isPresent()) {
-        throw new InfrastructureException(
-            "Runtime state for workspace with id '" + id.getWorkspaceId() + "' was not found");
-      }
-
-      return runtimeStateOpt.get().getStatus();
+      return runtimeStateOpt.map(KubernetesRuntimeState::getStatus);
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getMessage(), x);
+    }
+  }
+
+  @Override
+  public List<? extends Command> getCommands(RuntimeIdentity runtimeId)
+      throws InfrastructureException {
+    Optional<KubernetesRuntimeState> k8sRuntimeState = get(runtimeId);
+    if (k8sRuntimeState.isPresent()) {
+      return k8sRuntimeState.get().getCommands();
+    } else {
+      // runtime is not started yet
+      return emptyList();
     }
   }
 
@@ -132,6 +142,18 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
       return true;
     } catch (IllegalStateException e) {
       return false;
+    } catch (RuntimeException e) {
+      throw new InfrastructureException(e.getMessage(), e);
+    }
+  }
+
+  @Override
+  public void updateCommands(RuntimeIdentity identity, List<? extends Command> commands)
+      throws InfrastructureException {
+    try {
+      doUpdateCommands(
+          identity,
+          commands.stream().map(KubernetesRuntimeCommandImpl::new).collect(Collectors.toList()));
     } catch (RuntimeException e) {
       throw new InfrastructureException(e.getMessage(), e);
     }
@@ -209,6 +231,21 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
 
     existingState.setStatus(newStatus);
     entityManager.flush();
+  }
+
+  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  protected void doUpdateCommands(RuntimeIdentity id, List<KubernetesRuntimeCommandImpl> commands)
+      throws InfrastructureException {
+    Optional<KubernetesRuntimeState> runtimeStateOpt = get(id);
+
+    if (!runtimeStateOpt.isPresent()) {
+      throw new InfrastructureException(
+          "Runtime state for workspace with id '" + id.getWorkspaceId() + "' was not found");
+    }
+
+    runtimeStateOpt.get().setCommands(commands);
+
+    managerProvider.get().flush();
   }
 
   @Transactional

@@ -99,7 +99,7 @@ public class TheiaBuildPluginTest {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
     theiaIde.waitNotificationDisappearance(
-        "Che Workspace: Finished clonning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
+        "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
     // create project by "Yeoman Wizard"
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");

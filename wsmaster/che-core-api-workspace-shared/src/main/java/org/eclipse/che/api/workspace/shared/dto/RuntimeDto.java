@@ -55,5 +55,12 @@ public interface RuntimeDto extends Runtime, Hyperlinks {
   RuntimeDto withWarnings(List<WarningDto> warnings);
 
   @Override
+  List<CommandDto> getCommands();
+
+  void setCommands(List<CommandDto> commands);
+
+  RuntimeDto withCommands(List<CommandDto> commands);
+
+  @Override
   RuntimeDto withLinks(List<Link> links);
 }

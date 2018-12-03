@@ -14,6 +14,8 @@ package org.eclipse.che.api.workspace.server;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static java.lang.String.format;
 import static java.lang.System.currentTimeMillis;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
@@ -32,6 +34,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -41,6 +45,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -49,7 +54,9 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
@@ -57,6 +64,7 @@ import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeImpl;
@@ -179,7 +187,7 @@ public class WorkspaceRuntimes {
       throw new NotFoundException("Infrastructure not found for type: " + type);
     }
     // try to create internal environment to check if the specified environment is valid
-    createInternalEnvironment(environment, null);
+    createInternalEnvironment(environment, emptyMap(), emptyList());
   }
 
   /**
@@ -247,7 +255,12 @@ public class WorkspaceRuntimes {
 
   private static RuntimeImpl asRuntime(InternalRuntime<?> runtime) throws ServerException {
     try {
-      return new RuntimeImpl(runtime.getActiveEnv(), runtime.getMachines(), runtime.getOwner());
+      return new RuntimeImpl(
+          runtime.getActiveEnv(),
+          runtime.getMachines(),
+          runtime.getOwner(),
+          runtime.getCommands(),
+          runtime.getWarnings());
     } catch (InfrastructureException e) {
       throw new ServerException(e.getMessage(), e);
     }
@@ -299,19 +312,21 @@ public class WorkspaceRuntimes {
           environment.getRecipe().getType(), "Recipe type should not be null " + workspaceId);
     }
 
+    WorkspaceConfig workspaceConfig = workspace.getConfig();
     if (isStartRefused.get()) {
       throw new ConflictException(
           format(
               "Start of the workspace '%s' is rejected by the system, "
                   + "no more workspaces are allowed to start",
-              workspace.getConfig().getName()));
+              workspaceConfig.getName()));
     }
 
     final String ownerId = EnvironmentContext.getCurrent().getSubject().getUserId();
     final RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, ownerId);
     try {
       InternalEnvironment internalEnv =
-          createInternalEnvironment(environment, workspace.getConfig().getAttributes());
+          createInternalEnvironment(
+              environment, workspaceConfig.getAttributes(), workspaceConfig.getCommands());
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
       InternalRuntime runtime = runtimeContext.getRuntime();
 
@@ -329,7 +344,7 @@ public class WorkspaceRuntimes {
       LOG.info(
           "Starting workspace '{}/{}' with id '{}' by user '{}'",
           workspace.getNamespace(),
-          workspace.getConfig().getName(),
+          workspaceConfig.getName(),
           workspace.getId(),
           sessionUserNameOr("undefined"));
 
@@ -629,8 +644,9 @@ public class WorkspaceRuntimes {
     }
 
     Environment environment = null;
+    WorkspaceConfig workspaceConfig = workspace.getConfig();
     if (identity.getEnvName() != null) {
-      environment = workspace.getConfig().getEnvironments().get(identity.getEnvName());
+      environment = workspaceConfig.getEnvironments().get(identity.getEnvName());
       if (environment == null) {
         throw new ServerException(
             format(
@@ -642,7 +658,8 @@ public class WorkspaceRuntimes {
     InternalRuntime runtime;
     try {
       InternalEnvironment internalEnv =
-          createInternalEnvironment(environment, workspace.getConfig().getAttributes());
+          createInternalEnvironment(
+              environment, workspaceConfig.getAttributes(), workspaceConfig.getCommands());
       runtime = infra.prepare(identity, internalEnv).getRuntime();
       WorkspaceStatus runtimeStatus = runtime.getStatus();
       try (Unlocker ignored = lockService.writeLock(workspace.getId())) {
@@ -798,7 +815,9 @@ public class WorkspaceRuntimes {
 
   @VisibleForTesting
   InternalEnvironment createInternalEnvironment(
-      @Nullable Environment environment, Map<String, String> workspaceConfigAttributes)
+      @Nullable Environment environment,
+      Map<String, String> workspaceConfigAttributes,
+      List<? extends Command> commands)
       throws InfrastructureException, ValidationException, NotFoundException {
     String recipeType;
     if (environment == null) {
@@ -812,7 +831,9 @@ public class WorkspaceRuntimes {
           format("InternalEnvironmentFactory is not configured for recipe type: '%s'", recipeType));
     }
     InternalEnvironment internalEnvironment = factory.create(environment);
-    internalEnvironment.setAttributes(workspaceConfigAttributes);
+    internalEnvironment.setAttributes(new HashMap<>(workspaceConfigAttributes));
+    internalEnvironment.setCommands(
+        commands.stream().map(CommandImpl::new).collect(Collectors.toList()));
 
     return internalEnvironment;
   }
