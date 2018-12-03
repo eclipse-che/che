@@ -182,7 +182,8 @@ public class DevFileConverter {
   }
 
   private String findToolName(WorkspaceConfigImpl wsConfig, String toolId) {
-    String aliasesString = firstNonNull(wsConfig.getAttributes().get(ALIASES_WORKSPACE_ATTRIBUTE_NAME), "");
+    String aliasesString =
+        firstNonNull(wsConfig.getAttributes().get(ALIASES_WORKSPACE_ATTRIBUTE_NAME), "");
     Optional<String> valueOpt =
         Arrays.stream(aliasesString.split(","))
             .filter(s -> s.split("=")[0].equals(toolId))

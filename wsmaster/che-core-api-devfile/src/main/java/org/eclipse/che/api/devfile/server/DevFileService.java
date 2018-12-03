@@ -20,6 +20,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -75,6 +78,11 @@ public class DevFileService extends Service {
    */
   @GET
   @Produces(APPLICATION_JSON)
+  @ApiOperation(value = "Retrieves current version of Devfile JSON schema")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The schema successfully retrieved"),
+    @ApiResponse(code = 500, message = "Internal server error occurred")
+  })
   public Response getSchema() throws ServerException {
     try {
       return Response.ok(schemaCachedProvider.getSchemaContent()).build();
@@ -93,7 +101,22 @@ public class DevFileService extends Service {
   @POST
   @Consumes({"text/yaml", "text/x-yaml", "application/yaml", "application/json"})
   @Produces(APPLICATION_JSON)
-  public WorkspaceDto createFromYaml(String data, @QueryParam("verbose") boolean verbose)
+  @ApiOperation(
+      value = "Create a new workspace based on provided devfile",
+      notes =
+          "This operation can be performed only by authorized user,"
+              + "this user will be the owner of the created workspace",
+      response = WorkspaceDto.class)
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The workspace successfully created"),
+    @ApiResponse(
+        code = 400,
+        message =
+            "Provided devfile syntactically incorrect, doesn't match with actual schema or has integrity violations"),
+    @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
+    @ApiResponse(code = 500, message = "Internal server error occurred")
+  })
+  public Response createFromYaml(String data, @QueryParam("verbose") boolean verbose)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
@@ -112,7 +135,9 @@ public class DevFileService extends Service {
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     WorkspaceImpl workspace =
         workspaceManager.createWorkspace(findAvailableName(workspaceConfig), namespace, emptyMap());
-    return asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext()));
+    return Response.status(201)
+        .entity(asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext())))
+        .build();
   }
 
   /**
@@ -124,6 +149,16 @@ public class DevFileService extends Service {
   @GET
   @Path("/{key:.*}")
   @Produces("text/yml")
+  @ApiOperation(
+      value = "Generates the devfile from giben workspace",
+      notes =
+          "This operation can be performed only by authorized user,"
+              + "this user must be the owner of the exported workspace")
+  @ApiResponses({
+    @ApiResponse(code = 200, message = "The workspace successfully exported"),
+    @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
+    @ApiResponse(code = 500, message = "Internal server error occurred")
+  })
   public Response createFromWorkspace(@PathParam("key") String key)
       throws NotFoundException, ServerException, BadRequestException {
     validateKey(key);

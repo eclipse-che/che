@@ -124,7 +124,7 @@ public class DevFileServiceTest {
             .when()
             .post(SECURE_PATH + "/devfile");
 
-    assertEquals(response.getStatusCode(), 200);
+    assertEquals(response.getStatusCode(), 201);
     verify(validator).validateBySchema(eq(yamlContent), eq(false));
     verify(workspaceManager).createWorkspace(captor.capture(), eq(SUBJECT.getUserName()), anyMap());
     assertEquals("petclinic-dev-environment_2", captor.getValue().getName());
