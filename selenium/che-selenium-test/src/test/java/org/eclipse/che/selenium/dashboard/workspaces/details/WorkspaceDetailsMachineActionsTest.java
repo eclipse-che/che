@@ -53,7 +53,7 @@ public class WorkspaceDetailsMachineActionsTest {
   private static final String MAX_VALID_RAM_VALUE = "100";
   private static final String NOT_EXISTED_IMAGE = NameGenerator.generate("wrong/image", 5);
   private static final String CHANGED_RAM_SIZE = "7";
-  private static final String MIN_VALID_RAM_VALUE = "0.5";
+  private static final String MIN_VALID_RAM_VALUE = "0.1";
 
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
@@ -172,8 +172,8 @@ public class WorkspaceDetailsMachineActionsTest {
     editMachineForm.waitRamFieldText(MIN_VALID_RAM_VALUE);
 
     seleniumWebDriverHelper.sendKeys(ARROW_UP.toString());
-    editMachineForm.waitRamFieldText("1");
-    editMachineForm.waitSliderRamValue("1 GB");
+    editMachineForm.waitRamFieldText("0.2");
+    editMachineForm.waitSliderRamValue("0.2 GB");
 
     // check RAM behavior with more than max valid value
     editMachineForm.typeRam(TOO_BIG_RAM_SIZE);
@@ -194,8 +194,8 @@ public class WorkspaceDetailsMachineActionsTest {
     seleniumWebDriverHelper.sendKeys(ARROW_DOWN.toString());
     editMachineForm.waitValidNameHighlighting();
     editMachineForm.waitSaveButtonEnabling();
-    editMachineForm.waitRamFieldText("99.5");
-    editMachineForm.waitSliderRamValue("99.5 GB");
+    editMachineForm.waitRamFieldText("99.9");
+    editMachineForm.waitSliderRamValue("99.9 GB");
 
     // check restoring of default values after clicking on "Cancel" button
     editMachineForm.typeRam("4");

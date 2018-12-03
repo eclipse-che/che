@@ -30,6 +30,8 @@ import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectOptions;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
+import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
@@ -101,6 +103,7 @@ public class AddOrImportProjectFormTest {
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private WorkspaceOverview workspaceOverview;
+  @Inject private WorkspaceDetails workspaceDetails;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private ProjectOptions projectOptions;
@@ -393,13 +396,12 @@ public class AddOrImportProjectFormTest {
     newWorkspace.setMachineRAM("dev-machine", 5.0);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
 
-    newWorkspace.clickOnCreateButtonAndOpenInIDE();
+    newWorkspace.clickOnCreateButtonAndEditWorkspace();
+    workspaceDetails.waitToolbarTitleName(WORKSPACE_NAME);
+    workspaceDetails.checkStateOfWorkspace(StateWorkspace.STOPPED);
     // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
     // possible to read logs in case of test failure
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE_NAME, defaultTestUser);
-
-    testWorkspaceServiceClient.waitStatus(WORKSPACE_NAME, defaultTestUser.getName(), RUNNING);
-    dashboard.selectWorkspacesItemOnDashboard();
   }
 
   @Test(priority = 3)
@@ -428,29 +430,23 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.clickOnAddButton();
     addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
 
-    // check closing of "Workspace Is Created" dialog window
-    newWorkspace.clickOnBottomCreateButton();
-    newWorkspace.waitWorkspaceCreatedDialogIsVisible();
-
-    newWorkspace.closeWorkspaceCreatedDialog();
-    newWorkspace.waitWorkspaceCreatedDialogDisappearance();
+    newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(TEST_BLANK_WORKSPACE_NAME);
 
     seleniumWebDriver.navigate().back();
 
-    prepareJavaWorkspaceAndOpenCreateDialog(TEST_JAVA_WORKSPACE_NAME);
-    newWorkspace.clickOnEditWorkspaceButton();
+    prepareJavaWorkspace(TEST_JAVA_WORKSPACE_NAME);
+    newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(TEST_JAVA_WORKSPACE_NAME);
 
     seleniumWebDriver.navigate().back();
 
-    prepareJavaWorkspaceAndOpenCreateDialog(TEST_JAVA_WORKSPACE_NAME_EDIT);
-    newWorkspace.waitWorkspaceCreatedDialogIsVisible();
-    newWorkspace.clickOnOpenInIDEButton();
+    prepareJavaWorkspace(TEST_JAVA_WORKSPACE_NAME_EDIT);
+    newWorkspace.clickOnTopCreateButton();
 
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     testWorkspaceServiceClient.waitStatus(
         TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName(), RUNNING);
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(SPRING_SAMPLE_NAME);
@@ -489,7 +485,7 @@ public class AddOrImportProjectFormTest {
     projectOptions.waitSaveButtonDisabling();
   }
 
-  private void prepareJavaWorkspaceAndOpenCreateDialog(String workspaceName) {
+  private void prepareJavaWorkspace(String workspaceName) {
     // prepare workspace
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(workspaceName);
@@ -508,9 +504,5 @@ public class AddOrImportProjectFormTest {
         SPRING_SAMPLE_NAME,
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_SAMPLE_NAME),
         EXPECTED_SPRING_REPOSITORY_URL);
-
-    // open create dialog
-    newWorkspace.clickOnBottomCreateButton();
-    newWorkspace.waitWorkspaceCreatedDialogIsVisible();
   }
 }
