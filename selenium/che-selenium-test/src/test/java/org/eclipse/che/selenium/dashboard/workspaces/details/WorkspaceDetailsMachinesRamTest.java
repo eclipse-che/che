@@ -31,7 +31,7 @@ public class WorkspaceDetailsMachinesRamTest {
   private static final String IMAGE_NAME = "eclipse/ubuntu_jdk8";
   private static final String EXPECTED_RAM_VALUE = "2";
   private static final String MAX_RAM_VALID_VALUE = "100";
-  private static final String MIN_RAM_VALID_VALUE = "0.5";
+  private static final String MIN_RAM_VALID_VALUE = "0.1";
   private static final String SUCCESS_NOTIFICATION_MESSAGE = "Workspace updated.";
 
   @Inject private Dashboard dashboard;
@@ -81,7 +81,7 @@ public class WorkspaceDetailsMachinesRamTest {
 
     workspaceDetailsMachines.clickOnDecrementRamButton(MACHINE_NAME);
     workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
-    workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, "99.5");
+    workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, "99.9");
 
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, MIN_RAM_VALID_VALUE);
     workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
@@ -92,7 +92,7 @@ public class WorkspaceDetailsMachinesRamTest {
     workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
 
     workspaceDetailsMachines.clickOnIncrementRamButton(MACHINE_NAME);
-    workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, "1");
+    workspaceDetailsMachines.waitRamAmount(MACHINE_NAME, "0.2");
     workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
 
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, "3");

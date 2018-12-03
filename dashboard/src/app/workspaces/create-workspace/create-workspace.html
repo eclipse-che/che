@@ -76,7 +76,7 @@
     <!-- Plugin selector -->
     <che-label-container che-label-name="Plugins"
                          che-label-description="Choose plugins for your workspace."
-                         ng-if="createWorkspaceController.pluginRegistry" >
+                         ng-if="createWorkspaceController.pluginRegistry && createWorkspaceController.displayPlugins" >
       <workspace-plugins workspace-config="createWorkspaceController.workspaceConfig"
                          plugin-registry-location="createWorkspaceController.pluginRegistry">
       </workspace-plugins>
@@ -85,8 +85,8 @@
     <che-label-container>
       <che-button-save-flat class="create-workspace-footer-button"
                             name="saveButton"
-                            che-button-title="Create"
-                            ng-click="createWorkspaceController.createWorkspaceAndShowDialog($event)"
+                            che-button-title="Create & Open"
+                            ng-click="createWorkspaceController.createWorkspaceAndOpenIDE()"
                             ng-disabled="createWorkspaceController.isCreateButtonDisabled()"></che-button-save-flat>
     </che-label-container>
 

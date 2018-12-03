@@ -248,12 +248,8 @@ export class StackSelectorController {
   buildStacksListsByScope(): void {
     const scopes = StackSelectorScope.values();
 
-    scopes.forEach((scope: StackSelectorScope) => {
-      this.stacksByScope[scope] = this.$filter('stackScopeFilter')(this.stacks, scope, this.stackMachines);
-    });
-
     // for quickstart do not show stacks based on unsupported recipe types
-    this.stacksByScope[StackSelectorScope.QUICK_START] = this.stacksByScope[StackSelectorScope.QUICK_START].filter((stack: che.IStack) => {
+    this.stacks = this.stacks.filter((stack: che.IStack) => {
       if (!stack.workspaceConfig.defaultEnv) {
         return this.supportedRecipeTypes.indexOf(CheRecipeTypes.NOENVIRONMENT) !== -1;
       }
@@ -261,7 +257,13 @@ export class StackSelectorController {
       const defaultEnvName = stack.workspaceConfig.defaultEnv,
         defaultEnv = stack.workspaceConfig.environments[defaultEnvName],
         recipeType = defaultEnv.recipe.type;
+
       return this.supportedRecipeTypes.indexOf(recipeType) !== -1;
+    });
+
+
+    scopes.forEach((scope: StackSelectorScope) => {
+      this.stacksByScope[scope] = this.$filter('stackScopeFilter')(this.stacks, scope, this.stackMachines);
     });
   }
 

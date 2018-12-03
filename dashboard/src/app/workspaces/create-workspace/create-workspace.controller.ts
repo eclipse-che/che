@@ -121,6 +121,11 @@ export class CreateWorkspaceController {
   private pluginRegistry: string;
 
   /**
+   * Property for displaying or hidding the plugins list.
+   */
+  private displayPlugins: boolean;
+
+  /**
    * Default constructor that is using resource injection
    */
   constructor($mdDialog: ng.material.IDialogService,
@@ -159,25 +164,26 @@ export class CreateWorkspaceController {
     // when stacks selector is rendered
     // and default stack is selected
     this.hideLoader = false;
+    this.displayPlugins = false;
 
     // header toolbar
     // dropdown button config
     this.headerCreateButtonConfig = {
       mainAction: {
-        title: 'Create',
-        type: 'button',
-        action: () => {
-          this.createWorkspace().then((workspace: che.IWorkspace) => {
-            this.createWorkspaceSvc.redirectToDetails(workspace);
-          });
-        }
-      },
-      otherActions: [{
-        title: 'Open in IDE',
+        title: 'Create & Open',
         type: 'button',
         action: () => {
           this.createWorkspace().then((workspace: che.IWorkspace) => {
             this.createWorkspaceSvc.redirectToIDE(workspace);
+          });
+        }
+      },
+      otherActions: [{
+        title: 'Create & Proceed Editing',
+        type: 'button',
+        action: () => {
+          this.createWorkspace().then((workspace: che.IWorkspace) => {
+            this.createWorkspaceSvc.redirectToDetails(workspace);
           });
         },
         orderNumber: 1
@@ -198,6 +204,7 @@ export class CreateWorkspaceController {
 
     this.stack = this.stackSelectorSvc.getStackById(stackId);
     this.workspaceConfig = angular.copy(this.stack.workspaceConfig);
+    this.displayPlugins = this.isPluginDefined();
 
     if (!this.stack.workspaceConfig || !this.stack.workspaceConfig.defaultEnv) {
       this.memoryByMachine = {};
@@ -392,6 +399,23 @@ export class CreateWorkspaceController {
         this.createWorkspaceSvc.redirectToDetails(workspace);
       });
     });
+  }
+
+  /**
+   * Creates a workspace and redirects to the IDE.
+   */
+  createWorkspaceAndOpenIDE(): void {
+    this.createWorkspace().then((workspace: che.IWorkspace) => {
+      this.createWorkspaceSvc.redirectToIDE(workspace);
+    });
+  }
+
+  isPluginDefined(): boolean {
+    if (this.workspaceConfig && this.workspaceConfig.attributes) {
+      return Object.keys(this.workspaceConfig.attributes).indexOf('editor') >= 0 || Object.keys(this.workspaceConfig.attributes).indexOf('plugins') >= 0;
+    }
+
+    return false;
   }
 
 }
