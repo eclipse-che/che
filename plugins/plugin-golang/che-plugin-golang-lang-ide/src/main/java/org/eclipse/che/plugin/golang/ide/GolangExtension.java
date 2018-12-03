@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.plugin.golang.ide;
 
+import static org.eclipse.che.plugin.golang.shared.Constants.GOLANG_FILE_EXT;
+
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.editor.editorconfig.TextEditorConfiguration;
@@ -21,8 +23,6 @@ import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.parts.ActivePartChangedEvent;
 import org.eclipse.che.ide.api.parts.PartPresenter;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
-
-import static org.eclipse.che.plugin.golang.shared.Constants.GOLANG_FILE_EXT;
 
 /** @author Eugene Ivantsov */
 @Extension(title = "Golang")
@@ -47,13 +47,12 @@ public class GolangExtension {
             return;
           }
 
-          if (!GOLANG_FILE_EXT
-              .equals(
-                  ((TextEditor) activePart)
-                      .getEditorInput()
-                      .getFile()
-                      .getLocation()
-                      .getFileExtension())) {
+          if (!GOLANG_FILE_EXT.equals(
+              ((TextEditor) activePart)
+                  .getEditorInput()
+                  .getFile()
+                  .getLocation()
+                  .getFileExtension())) {
             return;
           }
 
