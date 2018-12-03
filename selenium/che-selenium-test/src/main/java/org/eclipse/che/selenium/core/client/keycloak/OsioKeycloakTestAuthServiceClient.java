@@ -78,11 +78,15 @@ public class OsioKeycloakTestAuthServiceClient extends AbstractKeycloakTestAuthS
     HttpURLConnection conn;
     String formPostURL = loginAndGetFormPostURL();
 
+    // Need to disable followRedirects
     HttpURLConnection.setFollowRedirects(false);
 
     conn = fillFormAndCreateConnection(formPostURL, username, password);
 
     String tokenJsonString = followRedirects(conn);
+
+    // Re-enabling followRedirects
+    HttpURLConnection.setFollowRedirects(true);
 
     // "token_json={}"
     String tokenJson =
@@ -186,6 +190,7 @@ public class OsioKeycloakTestAuthServiceClient extends AbstractKeycloakTestAuthS
         return followRedirects(new URL(location).openConnection());
       }
     } else {
+      HttpURLConnection.setFollowRedirects(true);
       throw new RuntimeException("Unable to obtain active token.");
     }
   }
