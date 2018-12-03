@@ -12,12 +12,10 @@
 package org.eclipse.che.selenium.refactor.types;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.RENAME;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -36,7 +34,6 @@ import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -45,7 +42,6 @@ import org.testng.annotations.Test;
  *
  * @author Musienko Maxim
  */
-@Test(groups = UNDER_REPAIR)
 public class GenericsTest {
   private static final String PROJECT_NAME = generate("project", 4);
   private static final String PATH_TO_PACKAGE_IN_CHE_PREFIX =
@@ -101,14 +97,7 @@ public class GenericsTest {
         "Found potential matches. Please review changes on the preview page.");
     askDialog.waitFormToClose();
     projectExplorer.waitItem(pathToCurrentPackage + "/B.java");
-
-    try {
-      assertEquals(editor.getVisibleTextFromEditor(), contentFromOutB);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/11779");
-    }
-
+    assertEquals(editor.getVisibleTextFromEditor(), contentFromOutB);
     editor.waitTextIntoEditor(contentFromOutB);
   }
 

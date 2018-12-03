@@ -54,6 +54,8 @@ spec:
         - name: PROTOCOL
 {{- if .Values.global.tls.enabled }}
           value: "https"
+        - name: PROXY_ADDRESS_FORWARDING
+          value: "true"
 {{- else }}
           value: "http"
 {{- end }}
