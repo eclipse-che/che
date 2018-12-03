@@ -86,7 +86,7 @@ public class DevfileConverterTest {
               .filter(command1 -> command1.getName().equals(command.getName().split(":")[0]))
               .findFirst()
               .get();
-      for (Action action : expectedCommand.getActions()) {
+      for (Action action : command.getActions()) {
         Action expectedAction =
             expectedCommand
                 .getActions()

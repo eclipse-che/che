@@ -60,13 +60,15 @@ public class DevfileConverter {
     devFile.setProjects(projects);
 
     // Manage commands
+    Map<String, String> toolsIdToName = parseTools(wsConfig);
     List<Command> commands = new ArrayList<>();
-    wsConfig.getCommands().forEach(command -> commands.add(commandImplToDevCommand(command)));
+    wsConfig
+        .getCommands()
+        .forEach(command -> commands.add(commandImplToDevCommand(command, toolsIdToName)));
     devFile.setCommands(commands);
 
     // Manage tools
     List<Tool> tools = new ArrayList<>();
-    Map<String, String> toolIdToName = parseTools(wsConfig);
     for (Map.Entry<String, String> entry : wsConfig.getAttributes().entrySet()) {
       if (entry.getKey().equals(EDITOR_WORKSPACE_ATTRIBUTE_NAME)) {
         String editorId = entry.getValue();
@@ -74,7 +76,7 @@ public class DevfileConverter {
             new Tool()
                 .withType("cheEditor")
                 .withId(editorId)
-                .withName(toolIdToName.getOrDefault(editorId, editorId));
+                .withName(toolsIdToName.getOrDefault(editorId, editorId));
         tools.add(editorTool);
       } else if (entry.getKey().equals(PLUGINS_WORKSPACE_ATTRIBUTE_NAME)) {
         for (String pluginId : entry.getValue().split(",")) {
@@ -82,7 +84,7 @@ public class DevfileConverter {
               new Tool()
                   .withId(pluginId)
                   .withType("chePlugin")
-                  .withName(toolIdToName.getOrDefault(pluginId, pluginId));
+                  .withName(toolsIdToName.getOrDefault(pluginId, pluginId));
           tools.add(pluginTool);
         }
       }
@@ -115,8 +117,12 @@ public class DevfileConverter {
       }
       toolIdToNameMappingStringJoiner.add(tool.getId() + "=" + tool.getName());
     }
-    attributes.put(PLUGINS_WORKSPACE_ATTRIBUTE_NAME, pluginsStringJoiner.toString());
-    attributes.put(ALIASES_WORKSPACE_ATTRIBUTE_NAME, toolIdToNameMappingStringJoiner.toString());
+    if (pluginsStringJoiner.length() > 0) {
+      attributes.put(PLUGINS_WORKSPACE_ATTRIBUTE_NAME, pluginsStringJoiner.toString());
+    }
+    if (toolIdToNameMappingStringJoiner.length() > 0) {
+      attributes.put(ALIASES_WORKSPACE_ATTRIBUTE_NAME, toolIdToNameMappingStringJoiner.toString());
+    }
     config.setAttributes(attributes);
 
     // Manage commands
@@ -155,13 +161,15 @@ public class DevfileConverter {
     return commands;
   }
 
-  private Command commandImplToDevCommand(CommandImpl command) {
+  private Command commandImplToDevCommand(CommandImpl command, Map<String, String> toolsIdToName) {
     Command devCommand = new Command().withName(command.getName());
     Action action = new Action().withCommand(command.getCommandLine()).withType(command.getType());
     String workingDir = command.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE);
     if (!isNullOrEmpty(workingDir)) {
       action.setWorkdir(workingDir);
     }
+    action.setTool(toolsIdToName.getOrDefault(command.getAttributes().get("pluginId"), ""));
+    devCommand.getActions().add(action);
     devCommand.setAttributes(command.getAttributes());
     // Remove internal attributes
     devCommand.getAttributes().remove(WORKING_DIRECTORY_ATTRIBUTE);
