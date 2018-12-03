@@ -1,3 +1,6 @@
+{{- define "jaegerHost" }}
+{{- printf "jaeger-%s.%s" .Release.Namespace .Values.global.ingressDomain }}
+{{- end }}
 #
 # Copyright (c) 2012-2018 Red Hat, Inc.
 # This program and the accompanying materials are made
@@ -29,21 +32,10 @@ spec:
     secretName: {{ .Values.global.tls.secretName }}
 {{- end }}
   rules:
-{{- if eq .Values.global.serverStrategy "default-host" }}
-  - http:
-      paths:
-        - path: /auth/
-{{- else if eq .Values.global.serverStrategy "single-host" }}
-  - host: {{ template "jaegerHost" . }}
-    http:
-      paths:
-        - path: /auth/
-{{- else }}
   - host: {{ template "jaegerHost" . }}
     http:
       paths:
         - path: /
-{{- end }}
           backend:
               serviceName: jaeger-query
               servicePort: 16686
