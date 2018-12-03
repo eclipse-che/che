@@ -1,6 +1,3 @@
-{{- define "jaegerHost" }}
-{{- printf "jaeger-%s.%s" .Release.Namespace .Values.global.ingressDomain }}
-{{- end }}
 #
 # Copyright (c) 2012-2018 Red Hat, Inc.
 # This program and the accompanying materials are made
@@ -9,6 +6,9 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
+{{- define "jaegerHost" }}
+{{- printf "jaeger-%s.%s" .Release.Namespace .Values.global.ingressDomain }}
+{{- end }}
 
 apiVersion: extensions/v1beta1
 kind: Ingress
