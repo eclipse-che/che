@@ -14,7 +14,10 @@ package org.eclipse.che.api.devfile.server;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.devfile.server.Constants.EDITOR_WORKSPACE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_WORKSPACE_ATTRIBUTE_NAME;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,7 +59,7 @@ public class DevFileConverter {
     // Manage tools
     List<Tool> tools = new ArrayList<>();
     for (Map.Entry<String, String> entry : wsConfig.getAttributes().entrySet()) {
-      if (entry.getKey().equals("editor")) {
+      if (entry.getKey().equals(EDITOR_WORKSPACE_ATTRIBUTE_NAME)) {
         String editorId = entry.getValue();
         Tool editorTool =
             new Tool()
@@ -64,7 +67,7 @@ public class DevFileConverter {
                 .withId(editorId)
                 .withName(findToolName(wsConfig, editorId));
         tools.add(editorTool);
-      } else if (entry.getKey().equals("plugins")) {
+      } else if (entry.getKey().equals(PLUGINS_WORKSPACE_ATTRIBUTE_NAME)) {
         for (String pluginId : entry.getValue().split(",")) {
           Tool pluginTool =
               new Tool()
@@ -97,14 +100,14 @@ public class DevFileConverter {
     StringJoiner toolIdToNameMappingStringJoiner = new StringJoiner(",");
     for (Tool tool : devFile.getTools()) {
       if (tool.getType().equals("cheEditor")) {
-        attributes.put("editor", tool.getId());
+        attributes.put(EDITOR_WORKSPACE_ATTRIBUTE_NAME, tool.getId());
       } else if (tool.getType().equals("chePlugin")) {
         pluginsStringJoiner.add(tool.getId());
       }
       toolIdToNameMappingStringJoiner.add(tool.getId() + "=" + tool.getName());
     }
-    attributes.put("plugins", pluginsStringJoiner.toString());
-    attributes.put("toolsAliases", toolIdToNameMappingStringJoiner.toString());
+    attributes.put(PLUGINS_WORKSPACE_ATTRIBUTE_NAME, pluginsStringJoiner.toString());
+    attributes.put(ALIASES_WORKSPACE_ATTRIBUTE_NAME, toolIdToNameMappingStringJoiner.toString());
     config.setAttributes(attributes);
 
     // Manage commands

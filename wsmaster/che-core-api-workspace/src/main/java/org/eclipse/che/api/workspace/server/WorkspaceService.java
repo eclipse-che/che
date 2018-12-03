@@ -17,6 +17,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
+import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 
@@ -730,33 +731,6 @@ public class WorkspaceService extends Service {
   private void requiredNotNull(Object object, String subject) throws BadRequestException {
     if (object == null) {
       throw new BadRequestException(subject + " required");
-    }
-  }
-
-  /*
-   * Validate composite key.
-   *
-   */
-  private void validateKey(String key) throws BadRequestException {
-    String[] parts = key.split(":", -1); // -1 is to prevent skipping trailing part
-    switch (parts.length) {
-      case 1:
-        {
-          return; // consider it's id
-        }
-      case 2:
-        {
-          if (parts[1].isEmpty()) {
-            throw new BadRequestException(
-                "Wrong composite key format - workspace name required to be set.");
-          }
-          break;
-        }
-      default:
-        {
-          throw new BadRequestException(
-              format("Wrong composite key %s. Format should be 'username:workspace_name'. ", key));
-        }
     }
   }
 

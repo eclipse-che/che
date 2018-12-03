@@ -16,4 +16,18 @@ public class Constants {
   public static final String SCHEMA_LOCATION = "schema/devfile.json";
 
   public static final String CURRENT_SPEC_VERSION = "0.0.1";
+
+  public static final String EDITOR_WORKSPACE_ATTRIBUTE_NAME = "editor";
+
+  public static final String PLUGINS_WORKSPACE_ATTRIBUTE_NAME = "plugins";
+
+  /**
+   * Workspace attribute which contains comma-separated list of mappings of tool id to its name
+   * Example:
+   *
+   * <pre>
+   * eclipse/maven-jdk8:1.0.0=mvn-stack,eclipse/theia:0.0.3=theia-ide,eclipse/theia-jdtls:0.0.3=jdt.ls
+   * </pre>
+   */
+  public static final String ALIASES_WORKSPACE_ATTRIBUTE_NAME = "toolsAliases";
 }
