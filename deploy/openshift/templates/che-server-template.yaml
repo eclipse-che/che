@@ -38,6 +38,10 @@ objects:
       port: 8080
       protocol: TCP
       targetPort: 8080
+    - name: metrics
+      port: 8087
+      protocol: TCP
+      targetPort: 8087
     selector:
       app: che
 - apiVersion: v1
@@ -48,6 +52,8 @@ objects:
     to:
       kind: Service
       name: che-host
+    port:
+      targetPort: http
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -153,6 +159,8 @@ objects:
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
+          - name: CHE_METRICS_ENABLED
+            value: "false"
           - name: CHE_CORS_ENABLED
             value: "${CHE_CORS_ENABLED}"
           - name: CHE_CORS_ALLOW__CREDENTIALS
@@ -183,6 +191,9 @@ objects:
           ports:
           - containerPort: 8080
             name: http
+            protocol: TCP
+          - containerPort: 8087
+            name: metrics
             protocol: TCP
           - containerPort: 8000
             name: http-debug

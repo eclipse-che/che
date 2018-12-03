@@ -60,12 +60,14 @@ class InitializeParamsProvider {
   private static final Logger LOG = LoggerFactory.getLogger(InitializeParamsProvider.class);
 
   private final Registry<Boolean> localityRegistry;
+  private final Registry<String> projectsRootRegistry;
   private final URI rootUri;
 
   @Inject
   InitializeParamsProvider(PathTransformer pathTransformer, RegistryContainer registryContainer) {
     this.rootUri = pathTransformer.transform(ROOT).toUri();
     this.localityRegistry = registryContainer.localityRegistry;
+    this.projectsRootRegistry = registryContainer.projectsRootRegistry;
   }
 
   InitializeParams get(String id) throws LanguageServerException {
@@ -79,11 +81,23 @@ class InitializeParamsProvider {
     initializeParams.setProcessId(processId);
     LOG.debug("Process id: {}", processId);
 
-    String rootPath = Paths.get(rootUri).toAbsolutePath().toString();
+    String projectsRoot = projectsRootRegistry.getOrNull(id);
+
+    String rootPath;
+    if (projectsRoot != null) {
+      rootPath = projectsRoot;
+    } else {
+      rootPath = Paths.get(rootUri).toAbsolutePath().toString();
+    }
     initializeParams.setRootPath(rootPath);
     LOG.debug("Root path: {}", rootPath);
 
-    String rootUri = this.rootUri.toString();
+    String rootUri;
+    if (projectsRoot != null) {
+      rootUri = Paths.get(projectsRoot).toUri().toString();
+    } else {
+      rootUri = this.rootUri.toString();
+    }
     initializeParams.setRootUri(rootUri);
     LOG.debug("Root URI: {}", rootUri);
 

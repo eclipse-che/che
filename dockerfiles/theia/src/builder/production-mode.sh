@@ -13,14 +13,4 @@
 
 echo "Use production mode"
 
-# Size before
-SIZE_BEFORE=$(du -s . | cut -f1)
-LAST_SIZE=${SIZE_BEFORE}
-
-cd ${HOME}
-yarn install --frozen-lockfile --no-cache --production
-
-# Size after
-SIZE_AFTER=$(du -s . | cut -f1)
-
-echo "Current gain $((${SIZE_BEFORE}-${SIZE_AFTER}))"
+cd ${HOME}/theia-source-code && che:theia production

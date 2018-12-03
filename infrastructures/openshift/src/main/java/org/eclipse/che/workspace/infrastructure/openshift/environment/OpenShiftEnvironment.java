@@ -22,9 +22,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Warning;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.Builder;
 
 /**
  * Holds objects of OpenShift environment.
@@ -37,11 +39,39 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
 
   private final Map<String, Route> routes;
 
+  /** Returns builder for creating environment from blank {@link KubernetesEnvironment}. */
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /**
+   * Returns builder for creating environment based on specified {@link InternalEnvironment}.
+   *
+   * <p>It means that {@link InternalEnvironment} specific fields like machines, warnings will be
+   * preconfigured in Builder.
+   */
+  public static Builder builder(InternalEnvironment internalEnvironment) {
+    return new Builder(internalEnvironment);
+  }
+
   public OpenShiftEnvironment(KubernetesEnvironment k8sEnv) {
     super(k8sEnv);
-    this.routes = new HashMap<>();
     setType(TYPE);
-    setAttributes(k8sEnv.getAttributes());
+    this.routes = new HashMap<>();
+  }
+
+  public OpenShiftEnvironment(
+      InternalEnvironment internalEnvironment,
+      Map<String, Pod> pods,
+      Map<String, Service> services,
+      Map<String, Ingress> ingresses,
+      Map<String, PersistentVolumeClaim> pvcs,
+      Map<String, Secret> secrets,
+      Map<String, ConfigMap> configMaps,
+      Map<String, Route> routes) {
+    super(internalEnvironment, pods, services, ingresses, pvcs, secrets, configMaps);
+    setType(TYPE);
+    this.routes = routes;
   }
 
   public OpenShiftEnvironment(
@@ -56,12 +86,8 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
       Map<String, ConfigMap> configMaps,
       Map<String, Route> routes) {
     super(internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
-    this.routes = routes;
     setType(TYPE);
-  }
-
-  public static Builder builder() {
-    return new Builder();
+    this.routes = routes;
   }
 
   @Override
@@ -77,25 +103,27 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
   public static class Builder extends KubernetesEnvironment.Builder {
     private final Map<String, Route> routes = new HashMap<>();
 
-    private Builder() {
-      setType(TYPE);
+    private Builder() {}
+
+    private Builder(InternalEnvironment internalEnvironment) {
+      super(internalEnvironment);
     }
 
     @Override
     public Builder setInternalRecipe(InternalRecipe internalRecipe) {
-      this.internalRecipe = internalRecipe;
+      super.setInternalRecipe(internalRecipe);
       return this;
     }
 
     @Override
     public Builder setMachines(Map<String, InternalMachineConfig> machines) {
-      this.machines.putAll(machines);
+      super.setMachines(machines);
       return this;
     }
 
     @Override
     public Builder setWarnings(List<Warning> warnings) {
-      this.warnings.addAll(warnings);
+      super.setWarnings(warnings);
       return this;
     }
 
@@ -147,21 +175,8 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
     }
 
     public OpenShiftEnvironment build() {
-      OpenShiftEnvironment openShiftEnvironment =
-          new OpenShiftEnvironment(
-              internalRecipe,
-              machines,
-              warnings,
-              pods,
-              services,
-              ingresses,
-              pvcs,
-              secrets,
-              configMaps,
-              routes);
-      openShiftEnvironment.setAttributes(attributes);
-      openShiftEnvironment.setType(type);
-      return openShiftEnvironment;
+      return new OpenShiftEnvironment(
+          internalEnvironment, pods, services, ingresses, pvcs, secrets, configMaps, routes);
     }
   }
 }

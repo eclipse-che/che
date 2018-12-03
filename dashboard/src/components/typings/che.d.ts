@@ -168,6 +168,7 @@ declare namespace che {
       COMPOSE: string;
       KUBERNETES: string;
       OPENSHIFT: string;
+      NOENVIRONMENT: string;
       getValues(): Array<string>;
     }
   }

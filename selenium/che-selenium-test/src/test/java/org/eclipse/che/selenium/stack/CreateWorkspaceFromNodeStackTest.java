@@ -17,6 +17,7 @@ import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsCons
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODE;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -32,6 +33,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -139,7 +141,12 @@ public class CreateWorkspaceFromNodeStackTest {
     seleniumWebDriver.navigate().refresh();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     ide.waitOpenedWorkspaceIsReadyToUse();
-    consoles.waitPreviewUrlIsPresent();
+
+    try {
+      consoles.waitPreviewUrlIsPresent();
+    } catch (TimeoutException ex) {
+      fail("Known random failure https://github.com/eclipse/che/issues/11419", ex);
+    }
 
     consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 

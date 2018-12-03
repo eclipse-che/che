@@ -32,6 +32,7 @@ import org.eclipse.che.api.languageserver.DefaultInstanceProvider;
 import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.LanguageServerInitializedEvent;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.plugin.yaml.server.inject.YamlModule;
 import org.eclipse.che.plugin.yaml.shared.PreferenceHelper;
 import org.eclipse.che.plugin.yaml.shared.YamlPreference;
@@ -57,16 +58,19 @@ public class YamlLanguageServerConfig implements LanguageServerConfig {
   private final Path launchScript;
   private final EventService eventService;
   private final HttpJsonRequestFactory requestFactory;
+  private final RootDirPathProvider rootDirPathProvider;
   private final String apiUrl;
 
   @Inject
   public YamlLanguageServerConfig(
       EventService eventService,
       @Named("che.api") String apiUrl,
-      HttpJsonRequestFactory requestFactory) {
+      HttpJsonRequestFactory requestFactory,
+      RootDirPathProvider rootDirPathProvider) {
     this.eventService = eventService;
     this.apiUrl = apiUrl;
     this.requestFactory = requestFactory;
+    this.rootDirPathProvider = rootDirPathProvider;
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-yaml/launch.sh");
   }
 
@@ -193,5 +197,10 @@ public class YamlLanguageServerConfig implements LanguageServerConfig {
         return isSuccessfullyInstalled() ? null : "Launch script file does not exist";
       }
     };
+  }
+
+  @Override
+  public String getProjectsRoot() {
+    return rootDirPathProvider.get();
   }
 }

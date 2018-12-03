@@ -119,6 +119,7 @@ export class WorkspaceMachinesController {
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
 
     this.absUrl = $location.absUrl().split('?')[0];
+    this.machines = [];
     this.cheListHelper = cheListHelperFactory.getHelper(MACHINE_LIST_HELPER_ID);
 
     this.updateData(this.workspaceDetails);
@@ -137,7 +138,7 @@ export class WorkspaceMachinesController {
    * @returns {boolean}
    */
   isScalable(): boolean {
-    return this.cheRecipeService.isScalable(this.environment.recipe);
+    return this.environment ? this.cheRecipeService.isScalable(this.environment.recipe) : false;
   }
 
   /**
@@ -161,6 +162,7 @@ export class WorkspaceMachinesController {
       return;
     }
     this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.environment.recipe.type);
+
     this.machines = this.environmentManager.getMachines(this.environment);
     this.environment = this.environmentManager.getEnvironment(this.environment, this.machines);
 

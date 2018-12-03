@@ -210,7 +210,7 @@ public class GolangFileEditingTest {
       editor.waitTextElementsActiveLine("if k == 1");
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/10524");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11907");
     }
   }
 

@@ -28,6 +28,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
  * @author Alexander Garagatyi
  */
 public class DockerEnvironment extends InternalEnvironment {
+
   public static final String TYPE = "docker";
 
   private LinkedHashMap<String, DockerContainerConfig> containers;
@@ -40,14 +41,16 @@ public class DockerEnvironment extends InternalEnvironment {
     super(recipe, machines, warnings);
   }
 
+  public DockerEnvironment(InternalEnvironment internalEnvironment) {
+    super(internalEnvironment);
+  }
+
   public DockerEnvironment(
-      InternalRecipe recipe,
-      Map<String, InternalMachineConfig> machines,
-      List<Warning> warnings,
+      InternalEnvironment internalEnvironment,
       LinkedHashMap<String, DockerContainerConfig> containers,
       String network)
       throws InfrastructureException {
-    super(recipe, machines, warnings);
+    super(internalEnvironment);
     this.containers = containers;
     this.network = network;
   }

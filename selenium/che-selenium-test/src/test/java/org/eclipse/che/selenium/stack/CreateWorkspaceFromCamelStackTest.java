@@ -27,6 +27,7 @@ import org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -47,6 +48,7 @@ public class CreateWorkspaceFromCamelStackTest {
   @Inject private Dashboard dashboard;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private CreateWorkspaceHelper createWorkspaceHelper;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
@@ -88,6 +90,7 @@ public class CreateWorkspaceFromCamelStackTest {
     Workspace ws = workspaceServiceClient.getByName(WORKSPACE_NAME, defaultTestUser.getName());
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CONSOLE_JAVA_SIMPLE);
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
