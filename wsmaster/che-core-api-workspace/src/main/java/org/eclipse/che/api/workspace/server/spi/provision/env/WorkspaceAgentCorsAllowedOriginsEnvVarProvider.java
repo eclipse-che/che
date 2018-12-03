@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision.env;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -25,6 +26,7 @@ public class WorkspaceAgentCorsAllowedOriginsEnvVarProvider implements EnvVarPro
 
   private String wsAgentCorsAllowedOrigins;
 
+  @Inject
   public WorkspaceAgentCorsAllowedOriginsEnvVarProvider(
       @Named("che.wsagent.cors.allowed_origins") String cheWsMasterAllowedOrigins) {
     this.wsAgentCorsAllowedOrigins = cheWsMasterAllowedOrigins;
