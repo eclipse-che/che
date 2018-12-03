@@ -77,6 +77,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.postgresql.Driver;
@@ -131,6 +132,7 @@ public class PostgreSqlTckModule extends TckModule {
                 VolumeImpl.class,
                 // k8s-runtimes
                 KubernetesRuntimeState.class,
+                KubernetesRuntimeCommandImpl.class,
                 KubernetesMachineImpl.class,
                 KubernetesMachineImpl.MachineId.class,
                 KubernetesServerImpl.class,

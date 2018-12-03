@@ -550,7 +550,8 @@ public class ProjectExplorer {
           waitItemIsSelected(path);
         },
         (EXPECTED_MESS_IN_CONSOLE_SEC + ELEMENT_TIMEOUT_SEC) * 2,
-        NoSuchElementException.class);
+        NoSuchElementException.class,
+        TimeoutException.class);
 
     seleniumWebDriverHelper.waitNoExceptions(
         () -> {

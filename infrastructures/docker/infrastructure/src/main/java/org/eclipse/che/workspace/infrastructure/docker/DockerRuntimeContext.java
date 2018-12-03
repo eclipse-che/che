@@ -84,11 +84,10 @@ public class DockerRuntimeContext extends RuntimeContext<DockerEnvironment> {
     List<ContainerListEntry> runningContainers = containers.find(identity);
     DockerEnvironment environment = getEnvironment();
     if (runningContainers.isEmpty()) {
-      return runtimeFactory.create(this, environment.getWarnings());
+      return runtimeFactory.create(this);
     }
 
-    DockerInternalRuntime runtime =
-        runtimeFactory.create(this, runningContainers, environment.getWarnings());
+    DockerInternalRuntime runtime = runtimeFactory.create(this, runningContainers);
     try {
       consistencyChecker.check(environment, runtime);
       runtime.checkServers();

@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -47,8 +48,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -143,9 +144,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       RuntimeHangingDetector runtimeHangingDetector,
       @Nullable OptionalTracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
-      @Assisted KubernetesNamespace namespace,
-      @Assisted List<Warning> warnings) {
-    super(context, urlRewriter, warnings);
+      @Assisted KubernetesNamespace namespace) {
+    super(context, urlRewriter);
     this.unrecoverableEventListenerFactory = unrecoverableEventListenerFactory;
     this.bootstrapperFactory = bootstrapperFactory;
     this.serverCheckerFactory = serverCheckerFactory;
@@ -187,6 +187,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       for (InternalEnvironmentProvisioner envProvisioner : internalEnvironmentProvisioners) {
         envProvisioner.provision(context.getIdentity(), context.getEnvironment());
       }
+
+      // commands might be updated during provisioning
+      runtimeStates.updateCommands(context.getIdentity(), context.getEnvironment().getCommands());
 
       // Infrastructure specific provisioner should be applied last
       // because it converts all Workspace API model objects that comes
@@ -577,6 +580,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     return ImmutableMap.copyOf(machines.getMachines(getContext().getIdentity()));
   }
 
+  @Override
+  public List<? extends Command> getCommands() throws InfrastructureException {
+    return runtimeStates.getCommands(getContext().getIdentity());
+  }
+
   @Traced
   @Override
   protected void internalStop(Map<String, String> stopOptions) throws InfrastructureException {
@@ -750,14 +758,19 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   @Override
   public WorkspaceStatus getStatus() throws InfrastructureException {
-    return runtimeStates.getStatus(getContext().getIdentity());
+    Optional<WorkspaceStatus> runtimeStatusOpt =
+        runtimeStates.getStatus(getContext().getIdentity());
+    return runtimeStatusOpt.isPresent() ? runtimeStatusOpt.get() : WorkspaceStatus.STOPPED;
   }
 
   @Override
   protected void markStarting() throws InfrastructureException {
     if (!runtimeStates.putIfAbsent(
         new KubernetesRuntimeState(
-            getContext().getIdentity(), namespace.getName(), WorkspaceStatus.STARTING))) {
+            getContext().getIdentity(),
+            namespace.getName(),
+            WorkspaceStatus.STARTING,
+            getContext().getEnvironment().getCommands()))) {
       throw new StateException("Runtime is already started");
     }
   }
@@ -772,8 +785,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     RuntimeIdentity runtimeId = getContext().getIdentity();
 
     // Check if runtime is in STARTING phase to actualize state of startSynchronizer.
-    WorkspaceStatus status = runtimeStates.getStatus(runtimeId);
-    if (status == WorkspaceStatus.STARTING) {
+    Optional<WorkspaceStatus> statusOpt = runtimeStates.getStatus(runtimeId);
+    if (statusOpt.isPresent() && statusOpt.get() == WorkspaceStatus.STARTING) {
       startSynchronizer.start();
     }
 

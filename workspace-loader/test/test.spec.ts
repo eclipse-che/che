@@ -261,6 +261,7 @@ describe('Workspace Loader', () => {
                 return Promise.resolve({
                     addListener: () => { },
                     subscribeEnvironmentOutput: () => { },
+                    subscribeInstallerOutput: () => { },
                     subscribeWorkspaceStatus: (workspaceId, callback) => {
                         statusChangeCallback = callback;
                     }
@@ -391,6 +392,7 @@ describe('Workspace Loader', () => {
                 return Promise.resolve({
                     addListener: () => { },
                     subscribeEnvironmentOutput: () => {},
+                    subscribeInstallerOutput: () => {},
                     subscribeWorkspaceStatus: () => {}
                 });
             });
@@ -467,6 +469,7 @@ describe('Workspace Loader', () => {
                 return Promise.resolve({
                     addListener: () => { },
                     subscribeEnvironmentOutput: () => { },
+                    subscribeInstallerOutput: () => { },
                     subscribeWorkspaceStatus: (workspaceId, callback) => {
                         statusChangeCallback = callback;
                     }

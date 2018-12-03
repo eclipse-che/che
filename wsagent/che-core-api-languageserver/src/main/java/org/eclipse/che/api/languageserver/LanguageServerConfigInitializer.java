@@ -44,6 +44,7 @@ class LanguageServerConfigInitializer {
   private final Registry<CommunicationProvider> communicationProviderRegistry;
   private final Registry<Boolean> localityRegistry;
   private final Registry<String> languageFilterRegistry;
+  private final Registry<String> projectsRootRegistry;
   private final Set<LanguageServerConfigProvider> providers;
 
   @Inject
@@ -57,6 +58,7 @@ class LanguageServerConfigInitializer {
     this.communicationProviderRegistry = registryContainer.communicationProviderRegistry;
     this.localityRegistry = registryContainer.localityRegistry;
     this.languageFilterRegistry = registryContainer.languageFilterRegistry;
+    this.projectsRootRegistry = registryContainer.projectsRootRegistry;
   }
 
   void initialize() {
@@ -110,6 +112,7 @@ class LanguageServerConfigInitializer {
         instanceProviderRegistry.add(id, instanceProvider);
         communicationProviderRegistry.add(id, communicationProvider);
         localityRegistry.add(id, isLocal);
+        projectsRootRegistry.add(id, config.getProjectsRoot());
 
         languageRegexes.forEach(languageFilterRegistry::add);
 

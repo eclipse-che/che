@@ -24,6 +24,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.DefaultInstanceProvider;
 import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 
 /** Launcher for TypeScript Language Server */
 @Singleton
@@ -32,9 +33,11 @@ public class TypeScriptLanguageServerConfig implements LanguageServerConfig {
   private static final String REGEX = ".*\\.(js|ts|tsx)";
 
   private final Path launchScript;
+  private final RootDirPathProvider rootDirPathProvider;
 
   @Inject
-  public TypeScriptLanguageServerConfig() {
+  public TypeScriptLanguageServerConfig(RootDirPathProvider rootDirPathProvider) {
+    this.rootDirPathProvider = rootDirPathProvider;
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-typescript/launch.sh");
   }
 
@@ -80,5 +83,10 @@ public class TypeScriptLanguageServerConfig implements LanguageServerConfig {
         return isSuccessfullyInstalled() ? null : "Launch script file does not exist";
       }
     };
+  }
+
+  @Override
+  public String getProjectsRoot() {
+    return rootDirPathProvider.get();
   }
 }

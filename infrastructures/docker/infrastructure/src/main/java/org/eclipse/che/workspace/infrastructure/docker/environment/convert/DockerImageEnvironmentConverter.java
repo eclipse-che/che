@@ -41,9 +41,7 @@ public class DockerImageEnvironmentConverter implements DockerEnvironmentConvert
         new DockerContainerConfig().setImage(dockerImageEnv.getDockerImage());
 
     DockerEnvironment dockerEnv =
-        new DockerEnvironment(
-                environment.getRecipe(), environment.getMachines(), environment.getWarnings())
-            .setType(DockerEnvironment.TYPE);
+        new DockerEnvironment(environment).setType(DockerEnvironment.TYPE);
     dockerEnv.getContainers().put(machineName, container);
     return dockerEnv;
   }
