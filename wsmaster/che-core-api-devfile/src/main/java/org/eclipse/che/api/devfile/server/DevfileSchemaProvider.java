@@ -26,7 +26,7 @@ import javax.inject.Singleton;
 
 /** Loads a schema content and stores it in soft reference. */
 @Singleton
-public class DevFileSchemaProvider {
+public class DevfileSchemaProvider {
 
   private SoftReference<String> schemaRef = new SoftReference<>(null);
 

@@ -48,27 +48,27 @@ import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 @Path("/devfile")
-public class DevFileService extends Service {
+public class DevfileService extends Service {
 
   private WorkspaceLinksGenerator linksGenerator;
-  private DevFileSchemaValidator schemaValidator;
-  private DevFileSchemaProvider schemaCachedProvider;
+  private DevfileSchemaValidator schemaValidator;
+  private DevfileSchemaProvider schemaCachedProvider;
   private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
-  private DevFileConverter devFileConverter;
+  private DevfileConverter devfileConverter;
 
   @Inject
-  public DevFileService(
+  public DevfileService(
       WorkspaceLinksGenerator linksGenerator,
-      DevFileSchemaValidator schemaValidator,
-      DevFileSchemaProvider schemaCachedProvider,
+      DevfileSchemaValidator schemaValidator,
+      DevfileSchemaProvider schemaCachedProvider,
       WorkspaceManager workspaceManager) {
     this.linksGenerator = linksGenerator;
     this.schemaValidator = schemaValidator;
     this.schemaCachedProvider = schemaCachedProvider;
     this.workspaceManager = workspaceManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
-    this.devFileConverter = new DevFileConverter();
+    this.devfileConverter = new DevfileConverter();
   }
 
   /**
@@ -125,10 +125,10 @@ public class DevFileService extends Service {
     try {
       JsonNode parsed = schemaValidator.validateBySchema(data, verbose);
       devFile = objectMapper.treeToValue(parsed, Devfile.class);
-      workspaceConfig = devFileConverter.devFileToWorkspaceConfig(devFile);
+      workspaceConfig = devfileConverter.devFileToWorkspaceConfig(devFile);
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
-    } catch (DevFileFormatException e) {
+    } catch (DevfileFormatException e) {
       throw new BadRequestException(e.getMessage());
     }
 
@@ -163,7 +163,7 @@ public class DevFileService extends Service {
       throws NotFoundException, ServerException, BadRequestException {
     validateKey(key);
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-    Devfile workspaceDevFile = devFileConverter.workspaceToDevFile(workspace.getConfig());
+    Devfile workspaceDevFile = devfileConverter.workspaceToDevFile(workspace.getConfig());
     // Write object as YAML
     try {
       return Response.ok().entity(objectMapper.writeValueAsString(workspaceDevFile)).build();

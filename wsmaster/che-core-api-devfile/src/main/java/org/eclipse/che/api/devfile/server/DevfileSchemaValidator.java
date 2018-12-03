@@ -29,28 +29,28 @@ import javax.inject.Singleton;
 
 /** Validates YAML content against given JSON schema. */
 @Singleton
-public class DevFileSchemaValidator {
+public class DevfileSchemaValidator {
 
   private JsonValidator validator;
   private ObjectMapper yamlReader;
-  private DevFileSchemaProvider schemaProvider;
+  private DevfileSchemaProvider schemaProvider;
 
   @Inject
-  public DevFileSchemaValidator(DevFileSchemaProvider schemaProvider) throws IOException {
+  public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) throws IOException {
     this.schemaProvider = schemaProvider;
     this.validator = JsonSchemaFactory.byDefault().getValidator();
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
 
   public JsonNode validateBySchema(String yamlContent, boolean verbose)
-      throws DevFileFormatException {
+      throws DevfileFormatException {
     ProcessingReport report;
     JsonNode data;
     try {
       data = yamlReader.readTree(yamlContent);
       report = validator.validate(schemaProvider.getJsoneNode(), data);
     } catch (IOException | ProcessingException e) {
-      throw new DevFileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
+      throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }
     if (!report.isSuccess()) {
       String error =
@@ -58,7 +58,7 @@ public class DevFileSchemaValidator {
               .filter(m -> m.getLogLevel() == LogLevel.ERROR || m.getLogLevel() == LogLevel.FATAL)
               .map(message -> verbose ? message.asJson().toString() : message.getMessage())
               .collect(Collectors.joining(", ", "[", "]"));
-      throw new DevFileFormatException(
+      throw new DevfileFormatException(
           format("Devfile schema validation failed. Errors: %s", error));
     }
     return data;

@@ -15,13 +15,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
-public class DevFileSchemaValidatorTest {
+public class DevfileSchemaValidatorTest {
 
-  private DevFileSchemaValidator schemaValidator;
+  private DevfileSchemaValidator schemaValidator;
 
   @BeforeClass
   public void setUp() throws Exception {
-    schemaValidator = new DevFileSchemaValidator(new DevFileSchemaProvider());
+    schemaValidator = new DevfileSchemaValidator(new DevfileSchemaProvider());
   }
 
   @Test
@@ -33,7 +33,7 @@ public class DevFileSchemaValidatorTest {
   }
 
   @Test(
-      expectedExceptions = DevFileFormatException.class,
+      expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
           "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[\"name\"\\]\\)\\]$")
   public void shouldValidateIncorrectYamlBySchema() throws Exception {

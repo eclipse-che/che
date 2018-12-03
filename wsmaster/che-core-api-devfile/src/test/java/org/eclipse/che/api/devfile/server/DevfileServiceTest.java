@@ -58,14 +58,14 @@ import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
 @Listeners({EverrestJetty.class, MockitoTestNGListener.class})
-public class DevFileServiceTest {
+public class DevfileServiceTest {
 
   @Mock private WorkspaceLinksGenerator linksGenerator;
 
   @Mock private WorkspaceManager workspaceManager;
   @Mock private EnvironmentContext environmentContext;
-  private DevFileSchemaProvider schemaProvider = new DevFileSchemaProvider();
-  private DevFileSchemaValidator validator;
+  private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
+  private DevfileSchemaValidator validator;
 
   @SuppressWarnings("unused")
   private static final EnvironmentFilter FILTER = new EnvironmentFilter();
@@ -73,13 +73,13 @@ public class DevFileServiceTest {
   private static final Subject SUBJECT = new SubjectImpl("user", "user123", "token", false);
 
   @SuppressWarnings("unused")
-  private DevFileService devFileService;
+  private DevfileService devFileService;
 
   @BeforeMethod
   public void initService() throws IOException {
-    this.validator = spy(new DevFileSchemaValidator(schemaProvider));
+    this.validator = spy(new DevfileSchemaValidator(schemaProvider));
     this.devFileService =
-        new DevFileService(linksGenerator, validator, schemaProvider, workspaceManager);
+        new DevfileService(linksGenerator, validator, schemaProvider, workspaceManager);
   }
 
   @Test

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
@@ -39,11 +40,11 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
 /** Helps to convert Devfile into workspace config and back. */
-public class DevFileConverter {
+public class DevfileConverter {
 
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
 
-    Devfile devFile =
+    Devfile devfile =
         new Devfile().withSpecVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
     // Manage projects
@@ -51,15 +52,16 @@ public class DevFileConverter {
     wsConfig
         .getProjects()
         .forEach(projectConfig -> projects.add(projectConfigToDevProject(projectConfig)));
-    devFile.setProjects(projects);
+    devfile.setProjects(projects);
 
     // Manage commands
     List<Command> commands = new ArrayList<>();
     wsConfig.getCommands().forEach(command -> commands.add(commandImplToDevCommand(command)));
-    devFile.setCommands(commands);
+    devfile.setCommands(commands);
 
     // Manage tools
     List<Tool> tools = new ArrayList<>();
+    Map<String, String> toolIdToName = parseTools(wsConfig);
     for (Map.Entry<String, String> entry : wsConfig.getAttributes().entrySet()) {
       if (entry.getKey().equals(EDITOR_WORKSPACE_ATTRIBUTE_NAME)) {
         String editorId = entry.getValue();
@@ -67,7 +69,7 @@ public class DevFileConverter {
             new Tool()
                 .withType("cheEditor")
                 .withId(editorId)
-                .withName(findToolName(wsConfig, editorId));
+                .withName(toolIdToName.getOrDefault(editorId, editorId));
         tools.add(editorTool);
       } else if (entry.getKey().equals(PLUGINS_WORKSPACE_ATTRIBUTE_NAME)) {
         for (String pluginId : entry.getValue().split(",")) {
@@ -75,17 +77,17 @@ public class DevFileConverter {
               new Tool()
                   .withId(pluginId)
                   .withType("chePlugin")
-                  .withName(findToolName(wsConfig, pluginId));
+                  .withName(toolIdToName.getOrDefault(pluginId, pluginId));
           tools.add(pluginTool);
         }
       }
     }
-    devFile.setTools(tools);
-    return devFile;
+    devfile.setTools(tools);
+    return devfile;
   }
 
   public WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devFile)
-      throws DevFileFormatException {
+      throws DevfileFormatException {
     validateCurrentVersion(devFile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
@@ -181,20 +183,17 @@ public class DevFileConverter {
     return projectConfig;
   }
 
-  private String findToolName(WorkspaceConfigImpl wsConfig, String toolId) {
+  private Map<String, String> parseTools(WorkspaceConfigImpl wsConfig) {
     String aliasesString =
         firstNonNull(wsConfig.getAttributes().get(ALIASES_WORKSPACE_ATTRIBUTE_NAME), "");
-    Optional<String> valueOpt =
-        Arrays.stream(aliasesString.split(","))
-            .filter(s -> s.split("=")[0].equals(toolId))
-            .map(s -> s.split("=")[1])
-            .findAny();
-    return valueOpt.isPresent() ? valueOpt.get() : toolId.substring(0, toolId.indexOf(":"));
+    return Arrays.stream(aliasesString.split(","))
+        .map(s -> s.split("=", 2))
+        .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
   }
 
-  private static void validateCurrentVersion(Devfile devFile) throws DevFileFormatException {
+  private static void validateCurrentVersion(Devfile devFile) throws DevfileFormatException {
     if (!CURRENT_SPEC_VERSION.equals(devFile.getSpecVersion())) {
-      throw new DevFileFormatException(
+      throw new DevfileFormatException(
           format("Provided Devfile has unsupported version %s", devFile.getSpecVersion()));
     }
   }

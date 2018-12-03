@@ -26,10 +26,10 @@ import org.eclipse.che.commons.json.JsonHelper;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
-public class DevFileConverterTest {
+public class DevfileConverterTest {
 
   private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-  private DevFileConverter devFileConverter = new DevFileConverter();
+  private DevfileConverter devfileConverter = new DevfileConverter();
 
   @Test
   public void shouldBuildWorkspaceConfigFromYamlDevFile() throws Exception {
@@ -39,7 +39,7 @@ public class DevFileConverterTest {
 
     Devfile devFile = objectMapper.readValue(yamlContent, Devfile.class);
 
-    WorkspaceConfigImpl wsConfigImpl = devFileConverter.devFileToWorkspaceConfig(devFile);
+    WorkspaceConfigImpl wsConfigImpl = devfileConverter.devFileToWorkspaceConfig(devFile);
 
     String jsonContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
@@ -54,7 +54,7 @@ public class DevFileConverterTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
     WorkspaceConfigImpl workspaceConfig =
         JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
-    Devfile devFile = devFileConverter.workspaceToDevFile(workspaceConfig);
+    Devfile devFile = devfileConverter.workspaceToDevFile(workspaceConfig);
 
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
