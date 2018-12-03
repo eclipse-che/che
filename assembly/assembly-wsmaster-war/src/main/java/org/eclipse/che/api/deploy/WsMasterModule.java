@@ -191,7 +191,7 @@ public class WsMasterModule extends AbstractModule {
 
     // propagate CORS allowed origin evn variable to WS agent only if corresponding env variable
     // is defined on master
-    if (isNullOrEmpty("CHE_WSAGENT_CORS_ALLOWED__ORIGINS")) {
+    if (isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ALLOWED__ORIGINS"))) {
       envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
     }
 
