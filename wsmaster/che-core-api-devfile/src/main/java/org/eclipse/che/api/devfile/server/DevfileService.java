@@ -78,7 +78,7 @@ public class DevfileService extends Service {
    */
   @GET
   @Produces(APPLICATION_JSON)
-  @ApiOperation(value = "Retrieves current version of Devfile JSON schema")
+  @ApiOperation(value = "Retrieves current version of devfile JSON schema")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The schema successfully retrieved"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
@@ -150,7 +150,7 @@ public class DevfileService extends Service {
   @Path("/{key:.*}")
   @Produces("text/yml")
   @ApiOperation(
-      value = "Generates the devfile from giben workspace",
+      value = "Generates the devfile from given workspace",
       notes =
           "This operation can be performed only by authorized user,"
               + "this user must be the owner of the exported workspace")

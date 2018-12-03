@@ -27,7 +27,7 @@ import java.util.stream.StreamSupport;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-/** Validates YAML content against given JSON schema. */
+/** Validates YAML devfile content against given JSON schema. */
 @Singleton
 public class DevfileSchemaValidator {
 

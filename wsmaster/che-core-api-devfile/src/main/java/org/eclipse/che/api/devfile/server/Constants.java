@@ -23,7 +23,7 @@ public class Constants {
 
   /**
    * Workspace attribute which contains comma-separated list of mappings of tool id to its name
-   * Example:
+   * Example value:
    *
    * <pre>
    * eclipse/maven-jdk8:1.0.0=mvn-stack,eclipse/theia:0.0.3=theia-ide,eclipse/theia-jdtls:0.0.3=jdt.ls

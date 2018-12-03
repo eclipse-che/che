@@ -39,12 +39,17 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
-/** Helps to convert Devfile into workspace config and back. */
+/** Helps to convert devfile into workspace config and back. */
 public class DevfileConverter {
 
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
 
-    Devfile devfile =
+    if (!isNullOrEmpty(wsConfig.getDefaultEnv()) || !wsConfig.getEnvironments().isEmpty()) {
+      //  throw new UnsupportedOperationException("Given workspace cannot be converted to devfile
+      // since it is contains environments.");
+    }
+
+    Devfile devFile =
         new Devfile().withSpecVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
     // Manage projects
@@ -52,12 +57,12 @@ public class DevfileConverter {
     wsConfig
         .getProjects()
         .forEach(projectConfig -> projects.add(projectConfigToDevProject(projectConfig)));
-    devfile.setProjects(projects);
+    devFile.setProjects(projects);
 
     // Manage commands
     List<Command> commands = new ArrayList<>();
     wsConfig.getCommands().forEach(command -> commands.add(commandImplToDevCommand(command)));
-    devfile.setCommands(commands);
+    devFile.setCommands(commands);
 
     // Manage tools
     List<Tool> tools = new ArrayList<>();
@@ -82,8 +87,8 @@ public class DevfileConverter {
         }
       }
     }
-    devfile.setTools(tools);
-    return devfile;
+    devFile.setTools(tools);
+    return devFile;
   }
 
   public WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devFile)
