@@ -1,4 +1,8 @@
 [[constraint]]
+ name = "github.com/eclipse/che-go-jsonrpc"
+ version = "=0.1.0"
+
+[[constraint]]
   name = "github.com/dgrijalva/jwt-go"
   version = "=3.1.0"
 
