@@ -133,6 +133,10 @@ public class TheiaIde {
     seleniumWebDriverHelper.waitInvisibility(By.xpath(notificationMessage), timeout);
   }
 
+  public void waitNotificationPanelClosed() {
+    seleniumWebDriverHelper.waitInvisibility(By.className("theia-Notification"));
+  }
+
   public void waitTheiaIde() {
     seleniumWebDriverHelper.waitVisibility(theiaIde, PREPARING_WS_TIMEOUT_SEC);
   }

@@ -291,12 +291,7 @@ public class ContextMenuEditorTest {
     refactor.clickOkButtonRefactorForm();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
-    try {
-      editor.waitTabIsPresent(editorTabName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11697");
-    }
+    editor.waitTabIsPresent(editorTabName);
 
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Test1.java");
     editor.goToCursorPositionVisible(14, 15);
@@ -307,12 +302,7 @@ public class ContextMenuEditorTest {
     editor.typeTextIntoEditor(renamedEditorTabName);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     loader.waitOnClosed();
-    try {
-      editor.waitTabIsPresent(renamedEditorTabName);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11697");
-    }
+    editor.waitTabIsPresent(renamedEditorTabName);
     editor.waitTextIntoEditor("public class Zclass");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Zclass.java");
   }

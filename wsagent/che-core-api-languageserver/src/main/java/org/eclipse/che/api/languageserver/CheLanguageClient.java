@@ -15,7 +15,6 @@ import com.google.inject.assistedinject.Assisted;
 import java.util.concurrent.CompletableFuture;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.languageserver.messager.ShowMessageJsonRpcTransmitter;
 import org.eclipse.che.api.languageserver.shared.model.ExtendedPublishDiagnosticsParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;

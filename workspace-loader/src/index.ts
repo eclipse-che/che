@@ -313,6 +313,8 @@ export class WorkspaceLoader {
         return new Promise((resolve, reject) => {
             masterApi.subscribeEnvironmentOutput(this.workspace.id,
                 (message: any) => this.onEnvironmentOutput(message.text));
+            masterApi.subscribeInstallerOutput(this.workspace.id,
+                 (message: any) => this.onEnvironmentOutput(message.text));
             masterApi.subscribeWorkspaceStatus(this.workspace.id,
                 (message: any) => {
                     if (message.error) {

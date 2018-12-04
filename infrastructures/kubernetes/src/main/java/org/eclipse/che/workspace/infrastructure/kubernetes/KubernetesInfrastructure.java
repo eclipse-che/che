@@ -76,10 +76,7 @@ public class KubernetesInfrastructure extends RuntimeInfrastructure {
   private KubernetesEnvironment asKubernetesEnv(InternalEnvironment source)
       throws InfrastructureException {
     if (source instanceof NoEnvInternalEnvironment) {
-      return KubernetesEnvironment.builder()
-          .setAttributes(source.getAttributes())
-          .setWarnings(source.getWarnings())
-          .build();
+      return KubernetesEnvironment.builder(source).build();
     } else if (source instanceof KubernetesEnvironment) {
       return (KubernetesEnvironment) source;
     } else if (source instanceof DockerImageEnvironment) {

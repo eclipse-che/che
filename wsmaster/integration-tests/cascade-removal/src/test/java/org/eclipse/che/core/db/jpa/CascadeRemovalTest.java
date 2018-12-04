@@ -98,6 +98,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.h2.Driver;
@@ -185,6 +186,7 @@ public class CascadeRemovalTest {
                             SshPairImpl.class,
                             VolumeImpl.class,
                             KubernetesRuntimeState.class,
+                            KubernetesRuntimeCommandImpl.class,
                             KubernetesMachineImpl.class,
                             KubernetesMachineImpl.MachineId.class,
                             KubernetesServerImpl.class,

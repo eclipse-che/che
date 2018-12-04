@@ -240,6 +240,11 @@ public final class DtoConverter {
       runtimeDto.setWarnings(
           runtime.getWarnings().stream().map(DtoConverter::asDto).collect(Collectors.toList()));
     }
+
+    if (runtime.getCommands() != null) {
+      runtimeDto.setCommands(
+          runtime.getCommands().stream().map(DtoConverter::asDto).collect(toList()));
+    }
     return runtimeDto;
   }
 

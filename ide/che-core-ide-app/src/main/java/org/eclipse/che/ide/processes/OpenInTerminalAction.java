@@ -40,7 +40,6 @@ import org.eclipse.che.ide.terminal.options.TerminalOptionsJso;
 @Singleton
 public class OpenInTerminalAction extends AbstractPerspectiveAction {
 
-  private CoreLocalizationConstant locale;
   private final ProcessesPanelPresenter processesPanelPresenter;
 
   interface Command extends SafeHtmlTemplates {
@@ -59,8 +58,6 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
         locale.openInTerminalAction(),
         null,
         machineResources.addTerminalIcon());
-    this.locale = locale;
-
     this.processesPanelPresenter = processesPanelPresenter;
   }
 
@@ -76,7 +73,7 @@ public class OpenInTerminalAction extends AbstractPerspectiveAction {
       final Container parent = resource.getParent();
       resource = parent;
     }
-    Path path = resource.getLocation().makeRelative();
+    Path path = appContext.get().getProjectsRoot().append(resource.getLocation());
     Command cmdTmpl = GWT.create(Command.class);
     String command = cmdTmpl.openInTerminalCommand(path.toString()).asString();
     processesPanelPresenter.newTerminal(TerminalOptionsJso.create().withCommand(command), true);

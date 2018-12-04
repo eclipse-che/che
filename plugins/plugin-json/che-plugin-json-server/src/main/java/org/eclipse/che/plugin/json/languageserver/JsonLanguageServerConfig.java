@@ -25,6 +25,7 @@ import org.eclipse.che.api.languageserver.DefaultInstanceProvider;
 import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.LanguageServerInitializedEvent;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
+import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.plugin.json.inject.JsonModule;
 import org.eclipse.lsp4j.jsonrpc.Endpoint;
 import org.eclipse.lsp4j.jsonrpc.services.ServiceEndpoints;
@@ -37,11 +38,14 @@ import org.eclipse.lsp4j.jsonrpc.services.ServiceEndpoints;
 public class JsonLanguageServerConfig implements LanguageServerConfig {
   private static final String REGEX = ".*\\.(json|bowerrc|jshintrc|jscsrc|eslintrc|babelrc)";
 
+  private final RootDirPathProvider rootDirPathProvider;
   private final EventService eventService;
   private final Path launchScript;
 
   @Inject
-  public JsonLanguageServerConfig(EventService eventService) {
+  public JsonLanguageServerConfig(
+      RootDirPathProvider rootDirPathProvider, EventService eventService) {
+    this.rootDirPathProvider = rootDirPathProvider;
     this.eventService = eventService;
 
     this.launchScript = Paths.get(System.getenv("HOME"), "che/ls-json/launch.sh");
@@ -113,5 +117,10 @@ public class JsonLanguageServerConfig implements LanguageServerConfig {
         return isSuccessfullyInstalled() ? null : "Launch script file does not exist";
       }
     };
+  }
+
+  @Override
+  public String getProjectsRoot() {
+    return rootDirPathProvider.get();
   }
 }
