@@ -162,15 +162,17 @@ public class DevfileService extends Service {
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response createFromWorkspace(@PathParam("key") String key)
-      throws NotFoundException, ServerException, BadRequestException {
+      throws NotFoundException, ServerException, BadRequestException, ConflictException {
     validateKey(key);
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-    Devfile workspaceDevFile = devfileConverter.workspaceToDevFile(workspace.getConfig());
-    // Write object as YAML
     try {
+      Devfile workspaceDevFile = devfileConverter.workspaceToDevFile(workspace.getConfig());
+      // Write object as YAML
       return Response.ok().entity(objectMapper.writeValueAsString(workspaceDevFile)).build();
     } catch (JsonProcessingException e) {
       throw new ServerException(e.getMessage(), e);
+    } catch (WorkspaceExportException e) {
+      throw new ConflictException(e.getMessage());
     }
   }
 

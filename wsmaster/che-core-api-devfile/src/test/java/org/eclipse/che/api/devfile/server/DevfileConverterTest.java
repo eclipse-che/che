@@ -21,6 +21,7 @@ import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Tool;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.testng.annotations.Test;
@@ -119,5 +120,19 @@ public class DevfileConverterTest {
       assertEquals(tool.getId(), expectedTool.getId());
       assertEquals(tool.getType(), expectedTool.getType());
     }
+  }
+
+  @Test(
+      expectedExceptions = WorkspaceExportException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace .* cannot be converted to devfile since it is contains environments \\(which have no equivalent in devfile model\\)")
+  public void shouldThrowExceptionWhenWorkspaceHasEnvironments() throws Exception {
+    String jsonContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
+    WorkspaceConfigImpl workspaceConfig =
+        JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
+    workspaceConfig.getEnvironments().put("env1", new EnvironmentImpl());
+
+    devfileConverter.workspaceToDevFile(workspaceConfig);
   }
 }

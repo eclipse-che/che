@@ -42,11 +42,13 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 /** Helps to convert devfile into workspace config and back. */
 public class DevfileConverter {
 
-  public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) {
+  public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) throws WorkspaceExportException {
 
     if (!isNullOrEmpty(wsConfig.getDefaultEnv()) || !wsConfig.getEnvironments().isEmpty()) {
-      //  throw new UnsupportedOperationException("Given workspace cannot be converted to devfile
-      // since it is contains environments.");
+      throw new WorkspaceExportException(
+          format(
+              "Workspace %s cannot be converted to devfile since it is contains environments (which have no equivalent in devfile model)",
+              wsConfig.getName()));
     }
 
     Devfile devFile =
@@ -114,6 +116,9 @@ public class DevfileConverter {
         attributes.put(EDITOR_WORKSPACE_ATTRIBUTE_NAME, tool.getId());
       } else if (tool.getType().equals("chePlugin")) {
         pluginsStringJoiner.add(tool.getId());
+      } else {
+        throw new DevfileFormatException(
+            format("Unsupported tool %s type provided: %s", tool.getName(), tool.getType()));
       }
       toolIdToNameMappingStringJoiner.add(tool.getId() + "=" + tool.getName());
     }
