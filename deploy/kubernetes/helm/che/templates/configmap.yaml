@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2018 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -90,3 +90,10 @@ data:
   CHE_CORS_ALLOW__CREDENTIALS: "true"
   CHE_CORS_ALLOWED__ORIGINS: "*"
   CHE_WSAGENT_CORS_ALLOWED__ORIGINS: ""
+  CHE_TRACING_ENABLED: {{ .Values.global.tracingEnabled | quote }}
+  JAEGER_ENDPOINT: "http://jaeger-collector:14268/api/traces"
+  JAEGER_SERVICE_NAME: "che-server"
+  JAEGER_SAMPLER_MANAGER_HOST_PORT: "jaeger:5778"
+  JAEGER_SAMPLER_TYPE: "const"
+  JAEGER_SAMPLER_PARAM: "1"
+  JAEGER_REPORTER_MAX_QUEUE_SIZE: "10000"
