@@ -41,13 +41,19 @@ import (
 )
 
 var (
-	defaultUpgrader = &websocket.Upgrader{
+	// default upgrader that is used for upgrading http connection to WebSocket
+	// may be changed by client if custom settings are needed
+	DefaultUpgrader = &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
 	}
+
+	// default dialer that is used for WebSocket connection establishing
+	// may be changed by client if custom settings are needed
+    DefaultDialer = websocket.DefaultDialer
 )
 
 // Dial establishes a new client WebSocket connection.
@@ -59,7 +65,7 @@ func Dial(url string, token string) (*NativeConnAdapter, error) {
 		headers = make(map[string][]string)
 		headers.Add("Authorization", token)
 	}
-	conn, _, err := websocket.DefaultDialer.Dial(url, headers)
+	conn, _, err := DefaultDialer.Dial(url, headers)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +74,7 @@ func Dial(url string, token string) (*NativeConnAdapter, error) {
 
 // Upgrade upgrades http connection to WebSocket connection.
 func Upgrade(w http.ResponseWriter, r *http.Request) (*NativeConnAdapter, error) {
-	conn, err := defaultUpgrader.Upgrade(w, r, nil)
+	conn, err := DefaultUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return nil, err
 	}
