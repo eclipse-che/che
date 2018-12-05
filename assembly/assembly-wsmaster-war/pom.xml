@@ -311,6 +311,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
+            <artifactId>che-multiuser-permission-devfile</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-permission-factory</artifactId>
         </dependency>
         <dependency>
