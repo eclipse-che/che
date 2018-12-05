@@ -37,10 +37,12 @@ import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.openshift.Warnings;
 
 /**
  * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
@@ -48,23 +50,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  * @author Sergii Leshchenko
  */
 public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<OpenShiftEnvironment> {
-
-  static final int ROUTE_IGNORED_WARNING_CODE = 5100;
-  static final String ROUTES_IGNORED_WARNING_MESSAGE =
-      "Routes specified in OpenShift recipe are ignored. "
-          + "To expose ports please define servers in machine configuration.";
-
-  static final int PVC_IGNORED_WARNING_CODE = 4101;
-  static final String PVC_IGNORED_WARNING_MESSAGE =
-      "Persistent volume claims specified in OpenShift recipe are ignored.";
-
-  static final int SECRET_IGNORED_WARNING_CODE = 4102;
-  static final String SECRET_IGNORED_WARNING_MESSAGE =
-      "Secrets specified in OpenShift recipe are ignored.";
-
-  static final int CONFIG_MAP_IGNORED_WARNING_CODE = 4103;
-  static final String CONFIG_MAP_IGNORED_WARNING_MESSAGE =
-      "Config maps specified in Kubernetes recipe are ignored.";
 
   private final OpenShiftClientFactory clientFactory;
   private final KubernetesEnvironmentValidator envValidator;
@@ -86,10 +71,11 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
   @Override
   protected OpenShiftEnvironment doCreate(
-      InternalRecipe recipe,
+      @Nullable InternalRecipe recipe,
       Map<String, InternalMachineConfig> machines,
       List<Warning> sourceWarnings)
       throws InfrastructureException, ValidationException {
+    checkNotNull(recipe, "Null recipe is not supported by openshift environment factory");
     List<Warning> warnings = new ArrayList<>();
     if (sourceWarnings != null) {
       warnings.addAll(sourceWarnings);
@@ -144,20 +130,27 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     }
 
     if (isAnyRoutePresent) {
-      warnings.add(new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
+      warnings.add(
+          new WarningImpl(
+              Warnings.ROUTE_IGNORED_WARNING_CODE, Warnings.ROUTES_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnyPVCPresent) {
-      warnings.add(new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
+      warnings.add(
+          new WarningImpl(Warnings.PVC_IGNORED_WARNING_CODE, Warnings.PVC_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnySecretPresent) {
-      warnings.add(new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
+      warnings.add(
+          new WarningImpl(
+              Warnings.SECRET_IGNORED_WARNING_CODE, Warnings.SECRET_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnyConfigMapPresent) {
       warnings.add(
-          new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
+          new WarningImpl(
+              Warnings.CONFIG_MAP_IGNORED_WARNING_CODE,
+              Warnings.CONFIG_MAP_IGNORED_WARNING_MESSAGE));
     }
 
     addRamAttributes(machines, pods.values());

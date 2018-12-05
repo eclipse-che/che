@@ -57,6 +57,10 @@ public class ContextBasedRuntimeInfoProvider implements RuntimeInfoProvider {
       return emptyList();
     }
 
+    if (workspace.getConfig().getDefaultEnv() == null) {
+      return emptyList();
+    }
+
     // map with servers where probably port is set
     MachineConfigImpl preConfiguredRuntime =
         workspace

@@ -162,6 +162,9 @@ public class WorkspaceLoadingTrackerImpl
       EnvironmentImpl defaultEnvironment =
           appContext.getWorkspace().getConfig().getEnvironments().get(defaultEnvironmentName);
 
+      if (defaultEnvironment == null) {
+        return;
+      }
       Map<String, MachineConfigImpl> environmentMachines = defaultEnvironment.getMachines();
       for (final String machineName : environmentMachines.keySet()) {
         MachineConfigImpl machineConfig = environmentMachines.get(machineName);
@@ -178,8 +181,10 @@ public class WorkspaceLoadingTrackerImpl
     EnvironmentImpl defaultEnvironment =
         appContext.getWorkspace().getConfig().getEnvironments().get(defaultEnvironmentName);
 
+    if (defaultEnvironment == null) {
+      return;
+    }
     Map<String, MachineConfigImpl> machines = defaultEnvironment.getMachines();
-
     for (final String machineName : machines.keySet()) {
       MachineConfigImpl machineConfig = machines.get(machineName);
       view.addMachine(machineName);
@@ -219,6 +224,9 @@ public class WorkspaceLoadingTrackerImpl
     EnvironmentImpl defaultEnvironment =
         appContext.getWorkspace().getConfig().getEnvironments().get(defaultEnvironmentName);
 
+    if (defaultEnvironment == null) {
+      return;
+    }
     Map<String, MachineConfigImpl> machines = defaultEnvironment.getMachines();
     for (final String machineName : machines.keySet()) {
       MachineConfigImpl machineConfig = machines.get(machineName);

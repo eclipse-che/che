@@ -98,6 +98,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl;
 import org.h2.Driver;
@@ -185,7 +186,7 @@ public class CascadeRemovalTest {
                             SshPairImpl.class,
                             VolumeImpl.class,
                             KubernetesRuntimeState.class,
-                            KubernetesRuntimeState.RuntimeId.class,
+                            KubernetesRuntimeCommandImpl.class,
                             KubernetesMachineImpl.class,
                             KubernetesMachineImpl.MachineId.class,
                             KubernetesServerImpl.class,
@@ -238,7 +239,7 @@ public class CascadeRemovalTest {
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
                 bind(WorkspaceSharedPool.class)
-                    .toInstance(new WorkspaceSharedPool("cached", null, null));
+                    .toInstance(new WorkspaceSharedPool("cached", null, null, null));
               }
             });
 

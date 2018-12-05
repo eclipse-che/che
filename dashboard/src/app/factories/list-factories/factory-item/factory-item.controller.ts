@@ -62,7 +62,7 @@ export class FactoryItemController {
    * @returns {string} display value of memory limit
    */
   getMemoryLimit(): string {
-    if (!this.factory.workspace) {
+    if (!this.factory.workspace || !this.factory.workspace.defaultEnv) {
       return '-';
     }
 

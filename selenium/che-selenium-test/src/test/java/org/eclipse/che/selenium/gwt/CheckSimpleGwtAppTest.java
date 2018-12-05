@@ -75,7 +75,6 @@ public class CheckSimpleGwtAppTest {
 
     WorkspaceConfigDto workspace =
         workspaceDtoDeserializer.deserializeWorkspaceTemplate(UBUNTU_JDK8);
-
     workspace
         .getEnvironments()
         .get("replaced_name")

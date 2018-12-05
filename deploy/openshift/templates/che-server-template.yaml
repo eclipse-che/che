@@ -38,6 +38,10 @@ objects:
       port: 8080
       protocol: TCP
       targetPort: 8080
+    - name: metrics
+      port: 8087
+      protocol: TCP
+      targetPort: 8087
     selector:
       app: che
 - apiVersion: v1
@@ -48,6 +52,8 @@ objects:
     to:
       kind: Service
       name: che-host
+    port:
+      targetPort: http
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -153,6 +159,16 @@ objects:
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
+          - name: CHE_METRICS_ENABLED
+            value: "false"
+          - name: CHE_CORS_ENABLED
+            value: "${CHE_CORS_ENABLED}"
+          - name: CHE_CORS_ALLOW__CREDENTIALS
+            value: "${CHE_CORS_ALLOW__CREDENTIALS}"
+          - name: CHE_CORS_ALLOWED__ORIGINS
+            value: "${CHE_CORS_ALLOWED__ORIGINS}"
+          - name: CHE_WSAGENT_CORS_ALLOWED__ORIGINS
+            value: "${CHE_WSAGENT_CORS_ALLOWED__ORIGINS}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -175,6 +191,9 @@ objects:
           ports:
           - containerPort: 8080
             name: http
+            protocol: TCP
+          - containerPort: 8087
+            name: metrics
             protocol: TCP
           - containerPort: 8000
             name: http-debug
@@ -298,6 +317,22 @@ parameters:
   displayName: Eclipse Che tracing
   description: Enable or disable tracing in Eclipse Che
   value: 'false'
+- name: CHE_CORS_ENABLED
+  displayName: CORS filter for WS Master
+  description: Enable or disable CORS filter for Eclipse Che WS Master
+  value: 'true'
+- name: CHE_CORS_ALLOW__CREDENTIALS
+  displayName: CORS credentials support for WS Master
+  description: Allow requests with credentials for CORS filter
+  value: 'true'
+- name: CHE_CORS_ALLOWED__ORIGINS
+  displayName: CORS allowed origins for WS Master
+  description: defines allowed origins in requests for CORS filter
+  value: '*'
+- name: CHE_WSAGENT_CORS_ALLOWED__ORIGINS
+  displayName: CORS allowed origins for WS Agent
+  description: defines allowed origins in requests for CORS filter, that will be propagated as corresponding env variable on WS Agent. Only if its value is not null or empty
+  value: ''
 labels:
   app: che
   template: che

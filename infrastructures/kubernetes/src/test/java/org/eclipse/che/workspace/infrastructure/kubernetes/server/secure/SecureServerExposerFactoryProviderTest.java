@@ -12,9 +12,9 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.UNKNOWN_SECURE_SERVER_EXPOSER_CONFIGURED_IN_WS_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.UNKNOWN_EXPOSER_ERROR_TEMPLATE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.UNKNOWN_SECURE_SERVER_EXPOSER_CONFIGURED_IN_WS;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
@@ -83,7 +83,7 @@ public class SecureServerExposerFactoryProviderTest {
         ImmutableMap.of(SECURE_EXPOSER_IMPL_PROPERTY, NON_EXISTING_EXPOSER));
     WarningImpl expectedWarning =
         new WarningImpl(
-            UNKNOWN_SECURE_SERVER_EXPOSER_CONFIGURED_IN_WS,
+            UNKNOWN_SECURE_SERVER_EXPOSER_CONFIGURED_IN_WS_WARNING_CODE,
             format(
                 UNKNOWN_EXPOSER_ERROR_TEMPLATE,
                 NON_EXISTING_EXPOSER,

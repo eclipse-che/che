@@ -44,6 +44,7 @@ class RegistryContainer {
   final Registry<Set<PathMatcher>> pathMatcherRegistry = new Registry<>();
   final Registry<Set<Pattern>> patternRegistry = new Registry<>();
   final Registry<String> languageFilterRegistry = new Registry<>();
+  final Registry<String> projectsRootRegistry = new Registry<>();
 
   /**
    * Simple parametrized registry class backed by map-based internal registry, where the key is the

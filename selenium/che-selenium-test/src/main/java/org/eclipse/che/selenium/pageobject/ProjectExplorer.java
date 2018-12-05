@@ -550,7 +550,8 @@ public class ProjectExplorer {
           waitItemIsSelected(path);
         },
         (EXPECTED_MESS_IN_CONSOLE_SEC + ELEMENT_TIMEOUT_SEC) * 2,
-        NoSuchElementException.class);
+        NoSuchElementException.class,
+        TimeoutException.class);
 
     seleniumWebDriverHelper.waitNoExceptions(
         () -> {
@@ -621,6 +622,18 @@ public class ProjectExplorer {
    * @param path item's path in format: 'Test/src/pom.xml'
    */
   public void waitDisappearItemByPath(String path) {
+    seleniumWebDriverHelper.waitInvisibility(
+        By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), ELEMENT_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits invisibility during {@code timeout} of the item with specified {@code path} in project
+   * explorer.
+   *
+   * @param path item's path in format: 'Test/src/pom.xml'
+   * @param timeout time in seconds for waiting success condition
+   */
+  public void waitDisappearItemByPath(String path, int timeout) {
     seleniumWebDriverHelper.waitInvisibility(
         By.xpath(format(PROJECT_EXPLORER_ITEM_TEMPLATE, path)), ELEMENT_TIMEOUT_SEC);
   }

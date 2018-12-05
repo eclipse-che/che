@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -56,6 +57,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeResult.ProbeStatus;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbes;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -107,6 +109,7 @@ public class DockerInternalRuntimeTest {
   @Mock private DockerMachine dockerMachine;
   @Mock private ParallelDockerImagesBuilderFactory dockerImagesBuilderFactory;
   @Mock private ParallelDockerImagesBuilder dockerImagesBuilder;
+  private DockerEnvironment environment;
 
   @Captor private ArgumentCaptor<Consumer<ProbeResult>> probeResultConsumerCaptor;
   @Captor private ArgumentCaptor<MachineStatusEvent> eventCaptor;
@@ -125,7 +128,7 @@ public class DockerInternalRuntimeTest {
 
     ImmutableMap<String, InternalMachineConfig> machines =
         ImmutableMap.of(DEV_MACHINE, internalMachineCfg1, DB_MACHINE, internalMachineCfg2);
-    final DockerEnvironment environment = new DockerEnvironment(null, machines, emptyList());
+    environment = new DockerEnvironment(null, machines, emptyList());
     environment.setContainers(
         Maps.newLinkedHashMap(ImmutableMap.of(DEV_MACHINE, config1, DB_MACHINE, config2)));
 
@@ -144,7 +147,6 @@ public class DockerInternalRuntimeTest {
     dockerRuntime =
         new DockerInternalRuntime(
             runtimeContext,
-            emptyList(),
             mock(ExternalIpURLRewriter.class),
             networks,
             starter,
@@ -306,6 +308,24 @@ public class DockerInternalRuntimeTest {
               any());
       throw ex;
     }
+  }
+
+  @Test
+  public void shouldReturnEnvironmentCommands() throws Exception {
+    // given
+    CommandImpl envCommand = new CommandImpl("test", "Hello World", "custom");
+    environment.getCommands().add(envCommand);
+
+    // when
+    List<? extends Command> commands = dockerRuntime.getCommands();
+
+    // then
+    assertEquals(commands.size(), 1);
+    Command runtimeCommand = commands.get(0);
+    assertEquals(runtimeCommand.getName(), envCommand.getName());
+    assertEquals(runtimeCommand.getType(), envCommand.getType());
+    assertEquals(runtimeCommand.getCommandLine(), envCommand.getCommandLine());
+    assertEquals(runtimeCommand.getAttributes(), envCommand.getAttributes());
   }
 
   @Test

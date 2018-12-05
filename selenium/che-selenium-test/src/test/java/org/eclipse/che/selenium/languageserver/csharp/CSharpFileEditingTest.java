@@ -99,7 +99,7 @@ public class CSharpFileEditingTest {
     }
   }
 
-  public void checkCodeValidation() {
+  private void checkCodeValidation() {
     editor.goToCursorPositionVisible(24, 12);
     for (int i = 0; i < 9; i++) {
       editor.typeTextIntoEditor(BACK_SPACE.toString());

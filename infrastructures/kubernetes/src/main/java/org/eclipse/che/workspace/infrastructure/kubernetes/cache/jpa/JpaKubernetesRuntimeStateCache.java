@@ -12,8 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 
 import com.google.inject.persist.Transactional;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -24,9 +26,9 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
@@ -35,8 +37,8 @@ import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.eclipse.che.core.db.jpa.DuplicateKeyException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.BeforeKubernetesRuntimeStateRemovedEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
+import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeCommandImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
-import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState.RuntimeId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,18 +90,24 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
 
   @Transactional(rollbackOn = InfrastructureException.class)
   @Override
-  public WorkspaceStatus getStatus(RuntimeIdentity id) throws InfrastructureException {
+  public Optional<WorkspaceStatus> getStatus(RuntimeIdentity id) throws InfrastructureException {
     try {
       Optional<KubernetesRuntimeState> runtimeStateOpt = get(id);
-
-      if (!runtimeStateOpt.isPresent()) {
-        throw new InfrastructureException(
-            "Runtime state for workspace with id '" + id.getWorkspaceId() + "' was not found");
-      }
-
-      return runtimeStateOpt.get().getStatus();
+      return runtimeStateOpt.map(KubernetesRuntimeState::getStatus);
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getMessage(), x);
+    }
+  }
+
+  @Override
+  public List<? extends Command> getCommands(RuntimeIdentity runtimeId)
+      throws InfrastructureException {
+    Optional<KubernetesRuntimeState> k8sRuntimeState = get(runtimeId);
+    if (k8sRuntimeState.isPresent()) {
+      return k8sRuntimeState.get().getCommands();
+    } else {
+      // runtime is not started yet
+      return emptyList();
     }
   }
 
@@ -109,7 +117,7 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
       throws InfrastructureException {
     try {
       return Optional.ofNullable(
-          managerProvider.get().find(KubernetesRuntimeState.class, new RuntimeId(runtimeId)));
+          managerProvider.get().find(KubernetesRuntimeState.class, runtimeId.getWorkspaceId()));
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getMessage(), x);
     }
@@ -140,6 +148,18 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   }
 
   @Override
+  public void updateCommands(RuntimeIdentity identity, List<? extends Command> commands)
+      throws InfrastructureException {
+    try {
+      doUpdateCommands(
+          identity,
+          commands.stream().map(KubernetesRuntimeCommandImpl::new).collect(Collectors.toList()));
+    } catch (RuntimeException e) {
+      throw new InfrastructureException(e.getMessage(), e);
+    }
+  }
+
+  @Override
   public void remove(RuntimeIdentity runtimeId) throws InfrastructureException {
     try {
       doRemove(runtimeId);
@@ -152,15 +172,8 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
   protected Optional<KubernetesRuntimeState> find(String workspaceId)
       throws InfrastructureException {
     try {
-      KubernetesRuntimeState queried =
-          managerProvider
-              .get()
-              .createNamedQuery("KubernetesRuntime.getByWorkspaceId", KubernetesRuntimeState.class)
-              .setParameter("workspaceId", workspaceId)
-              .getSingleResult();
-      return Optional.of(queried);
-    } catch (NoResultException e) {
-      return Optional.empty();
+      return Optional.ofNullable(
+          managerProvider.get().find(KubernetesRuntimeState.class, workspaceId));
     } catch (RuntimeException x) {
       throw new InfrastructureException(x.getMessage(), x);
     }
@@ -171,7 +184,7 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     EntityManager em = managerProvider.get();
 
     KubernetesRuntimeState runtime =
-        em.find(KubernetesRuntimeState.class, new RuntimeId(runtimeIdentity));
+        em.find(KubernetesRuntimeState.class, runtimeIdentity.getWorkspaceId());
 
     if (runtime != null) {
       eventService
@@ -220,6 +233,21 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
     entityManager.flush();
   }
 
+  @Transactional(rollbackOn = {RuntimeException.class, InfrastructureException.class})
+  protected void doUpdateCommands(RuntimeIdentity id, List<KubernetesRuntimeCommandImpl> commands)
+      throws InfrastructureException {
+    Optional<KubernetesRuntimeState> runtimeStateOpt = get(id);
+
+    if (!runtimeStateOpt.isPresent()) {
+      throw new InfrastructureException(
+          "Runtime state for workspace with id '" + id.getWorkspaceId() + "' was not found");
+    }
+
+    runtimeStateOpt.get().setCommands(commands);
+
+    managerProvider.get().flush();
+  }
+
   @Transactional
   protected void doPutIfAbsent(KubernetesRuntimeState runtimeState) {
     EntityManager em = managerProvider.get();
@@ -245,7 +273,7 @@ public class JpaKubernetesRuntimeStateCache implements KubernetesRuntimeStateCac
           k8sRuntimes.find(event.getWorkspace().getId());
       if (k8sRuntimeStateOpt.isPresent()) {
         KubernetesRuntimeState existingK8sRuntimeState = k8sRuntimeStateOpt.get();
-        RuntimeId runtimeId = existingK8sRuntimeState.getRuntimeId();
+        RuntimeIdentity runtimeId = existingK8sRuntimeState.getRuntimeId();
 
         // It is not normal case when non STOPPED workspace is going to be removed.
         // Need to log error to investigate why it may happen

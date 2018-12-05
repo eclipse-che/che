@@ -67,7 +67,7 @@ public class CommandImpl implements Command {
     this.name = command.getName();
     this.commandLine = command.getCommandLine();
     this.type = command.getType();
-    this.attributes = command.getAttributes();
+    this.attributes = new HashMap<>(command.getAttributes());
   }
 
   @Override
