@@ -252,6 +252,7 @@ parse_args() {
     --destroy - destroy ocp cluster
     --deploy-che - deploy che to ocp
     --project | -p - OpenShift namespace to deploy Che (defaults to eclipse-che). Example: --project=myproject
+    --secure | -s - Deploy Che with SSL enabled
     --multiuser - deploy Che in multiuser mode
     --postgres-debug - run PostgreSQL DB with Debug logging
     --no-pull - IfNotPresent pull policy for Che server deployment
@@ -338,6 +339,10 @@ parse_args() {
            --image-che=*)
                export CHE_IMAGE_REPO=$(echo "${i#*=}" | sed 's/:.*//')
                export CHE_IMAGE_TAG=$(echo "${i#*=}" | sed 's/.*://')
+               shift
+           ;;
+           -s | --secure)
+               export ENABLE_SSL=true
                shift
            ;;
            --remove-che)
