@@ -36,10 +36,10 @@ import org.apache.catalina.filters.CorsFilter;
 /**
  * The special filter which provides filtering requests in according to settings which are set to
  * {@link CorsFilter}. More information about filter and parameters you can find in documentation.
- * The class contains business logic which allows to get allowed origin from any endpoint as it is
- * used by export workspace.
+ * The class contains business logic which allows to get allowed origin from any endpoint.
  *
  * @author Dmitry Shnurenko
+ * @author Mykhailo Kuznietsov
  */
 @Singleton
 public class CheCorsFilter implements Filter {
@@ -99,7 +99,7 @@ public class CheCorsFilter implements Filter {
 
     @Override
     public ServletContext getServletContext() {
-      throw new UnsupportedOperationException("The method does not supported in " + getClass());
+      throw new UnsupportedOperationException("The method is not supported in " + getClass());
     }
 
     @Override
@@ -109,7 +109,7 @@ public class CheCorsFilter implements Filter {
 
     @Override
     public Enumeration<String> getInitParameterNames() {
-      throw new UnsupportedOperationException("The method does not supported in " + getClass());
+      throw new UnsupportedOperationException("The method is not supported in " + getClass());
     }
   }
 }
