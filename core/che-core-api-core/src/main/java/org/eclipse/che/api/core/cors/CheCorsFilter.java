@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.core.cors;
 
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;

@@ -12,7 +12,6 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
-import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
