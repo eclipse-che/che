@@ -13,7 +13,8 @@
 #
 FROM node:8.12.0-alpine
 
-RUN apk add --update --no-cache curl jq expect make gcc g++ python git bash
+RUN apk add --update --no-cache curl jq expect make gcc g++ python git bash openssh openssh-keygen && \
+    echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.conf
 
 ENV HOME=/home/theia-dev
 WORKDIR ${HOME}
@@ -22,14 +23,6 @@ WORKDIR ${HOME}
 RUN yarn global add @eclipse-che/theia-generator@0.0.1-1543478099
 # change permissions
 RUN find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; 2>log.txt
-
-RUN apk update && \
-    apk add --no-cache \
-    openssh-keygen
-RUN apk add --no-cache openssh
-
-# Set up more file watcher
-RUN echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.conf
 
 EXPOSE 3000 3030
 
