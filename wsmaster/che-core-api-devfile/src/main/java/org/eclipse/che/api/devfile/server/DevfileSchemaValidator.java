@@ -36,14 +36,13 @@ public class DevfileSchemaValidator {
   private DevfileSchemaProvider schemaProvider;
 
   @Inject
-  public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) throws IOException {
+  DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
     this.schemaProvider = schemaProvider;
     this.validator = JsonSchemaFactory.byDefault().getValidator();
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
 
-  public JsonNode validateBySchema(String yamlContent, boolean verbose)
-      throws DevfileFormatException {
+  JsonNode validateBySchema(String yamlContent, boolean verbose) throws DevfileFormatException {
     ProcessingReport report;
     JsonNode data;
     try {

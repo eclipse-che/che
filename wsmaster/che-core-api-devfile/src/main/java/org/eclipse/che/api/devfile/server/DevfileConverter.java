@@ -17,8 +17,8 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_WORKSPACE_ATTRIBUTE_NAME;
-import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_WORKSPACE_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public class DevfileConverter {
     // Manage tools
     List<Tool> tools = new ArrayList<>();
     for (Map.Entry<String, String> entry : wsConfig.getAttributes().entrySet()) {
-      if (entry.getKey().equals(EDITOR_WORKSPACE_ATTRIBUTE_NAME)) {
+      if (entry.getKey().equals(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE)) {
         String editorId = entry.getValue();
         Tool editorTool =
             new Tool()
@@ -80,7 +80,7 @@ public class DevfileConverter {
                 .withId(editorId)
                 .withName(toolsIdToName.getOrDefault(editorId, editorId));
         tools.add(editorTool);
-      } else if (entry.getKey().equals(PLUGINS_WORKSPACE_ATTRIBUTE_NAME)) {
+      } else if (entry.getKey().equals(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE)) {
         for (String pluginId : entry.getValue().split(",")) {
           Tool pluginTool =
               new Tool()
@@ -112,18 +112,21 @@ public class DevfileConverter {
     StringJoiner pluginsStringJoiner = new StringJoiner(",");
     StringJoiner toolIdToNameMappingStringJoiner = new StringJoiner(",");
     for (Tool tool : devFile.getTools()) {
-      if (tool.getType().equals("cheEditor")) {
-        attributes.put(EDITOR_WORKSPACE_ATTRIBUTE_NAME, tool.getId());
-      } else if (tool.getType().equals("chePlugin")) {
-        pluginsStringJoiner.add(tool.getId());
-      } else {
-        throw new DevfileFormatException(
-            format("Unsupported tool %s type provided: %s", tool.getName(), tool.getType()));
+      switch (tool.getType()) {
+        case "cheEditor":
+          attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, tool.getId());
+          break;
+        case "chePlugin":
+          pluginsStringJoiner.add(tool.getId());
+          break;
+        default:
+          throw new DevfileFormatException(
+              format("Unsupported tool %s type provided: %s", tool.getName(), tool.getType()));
       }
       toolIdToNameMappingStringJoiner.add(tool.getId() + "=" + tool.getName());
     }
     if (pluginsStringJoiner.length() > 0) {
-      attributes.put(PLUGINS_WORKSPACE_ATTRIBUTE_NAME, pluginsStringJoiner.toString());
+      attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, pluginsStringJoiner.toString());
     }
     if (toolIdToNameMappingStringJoiner.length() > 0) {
       attributes.put(ALIASES_WORKSPACE_ATTRIBUTE_NAME, toolIdToNameMappingStringJoiner.toString());

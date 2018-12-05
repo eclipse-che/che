@@ -22,11 +22,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Example;
+import io.swagger.annotations.ExampleProperty;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -118,7 +122,12 @@ public class DevfileService extends Service {
     @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
-  public Response createFromYaml(String data, @QueryParam("verbose") boolean verbose)
+  public Response createFromYaml(
+      String data,
+      @ApiParam(value = "Provide extended validation messages")
+          @DefaultValue("false")
+          @QueryParam("verbose")
+          boolean verbose)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
@@ -161,7 +170,17 @@ public class DevfileService extends Service {
     @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
-  public Response createFromWorkspace(@PathParam("key") String key)
+  public Response createFromWorkspace(
+      @ApiParam(
+              value = "Composite key",
+              examples =
+                  @Example({
+                    @ExampleProperty("workspace12345678"),
+                    @ExampleProperty("namespace/workspace_name"),
+                    @ExampleProperty("namespace_part_1/namespace_part_2/workspace_name")
+                  }))
+          @PathParam("key")
+          String key)
       throws NotFoundException, ServerException, BadRequestException, ConflictException {
     validateKey(key);
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
