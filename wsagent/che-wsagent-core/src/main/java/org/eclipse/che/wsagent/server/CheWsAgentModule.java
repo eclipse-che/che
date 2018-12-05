@@ -16,6 +16,7 @@ import com.google.inject.name.Names;
 import java.net.URI;
 import org.eclipse.che.MachineTokenProvider;
 import org.eclipse.che.UriApiEndpointProvider;
+import org.eclipse.che.api.core.cors.CheWsAgentCorsAllowedOriginsProvider;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.wsagent.server.appstate.AppStateService;
 
@@ -36,6 +37,10 @@ public class CheWsAgentModule extends AbstractModule {
     bind(String.class)
         .annotatedWith(Names.named("wsagent.endpoint"))
         .toProvider(WsAgentURLProvider.class);
+
+    bind(String.class)
+        .annotatedWith(Names.named("che.cors.allowed_origins"))
+        .toProvider(CheWsAgentCorsAllowedOriginsProvider.class);
 
     bind(AppStateService.class);
   }
