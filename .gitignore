@@ -76,3 +76,4 @@ docs/assets/imgs
 ##################
 plugins/plugin-terminal-ui/node_modules/
 plugins/plugin-terminal-ui/build/
+requirements.lock
