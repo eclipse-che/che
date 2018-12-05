@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-dockerfiles-parent</artifactId>
         <groupId>org.eclipse.che.dockerfiles</groupId>
-        <version>6.15.0-SNAPSHOT</version>
+        <version>6.15.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-dockerfiles-theia</artifactId>
