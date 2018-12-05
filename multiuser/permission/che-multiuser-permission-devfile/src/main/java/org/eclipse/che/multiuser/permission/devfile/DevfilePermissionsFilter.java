@@ -26,7 +26,7 @@ import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 import org.everrest.core.Filter;
 import org.everrest.core.resource.GenericResourceMethod;
 
-/** Restricts access to methods of {@link DevfileService} by users' permissions. */
+/** Restricts access to methods of {@link DevfileService} by user's permissions. */
 @Filter
 @Path("/devfile{path:(/.*)?}")
 public class DevfilePermissionsFilter extends CheMethodInvokerFilter {
@@ -50,8 +50,7 @@ public class DevfilePermissionsFilter extends CheMethodInvokerFilter {
       case "createFromWorkspace":
         {
           // check user has reading rights
-          String wsKey = ((String) arguments[0]);
-          checkPermissionsWithCompositeKey(wsKey);
+          checkPermissionsWithCompositeKey((String) arguments[0]);
           return;
         }
       default:
