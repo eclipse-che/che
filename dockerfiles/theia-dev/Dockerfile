@@ -13,8 +13,7 @@
 #
 FROM node:8.12.0-alpine
 
-RUN apk add --update --no-cache curl jq expect make gcc g++ python git bash openssh openssh-keygen && \
-    echo "fs.inotify.max_user_watches = 524288" > /etc/sysctl.conf
+RUN apk add --update --no-cache curl jq expect make gcc g++ python git bash openssh openssh-keygen
 
 ENV HOME=/home/theia-dev
 WORKDIR ${HOME}
