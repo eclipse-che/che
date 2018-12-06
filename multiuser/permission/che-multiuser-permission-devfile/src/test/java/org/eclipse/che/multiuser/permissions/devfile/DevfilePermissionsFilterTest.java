@@ -91,7 +91,7 @@ public class DevfilePermissionsFilterTest {
   }
 
   @Test
-  public void shouldReturnForbiddenWhenUserDoesHavePermissionsToReadWorkspaceOnGettingFactoryJson()
+  public void shouldReturnForbiddenWhenUserDoesHavePermissionsToExportWorkspaceToDevfile()
       throws Exception {
     doThrow(new ForbiddenException("User in not authorized"))
         .when(subject)
