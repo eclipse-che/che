@@ -57,9 +57,21 @@ public final class Constants {
    * Workspace#getAttributes}
    */
   public static final String CREATED_ATTRIBUTE_NAME = "created";
+
   /**
-   * Describes time when workspace was last updated or started. Should be set/read from {@link
-   * Workspace#getAttributes}
+   * Describes the time when the workspace was last started. Note that this is not reset when the
+   * workspace is stopped so that the last running time of a stopped workspace can be determined.
+   *
+   * <p>Should be set/read from {@link Workspace#getAttributes()}.
+   */
+  public static final String STARTED_ATTRIBUTE_NAME = "started";
+
+  /**
+   * Describes time when workspace was last updated. Before Che 6.16.0 this attribute also marked a
+   * workspace start, but since 6.16.0 this is tracked separately by the {@link
+   * #STARTED_ATTRIBUTE_NAME started} attribute.
+   *
+   * <p>Should be set/read from {@link Workspace#getAttributes}
    */
   public static final String UPDATED_ATTRIBUTE_NAME = "updated";
   /**
