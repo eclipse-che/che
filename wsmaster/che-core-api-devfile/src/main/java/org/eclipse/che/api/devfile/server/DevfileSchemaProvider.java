@@ -12,12 +12,12 @@
 package org.eclipse.che.api.devfile.server;
 
 import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
+import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import javax.inject.Singleton;
 
@@ -41,10 +41,6 @@ public class DevfileSchemaProvider {
   }
 
   private String loadFile() throws IOException {
-    InputStream is = getClass().getClassLoader().getResourceAsStream(SCHEMA_LOCATION);
-    if (is != null) {
-      return readAndCloseQuietly(is);
-    }
-    return null;
+    return readAndCloseQuietly(getResource(SCHEMA_LOCATION));
   }
 }
