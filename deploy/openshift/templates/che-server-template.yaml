@@ -149,11 +149,11 @@ objects:
             value: "${CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB}"
           - name: ROUTING_SUFFIX
             value: "${ROUTING_SUFFIX}"
-          - name: OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE
+          - name: CHE_SELF__SIGNED__CERT
             valueFrom:
               secretKeyRef:
                 key: ca.crt
-                name: openshift-identity-provider
+                name: self-signed-certificate
                 optional: true
           - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"

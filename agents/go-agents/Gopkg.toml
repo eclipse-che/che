@@ -1,6 +1,10 @@
 [[constraint]]
+ name = "github.com/eclipse/che-go-jsonrpc"
+ version = "=0.1.0"
+
+[[constraint]]
   name = "github.com/dgrijalva/jwt-go"
-  version = "3.1.0"
+  version = "=3.1.0"
 
 [[constraint]]
  name = "github.com/gorilla/websocket"
@@ -8,13 +12,11 @@
 
 [[constraint]]
  name = "github.com/kr/pty"
-  version = "1.1.2"
-
+ version = "=1.1.2"
 
 [[constraint]]
  name = "github.com/julienschmidt/httprouter"
  revision = "4563b0ba73e4db6c6423b60a26f3cadd2e9a1ec9"
-
 
 
 [prune]
