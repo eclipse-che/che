@@ -12,15 +12,13 @@
 package org.eclipse.che.api.devfile.server;
 
 import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
+import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.ref.SoftReference;
-import java.util.stream.Collectors;
 import javax.inject.Singleton;
 
 /** Loads a schema content and stores it in soft reference. */
@@ -43,12 +41,10 @@ public class DevfileSchemaProvider {
   }
 
   private String loadFile() throws IOException {
-    try (InputStream is = getClass().getClassLoader().getResourceAsStream(SCHEMA_LOCATION)) {
-      if (is != null) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        return reader.lines().collect(Collectors.joining(System.lineSeparator()));
-      }
-      return null;
+    InputStream is = getClass().getClassLoader().getResourceAsStream(SCHEMA_LOCATION);
+    if (is != null) {
+      return readAndCloseQuietly(is);
     }
+    return null;
   }
 }
