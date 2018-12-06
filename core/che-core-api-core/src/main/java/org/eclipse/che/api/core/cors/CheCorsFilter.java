@@ -21,6 +21,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import org.apache.catalina.filters.CorsFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The special filter which provides filtering requests in according to settings which are set to
@@ -32,6 +34,8 @@ import org.apache.catalina.filters.CorsFilter;
 @Singleton
 public class CheCorsFilter implements Filter {
 
+  private static final Logger LOG = LoggerFactory.getLogger(CheCorsFilter.class);
+
   private CorsFilter corsFilter;
 
   @Inject private CheCorsFilterConfig cheCorsFilterConfig;
@@ -41,6 +45,10 @@ public class CheCorsFilter implements Filter {
     corsFilter = new CorsFilter();
 
     corsFilter.init(cheCorsFilterConfig);
+    LOG.debug(
+        "CORS initialized with parameters: 'cors.support.credentials': '{}', 'cors.allowed.origins': '{}'",
+        cheCorsFilterConfig.getInitParameter("cors.support.credentials"),
+        cheCorsFilterConfig.getInitParameter("cors.allowed.origins"));
   }
 
   @Override
