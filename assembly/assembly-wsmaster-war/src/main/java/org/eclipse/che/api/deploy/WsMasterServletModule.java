@@ -12,6 +12,7 @@
 package org.eclipse.che.api.deploy;
 
 import com.google.inject.servlet.ServletModule;
+import org.eclipse.che.api.core.cors.CheCorsFilter;
 import org.eclipse.che.commons.logback.filter.RequestIdLoggerFilter;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.multiuser.keycloak.server.deploy.KeycloakServletModule;
@@ -26,6 +27,9 @@ public class WsMasterServletModule extends ServletModule {
 
     if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
       install(new org.eclipse.che.core.tracing.web.TracingWebModule());
+    }
+    if (isCheCorsEnabled()) {
+      filter("/*").through(CheCorsFilter.class);
     }
 
     filter("/*").through(RequestIdLoggerFilter.class);
@@ -42,6 +46,16 @@ public class WsMasterServletModule extends ServletModule {
 
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       install(new org.eclipse.che.core.metrics.MetricsServletModule());
+    }
+  }
+
+  private boolean isCheCorsEnabled() {
+    String cheCorsEnabledEnvVar = System.getenv("CHE_CORS_ENABLED");
+    if (cheCorsEnabledEnvVar == null) {
+      // by default CORS should be enabled
+      return true;
+    } else {
+      return Boolean.valueOf(cheCorsEnabledEnvVar);
     }
   }
 
