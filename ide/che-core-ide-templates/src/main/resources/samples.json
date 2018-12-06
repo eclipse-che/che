@@ -660,40 +660,13 @@
       "location": "https://github.com/che-samples/web-php-simple.git",
       "parameters": {}
     },
-    "commands": [
-      {
-        "name": "start apache",
-        "type": "custom",
-        "commandLine": "service apache2 start \n tail -f /var/log/apache2/access.log -f /var/log/apache2/error.log",
-        "attributes": {
-          "previewUrl": "${server.80/tcp}/${current.project.relpath}",
-          "goal": "Run"
-        }
-      },
-      {
-        "name": "stop apache",
-        "type": "custom",
-        "commandLine": "service apache2 stop",
-        "attributes": {
-          "previewUrl": "",
-          "goal": "Run"
-        }
-      },
-      {
-        "name": "restart apache",
-        "type": "custom",
-        "commandLine": "service apache2 restart",
-        "attributes": {
-          "previewUrl": "${server.80/tcp}/${current.project.relpath}",
-          "goal": "Run"
-        }
-      }
-    ],
+    "commands": [],
     "links": [],
     "category": "Samples",
     "tags": [
       "apache",
-      "php"
+      "php",
+      "centos-php"
     ]
   },
   {

@@ -127,11 +127,11 @@ spec:
               value: http
             - name: ROUTING_SUFFIX
               value: 172.19.20.234.nip.io
-            - name: OPENSHIFT_IDENTITY_PROVIDER_CERTIFICATE
+            - name: CHE_SELF__SIGNED__CERT
               valueFrom:
                 secretKeyRef:
                   key: ca.crt
-                  name: openshift-identity-provider
+                  name: self-signed-certificate
                   optional: true
             - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
               value: 'NULL'

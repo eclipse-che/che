@@ -53,6 +53,7 @@ HELP="
 --rolling - Rolling update strategy (Recreate is the default one). With Rolling strategy Che server pvc and volume aren't created
 --debug - Deploy Che in a debug mode, create and expose debug route
 --image-che - Override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
+--secure | -s - Deploy Che with SSL enabled
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
@@ -460,7 +461,7 @@ ${CHE_VAR_ARRAY}"
         $OC_BINARY login -u "system:admin" > /dev/null
         KEYCLOAK_ROUTE=$($OC_BINARY get route/keycloak --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
         $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
-          -p REDIRECT_URI="http://${KEYCLOAK_ROUTE}/auth/realms/che/broker/${OCP_IDENTITY_PROVIDER_ID}/endpoint" \
+          -p REDIRECT_URI="${HTTP_PROTOCOL}://${KEYCLOAK_ROUTE}/auth/realms/che/broker/${OCP_IDENTITY_PROVIDER_ID}/endpoint" \
           -p OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID} \
           -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET}
 

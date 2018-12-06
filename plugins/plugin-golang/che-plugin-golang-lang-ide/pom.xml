@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-golang-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.15.0-SNAPSHOT</version>
+        <version>6.16.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-golang-lang-ide</artifactId>
     <packaging>gwt-lib</packaging>
@@ -33,6 +33,10 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-gwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-api</artifactId>
         </dependency>
         <dependency>
@@ -43,6 +47,14 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-golang-lang-shared</artifactId>
             <classifier>sources</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-languageserver-ide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.lsp4j</groupId>
+            <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>

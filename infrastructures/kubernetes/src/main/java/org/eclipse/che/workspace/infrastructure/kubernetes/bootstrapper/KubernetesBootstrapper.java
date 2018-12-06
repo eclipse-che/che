@@ -105,6 +105,10 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     injectBootstrapper();
 
     startSynchronizer.checkFailure();
+    LOG.debug(
+        "Bootstrapping {}:{}. Launching bootstrapper process",
+        runtimeIdentity,
+        kubernetesMachine.getName());
     exec(
         "sh",
         "-c",
@@ -158,6 +162,10 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     exec(
         outputConsumer,
         "curl",
+        // -f, --fail          Fail silently (no output at all) on HTTP errors
+        // -s, --silent        Silent mode
+        // -S, --show-error    Show error even when -s is used
+        // -o, --output <file> Write to file instead of stdout
         "-fsSo",
         BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE,
         bootstrapperBinaryUrl);
