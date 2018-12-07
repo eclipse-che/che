@@ -21,7 +21,6 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.Logs
 import com.google.inject.Inject;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +39,7 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
@@ -128,7 +128,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     String commonPVCName = getCommonPVCName(identity);
     final PersistentVolumeClaim pvc = newPVC(commonPVCName, pvcAccessMode, pvcQuantity);
     k8sEnv.getPersistentVolumeClaims().put(commonPVCName, pvc);
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (PodData pod : k8sEnv.getPodData().values()) {
       PodSpec podSpec = pod.getSpec();
       List<Container> containers = new ArrayList<>();
       containers.addAll(podSpec.getContainers());
@@ -198,7 +198,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       String pvcName,
       String workspaceId,
       Set<String> subPaths,
-      Pod pod,
+      PodData pod,
       Container container,
       Map<String, Volume> volumes) {
     if (volumes.isEmpty()) {

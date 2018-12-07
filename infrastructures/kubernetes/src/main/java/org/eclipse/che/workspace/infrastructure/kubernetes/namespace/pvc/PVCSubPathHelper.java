@@ -136,7 +136,7 @@ public class PVCSubPathHelper {
     final String podName = jobName + '-' + workspaceId;
     final String[] command = buildCommand(commandBase, arguments);
     final Pod pod = newPod(podName, command);
-    securityContextProvisioner.provision(pod);
+    securityContextProvisioner.provision(pod.getSpec());
 
     KubernetesDeployments deployments = null;
     try {

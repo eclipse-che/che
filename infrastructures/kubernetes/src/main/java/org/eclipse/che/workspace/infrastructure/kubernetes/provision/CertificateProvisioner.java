@@ -17,7 +17,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Volume;
@@ -30,6 +29,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Mount configured self-signed certificate as file in each workspace machines if configured.
@@ -81,7 +81,7 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
                 .withStringData(ImmutableMap.of(CA_CERT_FILE, certificate))
                 .build());
 
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (PodData pod : k8sEnv.getPodData().values()) {
       Optional<Volume> certVolume =
           pod.getSpec()
               .getVolumes()

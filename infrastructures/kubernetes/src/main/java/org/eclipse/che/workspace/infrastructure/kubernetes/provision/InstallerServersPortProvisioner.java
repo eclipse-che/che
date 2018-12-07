@@ -16,7 +16,6 @@ import static java.util.stream.Collectors.toList;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import io.fabric8.kubernetes.api.model.Pod;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +36,7 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Fixes installers servers ports if conflicts are present.
@@ -76,7 +76,7 @@ public class InstallerServersPortProvisioner implements ConfigurationProvisioner
 
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (PodData pod : k8sEnv.getPodData().values()) {
       // it is needed to detect conflicts between all containers in a pod
       // because they use the same ports
       List<InternalMachineConfig> podMachines =

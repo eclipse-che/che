@@ -13,14 +13,13 @@ package org.eclipse.che.workspace.infrastructure.openshift;
 
 import com.google.inject.assistedinject.Assisted;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -123,10 +122,12 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
 
     project.deployments().watchEvents(new MachineLogsPublisher());
     if (unrecoverablePodEventListenerFactory.isConfigured()) {
-      Map<String, Pod> pods = getContext().getEnvironment().getPods();
+      Set<String> toWatch = new HashSet<>();
+      OpenShiftEnvironment environment = getContext().getEnvironment();
+      toWatch.addAll(environment.getPodsCopy().keySet());
+      toWatch.addAll(environment.getDeploymentsCopy().keySet());
       UnrecoverablePodEventListener handler =
-          unrecoverablePodEventListenerFactory.create(
-              pods.keySet(), this::handleUnrecoverableEvent);
+          unrecoverablePodEventListenerFactory.create(toWatch, this::handleUnrecoverableEvent);
       project.deployments().watchEvents(handler);
     }
 

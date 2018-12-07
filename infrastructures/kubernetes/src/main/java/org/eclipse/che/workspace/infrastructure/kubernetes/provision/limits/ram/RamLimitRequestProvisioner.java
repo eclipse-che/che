@@ -16,7 +16,6 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.machineName;
 
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.Pod;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -26,6 +25,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvi
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
@@ -52,7 +52,7 @@ public class RamLimitRequestProvisioner implements ConfigurationProvisioner {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     final Map<String, InternalMachineConfig> machines = k8sEnv.getMachines();
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (PodData pod : k8sEnv.getPodData().values()) {
       for (Container container : pod.getSpec().getContainers()) {
         InternalMachineConfig machineConfig = machines.get(machineName(pod, container));
         memoryAttributeProvisioner.provision(

@@ -14,8 +14,10 @@ package org.eclipse.che.workspace.infrastructure.openshift.environment;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
@@ -27,6 +29,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.Builder;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Holds objects of OpenShift environment.
@@ -63,13 +66,24 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
   public OpenShiftEnvironment(
       InternalEnvironment internalEnvironment,
       Map<String, Pod> pods,
+      Map<String, Deployment> deployments,
+      Map<String, PodData> podData,
       Map<String, Service> services,
       Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> pvcs,
       Map<String, Secret> secrets,
       Map<String, ConfigMap> configMaps,
       Map<String, Route> routes) {
-    super(internalEnvironment, pods, services, ingresses, pvcs, secrets, configMaps);
+    super(
+        internalEnvironment,
+        pods,
+        deployments,
+        podData,
+        services,
+        ingresses,
+        pvcs,
+        secrets,
+        configMaps);
     setType(TYPE);
     this.routes = routes;
   }
@@ -79,13 +93,26 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
       Map<String, InternalMachineConfig> machines,
       List<Warning> warnings,
       Map<String, Pod> pods,
+      Map<String, Deployment> deployments,
+      Map<String, PodData> podData,
       Map<String, Service> services,
       Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> pvcs,
       Map<String, Secret> secrets,
       Map<String, ConfigMap> configMaps,
       Map<String, Route> routes) {
-    super(internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
+    super(
+        internalRecipe,
+        machines,
+        warnings,
+        pods,
+        deployments,
+        podData,
+        services,
+        ingresses,
+        pvcs,
+        secrets,
+        configMaps);
     setType(TYPE);
     this.routes = routes;
   }
@@ -130,6 +157,26 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
     @Override
     public Builder setPods(Map<String, Pod> pods) {
       this.pods.putAll(pods);
+      pods.entrySet()
+          .forEach(
+              e -> {
+                Pod pod = e.getValue();
+                podData.put(e.getKey(), new PodData(pod.getSpec(), pod.getMetadata()));
+              });
+      return this;
+    }
+
+    @Override
+    public Builder setDeployments(Map<String, Deployment> deployments) {
+      this.deployments.putAll(deployments);
+      deployments
+          .entrySet()
+          .forEach(
+              e -> {
+                PodTemplateSpec podTemplate = e.getValue().getSpec().getTemplate();
+                podData.put(
+                    e.getKey(), new PodData(podTemplate.getSpec(), podTemplate.getMetadata()));
+              });
       return this;
     }
 
@@ -176,7 +223,16 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
 
     public OpenShiftEnvironment build() {
       return new OpenShiftEnvironment(
-          internalEnvironment, pods, services, ingresses, pvcs, secrets, configMaps, routes);
+          internalEnvironment,
+          pods,
+          deployments,
+          podData,
+          services,
+          ingresses,
+          pvcs,
+          secrets,
+          configMaps,
+          routes);
     }
   }
 }
