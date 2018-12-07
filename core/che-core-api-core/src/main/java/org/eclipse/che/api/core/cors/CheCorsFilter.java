@@ -38,8 +38,7 @@ public class CheCorsFilter implements Filter {
 
   private CorsFilter corsFilter;
 
-  @Inject
-  private CheCorsFilterConfig cheCorsFilterConfig;
+  @Inject private CheCorsFilterConfig cheCorsFilterConfig;
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
