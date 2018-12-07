@@ -103,10 +103,10 @@ public class KubernetesEnvironmentFactory
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Deployment> deployments = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
+    Map<String, ConfigMap> configMaps = new HashMap<>();
     boolean isAnyIngressPresent = false;
     boolean isAnyPVCPresent = false;
     boolean isAnySecretPresent = false;
-    boolean isAnyConfigMapPresent = false;
     for (HasMetadata object : list.getItems()) {
       if (object instanceof Pod) {
         Pod pod = (Pod) object;
@@ -124,7 +124,8 @@ public class KubernetesEnvironmentFactory
       } else if (object instanceof Secret) {
         isAnySecretPresent = true;
       } else if (object instanceof ConfigMap) {
-        isAnyConfigMapPresent = true;
+        ConfigMap configMap = (ConfigMap) object;
+        configMaps.put(configMap.getMetadata().getName(), configMap);
       } else {
         throw new ValidationException(
             format("Found unknown object type '%s'", object.getMetadata()));
@@ -148,13 +149,6 @@ public class KubernetesEnvironmentFactory
               Warnings.SECRET_IGNORED_WARNING_CODE, Warnings.SECRET_IGNORED_WARNING_MESSAGE));
     }
 
-    if (isAnyConfigMapPresent) {
-      warnings.add(
-          new WarningImpl(
-              Warnings.CONFIG_MAP_IGNORED_WARNING_CODE,
-              Warnings.CONFIG_MAP_IGNORED_WARNING_MESSAGE));
-    }
-
     addRamAttributes(machines, pods.values());
 
     KubernetesEnvironment k8sEnv =
@@ -168,7 +162,7 @@ public class KubernetesEnvironmentFactory
             .setIngresses(new HashMap<>())
             .setPersistentVolumeClaims(new HashMap<>())
             .setSecrets(new HashMap<>())
-            .setConfigMaps(new HashMap<>())
+            .setConfigMaps(configMaps)
             .build();
 
     envValidator.validate(k8sEnv);

@@ -31,10 +31,6 @@ public final class Warnings {
   public static final String SECRET_IGNORED_WARNING_MESSAGE =
       "Secrets specified in Kubernetes recipe are ignored.";
 
-  public static final int CONFIG_MAP_IGNORED_WARNING_CODE = 4103;
-  public static final String CONFIG_MAP_IGNORED_WARNING_MESSAGE =
-      "Config maps specified in Kubernetes recipe are ignored.";
-
   public static final int RESTART_POLICY_SET_TO_NEVER_WARNING_CODE = 4104;
   public static final String RESTART_POLICY_SET_TO_NEVER_WARNING_MESSAGE_FMT =
       "Restart policy '%s' for pod '%s' is rewritten with %s";

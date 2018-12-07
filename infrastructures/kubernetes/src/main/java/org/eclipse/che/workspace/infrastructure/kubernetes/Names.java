@@ -73,8 +73,8 @@ public class Names {
   }
 
   /** Return pod name that will be unique for a whole namespace. */
-  public static String uniquePodName(String originalPodName, String workspaceId) {
-    return workspaceId + WORKSPACE_ID_PREFIX_SEPARATOR + originalPodName;
+  public static String uniqueResourceName(String originalResourceName, String workspaceId) {
+    return workspaceId + WORKSPACE_ID_PREFIX_SEPARATOR + originalResourceName;
   }
 
   /** Returns randomly generated name with given prefix. */
