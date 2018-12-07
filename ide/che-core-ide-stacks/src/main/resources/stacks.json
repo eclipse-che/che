@@ -2403,7 +2403,11 @@
                   "protocol": "tcp"
                 }
               },
-              "volumes": {},
+              "volumes": {
+                "databaseData": {
+                  "path": "/var/lib/pgsql/data"
+                }
+              },
               "installers": [
                 "org.eclipse.che.exec",
                 "org.eclipse.che.terminal"
@@ -2438,7 +2442,7 @@
           },
           "recipe": {
             "type": "openshift",
-            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: nodejs-postgres-pod\n   annotations:\n    org.eclipse.che.container.nodejs.machine_name: nodejs\n    org.eclipse.che.container.database.machine_name: database\n  spec:\n   containers:\n    - \n     image: quay.io/openshiftio/che-centos-nodejs\n     name: nodejs\n     ports:\n      - \n       containerPort: 8080\n       protocol: TCP\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: centos/postgresql-96-centos7\n     name: database\n     ports:\n      - \n       containerPort: 5432\n       protocol: TCP\n     resources:\n      limits:\n       memory: 512Mi\n     env:\n      - \n       name: POSTGRESQL_USER\n       value: user\n      - \n       name: POSTGRESQL_PASSWORD\n       value: password\n      - \n       name: POSTGRESQL_DATABASE\n       value: my_data\n      - \n       name: POSTGRESQL_ADMIN_PASSWORD\n       value: adminpassword\n     volumeMounts:\n      - \n       mountPath: /var/lib/pgsql/data\n       name: claim-che-workspace\n   volumes:\n    - \n     name: claim-che-workspace\n     persistentVolumeClaim:\n      claimName: claim-che-workspace\n",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: nodejs-postgres-pod\n   annotations:\n    org.eclipse.che.container.nodejs.machine_name: nodejs\n    org.eclipse.che.container.database.machine_name: database\n  spec:\n   containers:\n    - \n     image: quay.io/openshiftio/che-centos-nodejs\n     name: nodejs\n     ports:\n      - \n       containerPort: 8080\n       protocol: TCP\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: centos/postgresql-96-centos7\n     name: database\n     ports:\n      - \n       containerPort: 5432\n       protocol: TCP\n     resources:\n      limits:\n       memory: 512Mi\n     env:\n      - \n       name: POSTGRESQL_USER\n       value: user\n      - \n       name: POSTGRESQL_PASSWORD\n       value: password\n      - \n       name: POSTGRESQL_DATABASE\n       value: my_data\n      - \n       name: POSTGRESQL_ADMIN_PASSWORD\n       value: adminpassword\n",
             "contentType": "text/x-yaml"
           }
         }
