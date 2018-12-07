@@ -17,8 +17,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.CONFIG_MAP_IGNORED_WARNING_CODE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.CONFIG_MAP_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.PVC_IGNORED_WARNING_CODE;
@@ -38,6 +36,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.DoneableKubernetesList;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -167,18 +166,19 @@ public class KubernetesEnvironmentFactoryTest {
   }
 
   @Test
-  public void ignoreConfigMapsWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> recipeObjects = singletonList(new ConfigMap());
+  public void addConfigMapsWhenRecipeContainsThem() throws Exception {
+    ConfigMap configMap =
+        new ConfigMapBuilder().withNewMetadata().withName("test-configmap").endMetadata().build();
+    final List<HasMetadata> recipeObjects = singletonList(configMap);
     when(validatedObjects.getItems()).thenReturn(recipeObjects);
 
     final KubernetesEnvironment parsed =
         k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertTrue(parsed.getConfigMaps().isEmpty());
-    assertEquals(parsed.getWarnings().size(), 1);
+    assertEquals(parsed.getConfigMaps().size(), 1);
     assertEquals(
-        parsed.getWarnings().get(0),
-        new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
+        parsed.getConfigMaps().values().iterator().next().getMetadata().getName(),
+        configMap.getMetadata().getName());
   }
 
   @Test
