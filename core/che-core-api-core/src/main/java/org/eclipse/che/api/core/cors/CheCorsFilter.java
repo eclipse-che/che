@@ -11,9 +11,9 @@
  */
 package org.eclipse.che.api.core.cors;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import javax.inject.Inject;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -38,7 +38,8 @@ public class CheCorsFilter implements Filter {
 
   private CorsFilter corsFilter;
 
-  @Inject private CheCorsFilterConfig cheCorsFilterConfig;
+  @Inject
+  private CheCorsFilterConfig cheCorsFilterConfig;
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {
