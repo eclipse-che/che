@@ -2367,7 +2367,7 @@
     "creator": "Ibrahim Jarif",
     "name": "Nodejs and Postgres Stack",
     "description": "Nodejs stack with Postgres",
-    "scope": "general",
+    "scope": "advanced",
     "tags": [
       "node.js",
       "npm",
