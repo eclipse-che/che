@@ -16,9 +16,11 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Helps to work with Kubernetes objects names.
@@ -45,7 +47,15 @@ public class Names {
    * </pre>
    */
   public static String machineName(Pod pod, Container container) {
-    final Map<String, String> annotations = pod.getMetadata().getAnnotations();
+    return machineName(pod.getMetadata(), container);
+  }
+
+  public static String machineName(PodData podData, Container container) {
+    return machineName(podData.getMetadata(), container);
+  }
+
+  public static String machineName(ObjectMeta podMeta, Container container) {
+    final Map<String, String> annotations = podMeta.getAnnotations();
     final String machineName;
     final String containerName = container.getName();
     if (annotations != null
@@ -55,11 +65,11 @@ public class Names {
     }
 
     final String originalPodName;
-    final Map<String, String> labels = pod.getMetadata().getLabels();
+    final Map<String, String> labels = podMeta.getLabels();
     if (labels != null && (originalPodName = labels.get(CHE_ORIGINAL_NAME_LABEL)) != null) {
       return originalPodName + '/' + containerName;
     }
-    return pod.getMetadata().getName() + '/' + containerName;
+    return podMeta.getName() + '/' + containerName;
   }
 
   /** Return pod name that will be unique for a whole namespace. */

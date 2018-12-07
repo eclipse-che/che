@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
-import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodSpec;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -19,6 +19,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Adds grace termination period to workspace pods.
@@ -45,8 +46,8 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
 
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
-    for (Pod pod : k8sEnv.getPods().values()) {
-      if (!isTerminationGracePeriodSet(pod)) {
+    for (PodData pod : k8sEnv.getPodData().values()) {
+      if (!isTerminationGracePeriodSet(pod.getSpec())) {
         pod.getSpec().setTerminationGracePeriodSeconds(graceTerminationPeriodSec);
       }
     }
@@ -57,7 +58,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
    * @return true if 'terminationGracePeriodSeconds' have been explicitly set in Kubernetes /
    *     OpenShift recipe, false otherwise
    */
-  private boolean isTerminationGracePeriodSet(final Pod pod) {
-    return pod.getSpec().getTerminationGracePeriodSeconds() != null;
+  private boolean isTerminationGracePeriodSet(final PodSpec podSpec) {
+    return podSpec.getTerminationGracePeriodSeconds() != null;
   }
 }

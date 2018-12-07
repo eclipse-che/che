@@ -15,11 +15,11 @@ import static java.lang.String.format;
 
 import com.google.common.base.Joiner;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.Pod;
 import java.util.HashSet;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Validates {@link KubernetesEnvironment}.
@@ -35,10 +35,10 @@ public class KubernetesEnvironmentValidator {
    * @throws ValidationException if the specified {@link KubernetesEnvironment} is invalid
    */
   public void validate(KubernetesEnvironment env) throws ValidationException {
-    checkArgument(!env.getPods().isEmpty(), "Environment should contain at least 1 pod");
+    checkArgument(!env.getPodData().isEmpty(), "Environment should contain at least 1 pod");
 
     Set<String> missingMachines = new HashSet<>(env.getMachines().keySet());
-    for (Pod pod : env.getPods().values()) {
+    for (PodData pod : env.getPodData().values()) {
       if (pod.getSpec() != null && pod.getSpec().getContainers() != null) {
         for (Container container : pod.getSpec().getContainers()) {
           missingMachines.remove(Names.machineName(pod, container));

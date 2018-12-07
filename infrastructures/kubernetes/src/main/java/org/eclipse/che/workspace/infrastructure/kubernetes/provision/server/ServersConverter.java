@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision.server;
 
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Map;
 import javax.inject.Inject;
@@ -25,6 +24,7 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ConfigurationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
@@ -64,7 +64,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
     SecureServerExposer<T> secureServerExposer =
         secureServerExposerFactoryProvider.get(k8sEnv).create(identity);
 
-    for (Pod podConfig : k8sEnv.getPods().values()) {
+    for (PodData podConfig : k8sEnv.getPodData().values()) {
       final PodSpec podSpec = podConfig.getSpec();
       for (Container containerConfig : podSpec.getContainers()) {
         String machineName = Names.machineName(podConfig, containerConfig);

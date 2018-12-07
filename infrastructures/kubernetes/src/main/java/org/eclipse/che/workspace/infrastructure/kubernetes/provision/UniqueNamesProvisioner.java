@@ -14,8 +14,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import javax.inject.Singleton;
@@ -26,6 +26,7 @@ import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Makes names of Kubernetes pods and ingresses unique whole namespace by {@link Names}.
@@ -48,15 +49,14 @@ public class UniqueNamesProvisioner<T extends KubernetesEnvironment>
 
     TracingTags.WORKSPACE_ID.set(workspaceId);
 
-    final Set<Pod> pods = new HashSet<>(k8sEnv.getPods().values());
-    k8sEnv.getPods().clear();
-    for (Pod pod : pods) {
+    final Collection<PodData> podData = k8sEnv.getPodData().values();
+    for (PodData pod : podData) {
       final ObjectMeta podMeta = pod.getMetadata();
-      putLabel(pod, Constants.CHE_ORIGINAL_NAME_LABEL, podMeta.getName());
+      putLabel(podMeta, Constants.CHE_ORIGINAL_NAME_LABEL, podMeta.getName());
       final String podName = Names.uniquePodName(podMeta.getName(), workspaceId);
       podMeta.setName(podName);
-      k8sEnv.getPods().put(podName, pod);
     }
+
     final Set<Ingress> ingresses = new HashSet<>(k8sEnv.getIngresses().values());
     k8sEnv.getIngresses().clear();
     for (Ingress ingress : ingresses) {

@@ -29,6 +29,7 @@ import io.fabric8.kubernetes.api.model.OwnerReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
@@ -125,38 +126,59 @@ public class KubernetesDeployments {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
 
     ObjectMeta metadata = pod.getMetadata();
-    // Note: metadata.name will be changed as for pods it is set by the deployment.
-    String originalName = metadata.getName();
-    putLabel(pod, CHE_DEPLOYMENT_NAME_LABEL, originalName);
-
     PodSpec podSpec = pod.getSpec();
     podSpec.setRestartPolicy("Always"); // Only allowable value
+
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withMetadata(metadata)
+            .withNewSpec()
+            .withNewSelector()
+            .withMatchLabels(metadata.getLabels())
+            .endSelector()
+            .withReplicas(1)
+            .withNewTemplate()
+            .withMetadata(metadata)
+            .withSpec(podSpec)
+            .endTemplate()
+            .endSpec()
+            .build();
+    return createDeployment(deployment, workspaceId);
+  }
+
+  public Pod deploy(Deployment deployment) throws InfrastructureException {
+    ObjectMeta podMeta = deployment.getSpec().getTemplate().getMetadata();
+    putLabel(podMeta, CHE_WORKSPACE_ID_LABEL, workspaceId);
+    putLabel(podMeta, CHE_DEPLOYMENT_NAME_LABEL, deployment.getMetadata().getName());
+    putLabel(deployment.getMetadata(), CHE_WORKSPACE_ID_LABEL, workspaceId);
+    // Match condition for a deployment is an AND of all labels
+    deployment.getSpec().getSelector().setMatchLabels(podMeta.getLabels());
+    // Avoid accidental setting of multiple replicas
+    deployment.getSpec().setReplicas(1);
+
+    PodSpec podSpec = deployment.getSpec().getTemplate().getSpec();
+    podSpec.setRestartPolicy("Always"); // Only allowable value
+
+    return createDeployment(deployment, workspaceId);
+  }
+
+  private Pod createDeployment(Deployment deployment, String workspaceId)
+      throws InfrastructureException {
+    final String deploymentName = deployment.getMetadata().getName();
     final CompletableFuture<Pod> createFuture = new CompletableFuture<>();
     final Watch createWatch =
         clientFactory
             .create(workspaceId)
             .pods()
             .inNamespace(namespace)
-            .watch(new CreateWatcher(createFuture, workspaceId, originalName));
+            .watch(new CreateWatcher(createFuture, workspaceId, deploymentName));
     try {
       clientFactory
           .create(workspaceId)
           .apps()
           .deployments()
           .inNamespace(namespace)
-          .createNew()
-          .withMetadata(metadata)
-          .withNewSpec()
-          .withNewSelector()
-          .withMatchLabels(metadata.getLabels())
-          .endSelector()
-          .withReplicas(1)
-          .withNewTemplate()
-          .withMetadata(metadata)
-          .withSpec(podSpec)
-          .endTemplate()
-          .endSpec()
-          .done();
+          .create(deployment);
       return createFuture.get(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
@@ -165,17 +187,17 @@ public class KubernetesDeployments {
       throw new InfrastructureException(
           String.format(
               "Interrupted while waiting for Pod creation. -id: %s -message: %s",
-              metadata.getName(), e.getMessage()));
+              deploymentName, e.getMessage()));
     } catch (ExecutionException e) {
       throw new InfrastructureException(
           String.format(
               "Error occured while waiting for Pod creation. -id: %s -message: %s",
-              metadata.getName(), e.getCause().getMessage()));
+              deploymentName, e.getCause().getMessage()));
     } catch (TimeoutException e) {
       throw new InfrastructureException(
           String.format(
               "Pod creation timeout exceeded. -id: %s -message: %s",
-              metadata.getName(), e.getMessage()));
+              deploymentName, e.getMessage()));
     } finally {
       createWatch.close();
     }
@@ -894,19 +916,20 @@ public class KubernetesDeployments {
 
     private final CompletableFuture<Pod> future;
     private final String workspaceId;
-    private final String originalName;
+    private final String deploymentName;
 
-    private CreateWatcher(CompletableFuture<Pod> future, String workspaceId, String originalName) {
+    private CreateWatcher(
+        CompletableFuture<Pod> future, String workspaceId, String deploymentName) {
       this.future = future;
       this.workspaceId = workspaceId;
-      this.originalName = originalName;
+      this.deploymentName = deploymentName;
     }
 
     @Override
     public void eventReceived(Action action, Pod resource) {
       Map<String, String> labels = resource.getMetadata().getLabels();
       if (workspaceId.equals(labels.get(CHE_WORKSPACE_ID_LABEL))
-          && originalName.equals(labels.get(CHE_DEPLOYMENT_NAME_LABEL))) {
+          && deploymentName.equals(labels.get(CHE_DEPLOYMENT_NAME_LABEL))) {
         future.complete(resource);
       }
     }

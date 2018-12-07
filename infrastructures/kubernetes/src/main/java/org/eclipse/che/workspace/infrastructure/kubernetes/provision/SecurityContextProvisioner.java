@@ -11,8 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSecurityContextBuilder;
+import io.fabric8.kubernetes.api.model.PodSpec;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -38,13 +38,12 @@ public class SecurityContextProvisioner implements ConfigurationProvisioner<Kube
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     if (runAsUser != null) {
-      k8sEnv.getPods().values().forEach(this::provision);
+      k8sEnv.getPodData().values().forEach(p -> provision(p.getSpec()));
     }
   }
 
-  public void provision(Pod pod) {
-    pod.getSpec()
-        .setSecurityContext(
-            new PodSecurityContextBuilder().withRunAsUser(runAsUser).withFsGroup(fsGroup).build());
+  public void provision(PodSpec podSpec) {
+    podSpec.setSecurityContext(
+        new PodSecurityContextBuilder().withRunAsUser(runAsUser).withFsGroup(fsGroup).build());
   }
 }

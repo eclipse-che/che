@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.Pod;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
@@ -22,6 +21,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Add proxy configuration to pod containers
@@ -60,7 +60,7 @@ public class ProxySettingsProvisioner implements ConfigurationProvisioner {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!proxyEnvVars.isEmpty()) {
-      for (Pod pod : k8sEnv.getPods().values()) {
+      for (PodData pod : k8sEnv.getPodData().values()) {
         pod.getSpec()
             .getContainers()
             .forEach(

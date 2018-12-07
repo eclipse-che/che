@@ -22,6 +22,7 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -100,6 +101,7 @@ public class KubernetesEnvironmentFactory
         clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
 
     Map<String, Pod> pods = new HashMap<>();
+    Map<String, Deployment> deployments = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
     boolean isAnyIngressPresent = false;
     boolean isAnyPVCPresent = false;
@@ -109,6 +111,9 @@ public class KubernetesEnvironmentFactory
       if (object instanceof Pod) {
         Pod pod = (Pod) object;
         pods.put(pod.getMetadata().getName(), pod);
+      } else if (object instanceof Deployment) {
+        Deployment deployment = (Deployment) object;
+        deployments.put(deployment.getMetadata().getName(), deployment);
       } else if (object instanceof Service) {
         Service service = (Service) object;
         services.put(service.getMetadata().getName(), service);
@@ -158,6 +163,7 @@ public class KubernetesEnvironmentFactory
             .setMachines(machines)
             .setWarnings(warnings)
             .setPods(pods)
+            .setDeployments(deployments)
             .setServices(services)
             .setIngresses(new HashMap<>())
             .setPersistentVolumeClaims(new HashMap<>())

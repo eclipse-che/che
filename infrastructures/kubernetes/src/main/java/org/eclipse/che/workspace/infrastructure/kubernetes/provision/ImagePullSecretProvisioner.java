@@ -16,7 +16,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonWriter;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.LocalObjectReferenceBuilder;
-import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import java.io.IOException;
@@ -93,7 +93,10 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
 
     k8sEnv.getSecrets().put(secret.getMetadata().getName(), secret);
 
-    k8sEnv.getPods().values().forEach(p -> addImagePullSecret(secret.getMetadata().getName(), p));
+    k8sEnv
+        .getPodData()
+        .values()
+        .forEach(p -> addImagePullSecret(secret.getMetadata().getName(), p.getSpec()));
   }
 
   /**
@@ -160,13 +163,12 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
     }
   }
 
-  private void addImagePullSecret(String secretName, Pod pod) {
-    List<LocalObjectReference> imagePullSecrets = pod.getSpec().getImagePullSecrets();
-    pod.getSpec()
-        .setImagePullSecrets(
-            ImmutableList.<LocalObjectReference>builder()
-                .add(new LocalObjectReferenceBuilder().withName(secretName).build())
-                .addAll(imagePullSecrets)
-                .build());
+  private void addImagePullSecret(String secretName, PodSpec podSpec) {
+    List<LocalObjectReference> imagePullSecrets = podSpec.getImagePullSecrets();
+    podSpec.setImagePullSecrets(
+        ImmutableList.<LocalObjectReference>builder()
+            .add(new LocalObjectReferenceBuilder().withName(secretName).build())
+            .addAll(imagePullSecrets)
+            .build());
   }
 }

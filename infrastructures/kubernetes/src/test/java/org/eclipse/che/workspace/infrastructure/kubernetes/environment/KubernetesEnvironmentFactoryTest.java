@@ -45,10 +45,15 @@ import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PodTemplateSpec;
+import io.fabric8.kubernetes.api.model.PodTemplateSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
@@ -174,6 +179,116 @@ public class KubernetesEnvironmentFactoryTest {
     assertEquals(
         parsed.getWarnings().get(0),
         new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
+  }
+
+  @Test
+  public void addPodsWhenRecipeContainsThem() throws Exception {
+    Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("pod-test")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+
+    final List<HasMetadata> recipeObjects = singletonList(pod);
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertEquals(parsed.getPodsCopy().size(), 1);
+    assertEquals(
+        parsed.getPodsCopy().values().iterator().next().getMetadata().getName(),
+        pod.getMetadata().getName());
+    assertEquals(parsed.getPodData().size(), 1);
+    assertEquals(
+        parsed.getPodData().values().iterator().next().getMetadata().getName(),
+        pod.getMetadata().getName());
+  }
+
+  @Test
+  public void addDeploymentsWhenRecipeContainsThem() throws Exception {
+    PodTemplateSpec podTemplate =
+        new PodTemplateSpecBuilder()
+            .withNewMetadata()
+            .withName("deployment-pod")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withNewMetadata()
+            .withName("deployment-test")
+            .endMetadata()
+            .withNewSpec()
+            .withTemplate(podTemplate)
+            .endSpec()
+            .build();
+
+    final List<HasMetadata> recipeObjects = singletonList(deployment);
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertEquals(parsed.getDeploymentsCopy().size(), 1);
+    assertEquals(
+        parsed.getDeploymentsCopy().values().iterator().next().getMetadata().getName(),
+        deployment.getMetadata().getName());
+    assertEquals(parsed.getPodData().size(), 1);
+    assertEquals(
+        parsed.getPodData().values().iterator().next().getMetadata().getName(),
+        podTemplate.getMetadata().getName());
+  }
+
+  @Test
+  public void bothPodsAndDeploymentsIncludedInPodData() throws Exception {
+    PodTemplateSpec podTemplate =
+        new PodTemplateSpecBuilder()
+            .withNewMetadata()
+            .withName("deployment-pod")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withNewMetadata()
+            .withName("deployment-test")
+            .endMetadata()
+            .withNewSpec()
+            .withTemplate(podTemplate)
+            .endSpec()
+            .build();
+    Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("bare-pod")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    final List<HasMetadata> recipeObjects = asList(deployment, pod);
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertEquals(parsed.getPodData().size(), 2);
+    assertTrue(
+        parsed
+            .getPodData()
+            .values()
+            .stream()
+            .allMatch(
+                podData -> {
+                  String name = podData.getMetadata().getName();
+                  return name.equals(podTemplate.getMetadata().getName())
+                      || name.equals(pod.getMetadata().getName());
+                }));
   }
 
   @Test

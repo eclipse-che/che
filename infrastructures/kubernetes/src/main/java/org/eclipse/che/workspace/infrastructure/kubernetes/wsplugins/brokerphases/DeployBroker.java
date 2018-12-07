@@ -75,7 +75,7 @@ public class DeployBroker extends BrokerPhase {
         namespace.configMaps().create(configMap);
       }
 
-      Pod pluginBrokerPod = getPluginBrokerPod(brokerEnvironment.getPods());
+      Pod pluginBrokerPod = getPluginBrokerPod(brokerEnvironment.getPodsCopy());
 
       if (factory.isConfigured()) {
         UnrecoverablePodEventListener unrecoverableEventListener =

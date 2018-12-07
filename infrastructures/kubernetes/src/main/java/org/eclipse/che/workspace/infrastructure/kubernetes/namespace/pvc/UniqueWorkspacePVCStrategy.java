@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,6 +40,7 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
 import org.slf4j.Logger;
@@ -115,7 +115,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
                 .create(workspaceId)
                 .persistentVolumeClaims()
                 .getByLabel(CHE_WORKSPACE_ID_LABEL, workspaceId));
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (PodData pod : k8sEnv.getPodData().values()) {
       final PodSpec podSpec = pod.getSpec();
       List<Container> containers = new ArrayList<>();
       containers.addAll(podSpec.getContainers());
@@ -158,7 +158,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       String workspaceId,
       Map<String, PersistentVolumeClaim> provisionedClaims,
       Map<String, PersistentVolumeClaim> existingVolumeName2PVC,
-      Pod pod,
+      PodData pod,
       Container container,
       Map<String, Volume> volumes)
       throws InfrastructureException {

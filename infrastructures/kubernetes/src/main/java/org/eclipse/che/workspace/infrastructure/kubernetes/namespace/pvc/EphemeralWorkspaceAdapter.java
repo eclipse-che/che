@@ -15,7 +15,6 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
 
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import java.util.ArrayList;
@@ -29,6 +28,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +51,7 @@ public class EphemeralWorkspaceAdapter {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     LOG.debug("Provisioning PVC strategy for workspace '{}'", identity.getWorkspaceId());
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (PodData pod : k8sEnv.getPodData().values()) {
       PodSpec podSpec = pod.getSpec();
 
       // To ensure same volumes get mounted correctly in different containers, we need to track
