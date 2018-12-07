@@ -159,5 +159,8 @@ public class OpenShiftInfraModule extends AbstractModule {
     pluginBrokers
         .addBinding("Theia remote plugin")
         .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia_remote.image")));
+    pluginBrokers
+        .addBinding("VS Code extension")
+        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.vscode.image")));
   }
 }
