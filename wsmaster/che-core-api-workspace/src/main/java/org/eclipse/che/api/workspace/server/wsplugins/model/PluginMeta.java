@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import java.util.HashMap;
+
 /** @author Oleksandr Garagatyi */
 public class PluginMeta {
   private String name = null;
@@ -21,6 +23,7 @@ public class PluginMeta {
   private String description = null;
   private String icon = null;
   private String url = null;
+  private HashMap<String, String> attributes = new HashMap<>();
 
   public PluginMeta name(String name) {
     this.name = name;
@@ -92,5 +95,17 @@ public class PluginMeta {
 
   public String getDescription() {
     return description;
+  }
+
+  public HashMap<String, String> getAttributes() {
+    if (attributes == null) {
+      attributes = new HashMap<>();
+    }
+    return attributes;
+  }
+
+  public PluginMeta attributes(HashMap<String, String> attributes) {
+    this.attributes = attributes;
+    return this;
   }
 }
