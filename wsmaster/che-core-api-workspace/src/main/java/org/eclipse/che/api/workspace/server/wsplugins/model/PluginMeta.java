@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /** @author Oleksandr Garagatyi */
 public class PluginMeta {
