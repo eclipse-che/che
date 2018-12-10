@@ -80,10 +80,6 @@ public class AddFilesToIndexTest {
   @Named("github.username")
   private String gitHubUsername;
 
-  @Inject
-  @Named("github.password")
-  private String gitHubPassword;
-
   @Inject private DefaultTestUser productUser;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
@@ -107,9 +103,11 @@ public class AddFilesToIndexTest {
   }
 
   @Test
-  public void addFilesTest() throws InterruptedException {
+  public void addFilesTest() {
+    // preparation
     projectExplorer.waitProjectExplorer();
-    projectExplorer.openItemByPath(PROJECT_NAME);
+    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
         TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.INITIALIZE_REPOSITORY);
     askDialog.waitFormToOpen();
@@ -120,7 +118,6 @@ public class AddFilesToIndexTest {
     events.waitExpectedMessage(TestGitConstants.GIT_INITIALIZED_SUCCESS);
 
     // perform init commit
-    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("init");
