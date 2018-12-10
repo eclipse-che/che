@@ -71,7 +71,7 @@ public class FullTextSearchPresenter implements FullTextSearchView.ActionDelegat
         .then(
             optionalContainer -> {
               if (!optionalContainer.isPresent()) {
-                view.showErrorMessage("Path '" + startPoint + "' doesn't exists");
+                view.showErrorMessage("Path '" + startPoint + "' doesn't exist");
                 return;
               }
 
