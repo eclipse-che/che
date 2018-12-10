@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
 import com.google.common.annotations.Beta;
@@ -212,7 +213,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             command.getName(),
             command.getCommand().stream().collect(Collectors.joining(" ")),
             "custom");
-    cmd.getAttributes().put("workDir", command.getWorkingDir());
+    cmd.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, command.getWorkingDir());
     cmd.getAttributes().put("machineName", machineName);
     return cmd;
   }

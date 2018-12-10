@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.15.0-SNAPSHOT</version>
+        <version>6.16.0-SNAPSHOT</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <artifactId>che-master-parent</artifactId>
@@ -28,6 +28,7 @@
         <module>che-core-api-installer</module>
         <module>che-core-api-auth-shared</module>
         <module>che-core-api-auth</module>
+        <module>che-core-api-devfile</module>
         <module>che-core-api-project-templates-shared</module>
         <module>che-core-api-project-templates</module>
         <module>che-core-api-workspace-shared</module>
