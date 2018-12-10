@@ -2452,7 +2452,7 @@
       "attributes": {},
       "commands": [
         {
-          "commandLine": "cd ${current.project.path} && npm install && node .",
+          "commandLine": "cd ${current.project.path} && node .",
           "name": "Run",
           "attributes": {
             "goal": "Run",
