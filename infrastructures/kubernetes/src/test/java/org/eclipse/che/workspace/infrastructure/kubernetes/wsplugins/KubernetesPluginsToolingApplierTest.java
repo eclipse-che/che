@@ -17,6 +17,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
@@ -136,7 +137,8 @@ public class KubernetesPluginsToolingApplierTest {
         envCommand.getCommandLine(),
         pluginCommand.getCommand().stream().collect(Collectors.joining(" ")));
     assertEquals(envCommand.getType(), "custom");
-    assertEquals(envCommand.getAttributes().get("workDir"), pluginCommand.getWorkingDir());
+    assertEquals(
+        envCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), pluginCommand.getWorkingDir());
     assertEquals(envCommand.getAttributes().get("machineName"), POD_NAME + "/plugin-container");
   }
 

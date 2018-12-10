@@ -65,8 +65,8 @@ public class NewWorkspacePageTest {
   private static final String EXPECTED_WORKSPACE_NAME_PREFIX = "wksp-";
   private static final String MACHINE_NAME = "dev-machine";
   private static final double MAX_RAM_VALUE = 100.0;
-  private static final double MIN_RAM_VALUE = 0.5;
-  private static final double RAM_CHANGE_STEP = 0.5;
+  private static final double MIN_RAM_VALUE = 0.1;
+  private static final double RAM_CHANGE_STEP = 0.1;
   private static final String JDK_SUGGESTION_TITLE = "JDK";
   private static final String JAVA_SUGGESTION_TITLE = "JAVA";
   private static final String JAVA_1_8_SUGGESTION_TITLE = "JAVA 1.8";
@@ -195,8 +195,6 @@ public class NewWorkspacePageTest {
           CENTOS_NODEJS,
           CENTOS_WILDFLY_SWARM,
           CEYLON_WITH_JAVA_JAVASCRIPT,
-          CHE_7_PREVIEW,
-          CHE_7_PREVIEW_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO,
@@ -209,31 +207,13 @@ public class NewWorkspacePageTest {
           SPRING_BOOT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
-      asList(
-          JAVA_MYSQL,
-          JAVA_MYSQL_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_OPENSHIFT,
-          JAVA_MYSQL_CENTOS,
-          JAVA_THEIA_DOCKER);
+      asList(JAVA_MYSQL_THEIA_ON_KUBERNETES, JAVA_THEIA_ON_KUBERNETES, JAVA_THEIA_OPENSHIFT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_K8S_MULTI_MACHINE_STACKS =
-      asList(
-          JAVA_MYSQL,
-          JAVA_MYSQL_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_OPENSHIFT,
-          JAVA_MYSQL_CENTOS,
-          JAVA_THEIA_DOCKER);
+      asList(JAVA_MYSQL_THEIA_ON_KUBERNETES, JAVA_THEIA_ON_KUBERNETES, JAVA_THEIA_OPENSHIFT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
-      asList(
-          JAVA_MYSQL,
-          JAVA_MYSQL_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_OPENSHIFT,
-          JAVA_MYSQL_CENTOS,
-          JAVA_THEIA_DOCKER);
+      asList(JAVA_MYSQL, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
 
   private static final List<NewWorkspace.Stack>
       EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =

@@ -1,0 +1,180 @@
+{
+  "definitions": {
+    "attributes" : {
+      "id": "propertyList",
+      "type": "object",
+      "javaType": "java.util.Map<String, String>"
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "The Root Schema of DevFile object",
+  "required": [
+    "specVersion",
+    "name",
+    "projects",
+    "tools",
+    "commands"
+  ],
+  "properties": {
+    "specVersion": {
+      "type": "string",
+      "title": "Devfile Schema Specification Version",
+      "examples": [
+        "0.0.1"
+      ]
+    },
+    "name": {
+      "type": "string",
+      "title": "Devfile Name",
+      "examples": [
+        "petclinic-dev-environment"
+      ]
+    },
+    "projects": {
+      "type": "array",
+      "title": "The Projects Schema",
+      "description" : "Description of the project sources location and type",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "source"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "examples": [
+              "petclinic"
+            ]
+          },
+          "source": {
+            "type": "object",
+            "title": "The Project Source Schema",
+            "required": [
+              "type",
+              "location"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "Project-s source type.",
+                "examples": [
+                  "git",
+                  "github",
+                  "zip"
+                ]
+              },
+              "location": {
+                "type": "string",
+                "description": "Project-s source location address. Should be URL for git and github located projects, and file:// for zip.",
+                "examples": [
+                  "git@github.com:spring-projects/spring-petclinic.git"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "tools": {
+      "type": "array",
+      "title": "The Tools Schema",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "type",
+          "id"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "examples": [
+              "mvn-stack"
+            ]
+          },
+          "type": {
+            "description": "Describes type or tool, e.g. whether it is and plugin or editor or other type",
+            "type": "string",
+            "examples": [
+              "chePlugin",
+              "cheEditor"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "description": "Describes the tool FQN",
+            "examples": [
+              "eclipse/maven-jdk8:1.0.0"
+            ]
+          }
+        }
+      }
+    },
+    "commands": {
+      "type": "array",
+      "title": "The Commands Schema",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "actions"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "examples": [
+              "build"
+            ]
+          },
+          "attributes": {
+            "$ref": "#/definitions/attributes"
+          },
+          "actions": {
+            "type": "array",
+            "title": "The Command Actions Schema",
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "tool",
+                "command"
+              ],
+              "properties": {
+                "type": {
+                  "description": "Describes action type",
+                  "type": "string",
+                  "examples": [
+                    "exec"
+                  ]
+                },
+                "tool": {
+                  "type": "string",
+                  "description": "Describes tool to which given action relates",
+                  "examples": [
+                    "mvn-stack"
+                  ]
+                },
+                "command": {
+                  "type": "string",
+                  "description": "The actual action command-line string",
+                  "examples": [
+                    "mvn package"
+                  ]
+                },
+                "workdir": {
+                  "type": "string",
+                  "description": "Working directory where the schema should be executed",
+                  "examples": [
+                    "/projects/spring-petclinic"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

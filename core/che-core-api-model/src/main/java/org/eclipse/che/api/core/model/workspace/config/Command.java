@@ -22,6 +22,12 @@ import java.util.Map;
 public interface Command {
 
   /**
+   * {@link Command} attribute which indicates the working directory where the given command must be
+   * run
+   */
+  String WORKING_DIRECTORY_ATTRIBUTE = "workingDir";
+
+  /**
    * Returns command name (i.e. 'start tomcat') The name should be unique per user in one workspace,
    * which means that user may create only one command with the same name in the same workspace
    */

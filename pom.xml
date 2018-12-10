@@ -17,7 +17,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>6.15.0-SNAPSHOT</version>
+        <version>6.16.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
@@ -324,6 +324,11 @@
                 <artifactId>che-core-api-debug-shared</artifactId>
                 <version>${che.version}</version>
                 <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-devfile</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -1061,6 +1066,11 @@
                 <artifactId>che-multiuser-machine-authentication-shared</artifactId>
                 <version>${che.version}</version>
                 <classifier>sources</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.multiuser</groupId>
+                <artifactId>che-multiuser-permission-devfile</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.multiuser</groupId>

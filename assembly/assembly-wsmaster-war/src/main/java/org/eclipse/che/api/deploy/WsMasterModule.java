@@ -30,6 +30,8 @@ import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
+import org.eclipse.che.api.devfile.server.DevfileSchemaValidator;
+import org.eclipse.che.api.devfile.server.DevfileService;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
@@ -151,6 +153,9 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.ProfileService.class);
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
+
+    bind(DevfileSchemaValidator.class);
+    bind(DevfileService.class);
 
     MapBinder<String, String> stacks =
         MapBinder.newMapBinder(
@@ -363,6 +368,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.multiuser.permission.logger.LoggerServicePermissionsFilter.class);
 
     bind(org.eclipse.che.multiuser.permission.factory.FactoryPermissionsFilter.class);
+    bind(org.eclipse.che.multiuser.permission.devfile.DevfilePermissionsFilter.class);
     bind(
         org.eclipse.che.multiuser.permission.installer.InstallerRegistryServicePermissionsFilter
             .class);

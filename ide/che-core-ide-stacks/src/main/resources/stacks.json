@@ -1725,7 +1725,7 @@
       "description": null,
       "commands": [
         {
-          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+          "commandLine": "MAVEN_OPTS='-Xmx100m' && scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
           "name": "build",
           "type": "mvn",
           "attributes": {
@@ -1825,7 +1825,7 @@
       },
       "commands": [
         {
-          "commandLine": "scl enable rh-maven33 'mvn install -f ${current.project.path}'",
+          "commandLine": "MAVEN_OPTS='-Xmx100m' && scl enable rh-maven33 'mvn install -f ${current.project.path}'",
           "name": "build",
           "type": "mvn",
           "attributes": {

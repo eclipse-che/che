@@ -14,13 +14,11 @@ package org.eclipse.che.selenium.pageobject.dashboard;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ALL_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.CREATE_STACK_DIALOG_FORM_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.DECREMENT_MEMORY_BUTTON;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.EDIT_WORKSPACE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ERROR_MESSAGE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTERS_INPUT_TAGS_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTERS_INPUT_TAG_XPATH_TEMPLATE;
@@ -28,15 +26,14 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locator
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.FILTER_SUGGESTION_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.INCREMENT_MEMORY_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.MULTI_MACHINE_BUTTON_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.OPEN_IN_IDE_DIALOG_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ORGANIZATIONS_LIST_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.QUICK_START_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.SINGLE_MACHINE_BUTTON_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.STACK_ROW_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOOLBAR_TITLE_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_CREATE_BUTTON_XPATH;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.WORKSPACE_CREATED_DIALOG;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.WORKSPACE_CREATED_DIALOG_CLOSE_BUTTON_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_DROPDOWN_BUTTON_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_EDIT_BUTTON_XPATH;
 import static org.openqa.selenium.Keys.BACK_SPACE;
 
 import com.google.inject.Inject;
@@ -112,11 +109,6 @@ public class NewWorkspace {
     String INCREMENT_MEMORY_BUTTON =
         "//*[@id='machine-%s-ram']//button[@aria-label='Increment memory']";
     String MACHINE_RAM_VALUE = "//*[@id='machine-%s-ram']//input";
-    String WORKSPACE_CREATED_DIALOG = "//md-dialog/che-popup[@title='Workspace Is Created']";
-    String WORKSPACE_CREATED_DIALOG_CLOSE_BUTTON_XPATH =
-        "//md-dialog/che-popup[@title='Workspace Is Created']//i";
-    String EDIT_WORKSPACE_DIALOG_BUTTON = "//che-button-primary//span[text()='Edit']";
-    String OPEN_IN_IDE_DIALOG_BUTTON = "//che-button-default//span[text()='Open In IDE']";
     String ORGANIZATIONS_LIST_ID = "namespace-selector";
     String ORGANIZATION_ITEM = "//md-menu-item[text()='%s']";
     String FILTERS_INPUT_TAGS_XPATH = "//div[@class='md-chip-content']";
@@ -126,6 +118,8 @@ public class NewWorkspace {
 
     // buttons
     String TOP_CREATE_BUTTON_XPATH = "//button[@name='split-button']";
+    String TOP_DROPDOWN_BUTTON_XPATH = "//button[@name='dropdown-toggle']";
+    String TOP_EDIT_BUTTON_XPATH = "//span[text()='Create & Proceed Editing']";
     String BOTTOM_CREATE_BUTTON_XPATH = "//che-button-save-flat/button[@name='saveButton']";
     String ALL_BUTTON_ID = "all-stacks-button";
     String QUICK_START_BUTTON_ID = "quick-start-button";
@@ -213,6 +207,15 @@ public class NewWorkspace {
 
   @FindBy(xpath = BOTTOM_CREATE_BUTTON_XPATH)
   WebElement bottomCreateWorkspaceButton;
+
+  @FindBy(xpath = TOP_CREATE_BUTTON_XPATH)
+  WebElement topCreateWorkspaceButton;
+
+  @FindBy(xpath = TOP_DROPDOWN_BUTTON_XPATH)
+  WebElement topDropdownButton;
+
+  @FindBy(xpath = TOP_EDIT_BUTTON_XPATH)
+  WebElement topEditWorkspaceButton;
 
   @FindBy(xpath = Locators.SEARCH_INPUT)
   WebElement searchInput;
@@ -560,40 +563,15 @@ public class NewWorkspace {
     seleniumWebDriverHelper.waitAndClick(selectMultiMachineStacksTab);
   }
 
-  public void waitWorkspaceCreatedDialogIsVisible() {
-    testWebElementRenderChecker.waitElementIsRendered(
-        By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
-  }
-
-  public void closeWorkspaceCreatedDialog() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(WORKSPACE_CREATED_DIALOG_CLOSE_BUTTON_XPATH));
-  }
-
-  public void waitWorkspaceCreatedDialogDisappearance() {
-    seleniumWebDriverHelper.waitInvisibility(
-        By.xpath(WORKSPACE_CREATED_DIALOG), ELEMENT_TIMEOUT_SEC);
-  }
-
-  public void clickOnEditWorkspaceButton() {
-    seleniumWebDriverHelper.waitAndClick(
-        By.xpath(EDIT_WORKSPACE_DIALOG_BUTTON), ELEMENT_TIMEOUT_SEC);
-  }
-
-  public void clickOnOpenInIDEButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath(OPEN_IN_IDE_DIALOG_BUTTON), ELEMENT_TIMEOUT_SEC);
-  }
-
   public void clickOnCreateButtonAndOpenInIDE() {
     seleniumWebDriverHelper.waitAndClick(bottomCreateWorkspaceButton);
-    waitWorkspaceCreatedDialogIsVisible();
-    clickOnOpenInIDEButton();
   }
 
   public void clickOnCreateButtonAndEditWorkspace() {
-    waitBottomCreateWorkspaceButtonEnabled();
-    seleniumWebDriverHelper.waitAndClick(bottomCreateWorkspaceButton);
-    waitWorkspaceCreatedDialogIsVisible();
-    clickOnEditWorkspaceButton();
+    waitTopCreateButton();
+
+    seleniumWebDriverHelper.waitAndClick(topDropdownButton);
+    seleniumWebDriverHelper.waitAndClick(topEditWorkspaceButton);
   }
 
   public void clickOnBottomCreateButton() {
