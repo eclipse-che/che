@@ -23,7 +23,7 @@ public class PluginMeta {
   private String description = null;
   private String icon = null;
   private String url = null;
-  private HashMap<String, String> attributes = new HashMap<>();
+  private Map<String, String> attributes = new HashMap<>();
 
   public PluginMeta name(String name) {
     this.name = name;
@@ -97,14 +97,14 @@ public class PluginMeta {
     return description;
   }
 
-  public HashMap<String, String> getAttributes() {
+  public Map<String, String> getAttributes() {
     if (attributes == null) {
       attributes = new HashMap<>();
     }
     return attributes;
   }
 
-  public PluginMeta attributes(HashMap<String, String> attributes) {
+  public PluginMeta attributes(Map<String, String> attributes) {
     this.attributes = attributes;
     return this;
   }
