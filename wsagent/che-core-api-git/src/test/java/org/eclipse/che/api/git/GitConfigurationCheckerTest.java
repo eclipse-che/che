@@ -63,7 +63,7 @@ public class GitConfigurationCheckerTest {
     checker.start();
 
     Assert.assertTrue(
-        "New global .gitconfig file should be created in case it doesn't exists.",
+        "New global .gitconfig file should be created in case it doesn't exist.",
         Files.exists(globalGitconfigFilePath));
     Assert.assertTrue(
         "New global .gitignore file should be created.", Files.exists(gitignoreFilePath));
