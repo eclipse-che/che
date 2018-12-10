@@ -305,7 +305,7 @@ public class DockerConnectorConfiguration {
       } else {
         LOG.error(
             String.format(
-                "The directory provided by property %s doesn't exists. Returning default value",
+                "The directory provided by property %s doesn't exist. Returning default value",
                 certPath));
       }
     }
