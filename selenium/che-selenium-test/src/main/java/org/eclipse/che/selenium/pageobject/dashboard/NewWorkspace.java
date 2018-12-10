@@ -274,9 +274,6 @@ public class NewWorkspace {
 
   public void clickOnIncrementMemoryButton(String machineName) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(INCREMENT_MEMORY_BUTTON, machineName)));
-
-    // we need to wait a little to avoid quick clicking on this button
-    WaitUtils.sleepQuietly(1);
   }
 
   public void clickAndHoldIncrementMemoryButton(String machineName, int holdingTimeout) {
@@ -303,9 +300,6 @@ public class NewWorkspace {
 
   public void clickOnDecrementMemoryButton(String machineName) {
     seleniumWebDriverHelper.waitAndClick(By.xpath(format(DECREMENT_MEMORY_BUTTON, machineName)));
-
-    // we need to wait a little to avoid quick clicking on this button
-    WaitUtils.sleepQuietly(1);
   }
 
   public double getRAM(String machineName) {
