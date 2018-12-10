@@ -53,7 +53,7 @@ public class WorkspacesListTest {
   private static final int JAVA_WS_MB = 3072;
   private static final int BLANK_WS_PROJECTS_COUNT = 0;
   private static final int JAVA_WS_PROJECTS_COUNT = 1;
-  private static final String EXPECTED_DOCUMENTATION_PAGE_TITLE = "What Is a Che Workspace?";
+  private static final String EXPECTED_DOCUMENTATION_PAGE_TITLE = "Eclipse Che Documentation";
   private static final String EXPECTED_JAVA_PROJECT_NAME = "web-java-spring";
   private static final String NEWEST_CREATED_WORKSPACE_NAME = "just-created-workspace";
   private static final int EXPECTED_SORTED_WORKSPACES_COUNT = 1;
@@ -286,7 +286,7 @@ public class WorkspacesListTest {
     seleniumWebDriverHelper.waitOpenedSomeWin();
     seleniumWebDriverHelper.switchToNextWindow(mainWindow);
 
-    assertEquals(EXPECTED_DOCUMENTATION_PAGE_TITLE, documentationPage.getTitle());
+    documentationPage.waitTitle(EXPECTED_DOCUMENTATION_PAGE_TITLE);
 
     seleniumWebDriver.close();
     seleniumWebDriver.switchTo().window(mainWindow);

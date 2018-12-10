@@ -33,11 +33,16 @@ public class DocumentationPage {
   }
 
   public interface Locators {
-    String PAGE_TITLE_CLASS_NAME = "post-title-main";
+    String PAGE_TITLE_CLASS_NAME = "projectTitle";
   }
 
   public String getTitle() {
     return seleniumWebDriverHelper.waitVisibilityAndGetText(
         By.className(PAGE_TITLE_CLASS_NAME), LOADER_TIMEOUT_SEC);
+  }
+
+  public void waitTitle(String title) {
+    seleniumWebDriverHelper.waitTextContains(
+        By.className(PAGE_TITLE_CLASS_NAME), title, LOADER_TIMEOUT_SEC);
   }
 }

@@ -25,6 +25,7 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.TestGroup;
+import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
@@ -103,7 +104,11 @@ public class CreateWorkspaceTest {
     newWorkspace.clickOnIncrementMemoryButton(machineName);
     assertEquals(newWorkspace.getRAM(machineName), 2.1);
     newWorkspace.clickOnDecrementMemoryButton(machineName);
+
+    // we need to wait a little to avoid quick clicking on this button
+    WaitUtils.sleepQuietly(1);
     newWorkspace.clickOnDecrementMemoryButton(machineName);
+    WaitUtils.sleepQuietly(1);
     newWorkspace.clickOnDecrementMemoryButton(machineName);
     assertEquals(newWorkspace.getRAM(machineName), 1.8);
 
@@ -138,7 +143,11 @@ public class CreateWorkspaceTest {
     newWorkspace.clickOnIncrementMemoryButton(machineName);
     assertEquals(newWorkspace.getRAM(machineName), 2.1);
     newWorkspace.clickOnDecrementMemoryButton(machineName);
+
+    // we need to wait a little to avoid quick clicking on this button
+    WaitUtils.sleepQuietly(1);
     newWorkspace.clickOnDecrementMemoryButton(machineName);
+    WaitUtils.sleepQuietly(1);
     newWorkspace.clickOnDecrementMemoryButton(machineName);
     assertEquals(newWorkspace.getRAM(machineName), 1.8);
 
