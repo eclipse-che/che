@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
@@ -44,6 +45,7 @@ public class CheckOnValidAndInvalidPackageNameTest {
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private Consoles console;
   @Inject private Loader loader;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient testProjectServiceClient;
@@ -67,6 +69,7 @@ public class CheckOnValidAndInvalidPackageNameTest {
     createPackageByPath(PROJECT_NAME + PATH_TO_JAVA_FOLDER, packageName);
 
     projectExplorer.waitVisibilityByName(packageName);
+    console.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.openItemByVisibleNameInExplorer(packageName);
   }
 
