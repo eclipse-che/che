@@ -305,6 +305,7 @@ wait_for_postgres() {
       printError "Deployment timeout. Aborting."
       exit 1
     fi
+    printInfo "Postgres successfully deployed"
 }
 
 wait_for_keycloak() {
@@ -327,6 +328,7 @@ wait_for_keycloak() {
       printError "Deployment timeout. Aborting."
       exit 1
     fi
+    printInfo "Keycloak successfully deployed"
 }
 
 wait_for_che() {
@@ -488,7 +490,9 @@ ${CHE_VAR_ARRAY}"
       wait_for_keycloak
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
+        printInfo "Registering oAuth client in OpenShift"
         # register oAuth client in OpenShift
+        printInfo "Logging as \"system:admin\""
         $OC_BINARY login -u "system:admin" > /dev/null
         KEYCLOAK_ROUTE=$($OC_BINARY get route/keycloak --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
         $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
@@ -497,6 +501,8 @@ ${CHE_VAR_ARRAY}"
           -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET}
 
         # register OpenShift Identity Provider in Keycloak
+        printInfo "Registering oAuth client in Keycloak"
+        printInfo "Logging as \"${OPENSHIFT_USERNAME}\""
         $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
         KEYCLOAK_POD_NAME=$(${OC_BINARY} get pod --namespace=${CHE_OPENSHIFT_PROJECT} -l app=keycloak --no-headers | awk '{print $1}')
         ${OC_BINARY} exec ${KEYCLOAK_POD_NAME} -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che \
