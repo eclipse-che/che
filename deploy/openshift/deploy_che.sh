@@ -19,6 +19,9 @@
 # --------------
 # Print Che logo
 # --------------
+
+set -e
+
 export TERM=xterm
 
 echo
