@@ -41,9 +41,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-/**
- * @author Alexander Garagatyi
- */
+/** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
 public class BrokerEnvironmentFactoryTest {
 
@@ -52,31 +50,29 @@ public class BrokerEnvironmentFactoryTest {
   private static final String IMAGE_PULL_POLICY = "Never";
   private static final String PUSH_ENDPOINT = "http://localhost:8080";
 
-  @Mock
-  private AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
-  @Mock
-  private MachineTokenEnvVarProvider machineTokenEnvVarProvider;
-  @Mock
-  private RuntimeIdentity runtimeId;
+  @Mock private AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
+  @Mock private MachineTokenEnvVarProvider machineTokenEnvVarProvider;
+  @Mock private RuntimeIdentity runtimeId;
 
   private BrokerEnvironmentFactory<KubernetesEnvironment> factory;
 
   @BeforeMethod
   public void setUp() throws Exception {
     factory =
-        spy(new BrokerEnvironmentFactory<KubernetesEnvironment>(
-            PUSH_ENDPOINT,
-            IMAGE_PULL_POLICY,
-            authEnableEnvVarProvider,
-            machineTokenEnvVarProvider,
-            ImmutableMap.of(
-                SUPPORTED_TYPE, "testRepo/image:tag", "Test type 2", "testRepo/image2:tag2"),
-            INIT_IMAGE) {
-          @Override
-          protected KubernetesEnvironment doCreate(BrokersConfigs brokersConfigs) {
-            return null;
-          }
-        });
+        spy(
+            new BrokerEnvironmentFactory<KubernetesEnvironment>(
+                PUSH_ENDPOINT,
+                IMAGE_PULL_POLICY,
+                authEnableEnvVarProvider,
+                machineTokenEnvVarProvider,
+                ImmutableMap.of(
+                    SUPPORTED_TYPE, "testRepo/image:tag", "Test type 2", "testRepo/image2:tag2"),
+                INIT_IMAGE) {
+              @Override
+              protected KubernetesEnvironment doCreate(BrokersConfigs brokersConfigs) {
+                return null;
+              }
+            });
 
     when(authEnableEnvVarProvider.get(any(RuntimeIdentity.class)))
         .thenReturn(new Pair<>("test1", "value1"));
@@ -127,12 +123,19 @@ public class BrokerEnvironmentFactoryTest {
     Container initContainer = initContainers.get(0);
     assertEquals(initContainer.getImage(), INIT_IMAGE);
     assertEquals(initContainer.getImagePullPolicy(), IMAGE_PULL_POLICY);
-    assertEquals(initContainer.getEnv(),
+    assertEquals(
+        initContainer.getEnv(),
         asList(new EnvVar("test1", "value1", null), new EnvVar("test2", "value2", null)));
-    assertEquals(initContainer.getArgs().toArray(), new String[]{"-push-endpoint",
-        PUSH_ENDPOINT, "-runtime-id",
-        String.format("%s:%s:%s", runtimeId.getWorkspaceId(), runtimeId.getEnvName(),
-            runtimeId.getOwnerId())});
+    assertEquals(
+        initContainer.getArgs().toArray(),
+        new String[] {
+          "-push-endpoint",
+          PUSH_ENDPOINT,
+          "-runtime-id",
+          String.format(
+              "%s:%s:%s",
+              runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId())
+        });
     assertEquals(Containers.getRamLimit(initContainer), 262144000);
     assertEquals(Containers.getRamLimit(initContainer), 262144000);
   }

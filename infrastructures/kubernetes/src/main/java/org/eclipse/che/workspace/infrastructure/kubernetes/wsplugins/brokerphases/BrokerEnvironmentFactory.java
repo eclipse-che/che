@@ -164,7 +164,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   }
 
   private Container newContainer(
-      RuntimeIdentity runtimeId, List<EnvVar> envVars, String image, @Nullable String brokerVolumeName) {
+      RuntimeIdentity runtimeId,
+      List<EnvVar> envVars,
+      String image,
+      @Nullable String brokerVolumeName) {
     final ContainerBuilder cb =
         new ContainerBuilder()
             .withName(generateUniqueName(CONTAINER_NAME_SUFFIX))
