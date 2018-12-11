@@ -180,7 +180,7 @@ public class KubernetesInfraModule extends AbstractModule {
         .addBinding("Che Editor")
         .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
     pluginBrokers
-        .addBinding("Theia remote plugin")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia_remote.image")));
+        .addBinding("Theia plugin")
+        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia.image")));
   }
 }
