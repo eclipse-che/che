@@ -50,7 +50,8 @@ public class BrokerEnvironmentFactoryTest {
             authEnableEnvVarProvider,
             machineTokenEnvVarProvider,
             ImmutableMap.of(
-                "Test type 1", "testRepo/image:tag", "Test type 2", "testRepo/image2:tag2")) {
+                "Test type 1", "testRepo/image:tag", "Test type 2", "testRepo/image2:tag2"),
+            "init:image") {
           @Override
           protected KubernetesEnvironment doCreate(BrokersConfigs brokersConfigs) {
             return null;
@@ -85,4 +86,6 @@ public class BrokerEnvironmentFactoryTest {
     // when
     factory.create(metas, runtimeId, new BrokersResult());
   }
+
+  // TODO
 }
