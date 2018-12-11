@@ -2047,15 +2047,15 @@
             <id>fast</id>
             <properties>
                 <findbugs.skip>true</findbugs.skip>
+                <gpg.skip>true</gpg.skip>
                 <gwt.compiler.localWorkers>2 -T 1C</gwt.compiler.localWorkers>
                 <license.skip>true</license.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
                 <mdep.analyze.skip>true</mdep.analyze.skip>
-                <skipTests>true</skipTests>
                 <skip-enforce>true</skip-enforce>
                 <skip-validate-sources>true</skip-validate-sources>
                 <skipIntegrationTests>true</skipIntegrationTests>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-                <gpg.skip>true</gpg.skip>
+                <skipTests>true</skipTests>
             </properties>
         </profile>
         <!-- Profile for launching GWT Super DevMode in Che IDE (inside a container) -->
