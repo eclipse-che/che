@@ -2051,6 +2051,11 @@
                 <license.skip>true</license.skip>
                 <mdep.analyze.skip>true</mdep.analyze.skip>
                 <skipTests>true</skipTests>
+                <skip-enforce>true</skip-enforce>
+                <skip-validate-sources>true</skip-validate-sources>
+                <skipIntegrationTests>true</skipIntegrationTests>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <gpg.skip>true</gpg.skip>
             </properties>
         </profile>
         <!-- Profile for launching GWT Super DevMode in Che IDE (inside a container) -->
