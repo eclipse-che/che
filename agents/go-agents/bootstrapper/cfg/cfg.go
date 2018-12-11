@@ -55,6 +55,9 @@ var (
 
 	// LogsEndpointReconnectPeriodSec how much time(seconds) is between logs endpoint reconnect attempts.
 	LogsEndpointReconnectPeriodSec int
+
+	// SelfSignedCertificateFilePath path to certificate file that should be used while connection establishing
+	SelfSignedCertificateFilePath string
 )
 
 func init() {
@@ -127,6 +130,12 @@ func init() {
 		`Time(in seconds) between attempts to reconnect to push-logs-endpoint.
 	Bootstrapper tries to reconnect to push-logs-endpoint when previously established connection lost`,
 	)
+	flag.StringVar(
+		&SelfSignedCertificateFilePath,
+		"cacert",
+		"",
+		"Path to Certificate that should be used while connection establishing",
+	)
 }
 
 // Parse parses configuration.
@@ -180,6 +189,9 @@ func Print() {
 	log.Printf("  Push endpoint: %s", PushStatusesEndpoint)
 	log.Printf("  Push logs endpoint: %s", PushLogsEndpoint)
 	log.Printf("  Auth enabled: %t", AuthEnabled)
+	if (SelfSignedCertificateFilePath != "") {
+		log.Printf("  Self signed certificate %s", SelfSignedCertificateFilePath)
+	}
 	log.Print("  Runtime ID:")
 	log.Printf("    Workspace: %s", RuntimeID.Workspace)
 	log.Printf("    Environment: %s", RuntimeID.Environment)

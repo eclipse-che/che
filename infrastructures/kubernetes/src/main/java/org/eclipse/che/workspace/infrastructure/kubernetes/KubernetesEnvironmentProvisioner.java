@@ -20,6 +20,7 @@ import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
@@ -54,21 +55,22 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private static final Logger LOG =
         LoggerFactory.getLogger(KubernetesEnvironmentProvisionerImpl.class);
 
-    private boolean pvcEnabled;
-    private WorkspaceVolumesStrategy volumesStrategy;
-    private UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner;
-    private ServersConverter<KubernetesEnvironment> serversConverter;
-    private EnvVarsConverter envVarsConverter;
-    private RestartPolicyRewriter restartPolicyRewriter;
-    private RamLimitRequestProvisioner ramLimitProvisioner;
-    private InstallerServersPortProvisioner installerServersPortProvisioner;
-    private LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
-    private SecurityContextProvisioner securityContextProvisioner;
-    private PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
-    private IngressTlsProvisioner externalServerIngressTlsProvisioner;
-    private ImagePullSecretProvisioner imagePullSecretProvisioner;
-    private ProxySettingsProvisioner proxySettingsProvisioner;
-    private ServiceAccountProvisioner serviceAccountProvisioner;
+    private final boolean pvcEnabled;
+    private final WorkspaceVolumesStrategy volumesStrategy;
+    private final UniqueNamesProvisioner<KubernetesEnvironment> uniqueNamesProvisioner;
+    private final ServersConverter<KubernetesEnvironment> serversConverter;
+    private final EnvVarsConverter envVarsConverter;
+    private final RestartPolicyRewriter restartPolicyRewriter;
+    private final RamLimitRequestProvisioner ramLimitProvisioner;
+    private final InstallerServersPortProvisioner installerServersPortProvisioner;
+    private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
+    private final SecurityContextProvisioner securityContextProvisioner;
+    private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
+    private final IngressTlsProvisioner externalServerIngressTlsProvisioner;
+    private final ImagePullSecretProvisioner imagePullSecretProvisioner;
+    private final ProxySettingsProvisioner proxySettingsProvisioner;
+    private final ServiceAccountProvisioner serviceAccountProvisioner;
+    private final CertificateProvisioner certificateProvisioner;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(
@@ -86,7 +88,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         IngressTlsProvisioner externalServerIngressTlsProvisioner,
         ImagePullSecretProvisioner imagePullSecretProvisioner,
         ProxySettingsProvisioner proxySettingsProvisioner,
-        ServiceAccountProvisioner serviceAccountProvisioner) {
+        ServiceAccountProvisioner serviceAccountProvisioner,
+        CertificateProvisioner certificateProvisioner) {
       this.pvcEnabled = pvcEnabled;
       this.volumesStrategy = volumesStrategy;
       this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -102,6 +105,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.imagePullSecretProvisioner = imagePullSecretProvisioner;
       this.proxySettingsProvisioner = proxySettingsProvisioner;
       this.serviceAccountProvisioner = serviceAccountProvisioner;
+      this.certificateProvisioner = certificateProvisioner;
     }
 
     @Traced
@@ -139,6 +143,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       imagePullSecretProvisioner.provision(k8sEnv, identity);
       proxySettingsProvisioner.provision(k8sEnv, identity);
       serviceAccountProvisioner.provision(k8sEnv, identity);
+      certificateProvisioner.provision(k8sEnv, identity);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }
