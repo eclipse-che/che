@@ -502,10 +502,11 @@ ${CHE_VAR_ARRAY}"
         printInfo "Logging as \"system:admin\""
         $OC_BINARY login -u "system:admin"
         KEYCLOAK_ROUTE=$($OC_BINARY get route/keycloak --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
-        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
+
+        $OC_BINARY process -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
           -p REDIRECT_URI="${HTTP_PROTOCOL}://${KEYCLOAK_ROUTE}/auth/realms/che/broker/${OCP_IDENTITY_PROVIDER_ID}/endpoint" \
           -p OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID} \
-          -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET}
+          -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET} | oc apply -f -
 
         # register OpenShift Identity Provider in Keycloak
         printInfo "Registering oAuth client in Keycloak"
