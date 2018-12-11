@@ -15,6 +15,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.inject.persist.Transactional;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -22,6 +23,7 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
@@ -38,22 +40,19 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
   @Override
   public void setExpiration(WorkspaceExpiration expiration) throws ServerException {
-    requireNonNull(expiration, "Required non-null expiration object");
-    try {
-      doCreateOrUpdate(expiration);
-    } catch (RuntimeException x) {
-      throw new ServerException(x.getLocalizedMessage(), x);
-    }
+    setExpirationTime(expiration.getWorkspaceId(), expiration.getExpiration());
+  }
+
+  @Override
+  public void setExpirationTime(String workspaceId, long expirationTime) throws ServerException {
+    requireNonNull(workspaceId, "Required non-null workspace id");
+    withActivity(workspaceId, a -> a.setExpiration(expirationTime));
   }
 
   @Override
   public void removeExpiration(String workspaceId) throws ServerException {
-    requireNonNull(workspaceId, "Required non-null id");
-    try {
-      doRemove(workspaceId);
-    } catch (RuntimeException x) {
-      throw new ServerException(x.getLocalizedMessage(), x);
-    }
+    requireNonNull(workspaceId, "Required non-null workspace id");
+    withOptionalActivity(workspaceId, a -> a.setExpiration(null));
   }
 
   @Override
@@ -65,37 +64,158 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     }
   }
 
+  @Override
+  @Transactional
+  public void removeActivity(String workspaceId) throws ServerException {
+    EntityManager em = managerProvider.get();
+    WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
+    try {
+      if (activity != null) {
+        em.remove(activity);
+        em.flush();
+      }
+    } catch (RuntimeException x) {
+      throw new ServerException(x.getLocalizedMessage(), x);
+    }
+  }
+
+  @Override
+  public void setCreatedTime(String workspaceId, long createdTimestamp) throws ServerException {
+    requireNonNull(workspaceId, "Required non-null workspace id");
+    EntityManager em = managerProvider.get();
+    try {
+      WorkspaceActivity a = em.find(WorkspaceActivity.class, workspaceId);
+      if (a == null) {
+        a = new WorkspaceActivity();
+        a.setStatus(WorkspaceStatus.STOPPED);
+        a.setWorkspaceId(workspaceId);
+        a.setCreated(createdTimestamp);
+        em.persist(a);
+      } else {
+        a.setCreated(createdTimestamp);
+        em.merge(a);
+      }
+    } catch (RuntimeException e) {
+      throw new ServerException(e.getLocalizedMessage(), e);
+    }
+  }
+
+  @Override
+  public void setStatusChangeTime(String workspaceId, WorkspaceStatus status, long timestamp)
+      throws ServerException {
+    requireNonNull(workspaceId, "Required non-null workspace id");
+
+    Consumer<WorkspaceActivity> update;
+    switch (status) {
+      case RUNNING:
+        update =
+            a -> {
+              a.setStatus(status);
+              a.setLastRunning(timestamp);
+            };
+        break;
+      case STARTING:
+        update =
+            a -> {
+              a.setStatus(status);
+              a.setLastStarting(timestamp);
+            };
+        break;
+      case STOPPED:
+        update =
+            a -> {
+              a.setStatus(status);
+              a.setLastStopped(timestamp);
+            };
+        break;
+      case STOPPING:
+        update =
+            a -> {
+              a.setStatus(status);
+              a.setLastStopping(timestamp);
+            };
+        break;
+      default:
+        throw new IllegalStateException("Unhandled workspace status: " + status);
+    }
+
+    withActivity(workspaceId, update);
+  }
+
+  @Override
+  public List<String> findInStatusSince(long timestamp, WorkspaceStatus status)
+      throws ServerException {
+    String queryName = "WorkspaceActivity.get" + firstUpperCase(status.name()) + "Since";
+
+    try {
+      return managerProvider
+          .get()
+          .createNamedQuery(queryName, WorkspaceActivity.class)
+          .setParameter("time", timestamp)
+          .getResultList()
+          .stream()
+          .map(WorkspaceActivity::getWorkspaceId)
+          .collect(Collectors.toList());
+    } catch (RuntimeException e) {
+      throw new ServerException(e.getLocalizedMessage(), e);
+    }
+  }
+
+  @Override
+  public WorkspaceActivity findActivity(String workspaceId) throws ServerException {
+    try {
+      EntityManager em = managerProvider.get();
+      return em.find(WorkspaceActivity.class, workspaceId);
+    } catch (RuntimeException x) {
+      throw new ServerException(x.getLocalizedMessage(), x);
+    }
+  }
+
+  @Transactional
+  protected void withActivity(String workspaceId, Consumer<WorkspaceActivity> updater)
+      throws ServerException {
+    withActivity(false, workspaceId, updater);
+  }
+
+  @Transactional
+  protected void withOptionalActivity(String workspaceId, Consumer<WorkspaceActivity> updater)
+      throws ServerException {
+    withActivity(true, workspaceId, updater);
+  }
+
+  private void withActivity(
+      boolean optional, String workspaceId, Consumer<WorkspaceActivity> updater)
+      throws ServerException {
+
+    try {
+      EntityManager em = managerProvider.get();
+      WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
+      if (activity == null) {
+        if (optional) {
+          return;
+        }
+        throw new ServerException("Activity record for workspace " + workspaceId + " not found.");
+      }
+
+      updater.accept(activity);
+
+      em.merge(activity);
+      em.flush();
+    } catch (RuntimeException x) {
+      throw new ServerException(x.getLocalizedMessage(), x);
+    }
+  }
+
   @Transactional
   protected List<String> doFindExpired(long timestamp) {
     return managerProvider
         .get()
-        .createNamedQuery("WorkspaceExpiration.getExpired", WorkspaceExpiration.class)
+        .createNamedQuery("WorkspaceActivity.getExpired", WorkspaceActivity.class)
         .setParameter("expiration", timestamp)
         .getResultList()
         .stream()
-        .map(WorkspaceExpiration::getWorkspaceId)
+        .map(WorkspaceActivity::getWorkspaceId)
         .collect(Collectors.toList());
-  }
-
-  @Transactional
-  protected void doCreateOrUpdate(WorkspaceExpiration expiration) {
-    final EntityManager manager = managerProvider.get();
-    if (manager.find(WorkspaceExpiration.class, expiration.getWorkspaceId()) == null) {
-      manager.persist(expiration);
-    } else {
-      manager.merge(expiration);
-    }
-    manager.flush();
-  }
-
-  @Transactional
-  protected void doRemove(String workspaceId) {
-    final EntityManager manager = managerProvider.get();
-    final WorkspaceExpiration expiration = manager.find(WorkspaceExpiration.class, workspaceId);
-    if (expiration != null) {
-      manager.remove(expiration);
-      manager.flush();
-    }
   }
 
   @Singleton
@@ -103,6 +223,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
       extends CascadeEventSubscriber<BeforeWorkspaceRemovedEvent> {
 
     @Inject private EventService eventService;
+
     @Inject private WorkspaceActivityDao workspaceActivityDao;
 
     @PostConstruct
@@ -112,7 +233,11 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
     @Override
     public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
-      workspaceActivityDao.removeExpiration(event.getWorkspace().getId());
+      workspaceActivityDao.removeActivity(event.getWorkspace().getId());
     }
+  }
+
+  private static String firstUpperCase(String str) {
+    return Character.toUpperCase(str.charAt(0)) + str.substring(1).toLowerCase();
   }
 }

@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -71,23 +72,23 @@ public class WorkspaceActivityManagerTest {
 
     activityManager.update(wsId, activityTime);
 
-    WorkspaceExpiration expected = new WorkspaceExpiration(wsId, activityTime + DEFAULT_TIMEOUT);
-    verify(workspaceActivityDao, times(1)).setExpiration(eq(expected));
+    verify(workspaceActivityDao, times(1))
+        .setExpirationTime(eq(wsId), eq(activityTime + DEFAULT_TIMEOUT));
   }
 
   @Test
   public void shouldAddWorkspaceForTrackActivityWhenWorkspaceRunning() throws Exception {
     final String wsId = "testWsId";
     activityManager.subscribe();
-    verify(eventService).subscribe(captor.capture());
-    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
+    verify(eventService, times(2)).subscribe(captor.capture());
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getAllValues().get(0);
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withStatus(WorkspaceStatus.RUNNING)
             .withWorkspaceId(wsId));
-    ArgumentCaptor<WorkspaceExpiration> captor = ArgumentCaptor.forClass(WorkspaceExpiration.class);
-    verify(workspaceActivityDao, times(1)).setExpiration(captor.capture());
-    assertEquals(captor.getValue().getWorkspaceId(), wsId);
+    ArgumentCaptor<String> wsIdCaptor = ArgumentCaptor.forClass(String.class);
+    verify(workspaceActivityDao, times(1)).setExpirationTime(wsIdCaptor.capture(), any(long.class));
+    assertEquals(wsIdCaptor.getValue(), wsId);
   }
 
   @Test
@@ -96,8 +97,8 @@ public class WorkspaceActivityManagerTest {
     final long expiredTime = 1000L;
     activityManager.update(wsId, expiredTime);
     activityManager.subscribe();
-    verify(eventService).subscribe(captor.capture());
-    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
+    verify(eventService, times(2)).subscribe(captor.capture());
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getAllValues().get(0);
 
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)

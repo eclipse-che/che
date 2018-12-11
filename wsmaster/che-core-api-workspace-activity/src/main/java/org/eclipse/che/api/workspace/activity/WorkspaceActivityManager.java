@@ -12,10 +12,13 @@
 package org.eclipse.che.api.workspace.activity;
 
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -25,10 +28,13 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.schedule.ScheduleDelay;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class WorkspaceActivityManager {
+
   public static final long MINIMAL_TIMEOUT = 300_000L;
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
@@ -55,7 +62,8 @@ public class WorkspaceActivityManager {
   private final long defaultTimeout;
   private final WorkspaceActivityDao activityDao;
   private final EventService eventService;
-  private final EventSubscriber<?> workspaceEventsSubscriber;
+  private final EventSubscriber<WorkspaceStatusEvent> workspaceEventsSubscriber;
+  private final EventSubscriber<WorkspaceCreatedEvent> workspaceCreatedSubscriber;
 
   protected final WorkspaceManager workspaceManager;
 
@@ -76,27 +84,60 @@ public class WorkspaceActivityManager {
               + " minutes). This may cause problems with workspace components startup and/or premature workspace shutdown.");
     }
 
+    //noinspection Convert2Lambda
+    this.workspaceCreatedSubscriber =
+        new EventSubscriber<WorkspaceCreatedEvent>() {
+          @Override
+          public void onEvent(WorkspaceCreatedEvent event) {
+            try {
+              long createdTime =
+                  Long.parseLong(
+                      event.getWorkspace().getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+              activityDao.setCreatedTime(event.getWorkspace().getId(), createdTime);
+            } catch (ServerException | NumberFormatException x) {
+              LOG.warn("Failed to record workspace created time in workspace activity.", x);
+            }
+          }
+        };
+
+    //noinspection Convert2Lambda
     this.workspaceEventsSubscriber =
         new EventSubscriber<WorkspaceStatusEvent>() {
           @Override
           public void onEvent(WorkspaceStatusEvent event) {
-            switch (event.getStatus()) {
+            long now = System.currentTimeMillis();
+            String workspaceId = event.getWorkspaceId();
+            WorkspaceStatus status = event.getStatus();
+
+            // first, record the activity
+            try {
+              activityDao.setStatusChangeTime(workspaceId, status, now);
+            } catch (ServerException e) {
+              LOG.warn(
+                  String.format(
+                      "Failed to record workspace activity. Workspace: %s, status: %s",
+                      workspaceId, status.toString()),
+                  e);
+            }
+
+            // now do any special handling
+            switch (status) {
               case RUNNING:
                 try {
-                  Workspace workspace = workspaceManager.getWorkspace(event.getWorkspaceId());
+                  Workspace workspace = workspaceManager.getWorkspace(workspaceId);
                   if (workspace.getAttributes().remove(WORKSPACE_STOPPED_BY) != null) {
-                    workspaceManager.updateWorkspace(event.getWorkspaceId(), workspace);
+                    workspaceManager.updateWorkspace(workspaceId, workspace);
                   }
                 } catch (Exception ex) {
                   LOG.warn(
                       "Failed to remove stopped information attribute for workspace "
-                          + event.getWorkspaceId());
+                          + workspaceId);
                 }
-                update(event.getWorkspaceId(), System.currentTimeMillis());
+                WorkspaceActivityManager.this.update(workspaceId, now);
                 break;
               case STOPPED:
                 try {
-                  activityDao.removeExpiration(event.getWorkspaceId());
+                  activityDao.removeExpiration(workspaceId);
                 } catch (ServerException e) {
                   LOG.error(e.getLocalizedMessage(), e);
                 }
@@ -118,11 +159,16 @@ public class WorkspaceActivityManager {
     try {
       long timeout = getIdleTimeout(wsId);
       if (timeout > 0) {
-        activityDao.setExpiration(new WorkspaceExpiration(wsId, activityTime + timeout));
+        activityDao.setExpirationTime(wsId, activityTime + timeout);
       }
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
+  }
+
+  public List<String> findWorkspacesInStatus(WorkspaceStatus status, long threshold)
+      throws ServerException {
+    return activityDao.findInStatusSince(threshold, status);
   }
 
   protected long getIdleTimeout(String wsId) {
@@ -167,5 +213,6 @@ public class WorkspaceActivityManager {
   @PostConstruct
   public void subscribe() {
     eventService.subscribe(workspaceEventsSubscriber);
+    eventService.subscribe(workspaceCreatedSubscriber);
   }
 }
