@@ -57,6 +57,7 @@ HELP="
 --debug - Deploy Che in a debug mode, create and expose debug route
 --image-che - Override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
 --secure | -s - Deploy Che with SSL enabled
+--setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
@@ -89,6 +90,10 @@ case $key in
     ;;
     --no-pull)
     IMAGE_PULL_POLICY=IfNotPresent
+    shift
+    ;;
+    --setup-ocp-oauth)
+    export SETUP_OCP_OAUTH=true
     shift
     ;;
     --postgres-debug)
@@ -147,11 +152,33 @@ export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-${DEFAULT_IMAGE_KEYCLOAK}}
 DEFAULT_KEYCLOAK_IMAGE_TAG="nightly"
 export KEYCLOAK_IMAGE_TAG=${KEYCLOAK_IMAGE_TAG:-${DEFAULT_KEYCLOAK_IMAGE_TAG}}
 
-KEYCLOAK_IMAGE_PULL_POLICY="Always"
-export ${KEYCLOAK_IMAGE_PULL_POLICY:-${DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY}}
+DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY="Always"
+export KEYCLOAK_IMAGE_PULL_POLICY=${KEYCLOAK_IMAGE_PULL_POLICY:-${DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
+
+DEFAULT_OPENSHIFT_USERNAME="developer"
+export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
+
+DEFAULT_OPENSHIFT_PASSWORD="developer"
+export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
+
+
+DEFAULT_OCP_OAUTH_CLIENT_ID=ocp-client
+export OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID:-${DEFAULT_OCP_OAUTH_CLIENT_ID}}
+
+DEFAULT_OCP_OAUTH_CLIENT_SECRET=ocp-client-secret
+export OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET:-${DEFAULT_OCP_OAUTH_CLIENT_SECRET}}
+
+DEFAULT_OCP_IDENTITY_PROVIDER_ID=openshift-v3
+export OCP_IDENTITY_PROVIDER_ID=${OCP_IDENTITY_PROVIDER_ID:-${DEFAULT_OCP_IDENTITY_PROVIDER_ID}}
+
+DEFAULT_KEYCLOAK_USER=admin
+export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
+
+DEFAULT_KEYCLOAK_PASSWORD=admin
+export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
 
 DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG="latest"
 export PLUGIN_REGISTRY_IMAGE_TAG=${PLUGIN_REGISTRY_IMAGE_TAG:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG}}
@@ -236,6 +263,7 @@ isLoggedIn() {
     exit 1
   else
     CONTEXT=$(${OC_BINARY} whoami -c)
+    OPENSHIFT_ENDPOINT=$(oc whoami -c --show-context=false --show-server=true)
     printInfo "Active session found. Your current context is: ${CONTEXT}"
   fi
 }
