@@ -63,7 +63,7 @@ public interface VirtualFile {
    * file represent image, image viewer may use this URL as src for {@link
    * com.google.gwt.user.client.ui.Image}.
    *
-   * @return url or null if content url doesn't exists.
+   * @return url or null if content url doesn't exist.
    */
   String getContentUrl();
 
