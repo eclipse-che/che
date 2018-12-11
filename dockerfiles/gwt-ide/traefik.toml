@@ -5,9 +5,9 @@
 debug = true
 logLevel = "DEBUG"
 [traefikLog]
-  filePath = "/home/user/traefik/traefik.log"
+  filePath = "/home/user/agent/traefik/traefik.log"
 [accessLog]
-  filePath = "/home/user/traefik/access.log"
+  filePath = "/home/user/agent/traefik/access.log"
 
 
 # Entrypoints to be used by frontends that do not specify any entrypoint.

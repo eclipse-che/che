@@ -14,7 +14,7 @@
 
 FROM alpine:3.8 as builder
 
-RUN mkdir -p /tmp/agent && mkdir -p /home/user/agent/wsagent
+RUN mkdir -p /tmp/agent && mkdir -p /home/user/agent/wsagent/webapps/
 COPY eclipse-che/tomcat/webapps/ROOT.war /home/user/wsagent/webapps/ide.war
 COPY eclipse-che/lib/ws-agent.tar.gz /tmp/agent
 COPY eclipse-che/lib/linux_amd64/exec /tmp/agent
@@ -22,7 +22,7 @@ COPY eclipse-che/lib/linux_amd64/terminal /tmp/agent
 
 
 RUN mkdir  -p /home/user/agent/traefik ;\
-    wget -O /home/user/agent/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.7.3/traefik_linux-amd64"; \
+    wget -O /home/user/agent/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.7.5/traefik_linux-amd64"; \
     chmod +x /home/user/agent/traefik/traefik
 COPY traefik.toml traefik_conf.sh /home/user/agent/traefik/
 
@@ -36,7 +36,7 @@ RUN sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/agent/ws
     tar -xf ws-agent.tar.gz  && \
     tar -xf exec-agent-linux_amd64.tar.gz -C /home/user/agent && \
     tar -xf websocket-terminal-linux_amd64.tar.gz -C /home/user/agent && \
-    cp webapps/ROOT.war /home/user/agent/wsagent/webapps && \
+    cp webapps/ROOT.war /home/user/agent/wsagent/webapps/ && \
     rm -rf /tmp/agent
 
 FROM openjdk:8u181-jdk-alpine3.8
@@ -47,7 +47,7 @@ WORKDIR ${HOME}
 RUN PACKAGE="ca-certificates supervisor mc git bash sudo" && \
     apk update upgrade --no-cache && apk add --no-cache ${PACKAGE}
 
-COPY --from=builder /home/user/agent /home/user/agent
+
 RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh user \
     && echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     # Create /projects for Che
@@ -63,8 +63,7 @@ RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh user \
     && rm -rf /tmp/* \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
-
-
+COPY --chown=user:root --from=builder /home/user/agent /home/user/agent
 USER user
 
 ADD entrypoint.sh /entrypoint.sh
