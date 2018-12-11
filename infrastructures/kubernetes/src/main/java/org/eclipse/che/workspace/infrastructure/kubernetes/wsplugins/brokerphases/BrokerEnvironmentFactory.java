@@ -170,8 +170,6 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
             .withName(generateUniqueName(CONTAINER_NAME_SUFFIX))
             .withImage(image)
             .withArgs(
-                "-metas",
-                CONF_FOLDER + "/" + CONFIG_FILE,
                 "-push-endpoint",
                 cheWebsocketEndpoint,
                 "-runtime-id",
@@ -181,11 +179,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                     MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
                     runtimeId.getOwnerId()))
             .withImagePullPolicy(brokerPullPolicy)
-            .withEnv(envVars)
-            .withNewResources()
-            .endResources();
+            .withEnv(envVars);
     if (brokerVolumeName != null) {
       cb.withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null));
+      cb.addToArgs("-metas", CONF_FOLDER + "/" + CONFIG_FILE);
     }
     Container container = cb.build();
     Containers.addRamLimit(container, "250Mi");
