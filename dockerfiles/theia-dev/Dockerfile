@@ -28,7 +28,7 @@ RUN apk add --update --no-cache \
     bash
 
 # Add npm global bin directory to the path
-ENV HOME=/home/theia-dev PATH=${HOME}/.npm-global/bin:${PATH}
+ENV HOME=/home/theia-dev PATH=/home/theia-dev/.npm-global/bin:${PATH}
 WORKDIR ${HOME}
 
 # Exposing Theia ports
@@ -38,7 +38,7 @@ EXPOSE 3000 3030
 RUN npm config set prefix "${HOME}/.npm-global" && \
     echo "--global-folder \"${HOME}/.yarn-global\"" > ${HOME}/.yarnrc && \
     # add eclipse che theia generator
-    yarn global add @eclipse-che/theia-generator@0.0.1-1543478099 && \
+    yarn global add @eclipse-che/theia-generator@0.0.1-1543568125 && \
     # Generate .passwd.template \
     cat /etc/passwd | \
     sed s#root:x.*#theia-dev:x:\${USER_ID}:\${GROUP_ID}::${HOME}:/bin/bash#g \
