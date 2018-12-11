@@ -53,7 +53,7 @@ public interface Container extends Resource {
    * @throws IllegalStateException if during resource search failed has been occurred. Reasons
    *     include:
    *     <ul>
-   *       <li>Resource with path '/project_path' doesn't exists
+   *       <li>Resource with path '/project_path' doesn't exist
    *       <li>Resource with path '/project_path' isn't a project
    *       <li>Not a file
    *     </ul>
@@ -74,7 +74,7 @@ public interface Container extends Resource {
    * @throws IllegalStateException if during resource search failed has been occurred. Reasons
    *     include:
    *     <ul>
-   *       <li>Resource with path '/project_path' doesn't exists
+   *       <li>Resource with path '/project_path' doesn't exist
    *       <li>Resource with path '/project_path' isn't a project
    *       <li>Not a file
    *     </ul>
@@ -95,7 +95,7 @@ public interface Container extends Resource {
    * @throws IllegalStateException if during resource search failed has been occurred. Reasons
    *     include:
    *     <ul>
-   *       <li>Resource with path '/project_path' doesn't exists
+   *       <li>Resource with path '/project_path' doesn't exist
    *       <li>Resource with path '/project_path' isn't a project
    *       <li>Not a container
    *     </ul>
@@ -116,7 +116,7 @@ public interface Container extends Resource {
    * @throws IllegalStateException if during resource search failed has been occurred. Reasons
    *     include:
    *     <ul>
-   *       <li>Resource with path '/project_path' doesn't exists
+   *       <li>Resource with path '/project_path' doesn't exist
    *       <li>Resource with path '/project_path' isn't a project
    *       <li>Not a container
    *     </ul>
@@ -137,7 +137,7 @@ public interface Container extends Resource {
    * @throws IllegalStateException if during resource search failed has been occurred. Reasons
    *     include:
    *     <ul>
-   *       <li>Resource with path '/project_path' doesn't exists
+   *       <li>Resource with path '/project_path' doesn't exist
    *       <li>Resource with path '/project_path' isn't a project
    *     </ul>
    *

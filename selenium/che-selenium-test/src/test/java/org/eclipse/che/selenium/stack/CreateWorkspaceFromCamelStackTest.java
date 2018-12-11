@@ -91,6 +91,7 @@ public class CreateWorkspaceFromCamelStackTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, CONSOLE_JAVA_SIMPLE);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);

@@ -73,7 +73,10 @@ public class RunToCursorTest {
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick("build");
     projectExplorer.quickExpandWithJavaScript();
+
+    projectExplorer.waitItem(PROJECT + "/src/App.class");
     projectExplorer.openItemByPath(PROJECT + "/src/App.java");
+    editor.waitActive();
     editor.setBreakpoint(15);
     debugPanel.openDebugPanel();
 

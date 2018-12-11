@@ -25,4 +25,3 @@ if [ -d "/home/theia-build/patches/${THEIA_VERSION}" ]; then
         cd ${HOME}/theia-source-code && patch -p1 < ${file};
     done
 fi
-

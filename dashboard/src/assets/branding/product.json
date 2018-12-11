@@ -9,7 +9,7 @@
   "websocketContext": "/api/websocket",
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
-  "supportEmail": "wish@codenvy.com",
+  "supportEmail": "che-dev@eclipse.org",
   "oauthDocs": "Configure OAuth in the che.properties file.",
   "workspace": {
     "priorityStacks": ["Java", "Java-MySQL", "Blank"],

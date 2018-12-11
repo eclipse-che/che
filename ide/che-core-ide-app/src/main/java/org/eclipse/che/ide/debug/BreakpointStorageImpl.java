@@ -177,7 +177,7 @@ public class BreakpointStorageImpl implements BreakpointStorage {
    * Remove all keys from the local storage that contain breakpoints for unexisted workspaces.
    *
    * <p>Implementation doesn't handle workspace removal, so it is necessary to check if workspaces
-   * doesn't exists and remove local storage records if so.
+   * doesn't exist and remove local storage records if so.
    */
   private void clearOutdatedRecords() {
     for (int i = 0; i < storage.getLength(); i++) {

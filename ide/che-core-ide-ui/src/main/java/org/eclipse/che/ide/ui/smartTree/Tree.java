@@ -382,7 +382,7 @@ public class Tree extends FocusWidget
    * rendered DOM elements and parent/children relationship.
    *
    * @param node node to process
-   * @return instance of {@link NodeDescriptor} or <code>null</code> if one's doesn't exists
+   * @return instance of {@link NodeDescriptor} or <code>null</code> if one's doesn't exist
    */
   public NodeDescriptor getNodeDescriptor(Node node) {
     checkNotNull(node, NULL_NODE_MSG);
@@ -402,7 +402,7 @@ public class Tree extends FocusWidget
    * Event.ONDBLCLICK.
    *
    * @param target DOM element, e.g. joint, icon, presentable of info text
-   * @return instance of {@link NodeDescriptor} or <code>null</code> if one's doesn't exists
+   * @return instance of {@link NodeDescriptor} or <code>null</code> if one's doesn't exist
    */
   public NodeDescriptor getNodeDescriptor(Element target) {
     checkNotNull(target);
