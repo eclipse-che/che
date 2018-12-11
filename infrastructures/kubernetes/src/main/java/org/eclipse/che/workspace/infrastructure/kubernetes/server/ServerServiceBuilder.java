@@ -63,7 +63,7 @@ public class ServerServiceBuilder {
         new io.fabric8.kubernetes.api.model.ServiceBuilder();
     return builder
         .withNewMetadata()
-        .withName(name.replace("/", "-"))
+        .withName(name.replace("/", "-").toLowerCase())
         .withAnnotations(
             Annotations.newSerializer()
                 .servers(serversConfigs)
