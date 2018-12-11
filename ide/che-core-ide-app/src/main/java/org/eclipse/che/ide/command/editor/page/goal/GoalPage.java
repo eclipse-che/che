@@ -92,7 +92,7 @@ public class GoalPage extends AbstractCommandEditorPage implements GoalPageView.
 
   /**
    * Asks user for the the new goal name nad creates it if another one with the same name doesn't
-   * exists.
+   * exist.
    */
   private void createGoal(String initialName) {
     final InputCallback inputCallback =
