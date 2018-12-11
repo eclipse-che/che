@@ -475,7 +475,14 @@ ${CHE_VAR_ARRAY}"
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
         # create secret with OpenShift certificate
-        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat /var/lib/origin/openshift.local.config/master/ca.crt)"
+
+        if [[ -z ${OPENSHIFT_CERT} ]]; then
+          DEFAULT_OPENSHIFT_CERT_PATH=/var/lib/origin/openshift.local.config/master/ca.crt
+          export OPENSHIFT_CERT_PATH=${OPENSHIFT_CERT_PATH:-${DEFAULT_OPENSHIFT_CERT_PATH}}
+          OPENSHIFT_CERT="$(cat $OPENSHIFT_CERT_PATH)"
+        fi
+
+        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$OPENSHIFT_CERT"
       fi
 
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml \
