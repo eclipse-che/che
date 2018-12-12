@@ -49,7 +49,7 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Duplicate tool name found:'.*'")
+      expectedExceptionsMessageRegExp = "Duplicate tool name found:'mvn-stack'")
   public void shouldThrowExceptionOnDuplicateToolName() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getTools().add(new Tool().withName(initialDevfile.getTools().get(0).getName()));
@@ -59,7 +59,7 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Multiple editor tools found: '.*', '.*'")
+      expectedExceptionsMessageRegExp = "Multiple editor tools found: 'theia-ide', 'editor-2'")
   public void shouldThrowExceptionOnMultipleEditors() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getTools().add(new Tool().withName("editor-2").withType("cheEditor"));
@@ -69,7 +69,7 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Duplicate command name found:'.*'")
+      expectedExceptionsMessageRegExp = "Duplicate command name found:'build'")
   public void shouldThrowExceptionOnDuplicateCommandName() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getCommands().add(new Command().withName(initialDevfile.getCommands().get(0).getName()));
@@ -80,7 +80,7 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Found actions which refers to non-existing tools in command '.*':'no_such_tool'")
+          "Found actions which refers to non-existing tools in command 'build':'no_such_tool'")
   public void shouldThrowExceptionOnUnexistingCommandActionTool() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getCommands().get(0).getActions().add(new Action().withTool("no_such_tool"));
@@ -90,7 +90,7 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Duplicate project name found:'.*'")
+      expectedExceptionsMessageRegExp = "Duplicate project name found:'petclinic'")
   public void shouldThrowExceptionOnDuplicateProjectName() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getProjects().add(new Project().withName(initialDevfile.getProjects().get(0).getName()));
@@ -101,7 +101,7 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Invalid project name found:'.*'. Name must contain only Latin letters,\\n"
+          "Invalid project name found:'.*'. Name must contain only Latin letters,"
               + "digits or these following special characters ._-")
   public void shouldThrowExceptionOnInvalidProjectName() throws Exception {
     Devfile broken = copyOf(initialDevfile);

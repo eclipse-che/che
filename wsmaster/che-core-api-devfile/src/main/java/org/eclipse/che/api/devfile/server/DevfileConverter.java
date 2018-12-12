@@ -17,6 +17,8 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
@@ -76,7 +78,7 @@ public class DevfileConverter {
         String editorId = entry.getValue();
         Tool editorTool =
             new Tool()
-                .withType("cheEditor")
+                .withType(EDITOR_TOOL_TYPE)
                 .withId(editorId)
                 .withName(toolsIdToName.getOrDefault(editorId, editorId));
         tools.add(editorTool);
@@ -85,7 +87,7 @@ public class DevfileConverter {
           Tool pluginTool =
               new Tool()
                   .withId(pluginId)
-                  .withType("chePlugin")
+                  .withType(PLUGIN_TOOL_TYPE)
                   .withName(toolsIdToName.getOrDefault(pluginId, pluginId));
           tools.add(pluginTool);
         }
@@ -113,10 +115,10 @@ public class DevfileConverter {
     StringJoiner toolIdToNameMappingStringJoiner = new StringJoiner(",");
     for (Tool tool : devfile.getTools()) {
       switch (tool.getType()) {
-        case "cheEditor":
+        case EDITOR_TOOL_TYPE:
           attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, tool.getId());
           break;
-        case "chePlugin":
+        case PLUGIN_TOOL_TYPE:
           pluginsStringJoiner.add(tool.getId());
           break;
         default:

@@ -13,6 +13,8 @@ package org.eclipse.che.api.devfile.server;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
+import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,8 +39,12 @@ import org.eclipse.che.api.devfile.model.Tool;
  * </pre>
  */
 @Singleton
-public class DevfileIntegrityValidator {
+class DevfileIntegrityValidator {
 
+  /**
+   * Checks than name may contain only letters, digits, symbols _.- and does not starts with
+   * non-word character.
+   */
   private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("^[\\w\\d]+[\\w\\d_.-]*$");
 
   void validateDevfile(Devfile devfile) throws DevfileFormatException {
@@ -55,7 +61,7 @@ public class DevfileIntegrityValidator {
         throw new DevfileFormatException(format("Duplicate tool name found:'%s'", tool.getName()));
       }
       switch (tool.getType()) {
-        case "cheEditor":
+        case EDITOR_TOOL_TYPE:
           if (editorTool != null) {
             throw new DevfileFormatException(
                 format(
@@ -64,7 +70,7 @@ public class DevfileIntegrityValidator {
           }
           editorTool = tool;
           break;
-        case "chePlugin":
+        case PLUGIN_TOOL_TYPE:
           break;
         default:
           throw new DevfileFormatException(
@@ -108,7 +114,7 @@ public class DevfileIntegrityValidator {
       if (!PROJECT_NAME_PATTERN.matcher(project.getName()).matches()) {
         throw new DevfileFormatException(
             format(
-                "Invalid project name found:'%s'. Name must contain only Latin letters,\n"
+                "Invalid project name found:'%s'. Name must contain only Latin letters,"
                     + "digits or these following special characters ._-",
                 project.getName()));
       }
