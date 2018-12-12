@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.java.languageserver;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.InputStream;
@@ -50,6 +51,8 @@ import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
 import org.eclipse.che.api.project.shared.Constants.Services;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.jdt.ls.extension.api.Notifications;
 import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 import org.eclipse.che.jdt.ls.extension.api.dto.StatusReport;
@@ -78,8 +81,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private final ProjectManager projectManager;
   private final ProjectsSynchronizer projectSynchronizer;
   private final AtomicBoolean isStarted = new AtomicBoolean(false);
-
-  private ExecutorService notificationHandler;
+  private final ExecutorService notificationHandler;
 
   @Inject
   public JavaLanguageServerLauncher(
@@ -97,7 +99,13 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     this.eventService = eventService;
     this.projectManager = projectManager;
     this.projectSynchronizer = projectSynchronizer;
-    this.notificationHandler = Executors.newSingleThreadExecutor();
+    this.notificationHandler =
+        Executors.newSingleThreadScheduledExecutor(
+            new ThreadFactoryBuilder()
+                .setNameFormat("Jdtls Notification Handler")
+                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                .setDaemon(true)
+                .build());
 
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
   }
@@ -204,7 +212,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
                     });
           }
           params.setArguments(fixedPathList);
-          notifyTransmitter.sendNotification(params);
+          notifyClient(params);
 
           break;
         }
@@ -218,11 +226,15 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
             projectSynchronizer.ensureMavenProject(projectPath);
           }
           params.setArguments(fixedPathList);
-          notifyTransmitter.sendNotification(params);
+          notifyClient(params);
 
           break;
         }
     }
+  }
+
+  void notifyClient(ExecuteCommandParams params) {
+    notifyTransmitter.sendNotification(params);
   }
 
   private JsonRpcException toJsonRpcException(ApiException e) {
@@ -319,9 +331,32 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
                 Proxy.newProxyInstance(
                     getClass().getClassLoader(),
                     new Class[] {LanguageServer.class, FileContentAccess.class},
-                    new DynamicWrapper(new JavaLSWrapper(proxy), proxy));
+                    new DynamicWrapper(
+                        new JavaLSWrapper(JavaLanguageServerLauncher.this, proxy), proxy));
         return wrapped;
       }
     };
+  }
+
+  public void pomChanged(String uri) {
+    String pomPath = removePrefixUri(uri);
+    projectManager
+        .getClosest(pomPath)
+        .ifPresent(
+            project -> {
+              try {
+                LOG.info("updating projectconfig for {}", project.getPath());
+                projectManager.update(project);
+                notifyClient(
+                    new ExecuteCommandParams(
+                        Constants.POM_CHANGED, Collections.singletonList(pomPath)));
+              } catch (ForbiddenException
+                  | ServerException
+                  | NotFoundException
+                  | ConflictException
+                  | BadRequestException e) {
+                throw toJsonRpcException(e);
+              }
+            });
   }
 }

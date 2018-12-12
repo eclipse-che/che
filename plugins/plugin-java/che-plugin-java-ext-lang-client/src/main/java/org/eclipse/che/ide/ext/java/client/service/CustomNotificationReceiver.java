@@ -20,10 +20,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestTransmitter;
-import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathChangedEvent;
-import org.eclipse.che.ide.project.ProjectServiceClient;
+import org.eclipse.che.ide.ext.java.shared.Constants;
+import org.eclipse.che.ide.resource.Path;
 import org.eclipse.che.jdt.ls.extension.api.Notifications;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 
@@ -36,20 +36,12 @@ public class CustomNotificationReceiver {
   private final RequestTransmitter transmitter;
   private final EventBus eventBus;
   private final AppContext appContext;
-  private final ProjectServiceClient projectService;
-  private final PromiseProvider promises;
 
   @Inject
   public CustomNotificationReceiver(
-      RequestTransmitter transmitter,
-      EventBus eventBus,
-      AppContext appContext,
-      ProjectServiceClient projectService,
-      PromiseProvider promises) {
+      RequestTransmitter transmitter, EventBus eventBus, AppContext appContext) {
     this.eventBus = eventBus;
     this.appContext = appContext;
-    this.projectService = projectService;
-    this.promises = promises;
     this.transmitter = transmitter;
   }
 
@@ -84,6 +76,13 @@ public class CustomNotificationReceiver {
           }
           break;
         }
+      case Constants.POM_CHANGED:
+        {
+          for (Object file : params.getArguments()) {
+            updateResource(stringValue(file));
+          }
+        }
+        break;
       default:
         break;
     }
@@ -96,6 +95,19 @@ public class CustomNotificationReceiver {
         .methodName(NOTIFY_SUBSCRIBE)
         .noParams()
         .sendAndSkipResult();
+  }
+
+  private void updateResource(String path) {
+    appContext
+        .getWorkspaceRoot()
+        .getResource(Path.valueOf(path))
+        .then(
+            resource -> {
+              if (resource.isPresent()) {
+                resource.get().getProject().synchronize();
+                resource.get().getParent().synchronize();
+              }
+            });
   }
 
   private void updateProjectConfig(String project) {
