@@ -26,20 +26,9 @@ import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Tool;
 
-/**
- * Validates devfile logical integrity. Performs the following checks:
- *
- * <pre>
- * <ul>
- *   <li>All listed items (projects, tools, commands) have unique names</li>
- *   <li>There is only one tool of type cheEditor</li>
- *   <li>All tools exists which are referenced/required by command actions</li>
- *   <li>Project names conforms naming rules</li>
- * </ul>
- * </pre>
- */
+/** Validates devfile logical integrity. */
 @Singleton
-class DevfileIntegrityValidator {
+public class DevfileIntegrityValidator {
 
   /**
    * Checks than name may contain only letters, digits, symbols _.- and does not starts with
@@ -47,7 +36,23 @@ class DevfileIntegrityValidator {
    */
   private static final Pattern PROJECT_NAME_PATTERN = Pattern.compile("^[\\w\\d]+[\\w\\d_.-]*$");
 
-  void validateDevfile(Devfile devfile) throws DevfileFormatException {
+  /**
+   * Performs the following checks:
+   *
+   * <pre>
+   * <ul>
+   *   <li>All listed items (projects, tools, commands) have unique names</li>
+   *   <li>There is only one tool of type cheEditor</li>
+   *   <li>All tools exists which are referenced/required by command actions</li>
+   *   <li>Project names conforms naming rules</li>
+   * </ul>
+   * </pre>
+   *
+   * param devfile input devfile
+   *
+   * @throws DevfileFormatException is some of the checks is failed
+   */
+  public void validateDevfile(Devfile devfile) throws DevfileFormatException {
     validateProjects(devfile);
     Set<String> toolNames = validateTools(devfile);
     validateCommands(devfile, toolNames);
