@@ -51,7 +51,7 @@ public class DevfileConverter {
               wsConfig.getName()));
     }
 
-    Devfile devFile =
+    Devfile devfile =
         new Devfile().withSpecVersion(CURRENT_SPEC_VERSION).withName(wsConfig.getName());
 
     // Manage projects
@@ -59,7 +59,7 @@ public class DevfileConverter {
     wsConfig
         .getProjects()
         .forEach(projectConfig -> projects.add(projectConfigToDevProject(projectConfig)));
-    devFile.setProjects(projects);
+    devfile.setProjects(projects);
 
     // Manage commands
     Map<String, String> toolsIdToName = parseTools(wsConfig);
@@ -67,7 +67,7 @@ public class DevfileConverter {
     wsConfig
         .getCommands()
         .forEach(command -> commands.add(commandImplToDevCommand(command, toolsIdToName)));
-    devFile.setCommands(commands);
+    devfile.setCommands(commands);
 
     // Manage tools
     List<Tool> tools = new ArrayList<>();
@@ -91,27 +91,27 @@ public class DevfileConverter {
         }
       }
     }
-    devFile.setTools(tools);
-    return devFile;
+    devfile.setTools(tools);
+    return devfile;
   }
 
-  public WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devFile)
+  public WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devfile)
       throws DevfileFormatException {
-    validateCurrentVersion(devFile);
+    validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
-    config.setName(devFile.getName());
+    config.setName(devfile.getName());
 
     // Manage projects
     List<ProjectConfigImpl> projects = new ArrayList<>();
-    devFile.getProjects().forEach(project -> projects.add(devProjectToProjectConfig(project)));
+    devfile.getProjects().forEach(project -> projects.add(devProjectToProjectConfig(project)));
     config.setProjects(projects);
 
     // Manage tools
     Map<String, String> attributes = new HashMap<>();
     StringJoiner pluginsStringJoiner = new StringJoiner(",");
     StringJoiner toolIdToNameMappingStringJoiner = new StringJoiner(",");
-    for (Tool tool : devFile.getTools()) {
+    for (Tool tool : devfile.getTools()) {
       switch (tool.getType()) {
         case "cheEditor":
           attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, tool.getId());
@@ -135,9 +135,9 @@ public class DevfileConverter {
 
     // Manage commands
     List<CommandImpl> commands = new ArrayList<>();
-    devFile
+    devfile
         .getCommands()
-        .forEach(command -> commands.addAll(devCommandToCommandImpls(devFile, command)));
+        .forEach(command -> commands.addAll(devCommandToCommandImpls(devfile, command)));
     config.setCommands(commands);
     return config;
   }

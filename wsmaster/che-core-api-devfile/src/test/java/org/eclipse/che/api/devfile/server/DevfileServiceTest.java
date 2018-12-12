@@ -64,6 +64,7 @@ public class DevfileServiceTest {
 
   @Mock private WorkspaceManager workspaceManager;
   @Mock private EnvironmentContext environmentContext;
+  @Mock private DevfileIntegrityValidator integrityValidator;
   private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
   private DevfileSchemaValidator validator;
 
@@ -76,10 +77,11 @@ public class DevfileServiceTest {
   private DevfileService devFileService;
 
   @BeforeMethod
-  public void initService() throws IOException {
+  public void initService() {
     this.validator = spy(new DevfileSchemaValidator(schemaProvider));
     this.devFileService =
-        new DevfileService(linksGenerator, validator, schemaProvider, workspaceManager);
+        new DevfileService(
+            linksGenerator, validator, integrityValidator, schemaProvider, workspaceManager);
   }
 
   @Test
