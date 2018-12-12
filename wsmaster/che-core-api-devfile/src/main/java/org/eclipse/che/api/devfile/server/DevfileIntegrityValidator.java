@@ -32,7 +32,7 @@ import org.eclipse.che.api.devfile.model.Tool;
  *   <li>All listed items (projects, tools, commands) have unique names</li>
  *   <li>There is only one tool of type cheEditor</li>
  *   <li>All tools exists which are referenced/required by command actions</li>
- *   <li>Project names conforms naming rules<li/>
+ *   <li>Project names conforms naming rules</li>
  * </ul>
  * </pre>
  */
