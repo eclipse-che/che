@@ -29,19 +29,19 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
   @NamedQuery(
       name = "WorkspaceActivity.getStoppedSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPED' AND a.last_stopped <= :time"),
+          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPED' AND a.lastStopped <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getStoppingSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPING' AND a.last_stopping <= :time"),
+          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPING' AND a.lastStopping <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getRunningSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'RUNNING' AND a.last_running <= :time"),
+          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'RUNNING' AND a.lastRunning <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getStartingSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPED' AND a.last_starting <= :time"),
+          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPED' AND a.lastStarting <= :time"),
 })
 public class WorkspaceActivity {
 
