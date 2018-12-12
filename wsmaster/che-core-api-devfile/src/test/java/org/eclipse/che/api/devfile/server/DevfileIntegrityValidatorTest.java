@@ -132,11 +132,20 @@ public class DevfileIntegrityValidatorTest {
     result.setTools(tools);
     List<Command> commands = new ArrayList<>();
     for (Command command : source.getCommands()) {
+      List<Action> actions = new ArrayList<>();
+      for (Action action : command.getActions()) {
+        actions.add(
+            new Action()
+                .withCommand(action.getCommand())
+                .withTool(action.getTool())
+                .withType(action.getType())
+                .withWorkdir(action.getWorkdir()));
+      }
       commands.add(
           new Command()
               .withName(command.getName())
               .withAttributes(command.getAttributes())
-              .withActions(new ArrayList<>(command.getActions())));
+              .withActions(actions));
     }
     result.setCommands(commands);
     return result;
