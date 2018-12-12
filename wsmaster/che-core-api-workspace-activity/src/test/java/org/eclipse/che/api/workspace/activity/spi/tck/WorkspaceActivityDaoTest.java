@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
-import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -58,11 +58,11 @@ public class WorkspaceActivityDaoTest {
 
   private AccountImpl[] accounts = new AccountImpl[COUNT];
   private WorkspaceImpl[] workspaces = new WorkspaceImpl[COUNT];
-  private WorkspaceExpiration[] expirations = new WorkspaceExpiration[COUNT];
+  private WorkspaceActivity[] activities = new WorkspaceActivity[COUNT];
 
   @Inject private TckRepository<AccountImpl> accountTckRepository;
 
-  @Inject private TckRepository<WorkspaceExpiration> expirationTckRepository;
+  @Inject private TckRepository<WorkspaceActivity> activityTckRepository;
 
   @Inject private TckRepository<WorkspaceImpl> wsTckRepository;
 
@@ -74,17 +74,27 @@ public class WorkspaceActivityDaoTest {
       // 2 workspaces share 1 namespace
       workspaces[i] = createWorkspace("ws" + i, accounts[i / 2], "name-" + i);
 
-      expirations[i] = new WorkspaceExpiration("ws" + i, (i + 1) * 1_000_000);
+      long base = (long) i + 1;
+      WorkspaceActivity a = new WorkspaceActivity();
+      a.setWorkspaceId("ws" + i);
+      a.setCreated(base);
+      a.setLastStarting(base * 10);
+      a.setLastRunning(base * 100);
+      a.setLastStopping(base * 1_000);
+      a.setLastStopped(base * 10_000);
+      a.setExpiration(base * 1_000_000);
+
+      activities[i] = a;
     }
 
     accountTckRepository.createAll(asList(accounts));
     wsTckRepository.createAll(asList(workspaces));
-    expirationTckRepository.createAll(asList(expirations));
+    activityTckRepository.createAll(asList(activities));
   }
 
   @AfterMethod
   private void cleanup() throws TckRepositoryException {
-    expirationTckRepository.removeAll();
+    activityTckRepository.removeAll();
     wsTckRepository.removeAll();
     accountTckRepository.removeAll();
   }
@@ -92,7 +102,7 @@ public class WorkspaceActivityDaoTest {
   @Test
   public void shouldFindExpirationsByTimestamp() throws Exception {
     List<String> expected =
-        Arrays.asList(expirations[0].getWorkspaceId(), expirations[1].getWorkspaceId());
+        Arrays.asList(activities[0].getWorkspaceId(), activities[1].getWorkspaceId());
     List<String> found = workspaceActivityDao.findExpired(2_500_000);
 
     assertEquals(found, expected);
@@ -100,9 +110,9 @@ public class WorkspaceActivityDaoTest {
 
   @Test(dependsOnMethods = "shouldFindExpirationsByTimestamp")
   public void shouldRemoveExpirationsByWsId() throws Exception {
-    List<String> expected = Collections.singletonList(expirations[1].getWorkspaceId());
+    List<String> expected = Collections.singletonList(activities[1].getWorkspaceId());
 
-    workspaceActivityDao.removeExpiration(expirations[0].getWorkspaceId());
+    workspaceActivityDao.removeExpiration(activities[0].getWorkspaceId());
 
     List<String> found = workspaceActivityDao.findExpired(2_500_000);
     assertEquals(found, expected);
@@ -113,11 +123,10 @@ public class WorkspaceActivityDaoTest {
 
     List<String> expected =
         Arrays.asList(
-            expirations[0].getWorkspaceId(),
-            expirations[2].getWorkspaceId(),
-            expirations[1].getWorkspaceId());
-    workspaceActivityDao.setExpiration(
-        new WorkspaceExpiration(expirations[2].getWorkspaceId(), 1_750_000));
+            activities[0].getWorkspaceId(),
+            activities[2].getWorkspaceId(),
+            activities[1].getWorkspaceId());
+    workspaceActivityDao.setExpirationTime(activities[2].getWorkspaceId(), 1_750_000);
 
     List<String> found = workspaceActivityDao.findExpired(2_500_000);
     assertEquals(found, expected);
@@ -127,12 +136,11 @@ public class WorkspaceActivityDaoTest {
   public void shouldAddExpirations() throws Exception {
 
     List<String> expected =
-        Arrays.asList(expirations[0].getWorkspaceId(), expirations[1].getWorkspaceId());
-    workspaceActivityDao.removeExpiration(expirations[1].getWorkspaceId());
+        Arrays.asList(activities[0].getWorkspaceId(), activities[1].getWorkspaceId());
+    workspaceActivityDao.removeExpiration(activities[1].getWorkspaceId());
 
     // create new again
-    workspaceActivityDao.setExpiration(
-        new WorkspaceExpiration(expirations[1].getWorkspaceId(), 1_250_000));
+    workspaceActivityDao.setExpirationTime(activities[1].getWorkspaceId(), 1_250_000);
 
     List<String> found = workspaceActivityDao.findExpired(1_500_000);
     assertEquals(found, expected);

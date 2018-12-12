@@ -17,14 +17,17 @@ INSERT INTO che_workspace_activity (workspace_id, expiration)
   SELECT workspace_id, expiration FROM che_workspace_expiration;
 
 INSERT INTO che_workspace_activity (workspace_id, created)
-  SELECT workspace_id, cast (attributes as int) FROM workspace_attributes
-  WHERE attribute_key = 'created';
+  SELECT workspace_id, attributes FROM workspace_attributes
+  WHERE attributes_key = 'created';
 
-UPDATE che_workspace_activity SET last_running = cast(a.attributes as int)
-  FROM workspace_attributes AS a, che_k8s_runtime r
-  WHERE che_workspace_activity.workspace_id = a.workspace_id AND a.workspace_id = r.workspace_id
-  AND a.attribute_key = 'updated' AND r.status = 'RUNNING';
+UPDATE che_workspace_activity
+  INNER JOIN workspace_attributes AS a
+    ON che_workspace_activity.workspace_id = a.workspace_id
+  INNER JOIN che_k8s_runtime AS r
+    ON a.workspace_id = r.workspace_id AND a.attributes_key = 'updated' AND r.status = 'RUNNING'
+  SET last_running = a.attributes;
 
-UPDATE che_workspace_activity SET last_stopped = cast(a.attributes as int)
-  FROM workspace_attributes AS a WHERE che_workspace_activity.workspace_id = a.workspace_id
-  AND a.attribute_key LIKE 'stopped%';
+UPDATE che_workspace_activity
+  INNER JOIN workspace_attributes AS a
+    ON che_workspace_activity.workspace_id = a.workspace_id AND a.attributes_key LIKE 'stopped%'
+  SET last_stopped = a.attributes;
