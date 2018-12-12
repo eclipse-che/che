@@ -48,8 +48,7 @@ public class DevfileIntegrityValidator {
    * </ul>
    * </pre>
    *
-   * param devfile input devfile
-   *
+   * @param devfile input devfile
    * @throws DevfileFormatException is some of the checks is failed
    */
   public void validateDevfile(Devfile devfile) throws DevfileFormatException {
