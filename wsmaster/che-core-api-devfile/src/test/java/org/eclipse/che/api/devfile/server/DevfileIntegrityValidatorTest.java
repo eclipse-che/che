@@ -80,7 +80,7 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Found actions which refers to non-existing tools in command 'build':'no_such_tool'")
+          "Found actions which refer to non-existing tools in command 'build':'no_such_tool'")
   public void shouldThrowExceptionOnUnexistingCommandActionTool() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getCommands().get(0).getActions().add(new Action().withTool("no_such_tool"));

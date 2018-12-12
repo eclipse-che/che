@@ -92,18 +92,18 @@ public class DevfileIntegrityValidator {
         throw new DevfileFormatException(
             format("Duplicate command name found:'%s'", command.getName()));
       }
-      Set<String> nonexistingToolActions =
+      Set<String> nonExistingToolActions =
           command
               .getActions()
               .stream()
               .map(Action::getTool)
               .filter(t -> !toolNames.contains(t))
               .collect(toSet());
-      if (!nonexistingToolActions.isEmpty()) {
+      if (!nonExistingToolActions.isEmpty()) {
         throw new DevfileFormatException(
             format(
-                "Found actions which refers to non-existing tools in command '%s':'%s'",
-                command.getName(), String.join(",", nonexistingToolActions)));
+                "Found actions which refer to non-existing tools in command '%s':'%s'",
+                command.getName(), String.join(",", nonExistingToolActions)));
       }
     }
   }
