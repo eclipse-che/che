@@ -49,7 +49,7 @@ public class DevfileIntegrityValidator {
    * </pre>
    *
    * @param devfile input devfile
-   * @throws DevfileFormatException is some of the checks is failed
+   * @throws DevfileFormatException if some of the checks is failed
    */
   public void validateDevfile(Devfile devfile) throws DevfileFormatException {
     validateProjects(devfile);
