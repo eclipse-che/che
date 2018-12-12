@@ -47,21 +47,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides a unique PVC for each workspace.
+ * Provides a unique PVC for each volume of a workspace.
  *
  * <p>Names for PVCs are evaluated as: '{configured_prefix}' + '-' +'{generated_8_chars}' to avoid
  * naming collisions inside of one Kubernetes namespace.
  *
- * <p>Note that for this strategy count of simultaneously running workspaces and workspaces with
- * backed up data is always the same and equal to the count of available PVCs in Kubernetes
- * namespace.
+ * <p>Note that for this strategy count of simultaneously used volumes by workspaces is always the
+ * same and equal to the count of available PVCs in Kubernetes namespace.
  *
  * <p>The usage of PVCs for this strategy is next: one PVC per volume, but for volumes that are
  * provided by Che there a small exception: <br>
  * - when the workspace contains few machines that are placed in separated pods and relies on the
  * same volume then, for each of the pods' the separate PVC would be provided.
  *
- * <p>Cleanup of backed up data is performed by removing of PVC related to the workspace but when
+ * <p>This strategy uses subpaths to do the same as {@link CommonPVCStrategy} does and make easier
+ * data migration if it will be needed.<br>
+ * Subpaths have the following format: '{workspaceId}/{volumeName}'.<br>
+ * Note that logs volume has the special format: '{workspaceId}/{volumeName}/{machineName}'. It is
+ * done in this way to avoid conflicts e.g. two identical agents inside different machines produce
+ * the same log file.
+ *
+ * <p>Cleanup of backed up data is performed by removing of PVCs related to the workspace but when
  * the volume or machine name is changed then related PVC would not be removed.
  *
  * @author Anton Korneta
