@@ -46,13 +46,13 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   @Override
   public void setExpirationTime(String workspaceId, long expirationTime) throws ServerException {
     requireNonNull(workspaceId, "Required non-null workspace id");
-    withActivity(workspaceId, a -> a.setExpiration(expirationTime));
+    doUpdate(workspaceId, a -> a.setExpiration(expirationTime));
   }
 
   @Override
   public void removeExpiration(String workspaceId) throws ServerException {
     requireNonNull(workspaceId, "Required non-null workspace id");
-    withOptionalActivity(workspaceId, a -> a.setExpiration(null));
+    doUpdateOptionally(workspaceId, a -> a.setExpiration(null));
   }
 
   @Override
@@ -68,8 +68,8 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   @Transactional
   public void removeActivity(String workspaceId) throws ServerException {
     EntityManager em = managerProvider.get();
-    WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
     try {
+      WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
       if (activity != null) {
         em.remove(activity);
         em.flush();
@@ -82,22 +82,20 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   @Override
   public void setCreatedTime(String workspaceId, long createdTimestamp) throws ServerException {
     requireNonNull(workspaceId, "Required non-null workspace id");
-    EntityManager em = managerProvider.get();
-    try {
-      WorkspaceActivity a = em.find(WorkspaceActivity.class, workspaceId);
-      if (a == null) {
-        a = new WorkspaceActivity();
-        a.setStatus(WorkspaceStatus.STOPPED);
-        a.setWorkspaceId(workspaceId);
-        a.setCreated(createdTimestamp);
-        em.persist(a);
-      } else {
-        a.setCreated(createdTimestamp);
-        em.merge(a);
-      }
-    } catch (RuntimeException e) {
-      throw new ServerException(e.getLocalizedMessage(), e);
-    }
+    doUpdate(
+        workspaceId,
+        a -> {
+          a.setCreated(createdTimestamp);
+
+          // We might just have created the activity record and we need to initialize the status
+          // to something. Since a created workspace is implicitly stopped, let's record it like
+          // that.
+          // If any status change event was already captured, the status would have been set
+          // accordingly already.
+          if (a.getStatus() == null) {
+            a.setStatus(WorkspaceStatus.STOPPED);
+          }
+        });
   }
 
   @Override
@@ -139,7 +137,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
         throw new IllegalStateException("Unhandled workspace status: " + status);
     }
 
-    withActivity(workspaceId, update);
+    doUpdate(workspaceId, update);
   }
 
   @Override
@@ -172,19 +170,18 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Transactional
-  protected void withActivity(String workspaceId, Consumer<WorkspaceActivity> updater)
+  protected void doUpdate(String workspaceId, Consumer<WorkspaceActivity> updater)
       throws ServerException {
-    withActivity(false, workspaceId, updater);
+    doUpdate(false, workspaceId, updater);
   }
 
   @Transactional
-  protected void withOptionalActivity(String workspaceId, Consumer<WorkspaceActivity> updater)
+  protected void doUpdateOptionally(String workspaceId, Consumer<WorkspaceActivity> updater)
       throws ServerException {
-    withActivity(true, workspaceId, updater);
+    doUpdate(true, workspaceId, updater);
   }
 
-  private void withActivity(
-      boolean optional, String workspaceId, Consumer<WorkspaceActivity> updater)
+  private void doUpdate(boolean optional, String workspaceId, Consumer<WorkspaceActivity> updater)
       throws ServerException {
 
     try {
@@ -194,13 +191,19 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
         if (optional) {
           return;
         }
-        throw new ServerException("Activity record for workspace " + workspaceId + " not found.");
+        activity = new WorkspaceActivity();
+        activity.setWorkspaceId(workspaceId);
+
+        updater.accept(activity);
+
+        em.persist(activity);
+      } else {
+        updater.accept(activity);
+
+        em.merge(activity);
+        em.flush();
       }
 
-      updater.accept(activity);
-
-      em.merge(activity);
-      em.flush();
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
     }
