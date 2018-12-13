@@ -62,10 +62,16 @@
              */
             this.loadKeycloakSettings = function() {
                 var msg = "Cannot load keycloak settings. This is normal for single-user mode.";
-                if (window.parent && window.parent['_keycloak']) {
-                    window['_keycloak'] = window.parent['_keycloak'];
-                    Loader.startLoading();
-                    return;
+                try {
+                    if (window.parent && window.parent['_keycloak']) {
+                        window['_keycloak'] = window.parent['_keycloak'];
+                        Loader.startLoading();
+                        return;
+                    }
+                } catch (e) {
+                    // access to parent frame can be forbidden from inner iframe, in case if IDE.html would
+                    // be loaded from different domain then paren frame.
+                    console.error(msg, e);
                 }
                 
                 try {
