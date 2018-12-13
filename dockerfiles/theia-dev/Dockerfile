@@ -28,7 +28,13 @@ RUN apk add --update --no-cache \
     bash
 
 # Add npm global bin directory to the path
-ENV HOME=/home/theia-dev PATH=/home/theia-dev/.npm-global/bin:${PATH}
+ENV HOME=/home/theia-dev \
+    PATH=/home/theia-dev/.npm-global/bin:${PATH} \
+    # Specify the directory of git (avoid to search at init of Theia)
+    USE_LOCAL_GIT=true \
+    LOCAL_GIT_DIRECTORY=/usr \
+    GIT_EXEC_PATH=/usr/libexec/git-core
+
 WORKDIR ${HOME}
 
 # Exposing Theia ports
