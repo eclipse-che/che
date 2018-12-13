@@ -17,6 +17,10 @@ public class Constants {
 
   public static final String CURRENT_SPEC_VERSION = "0.0.1";
 
+  public static final String EDITOR_TOOL_TYPE = "cheEditor";
+
+  public static final String PLUGIN_TOOL_TYPE = "chePlugin";
+
   /**
    * Workspace attribute which contains comma-separated list of mappings of tool id to its name
    * Example value:

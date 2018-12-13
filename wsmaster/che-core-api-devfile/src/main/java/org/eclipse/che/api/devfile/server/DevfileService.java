@@ -58,6 +58,7 @@ public class DevfileService extends Service {
 
   private WorkspaceLinksGenerator linksGenerator;
   private DevfileSchemaValidator schemaValidator;
+  private DevfileIntegrityValidator integrityValidator;
   private DevfileSchemaProvider schemaCachedProvider;
   private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
@@ -67,10 +68,12 @@ public class DevfileService extends Service {
   public DevfileService(
       WorkspaceLinksGenerator linksGenerator,
       DevfileSchemaValidator schemaValidator,
+      DevfileIntegrityValidator integrityValidator,
       DevfileSchemaProvider schemaCachedProvider,
       WorkspaceManager workspaceManager) {
     this.linksGenerator = linksGenerator;
     this.schemaValidator = schemaValidator;
+    this.integrityValidator = integrityValidator;
     this.schemaCachedProvider = schemaCachedProvider;
     this.workspaceManager = workspaceManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
@@ -136,6 +139,7 @@ public class DevfileService extends Service {
     try {
       JsonNode parsed = schemaValidator.validateBySchema(data, verbose);
       devFile = objectMapper.treeToValue(parsed, Devfile.class);
+      integrityValidator.validateDevfile(devFile);
       workspaceConfig = devfileConverter.devFileToWorkspaceConfig(devFile);
     } catch (IOException e) {
       throw new ServerException(e.getMessage());
