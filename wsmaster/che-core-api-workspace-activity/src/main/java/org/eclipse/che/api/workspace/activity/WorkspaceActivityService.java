@@ -25,12 +25,16 @@ import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.Service;
+import org.eclipse.che.api.core.rest.annotations.Required;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.slf4j.Logger;
@@ -74,8 +78,9 @@ public class WorkspaceActivityService extends Service {
 
   @GET
   @ApiOperation("Retrieves the IDs of workspaces that have been in given state.")
+  @Produces(MediaType.APPLICATION_JSON)
   public List<String> getWorkspacesByActivity(
-      @QueryParam("status") @ApiParam("The requested status of the workspaces")
+      @QueryParam("status") @Required @ApiParam("The requested status of the workspaces")
           WorkspaceStatus status,
       @QueryParam("threshold")
           @DefaultValue("-1")
@@ -92,7 +97,11 @@ public class WorkspaceActivityService extends Service {
                   + " specified in milliseconds. If both threshold and minDuration are specified,"
                   + " minDuration is NOT taken into account.")
           long minDuration)
-      throws ServerException {
+      throws ServerException, BadRequestException {
+
+    if (status == null) {
+      throw new BadRequestException("The status query parameter is query.");
+    }
 
     if (threshold == -1) {
       threshold = System.currentTimeMillis();
