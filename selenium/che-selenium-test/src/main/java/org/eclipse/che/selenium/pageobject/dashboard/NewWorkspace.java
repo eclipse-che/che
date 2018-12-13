@@ -156,6 +156,7 @@ public class NewWorkspace {
     JAVA_DEBIAN("java-debian"),
     KOTLIN("kotlin-default"),
     NODE("node-default"),
+    NODEJS_AND_POSTGRES("nodejs-postgres"),
     OPENSHIFT_SQL("openshift-sql"),
     PHP("php-default"),
     PHP_GAE("php-gae"),

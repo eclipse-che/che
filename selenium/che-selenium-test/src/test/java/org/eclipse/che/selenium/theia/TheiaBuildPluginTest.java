@@ -115,7 +115,7 @@ public class TheiaBuildPluginTest {
     theiaIde.waitNotificationDisappearance(expectedYaomanMessage, UPDATING_PROJECT_TIMEOUT_SEC);
 
     // build plugin
-    openTerminal("File", "Open Terminal in specific container", "ws/theia-ide");
+    openTerminalByProposal("ws/theia-ide");
     theiaTerminal.waitTab(wsTheiaIdeTerminalTitle);
     theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
     theiaTerminal.performCommand(goToDirectoryCommand);
@@ -244,6 +244,13 @@ public class TheiaBuildPluginTest {
     theiaIde.runMenuCommand(topMenuCommand, commandName);
 
     theiaProposalForm.waitSearchField();
+    theiaProposalForm.waitProposal(proposalText);
+    theiaProposalForm.clickOnProposal(proposalText);
+    theiaProposalForm.waitFormDisappearance();
+  }
+
+  private void openTerminalByProposal(String proposalText) {
+    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, "`");
     theiaProposalForm.waitProposal(proposalText);
     theiaProposalForm.clickOnProposal(proposalText);
     theiaProposalForm.waitFormDisappearance();
