@@ -14,7 +14,6 @@ package org.eclipse.che.api.project.server;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 
-import com.google.common.annotations.Beta;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.project.ProjectProblem;
@@ -23,8 +22,6 @@ import org.eclipse.che.api.core.model.workspace.config.SourceStorage;
 import org.eclipse.che.api.project.shared.NewProjectConfig;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 
-/** @author Vlad Zhukovskiy */
-@Beta
 public class MutableProjectConfig implements ProjectConfig {
 
   private String name;
