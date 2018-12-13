@@ -264,6 +264,7 @@
                             <goal>integration-test</goal>
                         </goals>
                         <configuration>
+                            <skipITs>${skipIntegrationTests}</skipITs>
                             <trimStackTrace>false</trimStackTrace>
                             <!-- we need to set 'parallel=classes' to prevent unexpected destroy 
 								of test objects in case of execution the package of tests -->
@@ -390,6 +391,7 @@
                             </execution>
                         </executions>
                         <configuration>
+                            <skipITs>false</skipITs>
                             <suiteXmlFiles>
                                 <suiteXmlFile>${runSuite}</suiteXmlFile>
                             </suiteXmlFiles>
