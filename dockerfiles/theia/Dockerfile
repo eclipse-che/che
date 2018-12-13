@@ -80,7 +80,7 @@ ENV USE_LOCAL_GIT=true \
     LOCAL_GIT_DIRECTORY=/usr \
     GIT_EXEC_PATH=/usr/libexec/git-core
 
-EXPOSE 3000 3030
+EXPOSE 3100 3130
 
 # Install sudo
 # Install Java for java extension
