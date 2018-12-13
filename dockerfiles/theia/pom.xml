@@ -24,6 +24,13 @@
     <packaging>pom</packaging>
     <name>Che Dockerfiles :: Theia</name>
     <inceptionYear>2018</inceptionYear>
+    <dependencies>
+        <dependency>
+            <groupId>org.eclipse.che.dockerfiles</groupId>
+            <artifactId>che-dockerfiles-theia-dev</artifactId>
+            <type>pom</type>
+        </dependency>
+    </dependencies>
     <profiles>
         <profile>
             <id>integration</id>
