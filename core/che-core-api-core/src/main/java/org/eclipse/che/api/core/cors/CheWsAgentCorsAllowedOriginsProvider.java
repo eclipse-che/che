@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Provider of "cors.allowed.origins" setting for CORS Filter of WS Agent. Provides the value of WS
@@ -22,11 +23,17 @@ import javax.ws.rs.core.UriBuilder;
  */
 public class CheWsAgentCorsAllowedOriginsProvider implements Provider<String> {
 
-  private String allowedOrigins;
+  private final String allowedOrigins;
 
   @Inject
-  public CheWsAgentCorsAllowedOriginsProvider(@Named("che.api") String cheApi) {
-    this.allowedOrigins = UriBuilder.fromUri(cheApi).replacePath(null).build().toString();
+  public CheWsAgentCorsAllowedOriginsProvider(
+      @Named("che.api") String cheApi,
+      @Nullable @Named("che.cors.allowed_origins") String allowedOrigins) {
+    if (allowedOrigins == null) {
+      this.allowedOrigins = UriBuilder.fromUri(cheApi).replacePath(null).build().toString();
+    } else {
+      this.allowedOrigins = allowedOrigins;
+    }
   }
 
   @Override
