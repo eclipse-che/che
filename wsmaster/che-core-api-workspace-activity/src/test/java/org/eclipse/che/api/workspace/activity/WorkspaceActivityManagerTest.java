@@ -38,11 +38,12 @@ import org.testng.annotations.Test;
 @Listeners(value = MockitoTestNGListener.class)
 /** Tests for {@link WorkspaceActivityNotifier} */
 public class WorkspaceActivityManagerTest {
+
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
 
   @Mock private WorkspaceManager workspaceManager;
 
-  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> captor;
+  @Captor private ArgumentCaptor<EventSubscriber<?>> captor;
 
   @Mock private Account account;
   @Mock private WorkspaceImpl workspace;
@@ -81,7 +82,9 @@ public class WorkspaceActivityManagerTest {
     final String wsId = "testWsId";
     activityManager.subscribe();
     verify(eventService, times(2)).subscribe(captor.capture());
-    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getAllValues().get(0);
+    @SuppressWarnings("unchecked")
+    final EventSubscriber<WorkspaceStatusEvent> subscriber =
+        (EventSubscriber<WorkspaceStatusEvent>) captor.getAllValues().get(0);
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withStatus(WorkspaceStatus.RUNNING)
@@ -98,7 +101,9 @@ public class WorkspaceActivityManagerTest {
     activityManager.update(wsId, expiredTime);
     activityManager.subscribe();
     verify(eventService, times(2)).subscribe(captor.capture());
-    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getAllValues().get(0);
+    @SuppressWarnings("unchecked")
+    final EventSubscriber<WorkspaceStatusEvent> subscriber =
+        (EventSubscriber<WorkspaceStatusEvent>) captor.getAllValues().get(0);
 
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
