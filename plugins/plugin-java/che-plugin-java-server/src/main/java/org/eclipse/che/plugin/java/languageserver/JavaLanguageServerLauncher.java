@@ -112,7 +112,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
 
   @PreDestroy
   public void shutDown() {
-    notificationHandler.shutdown();
+    notificationHandler.shutdownNow();
   }
 
   public void sendStatusReport(StatusReport report) {
