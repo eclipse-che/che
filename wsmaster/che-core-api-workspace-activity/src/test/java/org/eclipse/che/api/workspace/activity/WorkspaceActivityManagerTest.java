@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.activity;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -19,19 +20,25 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.AssertJUnit.assertEquals;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.stream.Stream;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -80,11 +87,8 @@ public class WorkspaceActivityManagerTest {
   @Test
   public void shouldAddWorkspaceForTrackActivityWhenWorkspaceRunning() throws Exception {
     final String wsId = "testWsId";
-    activityManager.subscribe();
-    verify(eventService, times(2)).subscribe(captor.capture());
-    @SuppressWarnings("unchecked")
-    final EventSubscriber<WorkspaceStatusEvent> subscriber =
-        (EventSubscriber<WorkspaceStatusEvent>) captor.getAllValues().get(0);
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = subscribeAndGetStatusEventSubscriber();
+
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withStatus(WorkspaceStatus.RUNNING)
@@ -99,11 +103,7 @@ public class WorkspaceActivityManagerTest {
     final String wsId = "testWsId";
     final long expiredTime = 1000L;
     activityManager.update(wsId, expiredTime);
-    activityManager.subscribe();
-    verify(eventService, times(2)).subscribe(captor.capture());
-    @SuppressWarnings("unchecked")
-    final EventSubscriber<WorkspaceStatusEvent> subscriber =
-        (EventSubscriber<WorkspaceStatusEvent>) captor.getAllValues().get(0);
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = subscribeAndGetStatusEventSubscriber();
 
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
@@ -111,5 +111,60 @@ public class WorkspaceActivityManagerTest {
             .withWorkspaceId(wsId));
 
     verify(workspaceActivityDao, times(1)).removeExpiration(eq(wsId));
+  }
+
+  @Test
+  public void shouldRecordWorkspaceCreation() throws Exception {
+    String wsId = "1";
+
+    EventSubscriber<WorkspaceCreatedEvent> subscriber = subscribeAndGetCreatedSubscriber();
+
+    subscriber.onEvent(
+        new WorkspaceCreatedEvent(
+            DtoFactory.newDto(WorkspaceDto.class)
+                .withId(wsId)
+                .withAttributes(ImmutableMap.of(Constants.CREATED_ATTRIBUTE_NAME, "15"))));
+
+    verify(workspaceActivityDao, times(1)).setCreatedTime(eq(wsId), eq(15L));
+  }
+
+  @Test(dataProvider = "wsStatus")
+  public void shouldRecordWorkspaceStatusChange(WorkspaceStatus status) throws Exception {
+    String wsId = "1";
+
+    EventSubscriber<WorkspaceStatusEvent> subscriber = subscribeAndGetStatusEventSubscriber();
+
+    subscriber.onEvent(
+        DtoFactory.newDto(WorkspaceStatusEvent.class).withStatus(status).withWorkspaceId(wsId));
+
+    verify(workspaceActivityDao, times(1)).setStatusChangeTime(eq(wsId), eq(status), anyLong());
+  }
+
+  @DataProvider(name = "wsStatus")
+  public Object[][] getWorkspaceStatus() {
+    return Stream.of(WorkspaceStatus.values())
+        .map(s -> new WorkspaceStatus[] {s})
+        .toArray(Object[][]::new);
+  }
+
+  private EventSubscriber<WorkspaceStatusEvent> subscribeAndGetStatusEventSubscriber() {
+    subscribeToEventService();
+    @SuppressWarnings("unchecked")
+    final EventSubscriber<WorkspaceStatusEvent> subscriber =
+        (EventSubscriber<WorkspaceStatusEvent>) captor.getAllValues().get(0);
+    return subscriber;
+  }
+
+  private EventSubscriber<WorkspaceCreatedEvent> subscribeAndGetCreatedSubscriber() {
+    subscribeToEventService();
+    @SuppressWarnings("unchecked")
+    final EventSubscriber<WorkspaceCreatedEvent> subscriber =
+        (EventSubscriber<WorkspaceCreatedEvent>) captor.getAllValues().get(1);
+    return subscriber;
+  }
+
+  private void subscribeToEventService() {
+    activityManager.subscribe();
+    verify(eventService, times(2)).subscribe(captor.capture());
   }
 }
