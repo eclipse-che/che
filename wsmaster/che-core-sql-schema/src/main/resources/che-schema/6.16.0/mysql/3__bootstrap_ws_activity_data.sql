@@ -13,12 +13,14 @@
 -- copy data from the old workspace expiration table. Leave the old table and data intact, we just
 -- won't be using it anymore, but leave it there so that we don't make breaking schema changes
 -- straight away.
-INSERT INTO che_workspace_activity (workspace_id, expiration)
-  SELECT workspace_id, expiration FROM che_workspace_expiration;
-
 INSERT INTO che_workspace_activity (workspace_id, created)
   SELECT workspace_id, attributes FROM workspace_attributes
   WHERE attributes_key = 'created';
+
+UPDATE che_workspace_activity AS a
+  INNER JOIN che_workspace_expiration AS e
+    ON a.workspace_id = e.workspace_id
+  SET expiration = e.expiration;
 
 UPDATE che_workspace_activity
   INNER JOIN workspace_attributes AS a

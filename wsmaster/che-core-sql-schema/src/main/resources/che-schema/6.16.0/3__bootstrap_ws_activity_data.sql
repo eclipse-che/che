@@ -14,26 +14,22 @@
 -- won't be using it anymore, but leave it there so that we don't make breaking schema changes
 -- straight away.
 
--- We specialize for postgres and mysql, leaving this default for H2 which is only used during
--- testing. We don't actually need any data migration during testing so let's just give up H2 which
--- doesn't support UPDATE FROM
+-- We specialize for postgres and mysql, leaving this default for H2.
 
---INSERT INTO che_workspace_activity (workspace_id, expiration)
---  SELECT workspace_id, expiration FROM che_workspace_expiration;
---
---INSERT INTO che_workspace_activity (workspace_id, created)
---  SELECT workspace_id, cast (attributes as bigint) FROM workspace_attributes
---  WHERE attributes_key = 'created';
---
---UPDATE che_workspace_activity SET status = r.status
---  FROM che_k8s_runtime r
---  WHERE che_workspace_activity.workspace_id = r.workspace_id;
---
---UPDATE che_workspace_activity SET last_running = cast(a.attributes as bigint)
---  FROM workspace_attributes AS a, che_k8s_runtime r
---  WHERE che_workspace_activity.workspace_id = a.workspace_id AND a.workspace_id = r.workspace_id
---  AND a.attributes_key = 'updated' AND r.status = 'RUNNING';
---
---UPDATE che_workspace_activity SET last_stopped = cast(a.attributes as bigint)
---  FROM workspace_attributes AS a WHERE che_workspace_activity.workspace_id = a.workspace_id
---  AND a.attributes_key LIKE 'stopped%';
+INSERT INTO che_workspace_activity (workspace_id, created)
+  SELECT workspace_id, cast(attributes as bigint) FROM workspace_attributes
+  WHERE attributes_key = 'created';
+
+UPDATE che_workspace_activity AS a SET expiration =
+  (SELECT expiration FROM che_workspace_expiration e WHERE a.workspace_id = e.workspace_id);
+
+UPDATE che_workspace_activity AS a SET status =
+  (SELECT r.status FROM che_k8s_runtime r WHERE a.workspace_id = r.workspace_id);
+
+UPDATE che_workspace_activity AS a SET last_running =
+  (SELECT cast(t.attributes as bigint) FROM workspace_attributes AS t, che_k8s_runtime AS r
+    WHERE a.workspace_id = t.workspace_id AND a.workspace_id = r.workspace_id);
+
+UPDATE che_workspace_activity AS a SET last_stopped =
+  (SELECT cast(t.attributes as bigint) FROM workspace_attributes AS t
+    WHERE a.workspace_id = t.workspace_id AND t.attributes_key LIKE 'stopped%');
