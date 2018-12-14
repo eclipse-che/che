@@ -908,6 +908,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     view.removeProcessNode(childNode);
     machineTreeNode.getChildren().remove(childNode);
     view.setProcessesData(rootNode);
+    rootNode.getChildren().forEach(node -> refreshStopButtonState(node.getId()));
   }
 
   @Nullable
