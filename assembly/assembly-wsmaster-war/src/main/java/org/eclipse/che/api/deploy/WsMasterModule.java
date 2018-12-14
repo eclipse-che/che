@@ -64,7 +64,9 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariabl
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowCredentialsEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowedOriginsEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsEnabledEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceMavenServerJavaOptsEnvVariableProvider;
@@ -198,6 +200,14 @@ public class WsMasterModule extends AbstractModule {
     // is defined on master
     if (!isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ALLOWED__ORIGINS"))) {
       envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
+    }
+
+    if (!isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ALLOW_CREDENTIALS"))) {
+      envVarProviders.addBinding().to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
+    }
+
+    if (!isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ENABLED"))) {
+      envVarProviders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
     }
 
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
