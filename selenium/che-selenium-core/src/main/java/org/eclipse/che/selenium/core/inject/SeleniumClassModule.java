@@ -51,7 +51,16 @@ public class SeleniumClassModule extends AbstractModule {
 
     @Override
     public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-      Class<?> clazz = type.getRawType();
+      goThroughClassHierarchy(encounter, type.getRawType());
+    }
+
+    private <I> void goThroughClassHierarchy(TypeEncounter<I> encounter, Class<?> clazz) {
+      if (clazz == null) {
+        return;
+      }
+
+      goThroughClassHierarchy(encounter, clazz.getSuperclass());
+
       for (Field field : clazz.getDeclaredFields()) {
         if (field.getType() == TestWorkspace.class
             && field.isAnnotationPresent(InjectTestWorkspace.class)) {
