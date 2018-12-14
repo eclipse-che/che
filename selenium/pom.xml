@@ -27,4 +27,19 @@
         <module>che-selenium-core</module>
         <module>che-selenium-test</module>
     </modules>
+
+    <properties>
+        <!-- fix of conflict of seleniumhq 3.0.1 with guava 27.0.1-jre (https://github.com/eclipse/che/issues/12184) -->
+        <com.google.guava.version>20.0</com.google.guava.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${com.google.guava.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
