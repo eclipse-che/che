@@ -20,7 +20,7 @@ INSERT INTO che_workspace_activity (workspace_id, created)
 UPDATE che_workspace_activity AS a
   INNER JOIN che_workspace_expiration AS e
     ON a.workspace_id = e.workspace_id
-  SET expiration = e.expiration;
+  SET a.expiration = e.expiration;
 
 UPDATE che_workspace_activity
   INNER JOIN workspace_attributes AS a
