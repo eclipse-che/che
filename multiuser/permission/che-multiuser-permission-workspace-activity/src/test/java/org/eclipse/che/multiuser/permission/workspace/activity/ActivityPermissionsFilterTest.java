@@ -24,9 +24,11 @@ import static org.testng.Assert.assertEquals;
 
 import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityService;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.multiuser.api.permission.server.SystemDomain;
 import org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain;
 import org.everrest.assured.EverrestJetty;
 import org.everrest.core.Filter;
@@ -89,6 +91,43 @@ public class ActivityPermissionsFilterTest {
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
             .put(SECURE_PATH + "/activity/workspace123");
+
+    assertEquals(response.getStatusCode(), 403);
+  }
+
+  @Test
+  public void shouldCheckPermissionsOnGettingActivity() throws Exception {
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/activity?status=RUNNING");
+
+    assertEquals(response.getStatusCode(), 200);
+    verify(service).getWorkspacesByActivity(eq(WorkspaceStatus.RUNNING), eq(-1L), eq(-1L));
+    verify(subject)
+        .checkPermission(
+            eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MONITOR_SYSTEM_ACTION));
+  }
+
+  @Test
+  public void shouldThrowExceptionWhenNotAuthzdToGetActivity() throws Exception {
+    doThrow(
+            new ForbiddenException(
+                "The user does not have permission to "
+                    + SystemDomain.MONITOR_SYSTEM_ACTION
+                    + " workspace with id 'workspace123'"))
+        .when(subject)
+        .checkPermission(
+            eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MONITOR_SYSTEM_ACTION));
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .when()
+            .get(SECURE_PATH + "/activity?status=STARTING");
 
     assertEquals(response.getStatusCode(), 403);
   }
