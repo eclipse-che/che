@@ -32,10 +32,12 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.schedule.ScheduleDelay;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +66,7 @@ public class WorkspaceActivityManager {
   private final EventService eventService;
   private final EventSubscriber<WorkspaceStatusEvent> workspaceEventsSubscriber;
   private final EventSubscriber<WorkspaceCreatedEvent> workspaceCreatedSubscriber;
+  private final EventSubscriber<BeforeWorkspaceRemovedEvent> workspaceRemoveSubscriber;
 
   protected final WorkspaceManager workspaceManager;
 
@@ -97,6 +100,14 @@ public class WorkspaceActivityManager {
             } catch (ServerException | NumberFormatException x) {
               LOG.warn("Failed to record workspace created time in workspace activity.", x);
             }
+          }
+        };
+
+    this.workspaceRemoveSubscriber =
+        new CascadeEventSubscriber<BeforeWorkspaceRemovedEvent>() {
+          @Override
+          public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+            activityDao.removeActivity(event.getWorkspace().getId());
           }
         };
 
@@ -214,5 +225,6 @@ public class WorkspaceActivityManager {
   public void subscribe() {
     eventService.subscribe(workspaceEventsSubscriber);
     eventService.subscribe(workspaceCreatedSubscriber);
+    eventService.subscribe(workspaceRemoveSubscriber, BeforeWorkspaceRemovedEvent.class);
   }
 }

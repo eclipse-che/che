@@ -27,6 +27,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -50,7 +51,8 @@ public class WorkspaceActivityManagerTest {
 
   @Mock private WorkspaceManager workspaceManager;
 
-  @Captor private ArgumentCaptor<EventSubscriber<?>> captor;
+  @Captor private ArgumentCaptor<EventSubscriber<?>> createAndChangeEventCaptor;
+  @Captor private ArgumentCaptor<EventSubscriber<BeforeWorkspaceRemovedEvent>> removeEventCaptor;
 
   @Mock private Account account;
   @Mock private WorkspaceImpl workspace;
@@ -140,6 +142,19 @@ public class WorkspaceActivityManagerTest {
     verify(workspaceActivityDao, times(1)).setStatusChangeTime(eq(wsId), eq(status), anyLong());
   }
 
+  @Test
+  public void shouldRemoveActivityWhenWorkspaceRemoved() throws Exception {
+    String wsId = "1";
+
+    EventSubscriber<BeforeWorkspaceRemovedEvent> subscriber = subscribeAndGetRemoveSubscriber();
+
+    subscriber.onEvent(
+        new BeforeWorkspaceRemovedEvent(
+            new WorkspaceImpl(DtoFactory.newDto(WorkspaceDto.class).withId(wsId), null)));
+
+    verify(workspaceActivityDao, times(1)).removeActivity(eq(wsId));
+  }
+
   @DataProvider(name = "wsStatus")
   public Object[][] getWorkspaceStatus() {
     return Stream.of(WorkspaceStatus.values())
@@ -151,7 +166,7 @@ public class WorkspaceActivityManagerTest {
     subscribeToEventService();
     @SuppressWarnings("unchecked")
     final EventSubscriber<WorkspaceStatusEvent> subscriber =
-        (EventSubscriber<WorkspaceStatusEvent>) captor.getAllValues().get(0);
+        (EventSubscriber<WorkspaceStatusEvent>) createAndChangeEventCaptor.getAllValues().get(0);
     return subscriber;
   }
 
@@ -159,12 +174,20 @@ public class WorkspaceActivityManagerTest {
     subscribeToEventService();
     @SuppressWarnings("unchecked")
     final EventSubscriber<WorkspaceCreatedEvent> subscriber =
-        (EventSubscriber<WorkspaceCreatedEvent>) captor.getAllValues().get(1);
+        (EventSubscriber<WorkspaceCreatedEvent>) createAndChangeEventCaptor.getAllValues().get(1);
+    return subscriber;
+  }
+
+  private EventSubscriber<BeforeWorkspaceRemovedEvent> subscribeAndGetRemoveSubscriber() {
+    subscribeToEventService();
+    final EventSubscriber<BeforeWorkspaceRemovedEvent> subscriber = removeEventCaptor.getValue();
     return subscriber;
   }
 
   private void subscribeToEventService() {
     activityManager.subscribe();
-    verify(eventService, times(2)).subscribe(captor.capture());
+    verify(eventService, times(2)).subscribe(createAndChangeEventCaptor.capture());
+    verify(eventService, times(1))
+        .subscribe(removeEventCaptor.capture(), eq(BeforeWorkspaceRemovedEvent.class));
   }
 }

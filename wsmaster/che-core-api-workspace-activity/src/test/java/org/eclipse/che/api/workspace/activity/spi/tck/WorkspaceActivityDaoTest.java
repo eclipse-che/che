@@ -28,7 +28,6 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
