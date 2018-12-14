@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.wsagent.server;
 
-
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
 import java.net.URI;

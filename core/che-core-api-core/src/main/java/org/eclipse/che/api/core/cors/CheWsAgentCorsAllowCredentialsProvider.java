@@ -14,23 +14,25 @@ package org.eclipse.che.api.core.cors;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import javax.inject.Named;
+import org.eclipse.che.commons.annotation.Nullable;
 
-/**
- * Provider of "cors.support.credentials" setting for CORS Filter of WS Agent. Provides the value of
- * WS Master domain, by inferring it from "che.api" property
- */
+/** Provider of "cors.support.credentials" setting for CORS Filter of WS Agent. True by default */
 public class CheWsAgentCorsAllowCredentialsProvider implements Provider<Boolean> {
 
   private final boolean allowCredentials;
 
   @Inject
   public CheWsAgentCorsAllowCredentialsProvider(
-      @Named("che.cors.allow_credentials") boolean allowedOrigins) {
-    this.allowCredentials = true;
+      @Nullable @Named("che.cors.allow_credentials") Boolean allowCredentials) {
+    if (allowCredentials == null) {
+      // true by default
+      allowCredentials = true;
+    }
+    this.allowCredentials = allowCredentials;
   }
 
   @Override
-  public boolean get() {
+  public Boolean get() {
     return allowCredentials;
   }
 }

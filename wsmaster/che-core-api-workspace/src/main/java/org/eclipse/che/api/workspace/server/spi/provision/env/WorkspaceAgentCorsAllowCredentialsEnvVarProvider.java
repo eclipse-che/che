@@ -18,7 +18,8 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Add environment variable that defines support for requests with credentials for {@link CheCorsFilterConfig} of WS Agent
+ * Add environment variable that defines support for requests with credentials for {@link
+ * CheCorsFilterConfig} of WS Agent
  *
  * @author Mykhailo Kuznietsov
  */
