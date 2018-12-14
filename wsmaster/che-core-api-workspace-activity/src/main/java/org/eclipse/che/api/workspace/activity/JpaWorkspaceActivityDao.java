@@ -65,7 +65,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
-  @Transactional
+  @Transactional(rollbackOn = ServerException.class)
   public void removeActivity(String workspaceId) throws ServerException {
     EntityManager em = managerProvider.get();
     try {
@@ -141,6 +141,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
+  @Transactional(rollbackOn = ServerException.class)
   public List<String> findInStatusSince(long timestamp, WorkspaceStatus status)
       throws ServerException {
     String queryName = "WorkspaceActivity.get" + firstUpperCase(status.name()) + "Since";
@@ -169,13 +170,13 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     }
   }
 
-  @Transactional
+  @Transactional(rollbackOn = ServerException.class)
   protected void doUpdate(String workspaceId, Consumer<WorkspaceActivity> updater)
       throws ServerException {
     doUpdate(false, workspaceId, updater);
   }
 
-  @Transactional
+  @Transactional(rollbackOn = ServerException.class)
   protected void doUpdateOptionally(String workspaceId, Consumer<WorkspaceActivity> updater)
       throws ServerException {
     doUpdate(true, workspaceId, updater);
@@ -183,7 +184,6 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
   private void doUpdate(boolean optional, String workspaceId, Consumer<WorkspaceActivity> updater)
       throws ServerException {
-
     try {
       EntityManager em = managerProvider.get();
       WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);

@@ -14,6 +14,8 @@ package org.eclipse.che.api.workspace.activity;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -29,19 +31,19 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
   @NamedQuery(
       name = "WorkspaceActivity.getStoppedSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPED' AND a.lastStopped <= :time"),
+          "SELECT a FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED AND a.lastStopped <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getStoppingSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPING' AND a.lastStopping <= :time"),
+          "SELECT a FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING AND a.lastStopping <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getRunningSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'RUNNING' AND a.lastRunning <= :time"),
+          "SELECT a FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING AND a.lastRunning <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getStartingSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = 'STOPPED' AND a.lastStarting <= :time"),
+          "SELECT a FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING AND a.lastStarting <= :time"),
 })
 public class WorkspaceActivity {
 
@@ -68,6 +70,7 @@ public class WorkspaceActivity {
   private Long expiration;
 
   @Column(name = "status")
+  @Enumerated(EnumType.STRING)
   private WorkspaceStatus status;
 
   public String getWorkspaceId() {
