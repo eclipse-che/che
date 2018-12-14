@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.wsagent.server;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.name.Names;
@@ -40,11 +39,9 @@ public class CheWsAgentModule extends AbstractModule {
         .annotatedWith(Names.named("wsagent.endpoint"))
         .toProvider(WsAgentURLProvider.class);
 
-    if (isNullOrEmpty(System.getenv("CHE_CORS_ALLOWED__ORIGINS"))) {
-      bind(String.class)
-          .annotatedWith(Names.named("che.cors.allowed_origins"))
-          .toProvider(CheWsAgentCorsAllowedOriginsProvider.class);
-    }
+    bind(String.class)
+        .annotatedWith(Names.named("che.cors.allowed_origins"))
+        .toProvider(CheWsAgentCorsAllowedOriginsProvider.class);
 
     bind(AppStateService.class);
   }
