@@ -69,8 +69,9 @@
                         return;
                     }
                 } catch (e) {
-                    // access to parent frame can be forbidden from inner iframe, in case if IDE.html would
-                    // be loaded from different domain then paren frame.
+                    // access to parent frame can be forbidden from the inner iframe,
+                    // in case if IDE.html would be loaded(for example sidecar)
+                    // from a different domain than parent frame.
                     console.error(msg, e);
                 }
                 
