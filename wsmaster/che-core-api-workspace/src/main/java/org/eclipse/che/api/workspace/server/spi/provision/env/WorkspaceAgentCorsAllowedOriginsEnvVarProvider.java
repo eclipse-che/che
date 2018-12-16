@@ -34,6 +34,6 @@ public class WorkspaceAgentCorsAllowedOriginsEnvVarProvider implements EnvVarPro
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
-    return Pair.of("CHE_CORS_ALLOWED__ORIGINS", wsAgentCorsAllowedOrigins);
+    return Pair.of("CHE_WSAGENT_CORS_ALLOWED__ORIGINS", wsAgentCorsAllowedOrigins);
   }
 }

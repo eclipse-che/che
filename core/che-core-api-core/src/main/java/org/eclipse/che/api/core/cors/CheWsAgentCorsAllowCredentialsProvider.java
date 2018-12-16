@@ -23,7 +23,7 @@ public class CheWsAgentCorsAllowCredentialsProvider implements Provider<Boolean>
 
   @Inject
   public CheWsAgentCorsAllowCredentialsProvider(
-      @Nullable @Named("che.cors.allow_credentials") Boolean allowCredentials) {
+      @Nullable @Named("che.wsagent.cors.allow_credentials") Boolean allowCredentials) {
     if (allowCredentials == null) {
       // true by default
       allowCredentials = true;
