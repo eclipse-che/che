@@ -34,6 +34,7 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -57,13 +58,13 @@ public class RestartPolicyRewriterTest {
 
   @Test
   public void rewritesRestartPolicyWhenItsDifferentWithDefaultOne() throws Exception {
-    when(k8sEnv.getPods())
-        .thenReturn(singletonMap(TEST_POD_NAME, newPod(TEST_POD_NAME, ALWAYS_RESTART_POLICY)));
+    Pod pod = newPod(TEST_POD_NAME, ALWAYS_RESTART_POLICY);
+    PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
+    when(k8sEnv.getPodData()).thenReturn(singletonMap(TEST_POD_NAME, podData));
 
     restartPolicyRewriter.provision(k8sEnv, runtimeIdentity);
 
-    assertEquals(
-        k8sEnv.getPods().get(TEST_POD_NAME).getSpec().getRestartPolicy(), DEFAULT_RESTART_POLICY);
+    assertEquals(pod.getSpec().getRestartPolicy(), DEFAULT_RESTART_POLICY);
     verifyWarnings(
         new WarningImpl(
             RESTART_POLICY_SET_TO_NEVER_WARNING_CODE,

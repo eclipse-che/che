@@ -84,7 +84,7 @@ public class DockerImageEnvironmentConverterTest {
 
     final KubernetesEnvironment actual = converter.convert(dockerEnv);
 
-    assertEquals(pod, actual.getPods().values().iterator().next());
+    assertEquals(pod, actual.getPodsCopy().values().iterator().next());
     assertEquals(recipe, actual.getRecipe());
     assertEquals(machines, actual.getMachines());
   }

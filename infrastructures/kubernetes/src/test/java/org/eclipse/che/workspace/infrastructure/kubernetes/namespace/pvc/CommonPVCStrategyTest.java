@@ -31,6 +31,7 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotEquals;
 import static org.testng.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -50,6 +51,7 @@ import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
@@ -135,11 +137,6 @@ public class CommonPVCStrategyTest {
     machines.put(MACHINE_3_NAME, machine3);
     lenient().when(k8sEnv.getMachines()).thenReturn(machines);
 
-    Map<String, Pod> pods = new HashMap<>();
-    pods.put(POD_NAME, pod);
-    pods.put(POD_NAME_2, pod2);
-    lenient().when(k8sEnv.getPods()).thenReturn(pods);
-
     lenient().when(pod.getSpec()).thenReturn(podSpec);
     lenient().when(pod2.getSpec()).thenReturn(podSpec2);
     lenient().when(podSpec.getContainers()).thenReturn(asList(container, container2));
@@ -163,6 +160,14 @@ public class CommonPVCStrategyTest {
 
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
+
+    Map<String, Pod> pods = ImmutableMap.of(POD_NAME, pod, POD_NAME_2, pod);
+    Map<String, PodData> podData =
+        ImmutableMap.of(
+            POD_NAME, new PodData(pod.getSpec(), pod.getMetadata()),
+            POD_NAME_2, new PodData(pod2.getSpec(), pod2.getMetadata()));
+    lenient().when(k8sEnv.getPodData()).thenReturn(podData);
+
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
     Map<String, String> workspaceAttributes = new HashMap<>();
     WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);

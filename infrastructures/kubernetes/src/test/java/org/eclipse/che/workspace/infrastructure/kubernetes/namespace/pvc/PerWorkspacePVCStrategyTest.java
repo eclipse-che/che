@@ -55,6 +55,7 @@ import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
@@ -108,11 +109,11 @@ public class PerWorkspacePVCStrategyTest {
   @Mock private Workspace workspace;
   @Mock private EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
-  private PerWorkspacePVCStrategy perWorkspaceStratefy;
+  private PerWorkspacePVCStrategy perWorkspaceStrategy;
 
   @BeforeMethod
   public void setup() throws Exception {
-    perWorkspaceStratefy =
+    perWorkspaceStrategy =
         new PerWorkspacePVCStrategy(
             PVC_NAME_PREFIX,
             PVC_QUANTITY,
@@ -143,11 +144,6 @@ public class PerWorkspacePVCStrategyTest {
     machines.put(MACHINE_3_NAME, machine3);
     lenient().when(k8sEnv.getMachines()).thenReturn(machines);
 
-    Map<String, Pod> pods = new HashMap<>();
-    pods.put(POD_NAME, pod);
-    pods.put(POD_NAME_2, pod2);
-    lenient().when(k8sEnv.getPods()).thenReturn(pods);
-
     lenient().when(pod.getSpec()).thenReturn(podSpec);
     lenient().when(pod2.getSpec()).thenReturn(podSpec2);
     lenient().when(podSpec.getContainers()).thenReturn(asList(container, container2));
@@ -171,6 +167,13 @@ public class PerWorkspacePVCStrategyTest {
 
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
+
+    PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
+    PodData pod2Data = new PodData(pod2.getSpec(), pod2.getMetadata());
+    lenient()
+        .when(k8sEnv.getPodData())
+        .thenReturn(ImmutableMap.of(POD_NAME, podData, POD_NAME_2, pod2Data));
+
     lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
     Map<String, String> workspaceAttributes = new HashMap<>();
     WorkspaceConfig workspaceConfig = mock(WorkspaceConfig.class);
@@ -182,7 +185,7 @@ public class PerWorkspacePVCStrategyTest {
   public void testProvisionVolumesIntoKubernetesEnvironment() throws Exception {
     when(k8sEnv.getPersistentVolumeClaims()).thenReturn(new HashMap<>());
 
-    perWorkspaceStratefy.provision(k8sEnv, IDENTITY);
+    perWorkspaceStrategy.provision(k8sEnv, IDENTITY);
 
     // 2 volumes in machine1
     verify(container, times(2)).getVolumeMounts();
@@ -208,14 +211,14 @@ public class PerWorkspacePVCStrategyTest {
     claims.put(PVC_NAME, provisioned);
     when(k8sEnv.getPersistentVolumeClaims()).thenReturn(claims);
 
-    perWorkspaceStratefy.provision(k8sEnv, IDENTITY);
+    perWorkspaceStrategy.provision(k8sEnv, IDENTITY);
 
     assertNotEquals(k8sEnv.getPersistentVolumeClaims().get(PVC_NAME), provisioned);
   }
 
   @Test
   public void testProvisionVolumesWithSubpathsIntoKubernetesEnvironment() throws Exception {
-    perWorkspaceStratefy.provision(k8sEnv, IDENTITY);
+    perWorkspaceStrategy.provision(k8sEnv, IDENTITY);
 
     final Map<String, PersistentVolumeClaim> actual = k8sEnv.getPersistentVolumeClaims();
     assertFalse(actual.isEmpty());
@@ -235,7 +238,7 @@ public class PerWorkspacePVCStrategyTest {
 
   @Test
   public void testDoNotAddsSubpathsWhenPreCreationIsNotNeeded() throws Exception {
-    perWorkspaceStratefy =
+    perWorkspaceStrategy =
         new PerWorkspacePVCStrategy(
             PVC_NAME_PREFIX,
             PVC_QUANTITY,
@@ -245,7 +248,7 @@ public class PerWorkspacePVCStrategyTest {
             factory,
             ephemeralWorkspaceAdapter);
 
-    perWorkspaceStratefy.provision(k8sEnv, IDENTITY);
+    perWorkspaceStrategy.provision(k8sEnv, IDENTITY);
 
     final Map<String, PersistentVolumeClaim> actual = k8sEnv.getPersistentVolumeClaims();
     assertFalse(actual.isEmpty());
@@ -266,7 +269,7 @@ public class PerWorkspacePVCStrategyTest {
     when(pvc.getAdditionalProperties()).thenReturn(subPaths);
     doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, WORKSPACE_SUBPATHS);
 
-    perWorkspaceStratefy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    perWorkspaceStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
 
     verify(pvcs).get();
     verify(pvcs).create(pvc);
@@ -280,7 +283,7 @@ public class PerWorkspacePVCStrategyTest {
         .thenReturn(singletonMap(PVC_NAME, mock(PersistentVolumeClaim.class)));
     doThrow(InfrastructureException.class).when(pvcs).get();
 
-    perWorkspaceStratefy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    perWorkspaceStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -290,12 +293,12 @@ public class PerWorkspacePVCStrategyTest {
     when(pvcs.get()).thenReturn(emptyList());
     doThrow(InfrastructureException.class).when(pvcs).create(any());
 
-    perWorkspaceStratefy.prepare(k8sEnv, WORKSPACE_ID, 100);
+    perWorkspaceStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
   }
 
   @Test
   public void testCleanup() throws Exception {
-    perWorkspaceStratefy.cleanup(workspace);
+    perWorkspaceStrategy.cleanup(workspace);
 
     verify(pvcs).delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID));
   }

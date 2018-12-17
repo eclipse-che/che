@@ -75,9 +75,9 @@ public class ImagePullSecretProvisionerTest {
     when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     k8sEnv = KubernetesEnvironment.builder().build();
-    k8sEnv.getPods().put("wksp", pod);
     when(pod.getSpec()).thenReturn(podSpec);
     when(podSpec.getImagePullSecrets()).thenReturn(ImmutableList.of(existingImagePullSecretRef));
+    k8sEnv.addPod("wksp", pod);
 
     when(credentialsProvider.getCredentials()).thenReturn(authConfigs);
     imagePullSecretProvisioner = new ImagePullSecretProvisioner(credentialsProvider);
