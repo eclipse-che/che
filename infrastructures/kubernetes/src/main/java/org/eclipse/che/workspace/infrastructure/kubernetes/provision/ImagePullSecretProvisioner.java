@@ -94,7 +94,7 @@ public class ImagePullSecretProvisioner implements ConfigurationProvisioner<Kube
     k8sEnv.getSecrets().put(secret.getMetadata().getName(), secret);
 
     k8sEnv
-        .getPodData()
+        .getPodsData()
         .values()
         .forEach(p -> addImagePullSecret(secret.getMetadata().getName(), p.getSpec()));
   }

@@ -60,7 +60,7 @@ public class ProxySettingsProvisioner implements ConfigurationProvisioner {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!proxyEnvVars.isEmpty()) {
-      for (PodData pod : k8sEnv.getPodData().values()) {
+      for (PodData pod : k8sEnv.getPodsData().values()) {
         pod.getSpec()
             .getContainers()
             .forEach(

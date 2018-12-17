@@ -146,7 +146,7 @@ public class UniqueWorkspacePVCStrategyTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     PodData pod2Data = new PodData(pod2.getSpec(), pod2.getMetadata());
     lenient()
-        .when(k8sEnv.getPodData())
+        .when(k8sEnv.getPodsData())
         .thenReturn(ImmutableMap.of(POD_NAME, podData, POD_NAME_2, pod2Data));
 
     lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);

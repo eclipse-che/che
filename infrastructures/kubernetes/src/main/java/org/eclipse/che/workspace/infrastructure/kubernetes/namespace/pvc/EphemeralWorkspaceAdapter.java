@@ -51,7 +51,7 @@ public class EphemeralWorkspaceAdapter {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     LOG.debug("Provisioning PVC strategy for workspace '{}'", identity.getWorkspaceId());
-    for (PodData pod : k8sEnv.getPodData().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       PodSpec podSpec = pod.getSpec();
 
       // To ensure same volumes get mounted correctly in different containers, we need to track

@@ -252,7 +252,7 @@ public class KubernetesPluginsToolingApplierTest {
           "Che plugins tooling configuration can be applied to a workspace with one pod only")
   public void throwsExceptionWhenTheNumberOfPodsIsNot1() throws Exception {
     PodData podData = new PodData(podSpec, meta);
-    when(internalEnvironment.getPodData()).thenReturn(of("pod1", podData, "pod2", podData));
+    when(internalEnvironment.getPodsData()).thenReturn(of("pod1", podData, "pod2", podData));
 
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
   }

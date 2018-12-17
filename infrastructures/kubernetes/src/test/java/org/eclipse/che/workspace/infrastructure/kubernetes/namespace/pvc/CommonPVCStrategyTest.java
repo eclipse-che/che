@@ -166,7 +166,7 @@ public class CommonPVCStrategyTest {
         ImmutableMap.of(
             POD_NAME, new PodData(pod.getSpec(), pod.getMetadata()),
             POD_NAME_2, new PodData(pod2.getSpec(), pod2.getMetadata()));
-    lenient().when(k8sEnv.getPodData()).thenReturn(podData);
+    lenient().when(k8sEnv.getPodsData()).thenReturn(podData);
 
     when(workspace.getId()).thenReturn(WORKSPACE_ID);
     Map<String, String> workspaceAttributes = new HashMap<>();

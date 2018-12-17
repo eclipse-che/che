@@ -85,11 +85,11 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
     KubernetesEnvironment kubernetesEnvironment = (KubernetesEnvironment) internalEnvironment;
 
-    Map<String, PodData> pods = kubernetesEnvironment.getPodData();
+    Map<String, PodData> pods = kubernetesEnvironment.getPodsData();
     switch (pods.size()) {
       case 0:
         addToolingPod(kubernetesEnvironment);
-        pods = kubernetesEnvironment.getPodData();
+        pods = kubernetesEnvironment.getPodsData();
         break;
       case 1:
         break;
@@ -135,7 +135,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
     List<EnvVar> workspaceEnv = toK8sEnvVars(chePlugin.getWorkspaceEnv());
     kubernetesEnvironment
-        .getPodData()
+        .getPodsData()
         .values()
         .stream()
         .flatMap(pod -> pod.getSpec().getContainers().stream())

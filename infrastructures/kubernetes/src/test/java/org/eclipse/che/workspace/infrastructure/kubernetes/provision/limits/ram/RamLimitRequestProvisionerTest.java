@@ -81,7 +81,7 @@ public class RamLimitRequestProvisionerTest {
     when(podMetadata.getName()).thenReturn(POD_NAME);
     final PodSpec podSpec = mock(PodSpec.class);
     when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
-    when(k8sEnv.getPodData()).thenReturn(of(POD_NAME, new PodData(podSpec, podMetadata)));
+    when(k8sEnv.getPodsData()).thenReturn(of(POD_NAME, new PodData(podSpec, podMetadata)));
   }
 
   @Test

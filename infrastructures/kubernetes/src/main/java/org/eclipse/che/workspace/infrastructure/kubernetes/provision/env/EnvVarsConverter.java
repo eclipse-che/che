@@ -39,7 +39,7 @@ public class EnvVarsConverter implements ConfigurationProvisioner {
 
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
-    for (PodData pod : k8sEnv.getPodData().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       for (Container container : pod.getSpec().getContainers()) {
         String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConf = k8sEnv.getMachines().get(machineName);

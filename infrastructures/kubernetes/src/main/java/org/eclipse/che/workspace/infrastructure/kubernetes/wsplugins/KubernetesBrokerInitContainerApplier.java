@@ -58,14 +58,14 @@ public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironmen
     E brokerEnvironment =
         brokerEnvironmentFactory.create(pluginsMeta, runtimeID, new BrokersResult());
 
-    Map<String, PodData> workspacePods = workspaceEnvironment.getPodData();
+    Map<String, PodData> workspacePods = workspaceEnvironment.getPodsData();
     if (workspacePods.size() != 1) {
       throw new InfrastructureException(
           "Che plugins tooling configuration can be applied to a workspace with one pod only.");
     }
     PodData workspacePod = workspacePods.values().iterator().next();
 
-    Map<String, PodData> brokerPods = brokerEnvironment.getPodData();
+    Map<String, PodData> brokerPods = brokerEnvironment.getPodsData();
     if (brokerPods.size() != 1) {
       throw new InfrastructureException("Broker environment must have only one Pod.");
     }

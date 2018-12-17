@@ -76,7 +76,7 @@ public class InstallerServersPortProvisioner implements ConfigurationProvisioner
 
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
-    for (PodData pod : k8sEnv.getPodData().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       // it is needed to detect conflicts between all containers in a pod
       // because they use the same ports
       List<InternalMachineConfig> podMachines =

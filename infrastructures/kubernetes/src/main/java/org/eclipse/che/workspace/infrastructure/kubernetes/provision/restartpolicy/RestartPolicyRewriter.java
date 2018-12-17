@@ -40,7 +40,7 @@ public class RestartPolicyRewriter implements ConfigurationProvisioner {
 
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
-    for (PodData podConfig : k8sEnv.getPodData().values()) {
+    for (PodData podConfig : k8sEnv.getPodsData().values()) {
       final String podName = podConfig.getMetadata().getName();
       final PodSpec podSpec = podConfig.getSpec();
       rewriteRestartPolicy(podSpec, podName, k8sEnv);

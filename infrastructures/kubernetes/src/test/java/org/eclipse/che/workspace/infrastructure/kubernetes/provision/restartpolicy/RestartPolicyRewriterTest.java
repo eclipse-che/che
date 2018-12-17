@@ -60,7 +60,7 @@ public class RestartPolicyRewriterTest {
   public void rewritesRestartPolicyWhenItsDifferentWithDefaultOne() throws Exception {
     Pod pod = newPod(TEST_POD_NAME, ALWAYS_RESTART_POLICY);
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
-    when(k8sEnv.getPodData()).thenReturn(singletonMap(TEST_POD_NAME, podData));
+    when(k8sEnv.getPodsData()).thenReturn(singletonMap(TEST_POD_NAME, podData));
 
     restartPolicyRewriter.provision(k8sEnv, runtimeIdentity);
 

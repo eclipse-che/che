@@ -52,7 +52,7 @@ public class KubernetesEnvironmentValidatorTest {
       expectedExceptionsMessageRegExp = "Environment should contain at least 1 pod")
   public void shouldThrowExceptionWhenEnvDoesNotHaveAnyPods() throws Exception {
     // given
-    when(kubernetesEnvironment.getPodData()).thenReturn(emptyMap());
+    when(kubernetesEnvironment.getPodsData()).thenReturn(emptyMap());
 
     // when
     environmentValidator.validate(kubernetesEnvironment);
@@ -68,7 +68,7 @@ public class KubernetesEnvironmentValidatorTest {
     String podName = "pod1";
     Pod pod = createPod("pod1", "main");
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
-    when(kubernetesEnvironment.getPodData()).thenReturn(ImmutableMap.of(podName, podData));
+    when(kubernetesEnvironment.getPodsData()).thenReturn(ImmutableMap.of(podName, podData));
     when(kubernetesEnvironment.getMachines())
         .thenReturn(ImmutableMap.of(podName + "/db", mock(InternalMachineConfig.class)));
 
