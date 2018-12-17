@@ -107,14 +107,14 @@ public class CertificateProvisionerTest {
   @Test
   public void shouldAddVolumeAndVolumeMountsToPodsAndContainersInEnvironment() throws Exception {
     // given
-    k8sEnv.getPods().put("pod", createPod());
-    k8sEnv.getPods().put("pod2", createPod());
+    k8sEnv.addPod("pod", createPod());
+    k8sEnv.addPod("pod2", createPod());
 
     // when
     provisioner.provision(k8sEnv, runtimeId);
 
     // then
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (Pod pod : k8sEnv.getPodsCopy().values()) {
       verifyVolumeIsPresent(pod);
       for (Container container : pod.getSpec().getContainers()) {
         verifyVolumeMountIsPresent(container);
@@ -128,14 +128,14 @@ public class CertificateProvisionerTest {
           throws Exception {
     // given
     provisioner = new CertificateProvisioner("");
-    k8sEnv.getPods().put("pod", createPod());
-    k8sEnv.getPods().put("pod2", createPod());
+    k8sEnv.addPod("pod", createPod());
+    k8sEnv.addPod("pod2", createPod());
 
     // when
     provisioner.provision(k8sEnv, runtimeId);
 
     // then
-    for (Pod pod : k8sEnv.getPods().values()) {
+    for (Pod pod : k8sEnv.getPodsCopy().values()) {
       assertTrue(pod.getSpec().getVolumes().isEmpty());
       for (Container container : pod.getSpec().getContainers()) {
         assertTrue(container.getVolumeMounts().isEmpty());

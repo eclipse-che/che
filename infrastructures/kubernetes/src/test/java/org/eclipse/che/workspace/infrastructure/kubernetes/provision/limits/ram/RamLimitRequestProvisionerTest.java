@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -68,7 +69,6 @@ public class RamLimitRequestProvisionerTest {
     ramProvisioner = new RamLimitRequestProvisioner(memoryAttributeProvisioner);
     container = new Container();
     container.setName(CONTAINER_NAME);
-    when(k8sEnv.getPods()).thenReturn(of(POD_NAME, pod));
     when(k8sEnv.getMachines()).thenReturn(of(MACHINE_NAME, internalMachineConfig));
     when(internalMachineConfig.getAttributes())
         .thenReturn(
@@ -79,10 +79,9 @@ public class RamLimitRequestProvisionerTest {
                 RAM_REQUEST_ATTRIBUTE));
     final ObjectMeta podMetadata = mock(ObjectMeta.class);
     when(podMetadata.getName()).thenReturn(POD_NAME);
-    when(pod.getMetadata()).thenReturn(podMetadata);
     final PodSpec podSpec = mock(PodSpec.class);
     when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
-    when(pod.getSpec()).thenReturn(podSpec);
+    when(k8sEnv.getPodData()).thenReturn(of(POD_NAME, new PodData(podSpec, podMetadata)));
   }
 
   @Test

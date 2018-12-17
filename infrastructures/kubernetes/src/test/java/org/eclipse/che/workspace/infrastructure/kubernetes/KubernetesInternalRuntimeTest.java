@@ -279,10 +279,10 @@ public class KubernetesInternalRuntimeTest {
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.wait(anyString(), anyLong(), any(), any())).thenReturn(ingress);
-    when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(deployments.deploy(any(Pod.class))).thenAnswer(a -> a.getArguments()[0]);
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
-    when(k8sEnv.getPods()).thenReturn(podsMap);
+    when(k8sEnv.getPodsCopy()).thenReturn(podsMap);
     when(k8sEnv.getCommands()).thenReturn(new ArrayList<>(singletonList(envCommand)));
 
     when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
@@ -376,7 +376,7 @@ public class KubernetesInternalRuntimeTest {
     verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
     verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(secrets).create(any());
@@ -433,7 +433,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(namespace.deployments(), times(2)).watchEvents(any());
@@ -454,7 +454,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(namespace.deployments(), times(1)).watchEvents(any());
@@ -492,13 +492,13 @@ public class KubernetesInternalRuntimeTest {
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
-    when(k8sEnv.getPods()).thenReturn(allPods);
+    when(k8sEnv.getPodsCopy()).thenReturn(allPods);
     doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
 
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(deployments).deploy(any());
+      verify(deployments).deploy(any(Pod.class));
       verify(ingresses).create(any());
       verify(services).create(any());
       verify(bootstrapper, atLeastOnce()).bootstrapAsync();

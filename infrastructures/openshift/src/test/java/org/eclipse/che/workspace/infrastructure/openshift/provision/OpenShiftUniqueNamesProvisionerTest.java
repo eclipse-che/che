@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -25,6 +26,7 @@ import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import java.util.HashMap;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -57,10 +59,9 @@ public class OpenShiftUniqueNamesProvisionerTest {
   @Test
   public void provideUniquePodsNames() throws Exception {
     when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
-    final HashMap<String, Pod> pods = new HashMap<>();
     Pod pod = newPod();
-    pods.put(POD_NAME, pod);
-    doReturn(pods).when(osEnv).getPods();
+    PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
+    doReturn(ImmutableMap.of(POD_NAME, podData)).when(osEnv).getPodData();
 
     uniqueNamesProvisioner.provision(osEnv, runtimeIdentity);
 

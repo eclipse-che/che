@@ -131,7 +131,7 @@ public class JwtProxyProvisionerTest {
             + PUBLIC_KEY_FOOTER);
     assertNotNull(configMap.getData().get(JWT_PROXY_CONFIG_FILE));
 
-    Pod jwtProxyPod = k8sEnv.getPods().get("che-jwtproxy");
+    Pod jwtProxyPod = k8sEnv.getPodsCopy().get("che-jwtproxy");
     assertNotNull(jwtProxyPod);
 
     Service jwtProxyService = k8sEnv.getServices().get(jwtProxyProvisioner.getServiceName());

@@ -45,6 +45,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner.ServersPorts;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -75,13 +76,15 @@ public class InstallerServersPortProvisionerTest {
       throws Exception {
     // given
     doNothing().when(portProvisioner).fixInstallersPortsConflicts(anyList());
-    when(k8sEnv.getPods())
+    Pod pod1 = createPod("pod1", "container1", "container2");
+    Pod pod2 = createPod("pod2", "container3");
+    when(k8sEnv.getPodData())
         .thenReturn(
             ImmutableMap.of(
                 "pod1",
-                createPod("pod1", "container1", "container2"),
+                new PodData(pod1.getSpec(), pod1.getMetadata()),
                 "pod2",
-                createPod("pod2", "container3")));
+                new PodData(pod2.getSpec(), pod2.getMetadata())));
 
     InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
     InternalMachineConfig machine2 = mock(InternalMachineConfig.class);

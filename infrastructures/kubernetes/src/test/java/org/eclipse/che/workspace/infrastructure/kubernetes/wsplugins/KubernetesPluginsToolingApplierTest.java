@@ -66,6 +66,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -106,11 +107,11 @@ public class KubernetesPluginsToolingApplierTest {
     containers.add(userContainer);
     machines.put(USER_MACHINE_NAME, userMachineConfig);
 
-    internalEnvironment.getPods().put(POD_NAME, pod);
     when(pod.getSpec()).thenReturn(podSpec);
-    when(podSpec.getContainers()).thenReturn(containers);
+    lenient().when(podSpec.getContainers()).thenReturn(containers);
     lenient().when(pod.getMetadata()).thenReturn(meta);
     lenient().when(meta.getName()).thenReturn(POD_NAME);
+    internalEnvironment.addPod(POD_NAME, pod);
     internalEnvironment.getMachines().putAll(machines);
   }
 
@@ -250,7 +251,8 @@ public class KubernetesPluginsToolingApplierTest {
       expectedExceptionsMessageRegExp =
           "Che plugins tooling configuration can be applied to a workspace with one pod only")
   public void throwsExceptionWhenTheNumberOfPodsIsNot1() throws Exception {
-    when(internalEnvironment.getPods()).thenReturn(of("pod1", pod, "pod2", pod));
+    PodData podData = new PodData(podSpec, meta);
+    when(internalEnvironment.getPodData()).thenReturn(of("pod1", podData, "pod2", podData));
 
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
   }
@@ -266,7 +268,10 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void createsPodAndAddToolingIfNoPodIsPresent() throws Exception {
-    internalEnvironment.getPods().clear();
+    internalEnvironment = spy(KubernetesEnvironment.builder().build());
+    Map<String, InternalMachineConfig> machines = new HashMap<>();
+    machines.put(USER_MACHINE_NAME, userMachineConfig);
+    internalEnvironment.getMachines().putAll(machines);
 
     applier.apply(internalEnvironment, singletonList(createChePlugin()));
 
@@ -498,8 +503,8 @@ public class KubernetesPluginsToolingApplierTest {
         ImmutableList.of(createChePlugin(), createChePlugin(createContainer(), createContainer())));
 
     // then
-    assertEquals(internalEnvironment.getPods().size(), 1);
-    Pod pod = internalEnvironment.getPods().values().iterator().next();
+    assertEquals(internalEnvironment.getPodsCopy().size(), 1);
+    Pod pod = internalEnvironment.getPodsCopy().values().iterator().next();
     List<Container> actualContainers = pod.getSpec().getContainers();
     assertEquals(actualContainers.size(), 5);
     for (Container actualContainer : actualContainers) {
@@ -558,7 +563,7 @@ public class KubernetesPluginsToolingApplierTest {
 
     assertEquals(
         internalEnvironment
-            .getPods()
+            .getPodsCopy()
             .values()
             .iterator()
             .next()
@@ -577,7 +582,7 @@ public class KubernetesPluginsToolingApplierTest {
 
     assertNull(
         internalEnvironment
-            .getPods()
+            .getPodsCopy()
             .values()
             .iterator()
             .next()
@@ -635,8 +640,8 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   private void verifyPodAndContainersNumber(int containersNumber) {
-    assertEquals(internalEnvironment.getPods().size(), 1);
-    Pod pod = internalEnvironment.getPods().values().iterator().next();
+    assertEquals(internalEnvironment.getPodsCopy().size(), 1);
+    Pod pod = internalEnvironment.getPodsCopy().values().iterator().next();
     assertEquals(pod.getSpec().getContainers().size(), containersNumber);
   }
 
@@ -738,7 +743,7 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   private List<Container> getNonUserContainers(KubernetesEnvironment kubernetesEnvironment) {
-    Pod pod = kubernetesEnvironment.getPods().values().iterator().next();
+    Pod pod = kubernetesEnvironment.getPodsCopy().values().iterator().next();
     return pod.getSpec()
         .getContainers()
         .stream()

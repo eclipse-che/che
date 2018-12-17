@@ -47,6 +47,7 @@ import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
@@ -123,11 +124,6 @@ public class UniqueWorkspacePVCStrategyTest {
     machines.put(MACHINE_NAME_3, machine3);
     lenient().when(k8sEnv.getMachines()).thenReturn(machines);
 
-    Map<String, Pod> pods = new HashMap<>();
-    pods.put(POD_NAME, pod);
-    pods.put(POD_NAME_2, pod2);
-    lenient().when(k8sEnv.getPods()).thenReturn(pods);
-
     lenient().when(pod.getSpec()).thenReturn(podSpec);
     lenient().when(pod2.getSpec()).thenReturn(podSpec2);
     lenient().when(podSpec.getContainers()).thenReturn(asList(container, container2));
@@ -146,6 +142,12 @@ public class UniqueWorkspacePVCStrategyTest {
 
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
+
+    PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
+    PodData pod2Data = new PodData(pod2.getSpec(), pod2.getMetadata());
+    lenient()
+        .when(k8sEnv.getPodData())
+        .thenReturn(ImmutableMap.of(POD_NAME, podData, POD_NAME_2, pod2Data));
 
     lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
     Map<String, String> workspaceAttributes = new HashMap<>();
