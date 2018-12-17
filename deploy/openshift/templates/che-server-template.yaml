@@ -336,15 +336,15 @@ parameters:
 - name: CHE_WSAGENT_CORS_ENABLED
   displayName: CORS filter for WS Agent
   description: Enable or disable CORS filter for Eclipse Che WS Agent
-  value: ''
+  value: 'true'
 - name: CHE_WSAGENT_CORS_ALLOWED__ORIGINS
   displayName: CORS allowed origins for WS Agent
   description: defines allowed origins in requests for CORS filter, that will be propagated as corresponding env variable on WS Agent. Only if its value is not null or empty
   value: ''
 - name: CHE_WSAGENT_CORS_ALLOW__CREDENTIALS
-  displayName: Allow requests with credentials for CORS filter on WS Agent
-  description: //TODO
-  value: ''
+  displayName: CORS credentials support for WS Agent
+  description: Allow requests with credentials for CORS filter on WS Agent.
+  value: 'true'
 labels:
   app: che
   template: che
