@@ -47,13 +47,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides common PVC for each workspace in one Kubernetes namespace.
+ * Provides common PVC for all workspaces in one Kubernetes namespace.
  *
- * <p>This strategy uses subpaths for resolving backed up data paths collisions. <br>
- * Subpaths evaluated as following: '{workspaceId}/{workspace data folder}'. Workspace data folder
- * it's a configured path where workspace projects, logs or any other data located, this path may
- * contain a machine name when conflicts can occur e.g. two identical agents inside different
- * machines produce the same log file.
+ * <p>This strategy uses subpaths for resolving backed up data paths collisions.<br>
+ * Subpaths have the following format: '{workspaceId}/{volumeName}'.<br>
+ * Note that logs volume has the special format: '{workspaceId}/{volumeName}/{machineName}'. It is
+ * done in this way to avoid conflicts e.g. two identical agents inside different machines produce
+ * the same log file.
  *
  * <p>This strategy indirectly affects the workspace limits. <br>
  * The number of workspaces that can simultaneously store backups in one PV is limited only by the
@@ -65,7 +65,9 @@ import org.slf4j.LoggerFactory;
  */
 public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
-  private static final Logger LOG = LoggerFactory.getLogger(CommonPVCStrategy.class);
+  // use non-static variable to reuse child class logger
+  private final Logger log = LoggerFactory.getLogger(getClass());
+
   public static final String COMMON_STRATEGY = "common";
 
   /**
@@ -102,6 +104,17 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
   }
 
+  /**
+   * May be overridden by child class for changing common scope. Like common per user or common per
+   * workspace.
+   *
+   * @param identity runtime identity that needs PVC
+   * @return pvc name that should be used for the specified runtime identity
+   */
+  protected String getCommonPVCName(RuntimeIdentity identity) {
+    return pvcName;
+  }
+
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
@@ -110,10 +123,11 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       ephemeralWorkspaceAdapter.provision(k8sEnv, identity);
       return;
     }
-    LOG.debug("Provisioning PVC strategy for workspace '{}'", workspaceId);
+    log.debug("Provisioning PVC strategy for workspace '{}'", workspaceId);
     final Set<String> subPaths = new HashSet<>();
-    final PersistentVolumeClaim pvc = newPVC(pvcName, pvcAccessMode, pvcQuantity);
-    k8sEnv.getPersistentVolumeClaims().put(pvcName, pvc);
+    String commonPVCName = getCommonPVCName(identity);
+    final PersistentVolumeClaim pvc = newPVC(commonPVCName, pvcAccessMode, pvcQuantity);
+    k8sEnv.getPersistentVolumeClaims().put(commonPVCName, pvc);
     for (Pod pod : k8sEnv.getPods().values()) {
       PodSpec podSpec = pod.getSpec();
       List<Container> containers = new ArrayList<>();
@@ -122,7 +136,8 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       for (Container container : containers) {
         String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
-        addMachineVolumes(workspaceId, subPaths, pod, container, machineConfig.getVolumes());
+        addMachineVolumes(
+            commonPVCName, workspaceId, subPaths, pod, container, machineConfig.getVolumes());
       }
     }
     if (preCreateDirs && !subPaths.isEmpty()) {
@@ -130,7 +145,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
           format(SUBPATHS_PROPERTY_FMT, workspaceId),
           subPaths.toArray(new String[subPaths.size()]));
     }
-    LOG.debug("PVC strategy provisioning done for workspace '{}'", workspaceId);
+    log.debug("PVC strategy provisioning done for workspace '{}'", workspaceId);
   }
 
   @Override
@@ -143,28 +158,31 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       return;
     }
     final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
-    if (!claims.isEmpty()) {
-      LOG.debug("Preparing PVC started for workspace '{}'", workspaceId);
-      final KubernetesNamespace namespace = factory.create(workspaceId);
-      final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
-      final Set<String> existing =
-          pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
-      for (PersistentVolumeClaim pvc : claims) {
-        final String[] subpaths =
-            (String[])
-                pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
-        if (!existing.contains(pvc.getMetadata().getName())) {
-          LOG.debug("Creating PVC for workspace '{}'", workspaceId);
-          pvcs.create(pvc);
-          LOG.debug("Waiting PVC for workspace '{}' to be bound", workspaceId);
-          pvcs.waitBound(pvc.getMetadata().getName(), timeoutMillis);
-        }
-        if (preCreateDirs && subpaths != null) {
-          pvcSubPathHelper.createDirs(workspaceId, subpaths);
-        }
-      }
-      LOG.debug("Preparing PVC done for workspace '{}'", workspaceId);
+
+    if (claims.isEmpty()) {
+      return;
     }
+
+    log.debug("Preparing PVC started for workspace '{}'", workspaceId);
+    final KubernetesNamespace namespace = factory.create(workspaceId);
+    final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
+    final Set<String> existing =
+        pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
+    for (PersistentVolumeClaim pvc : claims) {
+      final String[] subpaths =
+          (String[])
+              pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
+      if (!existing.contains(pvc.getMetadata().getName())) {
+        log.debug("Creating PVC for workspace '{}'", workspaceId);
+        pvcs.create(pvc);
+        log.debug("Waiting PVC for workspace '{}' to be bound", workspaceId);
+        pvcs.waitBound(pvc.getMetadata().getName(), timeoutMillis);
+      }
+      if (preCreateDirs && subpaths != null) {
+        pvcSubPathHelper.createDirs(workspaceId, subpaths);
+      }
+    }
+    log.debug("Preparing PVC done for workspace '{}'", workspaceId);
   }
 
   @Override
@@ -177,6 +195,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   private void addMachineVolumes(
+      String pvcName,
       String workspaceId,
       Set<String> subPaths,
       Pod pod,
@@ -192,11 +211,11 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       subPaths.add(subPath);
 
       container.getVolumeMounts().add(newVolumeMount(pvcName, volumePath, subPath));
-      addVolumeIfNeeded(pod.getSpec());
+      addVolumeIfNeeded(pvcName, pod.getSpec());
     }
   }
 
-  private void addVolumeIfNeeded(PodSpec podSpec) {
+  private void addVolumeIfNeeded(String pvcName, PodSpec podSpec) {
     if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcName))) {
       podSpec.getVolumes().add(newVolume(pvcName, pvcName));
     }

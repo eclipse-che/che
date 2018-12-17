@@ -69,9 +69,7 @@ public class JavaTestPluginJunit4Test {
   @Inject private Loader loader;
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Menu menu;
-
   @Inject private TestWorkspace ws;
-
   @Inject private Ide ide;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
@@ -93,11 +91,14 @@ public class JavaTestPluginJunit4Test {
         ProjectTemplates.CONSOLE_JAVA_SIMPLE);
 
     ide.open(ws);
-    loader.waitOnClosed();
+    ide.waitOpenedWorkspaceIsReadyToUse();
+
     projectExplorer.waitItem(JUNIT4_PROJECT);
-    projectExplorer.quickExpandWithJavaScript();
-    runCompileCommandByPallete(compileCommand);
+    consoles.waitJDTLSProjectResolveFinishedMessage(JUNIT4_PROJECT);
     notifications.waitProgressPopupPanelClose();
+    projectExplorer.quickExpandWithJavaScript();
+
+    runCompileCommandByPallete(compileCommand);
   }
 
   private void runCompileCommandByPallete(CompileCommand compileCommand) {

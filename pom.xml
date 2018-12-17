@@ -834,6 +834,12 @@
                 <type>war</type>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.che.dockerfiles</groupId>
+                <artifactId>che-dockerfiles-theia-dev</artifactId>
+                <version>${che.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.che.docs</groupId>
                 <artifactId>che-docs</artifactId>
                 <version>${che.docs.version}</version>
