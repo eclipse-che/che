@@ -22,12 +22,12 @@ import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
 
 /**
  * Implementation of {@link BasicWebSocketEndpoint} for Che packaging. Add only mapping
- * "/websocket".
+ * "/websocket-minor".
  */
-@ServerEndpoint(value = "/websocket", configurator = GuiceInjectorEndpointConfigurator.class)
-public class CheWebSocketEndpoint extends BasicWebSocketEndpoint {
+@ServerEndpoint(value = "/websocket-minor", configurator = GuiceInjectorEndpointConfigurator.class)
+public class CheMinorWebSocketEndpoint extends BasicWebSocketEndpoint {
   @Inject
-  public CheWebSocketEndpoint(
+  public CheMinorWebSocketEndpoint(
       WebSocketSessionRegistry registry,
       MessagesReSender reSender,
       WebSocketMessageReceiver receiver,
@@ -37,6 +37,6 @@ public class CheWebSocketEndpoint extends BasicWebSocketEndpoint {
 
   @Override
   protected String getEndpointId() {
-    return "master-websocket-endpoint";
+    return "master-websocket-minor-endpoint";
   }
 }

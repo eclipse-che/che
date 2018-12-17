@@ -18,5 +18,5 @@ public interface RequestProcessor {
    *
    * @param runnable runnable to be called for processing of a request
    */
-  void process(Runnable runnable);
+  void process(String endpointId, Runnable runnable);
 }

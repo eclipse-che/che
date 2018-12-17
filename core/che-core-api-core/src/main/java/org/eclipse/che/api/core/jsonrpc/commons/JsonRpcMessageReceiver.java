@@ -55,24 +55,26 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
   }
 
   @Override
-  public void receive(String endpointId, String message) {
-    checkNotNull(endpointId, "Endpoint ID must not be null");
-    checkArgument(!endpointId.isEmpty(), "Endpoint ID name must not be empty");
+  public void receive(String combinedEndpointId, String message) {
+    checkNotNull(combinedEndpointId, "Endpoint ID must not be null");
+    checkArgument(!combinedEndpointId.isEmpty(), "Endpoint ID name must not be empty");
     checkNotNull(message, "Message must not be null");
     checkArgument(!message.isEmpty(), "Message must not be empty");
 
-    LOGGER.debug("Receiving message: " + message + ", from endpoint: " + endpointId);
+    LOGGER.debug("Receiving message: " + message + ", from endpoint: " + combinedEndpointId);
     if (!jsonRpcQualifier.isValidJson(message)) {
       String error = "An error occurred on the server while parsing the JSON text";
-      errorTransmitter.transmit(endpointId, new JsonRpcException(-32700, error));
+      errorTransmitter.transmit(combinedEndpointId, new JsonRpcException(-32700, error));
     }
 
     List<String> messages = jsonRpcUnmarshaller.unmarshalArray(message);
     for (String innerMessage : messages) {
       if (jsonRpcQualifier.isJsonRpcRequest(innerMessage)) {
-        requestProcessor.process(new ProcessRequestTask(endpointId, innerMessage));
+        String endpointId = combinedEndpointId.split("<-:->")[1];
+        ProcessRequestTask task = new ProcessRequestTask(combinedEndpointId, innerMessage);
+        requestProcessor.process(endpointId, task);
       } else if (jsonRpcQualifier.isJsonRpcResponse(innerMessage)) {
-        processResponse(endpointId, innerMessage);
+        processResponse(combinedEndpointId, innerMessage);
       } else {
         processError();
       }

@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 public class JsonRpcMessageReceiverTest {
 
   static final String MESSAGE = "message";
-  static final String ENDPOINT_ID = "endpoint-id";
+  static final String ENDPOINT_ID = "client-id<-:->endpoint-id";
 
   @Mock RequestDispatcher requestDispatcher;
   @Mock ResponseDispatcher responseDispatcher;
@@ -92,6 +92,6 @@ public class JsonRpcMessageReceiverTest {
 
     jsonRpcMessageReceiver.receive(ENDPOINT_ID, MESSAGE);
 
-    verify(requestProcessor).process(any());
+    verify(requestProcessor).process(any(), any());
   }
 }
