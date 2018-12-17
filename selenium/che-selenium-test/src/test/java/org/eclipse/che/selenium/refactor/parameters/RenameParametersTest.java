@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.refactor.parameters;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.DEFAULT_TIMEOUT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -32,7 +31,6 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -187,12 +185,7 @@ public class RenameParametersTest {
     renameLocalVariableByRefactorForm("j");
 
     // accept the ask dialog about duplicate parameters
-    try {
-      askDialog.acceptDialogWithText("Duplicate parameter j");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11185");
-    }
+    askDialog.acceptDialogWithText("Duplicate parameter j");
 
     loader.waitOnClosed();
     refactor.waitRenameParametersFormIsClosed();
