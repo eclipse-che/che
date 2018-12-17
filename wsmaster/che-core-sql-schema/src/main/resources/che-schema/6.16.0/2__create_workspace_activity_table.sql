@@ -23,9 +23,8 @@ CREATE TABLE che_workspace_activity (
     PRIMARY KEY (workspace_id)
 );
 ALTER TABLE che_workspace_activity ADD CONSTRAINT ws_activity_workspace_id FOREIGN KEY (workspace_id) REFERENCES workspace (id);
-CREATE INDEX che_index_ws_activity_status ON che_workspace_activity (status);
-CREATE INDEX che_index_ws_activity_last_starting ON che_workspace_activity (last_starting);
-CREATE INDEX che_index_ws_activity_last_running ON che_workspace_activity (last_running);
-CREATE INDEX che_index_ws_activity_last_stopping ON che_workspace_activity (last_stopping);
-CREATE INDEX che_index_ws_activity_last_stopped ON che_workspace_activity (last_stopped);
+CREATE INDEX che_index_ws_activity_last_starting ON che_workspace_activity (status, last_starting);
+CREATE INDEX che_index_ws_activity_last_running ON che_workspace_activity (status, last_running);
+CREATE INDEX che_index_ws_activity_last_stopping ON che_workspace_activity (status, last_stopping);
+CREATE INDEX che_index_ws_activity_last_stopped ON che_workspace_activity (status, last_stopped);
 CREATE INDEX che_index_ws_activity_expiration ON che_workspace_activity (expiration);
