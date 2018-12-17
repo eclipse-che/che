@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
@@ -28,8 +29,8 @@ public class WorkspaceAgentCorsEnabledEnvVarProvider implements EnvVarProvider {
 
   @Inject
   public WorkspaceAgentCorsEnabledEnvVarProvider(
-      @Named("che.wsagent.cors.enabled") String cheWsMasterAllowedOrigins) {
-    this.wsAgentCorsEnabled = cheWsMasterAllowedOrigins;
+      @Nullable @Named("che.wsagent.cors.enabled") String wsAgentCorsEnabled) {
+    this.wsAgentCorsEnabled = wsAgentCorsEnabled;
   }
 
   @Override

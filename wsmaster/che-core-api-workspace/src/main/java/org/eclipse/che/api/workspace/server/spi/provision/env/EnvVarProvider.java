@@ -23,7 +23,8 @@ import org.eclipse.che.commons.lang.Pair;
  */
 public interface EnvVarProvider {
   /**
-   * Returns environment variable which should be injected into machine environment.
+   * Returns environment variable which should be injected into machine environment. If null is
+   * returned, that means that no variable will be provided
    *
    * @param runtimeIdentity which may be needed to evaluate environment variable value
    */

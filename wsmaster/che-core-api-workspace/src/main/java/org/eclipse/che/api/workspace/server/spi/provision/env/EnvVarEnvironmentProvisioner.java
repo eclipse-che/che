@@ -44,10 +44,12 @@ public class EnvVarEnvironmentProvisioner implements InternalEnvironmentProvisio
     LOG.debug("Provisioning environment variables for workspace '{}'", id.getWorkspaceId());
     for (EnvVarProvider envVarProvider : envVarProviders) {
       Pair<String, String> envVar = envVarProvider.get(id);
-      internalEnvironment
-          .getMachines()
-          .values()
-          .forEach(m -> m.getEnv().putIfAbsent(envVar.first, envVar.second));
+      if (envVar != null) {
+        internalEnvironment
+            .getMachines()
+            .values()
+            .forEach(m -> m.getEnv().putIfAbsent(envVar.first, envVar.second));
+      }
     }
     LOG.debug("Environment variables provisioning done for workspace '{}'", id.getWorkspaceId());
   }

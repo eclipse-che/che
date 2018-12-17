@@ -196,19 +196,9 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
     envVarProviders.addBinding().to(WorkspaceMavenServerJavaOptsEnvVariableProvider.class);
 
-    // propagate CORS allowed origin evn variable to WS agent only if corresponding env variable
-    // is defined on master
-    if (!isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ALLOWED__ORIGINS"))) {
-      envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
-    }
-
-    if (!isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ALLOW_CREDENTIALS"))) {
-      envVarProviders.addBinding().to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
-    }
-
-    if (!isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ENABLED"))) {
-      envVarProviders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
-    }
+    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
