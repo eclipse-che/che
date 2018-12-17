@@ -168,4 +168,27 @@ public class WorkspaceActivity {
         expiration,
         status);
   }
+
+  @Override
+  public String toString() {
+    return "WorkspaceActivity{"
+        + "workspaceId='"
+        + workspaceId
+        + '\''
+        + ", created="
+        + created
+        + ", lastStarting="
+        + lastStarting
+        + ", lastRunning="
+        + lastRunning
+        + ", lastStopping="
+        + lastStopping
+        + ", lastStopped="
+        + lastStopped
+        + ", expiration="
+        + expiration
+        + ", status="
+        + status
+        + '}';
+  }
 }
