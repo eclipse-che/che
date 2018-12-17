@@ -51,7 +51,7 @@ public class ServiceAccountProvisioner implements ConfigurationProvisioner {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!isNullOrEmpty(serviceAccount)) {
-      for (PodData pod : k8sEnv.getPodData().values()) {
+      for (PodData pod : k8sEnv.getPodsData().values()) {
         pod.getSpec().setServiceAccountName(serviceAccount);
         pod.getSpec().setAutomountServiceAccountToken(true);
       }

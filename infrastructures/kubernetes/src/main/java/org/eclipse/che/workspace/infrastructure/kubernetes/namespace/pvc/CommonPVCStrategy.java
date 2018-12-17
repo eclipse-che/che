@@ -128,7 +128,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     String commonPVCName = getCommonPVCName(identity);
     final PersistentVolumeClaim pvc = newPVC(commonPVCName, pvcAccessMode, pvcQuantity);
     k8sEnv.getPersistentVolumeClaims().put(commonPVCName, pvc);
-    for (PodData pod : k8sEnv.getPodData().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       PodSpec podSpec = pod.getSpec();
       List<Container> containers = new ArrayList<>();
       containers.addAll(podSpec.getContainers());

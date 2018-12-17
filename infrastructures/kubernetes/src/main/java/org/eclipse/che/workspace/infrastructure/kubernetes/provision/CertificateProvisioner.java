@@ -81,7 +81,7 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
                 .withStringData(ImmutableMap.of(CA_CERT_FILE, certificate))
                 .build());
 
-    for (PodData pod : k8sEnv.getPodData().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       Optional<Volume> certVolume =
           pod.getSpec()
               .getVolumes()

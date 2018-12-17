@@ -46,7 +46,7 @@ public class PodTerminationGracePeriodProvisioner implements ConfigurationProvis
 
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
-    for (PodData pod : k8sEnv.getPodData().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       if (!isTerminationGracePeriodSet(pod.getSpec())) {
         pod.getSpec().setTerminationGracePeriodSeconds(graceTerminationPeriodSec);
       }

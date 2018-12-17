@@ -115,7 +115,7 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
                 .create(workspaceId)
                 .persistentVolumeClaims()
                 .getByLabel(CHE_WORKSPACE_ID_LABEL, workspaceId));
-    for (PodData pod : k8sEnv.getPodData().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       final PodSpec podSpec = pod.getSpec();
       List<Container> containers = new ArrayList<>();
       containers.addAll(podSpec.getContainers());

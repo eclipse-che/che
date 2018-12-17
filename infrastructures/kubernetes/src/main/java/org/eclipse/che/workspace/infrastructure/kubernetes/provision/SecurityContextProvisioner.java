@@ -38,7 +38,7 @@ public class SecurityContextProvisioner implements ConfigurationProvisioner<Kube
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     if (runAsUser != null) {
-      k8sEnv.getPodData().values().forEach(p -> provision(p.getSpec()));
+      k8sEnv.getPodsData().values().forEach(p -> provision(p.getSpec()));
     }
   }
 

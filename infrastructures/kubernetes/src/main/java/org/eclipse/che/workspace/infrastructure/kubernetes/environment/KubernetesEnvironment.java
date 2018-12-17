@@ -76,7 +76,6 @@ public class KubernetesEnvironment extends InternalEnvironment {
         k8sEnv,
         k8sEnv.getPodsCopy(),
         k8sEnv.getDeploymentsCopy(),
-        k8sEnv.getPodData(),
         k8sEnv.getServices(),
         k8sEnv.getIngresses(),
         k8sEnv.getPersistentVolumeClaims(),
@@ -88,7 +87,6 @@ public class KubernetesEnvironment extends InternalEnvironment {
       InternalEnvironment internalEnvironment,
       Map<String, Pod> pods,
       Map<String, Deployment> deployments,
-      Map<String, PodData> podData,
       Map<String, Service> services,
       Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> persistentVolumeClaims,
@@ -98,12 +96,26 @@ public class KubernetesEnvironment extends InternalEnvironment {
     setType(TYPE);
     this.pods = pods;
     this.deployments = deployments;
-    this.podData = podData;
     this.services = services;
     this.ingresses = ingresses;
     this.persistentVolumeClaims = persistentVolumeClaims;
     this.secrets = secrets;
     this.configMaps = configMaps;
+    this.podData = new HashMap<>();
+    pods.entrySet()
+        .forEach(
+            e -> {
+              Pod pod = e.getValue();
+              podData.put(e.getKey(), new PodData(pod.getSpec(), pod.getMetadata()));
+            });
+    deployments
+        .entrySet()
+        .forEach(
+            e -> {
+              PodTemplateSpec podTemplate = e.getValue().getSpec().getTemplate();
+              podData.put(
+                  e.getKey(), new PodData(podTemplate.getSpec(), podTemplate.getMetadata()));
+            });
   }
 
   protected KubernetesEnvironment(
@@ -112,7 +124,6 @@ public class KubernetesEnvironment extends InternalEnvironment {
       List<Warning> warnings,
       Map<String, Pod> pods,
       Map<String, Deployment> deployments,
-      Map<String, PodData> podData,
       Map<String, Service> services,
       Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> persistentVolumeClaims,
@@ -122,12 +133,26 @@ public class KubernetesEnvironment extends InternalEnvironment {
     setType(TYPE);
     this.pods = pods;
     this.deployments = deployments;
-    this.podData = podData;
     this.services = services;
     this.ingresses = ingresses;
     this.persistentVolumeClaims = persistentVolumeClaims;
     this.secrets = secrets;
     this.configMaps = configMaps;
+    this.podData = new HashMap<>();
+    pods.entrySet()
+        .forEach(
+            e -> {
+              Pod pod = e.getValue();
+              podData.put(e.getKey(), new PodData(pod.getSpec(), pod.getMetadata()));
+            });
+    deployments
+        .entrySet()
+        .forEach(
+            e -> {
+              PodTemplateSpec podTemplate = e.getValue().getSpec().getTemplate();
+              podData.put(
+                  e.getKey(), new PodData(podTemplate.getSpec(), podTemplate.getMetadata()));
+            });
   }
 
   @Override
@@ -139,7 +164,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
    * Returns pods that should be created when environment starts.
    *
    * <p>Note: This map <b>should not</b> be changed, as it will only return pods and not
-   * deployments. If objects in the map need to be changed, see {@link #getPodData()}
+   * deployments. If objects in the map need to be changed, see {@link #getPodsData()}
    */
   public Map<String, Pod> getPodsCopy() {
     return ImmutableMap.copyOf(pods);
@@ -149,7 +174,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
    * Returns deployments that should be created when environment starts.
    *
    * <p>Note: This map <b>should not</b> be changed. If objects in the map need to be changed, see
-   * {@link #getPodData()}
+   * {@link #getPodsData()}
    */
   public Map<String, Deployment> getDeploymentsCopy() {
     return ImmutableMap.copyOf(deployments);
@@ -161,17 +186,17 @@ public class KubernetesEnvironment extends InternalEnvironment {
    * deployment and pod objects that form the workspace, and should be used when provisioning or
    * performing any action that needs to see every object in the environment.
    */
-  public Map<String, PodData> getPodData() {
+  public Map<String, PodData> getPodsData() {
     return ImmutableMap.copyOf(podData);
   }
 
   /**
    * Add a pod to the current environment. This method is necessary as the map returned by {@link
-   * #getPodsCopy()} is a copy. This method also adds the relevant data to {@link #getPodData()}.
+   * #getPodsCopy()} is a copy. This method also adds the relevant data to {@link #getPodsData()}.
    */
-  public void addPod(String key, Pod pod) {
-    pods.put(key, pod);
-    podData.put(key, new PodData(pod.getSpec(), pod.getMetadata()));
+  public void addPod(String podName, Pod pod) {
+    pods.put(podName, pod);
+    podData.put(podName, new PodData(pod.getSpec(), pod.getMetadata()));
   }
 
   /** Returns services that should be created when environment starts. */
@@ -242,25 +267,11 @@ public class KubernetesEnvironment extends InternalEnvironment {
 
     public Builder setPods(Map<String, Pod> pods) {
       this.pods.putAll(pods);
-      pods.entrySet()
-          .forEach(
-              e -> {
-                Pod pod = e.getValue();
-                podData.put(e.getKey(), new PodData(pod.getSpec(), pod.getMetadata()));
-              });
       return this;
     }
 
     public Builder setDeployments(Map<String, Deployment> deployments) {
       this.deployments.putAll(deployments);
-      deployments
-          .entrySet()
-          .forEach(
-              e -> {
-                PodTemplateSpec podTemplate = e.getValue().getSpec().getTemplate();
-                podData.put(
-                    e.getKey(), new PodData(podTemplate.getSpec(), podTemplate.getMetadata()));
-              });
       return this;
     }
 
@@ -296,15 +307,7 @@ public class KubernetesEnvironment extends InternalEnvironment {
 
     public KubernetesEnvironment build() {
       return new KubernetesEnvironment(
-          internalEnvironment,
-          pods,
-          deployments,
-          podData,
-          services,
-          ingresses,
-          pvcs,
-          secrets,
-          configMaps);
+          internalEnvironment, pods, deployments, services, ingresses, pvcs, secrets, configMaps);
     }
   }
 

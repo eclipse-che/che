@@ -61,7 +61,7 @@ public class OpenShiftUniqueNamesProvisionerTest {
     when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
     Pod pod = newPod();
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
-    doReturn(ImmutableMap.of(POD_NAME, podData)).when(osEnv).getPodData();
+    doReturn(ImmutableMap.of(POD_NAME, podData)).when(osEnv).getPodsData();
 
     uniqueNamesProvisioner.provision(osEnv, runtimeIdentity);
 

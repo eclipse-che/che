@@ -62,7 +62,7 @@ public class UniqueNamesProvisionerTest {
 
     Pod pod = newPod();
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
-    doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodData();
+    doReturn(ImmutableMap.of(POD_NAME, podData)).when(k8sEnv).getPodsData();
 
     uniqueNamesProvisioner.provision(k8sEnv, runtimeIdentity);
 

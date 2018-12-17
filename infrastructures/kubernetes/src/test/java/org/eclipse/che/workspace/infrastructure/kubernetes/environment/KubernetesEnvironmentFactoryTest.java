@@ -202,9 +202,9 @@ public class KubernetesEnvironmentFactoryTest {
     assertEquals(
         parsed.getPodsCopy().values().iterator().next().getMetadata().getName(),
         pod.getMetadata().getName());
-    assertEquals(parsed.getPodData().size(), 1);
+    assertEquals(parsed.getPodsData().size(), 1);
     assertEquals(
-        parsed.getPodData().values().iterator().next().getMetadata().getName(),
+        parsed.getPodsData().values().iterator().next().getMetadata().getName(),
         pod.getMetadata().getName());
   }
 
@@ -238,9 +238,9 @@ public class KubernetesEnvironmentFactoryTest {
     assertEquals(
         parsed.getDeploymentsCopy().values().iterator().next().getMetadata().getName(),
         deployment.getMetadata().getName());
-    assertEquals(parsed.getPodData().size(), 1);
+    assertEquals(parsed.getPodsData().size(), 1);
     assertEquals(
-        parsed.getPodData().values().iterator().next().getMetadata().getName(),
+        parsed.getPodsData().values().iterator().next().getMetadata().getName(),
         podTemplate.getMetadata().getName());
   }
 
@@ -277,10 +277,10 @@ public class KubernetesEnvironmentFactoryTest {
     final KubernetesEnvironment parsed =
         k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertEquals(parsed.getPodData().size(), 2);
+    assertEquals(parsed.getPodsData().size(), 2);
     assertTrue(
         parsed
-            .getPodData()
+            .getPodsData()
             .values()
             .stream()
             .allMatch(

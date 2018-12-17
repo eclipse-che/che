@@ -110,7 +110,7 @@ public class EphemeralWorkspaceAdapterTest {
     Container container = new Container();
     Pod pod = buildPod(POD_ID, container);
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
-    when(k8sEnv.getPodData()).thenReturn(ImmutableMap.of(POD_ID, podData));
+    when(k8sEnv.getPodsData()).thenReturn(ImmutableMap.of(POD_ID, podData));
 
     ephemeralWorkspaceAdapter.provision(k8sEnv, runtimeIdentity);
 
@@ -126,7 +126,7 @@ public class EphemeralWorkspaceAdapterTest {
     Container container2 = new Container();
     Pod pod = buildPod(POD_ID, container1, container2);
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
-    when(k8sEnv.getPodData()).thenReturn(ImmutableMap.of(POD_ID, podData));
+    when(k8sEnv.getPodsData()).thenReturn(ImmutableMap.of(POD_ID, podData));
 
     ephemeralWorkspaceAdapter.provision(k8sEnv, runtimeIdentity);
 
@@ -152,7 +152,7 @@ public class EphemeralWorkspaceAdapterTest {
     Container initContainer = new Container();
     Pod pod = buildPod(POD_ID, container1, container2);
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
-    when(k8sEnv.getPodData()).thenReturn(ImmutableMap.of(POD_ID, podData));
+    when(k8sEnv.getPodsData()).thenReturn(ImmutableMap.of(POD_ID, podData));
     pod.getSpec().setInitContainers(ImmutableList.of(initContainer));
 
     ephemeralWorkspaceAdapter.provision(k8sEnv, runtimeIdentity);

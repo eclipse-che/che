@@ -52,7 +52,7 @@ public class RamLimitRequestProvisioner implements ConfigurationProvisioner {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     final Map<String, InternalMachineConfig> machines = k8sEnv.getMachines();
-    for (PodData pod : k8sEnv.getPodData().values()) {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
       for (Container container : pod.getSpec().getContainers()) {
         InternalMachineConfig machineConfig = machines.get(machineName(pod, container));
         memoryAttributeProvisioner.provision(

@@ -20,6 +20,7 @@ import io.fabric8.kubernetes.api.model.ConfigMapVolumeSource;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import java.util.Collection;
 import java.util.HashMap;
@@ -68,7 +69,7 @@ public class UniqueNamesProvisioner<T extends KubernetesEnvironment>
       configMapNameTranslation.put(originalName, uniqueName);
     }
 
-    final Collection<PodData> podData = k8sEnv.getPodData().values();
+    final Collection<PodData> podData = k8sEnv.getPodsData().values();
     for (PodData pod : podData) {
       final ObjectMeta podMeta = pod.getMetadata();
       putLabel(podMeta, Constants.CHE_ORIGINAL_NAME_LABEL, podMeta.getName());
@@ -77,6 +78,17 @@ public class UniqueNamesProvisioner<T extends KubernetesEnvironment>
       if (configMapNameTranslation.size() > 0) {
         rewriteConfigMapNames(pod, configMapNameTranslation);
       }
+    }
+
+    // We expliticly need to modify the deployments in the environment to provision unique names
+    // for them.
+    final Collection<Deployment> deployments = k8sEnv.getDeploymentsCopy().values();
+    for (Deployment deployment : deployments) {
+      final ObjectMeta deploymentMeta = deployment.getMetadata();
+      final String originalName = deploymentMeta.getName();
+      putLabel(deploymentMeta, Constants.CHE_ORIGINAL_NAME_LABEL, originalName);
+      final String deploymentName = Names.uniqueResourceName(originalName, workspaceId);
+      deploymentMeta.setName(deploymentName);
     }
 
     final Set<Ingress> ingresses = new HashSet<>(k8sEnv.getIngresses().values());

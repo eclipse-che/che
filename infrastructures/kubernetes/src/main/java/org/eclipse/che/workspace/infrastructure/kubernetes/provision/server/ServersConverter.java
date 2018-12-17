@@ -64,7 +64,7 @@ public class ServersConverter<T extends KubernetesEnvironment>
     SecureServerExposer<T> secureServerExposer =
         secureServerExposerFactoryProvider.get(k8sEnv).create(identity);
 
-    for (PodData podConfig : k8sEnv.getPodData().values()) {
+    for (PodData podConfig : k8sEnv.getPodsData().values()) {
       final PodSpec podSpec = podConfig.getSpec();
       for (Container containerConfig : podSpec.getContainers()) {
         String machineName = Names.machineName(podConfig, containerConfig);

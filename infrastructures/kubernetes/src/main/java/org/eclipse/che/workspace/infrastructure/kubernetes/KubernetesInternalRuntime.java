@@ -724,7 +724,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       ObjectMeta toCreateMeta = toCreate.getMetadata();
       final Pod createdPod = namespace.deployments().deploy(toCreate);
       LOG.debug("Creating pod '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
-      startMachines(createdPod, toCreateMeta, machineConfigs, serverResolver);
+      storeStartingMachine(createdPod, toCreateMeta, machineConfigs, serverResolver);
     }
     for (Deployment toCreate : environment.getDeploymentsCopy().values()) {
       PodTemplateSpec template = toCreate.getSpec().getTemplate();
@@ -732,13 +732,16 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       ObjectMeta toCreateMeta = toCreate.getMetadata();
       final Pod createdPod = namespace.deployments().deploy(toCreate);
       LOG.debug("Creating deployment '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
-      startMachines(createdPod, toCreateMeta, machineConfigs, serverResolver);
+      // We need to pass the meta from the pod in the deployment as that is what matches
+      // machine name
+      final ObjectMeta templateMeta = toCreate.getSpec().getTemplate().getMetadata();
+      storeStartingMachine(createdPod, templateMeta, machineConfigs, serverResolver);
     }
     LOG.debug("Pods creation finished in workspace '{}'", workspaceId);
   }
 
   /** Puts createdPod in the {@code machines} map and sends the starting event for this machine */
-  public void startMachines(
+  private void storeStartingMachine(
       Pod createdPod,
       ObjectMeta toCreateMeta,
       Map<String, InternalMachineConfig> machineConfigs,

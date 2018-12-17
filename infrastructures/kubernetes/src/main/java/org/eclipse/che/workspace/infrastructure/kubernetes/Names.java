@@ -36,6 +36,24 @@ public class Names {
   /**
    * Returns machine name for the specified container in the specified pod.
    *
+   * <p>This is a convenience method for {@link #machineName(ObjectMeta, Container)}
+   */
+  public static String machineName(Pod pod, Container container) {
+    return machineName(pod.getMetadata(), container);
+  }
+
+  /**
+   * Returns machine name for the specified container in the specified pod.
+   *
+   * <p>This is a convenience method for {@link #machineName(ObjectMeta, Container)}
+   */
+  public static String machineName(PodData podData, Container container) {
+    return machineName(podData.getMetadata(), container);
+  }
+
+  /**
+   * Returns machine name for the specified container in the specified pod.
+   *
    * <p>Machine name is evaluated by the following algorithm:<br>
    *
    * <pre>
@@ -46,14 +64,6 @@ public class Names {
    * otherwise return podName + '/' + containerName as machine name
    * </pre>
    */
-  public static String machineName(Pod pod, Container container) {
-    return machineName(pod.getMetadata(), container);
-  }
-
-  public static String machineName(PodData podData, Container container) {
-    return machineName(podData.getMetadata(), container);
-  }
-
   public static String machineName(ObjectMeta podMeta, Container container) {
     final Map<String, String> annotations = podMeta.getAnnotations();
     final String machineName;

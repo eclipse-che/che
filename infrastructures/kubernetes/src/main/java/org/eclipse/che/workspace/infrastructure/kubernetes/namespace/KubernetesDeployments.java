@@ -124,6 +124,10 @@ public class KubernetesDeployments {
    */
   public Pod deploy(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
+    // Since we use the pod's metadata as the deployment's metadata
+    // This is used to identify the pod in CreateWatcher.
+    String originalName = pod.getMetadata().getName();
+    putLabel(pod, CHE_DEPLOYMENT_NAME_LABEL, originalName);
 
     ObjectMeta metadata = pod.getMetadata();
     PodSpec podSpec = pod.getSpec();

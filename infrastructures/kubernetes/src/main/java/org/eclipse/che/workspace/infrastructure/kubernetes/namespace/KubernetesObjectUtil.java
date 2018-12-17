@@ -27,7 +27,6 @@ import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Helps to work with Kubernetes objects.
@@ -49,16 +48,7 @@ public class KubernetesObjectUtil {
     putLabel(target.getMetadata(), key, value);
   }
 
-  public static void putLabel(PodData target, String key, String value) {
-    ObjectMeta metadata = target.getMetadata();
-
-    if (metadata == null) {
-      target.setMetadata(metadata = new ObjectMeta());
-    }
-
-    putLabel(metadata, key, value);
-  }
-
+  /** Adds label to target Kubernetes object. */
   public static void putLabel(ObjectMeta metadata, String key, String value) {
     Map<String, String> labels = metadata.getLabels();
     if (labels == null) {
