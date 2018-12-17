@@ -17,7 +17,6 @@ import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.annotations.Api;
@@ -45,6 +44,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -57,25 +57,22 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 public class DevfileService extends Service {
 
   private WorkspaceLinksGenerator linksGenerator;
-  private DevfileSchemaValidator schemaValidator;
-  private DevfileIntegrityValidator integrityValidator;
   private DevfileSchemaProvider schemaCachedProvider;
   private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
   private DevfileConverter devfileConverter;
+  private DevfileManager devfileManager;
 
   @Inject
   public DevfileService(
       WorkspaceLinksGenerator linksGenerator,
-      DevfileSchemaValidator schemaValidator,
-      DevfileIntegrityValidator integrityValidator,
       DevfileSchemaProvider schemaCachedProvider,
-      WorkspaceManager workspaceManager) {
+      WorkspaceManager workspaceManager,
+      DevfileManager devfileManager) {
     this.linksGenerator = linksGenerator;
-    this.schemaValidator = schemaValidator;
-    this.integrityValidator = integrityValidator;
     this.schemaCachedProvider = schemaCachedProvider;
     this.workspaceManager = workspaceManager;
+    this.devfileManager = devfileManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
     this.devfileConverter = new DevfileConverter();
   }
@@ -134,17 +131,13 @@ public class DevfileService extends Service {
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
-    Devfile devFile;
     WorkspaceConfigImpl workspaceConfig;
     try {
-      JsonNode parsed = schemaValidator.validateBySchema(data, verbose);
-      devFile = objectMapper.treeToValue(parsed, Devfile.class);
-      integrityValidator.validateDevfile(devFile);
-      workspaceConfig = devfileConverter.devFileToWorkspaceConfig(devFile);
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage());
+      workspaceConfig = devfileManager.validateAndConvert(data, verbose);
     } catch (DevfileFormatException e) {
       throw new BadRequestException(e.getMessage());
+    } catch (JsonProcessingException e) {
+      throw new ServerException(e.getMessage());
     }
 
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();

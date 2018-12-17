@@ -12,10 +12,10 @@
 package org.eclipse.che.plugin.github.factory.resolver;
 
 import javax.inject.Inject;
-import org.eclipse.che.plugin.urlfactory.URLChecker;
+import org.eclipse.che.api.factory.server.urlfactory.URLChecker;
 
 /**
- * Support old dockerfila and factory filenames;
+ * Support old dockerfile and factory file names;
  *
  * @author Max Shaposhnik
  */

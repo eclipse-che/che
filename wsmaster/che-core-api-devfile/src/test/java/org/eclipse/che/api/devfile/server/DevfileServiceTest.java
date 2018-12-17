@@ -16,11 +16,11 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -33,9 +33,9 @@ import com.jayway.restassured.response.Response;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -64,9 +64,8 @@ public class DevfileServiceTest {
 
   @Mock private WorkspaceManager workspaceManager;
   @Mock private EnvironmentContext environmentContext;
-  @Mock private DevfileIntegrityValidator integrityValidator;
+  @Mock private DevfileManager devfileManager;
   private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
-  private DevfileSchemaValidator validator;
 
   @SuppressWarnings("unused")
   private static final EnvironmentFilter FILTER = new EnvironmentFilter();
@@ -78,10 +77,8 @@ public class DevfileServiceTest {
 
   @BeforeMethod
   public void initService() {
-    this.validator = spy(new DevfileSchemaValidator(schemaProvider));
     this.devFileService =
-        new DevfileService(
-            linksGenerator, validator, integrityValidator, schemaProvider, workspaceManager);
+        new DevfileService(linksGenerator, schemaProvider, workspaceManager, devfileManager);
   }
 
   @Test
@@ -102,6 +99,7 @@ public class DevfileServiceTest {
     ArgumentCaptor<WorkspaceConfigImpl> captor = ArgumentCaptor.forClass(WorkspaceConfigImpl.class);
     EnvironmentContext.setCurrent(environmentContext);
     WorkspaceImpl ws = mock(WorkspaceImpl.class);
+    when(devfileManager.validateAndConvert(anyString(), anyBoolean())).thenReturn(createConfig());
     when(workspaceManager.createWorkspace(any(), eq(SUBJECT.getUserName()), anyMap()))
         .thenReturn(createWorkspace(WorkspaceStatus.STOPPED));
     String yamlContent =
@@ -127,7 +125,6 @@ public class DevfileServiceTest {
             .post(SECURE_PATH + "/devfile");
 
     assertEquals(response.getStatusCode(), 201);
-    verify(validator).validateBySchema(eq(yamlContent), eq(false));
     verify(workspaceManager).createWorkspace(captor.capture(), eq(SUBJECT.getUserName()), anyMap());
     assertEquals("petclinic-dev-environment_2", captor.getValue().getName());
   }
@@ -160,7 +157,7 @@ public class DevfileServiceTest {
         .build();
   }
 
-  private WorkspaceConfig createConfig() throws IOException, JsonParseException {
+  private WorkspaceConfigImpl createConfig() throws IOException, JsonParseException {
     String jsonContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
     return JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);

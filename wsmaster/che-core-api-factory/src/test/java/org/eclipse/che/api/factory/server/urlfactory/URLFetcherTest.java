@@ -9,10 +9,10 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.urlfactory;
+package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.eclipse.che.plugin.urlfactory.URLFetcher.MAXIMUM_READ_BYTES;
+import static org.eclipse.che.api.factory.server.urlfactory.URLFetcher.MAXIMUM_READ_BYTES;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -51,9 +51,7 @@ public class URLFetcherTest {
   public void checkGetContent() {
 
     // test to download this class object
-    URL urlJson =
-        URLFetcherTest.class.getResource(
-            "/" + URLFetcherTest.class.getPackage().getName().replace('.', '/') + "/.che.json");
+    URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
     String content = URLFetcher.fetch(urlJson.toString());
@@ -82,9 +80,7 @@ public class URLFetcherTest {
   public void checkMissingContent() {
 
     // test to download this class object
-    URL urlJson =
-        URLFetcherTest.class.getResource(
-            "/" + URLFetcherTest.class.getPackage().getName().replace('.', '/') + "/.che.json");
+    URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
     // add extra path to make url not found
@@ -95,9 +91,7 @@ public class URLFetcherTest {
   /** Check when we reach custom limit */
   @Test
   public void checkPartialContent() {
-    URL urlJson =
-        URLFetcherTest.class.getResource(
-            "/" + URLFetcherTest.class.getPackage().getName().replace('.', '/') + "/.che.json");
+    URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
     String content = new OneByteURLFetcher().fetch(urlJson.toString());
@@ -118,9 +112,9 @@ public class URLFetcherTest {
   }
 
   /** Limit to only one Byte. */
-  class OneByteURLFetcher extends URLFetcher {
-
+  static class OneByteURLFetcher extends URLFetcher {
     /** Override the limit */
+    @Override
     protected long getLimit() {
       return 1;
     }

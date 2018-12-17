@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.urlfactory;
+package org.eclipse.che.api.factory.server.urlfactory;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.testng.Assert.assertEquals;

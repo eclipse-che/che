@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.urlfactory;
+package org.eclipse.che.api.factory.server.urlfactory;
 
 import static org.eclipse.jetty.http.HttpStatus.NOT_FOUND_404;
 import static org.eclipse.jetty.http.HttpStatus.OK_200;
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -81,9 +80,7 @@ public class URLCheckerTest {
   public void checkUrlFileNotExists() {
 
     // test to check if this url exist
-    URL urlJson =
-        URLCheckerTest.class.getResource(
-            "/" + URLCheckerTest.class.getPackage().getName().replace('.', '/') + "/.che.json");
+    URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
     boolean exists = URLChecker.exists(urlJson.toString() + "-notfound");
@@ -101,9 +98,7 @@ public class URLCheckerTest {
   @Test
   public void checkUrlIsInvalid() throws MalformedURLException {
     // test to check if this url exist
-    URL urlJson =
-        URLCheckerTest.class.getResource(
-            "/" + URLCheckerTest.class.getPackage().getName().replace('.', '/') + "/.che.json");
+    URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
     boolean exists = URLChecker.exists(new URL(urlJson.toString() + "-notfound"));
@@ -166,8 +161,8 @@ public class URLCheckerTest {
 
   /** Dummy servlet class. */
   static class MyServlet extends HttpServlet {
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
       resp.getOutputStream().print("hello");
     }
   }

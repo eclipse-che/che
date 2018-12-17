@@ -12,7 +12,7 @@
 package org.eclipse.che.plugin.github.factory.resolver;
 
 /**
- * Interface for Gitlab repository URL parsers.
+ * Interface for Github repository URL parsers.
  *
  * @author Max Shaposhnik
  */

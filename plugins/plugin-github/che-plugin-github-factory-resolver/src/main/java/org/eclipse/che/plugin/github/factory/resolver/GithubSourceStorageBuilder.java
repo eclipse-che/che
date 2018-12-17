@@ -42,7 +42,7 @@ public class GithubSourceStorageBuilder {
     }
     return newDto(SourceStorageDto.class)
         .withLocation(githubUrl.repositoryLocation())
-        .withType("git")
+        .withType("github")
         .withParameters(parameters);
   }
 }

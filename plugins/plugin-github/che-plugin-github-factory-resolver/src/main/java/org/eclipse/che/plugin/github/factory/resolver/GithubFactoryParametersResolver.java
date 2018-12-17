@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.plugin.github.factory.resolver;
 
+import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.Map;
@@ -18,10 +19,10 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
+import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
+import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
-import org.eclipse.che.plugin.urlfactory.ProjectConfigDtoMerger;
-import org.eclipse.che.plugin.urlfactory.URLFactoryBuilder;
 
 /**
  * Provides Factory Parameters resolver for github repositories.
@@ -34,15 +35,28 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
   protected static final String URL_PARAMETER_NAME = "url";
 
   /** Parser which will allow to check validity of URLs and create objects. */
-  @Inject private GithubURLParser githubUrlParser;
+  private GithubURLParser githubUrlParser;
 
   /** Builder allowing to build objects from github URL. */
-  @Inject private GithubSourceStorageBuilder githubSourceStorageBuilder;
+  private GithubSourceStorageBuilder githubSourceStorageBuilder;
 
-  @Inject private URLFactoryBuilder urlFactoryBuilder;
+  /** Builds factory by fetching json/devfile content from given URL */
+  private URLFactoryBuilder urlFactoryBuilder;
 
   /** ProjectDtoMerger */
   @Inject private ProjectConfigDtoMerger projectConfigDtoMerger;
+
+  @Inject
+  public GithubFactoryParametersResolver(
+      GithubURLParser githubUrlParser,
+      GithubSourceStorageBuilder githubSourceStorageBuilder,
+      URLFactoryBuilder urlFactoryBuilder,
+      ProjectConfigDtoMerger projectConfigDtoMerger) {
+    this.githubUrlParser = githubUrlParser;
+    this.githubSourceStorageBuilder = githubSourceStorageBuilder;
+    this.urlFactoryBuilder = urlFactoryBuilder;
+    this.projectConfigDtoMerger = projectConfigDtoMerger;
+  }
 
   /**
    * Check if this resolver can be used with the given parameters.
@@ -72,8 +86,15 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get("url"));
 
     // create factory from the following location if location exists, else create default factory
-    FactoryDto factory = urlFactoryBuilder.createFactory(githubUrl.factoryJsonFileLocation());
-
+    FactoryDto factory =
+        urlFactoryBuilder.createFactoryFromDevfile(githubUrl.devfileFileLocation());
+    if (factory == null) {
+      factory = urlFactoryBuilder.createFactoryFromJson(githubUrl.factoryJsonFileLocation());
+    }
+    // try to build factory from parameters
+    if (factory == null) {
+      factory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
+    }
     // add workspace configuration if not defined
     if (factory.getWorkspace() == null) {
       factory.setWorkspace(

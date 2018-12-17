@@ -45,6 +45,9 @@ public class GithubUrl {
   /** Factory json filename */
   private String factoryFilename;
 
+  /** Devfile filename */
+  private String devfileFilename;
+
   /**
    * Creation of this instance is made by the parser so user may not need to create a new instance
    * directly
@@ -104,6 +107,20 @@ public class GithubUrl {
 
   protected GithubUrl withFactoryFilename(String factoryFilename) {
     this.factoryFilename = factoryFilename;
+    return this;
+  }
+
+  /**
+   * Gets devfile file name of this github url
+   *
+   * @return the devfile file name
+   */
+  public String getDevfileFilename() {
+    return this.devfileFilename;
+  }
+
+  protected GithubUrl withDevfileFilename(String devfileFilename) {
+    this.devfileFilename = devfileFilename;
     return this;
   }
 
@@ -170,6 +187,21 @@ public class GithubUrl {
         .add(repository)
         .add(branch)
         .add(factoryFilename)
+        .toString();
+  }
+
+  /**
+   * Provides the location to devfile yaml file
+   *
+   * @return location of devfile yaml file in a repository
+   */
+  protected String devfileFileLocation() {
+    return new StringJoiner("/")
+        .add("https://raw.githubusercontent.com")
+        .add(username)
+        .add(repository)
+        .add(branch)
+        .add(devfileFilename)
         .toString();
   }
 

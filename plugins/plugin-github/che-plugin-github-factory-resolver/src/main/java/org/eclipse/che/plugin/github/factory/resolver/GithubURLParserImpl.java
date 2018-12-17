@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
-import org.eclipse.che.plugin.urlfactory.URLFetcher;
+import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
 
 /**
  * Parser of String Github URLs and provide {@link GithubUrl} objects.
@@ -91,6 +91,7 @@ public class GithubURLParserImpl implements GithubURLParser {
         .withBranch(branchName)
         .withSubfolder(matcher.group("subFolder"))
         .withDockerfileFilename(".factory.dockerfile")
+        .withDevfileFilename(".devfile")
         .withFactoryFilename(".factory.json");
   }
 }

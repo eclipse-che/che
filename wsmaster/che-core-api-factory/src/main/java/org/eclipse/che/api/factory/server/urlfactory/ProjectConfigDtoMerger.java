@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.urlfactory;
+package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.util.Collections.singletonList;
 
@@ -33,16 +33,16 @@ public class ProjectConfigDtoMerger {
    *
    * <ul>
    *   <li>no projects --> add whole project
-   *   <li>if projects
+   *   <li>if projects:
    *       <ul>
-   *         <li>: if there is only one project: add source if missing
+   *         <li>if there is only one project: add source if missing
    *         <li>if many projects: do nothing
    *       </ul>
    * </ul>
    *
-   * @param factory
+   * @param factory source factory
    * @param computedProjectConfig
-   * @return
+   * @return factory with merged project sources
    */
   public FactoryDto merge(FactoryDto factory, ProjectConfigDto computedProjectConfig) {
 

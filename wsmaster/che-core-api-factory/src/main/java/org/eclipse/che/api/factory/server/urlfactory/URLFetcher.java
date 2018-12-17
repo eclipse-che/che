@@ -9,11 +9,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.urlfactory;
+package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +42,7 @@ public class URLFetcher {
   private static final Logger LOG = LoggerFactory.getLogger(URLFetcher.class);
 
   /** Maximum size of allowed data. (40KB) */
-  protected static final long MAXIMUM_READ_BYTES = 40 * 1000;
+  protected static final long MAXIMUM_READ_BYTES = 40 * 1024;
 
   /** The Compiled REGEX PATTERN that can be used for http|https git urls */
   final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");
@@ -104,6 +105,7 @@ public class URLFetcher {
    * @return if the url ends with .git will return the url without .git otherwise return the url as
    *     it is
    */
+  @VisibleForTesting
   String sanitized(String url) {
     if (url != null) {
       final Matcher matcher = GIT_HTTP_URL_PATTERN.matcher(url);

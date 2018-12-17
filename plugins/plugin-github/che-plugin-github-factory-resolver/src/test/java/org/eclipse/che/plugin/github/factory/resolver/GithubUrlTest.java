@@ -41,7 +41,7 @@ public class GithubUrlTest {
     assertNotNull(this.githubUrl);
   }
 
-  /** Check when there is .codenvy.dockerfile in the repository */
+  /** Check when there is .factory.dockerfile in the repository */
   @Test
   public void checkDockerfileLocation() {
     assertEquals(
@@ -49,9 +49,17 @@ public class GithubUrlTest {
         "https://raw.githubusercontent.com/eclipse/che/master/.factory.dockerfile");
   }
 
-  /** Check when there is .codenvy.json file in the repository */
+  /** Check when there is .devfile in the repository */
   @Test
-  public void checkCodenvyFactoryJsonFileLocation() {
+  public void checkDevfileLocation() {
+    assertEquals(
+        githubUrl.devfileFileLocation(),
+        "https://raw.githubusercontent.com/eclipse/che/master/.devfile");
+  }
+
+  /** Check when there is .factory.json file in the repository */
+  @Test
+  public void checkFactoryJsonFileLocation() {
     assertEquals(
         githubUrl.factoryJsonFileLocation(),
         "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");

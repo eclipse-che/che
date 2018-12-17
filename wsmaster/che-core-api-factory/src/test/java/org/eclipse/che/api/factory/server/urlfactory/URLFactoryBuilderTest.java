@@ -9,18 +9,17 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.urlfactory;
+package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.lang.Boolean.FALSE;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder.DEFAULT_DOCKER_IMAGE;
+import static org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder.DEFAULT_MEMORY_LIMIT_BYTES;
+import static org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder.MACHINE_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_DOCKER_IMAGE;
-import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.DEFAULT_MEMORY_LIMIT_BYTES;
-import static org.eclipse.che.plugin.urlfactory.URLFactoryBuilder.MACHINE_NAME;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableList;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
@@ -172,18 +171,8 @@ public class URLFactoryBuilderTest {
     when(urlChecker.exists(myLocation)).thenReturn(FALSE);
     when(urlFetcher.fetch(myLocation)).thenReturn(jsonFactory);
 
-    FactoryDto factory = urlFactoryBuilder.createFactory(myLocation);
+    FactoryDto factory = urlFactoryBuilder.createFactoryFromJson(myLocation);
 
     assertEquals(templateFactory, factory);
-  }
-
-  /** Check that without specifying a custom factory.json we've default factory */
-  @Test
-  public void checkWithDefaultFactoryJsonFile() throws Exception {
-
-    FactoryDto factory = urlFactoryBuilder.createFactory(null);
-
-    assertNull(factory.getWorkspace());
-    assertEquals(factory.getV(), "4.0");
   }
 }

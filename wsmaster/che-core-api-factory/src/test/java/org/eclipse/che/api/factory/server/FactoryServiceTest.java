@@ -26,7 +26,7 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyMapOf;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -126,6 +126,7 @@ public class FactoryServiceTest {
   @Mock private FactoryEditValidator editValidator;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private FactoryParametersResolverHolder factoryParametersResolverHolder;
+  @Mock private DefaultFactoryParameterResolver defaultFactoryParameterResolver;
   @Mock private UriInfo uriInfo;
 
   private FactoryBuilder factoryBuilderSpy;
@@ -147,7 +148,7 @@ public class FactoryServiceTest {
     factoryParametersResolvers = new HashSet<>();
     lenient().doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class));
     lenient().doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class), anyBoolean());
-    when(factoryParametersResolverHolder.getFactoryParametersResolvers())
+    when(factoryParametersResolverHolder.getSpecificFactoryParametersResolvers())
         .thenReturn(factoryParametersResolvers);
     user = new UserImpl(USER_ID, USER_EMAIL, ADMIN_USER_NAME);
     lenient().when(userManager.getById(anyString())).thenReturn(user);
@@ -164,11 +165,13 @@ public class FactoryServiceTest {
             editValidator,
             factoryBuilderSpy,
             workspaceManager,
-            factoryParametersResolverHolder);
+            factoryParametersResolverHolder,
+            defaultFactoryParameterResolver);
   }
 
   @Filter
   public static class EnvironmentFilter implements RequestFilter {
+    @Override
     public void doFilter(GenericContainerRequest request) {
       EnvironmentContext context = EnvironmentContext.getCurrent();
       context.setSubject(new SubjectImpl(ADMIN_USER_NAME, USER_ID, ADMIN_USER_PASSWORD, false));
@@ -253,7 +256,7 @@ public class FactoryServiceTest {
 
   @Test
   public void shouldReturnFactoryListByNameAttribute() throws Exception {
-    final Factory factory = createFactory();
+    final FactoryImpl factory = createFactory();
     when(factoryManager.getByAttribute(1, 0, ImmutableList.of(Pair.of("name", factory.getName()))))
         .thenReturn(ImmutableList.of(factory));
 
@@ -288,8 +291,8 @@ public class FactoryServiceTest {
 
   @Test
   public void shouldReturnFactoryListByCreatorAttribute() throws Exception {
-    final Factory factory1 = createNamedFactory("factory1");
-    final Factory factory2 = createNamedFactory("factory2");
+    final FactoryImpl factory1 = createNamedFactory("factory1");
+    final FactoryImpl factory2 = createNamedFactory("factory2");
     when(factoryManager.getByAttribute(
             2, 0, ImmutableList.of(Pair.of("creator.userId", user.getName()))))
         .thenReturn(ImmutableList.of(factory1, factory2));
@@ -538,9 +541,8 @@ public class FactoryServiceTest {
         DTO.createDto(FactoryDto.class).withV("4.0").withName("matchingResolverFactory");
 
     // accept resolver
-    when(dummyResolver.accept(anyMapOf(String.class, String.class))).thenReturn(true);
-    when(dummyResolver.createFactory(anyMapOf(String.class, String.class)))
-        .thenReturn(expectFactory);
+    when(dummyResolver.accept(anyMap())).thenReturn(true);
+    when(dummyResolver.createFactory(anyMap())).thenReturn(expectFactory);
 
     // when
     final Map<String, String> map = new HashMap<>();
@@ -557,22 +559,22 @@ public class FactoryServiceTest {
     assertTrue(response.getBody().asString().contains(invalidFactoryMessage));
 
     // check we call resolvers
-    verify(dummyResolver).accept(anyMapOf(String.class, String.class));
-    verify(dummyResolver).createFactory(anyMapOf(String.class, String.class));
+    verify(dummyResolver).accept(anyMap());
+    verify(dummyResolver).createFactory(anyMap());
 
     // check we call validator
     verify(acceptValidator).validateOnAccept(any());
   }
 
-  private Factory createFactory() {
+  private FactoryImpl createFactory() {
     return createNamedFactory(FACTORY_NAME);
   }
 
-  private Factory createNamedFactory(String name) {
+  private FactoryImpl createNamedFactory(String name) {
     return createFactoryWithStorage(name, PROJECT_SOURCE_TYPE, PROJECT_SOURCE_LOCATION);
   }
 
-  private Factory createFactoryWithStorage(String name, String type, String location) {
+  private FactoryImpl createFactoryWithStorage(String name, String type, String location) {
     return FactoryImpl.builder()
         .setId(FACTORY_ID)
         .setVersion("4.0")

@@ -80,14 +80,14 @@ import org.eclipse.che.dto.server.DtoFactory;
 public class FactoryService extends Service {
 
   /** Error message if there is no plugged resolver. */
-  public static final String ERROR_NO_RESOLVER_AVAILABLE =
-      "Cannot build factory with any of the provided parameters.";
+  public static final String FACTORY_NOT_RESOLVABLE =
+      "Cannot build factory with any of the provided parameters. Please check the correctness, and repeat query.";
 
   /** Validate query parameter. If true, factory will be validated */
   public static final String VALIDATE_QUERY_PARAMETER = "validate";
 
   /** Set of resolvers for factories. Injected through an holder. */
-  private final Set<FactoryParametersResolver> factoryParametersResolvers;
+  private final Set<FactoryParametersResolver> specificFactoryParametersResolvers;
 
   private final FactoryManager factoryManager;
   private final UserManager userManager;
@@ -97,6 +97,7 @@ public class FactoryService extends Service {
   private final FactoryAcceptValidator acceptValidator;
   private final FactoryBuilder factoryBuilder;
   private final WorkspaceManager workspaceManager;
+  private final DefaultFactoryParameterResolver defaultFactoryResolver;
 
   @Inject
   public FactoryService(
@@ -108,7 +109,8 @@ public class FactoryService extends Service {
       FactoryEditValidator editValidator,
       FactoryBuilder factoryBuilder,
       WorkspaceManager workspaceManager,
-      FactoryParametersResolverHolder factoryParametersResolverHolder) {
+      FactoryParametersResolverHolder factoryParametersResolverHolder,
+      DefaultFactoryParameterResolver defaultFactoryResolver) {
     this.factoryManager = factoryManager;
     this.userManager = userManager;
     this.createValidator = createValidator;
@@ -117,8 +119,9 @@ public class FactoryService extends Service {
     this.editValidator = editValidator;
     this.factoryBuilder = factoryBuilder;
     this.workspaceManager = workspaceManager;
-    this.factoryParametersResolvers =
-        factoryParametersResolverHolder.getFactoryParametersResolvers();
+    this.specificFactoryParametersResolvers =
+        factoryParametersResolverHolder.getSpecificFactoryParametersResolvers();
+    this.defaultFactoryResolver = defaultFactoryResolver;
   }
 
   @POST
@@ -276,7 +279,7 @@ public class FactoryService extends Service {
     @ApiResponse(code = 500, message = "Internal server error")
   })
   public void removeFactory(@ApiParam(value = "Factory identifier") @PathParam("id") String id)
-      throws ForbiddenException, ServerException {
+      throws ServerException {
     factoryManager.removeFactory(id);
   }
 
@@ -329,23 +332,30 @@ public class FactoryService extends Service {
           @DefaultValue("false")
           @QueryParam(VALIDATE_QUERY_PARAMETER)
           Boolean validate)
-      throws ServerException, BadRequestException {
+      throws BadRequestException {
 
     // check parameter
     requiredNotNull(parameters, "Factory build parameters");
 
     // search matching resolver and create factory from matching resolver
-    for (FactoryParametersResolver resolver : factoryParametersResolvers) {
+    FactoryDto resolvedFactory = null;
+    for (FactoryParametersResolver resolver : specificFactoryParametersResolvers) {
       if (resolver.accept(parameters)) {
-        final FactoryDto factory = resolver.createFactory(parameters);
-        if (validate) {
-          acceptValidator.validateOnAccept(factory);
-        }
-        return injectLinks(factory);
+        resolvedFactory = resolver.createFactory(parameters);
+        break;
       }
     }
-    // no match
-    throw new BadRequestException(ERROR_NO_RESOLVER_AVAILABLE);
+    if (resolvedFactory == null) {
+      // no dedicated resolved found for this parameters, use default one
+      resolvedFactory = defaultFactoryResolver.createFactory(parameters);
+    }
+    if (resolvedFactory != null) {
+      if (validate) {
+        acceptValidator.validateOnAccept(resolvedFactory);
+      }
+      return injectLinks(resolvedFactory);
+    }
+    throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
   }
 
   /** Injects factory links. If factory is named then accept named link will be injected. */
@@ -424,21 +434,22 @@ public class FactoryService extends Service {
     }
   }
 
-  /** Usage of a dedicated class to manage the optional resolvers */
+  /** Usage of a dedicated class to manage the optional service-specific resolvers */
   protected static class FactoryParametersResolverHolder {
 
     /** Optional inject for the resolvers. */
     @com.google.inject.Inject(optional = true)
-    private Set<FactoryParametersResolver> factoryParametersResolvers;
+    @SuppressWarnings("unused")
+    private Set<FactoryParametersResolver> specificFactoryParametersResolvers;
 
     /**
-     * Provides the set of resolvers if there are some else return an empty set.
+     * Provides the set of service-specific resolvers if there are some else return an empty set.
      *
      * @return a non null set
      */
-    public Set<FactoryParametersResolver> getFactoryParametersResolvers() {
-      if (factoryParametersResolvers != null) {
-        return factoryParametersResolvers;
+    public Set<FactoryParametersResolver> getSpecificFactoryParametersResolvers() {
+      if (specificFactoryParametersResolvers != null) {
+        return specificFactoryParametersResolvers;
       } else {
         return Collections.emptySet();
       }
