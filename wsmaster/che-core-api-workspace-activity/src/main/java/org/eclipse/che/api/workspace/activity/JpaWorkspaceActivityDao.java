@@ -63,8 +63,8 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   @Override
   @Transactional(rollbackOn = ServerException.class)
   public void removeActivity(String workspaceId) throws ServerException {
-    EntityManager em = managerProvider.get();
     try {
+      EntityManager em = managerProvider.get();
       WorkspaceActivity activity = em.find(WorkspaceActivity.class, workspaceId);
       if (activity != null) {
         em.remove(activity);
@@ -130,7 +130,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
             };
         break;
       default:
-        throw new IllegalStateException("Unhandled workspace status: " + status);
+        throw new ServerException("Unhandled workspace status: " + status);
     }
 
     doUpdate(workspaceId, update);
@@ -140,9 +140,9 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   @Transactional(rollbackOn = ServerException.class)
   public List<String> findInStatusSince(long timestamp, WorkspaceStatus status)
       throws ServerException {
-    String queryName = "WorkspaceActivity.get" + firstUpperCase(status.name()) + "Since";
-
     try {
+      String queryName = "WorkspaceActivity.get" + firstUpperCase(status.name()) + "Since";
+
       return managerProvider
           .get()
           .createNamedQuery(queryName, WorkspaceActivity.class)
