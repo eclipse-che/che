@@ -45,7 +45,7 @@ public class CheCorsFilter implements Filter {
     corsFilter = new CorsFilter();
 
     corsFilter.init(cheCorsFilterConfig);
-    LOG.debug(
+    LOG.info(
         "CORS initialized with parameters: 'cors.support.credentials': '{}', 'cors.allowed.origins': '{}'",
         cheCorsFilterConfig.getInitParameter("cors.support.credentials"),
         cheCorsFilterConfig.getInitParameter("cors.allowed.origins"));
