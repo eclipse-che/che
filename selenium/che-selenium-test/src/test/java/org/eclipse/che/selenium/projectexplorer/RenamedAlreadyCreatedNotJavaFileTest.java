@@ -59,6 +59,8 @@ public class RenamedAlreadyCreatedNotJavaFileTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
@@ -66,7 +68,6 @@ public class RenamedAlreadyCreatedNotJavaFileTest {
     // preparation
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     // open file and check editor tab appears
     projectExplorer.openItemByPath(PATH_TO_FILE);

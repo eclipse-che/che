@@ -2369,7 +2369,7 @@
     "description": "Nodejs stack with Postgres",
     "scope": "advanced",
     "tags": [
-      "node.js",
+      "nodejs-postgres",
       "npm",
       "postgres"
     ],
