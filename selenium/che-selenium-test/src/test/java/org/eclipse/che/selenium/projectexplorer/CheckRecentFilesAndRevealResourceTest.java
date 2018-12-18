@@ -19,6 +19,7 @@ import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -46,6 +47,7 @@ public class CheckRecentFilesAndRevealResourceTest {
   @Inject private Loader loader;
   @Inject private RecentFiles recentFiles;
   @Inject private CodenvyEditor editor;
+  @Inject private Consoles consoles;
   @Inject private Menu menu;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
@@ -64,6 +66,8 @@ public class CheckRecentFilesAndRevealResourceTest {
         SECOND_PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(FIRST_PROJECT_NAME, SECOND_PROJECT_NAME);
   }
 
   @Test
