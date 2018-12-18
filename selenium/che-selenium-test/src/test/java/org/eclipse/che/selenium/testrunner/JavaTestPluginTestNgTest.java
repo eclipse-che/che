@@ -104,7 +104,13 @@ public class JavaTestPluginTestNgTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT);
     notifications.waitProgressPopupPanelClose();
-    runCompileCommandByPallete(compileCommand);
+
+    try {
+      runCompileCommandByPallete(compileCommand);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/12220");
+    }
   }
 
   @Test
