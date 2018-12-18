@@ -28,6 +28,7 @@ public class CheWsAgentCorsAllowCredentialsProvider implements Provider<Boolean>
   }
 
   @Override
-  public Boolean get() { return allowCredentials;
+  public Boolean get() {
+    return allowCredentials;
   }
 }
