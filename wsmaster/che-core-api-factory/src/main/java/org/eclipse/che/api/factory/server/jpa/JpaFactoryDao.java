@@ -12,6 +12,7 @@
 package org.eclipse.che.api.factory.server.jpa;
 
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
@@ -30,6 +31,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
@@ -108,7 +110,7 @@ public class JpaFactoryDao implements FactoryDao {
 
   @Override
   @Transactional
-  public List<FactoryImpl> getByAttribute(
+  public Page<FactoryImpl> getByAttribute(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException {
     try {
       LOG.debug(
@@ -116,31 +118,63 @@ public class JpaFactoryDao implements FactoryDao {
           maxItems,
           skipCount,
           attributes);
-      final Map<String, String> params = new HashMap<>();
-      String query = "SELECT factory FROM Factory factory";
-      if (!attributes.isEmpty()) {
-        final StringJoiner matcher = new StringJoiner(" AND ", " WHERE ", " ");
-        int i = 0;
-        for (Pair<String, String> attribute : attributes) {
-          final String parameterName = "parameterName" + i++;
-          params.put(parameterName, attribute.second);
-          matcher.add("factory." + attribute.first + " = :" + parameterName);
-        }
-        query = query + matcher;
+      final long count = countFactoryByParams(attributes);
+      if (count == 0) {
+        return new Page<>(emptyList(), skipCount, maxItems, count);
       }
-      final TypedQuery<FactoryImpl> typedQuery =
-          managerProvider
-              .get()
-              .createQuery(query, FactoryImpl.class)
-              .setFirstResult(skipCount)
-              .setMaxResults(maxItems);
-      for (Map.Entry<String, String> entry : params.entrySet()) {
-        typedQuery.setParameter(entry.getKey(), entry.getValue());
-      }
-      return typedQuery.getResultList().stream().map(FactoryImpl::new).collect(Collectors.toList());
+      List<FactoryImpl> result = getFactoryByParams(maxItems, skipCount, attributes);
+      return new Page<>(result, skipCount, maxItems, count);
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getLocalizedMessage(), ex);
     }
+  }
+
+  @Transactional
+  private List<FactoryImpl> getFactoryByParams(
+      int maxItems, int skipCount, List<Pair<String, String>> attributes) {
+    final Map<String, String> params = new HashMap<>();
+    StringBuilder query = new StringBuilder("SELECT factory FROM Factory factory");
+    if (!attributes.isEmpty()) {
+      final StringJoiner matcher = new StringJoiner(" AND ", " WHERE ", " ");
+      int i = 0;
+      for (Pair<String, String> attribute : attributes) {
+        final String parameterName = "parameterName" + i++;
+        params.put(parameterName, attribute.second);
+        matcher.add("factory." + attribute.first + " = :" + parameterName);
+      }
+      query.append(matcher);
+    }
+    TypedQuery<FactoryImpl> typedQuery =
+        managerProvider
+            .get()
+            .createQuery(query.toString(), FactoryImpl.class)
+            .setFirstResult(skipCount)
+            .setMaxResults(maxItems);
+    for (Map.Entry<String, String> entry : params.entrySet()) {
+      typedQuery.setParameter(entry.getKey(), entry.getValue());
+    }
+    return typedQuery.getResultList().stream().map(FactoryImpl::new).collect(Collectors.toList());
+  }
+
+  @Transactional
+  private Long countFactoryByParams(List<Pair<String, String>> attributes) {
+    final Map<String, String> params = new HashMap<>();
+    StringBuilder query = new StringBuilder("SELECT COUNT(factory) FROM Factory factory");
+    if (!attributes.isEmpty()) {
+      final StringJoiner matcher = new StringJoiner(" AND ", " WHERE ", " ");
+      int i = 0;
+      for (Pair<String, String> attribute : attributes) {
+        final String parameterName = "parameterName" + i++;
+        params.put(parameterName, attribute.second);
+        matcher.add("factory." + attribute.first + " = :" + parameterName);
+      }
+      query.append(matcher);
+    }
+    TypedQuery<Long> typedQuery = managerProvider.get().createQuery(query.toString(), Long.class);
+    for (Map.Entry<String, String> entry : params.entrySet()) {
+      typedQuery.setParameter(entry.getKey(), entry.getValue());
+    }
+    return typedQuery.getSingleResult();
   }
 
   @Transactional
@@ -198,7 +232,8 @@ public class JpaFactoryDao implements FactoryDao {
     public void onCascadeEvent(BeforeUserRemovedEvent event) throws ServerException {
       final Pair<String, String> factoryCreator =
           Pair.of("creator.userId", event.getUser().getId());
-      for (FactoryImpl factory : factoryDao.getByAttribute(0, 0, singletonList(factoryCreator))) {
+      for (FactoryImpl factory :
+          factoryDao.getByAttribute(0, 0, singletonList(factoryCreator)).getItems()) {
         factoryDao.remove(factory.getId());
       }
     }

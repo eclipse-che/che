@@ -54,6 +54,7 @@ import java.util.Set;
 import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.user.User;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
@@ -260,7 +261,7 @@ public class FactoryServiceTest {
   @Test
   public void shouldReturnFactoryListByNameAttribute() throws Exception {
     final FactoryImpl factory = createFactory();
-    doReturn(ImmutableList.of(factory))
+    doReturn(new Page<>(ImmutableList.of(factory), 0, 1, 1))
         .when(factoryManager)
         .getByAttribute(1, 0, ImmutableList.of(Pair.of("name", factory.getName())));
     final Response response =
@@ -296,7 +297,7 @@ public class FactoryServiceTest {
   public void shouldReturnFactoryListByCreatorAttribute() throws Exception {
     final FactoryImpl factory1 = createNamedFactory("factory1");
     final FactoryImpl factory2 = createNamedFactory("factory2");
-    doReturn(ImmutableList.of(factory1, factory2))
+    doReturn(new Page<>(ImmutableList.of(factory1, factory2), 0, 2, 2))
         .when(factoryManager)
         .getByAttribute(2, 0, ImmutableList.of(Pair.of("creator.userId", user.getName())));
 

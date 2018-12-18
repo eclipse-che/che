@@ -14,6 +14,7 @@ package org.eclipse.che.api.factory.server.spi;
 import java.util.List;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.model.impl.FactoryImpl;
 import org.eclipse.che.commons.lang.Pair;
@@ -80,6 +81,6 @@ public interface FactoryDao {
    * @throws IllegalArgumentException when {@code skipCount} or {@code maxItems} is negative
    * @throws ServerException when any other error occurs
    */
-  List<FactoryImpl> getByAttribute(
+  Page<FactoryImpl> getByAttribute(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException;
 }

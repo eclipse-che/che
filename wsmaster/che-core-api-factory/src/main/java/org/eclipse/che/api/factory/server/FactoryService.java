@@ -223,7 +223,7 @@ public class FactoryService extends Service {
     }
 
     final List<FactoryDto> factories = new ArrayList<>();
-    for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query)) {
+    for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query).getItems()) {
       factories.add(injectLinks(asDto(factory)));
     }
     return factories;
