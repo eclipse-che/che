@@ -19,6 +19,8 @@ import javax.persistence.ElementCollection;
 import javax.persistence.Embeddable;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
@@ -37,6 +39,7 @@ public class KubernetesServerImpl implements Server {
   private String url;
 
   @Column(name = "status")
+  @Enumerated(EnumType.STRING)
   private ServerStatus status;
 
   @ElementCollection(fetch = FetchType.EAGER)
