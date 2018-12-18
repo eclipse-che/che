@@ -340,7 +340,7 @@ parameters:
 - name: CHE_WSAGENT_CORS_ALLOWED__ORIGINS
   displayName: CORS allowed origins for WS Agent
   description: defines allowed origins in requests for CORS filter, that will be propagated as corresponding env variable on WS Agent. Only if its value is not null or empty
-  value: ''
+  value: 'NULL'
 - name: CHE_WSAGENT_CORS_ALLOW__CREDENTIALS
   displayName: CORS credentials support for WS Agent
   description: Allow requests with credentials for CORS filter on WS Agent.
