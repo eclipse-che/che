@@ -11,27 +11,25 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
 import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
-import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
+import org.openqa.selenium.Keys;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -46,23 +44,16 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
 
   @Inject private JavaTestRunnerPluginConsole pluginConsole;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private Loader loader;
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Menu menu;
-
   @Inject private TestWorkspace ws;
-
   @Inject private Ide ide;
   @Inject private Consoles consoles;
-  @Inject private CodenvyEditor editor;
-  @Inject private TestCommandServiceClient testCommandServiceClient;
-  @Inject private CommandsPalette commandsPalette;
+  @Inject private CheTerminal terminal;
   @Inject private TestProjectServiceClient projectServiceClient;
 
   @BeforeClass
   public void prepareTestProject() throws Exception {
-    CompileCommand compileCommand = new CompileCommand();
-    testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), ws.getId());
     projectServiceClient.importProject(
         ws.getId(),
         Paths.get(
@@ -72,9 +63,10 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
         JUNIT4_PROJECT,
         ProjectTemplates.CONSOLE_JAVA_SIMPLE);
     ide.open(ws);
-    loader.waitOnClosed();
+    ide.waitOpenedWorkspaceIsReadyToUse();
+
     projectExplorer.waitItem(JUNIT4_PROJECT);
-    runCompileCommandByPallete(compileCommand);
+    runCompileCommand();
     notifications.waitProgressPopupPanelClose();
     consoles.dragConsolesInDefinePosition(VALUE_OF_SHIFTING_CONSOLES_ALONG_X_AXIS);
   }
@@ -124,9 +116,9 @@ public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
     assertTrue(pluginConsole.getTestErrorMessage().startsWith(expectedExceptionForFailedTest));
   }
 
-  private void runCompileCommandByPallete(CompileCommand compileCommand) {
-    commandsPalette.openCommandPalette();
-    commandsPalette.startCommandByDoubleClick(compileCommand.getName());
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
+  private void runCompileCommand() {
+    consoles.selectProcessByTabName("Terminal");
+    terminal.typeIntoActiveTerminal("mvn test-compile -f " + JUNIT4_PROJECT + Keys.ENTER);
+    terminal.waitTextInTerminal(TestBuildConstants.BUILD_SUCCESS, EXPECTED_MESS_IN_CONSOLE_SEC);
   }
 }
