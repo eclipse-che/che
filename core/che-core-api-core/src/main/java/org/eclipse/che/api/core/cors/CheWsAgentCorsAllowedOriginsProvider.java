@@ -16,12 +16,16 @@ import com.google.inject.Provider;
 import javax.inject.Named;
 import javax.ws.rs.core.UriBuilder;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provider of "cors.allowed.origins" setting for CORS Filter of WS Agent. Provides the value of WS
  * Master domain, by inferring it from "che.api" property
  */
 public class CheWsAgentCorsAllowedOriginsProvider implements Provider<String> {
+
+  private static final Logger LOG = LoggerFactory.getLogger(CheWsAgentCorsAllowedOriginsProvider.class);
 
   private final String allowedOrigins;
 
@@ -31,8 +35,10 @@ public class CheWsAgentCorsAllowedOriginsProvider implements Provider<String> {
       @Nullable @Named("che.wsagent.cors.allowed_origins") String allowedOrigins) {
     if (allowedOrigins == null) {
       this.allowedOrigins = UriBuilder.fromUri(cheApi).replacePath(null).build().toString();
+      LOG.info("auto provision of URL, allowed origins is {}", allowedOrigins);
     } else {
       this.allowedOrigins = allowedOrigins;
+      LOG.info("URL provided from property", allowedOrigins);
     }
   }
 

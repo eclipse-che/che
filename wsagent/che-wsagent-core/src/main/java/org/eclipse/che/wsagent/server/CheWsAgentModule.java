@@ -43,7 +43,7 @@ public class CheWsAgentModule extends AbstractModule {
         .annotatedWith(Names.named("che.cors.allowed_origins"))
         .toProvider(CheWsAgentCorsAllowedOriginsProvider.class);
 
-    bind(String.class)
+    bind(Boolean.class)
         .annotatedWith(Names.named("che.cors.allow_credentials"))
         .toProvider(CheWsAgentCorsAllowCredentialsProvider.class);
 

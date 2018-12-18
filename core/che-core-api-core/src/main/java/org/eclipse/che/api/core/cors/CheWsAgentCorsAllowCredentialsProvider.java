@@ -17,22 +17,17 @@ import javax.inject.Named;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /** Provider of "cors.support.credentials" setting for CORS Filter of WS Agent. True by default */
-public class CheWsAgentCorsAllowCredentialsProvider implements Provider<String> {
+public class CheWsAgentCorsAllowCredentialsProvider implements Provider<Boolean> {
 
-  private final String allowCredentials;
+  private final Boolean allowCredentials;
 
   @Inject
   public CheWsAgentCorsAllowCredentialsProvider(
       @Nullable @Named("che.wsagent.cors.allow_credentials") String allowCredentials) {
-    if (allowCredentials == null) {
-      // true by default
-      allowCredentials = "true";
-    }
-    this.allowCredentials = allowCredentials;
+    this.allowCredentials = Boolean.valueOf(allowCredentials);
   }
 
   @Override
-  public String get() {
-    return allowCredentials;
+  public Boolean get() { return allowCredentials;
   }
 }
