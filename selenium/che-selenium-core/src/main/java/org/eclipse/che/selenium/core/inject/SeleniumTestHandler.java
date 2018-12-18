@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.zip.ZipOutputStream;
 import javax.annotation.PreDestroy;
@@ -390,51 +391,59 @@ public abstract class SeleniumTestHandler
 
   private void captureTestWorkspaceLogs(ITestResult result) {
     Object testInstance = result.getInstance();
-    for (Field field : testInstance.getClass().getDeclaredFields()) {
-      field.setAccessible(true);
+    traverseClassHierarchy(
+        testInstance.getClass(),
+        (clazz) -> {
+          for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
 
-      Object obj;
-      try {
-        obj = field.get(testInstance);
-      } catch (IllegalAccessException e) {
-        LOG.error(
-            "Field {} is inaccessible in {}.", field.getName(), testInstance.getClass().getName());
-        continue;
-      }
+            Object obj;
+            try {
+              obj = field.get(testInstance);
+            } catch (IllegalAccessException e) {
+              LOG.error(
+                  "Field {} is inaccessible in {}.",
+                  field.getName(),
+                  testInstance.getClass().getName());
+              continue;
+            }
 
-      if (!(obj instanceof TestWorkspace)) {
-        continue;
-      }
+            if (!(obj instanceof TestWorkspace)) {
+              continue;
+            }
 
-      try {
-        if (((TestWorkspace) obj).getId() == null) {
-          continue;
-        }
-      } catch (ExecutionException | InterruptedException e) {
-        continue;
-      }
+            try {
+              if (((TestWorkspace) obj).getId() == null) {
+                continue;
+              }
+            } catch (ExecutionException | InterruptedException e) {
+              continue;
+            }
 
-      String testReference = getTestReference(result);
-      Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, testReference);
-      testWorkspaceLogsReader.store((TestWorkspace) obj, pathToStoreWorkspaceLogs, false);
-      Path pathToZipWithWorkspaceLogs =
-          pathToStoreWorkspaceLogs.getParent().resolve(getTestResultFilename(testReference, "zip"));
+            String testReference = getTestReference(result);
+            Path pathToStoreWorkspaceLogs = Paths.get(workspaceLogsDir, testReference);
+            testWorkspaceLogsReader.store((TestWorkspace) obj, pathToStoreWorkspaceLogs, false);
+            Path pathToZipWithWorkspaceLogs =
+                pathToStoreWorkspaceLogs
+                    .getParent()
+                    .resolve(getTestResultFilename(testReference, "zip"));
 
-      if (!Files.exists(pathToStoreWorkspaceLogs)) {
-        return;
-      }
+            if (!Files.exists(pathToStoreWorkspaceLogs)) {
+              return;
+            }
 
-      try {
-        Path zip = Files.createFile(pathToZipWithWorkspaceLogs);
-        try (ZipOutputStream out = ZipUtils.stream(zip)) {
-          ZipUtils.add(out, pathToStoreWorkspaceLogs);
-        }
+            try {
+              Path zip = Files.createFile(pathToZipWithWorkspaceLogs);
+              try (ZipOutputStream out = ZipUtils.stream(zip)) {
+                ZipUtils.add(out, pathToStoreWorkspaceLogs);
+              }
 
-        FileUtils.deleteQuietly(pathToStoreWorkspaceLogs.toFile());
-      } catch (IOException | IllegalArgumentException e) {
-        LOG.warn("Error of creation zip-file with workspace logs.", e);
-      }
-    }
+              FileUtils.deleteQuietly(pathToStoreWorkspaceLogs.toFile());
+            } catch (IOException | IllegalArgumentException e) {
+              LOG.warn("Error of creation zip-file with workspace logs.", e);
+            }
+          }
+        });
   }
 
   private boolean isInjectedWorkspace(Field field) {
@@ -447,36 +456,42 @@ public abstract class SeleniumTestHandler
   private void preDestroy(Object testInstance) {
     LOG.info("Processing @PreDestroy annotation in {}", testInstance.getClass().getName());
 
-    for (Field field : testInstance.getClass().getDeclaredFields()) {
-      field.setAccessible(true);
+    traverseClassHierarchy(
+        testInstance.getClass(),
+        (clazz) -> {
+          for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
 
-      Object obj;
-      try {
-        obj = field.get(testInstance);
-      } catch (IllegalAccessException e) {
-        LOG.error(
-            "Field {} is inaccessible in {}.", field.getName(), testInstance.getClass().getName());
-        continue;
-      }
+            Object obj;
+            try {
+              obj = field.get(testInstance);
+            } catch (IllegalAccessException e) {
+              LOG.error(
+                  "Field {} is inaccessible in {}.",
+                  field.getName(),
+                  testInstance.getClass().getName());
+              continue;
+            }
 
-      if (obj == null || !hasInjectAnnotation(field)) {
-        continue;
-      }
+            if (obj == null || !hasInjectAnnotation(field)) {
+              continue;
+            }
 
-      for (Method m : obj.getClass().getMethods()) {
-        if (m.isAnnotationPresent(PreDestroy.class)) {
-          try {
-            m.invoke(obj);
-          } catch (Exception e) {
-            LOG.error(
-                format(
-                    "Failed to invoke method %s annotated with @PreDestroy in %s. Test instance: %s",
-                    m.getName(), obj.getClass().getName(), testInstance.getClass().getName()),
-                e);
+            for (Method m : obj.getClass().getMethods()) {
+              if (m.isAnnotationPresent(PreDestroy.class)) {
+                try {
+                  m.invoke(obj);
+                } catch (Exception e) {
+                  LOG.error(
+                      format(
+                          "Failed to invoke method %s annotated with @PreDestroy in %s. Test instance: %s",
+                          m.getName(), obj.getClass().getName(), testInstance.getClass().getName()),
+                      e);
+                }
+              }
+            }
           }
-        }
-      }
-    }
+        });
   }
 
   private boolean hasInjectAnnotation(AccessibleObject f) {
@@ -502,39 +517,56 @@ public abstract class SeleniumTestHandler
    * @param webDrivers as the result of the method will contain all {@link WebDriver}
    */
   private void collectInjectedWebDrivers(Object testInstance, Set<SeleniumWebDriver> webDrivers) {
-    for (Field field : testInstance.getClass().getDeclaredFields()) {
-      field.setAccessible(true);
+    traverseClassHierarchy(
+        testInstance.getClass(),
+        (clazz) -> {
+          for (Field field : clazz.getDeclaredFields()) {
+            field.setAccessible(true);
 
-      Object obj;
-      try {
-        obj = field.get(testInstance);
-      } catch (IllegalAccessException e) {
-        LOG.error(
-            "Field {} is inaccessible in {}.", field.getName(), testInstance.getClass().getName());
-        continue;
-      }
+            Object obj;
+            try {
+              obj = field.get(testInstance);
+            } catch (IllegalAccessException e) {
+              LOG.error(
+                  "Field {} is inaccessible in {}.",
+                  field.getName(),
+                  testInstance.getClass().getName());
+              continue;
+            }
 
-      if (obj == null) {
-        continue;
-      }
+            if (obj == null) {
+              continue;
+            }
 
-      Optional<Constructor<?>> injectedConstructor =
-          Stream.of(obj.getClass().getConstructors()).filter(this::hasInjectAnnotation).findAny();
+            Optional<Constructor<?>> injectedConstructor =
+                Stream.of(obj.getClass().getConstructors())
+                    .filter(this::hasInjectAnnotation)
+                    .findAny();
 
-      if (!hasInjectAnnotation(field) && !injectedConstructor.isPresent()) {
-        continue;
-      }
+            if (!hasInjectAnnotation(field) && !injectedConstructor.isPresent()) {
+              continue;
+            }
 
-      if (obj instanceof com.google.inject.Provider || obj instanceof javax.inject.Provider) {
-        continue;
-      }
+            if (obj instanceof com.google.inject.Provider || obj instanceof javax.inject.Provider) {
+              continue;
+            }
 
-      if (obj instanceof SeleniumWebDriver) {
-        webDrivers.add((SeleniumWebDriver) obj);
-      } else {
-        collectInjectedWebDrivers(obj, webDrivers);
-      }
+            if (obj instanceof SeleniumWebDriver) {
+              webDrivers.add((SeleniumWebDriver) obj);
+            } else {
+              collectInjectedWebDrivers(obj, webDrivers);
+            }
+          }
+        });
+  }
+
+  private void traverseClassHierarchy(Class clazz, Consumer<Class> handler) {
+    if (clazz == null || clazz.equals(Object.class)) {
+      return;
     }
+
+    traverseClassHierarchy(clazz.getSuperclass(), handler);
+    handler.accept(clazz);
   }
 
   private void captureScreenshotFromCurrentWindow(ITestResult result, SeleniumWebDriver webDriver) {
