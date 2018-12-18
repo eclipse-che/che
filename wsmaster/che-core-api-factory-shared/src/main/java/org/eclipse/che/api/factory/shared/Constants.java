@@ -26,5 +26,8 @@ public final class Constants {
   public static final String FACTORY_ACCEPTANCE_REL_ATT = "accept";
   public static final String NAMED_FACTORY_ACCEPTANCE_REL_ATT = "accept-named";
 
+  // url factory parameter names
+  public static final String URL_PARAMETER_NAME = "url";
+
   private Constants() {}
 }

@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.factory.server;
 
+import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
+
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,8 +22,8 @@ import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 
 /**
- * Default factory parameter resolver implementation. Tries to resolve factory object based on
- * provided parameters. Threats url parameters as direct URL to a devfile content.
+ * Default {@link FactoryParametersResolver} implementation. Tries to resolve factory based on
+ * provided parameters. Presumes url parameters as direct URL to a devfile content.
  */
 @Singleton
 public class DefaultFactoryParameterResolver implements FactoryParametersResolver {
@@ -35,18 +37,19 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
 
   @Override
   public boolean accept(Map<String, String> factoryParameters) {
-    return !factoryParameters.get("url").isEmpty();
+    return !factoryParameters.get(URL_PARAMETER_NAME).isEmpty();
   }
 
   /**
-   * Tries to create factory object based on provided parameters. Threats url parameters as direct
-   * URL to a devfile content.
+   * Creates factory based on provided parameters. Presumes url parameter as direct URL to a devfile
+   * content.
    *
    * @param factoryParameters map containing factory data parameters provided through URL
    */
+  @Override
   public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
       throws BadRequestException {
     // create factory from the following devfile location
-    return urlFactoryBuilder.createFactoryFromDevfile(factoryParameters.get("url"));
+    return urlFactoryBuilder.createFactoryFromDevfile(factoryParameters.get(URL_PARAMETER_NAME));
   }
 }

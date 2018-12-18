@@ -70,7 +70,7 @@ public class URLFactoryBuilder {
   public FactoryDto createFactoryFromJson(String jsonFileLocation) {
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
-      String factoryJsonContent = urlFetcher.fetch(jsonFileLocation);
+      final String factoryJsonContent = urlFetcher.fetch(jsonFileLocation);
       if (!Strings.isNullOrEmpty(factoryJsonContent)) {
         return DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class);
       }
@@ -86,7 +86,7 @@ public class URLFactoryBuilder {
    */
   public FactoryDto createFactoryFromDevfile(String devfileLocation) throws BadRequestException {
     if (devfileLocation != null) {
-      String devfileYamlContent = urlFetcher.fetch(devfileLocation);
+      final String devfileYamlContent = urlFetcher.fetch(devfileLocation);
       if (!Strings.isNullOrEmpty(devfileYamlContent)) {
         try {
           WorkspaceConfigImpl wsConfig =

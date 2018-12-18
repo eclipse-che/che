@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
@@ -38,12 +39,12 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,7 +78,9 @@ import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl.WorkspaceConfigImplBuilder;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl.WorkspaceImplBuilder;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -257,9 +260,9 @@ public class FactoryServiceTest {
   @Test
   public void shouldReturnFactoryListByNameAttribute() throws Exception {
     final FactoryImpl factory = createFactory();
-    when(factoryManager.getByAttribute(1, 0, ImmutableList.of(Pair.of("name", factory.getName()))))
-        .thenReturn(ImmutableList.of(factory));
-
+    doReturn(ImmutableList.of(factory))
+        .when(factoryManager)
+        .getByAttribute(1, 0, ImmutableList.of(Pair.of("name", factory.getName())));
     final Response response =
         given()
             .auth()
@@ -293,9 +296,9 @@ public class FactoryServiceTest {
   public void shouldReturnFactoryListByCreatorAttribute() throws Exception {
     final FactoryImpl factory1 = createNamedFactory("factory1");
     final FactoryImpl factory2 = createNamedFactory("factory2");
-    when(factoryManager.getByAttribute(
-            2, 0, ImmutableList.of(Pair.of("creator.userId", user.getName()))))
-        .thenReturn(ImmutableList.of(factory1, factory2));
+    doReturn(ImmutableList.of(factory1, factory2))
+        .when(factoryManager)
+        .getByAttribute(2, 0, ImmutableList.of(Pair.of("creator.userId", user.getName())));
 
     final Response response =
         given()
@@ -409,8 +412,8 @@ public class FactoryServiceTest {
   public void shouldGenerateFactoryJsonIncludeGivenProjects() throws Exception {
     // given
     final String wsId = "workspace123234";
-    WorkspaceImpl.WorkspaceImplBuilder ws = WorkspaceImpl.builder();
-    WorkspaceConfigImpl.WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
+    WorkspaceImplBuilder ws = WorkspaceImpl.builder();
+    WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
     ws.setId(wsId);
     wsConfig.setProjects(
         Arrays.asList(
@@ -456,8 +459,8 @@ public class FactoryServiceTest {
   public void shouldNotGenerateFactoryIfNoProjectsWithSourceStorage() throws Exception {
     // given
     final String wsId = "workspace123234";
-    WorkspaceImpl.WorkspaceImplBuilder ws = WorkspaceImpl.builder();
-    WorkspaceConfigImpl.WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
+    WorkspaceImplBuilder ws = WorkspaceImpl.builder();
+    WorkspaceConfigImplBuilder wsConfig = WorkspaceConfigImpl.builder();
     ws.setId(wsId);
     wsConfig.setProjects(
         Arrays.asList(
@@ -622,9 +625,7 @@ public class FactoryServiceTest {
 
   private static <T> List<T> unwrapDtoList(Response response, Class<T> dtoClass)
       throws IOException {
-    return FluentIterable.from(
-            DtoFactory.getInstance()
-                .createListDtoFromJson(response.body().asInputStream(), dtoClass))
-        .toList();
+    return new ArrayList<>(
+        DtoFactory.getInstance().createListDtoFromJson(response.body().asInputStream(), dtoClass));
   }
 }

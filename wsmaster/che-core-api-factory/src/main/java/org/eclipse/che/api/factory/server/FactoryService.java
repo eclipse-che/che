@@ -81,7 +81,7 @@ public class FactoryService extends Service {
 
   /** Error message if there is no plugged resolver. */
   public static final String FACTORY_NOT_RESOLVABLE =
-      "Cannot build factory with any of the provided parameters. Please check the correctness, and repeat query.";
+      "Cannot build factory with any of the provided parameters. Please check parameters correctness, and resend query.";
 
   /** Validate query parameter. If true, factory will be validated */
   public static final String VALIDATE_QUERY_PARAMETER = "validate";

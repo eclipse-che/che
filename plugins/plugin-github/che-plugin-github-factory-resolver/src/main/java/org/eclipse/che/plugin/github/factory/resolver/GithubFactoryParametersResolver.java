@@ -12,6 +12,7 @@
 package org.eclipse.che.plugin.github.factory.resolver;
 
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
+import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.Map;
@@ -31,8 +32,6 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
  */
 public class GithubFactoryParametersResolver implements FactoryParametersResolver {
 
-  /** Parameter name. */
-  protected static final String URL_PARAMETER_NAME = "url";
 
   /** Parser which will allow to check validity of URLs and create objects. */
   private GithubURLParser githubUrlParser;
@@ -83,7 +82,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
       throws BadRequestException {
 
     // no need to check null value of url parameter as accept() method has performed the check
-    final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get("url"));
+    final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
     // create factory from the following location if location exists, else create default factory
     FactoryDto factory =
