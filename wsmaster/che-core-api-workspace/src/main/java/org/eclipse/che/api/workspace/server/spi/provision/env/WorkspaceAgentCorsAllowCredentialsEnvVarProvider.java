@@ -36,10 +36,8 @@ public class WorkspaceAgentCorsAllowCredentialsEnvVarProvider implements EnvVarP
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
-    if (wsAgentCorsAllowCredentials == null) {
-      return null;
-    } else {
-      return Pair.of("CHE_WSAGENT_CORS_ALLOW__CREDENTIALS", wsAgentCorsAllowCredentials);
-    }
+    return wsAgentCorsAllowCredentials == null
+        ? null
+        : Pair.of("CHE_WSAGENT_CORS_ALLOW__CREDENTIALS", wsAgentCorsAllowCredentials);
   }
 }

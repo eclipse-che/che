@@ -35,10 +35,8 @@ public class WorkspaceAgentCorsEnabledEnvVarProvider implements EnvVarProvider {
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
-    if (wsAgentCorsEnabled == null) {
-      return null;
-    } else {
-      return Pair.of("CHE_WSAGENT_CORS_ENABLED", wsAgentCorsEnabled);
-    }
+    return wsAgentCorsEnabled == null
+        ? null
+        : Pair.of("CHE_WSAGENT_CORS_ENABLED", wsAgentCorsEnabled);
   }
 }
