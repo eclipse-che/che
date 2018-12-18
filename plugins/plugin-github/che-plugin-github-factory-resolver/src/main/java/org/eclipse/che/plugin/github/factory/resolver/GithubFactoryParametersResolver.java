@@ -32,7 +32,6 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
  */
 public class GithubFactoryParametersResolver implements FactoryParametersResolver {
 
-
   /** Parser which will allow to check validity of URLs and create objects. */
   private GithubURLParser githubUrlParser;
 

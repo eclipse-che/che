@@ -12,8 +12,9 @@
 package org.eclipse.che.plugin.github.factory.resolver;
 
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
+import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver.URL_PARAMETER_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -103,42 +104,11 @@ public class GithubFactoryParametersResolverTest {
 
   /** Check that with a simple valid URL github url it works */
   @Test
-  public void shouldReturnGitHubDevfileFactory() throws Exception {
-
-    String githubUrl = "https://github.com/eclipse/che";
-
-    FactoryDto computedFactory = newDto(FactoryDto.class).withV("4.0");
-    when(urlFactoryBuilder.createFactoryFromDevfile(anyString())).thenReturn(computedFactory);
-
-    githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
-
-    // check we called the builder with the following devfile
-    verify(urlFactoryBuilder).createFactoryFromDevfile(fileLocationArgumentCaptor.capture());
-    assertEquals(
-        fileLocationArgumentCaptor.getValue(),
-        "https://raw.githubusercontent.com/eclipse/che/master/.devfile");
-    // check project config built
-    verify(projectConfigDtoMerger)
-        .merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
-
-    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue();
-
-    SourceStorageDto sourceStorageDto = projectConfigDto.getSource();
-    assertNotNull(sourceStorageDto);
-    assertEquals(sourceStorageDto.getType(), "github");
-    assertEquals(sourceStorageDto.getLocation(), githubUrl);
-    Map<String, String> sourceParameters = sourceStorageDto.getParameters();
-    assertEquals(sourceParameters.size(), 1);
-    assertEquals(sourceParameters.get("branch"), "master");
-  }
-
-  /** Check that with a simple valid URL github url it works */
-  @Test
   public void shouldReturnGitHubSimpleJsonFactory() throws Exception {
 
     String githubUrl = "https://github.com/eclipse/che";
 
-    FactoryDto computedFactory = newDto(FactoryDto.class).withV("4.0");
+    FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
     when(urlFactoryBuilder.createFactoryFromJson(anyString())).thenReturn(computedFactory);
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
@@ -171,6 +141,37 @@ public class GithubFactoryParametersResolverTest {
     assertEquals(sourceParameters.get("branch"), "master");
   }
 
+  /** Check that with a simple valid URL github url it works */
+  @Test
+  public void shouldReturnGitHubDevfileFactory() throws Exception {
+
+    String githubUrl = "https://github.com/eclipse/che";
+
+    FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
+    when(urlFactoryBuilder.createFactoryFromDevfile(anyString())).thenReturn(computedFactory);
+
+    githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
+
+    // check we called the builder with the following devfile
+    verify(urlFactoryBuilder).createFactoryFromDevfile(fileLocationArgumentCaptor.capture());
+    assertEquals(
+        fileLocationArgumentCaptor.getValue(),
+        "https://raw.githubusercontent.com/eclipse/che/master/.devfile");
+    // check project config built
+    verify(projectConfigDtoMerger)
+        .merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
+
+    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue();
+
+    SourceStorageDto sourceStorageDto = projectConfigDto.getSource();
+    assertNotNull(sourceStorageDto);
+    assertEquals(sourceStorageDto.getType(), "github");
+    assertEquals(sourceStorageDto.getLocation(), githubUrl);
+    Map<String, String> sourceParameters = sourceStorageDto.getParameters();
+    assertEquals(sourceParameters.size(), 1);
+    assertEquals(sourceParameters.get("branch"), "master");
+  }
+
   /** Check that we've expected branch when url contains a branch name */
   @Test
   public void shouldReturnGitHubBranchFactory() throws Exception {
@@ -179,7 +180,7 @@ public class GithubFactoryParametersResolverTest {
     String githubCloneUrl = "https://github.com/eclipse/che";
     String githubBranch = "4.2.x";
 
-    FactoryDto computedFactory = newDto(FactoryDto.class).withV("4.0");
+    FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
     when(urlFactoryBuilder.createFactoryFromJson(anyString())).thenReturn(computedFactory);
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
@@ -220,7 +221,7 @@ public class GithubFactoryParametersResolverTest {
     String githubBranch = "4.2.x";
     String githubKeepdir = "dashboard";
 
-    FactoryDto computedFactory = newDto(FactoryDto.class).withV("4.0");
+    FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
     when(urlFactoryBuilder.createFactoryFromJson(anyString())).thenReturn(computedFactory);
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
