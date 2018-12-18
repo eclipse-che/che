@@ -33,22 +33,22 @@ RUN wget -O /tmp/tomcat8.zip "https://oss.sonatype.org/content/repositories/rele
 RUN sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/agent/wsagent/conf/server.xml; \
     sed -i 's/<Context>/<Context reloadable=\"true\">/g' /home/user/agent/wsagent/conf/context.xml ; \
     cd /tmp/agent && \
-    tar -xf ws-agent.tar.gz  && \
+    tar -xf ws-agent.tar.gz && \
     tar -xf exec-agent-linux_amd64.tar.gz -C /home/user/agent && \
     tar -xf websocket-terminal-linux_amd64.tar.gz -C /home/user/agent && \
     cp webapps/ROOT.war /home/user/agent/wsagent/webapps/ && \
     rm -rf /tmp/agent
 
  # change permissions
- RUN find /home/user/agent -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
+RUN find /home/user/agent -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
 FROM openjdk:8u181-jdk-alpine3.8
 
 ENV HOME=/home/user
 WORKDIR ${HOME}
 
-RUN PACKAGE="ca-certificates supervisor mc git bash sudo" && \
-    apk update upgrade --no-cache && apk add --no-cache ${PACKAGE}
+RUN PACKAGES="ca-certificates supervisor git bash sudo" && \
+    apk update upgrade --no-cache && apk add --no-cache ${PACKAGES}
 
 
 RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh user \
@@ -56,16 +56,15 @@ RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh user \
     # Create /projects for Che
     && mkdir /projects \
     && touch /var/log/supervisord.log \
-    && for f in "${HOME}" "/etc/passwd" "/etc/group /var/log/ /projects "; do\
-           sudo chgrp -R 0 ${f} && \
-           sudo chmod -R g+rwX ${f}; \
-       done \
     && cat /etc/passwd | sed s#root:x.*#root:x:\${USER_ID}:\${GROUP_ID}::\${HOME}:/bin/bash#g > ${HOME}/passwd.template \
     && cat /etc/group | sed s#root:x:0:#root:x:0:0,\${USER_ID}:#g > ${HOME}/group.template \
     # Cleanup tmp folder
     && rm -rf /tmp/* \
     # Change permissions to allow editing of files for openshift user
-    && find ${HOME} -exec sh -c "echo {}; chgrp 0 {}; chmod g+rwX {}" \;
+    && for f in "${HOME}" "/etc/passwd" "/etc/group /var/log/ /projects"; do\
+               sudo chgrp -R 0 ${f} && \
+               sudo chmod -R g+rwX ${f}; \
+           done ;
 COPY --chown=user:root --from=builder /home/user/agent /home/user/agent
 USER user
 
