@@ -103,13 +103,15 @@ public class WorkspaceActivityService extends Service {
       throw new BadRequestException("The status query parameter is query.");
     }
 
-    if (threshold == -1) {
-      threshold = System.currentTimeMillis();
+    long limit = threshold;
+
+    if (limit == -1) {
+      limit = System.currentTimeMillis();
       if (minDuration != -1) {
-        threshold -= minDuration;
+        limit -= minDuration;
       }
     }
 
-    return workspaceActivityManager.findWorkspacesInStatus(status, threshold);
+    return workspaceActivityManager.findWorkspacesInStatus(status, limit);
   }
 }
