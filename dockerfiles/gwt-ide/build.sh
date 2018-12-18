@@ -30,7 +30,7 @@ fi
 echo "Copying assembly ${BUILD_ASSEMBLY_DIR} --> ${LOCAL_ASSEMBLY_DIR}"
 cp -r "${BUILD_ASSEMBLY_DIR}" "${LOCAL_ASSEMBLY_DIR}"
 
-init --name:gwt-ide "$@"
+init --name:editor-gwt-ide "$@"
 build
 
 #cleanUp
