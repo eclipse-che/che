@@ -61,7 +61,7 @@ RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh user \
     # Cleanup tmp folder
     && rm -rf /tmp/* \
     # Change permissions to allow editing of files for openshift user
-    && for f in "${HOME}" "/etc/passwd" "/etc/group /var/log/ /projects"; do\
+     && for f in "${HOME}" "/etc/passwd" "/etc/group" "/var/log/" "/projects"; do\
                sudo chgrp -R 0 ${f} && \
                sudo chmod -R g+rwX ${f}; \
            done ;
