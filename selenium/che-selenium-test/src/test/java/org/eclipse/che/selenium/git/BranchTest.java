@@ -42,9 +42,11 @@ public class BranchTest {
   private static final String PROJECT_NAME = NameGenerator.generate("Branch_", 4);
   private static final String APP_JAVA_TAB_NAME = "AppController";
   private static final String HELLO_JAVA_TAB_NAME = "Hello";
+  private static final String JSP_TAB_NAME = "index.jsp";
   private static final String APP_JAVA_PATH =
       "/src/main/java/org/eclipse/qa/examples/AppController.java";
   private static final String HELLO_JAVA_PATH = "/src/main/java/org/eclipse/qa/examples/Hello.java";
+  private static final String JSP_FILE_PATH = "/src/main/webapp/index.jsp";
   private static final String SCRIPT_FILE_PATH = "/src/main/webapp/script.js";
   private final String MASTER_BRANCH = "master";
   private final String TEST_BRANCH = "newbranch";
@@ -107,7 +109,7 @@ public class BranchTest {
   }
 
   @Test
-  public void checkoutBranchTest() throws Exception {
+  public void checkoutBranchTest() {
     // perform init commit
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -122,12 +124,12 @@ public class BranchTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit("init");
+    projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
     createBranch();
     switchOnTestBranch();
 
     // create change in AppController.java
-    projectExplorer.quickExpandWithJavaScript();
     projectExplorer.openItemByPath(PROJECT_NAME + APP_JAVA_PATH);
     editor.setCursorToLine(16);
     editor.typeTextIntoEditor("\n" + "//some change");
@@ -135,10 +137,8 @@ public class BranchTest {
     loader.waitOnClosed();
 
     // Create change in index.jsp
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
+    projectExplorer.openItemByPath(PROJECT_NAME + JSP_FILE_PATH);
     editor.waitActive();
-    editor.typeTextIntoEditor(Keys.PAGE_DOWN.toString());
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(CHANGE_CONTENT_1);
     editor.waitTextIntoEditor(CHANGE_CONTENT_1);
     loader.waitOnClosed();
@@ -198,9 +198,9 @@ public class BranchTest {
     // checkout in main branch and check changed files
     switchOnMasterBranch();
     loader.waitOnClosed();
-    projectExplorer.openItemByPath(PROJECT_NAME + APP_JAVA_PATH);
+    editor.selectTabByName(APP_JAVA_TAB_NAME);
     editor.waitTextNotPresentIntoEditor("\n" + "//some change");
-    projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
+    editor.selectTabByName(JSP_TAB_NAME);
     editor.waitTextNotPresentIntoEditor(CHANGE_CONTENT_1);
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + SCRIPT_FILE_PATH);
@@ -211,10 +211,10 @@ public class BranchTest {
 
     // switch to test branch again and check earlier changes
     switchOnTestBranch();
-    projectExplorer.openItemByPath(PROJECT_NAME + APP_JAVA_PATH);
+    editor.selectTabByName(APP_JAVA_TAB_NAME);
     loader.waitOnClosed();
     editor.waitTextIntoEditor("\n" + "//some change");
-    projectExplorer.openItemByVisibleNameInExplorer("index.jsp");
+    editor.selectTabByName(JSP_TAB_NAME);
     editor.waitTextIntoEditor(CHANGE_CONTENT_1);
     projectExplorer.openItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
     loader.waitOnClosed();
@@ -222,7 +222,6 @@ public class BranchTest {
     projectExplorer.openItemByPath(PROJECT_NAME + SCRIPT_FILE_PATH);
     loader.waitOnClosed();
     editor.closeFileByNameWithSaving("script.js");
-    editor.waitWhileFileIsClosed("script.js");
 
     // Checkout in main branch, change files in master branch (this creates conflict) and check
     // message with conflict
@@ -239,7 +238,7 @@ public class BranchTest {
     loader.waitOnClosed();
 
     // create change in index.jsp
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/index.jsp");
+    editor.selectTabByName(JSP_TAB_NAME);
     editor.waitTextNotPresentIntoEditor(CHANGE_CONTENT_2);
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.PAGE_UP.toString());
@@ -305,7 +304,7 @@ public class BranchTest {
     git.waitGitStatusBarWithMess(CONFLICT_MESSAGE);
   }
 
-  private void switchOnMasterBranch() throws Exception {
+  private void switchOnMasterBranch() {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.BRANCHES);
     loader.waitOnClosed();
     git.waitBranchInTheList(MASTER_BRANCH);
