@@ -60,7 +60,7 @@ public class ProjectConfigDtoMergerTest {
     Assert.assertTrue(factory.getWorkspace().getProjects().isEmpty());
 
     // merge
-    projectConfigDtoMerger.merge(factory, computedProjectConfig);
+    projectConfigDtoMerger.merge(factory, () -> computedProjectConfig);
 
     // project
     assertEquals(factory.getWorkspace().getProjects().size(), 1);
@@ -79,7 +79,7 @@ public class ProjectConfigDtoMergerTest {
     Assert.assertNull(projectConfigDto.getSource());
 
     // merge
-    projectConfigDtoMerger.merge(factory, computedProjectConfig);
+    projectConfigDtoMerger.merge(factory, () -> computedProjectConfig);
 
     // project still 1
     assertEquals(factory.getWorkspace().getProjects().size(), 1);

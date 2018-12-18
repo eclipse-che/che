@@ -96,19 +96,19 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     // add workspace configuration if not defined
     if (factory.getWorkspace() == null) {
       factory.setWorkspace(
-          urlFactoryBuilder.buildWorkspaceConfig(
-              githubUrl.getRepository(), githubUrl.getUsername(), githubUrl.dockerFileLocation()));
+          urlFactoryBuilder.buildDefaultWorkspaceConfig(githubUrl.getRepository()));
     }
 
-    // Compute project configuration
-    ProjectConfigDto projectConfigDto =
-        newDto(ProjectConfigDto.class)
-            .withSource(githubSourceStorageBuilder.build(githubUrl))
-            .withName(githubUrl.getRepository())
-            .withType("blank")
-            .withPath("/".concat(githubUrl.getRepository()));
-
-    // apply merging operation from existing and computed settings
-    return projectConfigDtoMerger.merge(factory, projectConfigDto);
+    // apply merging operation from existing and computed settings if needed
+    return projectConfigDtoMerger.merge(
+        factory,
+        () -> {
+          // Compute project configuration
+          return newDto(ProjectConfigDto.class)
+              .withSource(githubSourceStorageBuilder.build(githubUrl))
+              .withName(githubUrl.getRepository())
+              .withType("blank")
+              .withPath("/".concat(githubUrl.getRepository()));
+        });
   }
 }

@@ -41,14 +41,6 @@ public class GithubUrlTest {
     assertNotNull(this.githubUrl);
   }
 
-  /** Check when there is .factory.dockerfile in the repository */
-  @Test
-  public void checkDockerfileLocation() {
-    assertEquals(
-        githubUrl.dockerFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/master/.factory.dockerfile");
-  }
-
   /** Check when there is .devfile in the repository */
   @Test
   public void checkDevfileLocation() {

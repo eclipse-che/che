@@ -15,7 +15,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.factory.server.urlfactory.URLChecker;
 
 /**
- * Support old dockerfile and factory file names;
+ * Support old factory file name;
  *
  * @author Max Shaposhnik
  */
@@ -31,10 +31,6 @@ public class LegacyGithubURLParser extends GithubURLParserImpl {
   @Override
   public GithubUrl parse(String url) {
     GithubUrl githubUrl = super.parse(url);
-    if (!urlChecker.exists(githubUrl.dockerFileLocation())) {
-      githubUrl.withDockerfileFilename(".codenvy.dockerfile");
-    }
-
     if (!urlChecker.exists(githubUrl.factoryJsonFileLocation())) {
       githubUrl.withFactoryFilename(".codenvy.json");
     }

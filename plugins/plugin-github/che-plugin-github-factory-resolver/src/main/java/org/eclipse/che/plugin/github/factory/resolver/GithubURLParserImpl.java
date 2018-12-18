@@ -90,7 +90,6 @@ public class GithubURLParserImpl implements GithubURLParser {
         .withRepository(repoName)
         .withBranch(branchName)
         .withSubfolder(matcher.group("subFolder"))
-        .withDockerfileFilename(".factory.dockerfile")
         .withDevfileFilename(".devfile")
         .withFactoryFilename(".factory.json");
   }

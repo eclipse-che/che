@@ -14,6 +14,7 @@ package org.eclipse.che.api.factory.server.urlfactory;
 import static java.util.Collections.singletonList;
 
 import java.util.List;
+import java.util.function.Supplier;
 import javax.inject.Singleton;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -41,14 +42,14 @@ public class ProjectConfigDtoMerger {
    * </ul>
    *
    * @param factory source factory
-   * @param computedProjectConfig
+   * @param configSupplier supplier which can compute project config on demand
    * @return factory with merged project sources
    */
-  public FactoryDto merge(FactoryDto factory, ProjectConfigDto computedProjectConfig) {
+  public FactoryDto merge(FactoryDto factory, Supplier<ProjectConfigDto> configSupplier) {
 
     final List<ProjectConfigDto> projects = factory.getWorkspace().getProjects();
     if (projects == null || projects.isEmpty()) {
-      factory.getWorkspace().setProjects(singletonList(computedProjectConfig));
+      factory.getWorkspace().setProjects(singletonList(configSupplier.get()));
       return factory;
     }
 
@@ -56,7 +57,7 @@ public class ProjectConfigDtoMerger {
     if (projects.size() == 1) {
       ProjectConfigDto projectConfig = projects.get(0);
       if (projectConfig.getSource() == null)
-        projectConfig.setSource(computedProjectConfig.getSource());
+        projectConfig.setSource(configSupplier.get().getSource());
     }
 
     return factory;

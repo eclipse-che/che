@@ -22,6 +22,8 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 import static org.eclipse.che.api.factory.server.DtoConverter.asDto;
 import static org.eclipse.che.api.factory.server.FactoryService.VALIDATE_QUERY_PARAMETER;
+import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
+import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.mockito.ArgumentMatchers.any;
@@ -418,23 +420,21 @@ public class FactoryServiceTest {
     ws.setId(wsId);
     wsConfig.setProjects(
         Arrays.asList(
-            DTO.createDto(ProjectConfigDto.class)
+            newDto(ProjectConfigDto.class)
                 .withPath("/proj1")
                 .withSource(
-                    DTO.createDto(SourceStorageDto.class).withType("git").withLocation("location")),
-            DTO.createDto(ProjectConfigDto.class)
+                    newDto(SourceStorageDto.class).withType("git").withLocation("location")),
+            newDto(ProjectConfigDto.class)
                 .withPath("/proj2")
                 .withSource(
-                    DTO.createDto(SourceStorageDto.class)
-                        .withType("git")
-                        .withLocation("location"))));
+                    newDto(SourceStorageDto.class).withType("git").withLocation("location"))));
     wsConfig.setName("wsname");
-    wsConfig.setEnvironments(singletonMap("env1", DTO.createDto(EnvironmentDto.class)));
+    wsConfig.setEnvironments(singletonMap("env1", newDto(EnvironmentDto.class)));
     wsConfig.setDefaultEnv("env1");
     ws.setStatus(WorkspaceStatus.RUNNING);
     wsConfig.setCommands(
         singletonList(
-            DTO.createDto(CommandDto.class)
+            newDto(CommandDto.class)
                 .withName("MCI")
                 .withType("mvn")
                 .withCommandLine("clean install")));
@@ -465,15 +465,15 @@ public class FactoryServiceTest {
     ws.setId(wsId);
     wsConfig.setProjects(
         Arrays.asList(
-            DTO.createDto(ProjectConfigDto.class).withPath("/proj1"),
-            DTO.createDto(ProjectConfigDto.class).withPath("/proj2")));
+            newDto(ProjectConfigDto.class).withPath("/proj1"),
+            newDto(ProjectConfigDto.class).withPath("/proj2")));
     wsConfig.setName("wsname");
-    wsConfig.setEnvironments(singletonMap("env1", DTO.createDto(EnvironmentDto.class)));
+    wsConfig.setEnvironments(singletonMap("env1", newDto(EnvironmentDto.class)));
     wsConfig.setDefaultEnv("env1");
     ws.setStatus(WorkspaceStatus.RUNNING);
     wsConfig.setCommands(
         singletonList(
-            DTO.createDto(CommandDto.class)
+            newDto(CommandDto.class)
                 .withName("MCI")
                 .withType("mvn")
                 .withCommandLine("clean install")));
@@ -542,7 +542,7 @@ public class FactoryServiceTest {
 
     // create factory
     final FactoryDto expectFactory =
-        DTO.createDto(FactoryDto.class).withV("4.0").withName("matchingResolverFactory");
+        newDto(FactoryDto.class).withV(CURRENT_VERSION).withName("matchingResolverFactory");
 
     // accept resolver
     when(dummyResolver.accept(anyMap())).thenReturn(true);

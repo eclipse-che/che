@@ -26,7 +26,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Map;
-import org.eclipse.che.api.core.BadRequestException;
+import java.util.function.Supplier;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
@@ -62,8 +62,8 @@ public class GithubFactoryParametersResolverTest {
   /** Parser which will allow to check validity of URLs and create objects. */
   @Mock private URLFactoryBuilder urlFactoryBuilder;
 
-  /** Capturing the project config DTO parameter. */
-  @Captor private ArgumentCaptor<ProjectConfigDto> projectConfigDtoArgumentCaptor;
+  /** Capturing the project config DTO supplier parameter. */
+  @Captor private ArgumentCaptor<Supplier<ProjectConfigDto>> projectConfigDtoArgumentCaptor;
 
   /**
    * Capturing the parameter when calling {@link URLFactoryBuilder#createFactoryFromJson(String)} or
@@ -76,7 +76,7 @@ public class GithubFactoryParametersResolverTest {
 
   /** Check missing parameter name can't be accepted by this resolver */
   @Test
-  public void checkMissingParameter() throws BadRequestException {
+  public void checkMissingParameter() {
     Map<String, String> parameters = singletonMap("foo", "this is a foo bar");
     boolean accept = githubFactoryParametersResolver.accept(parameters);
     // shouldn't be accepted
@@ -85,7 +85,7 @@ public class GithubFactoryParametersResolverTest {
 
   /** Check url which is not a github url can't be accepted by this resolver */
   @Test
-  public void checkInvalidAcceptUrl() throws BadRequestException {
+  public void checkInvalidAcceptUrl() {
     Map<String, String> parameters = singletonMap(URL_PARAMETER_NAME, "http://www.eclipse.org/che");
     boolean accept = githubFactoryParametersResolver.accept(parameters);
     // shouldn't be accepted
@@ -94,7 +94,7 @@ public class GithubFactoryParametersResolverTest {
 
   /** Check github url will be be accepted by this resolver */
   @Test
-  public void checkValidAcceptUrl() throws BadRequestException {
+  public void checkValidAcceptUrl() {
     Map<String, String> parameters =
         singletonMap(URL_PARAMETER_NAME, "https://github.com/codenvy/codenvy.git");
     boolean accept = githubFactoryParametersResolver.accept(parameters);
@@ -120,17 +120,13 @@ public class GithubFactoryParametersResolverTest {
         "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");
 
     // check we provide dockerfile and correct env
-    verify(urlFactoryBuilder)
-        .buildWorkspaceConfig(
-            eq("che"),
-            eq("eclipse"),
-            eq("https://raw.githubusercontent.com/eclipse/che/master/.factory.dockerfile"));
+    verify(urlFactoryBuilder).buildDefaultWorkspaceConfig(eq("che"));
 
     // check project config built
     verify(projectConfigDtoMerger)
         .merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
 
-    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue();
+    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue().get();
 
     SourceStorageDto sourceStorageDto = projectConfigDto.getSource();
     assertNotNull(sourceStorageDto);
@@ -161,7 +157,7 @@ public class GithubFactoryParametersResolverTest {
     verify(projectConfigDtoMerger)
         .merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
 
-    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue();
+    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue().get();
 
     SourceStorageDto sourceStorageDto = projectConfigDto.getSource();
     assertNotNull(sourceStorageDto);
@@ -192,17 +188,13 @@ public class GithubFactoryParametersResolverTest {
         "https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.json");
 
     // check we provide dockerfile and correct env
-    verify(urlFactoryBuilder)
-        .buildWorkspaceConfig(
-            eq("che"),
-            eq("eclipse"),
-            eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.dockerfile"));
+    verify(urlFactoryBuilder).buildDefaultWorkspaceConfig(eq("che"));
 
     // check project config built
     verify(projectConfigDtoMerger)
         .merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
 
-    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue();
+    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue().get();
     SourceStorageDto sourceStorageDto = projectConfigDto.getSource();
     assertNotNull(sourceStorageDto);
     assertEquals(sourceStorageDto.getType(), "github");
@@ -233,17 +225,13 @@ public class GithubFactoryParametersResolverTest {
         "https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.json");
 
     // check we provide dockerfile and correct env
-    verify(urlFactoryBuilder)
-        .buildWorkspaceConfig(
-            eq("che"),
-            eq("eclipse"),
-            eq("https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.dockerfile"));
+    verify(urlFactoryBuilder).buildDefaultWorkspaceConfig(eq("che"));
 
     // check project config built
     verify(projectConfigDtoMerger)
         .merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
 
-    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue();
+    ProjectConfigDto projectConfigDto = projectConfigDtoArgumentCaptor.getValue().get();
     SourceStorageDto sourceStorageDto = projectConfigDto.getSource();
     assertNotNull(sourceStorageDto);
     assertEquals(sourceStorageDto.getType(), "github");

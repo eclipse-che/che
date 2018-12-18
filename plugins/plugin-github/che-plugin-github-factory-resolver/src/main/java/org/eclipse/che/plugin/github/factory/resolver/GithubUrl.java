@@ -39,9 +39,6 @@ public class GithubUrl {
   /** Subfolder if any */
   private String subfolder;
 
-  /** Dockerfile filename */
-  private String dockerfileFilename;
-
   /** Factory json filename */
   private String factoryFilename;
 
@@ -83,16 +80,16 @@ public class GithubUrl {
   }
 
   /**
-   * Gets dockerfile file name of this github url
+   * Gets devfile file name of this github url
    *
-   * @return the dockerfile file name
+   * @return the devfile file name
    */
-  public String getDockerfileFilename() {
-    return this.dockerfileFilename;
+  public String getDevfileFilename() {
+    return this.devfileFilename;
   }
 
-  protected GithubUrl withDockerfileFilename(String dockerfileFilename) {
-    this.dockerfileFilename = dockerfileFilename;
+  protected GithubUrl withDevfileFilename(String devfileFilename) {
+    this.devfileFilename = devfileFilename;
     return this;
   }
 
@@ -107,20 +104,6 @@ public class GithubUrl {
 
   protected GithubUrl withFactoryFilename(String factoryFilename) {
     this.factoryFilename = factoryFilename;
-    return this;
-  }
-
-  /**
-   * Gets devfile file name of this github url
-   *
-   * @return the devfile file name
-   */
-  public String getDevfileFilename() {
-    return this.devfileFilename;
-  }
-
-  protected GithubUrl withDevfileFilename(String devfileFilename) {
-    this.devfileFilename = devfileFilename;
     return this;
   }
 
@@ -158,21 +141,6 @@ public class GithubUrl {
   protected GithubUrl withSubfolder(String subfolder) {
     this.subfolder = subfolder;
     return this;
-  }
-
-  /**
-   * Provides the location to dockerfile
-   *
-   * @return location of dockerfile in a repository
-   */
-  protected String dockerFileLocation() {
-    return new StringJoiner("/")
-        .add("https://raw.githubusercontent.com")
-        .add(username)
-        .add(repository)
-        .add(branch)
-        .add(dockerfileFilename)
-        .toString();
   }
 
   /**

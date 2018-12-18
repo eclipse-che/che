@@ -11,14 +11,15 @@
  */
 package org.eclipse.che.api.factory.server.urlfactory;
 
-import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
@@ -27,9 +28,6 @@ import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
-import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
-import org.eclipse.che.api.workspace.shared.dto.RecipeDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
@@ -49,14 +47,11 @@ public class URLFactoryBuilder {
 
   protected static final String MACHINE_NAME = "ws-machine";
 
-  private final URLChecker urlChecker;
   private final URLFetcher urlFetcher;
   private final DevfileManager devfileManager;
 
   @Inject
-  public URLFactoryBuilder(
-      URLChecker urlChecker, URLFetcher urlFetcher, DevfileManager devfileManager) {
-    this.urlChecker = urlChecker;
+  public URLFactoryBuilder(URLFetcher urlFetcher, DevfileManager devfileManager) {
     this.urlFetcher = urlFetcher;
     this.devfileManager = devfileManager;
   }
@@ -107,43 +102,16 @@ public class URLFactoryBuilder {
   /**
    * Help to generate default workspace configuration
    *
-   * @param environmentName the name of the environment to create
    * @param name the name of the workspace
-   * @param dockerFileLocation the optional location for codenvy dockerfile to use
    * @return a workspace configuration
    */
-  public WorkspaceConfigDto buildWorkspaceConfig(
-      String environmentName, String name, String dockerFileLocation) {
+  public WorkspaceConfigDto buildDefaultWorkspaceConfig(String name) {
 
-    // if remote repository contains a docker file, use it
-    // else use the default image.
-    RecipeDto recipeDto;
-    if (dockerFileLocation != null && urlChecker.exists(dockerFileLocation)) {
-      recipeDto =
-          newDto(RecipeDto.class)
-              .withLocation(dockerFileLocation)
-              .withType("dockerfile")
-              .withContentType("text/x-dockerfile");
-    } else {
-      recipeDto = newDto(RecipeDto.class).withContent(DEFAULT_DOCKER_IMAGE).withType("dockerimage");
-    }
-    MachineConfigDto machine =
-        newDto(MachineConfigDto.class)
-            .withInstallers(
-                ImmutableList.of(
-                    "org.eclipse.che.ws-agent", "org.eclipse.che.exec", "org.eclipse.che.terminal"))
-            .withAttributes(singletonMap(MEMORY_LIMIT_ATTRIBUTE, DEFAULT_MEMORY_LIMIT_BYTES));
-
-    // setup environment
-    EnvironmentDto environmentDto =
-        newDto(EnvironmentDto.class)
-            .withRecipe(recipeDto)
-            .withMachines(singletonMap(MACHINE_NAME, machine));
+    Map<String, String> attributes = new HashMap<>();
+    attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "org.eclipse.che.editor.theia:1.0.0");
+    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, "che-machine-exec-plugin:0.0.1");
 
     // workspace configuration using the environment
-    return newDto(WorkspaceConfigDto.class)
-        .withDefaultEnv(environmentName)
-        .withEnvironments(singletonMap(environmentName, environmentDto))
-        .withName(name);
+    return newDto(WorkspaceConfigDto.class).withName(name).withAttributes(attributes);
   }
 }
