@@ -59,6 +59,9 @@ public class CheckOnValidAndInvalidPackageNameTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    console.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
