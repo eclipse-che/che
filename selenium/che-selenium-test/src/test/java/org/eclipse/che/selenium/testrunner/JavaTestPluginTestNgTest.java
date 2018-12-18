@@ -14,7 +14,6 @@ package org.eclipse.che.selenium.testrunner;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_NG_TEST_DROP_DAWN_ITEM;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
 import static org.testng.Assert.assertTrue;
@@ -23,21 +22,24 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
+import org.eclipse.che.api.workspace.server.DtoConverter;
+import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
+import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.InjectTestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.WorkspaceTemplate;
-import org.eclipse.che.selenium.pageobject.CheTerminal;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
+import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -76,27 +78,39 @@ public class JavaTestPluginTestNgTest {
   private TestWorkspace ws;
 
   @Inject private Ide ide;
+  @Inject private DefaultTestUser user;
+
   @Inject private JavaTestRunnerPluginConsole pluginConsole;
   @Inject private ProjectExplorer projectExplorer;
+  @Inject private Loader loader;
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Menu menu;
+  @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private CheTerminal terminal;
+  @Inject private CommandsPalette commandsPalette;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
 
   @BeforeClass
   public void prepareTestProject() throws Exception {
     URL resource = getClass().getResource("/projects/plugins/JavaTestRunnerPlugin/testng-tests");
+
+    CompileCommand compileCommand = new CompileCommand();
+    testCommandServiceClient.createCommand(DtoConverter.asDto(compileCommand), ws.getId());
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT, ProjectTemplates.CONSOLE_JAVA_SIMPLE);
 
     ide.open(ws);
-    ide.waitOpenedWorkspaceIsReadyToUse();
-
+    loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT);
     notifications.waitProgressPopupPanelClose();
-    runCompileCommand();
+
+    try {
+      runCompileCommandByPallete(compileCommand);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/12220");
+    }
   }
 
   @Test
@@ -192,9 +206,9 @@ public class JavaTestPluginTestNgTest {
         testErrorMessage.endsWith(END_OF_FAILED_TEST), "Actual message was: " + testErrorMessage);
   }
 
-  private void runCompileCommand() {
-    consoles.selectProcessByTabName("Terminal");
-    terminal.typeIntoActiveTerminal("mvn test-compile -f " + PROJECT + Keys.ENTER);
-    terminal.waitTextInTerminal(TestBuildConstants.BUILD_SUCCESS, EXPECTED_MESS_IN_CONSOLE_SEC);
+  private void runCompileCommandByPallete(CompileCommand compileCommand) {
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick(compileCommand.getName());
+    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS);
   }
 }
