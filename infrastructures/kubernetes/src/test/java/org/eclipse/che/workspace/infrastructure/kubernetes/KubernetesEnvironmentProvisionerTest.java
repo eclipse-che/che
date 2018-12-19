@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSecretProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.InstallerServersPortProvisioner;
@@ -62,6 +63,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Mock private ImagePullSecretProvisioner imagePullSecretProvisioner;
   @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
+  @Mock private CertificateProvisioner certificateProvisioner;
 
   private KubernetesEnvironmentProvisioner<KubernetesEnvironment> k8sInfraProvisioner;
 
@@ -85,7 +87,8 @@ public class KubernetesEnvironmentProvisionerTest {
             externalServerIngressTlsProvisioner,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
-            serviceAccountProvisioner);
+            serviceAccountProvisioner,
+            certificateProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -101,7 +104,8 @@ public class KubernetesEnvironmentProvisionerTest {
             externalServerIngressTlsProvisioner,
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
-            serviceAccountProvisioner);
+            serviceAccountProvisioner,
+            certificateProvisioner);
   }
 
   @Test
@@ -128,6 +132,7 @@ public class KubernetesEnvironmentProvisionerTest {
     provisionOrder.verify(imagePullSecretProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
+    provisionOrder.verify(certificateProvisioner).provision(eq(k8sEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

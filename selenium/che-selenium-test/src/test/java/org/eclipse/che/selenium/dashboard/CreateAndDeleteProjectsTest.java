@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
@@ -124,7 +125,7 @@ public class CreateAndDeleteProjectsTest {
     notificationsPopupPanel.waitPopupPanelsAreClosed();
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void deleteProjectsFromDashboardTest() {
     switchToWindow(dashboardWindow);
     dashboard.selectWorkspacesItemOnDashboard();

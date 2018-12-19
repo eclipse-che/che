@@ -137,8 +137,14 @@ WORKSPACE_MASTER_URI=$(echo $CHE_API | cut -d / -f 1-3)
 ## Evaluate variables now that prefix is defined
 eval "DOWNLOAD_AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}"
 
+CA_ARG=""
+if [ -f /tmp/che/secret/ca.crt ]; then
+  echo "Certificate File /tmp/che/secret/ca.crt will be used for binaries downloading"
+  CA_ARG="--cacert /tmp/che/secret/ca.crt"
+fi
+
 echo Downloading java LS
-curl -sL ${DOWNLOAD_AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
+curl ${CA_ARG} -sL ${DOWNLOAD_AGENT_BINARIES_URI} | tar xzf - -C ${LS_DIR}
 
 echo writing start script to ${LS_LAUNCHER}
 touch ${LS_LAUNCHER}

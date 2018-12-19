@@ -10,7 +10,7 @@
 
 context('TypeScript', () => {
     before(() => {
-        cy.visit('http://localhost:3000');
+        cy.visit('http://localhost:3100');
 
         // maybe it's possible to wait for an element being displayed/hidden
         cy.wait(10000);
