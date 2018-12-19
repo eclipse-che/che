@@ -1,0 +1,39 @@
+diff --git a/packages/file-search/src/browser/quick-file-open-contribution.ts b/packages/file-search/src/browser/quick-file-open-contribution.ts
+index 719b370d..2193cdfc 100644
+--- a/packages/file-search/src/browser/quick-file-open-contribution.ts
++++ b/packages/file-search/src/browser/quick-file-open-contribution.ts
+@@ -29,7 +29,7 @@ export class QuickFileOpenFrontendContribution implements CommandContribution, K
+     registerCommands(commands: CommandRegistry): void {
+         commands.registerCommand(quickFileOpen, {
+             // tslint:disable-next-line:no-any
+-            execute: (args: any[]) => {
++            execute: (...args: any[]) => {
+                 if (args) {
+                     const [fileURI] = args;
+                     return this.quickFileOpenService.openFile(new URI(fileURI));
+diff --git a/packages/git/src/browser/git-view-contribution.ts b/packages/git/src/browser/git-view-contribution.ts
+index 0916f51b..14dabe92 100644
+--- a/packages/git/src/browser/git-view-contribution.ts
++++ b/packages/git/src/browser/git-view-contribution.ts
+@@ -265,7 +265,7 @@ export class GitViewContribution extends AbstractViewContribution<GitWidget>
+         registry.registerCommand(GIT_COMMANDS.CLONE, {
+             isEnabled: () => this.workspaceService.opened,
+             // tslint:disable-next-line:no-any
+-            execute: (args: any[]) => {
++            execute: (...args: any[]) => {
+                 let url: string | undefined = undefined;
+                 let folder: string | undefined = undefined;
+                 let branch: string | undefined = undefined;
+diff --git a/packages/task/src/browser/task-frontend-contribution.ts b/packages/task/src/browser/task-frontend-contribution.ts
+index 65323d46..04126ed4 100644
+--- a/packages/task/src/browser/task-frontend-contribution.ts
++++ b/packages/task/src/browser/task-frontend-contribution.ts
+@@ -82,7 +82,7 @@ export class TaskFrontendContribution implements CommandContribution, MenuContri
+             {
+                 isEnabled: () => true,
+                 // tslint:disable-next-line:no-any
+-                execute: (args: any[]) => {
++                execute: (...args: any[]) => {
+                     if (args) {
+                         const [type, label] = args;
+                         return this.taskService.run(type, label);
