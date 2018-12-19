@@ -223,8 +223,8 @@ public class WorkspaceActivityManager {
   @VisibleForTesting
   @PostConstruct
   public void subscribe() {
-    eventService.subscribe(workspaceEventsSubscriber);
-    eventService.subscribe(workspaceCreatedSubscriber);
+    eventService.subscribe(workspaceEventsSubscriber, WorkspaceStatusEvent.class);
+    eventService.subscribe(workspaceCreatedSubscriber, WorkspaceCreatedEvent.class);
     eventService.subscribe(workspaceRemoveSubscriber, BeforeWorkspaceRemovedEvent.class);
   }
 }

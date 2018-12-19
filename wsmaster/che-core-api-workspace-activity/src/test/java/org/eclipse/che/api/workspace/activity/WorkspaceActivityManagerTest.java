@@ -51,7 +51,8 @@ public class WorkspaceActivityManagerTest {
 
   @Mock private WorkspaceManager workspaceManager;
 
-  @Captor private ArgumentCaptor<EventSubscriber<?>> createAndChangeEventCaptor;
+  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceCreatedEvent>> createEventCaptor;
+  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> statusChangeEventCaptor;
   @Captor private ArgumentCaptor<EventSubscriber<BeforeWorkspaceRemovedEvent>> removeEventCaptor;
 
   @Mock private Account account;
@@ -164,30 +165,26 @@ public class WorkspaceActivityManagerTest {
 
   private EventSubscriber<WorkspaceStatusEvent> subscribeAndGetStatusEventSubscriber() {
     subscribeToEventService();
-    @SuppressWarnings("unchecked")
-    final EventSubscriber<WorkspaceStatusEvent> subscriber =
-        (EventSubscriber<WorkspaceStatusEvent>) createAndChangeEventCaptor.getAllValues().get(0);
-    return subscriber;
+    return statusChangeEventCaptor.getValue();
   }
 
   private EventSubscriber<WorkspaceCreatedEvent> subscribeAndGetCreatedSubscriber() {
     subscribeToEventService();
-    @SuppressWarnings("unchecked")
-    final EventSubscriber<WorkspaceCreatedEvent> subscriber =
-        (EventSubscriber<WorkspaceCreatedEvent>) createAndChangeEventCaptor.getAllValues().get(1);
-    return subscriber;
+    return createEventCaptor.getValue();
   }
 
   private EventSubscriber<BeforeWorkspaceRemovedEvent> subscribeAndGetRemoveSubscriber() {
     subscribeToEventService();
-    final EventSubscriber<BeforeWorkspaceRemovedEvent> subscriber = removeEventCaptor.getValue();
-    return subscriber;
+    return removeEventCaptor.getValue();
   }
 
   private void subscribeToEventService() {
     activityManager.subscribe();
-    verify(eventService, times(2)).subscribe(createAndChangeEventCaptor.capture());
-    verify(eventService, times(1))
+    verify(eventService)
+        .subscribe(createEventCaptor.capture(), eq(WorkspaceCreatedEvent.class));
+    verify(eventService)
+        .subscribe(statusChangeEventCaptor.capture(), eq(WorkspaceStatusEvent.class));
+    verify(eventService)
         .subscribe(removeEventCaptor.capture(), eq(BeforeWorkspaceRemovedEvent.class));
   }
 }
