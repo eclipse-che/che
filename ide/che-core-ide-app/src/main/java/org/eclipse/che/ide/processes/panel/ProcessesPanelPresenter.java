@@ -166,6 +166,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   ProcessTreeNode rootNode;
   private ProcessTreeNode contextTreeNode;
   private Map<String, MachineImpl> machines;
+  private ProcessTreeNode lastSelectedNode;
 
   @Inject
   public ProcessesPanelPresenter(
@@ -648,6 +649,7 @@ public class ProcessesPanelPresenter extends BasePresenter
   @Override
   public void onTreeNodeSelected(final ProcessTreeNode node) {
     setSelection(new Selection.NoSelectionProvided());
+    lastSelectedNode = node;
 
     if (node != null) {
       String nodeId = node.getId();
@@ -909,6 +911,7 @@ public class ProcessesPanelPresenter extends BasePresenter
     machineTreeNode.getChildren().remove(childNode);
     view.setProcessesData(rootNode);
     rootNode.getChildren().forEach(node -> refreshStopButtonState(node.getId()));
+    view.selectNode(lastSelectedNode);
   }
 
   @Nullable
