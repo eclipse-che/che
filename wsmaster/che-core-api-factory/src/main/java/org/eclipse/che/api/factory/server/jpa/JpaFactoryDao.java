@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.factory.server.jpa;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -110,27 +111,39 @@ public class JpaFactoryDao implements FactoryDao {
 
   @Override
   @Transactional
-  public Page<FactoryImpl> getByAttribute(
+  public Page<FactoryImpl> getByAttributes(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException {
+    checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
+    checkArgument(
+        skipCount >= 0 && skipCount <= Integer.MAX_VALUE,
+        "The number of items to skip can't be negative or greater than " + Integer.MAX_VALUE);
     try {
       LOG.debug(
           "FactoryDao#getByAttributes #maxItems: {} #skipCount: {}, #attributes: {}",
           maxItems,
           skipCount,
           attributes);
-      final long count = countFactoryByParams(attributes);
+      final long count = countFactoriesByAttributes(attributes);
       if (count == 0) {
         return new Page<>(emptyList(), skipCount, maxItems, count);
       }
-      List<FactoryImpl> result = getFactoryByParams(maxItems, skipCount, attributes);
+      List<FactoryImpl> result = getFactoriesByAttributes(maxItems, skipCount, attributes);
       return new Page<>(result, skipCount, maxItems, count);
     } catch (RuntimeException ex) {
       throw new ServerException(ex.getLocalizedMessage(), ex);
     }
   }
 
+  @Override
   @Transactional
-  private List<FactoryImpl> getFactoryByParams(
+  public List<FactoryImpl> getByUser(String userId) {
+    requireNonNull(userId);
+    final Pair<String, String> factoryCreator = Pair.of("creator.userId", userId);
+    return getFactoriesByAttributes(Integer.MAX_VALUE, 0, singletonList(factoryCreator));
+  }
+
+  @Transactional
+  private List<FactoryImpl> getFactoriesByAttributes(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) {
     final Map<String, String> params = new HashMap<>();
     StringBuilder query = new StringBuilder("SELECT factory FROM Factory factory");
@@ -157,7 +170,7 @@ public class JpaFactoryDao implements FactoryDao {
   }
 
   @Transactional
-  private Long countFactoryByParams(List<Pair<String, String>> attributes) {
+  private Long countFactoriesByAttributes(List<Pair<String, String>> attributes) {
     final Map<String, String> params = new HashMap<>();
     StringBuilder query = new StringBuilder("SELECT COUNT(factory) FROM Factory factory");
     if (!attributes.isEmpty()) {
@@ -230,10 +243,7 @@ public class JpaFactoryDao implements FactoryDao {
 
     @Override
     public void onCascadeEvent(BeforeUserRemovedEvent event) throws ServerException {
-      final Pair<String, String> factoryCreator =
-          Pair.of("creator.userId", event.getUser().getId());
-      for (FactoryImpl factory :
-          factoryDao.getByAttribute(0, 0, singletonList(factoryCreator)).getItems()) {
+      for (FactoryImpl factory : factoryDao.getByUser(event.getUser().getId())) {
         factoryDao.remove(factory.getId());
       }
     }

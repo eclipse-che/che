@@ -214,7 +214,7 @@ public class FactoryDaoTest {
   public void shouldGetFactoryByIdAttribute() throws Exception {
     final FactoryImpl factory = factories[0];
     final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("id", factory.getId()));
-    final Page<FactoryImpl> result = factoryDao.getByAttribute(1, 0, attributes);
+    final Page<FactoryImpl> result = factoryDao.getByAttributes(1, 0, attributes);
 
     assertEquals(new HashSet<>(result.getItems()), ImmutableSet.of(factory));
   }
@@ -232,7 +232,7 @@ public class FactoryDaoTest {
     factory3.getPolicies().setReferer("ref2");
     factoryDao.update(factory1);
     factoryDao.update(factory3);
-    final Page<FactoryImpl> result = factoryDao.getByAttribute(factories.length, 0, attributes);
+    final Page<FactoryImpl> result = factoryDao.getByAttributes(factories.length, 0, attributes);
 
     assertEquals(
         new HashSet<>(result.getItems()),
@@ -242,9 +242,15 @@ public class FactoryDaoTest {
   @Test
   public void shouldFindAllFactoriesWhenAttributesNotSpecified() throws Exception {
     final List<Pair<String, String>> attributes = emptyList();
-    final Page<FactoryImpl> result = factoryDao.getByAttribute(factories.length, 0, attributes);
+    final Page<FactoryImpl> result = factoryDao.getByAttributes(factories.length, 0, attributes);
 
     assertEquals(new HashSet<>(result.getItems()), new HashSet<>(asList(factories)));
+  }
+
+  @Test
+  public void shouldFindAllFactoriesOfSpecifiedUser() throws Exception {
+    final List<FactoryImpl> result = factoryDao.getByUser(users[1].getId());
+    assertEquals(new HashSet<>(result), new HashSet<>(asList(factories[1])));
   }
 
   @Test(expectedExceptions = NotFoundException.class, dependsOnMethods = "shouldGetFactoryById")

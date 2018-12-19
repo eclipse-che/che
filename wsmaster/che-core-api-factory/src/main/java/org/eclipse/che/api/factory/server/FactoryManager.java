@@ -121,6 +121,6 @@ public class FactoryManager {
    */
   public Page<? extends Factory> getByAttribute(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException {
-    return factoryDao.getByAttribute(maxItems, skipCount, attributes);
+    return factoryDao.getByAttributes(maxItems, skipCount, attributes);
   }
 }

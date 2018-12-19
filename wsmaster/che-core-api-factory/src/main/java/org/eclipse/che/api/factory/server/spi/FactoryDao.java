@@ -72,6 +72,16 @@ public interface FactoryDao {
   FactoryImpl getById(String id) throws NotFoundException, ServerException;
 
   /**
+   * Gets all factories of specified user.
+   *
+   * @param userId user identifier
+   * @return list factory instances, never null
+   * @throws NullPointerException when {@code userId} is null
+   * @throws ServerException when any other error occurs
+   */
+  List<FactoryImpl> getByUser(String userId) throws ServerException;
+
+  /**
    * Gets the factories for the list of attributes.
    *
    * @param maxItems the maximum count of items to fetch
@@ -81,6 +91,6 @@ public interface FactoryDao {
    * @throws IllegalArgumentException when {@code skipCount} or {@code maxItems} is negative
    * @throws ServerException when any other error occurs
    */
-  Page<FactoryImpl> getByAttribute(
+  Page<FactoryImpl> getByAttributes(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException;
 }
