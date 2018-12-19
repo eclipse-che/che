@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.github.factory.resolver;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
 
@@ -22,6 +23,7 @@ import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
  *
  * @author Florent Benoit
  */
+@Singleton
 public class GithubURLParserImpl implements GithubURLParser {
 
   /** Fetcher to grab PR data */

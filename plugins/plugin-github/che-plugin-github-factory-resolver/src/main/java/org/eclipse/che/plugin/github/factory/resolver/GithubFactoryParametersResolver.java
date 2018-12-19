@@ -17,6 +17,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
@@ -30,6 +31,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
  *
  * @author Florent Benoit
  */
+@Singleton
 public class GithubFactoryParametersResolver implements FactoryParametersResolver {
 
   /** Parser which will allow to check validity of URLs and create objects. */
