@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.activity;
 
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 
+import com.google.common.annotations.Beta;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -76,6 +77,7 @@ public class WorkspaceActivityService extends Service {
     }
   }
 
+  @Beta
   @GET
   @ApiOperation("Retrieves the IDs of workspaces that have been in given state.")
   @Produces(MediaType.APPLICATION_JSON)
