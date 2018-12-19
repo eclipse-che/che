@@ -42,7 +42,7 @@ public class TheiaHostedPluginSelectPathForm {
 
   public interface Locators {
     String TITLE_XPATH =
-        "//div[@class='dialogBlock']//div[@class='dialogTitle']//div[text()='Hosted Plugin: Select Path']";
+        "//div[@class='dialogBlock']//div[@class='dialogTitle']//div[contains(text(),'Select Path')]";
     String CLOSE_ICON_XPATH =
         "//div[@class='dialogBlock']//div[@class='dialogTitle']//i[contains(@class, 'closeButton')]";
     String SUGGESTION_LIST_TITLE_XPATH =
