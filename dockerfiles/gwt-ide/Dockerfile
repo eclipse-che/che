@@ -44,7 +44,7 @@ FROM openjdk:8u181-jdk-alpine3.8
 ENV HOME=/home/user
 WORKDIR ${HOME}
 
-RUN PACKAGES="ca-certificates supervisor git bash sudo" && \
+RUN PACKAGES="ca-certificates supervisor git bash" && \
     apk update upgrade --no-cache && apk add --no-cache ${PACKAGES}
 
 
@@ -59,8 +59,8 @@ RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh user \
     && rm -rf /tmp/* \
     # Change permissions to allow editing of files for openshift user
      && for f in "${HOME}" "/etc/passwd" "/etc/group" "/var/log/" "/projects"; do\
-               sudo chgrp -R 0 ${f} && \
-               sudo chmod -R g+rwX ${f}; \
+               chgrp -R 0 ${f} && \
+               chmod -R g+rwX ${f}; \
            done ;
 COPY --chown=user:root --from=builder /home/user/agent /home/user/agent
 USER user
