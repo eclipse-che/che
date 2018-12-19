@@ -123,6 +123,7 @@ public class BranchTest {
     events.waitExpectedMessage(TestGitConstants.GIT_INITIALIZED_SUCCESS);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
+    loader.waitOnClosed();
     git.waitAndRunCommit("init");
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
@@ -131,9 +132,9 @@ public class BranchTest {
 
     // create change in AppController.java
     projectExplorer.openItemByPath(PROJECT_NAME + APP_JAVA_PATH);
-    editor.setCursorToLine(16);
-    editor.typeTextIntoEditor("\n" + "//some change");
-    editor.waitTextIntoEditor("\n" + "//some change");
+    editor.setCursorToLine(15);
+    editor.typeTextIntoEditor("//some change");
+    editor.waitTextIntoEditor("//some change");
     loader.waitOnClosed();
 
     // Create change in index.jsp
@@ -155,7 +156,6 @@ public class BranchTest {
     askForValueDialog.waitNewJavaClassClose();
     projectExplorer.openItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
     loader.waitOnClosed();
-    editor.closeFileByNameWithSaving(HELLO_JAVA_TAB_NAME);
 
     // Create script.js file
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main/webapp");
@@ -199,26 +199,26 @@ public class BranchTest {
     switchOnMasterBranch();
     loader.waitOnClosed();
     editor.selectTabByName(APP_JAVA_TAB_NAME);
-    editor.waitTextNotPresentIntoEditor("\n" + "//some change");
+    editor.waitTextNotPresentIntoEditor("//some change");
     editor.selectTabByName(JSP_TAB_NAME);
     editor.waitTextNotPresentIntoEditor(CHANGE_CONTENT_1);
-    projectExplorer.waitDisappearItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
-    projectExplorer.waitDisappearItemByPath(PROJECT_NAME + SCRIPT_FILE_PATH);
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/src/main");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     git.waitGitStatusBarWithMess(STATUS_MASTER_BRANCH);
     loader.waitOnClosed();
+    projectExplorer.waitDisappearItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
+    projectExplorer.waitDisappearItemByPath(PROJECT_NAME + SCRIPT_FILE_PATH);
 
     // switch to test branch again and check earlier changes
     switchOnTestBranch();
     editor.selectTabByName(APP_JAVA_TAB_NAME);
     loader.waitOnClosed();
-    editor.waitTextIntoEditor("\n" + "//some change");
+    editor.waitTextIntoEditor("//some change");
     editor.selectTabByName(JSP_TAB_NAME);
     editor.waitTextIntoEditor(CHANGE_CONTENT_1);
-    projectExplorer.openItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
+    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + HELLO_JAVA_PATH);
     loader.waitOnClosed();
-    editor.closeFileByNameWithSaving(HELLO_JAVA_TAB_NAME);
+    projectExplorer.openItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
     projectExplorer.openItemByPath(PROJECT_NAME + SCRIPT_FILE_PATH);
     loader.waitOnClosed();
     editor.closeFileByNameWithSaving("script.js");
@@ -231,9 +231,9 @@ public class BranchTest {
 
     // create change in GreetingController.java
     editor.selectTabByName(APP_JAVA_TAB_NAME);
-    editor.setCursorToLine(2);
-    editor.typeTextIntoEditor("\n" + "//change in master branch");
-    editor.waitTextIntoEditor("\n" + "//change in master branch");
+    editor.setCursorToLine(21);
+    editor.typeTextIntoEditor("//change in master branch");
+    editor.waitTextIntoEditor("//change in master branch");
     editor.waitTabFileWithSavedStatus(APP_JAVA_TAB_NAME);
     loader.waitOnClosed();
 
