@@ -180,8 +180,7 @@ public class WorkspaceActivityManagerTest {
 
   private void subscribeToEventService() {
     activityManager.subscribe();
-    verify(eventService)
-        .subscribe(createEventCaptor.capture(), eq(WorkspaceCreatedEvent.class));
+    verify(eventService).subscribe(createEventCaptor.capture(), eq(WorkspaceCreatedEvent.class));
     verify(eventService)
         .subscribe(statusChangeEventCaptor.capture(), eq(WorkspaceStatusEvent.class));
     verify(eventService)
