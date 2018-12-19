@@ -21,14 +21,14 @@ COPY eclipse-che/lib/linux_amd64/exec /tmp/agent
 COPY eclipse-che/lib/linux_amd64/terminal /tmp/agent
 
 
-RUN mkdir  -p /home/user/agent/traefik ;\
+RUN mkdir -p /home/user/agent/traefik ;\
     wget -O /home/user/agent/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.7.5/traefik_linux-amd64"; \
     chmod +x /home/user/agent/traefik/traefik
 COPY traefik.toml traefik_conf.sh /home/user/agent/traefik/
 
 
 RUN wget -O /tmp/tomcat8.zip "https://oss.sonatype.org/content/repositories/releases/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.15.0/che-tomcat8-slf4j-logback-6.15.0.zip" ;\
-    unzip   /tmp/tomcat8.zip  -d /home/user/agent/wsagent;
+    unzip /tmp/tomcat8.zip -d /home/user/agent/wsagent;
 
 RUN sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/agent/wsagent/conf/server.xml; \
     sed -i 's/<Context>/<Context reloadable=\"true\">/g' /home/user/agent/wsagent/conf/context.xml ; \

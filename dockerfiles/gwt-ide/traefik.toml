@@ -2,8 +2,8 @@
 # Global configuration
 ################################################################
 
-debug = true
-logLevel = "DEBUG"
+debug = false
+logLevel = "INFO"
 [traefikLog]
   filePath = "/home/user/agent/traefik/traefik.log"
 [accessLog]
