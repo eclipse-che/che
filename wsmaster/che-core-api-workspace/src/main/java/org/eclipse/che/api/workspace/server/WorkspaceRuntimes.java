@@ -722,18 +722,18 @@ public class WorkspaceRuntimes {
    * Gets the workspaces identifiers managed by this component. If an identifier is present in set
    * then that workspace wasn't stopped at the moment of method execution.
    *
-   * @return workspaces identifiers for those workspaces that are running(not stopped), or an empty
-   *     set if there is no a single running workspace
+   * @return workspaces identifiers for those workspaces that are active(not stopped), or an empty
+   *     set if there is no a single active workspace
    */
-  public Set<String> getRunning() {
+  public Set<String> getActive() {
     return ImmutableSet.copyOf(statuses.asMap().keySet());
   }
 
   /**
-   * Returns true if there is at least one workspace running(it's status is different from {@link
+   * Returns true if there is at least one workspace active(it's status is different from {@link
    * WorkspaceStatus#STOPPED}), otherwise returns false.
    */
-  public boolean isAnyRunning() {
+  public boolean isAnyActive() {
     return !statuses.asMap().isEmpty();
   }
 

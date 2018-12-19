@@ -543,7 +543,7 @@ public class WorkspaceRuntimesTest {
                 "ws3", WorkspaceStatus.STOPPING));
 
     // when
-    Set<String> active = runtimes.getRunning();
+    Set<String> active = runtimes.getActive();
 
     // then
     assertEquals(active.size(), 3);
