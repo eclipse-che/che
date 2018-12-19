@@ -197,9 +197,9 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
         updater.accept(activity);
 
         em.merge(activity);
-        em.flush();
       }
 
+      em.flush();
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
     }
