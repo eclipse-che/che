@@ -46,22 +46,22 @@ defaultEntryPoints = ["http"]
 [file]
 
 [backends]
-  [backends.backend1]
-      [backends.backend1.servers.server1]
+  [backends.ide]
+      [backends.ide.servers.server1]
              url = "http://localhost:8080"
-  [backends.backend2]
-        [backends.backend2.servers.server1]
+  [backends.chemaster]
+        [backends.chemaster.servers.server1]
              url = "http://che-host:8080"
 [frontends]
   [frontends.frontend2]
     priority = 10
-    backend = "backend2"
+    backend = "chemaster"
     passHostHeader = true
     [frontends.frontend2.routes.api]
     rule = "PathPrefix:/api/"
   [frontends.frontend1]
     priority = 5
-    backend = "backend1"
+    backend = "ide"
     passHostHeader = true
     [frontends.frontend1.redirect]
       regex = "^(http|https)://(.*)/gwt/ide/sidecar/entrypoint"
@@ -69,6 +69,6 @@ defaultEntryPoints = ["http"]
     [frontends.frontend1.routes.ide]
     rule = "PathPrefix: /; AddPrefix: /ide"
   [frontends.frontend3]
-    backend = "backend1"
+    backend = "ide"
     passHostHeader = true
     entrypoints = ["http2"]

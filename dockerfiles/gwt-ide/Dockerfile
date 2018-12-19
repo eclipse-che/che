@@ -14,21 +14,19 @@
 
 FROM alpine:3.8 as builder
 
-RUN mkdir -p /tmp/agent && mkdir -p /home/user/agent/wsagent/webapps/
+RUN mkdir -p /tmp/agent ;\
+    mkdir -p /home/user/agent/wsagent/webapps/;\
+    mkdir -p /home/user/agent/traefik ;\
+    wget -O /home/user/agent/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.7.5/traefik_linux-amd64"; \
+    chmod +x /home/user/agent/traefik/traefik;\
+    wget -O /tmp/tomcat8.zip "https://oss.sonatype.org/content/repositories/releases/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.15.0/che-tomcat8-slf4j-logback-6.15.0.zip" ;\
+    unzip /tmp/tomcat8.zip -d /home/user/agent/wsagent;
+
+COPY traefik.toml traefik_conf.sh /home/user/agent/traefik/
 COPY eclipse-che/tomcat/webapps/ROOT.war /home/user/agent/wsagent/webapps/ide.war
 COPY eclipse-che/lib/ws-agent.tar.gz /tmp/agent
 COPY eclipse-che/lib/linux_amd64/exec /tmp/agent
 COPY eclipse-che/lib/linux_amd64/terminal /tmp/agent
-
-
-RUN mkdir -p /home/user/agent/traefik ;\
-    wget -O /home/user/agent/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.7.5/traefik_linux-amd64"; \
-    chmod +x /home/user/agent/traefik/traefik
-COPY traefik.toml traefik_conf.sh /home/user/agent/traefik/
-
-
-RUN wget -O /tmp/tomcat8.zip "https://oss.sonatype.org/content/repositories/releases/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.15.0/che-tomcat8-slf4j-logback-6.15.0.zip" ;\
-    unzip /tmp/tomcat8.zip -d /home/user/agent/wsagent;
 
 RUN sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/agent/wsagent/conf/server.xml; \
     sed -i 's/<Context>/<Context reloadable=\"true\">/g' /home/user/agent/wsagent/conf/context.xml ; \
@@ -37,10 +35,9 @@ RUN sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/agent/ws
     tar -xf exec-agent-linux_amd64.tar.gz -C /home/user/agent && \
     tar -xf websocket-terminal-linux_amd64.tar.gz -C /home/user/agent && \
     cp webapps/ROOT.war /home/user/agent/wsagent/webapps/ && \
-    rm -rf /tmp/agent
-
- # change permissions
-RUN find /home/user/agent -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
+    rm -rf /tmp/agent && \
+    # change permissions
+    find /home/user/agent -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
 FROM openjdk:8u181-jdk-alpine3.8
 
