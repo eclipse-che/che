@@ -33,6 +33,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.InconsistentRuntimesDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientTermination;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
@@ -79,6 +80,7 @@ public class OpenShiftInfraModule extends AbstractModule {
     factories.addBinding(DockerImageEnvironment.TYPE).to(DockerImageEnvironmentFactory.class);
     factories.addBinding(Constants.NO_ENVIRONMENT_RECIPE_TYPE).to(NoEnvironmentFactory.class);
 
+    bind(InconsistentRuntimesDetector.class).asEagerSingleton();
     bind(RuntimeInfrastructure.class).to(OpenShiftInfrastructure.class);
 
     bind(KubernetesNamespaceFactory.class).to(OpenShiftProjectFactory.class);
