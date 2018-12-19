@@ -550,6 +550,26 @@ public class WorkspaceRuntimesTest {
     assertTrue(active.containsAll(asList("ws1", "ws2", "ws3")));
   }
 
+  @Test
+  public void shouldReturnWorkspaceIdsOfRunningRuntimes() {
+    // given
+    when(statuses.asMap())
+        .thenReturn(
+            ImmutableMap.of(
+                "ws1", WorkspaceStatus.STARTING,
+                "ws2", WorkspaceStatus.RUNNING,
+                "ws3", WorkspaceStatus.RUNNING,
+                "ws4", WorkspaceStatus.RUNNING,
+                "ws5", WorkspaceStatus.STOPPING));
+
+    // when
+    Set<String> running = runtimes.getRunning();
+
+    // then
+    assertEquals(running.size(), 3);
+    assertTrue(running.containsAll(asList("ws2", "ws3", "ws4")));
+  }
+
   private RuntimeContext mockContext(RuntimeIdentity identity)
       throws ValidationException, InfrastructureException {
     RuntimeContext context = mock(RuntimeContext.class);

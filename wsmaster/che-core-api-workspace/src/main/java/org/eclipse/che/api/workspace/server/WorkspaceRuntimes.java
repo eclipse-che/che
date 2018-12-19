@@ -219,7 +219,19 @@ public class WorkspaceRuntimes {
     }
   }
 
-  private InternalRuntime<?> getInternalRuntime(String workspaceId)
+  /**
+   * Returns {@link InternalRuntime} implementation for workspace with the specified id.
+   *
+   * <p>If memory-storage does not contain internal runtime, then runtime will be recovered if it is
+   * active. Otherwise, an exception will be thrown.
+   *
+   * @param workspaceId identifier of workspace to fetch runtime
+   * @return {@link InternalRuntime} implementation for workspace with the specified id.
+   * @throws InfrastructureException if any infrastructure exception occurs
+   * @throws ServerException if there is no active runtime for the specified workspace
+   * @throws ServerException if any other exception occurs
+   */
+  public InternalRuntime<?> getInternalRuntime(String workspaceId)
       throws InfrastructureException, ServerException {
     try (Unlocker ignored = lockService.writeLock(workspaceId)) {
       InternalRuntime<?> runtime = runtimes.get(workspaceId);
@@ -716,6 +728,17 @@ public class WorkspaceRuntimes {
    */
   public boolean refuseStart() {
     return isStartRefused.compareAndSet(false, true);
+  }
+
+  /** Returns workspace ids which has {@link WorkspaceStatus#RUNNING} runtimes. */
+  public Set<String> getRunning() {
+    return statuses
+        .asMap()
+        .entrySet()
+        .stream()
+        .filter(e -> RUNNING == e.getValue())
+        .map(Entry::getKey)
+        .collect(toSet());
   }
 
   /**
