@@ -25,10 +25,10 @@
     <name>Che Plugin :: Maven :: Parent</name>
     <modules>
         <module>che-plugin-maven-tools</module>
+        <module>che-plugin-maven-server</module>
         <module>che-plugin-maven-generator-archetype</module>
         <module>che-plugin-maven-shared</module>
         <module>che-plugin-maven-ide</module>
-        <module>che-plugin-maven-server</module>
     </modules>
     <!-- skip tests on Windows -->
     <profiles>

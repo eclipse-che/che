@@ -14,13 +14,11 @@ package org.eclipse.che.plugin.maven.client.inject;
 import static com.google.gwt.inject.client.multibindings.GinMultibinder.newSetBinder;
 
 import com.google.gwt.inject.client.AbstractGinModule;
-import org.eclipse.che.api.languageserver.shared.model.LanguageDescription;
 import org.eclipse.che.ide.api.command.CommandType;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.preferences.PreferencePagePresenter;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.resources.ResourceInterceptor;
-import org.eclipse.che.plugin.maven.client.MavenLanguageDescriptionProvider;
 import org.eclipse.che.plugin.maven.client.command.MavenCommandType;
 import org.eclipse.che.plugin.maven.client.preference.MavenPreferencePresenter;
 import org.eclipse.che.plugin.maven.client.resource.MavenProjectInterceptor;
@@ -56,9 +54,5 @@ public class MavenGinModule extends AbstractGinModule {
     newSetBinder(binder(), ResourceInterceptor.class)
         .addBinding()
         .to(MavenProjectInterceptor.class);
-
-    newSetBinder(binder(), LanguageDescription.class)
-        .addBinding()
-        .toProvider(MavenLanguageDescriptionProvider.class);
   }
 }

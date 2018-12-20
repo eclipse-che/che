@@ -67,7 +67,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVar
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowedOriginsEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
-import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceMavenServerJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNamespaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
@@ -192,7 +191,6 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(ProjectsRootEnvVariableProvider.class);
     envVarProviders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
-    envVarProviders.addBinding().to(WorkspaceMavenServerJavaOptsEnvVariableProvider.class);
 
     // propagate CORS allowed origin evn variable to WS agent only if corresponding env variable
     // is defined on master
