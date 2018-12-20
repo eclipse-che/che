@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
 public class GithubFactoryParametersResolverTest {
 
   /** Parser which will allow to check validity of URLs and create objects. */
-  @Spy private GithubURLParserImpl githubUrlParser = new GithubURLParserImpl();
+  @Spy private GithubURLParser githubUrlParser = new GithubURLParser();
 
   /** Converter allowing to convert github URL to other objects. */
   @Spy

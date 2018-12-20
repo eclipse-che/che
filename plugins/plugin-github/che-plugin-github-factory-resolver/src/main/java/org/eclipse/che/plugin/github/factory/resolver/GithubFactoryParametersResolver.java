@@ -109,7 +109,6 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
           return newDto(ProjectConfigDto.class)
               .withSource(githubSourceStorageBuilder.build(githubUrl))
               .withName(githubUrl.getRepository())
-              .withType("blank")
               .withPath("/".concat(githubUrl.getRepository()));
         });
   }

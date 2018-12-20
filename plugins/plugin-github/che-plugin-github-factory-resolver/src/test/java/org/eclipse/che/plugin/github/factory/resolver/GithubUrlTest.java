@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 public class GithubUrlTest {
 
   /** Parser used to create the url. */
-  @InjectMocks private GithubURLParserImpl githubUrlParser;
+  @InjectMocks private GithubURLParser githubUrlParser;
 
   /** Instance of the url created */
   private GithubUrl githubUrl;

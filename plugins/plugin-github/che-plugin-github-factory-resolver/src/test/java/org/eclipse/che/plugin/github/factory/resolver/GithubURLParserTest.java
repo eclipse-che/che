@@ -37,7 +37,7 @@ public class GithubURLParserTest {
   @Mock private URLFetcher urlFetcher;
 
   /** Instance of component that will be tested. */
-  @InjectMocks private GithubURLParserImpl githubUrlParser;
+  @InjectMocks private GithubURLParser githubUrlParser;
 
   /** Check invalid url (not a github one) */
   @Test(expectedExceptions = IllegalArgumentException.class)
