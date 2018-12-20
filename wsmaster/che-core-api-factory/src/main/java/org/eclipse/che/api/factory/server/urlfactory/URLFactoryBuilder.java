@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.server.DevfileFormatException;
@@ -39,19 +40,20 @@ import org.eclipse.che.dto.server.DtoFactory;
 @Singleton
 public class URLFactoryBuilder {
 
-  /** Default docker image (if repository has no dockerfile) */
-  protected static final String DEFAULT_DOCKER_IMAGE = "eclipse/ubuntu_jdk8";
-
-  /** Default docker type (if repository has no dockerfile) */
-  protected static final String DEFAULT_MEMORY_LIMIT_BYTES = Long.toString(2000L * 1024L * 1024L);
-
-  protected static final String MACHINE_NAME = "ws-machine";
+  private final String defaultCheEditor;
+  private final String defaultChePlugins;
 
   private final URLFetcher urlFetcher;
   private final DevfileManager devfileManager;
 
   @Inject
-  public URLFactoryBuilder(URLFetcher urlFetcher, DevfileManager devfileManager) {
+  public URLFactoryBuilder(
+      @Named("che.factory.default_editor") String defaultCheEditor,
+      @Named("che.factory.default_plugins") String defaultChePlugins,
+      URLFetcher urlFetcher,
+      DevfileManager devfileManager) {
+    this.defaultCheEditor = defaultCheEditor;
+    this.defaultChePlugins = defaultChePlugins;
     this.urlFetcher = urlFetcher;
     this.devfileManager = devfileManager;
   }
@@ -108,8 +110,8 @@ public class URLFactoryBuilder {
   public WorkspaceConfigDto buildDefaultWorkspaceConfig(String name) {
 
     Map<String, String> attributes = new HashMap<>();
-    attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "org.eclipse.che.editor.theia:1.0.0");
-    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, "che-machine-exec-plugin:0.0.1");
+    attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, defaultCheEditor);
+    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultChePlugins);
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class).withName(name).withAttributes(attributes);

@@ -20,12 +20,13 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -37,18 +38,28 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class URLFactoryBuilderTest {
 
+  private final String defaultEditor = "org.eclipse.che.editor.theia:1.0.0";
+  private final String defaultPlugin = "che-machine-exec-plugin:0.0.1";
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
 
+  @Mock private DevfileManager devfileManager;
+
   /** Tested instance. */
-  @InjectMocks private URLFactoryBuilder urlFactoryBuilder;
+  private URLFactoryBuilder urlFactoryBuilder;
+
+  @BeforeClass
+  public void setUp() {
+    this.urlFactoryBuilder =
+        new URLFactoryBuilder(defaultEditor, defaultPlugin, urlFetcher, devfileManager);
+  }
 
   @Test
   public void checkDefaultConfiguration() throws Exception {
 
     Map<String, String> attributes = new HashMap<>();
-    attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "org.eclipse.che.editor.theia:1.0.0");
-    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, "che-machine-exec-plugin:0.0.1");
+    attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, defaultEditor);
+    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultPlugin);
     // setup environment
     WorkspaceConfigDto expectedWsConfig =
         newDto(WorkspaceConfigDto.class).withAttributes(attributes).withName("foo");
