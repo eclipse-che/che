@@ -18,7 +18,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_B
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -26,6 +25,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -177,9 +177,9 @@ public class WorkspaceActivityManager {
     }
   }
 
-  public List<String> findWorkspacesInStatus(WorkspaceStatus status, long threshold)
-      throws ServerException {
-    return activityDao.findInStatusSince(threshold, status);
+  public Page<String> findWorkspacesInStatus(
+      WorkspaceStatus status, long threshold, int maxItems, long skipCount) throws ServerException {
+    return activityDao.findInStatusSince(threshold, status, maxItems, skipCount);
   }
 
   protected long getIdleTimeout(String wsId) {

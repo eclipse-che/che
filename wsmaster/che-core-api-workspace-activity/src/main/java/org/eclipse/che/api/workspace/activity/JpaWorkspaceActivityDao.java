@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
@@ -138,19 +139,29 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
   @Override
   @Transactional(rollbackOn = ServerException.class)
-  public List<String> findInStatusSince(long timestamp, WorkspaceStatus status)
-      throws ServerException {
+  public Page<String> findInStatusSince(
+      long timestamp, WorkspaceStatus status, int maxItems, long skipCount) throws ServerException {
     try {
       String queryName = "WorkspaceActivity.get" + firstUpperCase(status.name()) + "Since";
+      String countQueryName = queryName + "Count";
 
-      return managerProvider
-          .get()
-          .createNamedQuery(queryName, WorkspaceActivity.class)
-          .setParameter("time", timestamp)
-          .getResultList()
-          .stream()
-          .map(WorkspaceActivity::getWorkspaceId)
-          .collect(Collectors.toList());
+      long count =
+          managerProvider
+              .get()
+              .createNamedQuery(countQueryName, Long.class)
+              .setParameter("time", timestamp)
+              .getSingleResult();
+
+      List<String> data =
+          managerProvider
+              .get()
+              .createNamedQuery(queryName, String.class)
+              .setParameter("time", timestamp)
+              .setFirstResult((int) skipCount)
+              .setMaxResults(maxItems)
+              .getResultList();
+
+      return new Page<>(data, skipCount, maxItems, count);
     } catch (RuntimeException e) {
       throw new ServerException(e.getLocalizedMessage(), e);
     }

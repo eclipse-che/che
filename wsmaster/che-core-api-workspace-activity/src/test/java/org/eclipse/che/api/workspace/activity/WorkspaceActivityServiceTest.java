@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.activity;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.emptyList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -25,6 +27,8 @@ import com.jayway.restassured.response.Response;
 import java.net.URI;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
@@ -114,17 +118,23 @@ public class WorkspaceActivityServiceTest {
 
   @Test
   public void shouldBeAbleToQueryWithoutTimeConstraints() throws ServerException {
+    Page<String> emptyPage = new Page<>(emptyList(), 0, 1, 0);
+    when(workspaceActivityManager.findWorkspacesInStatus(any(), anyLong(), anyInt(), anyLong()))
+        .thenReturn(emptyPage);
+
     Response response = given().when().get(URI.create(SERVICE_PATH + "?status=RUNNING"));
 
     assertEquals(response.getStatusCode(), 200);
     verify(workspaceActivityManager, times(1))
-        .findWorkspacesInStatus(eq(WorkspaceStatus.RUNNING), anyLong());
+        .findWorkspacesInStatus(
+            eq(WorkspaceStatus.RUNNING), anyLong(), eq(Pages.DEFAULT_PAGE_SIZE), eq(0L));
   }
 
   @Test
   public void shouldIgnoredMinDurationWhenThresholdSpecified() throws Exception {
-    when(workspaceActivityManager.findWorkspacesInStatus(eq(WorkspaceStatus.STOPPED), anyLong()))
-        .thenReturn(emptyList());
+    when(workspaceActivityManager.findWorkspacesInStatus(
+            eq(WorkspaceStatus.STOPPED), anyLong(), anyInt(), anyLong()))
+        .thenReturn(new Page<>(emptyList(), 0, 1, 0));
 
     Response response =
         given()
@@ -133,7 +143,8 @@ public class WorkspaceActivityServiceTest {
 
     assertEquals(response.getStatusCode(), 200);
     verify(workspaceActivityManager, times(1))
-        .findWorkspacesInStatus(eq(WorkspaceStatus.STOPPED), eq(15L));
+        .findWorkspacesInStatus(
+            eq(WorkspaceStatus.STOPPED), eq(15L), eq(Pages.DEFAULT_PAGE_SIZE), eq(0L));
   }
 
   @DataProvider(name = "wsStatus")

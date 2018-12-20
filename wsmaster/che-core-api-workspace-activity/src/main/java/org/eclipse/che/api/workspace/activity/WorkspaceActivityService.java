@@ -18,7 +18,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.DefaultValue;
@@ -29,9 +28,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.Service;
@@ -81,7 +83,7 @@ public class WorkspaceActivityService extends Service {
   @GET
   @ApiOperation("Retrieves the IDs of workspaces that have been in given state.")
   @Produces(MediaType.APPLICATION_JSON)
-  public List<String> getWorkspacesByActivity(
+  public Response getWorkspacesByActivity(
       @QueryParam("status") @Required @ApiParam("The requested status of the workspaces")
           WorkspaceStatus status,
       @QueryParam("threshold")
@@ -98,7 +100,13 @@ public class WorkspaceActivityService extends Service {
                   + " duration that the workspaces need to have been in the given state. The duration is"
                   + " specified in milliseconds. If both threshold and minDuration are specified,"
                   + " minDuration is NOT taken into account.")
-          long minDuration)
+          long minDuration,
+      @QueryParam("maxItems")
+          @DefaultValue("" + Pages.DEFAULT_PAGE_SIZE)
+          @ApiParam("Maximum number of items on a page of results.")
+          int maxItems,
+      @QueryParam("skipCount") @DefaultValue("0") @ApiParam("How many items to skip.")
+          long skipCount)
       throws ServerException, BadRequestException {
 
     if (status == null) {
@@ -114,6 +122,9 @@ public class WorkspaceActivityService extends Service {
       }
     }
 
-    return workspaceActivityManager.findWorkspacesInStatus(status, limit);
+    Page<String> data =
+        workspaceActivityManager.findWorkspacesInStatus(status, limit, maxItems, skipCount);
+
+    return Response.ok(data).header("Link", createLinkHeader(data)).build();
   }
 }

@@ -31,19 +31,35 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
   @NamedQuery(
       name = "WorkspaceActivity.getStoppedSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED AND a.lastStopped <= :time"),
+          "SELECT a.workspaceId FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED AND a.lastStopped <= :time"),
+  @NamedQuery(
+      name = "WorkspaceActivity.getStoppedSinceCount",
+      query =
+          "SELECT COUNT(a) FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED AND a.lastStopped <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getStoppingSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING AND a.lastStopping <= :time"),
+          "SELECT a.workspaceId FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING AND a.lastStopping <= :time"),
+  @NamedQuery(
+      name = "WorkspaceActivity.getStoppingSinceCount",
+      query =
+          "SELECT COUNT(a) FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPING AND a.lastStopping <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getRunningSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING AND a.lastRunning <= :time"),
+          "SELECT a.workspaceId FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING AND a.lastRunning <= :time"),
+  @NamedQuery(
+      name = "WorkspaceActivity.getRunningSinceCount",
+      query =
+          "SELECT COUNT(a) FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING AND a.lastRunning <= :time"),
   @NamedQuery(
       name = "WorkspaceActivity.getStartingSince",
       query =
-          "SELECT a FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING AND a.lastStarting <= :time"),
+          "SELECT a.workspaceId FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING AND a.lastStarting <= :time"),
+  @NamedQuery(
+      name = "WorkspaceActivity.getStartingSinceCount",
+      query =
+          "SELECT COUNT(a) FROM WorkspaceActivity a WHERE a.status = org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING AND a.lastStarting <= :time"),
 })
 public class WorkspaceActivity {
 

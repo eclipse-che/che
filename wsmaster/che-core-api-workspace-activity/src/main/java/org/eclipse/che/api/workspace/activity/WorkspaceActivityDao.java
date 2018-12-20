@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.activity;
 
 import java.util.List;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
@@ -92,10 +93,14 @@ public interface WorkspaceActivityDao {
    * Finds workspaces that have been in the provided status since before the provided time.
    *
    * @param timestamp the stop-gap time
+   * @param status the status of the workspaces
+   * @param maxItems max items on the results page
+   * @param skipCount how many items of the result to skip
    * @return the list of workspaces that
    * @throws ServerException on error
    */
-  List<String> findInStatusSince(long timestamp, WorkspaceStatus status) throws ServerException;
+  Page<String> findInStatusSince(
+      long timestamp, WorkspaceStatus status, int maxItems, long skipCount) throws ServerException;
 
   /**
    * Returns the workspace activity record of the provided workspace.

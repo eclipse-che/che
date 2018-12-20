@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 
@@ -86,28 +87,41 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
-  public List<String> findInStatusSince(long timestamp, WorkspaceStatus status) {
-    return workspaceActivities
-        .values()
-        .stream()
-        .filter(a -> a.getStatus() == status)
-        .filter(
-            a -> {
-              switch (status) {
-                case STOPPED:
-                  return isGreater(a.getLastStopped(), timestamp);
-                case STOPPING:
-                  return isGreater(a.getLastStopped(), timestamp);
-                case RUNNING:
-                  return isGreater(a.getLastStopped(), timestamp);
-                case STARTING:
-                  return isGreater(a.getLastStopped(), timestamp);
-                default:
-                  return false;
-              }
-            })
-        .map(WorkspaceActivity::getWorkspaceId)
-        .collect(Collectors.toList());
+  public Page<String> findInStatusSince(
+      long timestamp, WorkspaceStatus status, int maxItems, long skipCount) {
+    List<String> all =
+        workspaceActivities
+            .values()
+            .stream()
+            .filter(a -> a.getStatus() == status)
+            .filter(
+                a -> {
+                  switch (status) {
+                    case STOPPED:
+                      return isGreater(a.getLastStopped(), timestamp);
+                    case STOPPING:
+                      return isGreater(a.getLastStopped(), timestamp);
+                    case RUNNING:
+                      return isGreater(a.getLastStopped(), timestamp);
+                    case STARTING:
+                      return isGreater(a.getLastStopped(), timestamp);
+                    default:
+                      return false;
+                  }
+                })
+            .map(WorkspaceActivity::getWorkspaceId)
+            .collect(Collectors.toList());
+
+    int total = all.size();
+    int from = skipCount > total ? total : (int) skipCount;
+    int to = from + maxItems;
+    if (to > total) {
+      to = total;
+    }
+
+    List<String> page = all.subList(from, to);
+
+    return new Page<>(page, skipCount, maxItems, all.size());
   }
 
   @Override

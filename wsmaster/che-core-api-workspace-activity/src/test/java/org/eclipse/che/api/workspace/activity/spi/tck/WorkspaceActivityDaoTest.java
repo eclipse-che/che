@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
@@ -150,8 +151,8 @@ public class WorkspaceActivityDaoTest {
 
   @Test
   public void shouldNotCareAboutCreatedAndStatusChangeOrder() throws Exception {
-    List<String> found =
-        workspaceActivityDao.findInStatusSince(System.currentTimeMillis(), STARTING);
+    Page<String> found =
+        workspaceActivityDao.findInStatusSince(System.currentTimeMillis(), STARTING, 1000, 0);
 
     assertTrue(found.isEmpty());
 
@@ -161,14 +162,16 @@ public class WorkspaceActivityDaoTest {
     workspaceActivityDao.setStatusChangeTime(activities[1].getWorkspaceId(), STARTING, 2L);
     workspaceActivityDao.setCreatedTime(activities[1].getWorkspaceId(), 1L);
 
-    found = workspaceActivityDao.findInStatusSince(System.currentTimeMillis(), STARTING);
+    found = workspaceActivityDao.findInStatusSince(System.currentTimeMillis(), STARTING, 1000, 0);
 
-    assertEquals(found, asList(activities[0].getWorkspaceId(), activities[1].getWorkspaceId()));
+    assertEquals(
+        found.getItems(), asList(activities[0].getWorkspaceId(), activities[1].getWorkspaceId()));
   }
 
   @Test(dataProvider = "allWorkspaceStatuses")
   public void shouldFindActivityByLastStatusChangeTime(WorkspaceStatus status) throws Exception {
-    List<String> found = workspaceActivityDao.findInStatusSince(System.currentTimeMillis(), status);
+    Page<String> found =
+        workspaceActivityDao.findInStatusSince(System.currentTimeMillis(), status, 1000, 0);
 
     assertTrue(found.isEmpty());
 
@@ -178,9 +181,9 @@ public class WorkspaceActivityDaoTest {
     workspaceActivityDao.setStatusChangeTime(activities[1].getWorkspaceId(), status, 5L);
     workspaceActivityDao.setCreatedTime(activities[1].getWorkspaceId(), 1L);
 
-    found = workspaceActivityDao.findInStatusSince(3L, status);
+    found = workspaceActivityDao.findInStatusSince(3L, status, 1000, 0);
 
-    assertEquals(found, singletonList(activities[0].getWorkspaceId()));
+    assertEquals(found.getItems(), singletonList(activities[0].getWorkspaceId()));
   }
 
   @DataProvider(name = "allWorkspaceStatuses")
