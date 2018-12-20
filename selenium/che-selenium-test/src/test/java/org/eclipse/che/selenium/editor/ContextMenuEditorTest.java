@@ -277,6 +277,7 @@ public class ContextMenuEditorTest {
 
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/java/com/example/Test1.java");
+
     editor.goToCursorPositionVisible(14, 15);
     editor.openContextMenuOnElementInEditor(editorTabName);
     editor.clickOnItemInContextMenu(REFACTORING);
@@ -291,6 +292,7 @@ public class ContextMenuEditorTest {
     refactor.clickOkButtonRefactorForm();
     refactor.waitMoveItemFormIsClosed();
     loader.waitOnClosed();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
 
     try {
       editor.waitTabIsPresent(editorTabName);
@@ -305,6 +307,10 @@ public class ContextMenuEditorTest {
     editor.clickOnItemInContextMenu(REFACTORING);
     editor.clickOnItemInContextMenu(REFACTORING_RENAME);
     editor.waitContextMenuIsNotPresent();
+    editor.typeTextIntoEditor(renamedEditorTabName);
+    editor.typeTextIntoEditor(Keys.ENTER.toString());
+    loader.waitOnClosed();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
 
     try {
       editor.waitTabIsPresent(renamedEditorTabName);
@@ -313,9 +319,6 @@ public class ContextMenuEditorTest {
       fail("Known random failure https://github.com/eclipse/che/issues/11697");
     }
 
-    editor.typeTextIntoEditor(Keys.ENTER.toString());
-    loader.waitOnClosed();
-    editor.waitTabIsPresent(renamedEditorTabName);
     editor.waitTextIntoEditor("public class Zclass");
     projectExplorer.waitItem(PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/Zclass.java");
   }
