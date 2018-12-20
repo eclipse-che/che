@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.NODEJS_WITH_JSON_LS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.NODEJS_HELLO_WORLD;
@@ -91,6 +92,7 @@ public class JsonFileEditingTest {
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
     projectExplorer.openItemByPath(PATH_TO_JSON_FILE);
+    editor.waitActive(WIDGET_TIMEOUT_SEC);
     editor.waitTabIsPresent(JSON_FILE_NAME);
 
     // check JSON language server initialized
