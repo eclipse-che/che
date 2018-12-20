@@ -71,6 +71,12 @@ public class ConfigureSomeSourceFoldersTest {
 
   @Test
   public void checkConfigureClasspathPlainJavaProject() {
+    String pathToNewJavaFile = PROJECT_NAME + "/source/NewClass.java";
+    String methodForChecking =
+        " public static String typeCheckMess(){\n"
+            + "  return \"Message from source folder\";\n"
+            + "    ";
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
@@ -81,15 +87,12 @@ public class ConfigureSomeSourceFoldersTest {
     projectExplorer.waitDefinedTypeOfFolder(PROJECT_NAME + "/src", JAVA_SOURCE_FOLDER);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + "/source");
     createNewJavaClass(newJavaClassName);
-    projectExplorer.waitItem(PROJECT_NAME + "/source/" + newJavaClassName + ".java");
+    projectExplorer.openItemByPath(pathToNewJavaFile);
+    codenvyEditor.waitActive();
     codenvyEditor.waitTextIntoEditor("public class NewClass {");
     codenvyEditor.waitAllMarkersInvisibility(ERROR);
     codenvyEditor.goToCursorPositionVisible(2, 24);
     codenvyEditor.typeTextIntoEditor(Keys.ENTER.toString());
-    String methodForChecking =
-        " public static String typeCheckMess(){\n"
-            + "        return \"Message from source folder\";\n"
-            + "    ";
     codenvyEditor.typeTextIntoEditor(methodForChecking);
     codenvyEditor.waitAllMarkersInvisibility(ERROR);
     projectExplorer.openItemByPath(PROJECT_NAME + "/src");
@@ -104,10 +107,10 @@ public class ConfigureSomeSourceFoldersTest {
     projectExplorer.clickOnItemInContextMenu(NEW);
     projectExplorer.clickOnNewContextMenuItem(JAVA_CLASS);
     askForValueDialog.createJavaFileByNameAndType(name, CLASS);
-    projectExplorer.waitVisibilityByName(name + ".java");
     codenvyEditor.waitActive();
     loader.waitOnClosed();
     codenvyEditor.waitTabIsPresent(name);
+    codenvyEditor.closeFileByNameWithSaving(name);
   }
 
   private void launchMainClassFromCommandWidget() {
