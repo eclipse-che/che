@@ -35,7 +35,7 @@ if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1 && sudo -n true > /de
 fi
 
 if [ -z "$THEIA_PORT" ]; then
-    export THEIA_PORT=3000
+    export THEIA_PORT=3100
 else
     # Parse THEIA_PORT env var in case it has weird value, such as tcp://10.108.137.206:3000
     theia_port_number_regexp='^[0-9]+$'

@@ -77,6 +77,7 @@ public class CreateProjectsForArtikPluginTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test

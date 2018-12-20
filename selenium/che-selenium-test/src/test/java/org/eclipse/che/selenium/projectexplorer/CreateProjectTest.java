@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -41,11 +42,13 @@ public class CreateProjectTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private Wizard projectWizard;
+  @Inject private Consoles consoles;
   @Inject private Menu menu;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
@@ -54,14 +57,17 @@ public class CreateProjectTest {
     loader.waitOnClosed();
     // create project with help context menu in the list of projects
     createProject(PROJECT_NAMES.get(0), Wizard.PackagingMavenType.NOT_SPECIFIED);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAMES.get(0));
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAMES.get(0));
     loader.waitOnClosed();
     createProject(PROJECT_NAMES.get(1), Wizard.PackagingMavenType.JAR);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAMES.get(1));
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAMES.get(1));
     loader.waitOnClosed();
     createProject(PROJECT_NAMES.get(2), Wizard.PackagingMavenType.WAR);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAMES.get(2));
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAMES.get(2));
     loader.waitOnClosed();

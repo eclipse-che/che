@@ -15,6 +15,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.RENAME;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -192,7 +193,7 @@ public class RenameTypeTest {
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     refactorPanel.waitRefactorPreviewFormIsClosed();
-    projectExplorer.waitItem(pathToCurrentPackage + "/B.java", 6);
+    projectExplorer.waitItem(pathToCurrentPackage + "/B.java", ELEMENT_TIMEOUT_SEC);
     editor.waitTextIntoEditor(contentFromOutB);
   }
 }

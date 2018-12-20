@@ -158,57 +158,96 @@
     border-right: 5px solid transparent;
 }
 
+/* Overwrite default styles for text view tooltip */
+
 .textviewTooltip {
-    font-family: "Open Sans", sans-serif;
-    font-size: 11px;
-    background-color: completionPopupBackgroundColor;
-    color: completionPopupItemTextColor;
-    padding-left: 10px;
-    padding-right: 10px;
-    padding-top: 5px;
-    padding-bottom: 7px !important;
+    font-family: "Open Sans", sans-serif !important;
+    font-size: 11px !important;
+    background-color: completionPopupBackgroundColor !important;
+    color: completionPopupItemTextColor !important;
+    padding: 8px !important;
+
+    box-sizing: content-box !important;
+    border-radius: 3px !important;
+    z-index: 101 !important;
+    position: fixed !important;
+    overflow: hidden !important;
 
     border: 1px solid completionPopupBorderColor;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.5);
-    line-height: 14px;
-    cursor: default;
-    outline: none;
 }
 
-.textviewTooltip em {
-    line-height: 20px;
+.textviewTooltip a {
+    color: #7CC7FF !important;
 }
-
+.textviewTooltip h3 {
+    -webkit-margin-before: 0 !important;
+    margin-top: 0 !important;
+}
+.textviewTooltip p:first-of-type {
+    -webkit-margin-before: 0 !important;
+    margin-top: 0 !important;
+    -webkit-margin-after: 0 !important;
+    margin-bottom: 0 !important;
+}
+.textviewTooltip p {
+    word-wrap: break-word !important;
+}
+.textviewTooltip multi_anno {
+    font-style: normal !important;
+    font-weight: bold !important;
+}
+.textviewTooltip span {
+    vertical-align: baseline !important;
+}
 .textviewTooltip .tooltipRow {
-    display: block;
-    position: relative;
+    display: table-row !important;
 }
-
 .textviewTooltip .tooltipImage {
-    display: table-cell;
-    vertical-align: top;
-    padding-top: 1px;
-    width: 18px;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    padding: 1px !important;
 }
-
-.textviewTooltip .tooltipImage {
-    margin-left: 0px;
-}
-
 .textviewTooltip .tooltipTitle {
-    display: table-cell;
-    max-width: 400px;
-    text-overflow: ellipsis;
-    overflow-x: hidden;
+    padding-left: 3px !important;
+    vertical-align: middle !important;
 }
+.textviewTooltip .hoverTooltipTitle {
+    font-weight: normal !important;
+}
+.textviewTooltip .quickFixList {
+    margin-top: 5px !important;
+}
+.textviewTooltip .commandButton {
+    border: 1px solid completionPopupBorderColor !important;
+    background-color: inherit !important;
+    color: completionPopupItemTextColor !important;
+}
+.textviewTooltip .commandButton:not(.dropdownTrigger){
+    text-transform: initial !important;
+}
+.textviewTooltip .commandList > li {
+    margin: 0 !important;
+}
+.textviewTooltip .quickfixAllParameter {
+    margin-bottom: 4px !important;
+    vertical-align: middle !important;
+    font-weight: normal !important;
+    font-family: "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", 'TeXGyreHerosRegular', "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif !important;
+}
+.textViewTooltipOnFocus {
+    resize: both !important;
+    overflow: auto !important;
+}
+.textViewTooltipOnHover {
+    overflow: auto !important;
+}
+
+/* End of overwrite default styles for text view tooltip */
 
 .tooltipTheme.textview {
     background-color: InfoBackground !important;
     color: InfoText !important;
-}
-
-.textViewTooltipOnHover {
-    overflow: auto;
 }
 
 .orionCodenvy .textViewFind {

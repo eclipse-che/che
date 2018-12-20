@@ -1,0 +1,84 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
+
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
+
+import com.google.common.collect.ImmutableMap;
+import javax.inject.Inject;
+import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
+
+/**
+ * Provides common PVC per each workspace.
+ *
+ * <p>Names for PVCs are evaluated as: '{configured_prefix}' + '-' +'{workspaceId}' to avoid naming
+ * collisions inside of one Kubernetes namespace.
+ *
+ * <p>This strategy uses subpaths to do the same as {@link CommonPVCStrategy} does and make easier
+ * data migration if it will be needed.<br>
+ * Subpaths have the following format: '{workspaceId}/{volumeName}'.<br>
+ * Note that logs volume has the special format: '{workspaceId}/{volumeName}/{machineName}'. It is
+ * done in this way to avoid conflicts e.g. two identical agents inside different machines produce
+ * the same log file.
+ *
+ * @author Sergii Leshchenko
+ * @author Masaki Muranaka
+ */
+public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
+
+  public static final String PER_WORKSPACE_STRATEGY = "per-workspace";
+
+  private final KubernetesNamespaceFactory factory;
+  private final String pvcNamePrefix;
+
+  @Inject
+  public PerWorkspacePVCStrategy(
+      @Named("che.infra.kubernetes.pvc.name") String pvcName,
+      @Named("che.infra.kubernetes.pvc.quantity") String pvcQuantity,
+      @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
+      @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
+      PVCSubPathHelper pvcSubPathHelper,
+      KubernetesNamespaceFactory factory,
+      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter) {
+    super(
+        pvcName,
+        pvcQuantity,
+        pvcAccessMode,
+        preCreateDirs,
+        pvcSubPathHelper,
+        factory,
+        ephemeralWorkspaceAdapter);
+    this.pvcNamePrefix = pvcName;
+    this.factory = factory;
+  }
+
+  @Override
+  protected String getCommonPVCName(RuntimeIdentity identity) {
+    return pvcNamePrefix + '-' + identity.getWorkspaceId();
+  }
+
+  @Override
+  public void cleanup(Workspace workspace) throws InfrastructureException {
+    if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
+      return;
+    }
+    final String workspaceId = workspace.getId();
+    factory
+        .create(workspaceId)
+        .persistentVolumeClaims()
+        .delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspaceId));
+  }
+}

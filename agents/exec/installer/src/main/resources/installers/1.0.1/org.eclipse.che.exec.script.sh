@@ -186,13 +186,26 @@ else
   echo "Exec Agent binary is downloaded remotely"
   # Use curl
   if [ ${CURL_INSTALLED} = true ]; then
-    if curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g'); then
-      curl -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')
-    elif curl -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g'); then
-      curl -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
+
+    CA_ARG=""
+    if [ -f /tmp/che/secret/ca.crt ]; then
+      echo "Certificate File /tmp/che/secret/ca.crt will be used for binaries downloading"
+      CA_ARG="--cacert /tmp/che/secret/ca.crt"
+    fi
+
+    if curl ${CA_ARG} -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g'); then
+      curl ${CA_ARG} -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')
+    elif curl ${CA_ARG} -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g'); then
+      curl ${CA_ARG} -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
     fi
     curl -s $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
   else
+    CA_ARG=""
+    if [ -f /tmp/che/secret/ca.crt ]; then
+      echo "Certificate File /tmp/che/secret/ca.crt will be used for binaries downloading"
+      CA_ARG="--ca-certificate /tmp/che/secret/ca.crt"
+    fi
+
     # replace https by http as wget may not be able to handle ssl
     AGENT_BINARIES_URI=$(echo ${AGENT_BINARIES_URI} | sed 's/https/http/g')
 
@@ -202,10 +215,10 @@ else
       WGET_SPIDER="wget -s"
     fi
     LOCAL_DOWNLOAD=$(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g')
-    if ${WGET_SPIDER} -q $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g') >/dev/null; then
-      wget -qO ${LOCAL_DOWNLOAD} $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')
-    elif ${WGET_SPIDER} -q $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g'); then
-      wget -qO- ${LOCAL_DOWNLOAD} $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
+    if ${WGET_SPIDER} ${CA_ARG} -q $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g') >/dev/null; then
+      wget ${CA_ARG} -qO ${LOCAL_DOWNLOAD} $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')
+    elif ${WGET_SPIDER} ${CA_ARG} -q $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g'); then
+      wget ${CA_ARG} -qO- ${LOCAL_DOWNLOAD} $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
     fi
     tar xzf ${LOCAL_DOWNLOAD} -C ${CHE_DIR}
   fi

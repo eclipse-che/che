@@ -1,0 +1,58 @@
+diff --git a/packages/file-search/src/browser/quick-file-open-contribution.ts b/packages/file-search/src/browser/quick-file-open-contribution.ts
+index 719b370d..44e9dbc7 100644
+--- a/packages/file-search/src/browser/quick-file-open-contribution.ts
++++ b/packages/file-search/src/browser/quick-file-open-contribution.ts
+@@ -29,12 +29,16 @@ export class QuickFileOpenFrontendContribution implements CommandContribution, K
+     registerCommands(commands: CommandRegistry): void {
+         commands.registerCommand(quickFileOpen, {
+             // tslint:disable-next-line:no-any
+-            execute: (args: any[]) => {
++            execute: (...args: any[]) => {
++                let fileURI: string | undefined;
+                 if (args) {
+-                    const [fileURI] = args;
+-                    return this.quickFileOpenService.openFile(new URI(fileURI));
++                    [fileURI] = args;
++                }
++                if (fileURI) {
++                    this.quickFileOpenService.openFile(new URI(fileURI));
++                } else {
++                    this.quickFileOpenService.open();
+                 }
+-                return this.quickFileOpenService.open();
+             },
+             isEnabled: () => this.quickFileOpenService.isEnabled()
+         });
+diff --git a/packages/git/src/browser/git-view-contribution.ts b/packages/git/src/browser/git-view-contribution.ts
+index 0916f51b..14dabe92 100644
+--- a/packages/git/src/browser/git-view-contribution.ts
++++ b/packages/git/src/browser/git-view-contribution.ts
+@@ -265,7 +265,7 @@ export class GitViewContribution extends AbstractViewContribution<GitWidget>
+         registry.registerCommand(GIT_COMMANDS.CLONE, {
+             isEnabled: () => this.workspaceService.opened,
+             // tslint:disable-next-line:no-any
+-            execute: (args: any[]) => {
++            execute: (...args: any[]) => {
+                 let url: string | undefined = undefined;
+                 let folder: string | undefined = undefined;
+                 let branch: string | undefined = undefined;
+diff --git a/packages/task/src/browser/task-frontend-contribution.ts b/packages/task/src/browser/task-frontend-contribution.ts
+index 65323d46..ae19a5aa 100644
+--- a/packages/task/src/browser/task-frontend-contribution.ts
++++ b/packages/task/src/browser/task-frontend-contribution.ts
+@@ -82,9 +82,13 @@ export class TaskFrontendContribution implements CommandContribution, MenuContri
+             {
+                 isEnabled: () => true,
+                 // tslint:disable-next-line:no-any
+-                execute: (args: any[]) => {
++                execute: (...args: any[]) => {
++                    let type: string | undefined;
++                    let label: string | undefined;
+                     if (args) {
+-                        const [type, label] = args;
++                        [type, label] = args;
++                    }
++                    if (type && label) {
+                         return this.taskService.run(type, label);
+                     }
+                     return this.quickOpenTask.open();

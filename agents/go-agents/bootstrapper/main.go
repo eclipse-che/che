@@ -16,11 +16,14 @@ import (
 	"log"
 	"os"
 
-	"github.com/eclipse/che/agents/go-agents/bootstrapper/booter"
-	"github.com/eclipse/che/agents/go-agents/bootstrapper/cfg"
+	"crypto/tls"
+	"crypto/x509"
 	"github.com/eclipse/che-go-jsonrpc"
 	"github.com/eclipse/che-go-jsonrpc/jsonrpcws"
+	"github.com/eclipse/che/agents/go-agents/bootstrapper/booter"
+	"github.com/eclipse/che/agents/go-agents/bootstrapper/cfg"
 	"github.com/eclipse/che/agents/go-agents/core/process"
+	"io/ioutil"
 )
 
 func main() {
@@ -28,6 +31,10 @@ func main() {
 
 	cfg.Parse()
 	cfg.Print()
+
+	if cfg.SelfSignedCertificateFilePath != "" {
+		configureCertPool(cfg.SelfSignedCertificateFilePath)
+	}
 
 	process.SetShellInterpreter("/bin/sh")
 
@@ -59,6 +66,30 @@ func main() {
 
 	if err := booter.Start(); err != nil {
 		log.Fatal(err)
+	}
+}
+
+func configureCertPool(customCertificateFilePath string) {
+	// Get the SystemCertPool, continue with an empty pool on error
+	rootCAs, _ := x509.SystemCertPool()
+	if rootCAs == nil {
+		rootCAs = x509.NewCertPool()
+	}
+
+	// Read in the cert file
+	certs, err := ioutil.ReadFile(customCertificateFilePath)
+	if err != nil {
+		log.Fatalf("Failed to read custom certificate %q. Error: %v", customCertificateFilePath, err)
+	}
+
+	// Append our cert to the system pool
+	if ok := rootCAs.AppendCertsFromPEM(certs); !ok {
+		log.Fatalf("Failed to append %q to RootCAs: %v", customCertificateFilePath, err)
+	}
+
+	// Trust the augmented cert pool in our client
+	jsonrpcws.DefaultDialer.TLSClientConfig = &tls.Config{
+		RootCAs: rootCAs,
 	}
 }
 

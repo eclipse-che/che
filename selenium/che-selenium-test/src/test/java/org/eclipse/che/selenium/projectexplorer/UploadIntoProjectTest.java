@@ -71,6 +71,7 @@ public class UploadIntoProjectTest {
         ProjectTemplates.PLAIN_JAVA);
 
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitVisibleItem(PROJECT_NAME);
   }

@@ -34,6 +34,7 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author Sergii Leshchenko
  */
 public class KubernetesBootstrapper extends AbstractBootstrapper {
+
   private static final int EXEC_TIMEOUT_MIN = 5;
 
   private static final Logger LOG = LoggerFactory.getLogger(KubernetesBootstrapper.class);
@@ -65,6 +67,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   private final EventService eventService;
   private final KubernetesNamespace namespace;
   private final StartSynchronizer startSynchronizer;
+  private final CertificateProvisioner certProvisioner;
 
   @Inject
   public KubernetesBootstrapper(
@@ -79,7 +82,8 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
       @Named("che.infra.kubernetes.bootstrapper.server_check_period_sec")
           int serverCheckPeriodSeconds,
       @Named("che.workspace.logs.root_dir") String logsRootPath,
-      EventService eventService) {
+      EventService eventService,
+      CertificateProvisioner certProvisioner) {
     super(
         kubernetesMachine.getName(),
         runtimeIdentity,
@@ -95,6 +99,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     this.bootstrapperLogsFolder = logsRootPath + "/bootstrapper";
     this.eventService = eventService;
     this.namespace = namespace;
+    this.certProvisioner = certProvisioner;
     this.bootstrapperLogsFile = bootstrapperLogsFolder + "/bootstrapper.log";
     this.startSynchronizer = startSynchronizer;
   }
@@ -134,6 +139,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
             + " -file "
             + BOOTSTRAPPER_DIR
             + CONFIG_FILE
+            + (certProvisioner.isConfigured() ? " -cacert " + certProvisioner.getCertPath() : "")
             // redirects command output and makes the bootstrapping process detached,
             // to avoid the holding of the socket connection for exec watcher.
             + " > "
@@ -161,14 +167,20 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     LOG.debug("Bootstrapping {}:{}. Downloading bootstrapper binary", runtimeIdentity, mName);
     exec(
         outputConsumer,
-        "curl",
-        // -f, --fail          Fail silently (no output at all) on HTTP errors
-        // -s, --silent        Silent mode
-        // -S, --show-error    Show error even when -s is used
-        // -o, --output <file> Write to file instead of stdout
-        "-fsSo",
-        BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE,
-        bootstrapperBinaryUrl);
+        "sh",
+        "-c",
+        "curl"
+            + (certProvisioner.isConfigured() ? " --cacert " + certProvisioner.getCertPath() : "")
+            +
+            // -f, --fail          Fail silently (no output at all) on HTTP errors
+            // -s, --silent        Silent mode
+            // -S, --show-error    Show error even when -s is used
+            // -o, --output <file> Write to file instead of stdout
+            " -fsSo "
+            + BOOTSTRAPPER_DIR
+            + BOOTSTRAPPER_FILE
+            + " "
+            + bootstrapperBinaryUrl);
     exec(outputConsumer, "chmod", "+x", BOOTSTRAPPER_DIR + BOOTSTRAPPER_FILE);
 
     startSynchronizer.checkFailure();

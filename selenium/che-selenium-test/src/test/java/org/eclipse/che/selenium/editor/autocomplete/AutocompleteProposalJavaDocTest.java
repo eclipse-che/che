@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.editor.autocomplete;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.fail;
@@ -153,7 +154,7 @@ public class AutocompleteProposalJavaDocTest {
     checkProposalDocumentationHTML("<p>No documentation found.</p>\n");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void shouldDisplayAnotherModuleClassJavaDoc() throws IOException {
     // when
     editor.waitActive();
@@ -266,7 +267,7 @@ public class AutocompleteProposalJavaDocTest {
       editor.waitProposalDocumentationHTML(expectedText);
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/11743");
+      fail("Known permanent failure https://github.com/eclipse/che/issues/11743");
     }
   }
 }

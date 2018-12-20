@@ -12,8 +12,10 @@
 package org.eclipse.che.selenium.stack;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_OPENSHIFT;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -25,12 +27,13 @@ import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Skoryk Serhii */
-@Test(groups = {TestGroup.OPENSHIFT})
+@Test(groups = {TestGroup.OPENSHIFT, UNDER_REPAIR})
 public class CreateWorkspaceFromJavaTheiaOpenshiftStackTest {
   private static final String WORKSPACE_NAME = generate("workspace", 4);
 
@@ -63,10 +66,16 @@ public class CreateWorkspaceFromJavaTheiaOpenshiftStackTest {
             JAVA_THEIA_OPENSHIFT, WORKSPACE_NAME);
 
     seleniumWebDriverHelper.waitAndSwitchToFrame(
-        By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
+        By.id("ide-application-iframe"), APPLICATION_START_TIMEOUT_SEC);
 
     // wait Theia is ready to use
-    theiaIde.waitTheiaIde();
+    try {
+      theiaIde.waitTheiaIde();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/12218");
+    }
+
     theiaIde.waitTheiaIdeTopPanel();
     theiaIde.waitLoaderInvisibility();
     theiaIde.waitNotificationPanelClosed();

@@ -20,6 +20,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
 import java.lang.reflect.Field;
+import java.util.function.Consumer;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.organization.InjectTestOrganization;
 import org.eclipse.che.selenium.core.organization.TestOrganization;
@@ -51,15 +52,29 @@ public class SeleniumClassModule extends AbstractModule {
 
     @Override
     public <I> void hear(TypeLiteral<I> type, TypeEncounter<I> encounter) {
-      Class<?> clazz = type.getRawType();
-      for (Field field : clazz.getDeclaredFields()) {
-        if (field.getType() == TestWorkspace.class
-            && field.isAnnotationPresent(InjectTestWorkspace.class)) {
-          encounter.register(
-              new TestWorkspaceInjector<>(
-                  field, field.getAnnotation(InjectTestWorkspace.class), injectorProvider.get()));
-        }
+      traverseClassHierarchy(
+          type.getRawType(),
+          (clazz) -> {
+            for (Field field : clazz.getDeclaredFields()) {
+              if (field.getType() == TestWorkspace.class
+                  && field.isAnnotationPresent(InjectTestWorkspace.class)) {
+                encounter.register(
+                    new TestWorkspaceInjector<>(
+                        field,
+                        field.getAnnotation(InjectTestWorkspace.class),
+                        injectorProvider.get()));
+              }
+            }
+          });
+    }
+
+    private void traverseClassHierarchy(Class clazz, Consumer<Class> handler) {
+      if (clazz == null || clazz.equals(Object.class)) {
+        return;
       }
+
+      traverseClassHierarchy(clazz.getSuperclass(), handler);
+      handler.accept(clazz);
     }
   }
 

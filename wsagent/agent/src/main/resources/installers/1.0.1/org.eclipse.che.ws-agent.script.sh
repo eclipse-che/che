@@ -265,13 +265,25 @@ else
     echo "Workspace Agent will be downloaded from Workspace Master"
     AGENT_BINARIES_URI=${DOWNLOAD_AGENT_BINARIES_URI}
     if [ ${CURL_INSTALLED} = true ]; then
-      curl -s  ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
+       CA_ARG=""
+      if [ -f /tmp/che/secret/ca.crt ]; then
+        echo "Certificate File /tmp/che/secret/ca.crt will be used for binaries downloading"
+        CA_ARG="--cacert /tmp/che/secret/ca.crt"
+      fi
+
+      curl -s ${CA_ARG} ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
     else
       # replace https by http as wget may not be able to handle ssl
       AGENT_BINARIES_URI=$(echo ${AGENT_BINARIES_URI} | sed 's/https/http/g')
 
+      CA_ARG=""
+      if [ -f /tmp/che/secret/ca.crt ]; then
+        echo "Certificate File /tmp/che/secret/ca.crt will be used for binaries downloading"
+        CA_ARG="--ca-certificate /tmp/che/secret/ca.crt"
+      fi
+
       # use wget
-      wget -qO- ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}/ws-agent
+      wget ${CA_ARG} -qO- ${AGENT_BINARIES_URI} | tar xzf - -C ${CHE_DIR}/ws-agent
     fi
 
 fi
