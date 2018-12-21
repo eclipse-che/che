@@ -124,7 +124,7 @@ public class DTOHelper {
         || Double.TYPE.equals(type)
         || Float.TYPE.equals(type)) {
       return "number";
-    } else if (Boolean.class.equals(type)) {
+    } else if (Boolean.class.equals(type) || Boolean.TYPE.equals(type)) {
       return "boolean";
     }
 
@@ -146,5 +146,92 @@ public class DTOHelper {
     } else {
       throw new IllegalArgumentException("Invalid type" + type);
     }
+  }
+
+  /**
+   * Same as {@link #convertParametrizedType(Type, ParameterizedType, Type)} but use [] instead if
+   * 'Array[' for arrays
+   */
+  public static String convertParametrizedTypeDTS(
+      Type type, ParameterizedType parameterizedType, Type rawType, Type containerType) {
+
+    if (List.class.equals(rawType)) {
+      return convertTypeForDTS(containerType, parameterizedType.getActualTypeArguments()[0]) + "[]";
+    } else if (Map.class.equals(rawType)) {
+      return "Map<"
+          + convertTypeForDTS(containerType, parameterizedType.getActualTypeArguments()[0])
+          + ","
+          + convertTypeForDTS(containerType, parameterizedType.getActualTypeArguments()[1])
+          + ">";
+    } else {
+      throw new IllegalArgumentException("Invalid type" + type);
+    }
+  }
+
+  /**
+   * Convert Java type to TypeScript type for .d.ts Same as {@link #convertType(Type)} but in
+   * addition check if dto and its container dto in same package than skip adding namespace
+   */
+  public static String convertTypeForDTS(Type containerType, Type type) {
+    if (type instanceof ParameterizedType) {
+      ParameterizedType parameterizedType = (ParameterizedType) type;
+      Type rawType = parameterizedType.getRawType();
+      return convertParametrizedTypeDTS(type, parameterizedType, rawType, containerType);
+    } else if (String.class.equals(type) || (type instanceof Class && ((Class) type).isEnum())) {
+      // Maybe find a better enum type for typescript
+      return "string";
+    } else if (Integer.class.equals(type)
+        || Integer.TYPE.equals(type)
+        || Long.class.equals(type)
+        || Long.TYPE.equals(type)
+        || Double.class.equals(type)
+        || Double.TYPE.equals(type)
+        || Float.TYPE.equals(type)) {
+      return "number";
+    } else if (Boolean.class.equals(type) || Boolean.TYPE.equals(type)) {
+      return "boolean";
+    }
+
+    String declarationPackage = convertToDTSPackageName((Class) containerType);
+    String typePackage = convertToDTSPackageName((Class) type);
+    if (declarationPackage.equals(typePackage)) {
+      return convertToDTSName((Class) type);
+    }
+
+    return typePackage + "." + convertToDTSName((Class) type);
+  }
+
+  /** Remove 'Dto' suffix from class nam */
+  public static String convertToDTSName(Class type) {
+    String name = type.getSimpleName();
+    if (name.toLowerCase().endsWith("dto")) {
+      name = name.substring(0, name.length() - 3);
+    }
+
+    return name;
+  }
+
+  /**
+   * Convert Java package to TypeScript namespace. This method deletes "org.eclipse.", ".api",
+   * ".dto", ".shared" segments from dto package name
+   *
+   * @param dto
+   * @return the TS namespace name
+   */
+  public static String convertToDTSPackageName(Class dto) {
+    return removeSubStrings(dto.getPackage().getName(), "org.eclipse.", ".api", ".dto", ".shared");
+  }
+
+  /** Remove all substrings from original string */
+  private static String removeSubStrings(String str, String... subStrings) {
+    StringBuilder builder = new StringBuilder(str);
+    for (String subString : subStrings) {
+      int index = builder.indexOf(subString);
+      if (index != -1) {
+        builder.delete(index, index + subString.length());
+      }
+    }
+
+    return builder.toString();
   }
 }

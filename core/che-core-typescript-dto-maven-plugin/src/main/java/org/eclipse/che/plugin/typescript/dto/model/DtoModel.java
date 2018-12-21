@@ -11,13 +11,7 @@
  */
 package org.eclipse.che.plugin.typescript.dto.model;
 
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.convertType;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.getGetterFieldName;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.getSetterFieldName;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.getWithFieldName;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.isDtoGetter;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.isDtoSetter;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.isDtoWith;
+import static org.eclipse.che.plugin.typescript.dto.DTOHelper.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -90,7 +84,7 @@ public class DtoModel {
         .forEach(
             field ->
                 fieldAttributeModels.add(
-                    new FieldAttributeModel(field.getKey(), field.getValue())));
+                    new FieldAttributeModel(field.getKey(), field.getValue(), dto)));
   }
 
   /**
@@ -155,6 +149,16 @@ public class DtoModel {
   }
 
   /**
+   * Gets the package name of this interface, without 'dto', 'shared', 'api' sections and
+   * 'org.eclipse.' prefix
+   *
+   * @return the package name of this interface
+   */
+  public String getDTSPackageName() {
+    return convertToDTSPackageName(this.dto);
+  }
+
+  /**
    * Gets the short (simple) name of the interface. Like HelloWorld if FQN class is
    * foo.bar.HelloWorld
    *
@@ -180,5 +184,14 @@ public class DtoModel {
    */
   public List<MethodModel> getMethods() {
     return this.methods;
+  }
+
+  /**
+   * Gets the FQN of this interface like foo.bar.HelloWorld, but without 'Dto' suffix
+   *
+   * @return the name of the interface
+   */
+  public String getDtsName() {
+    return convertToDTSName(this.dto);
   }
 }
