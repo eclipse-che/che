@@ -16,4 +16,4 @@ rm -rf /root/cypress/videos
 
 # Run tests
 echo "Run the tests"
-cd /root && unset LD_LIBRARY_PATH && /root/node_modules/.bin/cypress run -c trashAssetsBeforeRuns=false
+cd /root && unset LD_LIBRARY_PATH && /root/node_modules/.bin/cypress run -c trashAssetsBeforeRuns=false  --browser chrome
