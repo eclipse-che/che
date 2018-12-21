@@ -341,7 +341,7 @@ public class JpaEntitiesCascadeRemovalTest {
     assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
     assertTrue(sshDao.get(user.getId()).isEmpty());
     assertTrue(workspaceDao.getByNamespace(account.getName(), 30, 0).isEmpty());
-    assertTrue(factoryDao.getByUser(user.getId()).isEmpty());
+    assertTrue(factoryDao.getByUser(user.getId(), 30, 0).isEmpty());
     // Check workers and parent entity is removed
     assertTrue(workspaceDao.getByNamespace(user2.getId(), 30, 0).isEmpty());
     assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);
