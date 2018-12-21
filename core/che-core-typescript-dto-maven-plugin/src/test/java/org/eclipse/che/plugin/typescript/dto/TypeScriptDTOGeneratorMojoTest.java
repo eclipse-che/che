@@ -84,7 +84,7 @@ public class TypeScriptDTOGeneratorMojoTest {
   }
 
   @Test
-  public void checkD_TS_fileCreated() throws Exception {
+  public void checkDTSFileCreated() throws Exception {
     File projectCopy = this.resources.getBasedir("project-d-ts");
     File pom = new File(projectCopy, "pom.xml");
     assertNotNull(pom);

@@ -9,7 +9,7 @@ export namespace <namespaces.namespace> {
 
   <! BEGIN declare interfaces !>
 <namespaces.dtoInterfaces: { dto |
-  //<dto.name>
+  // <dto.name>
   export interface <dto.dtsName> {
      <! BEGIN declare fields !>
   <dto.fieldAttributeModels:{ field |

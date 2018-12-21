@@ -201,7 +201,7 @@ public class DTOHelper {
     return typePackage + "." + convertToDTSName((Class) type);
   }
 
-  /** Remove 'Dto' suffix from class nam */
+  /** Remove 'Dto' suffix from class name */
   public static String convertToDTSName(Class type) {
     String name = type.getSimpleName();
     if (name.toLowerCase().endsWith("dto")) {

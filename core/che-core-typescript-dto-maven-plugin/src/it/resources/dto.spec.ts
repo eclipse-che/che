@@ -11,6 +11,8 @@
  */
 import {org} from './dto';
 
+import {che} from './dtoD'
+
 let expect = require('chai').expect;
 
 class DTOBuilder {
@@ -103,6 +105,13 @@ describe("DTO serialization tests", () => {
         expect(myCustomDTO.toJson()).to.eql(myCustomDTOFromSource.toJson());
     });
 
+    it("check d.ts types", () => {
+        const customDto: che.plugin.typescript.MySimple = {
+            id: 1
+        }
+
+        expect(customDto).to.eql({id: 1} as che.plugin.typescript.MySimple)
+    });
 
 
 
