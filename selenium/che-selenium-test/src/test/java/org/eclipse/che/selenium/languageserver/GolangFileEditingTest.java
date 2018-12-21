@@ -17,6 +17,8 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.RENAME;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_GO;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
@@ -65,7 +67,7 @@ public class GolangFileEditingTest {
           + " fmt.Printf(\"Hello, world. Sqrt(2) = %v\\n\", math.Sqrt(2))\n"
           + "}";
 
-  private static final String REFERENCES_NOTJHING_TO_SHOW_TEXT = "Nothing to show";
+  private static final String REFERENCES_NOTHING_TO_SHOW_TEXT = "Nothing to show";
 
   private static final String[] REFERENCES_EXPECTED_TEXT = {
     "/desktop-go-simple/towers.go\nFrom:19:5 To:19:10",
@@ -205,7 +207,7 @@ public class GolangFileEditingTest {
     // check the LS info panel when is 'Nothing to show'
     editor.goToPosition(12, 1);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-    findReferencesConsoleTab.waitExpectedTextInLsPanel(REFERENCES_NOTJHING_TO_SHOW_TEXT);
+    findReferencesConsoleTab.waitExpectedTextInLsPanel(REFERENCES_NOTHING_TO_SHOW_TEXT);
 
     // check element in the editor
     editor.goToPosition(19, 5);
@@ -332,6 +334,17 @@ public class GolangFileEditingTest {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/10674", ex);
     }
+  }
+
+  @Test(priority = 2)
+  public void checkRenameFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.waitTabIsPresent("towers.go");
+    editor.goToCursorPositionVisible(22, 5);
+
+    // has to be changed when https://github.com/eclipse/che/issues/11907 resolved
+    menu.runCommand(ASSISTANT, REFACTORING);
+    menu.waitCommandIsNotPresentInMenu(RENAME);
   }
 
   private void openFindPanelAndPrintInputTetx(String inputText) {
