@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
@@ -80,21 +81,20 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
    */
   @Override
   public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
-      throws BadRequestException {
+      throws BadRequestException, ServerException {
 
     // no need to check null value of url parameter as accept() method has performed the check
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
     // create factory from the following location if location exists, else create default factory
     FactoryDto factory =
-        urlFactoryBuilder.createFactoryFromDevfile(githubUrl.devfileFileLocation());
-    if (factory == null) {
-      factory = urlFactoryBuilder.createFactoryFromJson(githubUrl.factoryJsonFileLocation());
-    }
-    // try to build factory from parameters
-    if (factory == null) {
-      factory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    }
+        urlFactoryBuilder
+            .createFactoryFromDevfile(githubUrl.devfileFileLocation())
+            .orElseGet(
+                () ->
+                    urlFactoryBuilder
+                        .createFactoryFromJson(githubUrl.factoryFileLocation())
+                        .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION)));
     // add workspace configuration if not defined
     if (factory.getWorkspace() == null) {
       factory.setWorkspace(

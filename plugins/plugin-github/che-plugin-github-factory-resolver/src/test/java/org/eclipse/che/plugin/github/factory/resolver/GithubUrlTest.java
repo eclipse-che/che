@@ -53,7 +53,7 @@ public class GithubUrlTest {
   @Test
   public void checkFactoryJsonFileLocation() {
     assertEquals(
-        githubUrl.factoryJsonFileLocation(),
+        githubUrl.factoryFileLocation(),
         "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");
   }
 

@@ -50,6 +50,7 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.core.model.user.User;
@@ -189,7 +190,7 @@ public class FactoryService extends Service {
     @ApiResponse(code = 500, message = "Internal server error")
   })
   @Deprecated
-  public List<FactoryDto> getFactoryByAttribute(
+  public Response getFactoryByAttribute(
       @DefaultValue("0") @QueryParam("skipCount") Integer skipCount,
       @DefaultValue("30") @QueryParam("maxItems") Integer maxItems,
       @Context UriInfo uriInfo)
@@ -215,11 +216,13 @@ public class FactoryService extends Service {
       }
     }
 
-    final List<FactoryDto> factories = new ArrayList<>();
-    for (Factory factory : factoryManager.getByAttribute(maxItems, skipCount, query).getItems()) {
-      factories.add(injectLinks(asDto(factory)));
+    Page<? extends Factory> factoriesPage =
+        factoryManager.getByAttribute(maxItems, skipCount, query);
+    List<FactoryDto> list = new ArrayList<>();
+    for (Factory factory : factoriesPage.getItems()) {
+      list.add(injectLinks(asDto(factory)));
     }
-    return factories;
+    return Response.ok().entity(list).header("Link", createLinkHeader(factoriesPage)).build();
   }
 
   @PUT

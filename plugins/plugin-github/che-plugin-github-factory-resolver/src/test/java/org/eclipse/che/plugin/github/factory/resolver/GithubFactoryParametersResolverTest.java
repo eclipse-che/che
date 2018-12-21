@@ -26,6 +26,7 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
@@ -109,7 +110,8 @@ public class GithubFactoryParametersResolverTest {
     String githubUrl = "https://github.com/eclipse/che";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromJson(anyString())).thenReturn(computedFactory);
+    when(urlFactoryBuilder.createFactoryFromJson(anyString()))
+        .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
@@ -144,7 +146,8 @@ public class GithubFactoryParametersResolverTest {
     String githubUrl = "https://github.com/eclipse/che";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromDevfile(anyString())).thenReturn(computedFactory);
+    when(urlFactoryBuilder.createFactoryFromDevfile(anyString()))
+        .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
@@ -177,7 +180,8 @@ public class GithubFactoryParametersResolverTest {
     String githubBranch = "4.2.x";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromJson(anyString())).thenReturn(computedFactory);
+    when(urlFactoryBuilder.createFactoryFromJson(anyString()))
+        .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
@@ -214,7 +218,8 @@ public class GithubFactoryParametersResolverTest {
     String githubKeepdir = "dashboard";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromJson(anyString())).thenReturn(computedFactory);
+    when(urlFactoryBuilder.createFactoryFromJson(anyString()))
+        .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 

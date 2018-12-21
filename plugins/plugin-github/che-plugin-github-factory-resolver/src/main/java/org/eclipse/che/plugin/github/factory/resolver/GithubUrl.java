@@ -148,7 +148,7 @@ public class GithubUrl {
    *
    * @return location of factory json file in a repository
    */
-  protected String factoryJsonFileLocation() {
+  protected String factoryFileLocation() {
     return new StringJoiner("/")
         .add("https://raw.githubusercontent.com")
         .add(username)
