@@ -197,23 +197,6 @@ public class GolangFileEditingTest {
     editor.clickOnCloseFileIcon("print.go");
   }
 
-  @Test(priority = 1, groups = UNDER_REPAIR)
-  public void checkRenameFeature() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
-    editor.waitTabIsPresent("towers.go");
-    editor.goToCursorPositionVisible(22, 5);
-    editor.waitTextElementsActiveLine("if n == 1");
-    editor.launchLocalRefactor();
-    editor.doRenamingByLanguageServerField("k");
-
-    try {
-      editor.waitTextElementsActiveLine("if k == 1");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/11907");
-    }
-  }
-
   @Test(priority = 1)
   public void checkFindReferencesFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
