@@ -91,6 +91,8 @@ context('TypeScript', () => {
         }).then(() => {
             // now, search if there is an invalid syntax
             cy.get('.lines-content.monaco-editor-background').contains('invalid').should('have.class', 'mtk11');
+        }).then(() => {
+            cy.visit('http://localhost:3100');
         });
     })
 });
