@@ -127,7 +127,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .endSpec()
             .build();
 
-    kubernetesEnvironment.addPod(CHE_WORKSPACE_POD, pod);
+    kubernetesEnvironment.addPod(pod);
   }
 
   private void populateWorkspaceEnvVars(

@@ -20,7 +20,6 @@ import static org.testng.Assert.assertEquals;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
@@ -55,7 +54,6 @@ public class RamLimitRequestProvisionerTest {
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity identity;
-  @Mock private Pod pod;
   @Mock private InternalMachineConfig internalMachineConfig;
   @Mock private MemoryAttributeProvisioner memoryAttributeProvisioner;
 

@@ -161,7 +161,6 @@ public class CommonPVCStrategyTest {
     mockName(pod, POD_NAME);
     mockName(pod2, POD_NAME_2);
 
-    Map<String, Pod> pods = ImmutableMap.of(POD_NAME, pod, POD_NAME_2, pod);
     Map<String, PodData> podData =
         ImmutableMap.of(
             POD_NAME, new PodData(pod.getSpec(), pod.getMetadata()),

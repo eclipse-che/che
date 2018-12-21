@@ -111,7 +111,7 @@ public class KubernetesPluginsToolingApplierTest {
     lenient().when(podSpec.getContainers()).thenReturn(containers);
     lenient().when(pod.getMetadata()).thenReturn(meta);
     lenient().when(meta.getName()).thenReturn(POD_NAME);
-    internalEnvironment.addPod(POD_NAME, pod);
+    internalEnvironment.addPod(pod);
     internalEnvironment.getMachines().putAll(machines);
   }
 

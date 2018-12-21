@@ -49,7 +49,7 @@ public class KubernetesEnvironmentValidatorTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Environment should contain at least 1 pod")
+      expectedExceptionsMessageRegExp = "Environment should contain at least 1 pod or deployment")
   public void shouldThrowExceptionWhenEnvDoesNotHaveAnyPods() throws Exception {
     // given
     when(kubernetesEnvironment.getPodsData()).thenReturn(emptyMap());

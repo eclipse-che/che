@@ -35,7 +35,8 @@ public class KubernetesEnvironmentValidator {
    * @throws ValidationException if the specified {@link KubernetesEnvironment} is invalid
    */
   public void validate(KubernetesEnvironment env) throws ValidationException {
-    checkArgument(!env.getPodsData().isEmpty(), "Environment should contain at least 1 pod");
+    checkArgument(
+        !env.getPodsData().isEmpty(), "Environment should contain at least 1 pod or deployment");
 
     Set<String> missingMachines = new HashSet<>(env.getMachines().keySet());
     for (PodData pod : env.getPodsData().values()) {
