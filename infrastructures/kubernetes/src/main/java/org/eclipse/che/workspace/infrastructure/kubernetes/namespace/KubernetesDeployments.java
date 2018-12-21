@@ -390,8 +390,9 @@ public class KubernetesDeployments {
                   .getLog();
           exceptionMessage = exceptionMessage.concat(" Pod logs: ").concat(podLog);
 
-        } catch (InfrastructureException e) {
-          exceptionMessage = exceptionMessage.concat(" Error occurred while fetching pod logs.");
+        } catch (InfrastructureException | KubernetesClientException e) {
+          exceptionMessage =
+              exceptionMessage.concat(" Error occurred while fetching pod logs: " + e.getMessage());
         }
       } else {
         exceptionMessage = exceptionMessage.concat(" Reason: ").concat(reason);
