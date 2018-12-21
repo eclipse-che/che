@@ -224,13 +224,7 @@ public class KubernetesDeployments {
    * @throws InfrastructureException when any exception occurs
    */
   public Optional<Pod> get(String name) throws InfrastructureException {
-    String podName = getPodName(name);
-    try {
-      return Optional.ofNullable(
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName).get());
-    } catch (KubernetesClientException e) {
-      throw new KubernetesInfrastructureException(e);
-    }
+    return findPod(name);
   }
 
   /**
@@ -842,21 +836,10 @@ public class KubernetesDeployments {
     return encoded;
   }
 
-  /**
-   * Returns the name of a specified Pod given either the actual Pod name or the name of the
-   * DeploymentConfig that controls it. <br>
-   * This is necessary because we are trying to transparently wrap Pods in DeploymentConfigs;
-   * attempting to create a Pod named {@code testPod} will result in a DeploymentConfig with name
-   * {@code testPod}, which will in turn create a Pod named e.g {@code testPod-1-xxxxx}.
-   *
-   * @param name Pod or DeploymentConfig name
-   * @return the name of the intended pod.
-   * @see
-   */
-  private String getPodName(String name) throws InfrastructureException {
-    if (clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get()
-        != null) {
-      return name;
+  private Optional<Pod> findPod(String name) throws InfrastructureException {
+    Pod pod = clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get();
+    if (pod != null) {
+      return Optional.of(pod);
     }
     Deployment deployment =
         clientFactory
@@ -867,7 +850,7 @@ public class KubernetesDeployments {
             .withName(name)
             .get();
     if (deployment == null) {
-      throw new InfrastructureException("Failed to get deployment for pod");
+      return Optional.empty();
     }
     Map<String, String> selector = deployment.getSpec().getSelector().getMatchLabels();
     List<Pod> pods =
@@ -879,13 +862,32 @@ public class KubernetesDeployments {
             .list()
             .getItems();
     if (pods.isEmpty()) {
-      throw new InfrastructureException(String.format("Failed to find pod with name %s", name));
+      return Optional.empty();
     } else if (pods.size() > 1) {
       throw new InfrastructureException(
-          String.format("Found multiple pods in DeploymentConfig %s", name));
+          String.format("Found multiple pods in Deployment '%s'", name));
     }
 
-    return pods.get(0).getMetadata().getName();
+    return Optional.of(pods.get(0));
+  }
+
+  /**
+   * Returns the name of a specified Pod given either the actual Pod name or the name of the
+   * Deployment that controls it. <br>
+   * This is necessary because we are trying to transparently wrap Pods in Deployment; attempting to
+   * create a Pod named {@code testPod} will result in a Deployment with name {@code testPod}, which
+   * will in turn create a Pod named e.g {@code testPod-1-xxxxx}.
+   *
+   * @param name Pod or Deployment name
+   * @return the name of the intended pod.
+   */
+  private String getPodName(String name) throws InfrastructureException {
+    Optional<Pod> pod = findPod(name);
+    if (pod.isPresent()) {
+      return pod.get().getMetadata().getName();
+    } else {
+      throw new InfrastructureException(String.format("Failed to find pod with name %s", name));
+    }
   }
 
   private static class CreateWatcher implements Watcher<Pod> {

@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_RUNNING;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_SUCCEEDED;
@@ -23,23 +25,30 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.PodStatus;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
 import io.fabric8.kubernetes.client.dsl.AppsAPIGroupDSL;
+import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -68,6 +77,7 @@ public class KubernetesDeploymentsTest {
   @Mock private ScalableResource deploymentResource;
   @Mock private Deployment deployment;
   @Mock private ObjectMeta deploymentMetadata;
+  @Mock private DeploymentSpec deploymentSpec;
 
   // Pod Mocks
   @Mock private Pod pod;
@@ -85,9 +95,9 @@ public class KubernetesDeploymentsTest {
   public void setUp() throws Exception {
     lenient().when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
 
-    when(pod.getStatus()).thenReturn(status);
-    when(pod.getMetadata()).thenReturn(metadata);
-    when(metadata.getName()).thenReturn(POD_NAME);
+    lenient().when(pod.getStatus()).thenReturn(status);
+    lenient().when(pod.getMetadata()).thenReturn(metadata);
+    lenient().when(metadata.getName()).thenReturn(POD_NAME);
 
     // Model DSL: client.pods().inNamespace(...).withName(...).get().getMetadata().getName();
     lenient().doReturn(podsMixedOperation).when(kubernetesClient).pods();
@@ -109,8 +119,83 @@ public class KubernetesDeploymentsTest {
         .withName(anyString());
     lenient().doReturn(deployment).when(deploymentResource).get();
     lenient().doReturn(deploymentMetadata).when(deployment).getMetadata();
+    lenient().doReturn(deploymentSpec).when(deployment).getSpec();
 
     kubernetesDeployments = new KubernetesDeployments("namespace", "workspace123", clientFactory);
+  }
+
+  @Test
+  public void shouldReturnEmptyOptionalWhenPodNorDeploymentWasNotFound() throws Exception {
+    // given
+    when(podResource.get()).thenReturn(null);
+    when(deploymentResource.get()).thenReturn(null);
+
+    // when
+    Optional<Pod> pod = kubernetesDeployments.get("non-existing");
+
+    // then
+    assertFalse(pod.isPresent());
+  }
+
+  @Test
+  public void shouldReturnOptionalWithPodWhenPodWithSpecifiedNameExists() throws Exception {
+    // given
+    when(podResource.get()).thenReturn(pod);
+
+    // when
+    Optional<Pod> fetchedPodOpt = kubernetesDeployments.get("existing");
+
+    // then
+    assertTrue(fetchedPodOpt.isPresent());
+    verify(podsNamespaceOperation).withName("existing");
+    assertEquals(fetchedPodOpt.get(), pod);
+  }
+
+  @Test
+  public void shouldReturnOptionalWithPodWhenPodWasNotFoundButDeploymentExists() throws Exception {
+    // given
+    when(podResource.get()).thenReturn(null);
+    when(deploymentResource.get()).thenReturn(deployment);
+    LabelSelector labelSelector = mock(LabelSelector.class);
+    doReturn(labelSelector).when(deploymentSpec).getSelector();
+    doReturn(ImmutableMap.of("deployment", "existing")).when(labelSelector).getMatchLabels();
+
+    FilterWatchListDeletable filterList = mock(FilterWatchListDeletable.class);
+    doReturn(filterList).when(podsNamespaceOperation).withLabels(any());
+    PodList podList = mock(PodList.class);
+    doReturn(singletonList(pod)).when(podList).getItems();
+    doReturn(podList).when(filterList).list();
+
+    // when
+    Optional<Pod> fetchedPodOpt = kubernetesDeployments.get("existing");
+
+    // then
+    assertTrue(fetchedPodOpt.isPresent());
+    verify(podsNamespaceOperation).withName("existing");
+    verify(deploymentsNamespaceOperation).withName("existing");
+    assertEquals(fetchedPodOpt.get(), pod);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp = "Found multiple pods in Deployment 'existing'")
+  public void shouldThrowExceptionWhenMultiplePodsExistsForDeploymentsOnPodFetching()
+      throws Exception {
+    // given
+    when(podResource.get()).thenReturn(null);
+    when(deploymentResource.get()).thenReturn(deployment);
+    LabelSelector labelSelector = mock(LabelSelector.class);
+    doReturn(labelSelector).when(deploymentSpec).getSelector();
+    doReturn(ImmutableMap.of("deployment", "existing")).when(labelSelector).getMatchLabels();
+
+    FilterWatchListDeletable filterList = mock(FilterWatchListDeletable.class);
+    doReturn(filterList).when(podsNamespaceOperation).withLabels(any());
+    PodList podList = mock(PodList.class);
+    doReturn(asList(pod, pod)).when(podList).getItems();
+    doReturn(podList).when(filterList).list();
+
+    // when
+    kubernetesDeployments.get("existing");
   }
 
   @Test
