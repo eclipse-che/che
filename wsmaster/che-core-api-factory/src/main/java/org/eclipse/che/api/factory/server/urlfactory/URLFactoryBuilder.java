@@ -36,6 +36,7 @@ import org.eclipse.che.dto.server.DtoFactory;
  * Handle the creation of some elements used inside a {@link FactoryDto}.
  *
  * @author Florent Benoit
+ * @author Max Shaposhnyk
  */
 @Singleton
 public class URLFactoryBuilder {

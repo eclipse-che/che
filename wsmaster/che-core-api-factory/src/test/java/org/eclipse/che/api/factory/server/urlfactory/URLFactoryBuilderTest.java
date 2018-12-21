@@ -34,6 +34,7 @@ import org.testng.annotations.Test;
  * Testing {@link URLFactoryBuilder}
  *
  * @author Florent Benoit
+ * @author Max Shaposhnyk
  */
 @Listeners(MockitoTestNGListener.class)
 public class URLFactoryBuilderTest {
