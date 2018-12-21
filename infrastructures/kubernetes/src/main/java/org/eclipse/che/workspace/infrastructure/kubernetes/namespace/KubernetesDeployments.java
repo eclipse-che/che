@@ -327,7 +327,7 @@ public class KubernetesDeployments {
     try {
       final String podName = getPodName(name);
       final PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create().pods().inNamespace(namespace).withName(podName);
+          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
       final Watch watch =
           podResource.watch(
               new Watcher<Pod>() {
@@ -383,7 +383,7 @@ public class KubernetesDeployments {
         try {
           String podLog =
               clientFactory
-                  .create()
+                  .create(workspaceId)
                   .pods()
                   .inNamespace(namespace)
                   .withName(pod.getMetadata().getName())

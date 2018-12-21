@@ -73,7 +73,6 @@ public class KubernetesDeploymentsTest {
     when(earlyPod.getStatus()).thenReturn(earlyPodStatus);
     when(podResource.get()).thenReturn(earlyPod);
 
-    lenient().when(clientFactory.create()).thenReturn(kubernetesClient);
     lenient().when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
 
     final MixedOperation mixedOperation = mock(MixedOperation.class);
@@ -185,7 +184,7 @@ public class KubernetesDeploymentsTest {
 
     doThrow(new InfrastructureException("Failure while retrieving pod logs"))
         .when(clientFactory)
-        .create();
+        .create(anyString());
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
