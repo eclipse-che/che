@@ -117,7 +117,12 @@ public class UniqueNamesProvisioner<T extends KubernetesEnvironment>
                 env -> {
                   ConfigMapKeySelector configMap = env.getValueFrom().getConfigMapKeyRef();
                   String originalName = configMap.getName();
-                  configMap.setName(configMapNameTranslation.get(originalName));
+                  // Since pods can reference configmaps that don't exist, we only change the name
+                  // if the configmap does exist to aid debugging recipes (otherwise message is just
+                  // null).
+                  if (configMapNameTranslation.containsKey(originalName)) {
+                    configMap.setName(configMapNameTranslation.get(originalName));
+                  }
                 });
       }
       if (container.getEnvFrom() != null) {
@@ -130,7 +135,9 @@ public class UniqueNamesProvisioner<T extends KubernetesEnvironment>
                 envFrom -> {
                   ConfigMapEnvSource configMapRef = envFrom.getConfigMapRef();
                   String originalName = configMapRef.getName();
-                  configMapRef.setName(configMapNameTranslation.get(originalName));
+                  if (configMapNameTranslation.containsKey(originalName)) {
+                    configMapRef.setName(configMapNameTranslation.get(originalName));
+                  }
                 });
       }
     }
@@ -144,7 +151,9 @@ public class UniqueNamesProvisioner<T extends KubernetesEnvironment>
               volume -> {
                 ConfigMapVolumeSource configMapVolume = volume.getConfigMap();
                 String originalName = configMapVolume.getName();
-                configMapVolume.setName(configMapNameTranslation.get(originalName));
+                if (configMapNameTranslation.containsKey(originalName)) {
+                  configMapVolume.setName(configMapNameTranslation.get(originalName));
+                }
               });
     }
   }

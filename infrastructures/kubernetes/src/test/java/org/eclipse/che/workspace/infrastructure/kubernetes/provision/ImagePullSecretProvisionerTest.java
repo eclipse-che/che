@@ -24,6 +24,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
 import io.fabric8.kubernetes.api.model.LocalObjectReferenceBuilder;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -75,9 +77,11 @@ public class ImagePullSecretProvisionerTest {
     when(runtimeIdentity.getWorkspaceId()).thenReturn(WORKSPACE_ID);
 
     k8sEnv = KubernetesEnvironment.builder().build();
+    ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
+    when(pod.getMetadata()).thenReturn(podMeta);
     when(pod.getSpec()).thenReturn(podSpec);
     when(podSpec.getImagePullSecrets()).thenReturn(ImmutableList.of(existingImagePullSecretRef));
-    k8sEnv.addPod("wksp", pod);
+    k8sEnv.addPod(pod);
 
     when(credentialsProvider.getCredentials()).thenReturn(authConfigs);
     imagePullSecretProvisioner = new ImagePullSecretProvisioner(credentialsProvider);

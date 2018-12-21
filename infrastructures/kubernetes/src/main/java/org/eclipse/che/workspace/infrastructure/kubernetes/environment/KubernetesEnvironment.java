@@ -165,6 +165,9 @@ public class KubernetesEnvironment extends InternalEnvironment {
    *
    * <p>Note: This map <b>should not</b> be changed, as it will only return pods and not
    * deployments. If objects in the map need to be changed, see {@link #getPodsData()}
+   *
+   * <p>If pods need to be added to the environment, then {@link #addPod(Pod)} should be used
+   * instead.
    */
   public Map<String, Pod> getPodsCopy() {
     return ImmutableMap.copyOf(pods);
@@ -175,6 +178,9 @@ public class KubernetesEnvironment extends InternalEnvironment {
    *
    * <p>Note: This map <b>should not</b> be changed. If objects in the map need to be changed, see
    * {@link #getPodsData()}
+   *
+   * <p>If pods need to be added to the environment, then {@link #addPod(Pod)} should be used
+   * instead.
    */
   public Map<String, Deployment> getDeploymentsCopy() {
     return ImmutableMap.copyOf(deployments);
@@ -185,6 +191,9 @@ public class KubernetesEnvironment extends InternalEnvironment {
    * that should be created when environment starts. The data returned by this method represents all
    * deployment and pod objects that form the workspace, and should be used when provisioning or
    * performing any action that needs to see every object in the environment.
+   *
+   * <p>If pods need to be added to the environment, then {@link #addPod(Pod)} should be used
+   * instead.
    */
   public Map<String, PodData> getPodsData() {
     return ImmutableMap.copyOf(podData);
@@ -194,7 +203,8 @@ public class KubernetesEnvironment extends InternalEnvironment {
    * Add a pod to the current environment. This method is necessary as the map returned by {@link
    * #getPodsCopy()} is a copy. This method also adds the relevant data to {@link #getPodsData()}.
    */
-  public void addPod(String podName, Pod pod) {
+  public void addPod(Pod pod) {
+    String podName = pod.getMetadata().getName();
     pods.put(podName, pod);
     podData.put(podName, new PodData(pod.getSpec(), pod.getMetadata()));
   }

@@ -15,6 +15,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACH
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
@@ -80,14 +81,11 @@ public class KubernetesBrokerInitContainerApplierTest {
   @Mock private InternalMachineConfig brokerMachine;
   private Volume brokerVolume;
   private ConfigMap brokerConfigMap;
-  private KubernetesEnvironment brokerEnvironment;
-  private Pod brokerPod;
   private Container brokerContainer;
 
   // Workspace Environment mocks
   private KubernetesEnvironment workspaceEnvironment;
   private Pod workspacePod;
-  private Map<String, ConfigMap> workspaceConfigMaps;
 
   private KubernetesBrokerInitContainerApplier<KubernetesEnvironment> applier;
 
@@ -97,7 +95,7 @@ public class KubernetesBrokerInitContainerApplierTest {
     ObjectMeta workspacePodMeta =
         new ObjectMetaBuilder().withAnnotations(workspacePodAnnotations).build();
     workspacePod = new PodBuilder().withMetadata(workspacePodMeta).withSpec(new PodSpec()).build();
-    workspaceConfigMaps = new HashMap<>();
+    Map<String, ConfigMap> workspaceConfigMaps = new HashMap<>();
     workspaceEnvironment =
         KubernetesEnvironment.builder()
             .setPods(ImmutableMap.of(WORKSPACE_POD_NAME, workspacePod))
@@ -110,7 +108,7 @@ public class KubernetesBrokerInitContainerApplierTest {
         new ObjectMetaBuilder().withAnnotations(brokerPodAnnotations).build();
     brokerContainer = new ContainerBuilder().withName(BROKER_CONTAINER_NAME).build();
     brokerVolume = new VolumeBuilder().build();
-    brokerPod =
+    Pod brokerPod =
         new PodBuilder()
             .withMetadata(brokerPodMeta)
             .withNewSpec()
@@ -119,7 +117,7 @@ public class KubernetesBrokerInitContainerApplierTest {
             .endSpec()
             .build();
     brokerConfigMap = new ConfigMapBuilder().addToData(brokerConfigMapData).build();
-    brokerEnvironment =
+    KubernetesEnvironment brokerEnvironment =
         KubernetesEnvironment.builder()
             .setPods(ImmutableMap.of(BROKER_POD_NAME, brokerPod))
             .setConfigMaps(ImmutableMap.of(BROKER_CONFIGMAP_NAME, brokerConfigMap))
@@ -144,7 +142,7 @@ public class KubernetesBrokerInitContainerApplierTest {
 
     ConfigMap workspaceConfigMap = workspaceEnvironment.getConfigMaps().get(BROKER_CONFIGMAP_NAME);
     assertNotNull(workspaceConfigMap);
-    assertTrue(!workspaceConfigMap.getData().isEmpty());
+    assertFalse(workspaceConfigMap.getData().isEmpty());
     assertTrue(
         workspaceConfigMap
             .getData()

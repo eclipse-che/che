@@ -107,8 +107,8 @@ public class CertificateProvisionerTest {
   @Test
   public void shouldAddVolumeAndVolumeMountsToPodsAndContainersInEnvironment() throws Exception {
     // given
-    k8sEnv.addPod("pod", createPod());
-    k8sEnv.addPod("pod2", createPod());
+    k8sEnv.addPod(createPod("pod"));
+    k8sEnv.addPod(createPod("pod2"));
 
     // when
     provisioner.provision(k8sEnv, runtimeId);
@@ -128,8 +128,8 @@ public class CertificateProvisionerTest {
           throws Exception {
     // given
     provisioner = new CertificateProvisioner("");
-    k8sEnv.addPod("pod", createPod());
-    k8sEnv.addPod("pod2", createPod());
+    k8sEnv.addPod(createPod("pod"));
+    k8sEnv.addPod(createPod("pod2"));
 
     // when
     provisioner.provision(k8sEnv, runtimeId);
@@ -162,9 +162,10 @@ public class CertificateProvisionerTest {
     assertEquals(volumeMount.getMountPath(), CERT_MOUNT_PATH);
   }
 
-  private Pod createPod() {
+  private Pod createPod(String podName) {
     return new PodBuilder()
         .withNewMetadata()
+        .withName(podName)
         .endMetadata()
         .withNewSpec()
         .withContainers(new ContainerBuilder().build(), new ContainerBuilder().build())

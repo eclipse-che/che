@@ -718,9 +718,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
-    LOG.debug("Begin pods creation for workspace '{}'", workspaceId);
+    LOG.info("Begin pods creation for workspace '{}'", workspaceId);
     for (Pod toCreate : environment.getPodsCopy().values()) {
-      startTracingContainersStartup(toCreate.getSpec(), toCreate.getMetadata());
+      startTracingContainersStartup(toCreate.getMetadata(), toCreate.getSpec());
       ObjectMeta toCreateMeta = toCreate.getMetadata();
       final Pod createdPod = namespace.deployments().deploy(toCreate);
       LOG.debug("Creating pod '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
@@ -728,7 +728,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     }
     for (Deployment toCreate : environment.getDeploymentsCopy().values()) {
       PodTemplateSpec template = toCreate.getSpec().getTemplate();
-      startTracingContainersStartup(template.getSpec(), template.getMetadata());
+      startTracingContainersStartup(template.getMetadata(), template.getSpec());
       ObjectMeta toCreateMeta = toCreate.getMetadata();
       final Pod createdPod = namespace.deployments().deploy(toCreate);
       LOG.debug("Creating deployment '{}' in workspace '{}'", toCreateMeta.getName(), workspaceId);
@@ -737,7 +737,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final ObjectMeta templateMeta = toCreate.getSpec().getTemplate().getMetadata();
       storeStartingMachine(createdPod, templateMeta, machineConfigs, serverResolver);
     }
-    LOG.debug("Pods creation finished in workspace '{}'", workspaceId);
+    LOG.info("Pods creation finished in workspace '{}'", workspaceId);
   }
 
   /** Puts createdPod in the {@code machines} map and sends the starting event for this machine */
@@ -766,7 +766,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     }
   }
 
-  private void startTracingContainersStartup(PodSpec podSpec, ObjectMeta podMeta) {
+  private void startTracingContainersStartup(ObjectMeta podMeta, PodSpec podSpec) {
     if (tracer == null) {
       return;
     }
