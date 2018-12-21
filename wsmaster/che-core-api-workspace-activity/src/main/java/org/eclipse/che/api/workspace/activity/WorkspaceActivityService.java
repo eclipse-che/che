@@ -82,6 +82,11 @@ public class WorkspaceActivityService extends Service {
   @Beta
   @GET
   @ApiOperation("Retrieves the IDs of workspaces that have been in given state.")
+  @ApiResponses(
+      @ApiResponse(
+          code = 200,
+          message = "Array of workspace IDs produced.",
+          response = String[].class))
   @Produces(MediaType.APPLICATION_JSON)
   public Response getWorkspacesByActivity(
       @QueryParam("status") @Required @ApiParam("The requested status of the workspaces")
