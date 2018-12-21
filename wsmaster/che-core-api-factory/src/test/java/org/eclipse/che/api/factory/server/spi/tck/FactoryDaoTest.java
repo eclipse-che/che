@@ -249,8 +249,8 @@ public class FactoryDaoTest {
 
   @Test
   public void shouldFindAllFactoriesOfSpecifiedUser() throws Exception {
-    final List<FactoryImpl> result = factoryDao.getByUser(users[1].getId());
-    assertEquals(new HashSet<>(result), new HashSet<>(asList(factories[1])));
+    final Page<FactoryImpl> result = factoryDao.getByUser(users[1].getId(), 30, 0);
+    assertEquals(new HashSet<>(result.getItems()), new HashSet<>(asList(factories[1])));
   }
 
   @Test(expectedExceptions = NotFoundException.class, dependsOnMethods = "shouldGetFactoryById")

@@ -79,7 +79,7 @@ public interface FactoryDao {
    * @throws NullPointerException when {@code userId} is null
    * @throws ServerException when any other error occurs
    */
-  List<FactoryImpl> getByUser(String userId) throws ServerException;
+  Page<FactoryImpl> getByUser(String userId, int maxItems, long skipCount) throws ServerException;
 
   /**
    * Gets the factories for the list of attributes.

@@ -85,7 +85,7 @@ public class URLFactoryBuilderTest {
     String myLocation = "http://foo-location";
     when(urlFetcher.fetch(myLocation)).thenReturn(jsonFactory);
 
-    FactoryDto factory = urlFactoryBuilder.createFactoryFromJson(myLocation);
+    FactoryDto factory = urlFactoryBuilder.createFactoryFromJson(myLocation).get();
 
     assertEquals(templateFactory, factory);
   }

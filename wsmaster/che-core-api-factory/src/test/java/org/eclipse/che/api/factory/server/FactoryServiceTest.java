@@ -49,11 +49,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.ws.rs.core.UriInfo;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
@@ -132,13 +130,10 @@ public class FactoryServiceTest {
   @Mock private FactoryEditValidator editValidator;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private FactoryParametersResolverHolder factoryParametersResolverHolder;
-  @Mock private DefaultFactoryParameterResolver defaultFactoryParameterResolver;
-  @Mock private UriInfo uriInfo;
 
   private FactoryBuilder factoryBuilderSpy;
 
   private User user;
-  private Set<FactoryParametersResolver> factoryParametersResolvers;
 
   private FactoryService service;
 
@@ -151,11 +146,8 @@ public class FactoryServiceTest {
   @BeforeMethod
   public void setUp() throws Exception {
     factoryBuilderSpy = spy(new FactoryBuilder(new SourceStorageParametersValidator()));
-    factoryParametersResolvers = new HashSet<>();
     lenient().doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class));
     lenient().doNothing().when(factoryBuilderSpy).checkValid(any(FactoryDto.class), anyBoolean());
-    when(factoryParametersResolverHolder.getSpecificFactoryParametersResolvers())
-        .thenReturn(factoryParametersResolvers);
     user = new UserImpl(USER_ID, USER_EMAIL, ADMIN_USER_NAME);
     lenient().when(userManager.getById(anyString())).thenReturn(user);
     lenient()
@@ -171,8 +163,7 @@ public class FactoryServiceTest {
             editValidator,
             factoryBuilderSpy,
             workspaceManager,
-            factoryParametersResolverHolder,
-            defaultFactoryParameterResolver);
+            factoryParametersResolverHolder);
   }
 
   @Filter
@@ -532,7 +523,8 @@ public class FactoryServiceTest {
   @Test
   public void checkValidateResolver() throws Exception {
     final FactoryParametersResolver dummyResolver = Mockito.mock(FactoryParametersResolver.class);
-    factoryParametersResolvers.add(dummyResolver);
+    when(factoryParametersResolverHolder.getFactoryParametersResolver(anyMap()))
+        .thenReturn(dummyResolver);
 
     // invalid factory
     final String invalidFactoryMessage = "invalid factory";
@@ -545,7 +537,6 @@ public class FactoryServiceTest {
         newDto(FactoryDto.class).withV(CURRENT_VERSION).withName("matchingResolverFactory");
 
     // accept resolver
-    when(dummyResolver.accept(anyMap())).thenReturn(true);
     when(dummyResolver.createFactory(anyMap())).thenReturn(expectFactory);
 
     // when
@@ -563,7 +554,7 @@ public class FactoryServiceTest {
     assertTrue(response.getBody().asString().contains(invalidFactoryMessage));
 
     // check we call resolvers
-    verify(dummyResolver).accept(anyMap());
+    factoryParametersResolverHolder.getFactoryParametersResolver(anyMap());
     verify(dummyResolver).createFactory(anyMap());
 
     // check we call validator

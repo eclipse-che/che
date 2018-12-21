@@ -99,7 +99,7 @@ public class DevfileServiceTest {
     ArgumentCaptor<WorkspaceConfigImpl> captor = ArgumentCaptor.forClass(WorkspaceConfigImpl.class);
     EnvironmentContext.setCurrent(environmentContext);
     WorkspaceImpl ws = mock(WorkspaceImpl.class);
-    when(devfileManager.validateAndConvert(anyString(), anyBoolean())).thenReturn(createConfig());
+    when(devfileManager.convert(anyString(), anyBoolean())).thenReturn(createConfig());
     when(workspaceManager.createWorkspace(any(), eq(SUBJECT.getUserName()), anyMap()))
         .thenReturn(createWorkspace(WorkspaceStatus.STOPPED));
     String yamlContent =

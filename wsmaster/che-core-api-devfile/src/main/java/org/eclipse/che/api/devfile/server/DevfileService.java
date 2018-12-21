@@ -133,7 +133,7 @@ public class DevfileService extends Service {
 
     WorkspaceConfigImpl workspaceConfig;
     try {
-      workspaceConfig = devfileManager.validateAndConvert(data, verbose);
+      workspaceConfig = devfileManager.convert(data, verbose);
     } catch (DevfileFormatException e) {
       throw new BadRequestException(e.getMessage());
     } catch (JsonProcessingException e) {

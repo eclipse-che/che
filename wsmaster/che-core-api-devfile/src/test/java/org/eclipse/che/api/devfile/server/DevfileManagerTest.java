@@ -47,7 +47,7 @@ public class DevfileManagerTest {
   public void testValidateAndConvert() throws Exception {
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-    devfileManager.validateAndConvert(yamlContent, true);
+    devfileManager.convert(yamlContent, true);
     verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
     verify(integrityValidator).validateDevfile(any(Devfile.class));
     verify(devfileConverter).devFileToWorkspaceConfig(any(Devfile.class));

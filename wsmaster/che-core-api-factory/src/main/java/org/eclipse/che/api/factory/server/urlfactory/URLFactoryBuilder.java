@@ -20,10 +20,12 @@ import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.devfile.server.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
@@ -60,46 +62,49 @@ public class URLFactoryBuilder {
   }
 
   /**
-   * Build a default factory using the provided json file or create default one
+   * Build a factory using the provided json file or create default one
    *
    * @param jsonFileLocation location of factory json file
    * @return a factory or null if factory json in not found
    */
-  public FactoryDto createFactoryFromJson(String jsonFileLocation) {
+  public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation) {
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
       final String factoryJsonContent = urlFetcher.fetch(jsonFileLocation);
       if (!Strings.isNullOrEmpty(factoryJsonContent)) {
-        return DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class);
+        return Optional.of(
+            DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class));
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   /**
-   * Build a default factory using the provided devfile
+   * Build a factory using the provided devfile
    *
    * @param devfileLocation location of devfile
    * @return a factory or null if devfile is not found
    */
-  public FactoryDto createFactoryFromDevfile(String devfileLocation) throws BadRequestException {
-    if (devfileLocation != null) {
-      final String devfileYamlContent = urlFetcher.fetch(devfileLocation);
-      if (!Strings.isNullOrEmpty(devfileYamlContent)) {
-        try {
-          WorkspaceConfigImpl wsConfig =
-              devfileManager.validateAndConvert(devfileYamlContent, false);
-          return newDto(FactoryDto.class)
-              .withV(CURRENT_VERSION)
-              .withWorkspace(DtoConverter.asDto(wsConfig));
-        } catch (DevfileFormatException e) {
-          throw new BadRequestException(e.getMessage());
-        } catch (IOException x) {
-          throw new IllegalStateException(x.getLocalizedMessage(), x);
-        }
-      }
+  public Optional<FactoryDto> createFactoryFromDevfile(String devfileLocation)
+      throws BadRequestException, ServerException {
+    if (devfileLocation == null) {
+      return Optional.empty();
     }
-    return null;
+    final String devfileYamlContent = urlFetcher.fetch(devfileLocation);
+    if (!Strings.isNullOrEmpty(devfileYamlContent)) {
+      return Optional.empty();
+    }
+    try {
+      WorkspaceConfigImpl wsConfig = devfileManager.convert(devfileYamlContent, false);
+      return Optional.of(
+          newDto(FactoryDto.class)
+              .withV(CURRENT_VERSION)
+              .withWorkspace(DtoConverter.asDto(wsConfig)));
+    } catch (DevfileFormatException e) {
+      throw new BadRequestException(e.getMessage());
+    } catch (IOException x) {
+      throw new ServerException(x.getLocalizedMessage(), x);
+    }
   }
 
   /**

@@ -27,7 +27,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -86,9 +85,6 @@ public class FactoryService extends Service {
   /** Validate query parameter. If true, factory will be validated */
   public static final String VALIDATE_QUERY_PARAMETER = "validate";
 
-  /** Set of resolvers for factories. Injected through an holder. */
-  private final Set<FactoryParametersResolver> specificFactoryParametersResolvers;
-
   private final FactoryManager factoryManager;
   private final UserManager userManager;
   private final PreferenceManager preferenceManager;
@@ -97,7 +93,7 @@ public class FactoryService extends Service {
   private final FactoryAcceptValidator acceptValidator;
   private final FactoryBuilder factoryBuilder;
   private final WorkspaceManager workspaceManager;
-  private final DefaultFactoryParameterResolver defaultFactoryResolver;
+  private final FactoryParametersResolverHolder factoryParametersResolverHolder;
 
   @Inject
   public FactoryService(
@@ -109,8 +105,7 @@ public class FactoryService extends Service {
       FactoryEditValidator editValidator,
       FactoryBuilder factoryBuilder,
       WorkspaceManager workspaceManager,
-      FactoryParametersResolverHolder factoryParametersResolverHolder,
-      DefaultFactoryParameterResolver defaultFactoryResolver) {
+      FactoryParametersResolverHolder factoryParametersResolverHolder) {
     this.factoryManager = factoryManager;
     this.userManager = userManager;
     this.createValidator = createValidator;
@@ -119,9 +114,7 @@ public class FactoryService extends Service {
     this.editValidator = editValidator;
     this.factoryBuilder = factoryBuilder;
     this.workspaceManager = workspaceManager;
-    this.specificFactoryParametersResolvers =
-        factoryParametersResolverHolder.getSpecificFactoryParametersResolvers();
-    this.defaultFactoryResolver = defaultFactoryResolver;
+    this.factoryParametersResolverHolder = factoryParametersResolverHolder;
   }
 
   @POST
@@ -332,30 +325,23 @@ public class FactoryService extends Service {
           @DefaultValue("false")
           @QueryParam(VALIDATE_QUERY_PARAMETER)
           Boolean validate)
-      throws BadRequestException {
+      throws BadRequestException, ServerException {
 
     // check parameter
     requiredNotNull(parameters, "Factory build parameters");
 
     // search matching resolver and create factory from matching resolver
-    FactoryDto resolvedFactory = null;
-    for (FactoryParametersResolver resolver : specificFactoryParametersResolvers) {
-      if (resolver.accept(parameters)) {
-        resolvedFactory = resolver.createFactory(parameters);
-        break;
-      }
-    }
+    FactoryDto resolvedFactory =
+        factoryParametersResolverHolder
+            .getFactoryParametersResolver(parameters)
+            .createFactory(parameters);
     if (resolvedFactory == null) {
-      // no dedicated resolved found for this parameters, use default one
-      resolvedFactory = defaultFactoryResolver.createFactory(parameters);
+      throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
     }
-    if (resolvedFactory != null) {
-      if (validate) {
-        acceptValidator.validateOnAccept(resolvedFactory);
-      }
-      return injectLinks(resolvedFactory);
+    if (validate) {
+      acceptValidator.validateOnAccept(resolvedFactory);
     }
-    throw new BadRequestException(FACTORY_NOT_RESOLVABLE);
+    return injectLinks(resolvedFactory);
   }
 
   /** Injects factory links. If factory is named then accept named link will be injected. */
@@ -442,17 +428,24 @@ public class FactoryService extends Service {
     @SuppressWarnings("unused")
     private Set<FactoryParametersResolver> specificFactoryParametersResolvers;
 
+    @Inject private DefaultFactoryParameterResolver defaultFactoryResolver;
+
     /**
-     * Provides the set of service-specific resolvers if there are some else return an empty set.
+     * Provides a suitable resolver for the given parameters
      *
-     * @return a non null set
+     * @return suitable service-specific resolver or default one
      */
-    public Set<FactoryParametersResolver> getSpecificFactoryParametersResolvers() {
-      if (specificFactoryParametersResolvers != null) {
-        return specificFactoryParametersResolvers;
-      } else {
-        return Collections.emptySet();
+    public FactoryParametersResolver getFactoryParametersResolver(Map<String, String> parameters) {
+      if (specificFactoryParametersResolvers == null) {
+        return defaultFactoryResolver;
       }
+      for (FactoryParametersResolver factoryParametersResolver :
+          specificFactoryParametersResolvers) {
+        if (factoryParametersResolver.accept(parameters)) {
+          return factoryParametersResolver;
+        }
+      }
+      return defaultFactoryResolver;
     }
   }
 

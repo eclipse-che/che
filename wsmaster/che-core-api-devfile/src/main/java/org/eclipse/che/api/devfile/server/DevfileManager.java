@@ -43,7 +43,7 @@ public class DevfileManager {
 
   /**
    * Creates {@link WorkspaceConfigImpl} from given devfile content. Performs schema and integrity
-   * validation of input data.
+   * validation of input data before conversion.
    *
    * @param devfileContent raw content of devfile
    * @param verbose when true, method returns more explained validation error messages if any
@@ -51,7 +51,7 @@ public class DevfileManager {
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws JsonProcessingException when parsing error occurs
    */
-  public WorkspaceConfigImpl validateAndConvert(String devfileContent, boolean verbose)
+  public WorkspaceConfigImpl convert(String devfileContent, boolean verbose)
       throws DevfileFormatException, JsonProcessingException {
     JsonNode parsed = schemaValidator.validateBySchema(devfileContent, verbose);
     Devfile devFile = objectMapper.treeToValue(parsed, Devfile.class);
