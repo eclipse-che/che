@@ -6,6 +6,7 @@
 </a>
 
 
+
 https://www.eclipse.org/che/. Next-generation Eclipse platform, developer workspace server and cloud IDE. Che is focused on container-native development. It defines workspaces that include their dependencies including embedded containerized runtimes, a web IDE, and project code. This makes workspaces distributed, collaborative, and portable to run anywhere on a desktop or a server ... [Read More](https://www.eclipse.org/che/features/)
 
 ![Eclipse Che](https://www.eclipse.org/che/images/hero-technology-v2@2x.png "Eclipse Che")
