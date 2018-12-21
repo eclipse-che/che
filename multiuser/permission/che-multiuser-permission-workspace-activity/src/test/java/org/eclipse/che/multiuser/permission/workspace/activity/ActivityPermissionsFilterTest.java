@@ -23,7 +23,10 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import com.jayway.restassured.response.Response;
+import java.util.Collections;
 import org.eclipse.che.api.core.ForbiddenException;
+import org.eclipse.che.api.core.Page;
+import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityService;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -97,6 +100,13 @@ public class ActivityPermissionsFilterTest {
 
   @Test
   public void shouldCheckPermissionsOnGettingActivity() throws Exception {
+    // simulate output to not get a 204, which should never happen in reality
+    when(service.getWorkspacesByActivity(
+            eq(WorkspaceStatus.RUNNING), eq(-1L), eq(-1L), eq(Pages.DEFAULT_PAGE_SIZE), eq(0L)))
+        .thenReturn(
+            javax.ws.rs.core.Response.ok(new Page<String>(Collections.emptyList(), 0, 1, 0))
+                .build());
+
     final Response response =
         given()
             .auth()
@@ -105,7 +115,9 @@ public class ActivityPermissionsFilterTest {
             .get(SECURE_PATH + "/activity?status=RUNNING");
 
     assertEquals(response.getStatusCode(), 200);
-    verify(service).getWorkspacesByActivity(eq(WorkspaceStatus.RUNNING), eq(-1L), eq(-1L));
+    verify(service)
+        .getWorkspacesByActivity(
+            eq(WorkspaceStatus.RUNNING), eq(-1L), eq(-1L), eq(Pages.DEFAULT_PAGE_SIZE), eq(0L));
     verify(subject)
         .checkPermission(
             eq(SystemDomain.DOMAIN_ID), eq(null), eq(SystemDomain.MONITOR_SYSTEM_ACTION));
