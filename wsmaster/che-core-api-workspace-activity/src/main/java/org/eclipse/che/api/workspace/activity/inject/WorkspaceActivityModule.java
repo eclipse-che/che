@@ -12,11 +12,16 @@
 package org.eclipse.che.api.workspace.activity.inject;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
+import io.micrometer.core.instrument.binder.MeterBinder;
 import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityManager;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityMeterBinder;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityService;
+import org.eclipse.che.inject.DynaModule;
 
+@DynaModule
 public class WorkspaceActivityModule extends AbstractModule {
 
   @Override
@@ -24,5 +29,10 @@ public class WorkspaceActivityModule extends AbstractModule {
     bind(WorkspaceActivityService.class);
     bind(WorkspaceActivityManager.class);
     bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
+
+    Multibinder<MeterBinder> meterMultibinder =
+        Multibinder.newSetBinder(binder(), MeterBinder.class);
+
+    meterMultibinder.addBinding().to(WorkspaceActivityMeterBinder.class);
   }
 }
