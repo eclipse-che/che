@@ -44,7 +44,6 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -141,8 +140,6 @@ public class DevfileService extends Service {
   /**
    * Generates the devfile based on an existing workspace. Key is workspace id or
    * namespace/workspace_name
-   *
-   * @see WorkspaceManager#getByKey(String)
    */
   @GET
   @Path("/{key:.*}")

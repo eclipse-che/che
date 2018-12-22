@@ -72,14 +72,14 @@ public class DevfileManager {
   }
 
   /**
-   * Creates workspace from given config
+   * Creates workspace from given {@link WorkspaceConfigImpl} with available name search
    *
    * @param workspaceConfig initial workspace configuration
    * @return created workspace instance
-   * @throws ServerException
-   * @throws ConflictException
-   * @throws NotFoundException
-   * @throws ValidationException
+   * @throws ValidationException when incoming configuration or attributes are not valid
+   * @throws ConflictException when any conflict occurs
+   * @throws NotFoundException when user account is not found
+   * @throws ServerException when other error occurs
    */
   public WorkspaceImpl createWorkspace(WorkspaceConfigImpl workspaceConfig)
       throws ServerException, ConflictException, NotFoundException, ValidationException {
@@ -88,6 +88,16 @@ public class DevfileManager {
         findAvailableName(workspaceConfig), namespace, emptyMap());
   }
 
+  /**
+   * Exports provided workspace into devfile
+   *
+   * @param key string composite workspace key
+   * @see WorkspaceManager#getByKey(String)
+   * @return devfile representation of given workspace
+   * @throws NotFoundException when no workspace can be found by given key
+   * @throws ConflictException when workspace cannot be exported into devfile
+   * @throws ServerException when other error occurs
+   */
   public Devfile exportWorkspace(String key)
       throws NotFoundException, ServerException, ConflictException {
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
