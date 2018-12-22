@@ -91,7 +91,7 @@ public class URLFactoryBuilder {
       return Optional.empty();
     }
     final String devfileYamlContent = urlFetcher.fetch(devfileLocation);
-    if (!Strings.isNullOrEmpty(devfileYamlContent)) {
+    if (Strings.isNullOrEmpty(devfileYamlContent)) {
       return Optional.empty();
     }
     try {
