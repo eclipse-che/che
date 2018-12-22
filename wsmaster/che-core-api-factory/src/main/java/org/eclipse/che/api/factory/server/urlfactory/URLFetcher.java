@@ -15,6 +15,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.ByteStreams;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +27,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
-import org.apache.commons.compress.utils.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class URLFetcher {
     try (InputStream inputStream = urlConnection.getInputStream();
         BufferedReader reader =
             new BufferedReader(
-                new InputStreamReader(new BoundedInputStream(inputStream, getLimit()), UTF_8))) {
+                new InputStreamReader(ByteStreams.limit(inputStream, getLimit()), UTF_8))) {
       value = reader.lines().collect(Collectors.joining("\n"));
     } catch (IOException e) {
       // we shouldn't fetch if check is done before
