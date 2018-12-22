@@ -53,9 +53,17 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
+  @Transactional(rollbackOn = ServerException.class)
   public List<String> findExpired(long timestamp) throws ServerException {
     try {
-      return doFindExpired(timestamp);
+      return managerProvider
+          .get()
+          .createNamedQuery("WorkspaceActivity.getExpired", WorkspaceActivity.class)
+          .setParameter("expiration", timestamp)
+          .getResultList()
+          .stream()
+          .map(WorkspaceActivity::getWorkspaceId)
+          .collect(Collectors.toList());
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
     }
@@ -168,6 +176,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
+  @Transactional(rollbackOn = ServerException.class)
   public WorkspaceActivity findActivity(String workspaceId) throws ServerException {
     try {
       EntityManager em = managerProvider.get();
@@ -214,18 +223,6 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
     }
-  }
-
-  @Transactional
-  protected List<String> doFindExpired(long timestamp) {
-    return managerProvider
-        .get()
-        .createNamedQuery("WorkspaceActivity.getExpired", WorkspaceActivity.class)
-        .setParameter("expiration", timestamp)
-        .getResultList()
-        .stream()
-        .map(WorkspaceActivity::getWorkspaceId)
-        .collect(Collectors.toList());
   }
 
   private static String firstUpperCase(String str) {

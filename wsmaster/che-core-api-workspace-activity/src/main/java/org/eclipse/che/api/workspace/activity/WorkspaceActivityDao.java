@@ -96,7 +96,7 @@ public interface WorkspaceActivityDao {
    * @param status the status of the workspaces
    * @param maxItems max items on the results page
    * @param skipCount how many items of the result to skip
-   * @return the list of workspaces that
+   * @return the list of workspaces ids that has the the specified status since timestamp
    * @throws ServerException on error
    */
   Page<String> findInStatusSince(

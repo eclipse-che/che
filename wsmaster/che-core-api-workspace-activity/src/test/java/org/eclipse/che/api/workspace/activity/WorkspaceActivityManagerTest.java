@@ -43,8 +43,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+/** Tests for {@link WorkspaceActivityManager} */
 @Listeners(value = MockitoTestNGListener.class)
-/** Tests for {@link WorkspaceActivityNotifier} */
 public class WorkspaceActivityManagerTest {
 
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute

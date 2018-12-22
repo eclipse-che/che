@@ -277,6 +277,8 @@ public class CascadeRemovalTest {
     assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
     assertTrue(sshDao.get(user.getId()).isEmpty());
     assertTrue(workspaceDao.getByNamespace(user.getName(), 30, 0).isEmpty());
+    assertNull(notFoundToNull(() -> workspaceActivityDao.findActivity(workspace1.getId())));
+    assertNull(notFoundToNull(() -> workspaceActivityDao.findActivity(workspace2.getId())));
   }
 
   @Test(dataProvider = "beforeUserRemoveRollbackActions")
