@@ -16,8 +16,8 @@ import java.sql.Driver;
 import java.util.Collection;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
-import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -52,7 +52,7 @@ public class WorkspaceActivityTckModule extends TckModule {
             .setDriver(Driver.class)
             .runningOn(server)
             .addEntityClasses(
-                WorkspaceExpiration.class,
+                WorkspaceActivity.class,
                 AccountImpl.class,
                 WorkspaceImpl.class,
                 WorkspaceConfigImpl.class,
@@ -79,8 +79,8 @@ public class WorkspaceActivityTckModule extends TckModule {
     bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
 
-    bind(new TypeLiteral<TckRepository<WorkspaceExpiration>>() {})
-        .toInstance(new JpaTckRepository<>(WorkspaceExpiration.class));
+    bind(new TypeLiteral<TckRepository<WorkspaceActivity>>() {})
+        .toInstance(new JpaTckRepository<>(WorkspaceActivity.class));
 
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
   }

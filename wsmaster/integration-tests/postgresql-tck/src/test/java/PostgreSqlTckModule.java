@@ -41,6 +41,7 @@ import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
@@ -128,7 +129,7 @@ public class PostgreSqlTckModule extends TckModule {
                 SshPairImpl.class,
                 InstallerImpl.class,
                 InstallerServerConfigImpl.class,
-                WorkspaceExpiration.class,
+                WorkspaceActivity.class,
                 VolumeImpl.class,
                 // k8s-runtimes
                 KubernetesRuntimeState.class,
@@ -283,6 +284,7 @@ public class PostgreSqlTckModule extends TckModule {
   }
 
   private static class WorkspaceRepository extends JpaTckRepository<WorkspaceImpl> {
+
     public WorkspaceRepository() {
       super(WorkspaceImpl.class);
     }
@@ -298,6 +300,7 @@ public class PostgreSqlTckModule extends TckModule {
   }
 
   private static class StackRepository extends JpaTckRepository<StackImpl> {
+
     public StackRepository() {
       super(StackImpl.class);
     }
