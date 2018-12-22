@@ -28,7 +28,19 @@ import org.everrest.guice.servlet.GuiceEverrestServlet;
 public class CheWsAgentServletModule extends ServletModule {
   @Override
   protected void configureServlets() {
-    filter("/*").through(CheCorsFilter.class);
+    if (isCheCorsEnabled()) {
+      filter("/*").through(CheCorsFilter.class);
+    }
     serveRegex("^/api((?!(/(ws|eventbus)($|/.*)))/.*)").with(GuiceEverrestServlet.class);
+  }
+
+  private boolean isCheCorsEnabled() {
+    String cheCorsEnabledEnvVar = System.getenv("CHE_WSAGENT_CORS_ENABLED");
+    if (cheCorsEnabledEnvVar == null) {
+      // by default CORS should be enabled
+      return true;
+    } else {
+      return Boolean.valueOf(cheCorsEnabledEnvVar);
+    }
   }
 }

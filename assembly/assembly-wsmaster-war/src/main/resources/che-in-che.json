@@ -97,7 +97,7 @@
           }
         },
         {
-          "commandLine": "cp -r /home/user/che/ws-agent/maven-server /home/user/tomcat8 && cd /home/user/tomcat8/bin && export SERVER_PORT=8080 && export JPDA_ADDRESS=9000 && ./catalina.sh jpda run",
+          "commandLine": "cd /home/user/tomcat8/bin && export SERVER_PORT=8080 && export JPDA_ADDRESS=9000 && ./catalina.sh jpda run",
           "name": "Tomcat8-IDE Start",
           "type": "custom",
           "attributes": {

@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.selenium.refactor.parameters;
 
-import static org.testng.Assert.fail;
-
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -30,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -97,14 +94,7 @@ public class FailParametersTest {
     refactor.typeAndWaitNewName(testParamObj.getRefactorValue());
     if (testParamObj.isHandleRefactorWithConfirming()) {
       refactor.clickOkButtonRefactorForm();
-
-      try {
-        askDialog.acceptDialogWithText(testParamObj.getExpectedDialogTextInRefactorWidget());
-      } catch (TimeoutException ex) {
-        // remove try-catch block after issue has been resolved
-        fail("Known random failure https://github.com/eclipse/che/issues/11185");
-      }
-
+      askDialog.acceptDialogWithText(testParamObj.getExpectedDialogTextInRefactorWidget());
     } else {
       refactor.waitTextInErrorMessage(testParamObj.getExpectedDialogTextInRefactorWidget());
       refactor.clickCancelButtonRefactorForm();
