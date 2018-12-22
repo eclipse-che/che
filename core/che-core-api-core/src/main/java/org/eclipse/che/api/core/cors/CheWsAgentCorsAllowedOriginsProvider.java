@@ -27,7 +27,7 @@ public class CheWsAgentCorsAllowedOriginsProvider implements Provider<String> {
 
   @Inject
   public CheWsAgentCorsAllowedOriginsProvider(
-      @Named("che.api") String cheApi,
+      @Named("che.api.external") String cheApi,
       @Nullable @Named("che.wsagent.cors.allowed_origins") String allowedOrigins) {
     if (allowedOrigins == null) {
       this.allowedOrigins = UriBuilder.fromUri(cheApi).replacePath(null).build().toString();
