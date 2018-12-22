@@ -16,15 +16,14 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.Pages.iterate;
 
 import com.google.inject.persist.Transactional;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Inject;
@@ -141,7 +140,7 @@ public class JpaFactoryDao implements FactoryDao {
   public Page<FactoryImpl> getByUser(String userId, int maxItems, long skipCount) {
     requireNonNull(userId);
     final Pair<String, String> factoryCreator = Pair.of("creator.userId", userId);
-    long totalCount = countFactoriesByAttributes(Collections.singletonList(factoryCreator));
+    long totalCount = countFactoriesByAttributes(singletonList(factoryCreator));
     return new Page<>(
         getFactoriesByAttributes(maxItems, skipCount, singletonList(factoryCreator)),
         skipCount,
@@ -172,7 +171,7 @@ public class JpaFactoryDao implements FactoryDao {
     for (Map.Entry<String, String> entry : params.entrySet()) {
       typedQuery.setParameter(entry.getKey(), entry.getValue());
     }
-    return typedQuery.getResultList().stream().map(FactoryImpl::new).collect(Collectors.toList());
+    return typedQuery.getResultList().stream().map(FactoryImpl::new).collect(toList());
   }
 
   private Long countFactoriesByAttributes(List<Pair<String, String>> attributes) {

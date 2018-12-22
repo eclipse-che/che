@@ -104,8 +104,8 @@ public class DevfileManagerTest {
         .thenAnswer(
             invocation -> {
               String wsname = invocation.getArgument(0);
-              if (wsname.equals("petclinic-dev-environment")
-                  || wsname.equals("petclinic-dev-environment_1")) {
+              if ("petclinic-dev-environment".equals(wsname)
+                  || "petclinic-dev-environment_1".equals(wsname)) {
                 return ws;
               }
               throw new NotFoundException("ws not found");
