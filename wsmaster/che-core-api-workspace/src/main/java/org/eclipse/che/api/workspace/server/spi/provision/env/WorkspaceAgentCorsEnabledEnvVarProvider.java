@@ -19,24 +19,24 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Add environment variable that defines allowed origins for {@link CheCorsFilterConfig} of WS Agent
+ * Add environment variable that enables CORS filter on WS Agent
  *
  * @author Mykhailo Kuznietsov
  */
-public class WorkspaceAgentCorsAllowedOriginsEnvVarProvider implements EnvVarProvider {
+public class WorkspaceAgentCorsEnabledEnvVarProvider implements EnvVarProvider {
 
-  private String wsAgentCorsAllowedOrigins;
+  private String wsAgentCorsEnabled;
 
   @Inject
-  public WorkspaceAgentCorsAllowedOriginsEnvVarProvider(
-      @Nullable @Named("che.wsagent.cors.allowed_origins") String wsAgentCorsAllowedOrigins) {
-    this.wsAgentCorsAllowedOrigins = wsAgentCorsAllowedOrigins;
+  public WorkspaceAgentCorsEnabledEnvVarProvider(
+      @Nullable @Named("che.wsagent.cors.enabled") String wsAgentCorsEnabled) {
+    this.wsAgentCorsEnabled = wsAgentCorsEnabled;
   }
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
-    return wsAgentCorsAllowedOrigins == null
+    return wsAgentCorsEnabled == null
         ? null
-        : Pair.of("CHE_WSAGENT_CORS_ALLOWED__ORIGINS", wsAgentCorsAllowedOrigins);
+        : Pair.of("CHE_WSAGENT_CORS_ENABLED", wsAgentCorsEnabled);
   }
 }

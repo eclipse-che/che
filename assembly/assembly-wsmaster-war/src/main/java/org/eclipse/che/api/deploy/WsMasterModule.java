@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.deploy;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
 import static org.eclipse.che.multiuser.api.permission.server.SystemDomain.SYSTEM_DOMAIN_ACTIONS;
@@ -64,7 +63,9 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariabl
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowCredentialsEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowedOriginsEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsEnabledEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
@@ -192,11 +193,9 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
 
-    // propagate CORS allowed origin evn variable to WS agent only if corresponding env variable
-    // is defined on master
-    if (!isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ALLOWED__ORIGINS"))) {
-      envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
-    }
+    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)

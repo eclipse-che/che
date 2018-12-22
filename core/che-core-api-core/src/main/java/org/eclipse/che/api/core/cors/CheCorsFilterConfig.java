@@ -38,7 +38,7 @@ public class CheCorsFilterConfig implements FilterConfig {
 
   @Inject
   public CheCorsFilterConfig(
-      @Named("che.cors.allow_credentials") boolean allowCredentials,
+      @Named("che.cors.allow_credentials") Boolean allowCredentials,
       @Named("che.cors.allowed_origins") String allowedOrigins) {
     filterParams = new HashMap<>();
     filterParams.put(PARAM_CORS_ALLOWED_ORIGINS, allowedOrigins);
