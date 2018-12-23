@@ -130,6 +130,6 @@ public class WorkspaceActivityService extends Service {
     Page<String> data =
         workspaceActivityManager.findWorkspacesInStatus(status, limit, maxItems, skipCount);
 
-    return Response.ok(data).header("Link", createLinkHeader(data)).build();
+    return Response.ok(data.getItems()).header("Link", createLinkHeader(data)).build();
   }
 }

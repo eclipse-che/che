@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.activity;
 
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -134,7 +135,7 @@ public class WorkspaceActivityServiceTest {
   public void shouldIgnoredMinDurationWhenThresholdSpecified() throws Exception {
     when(workspaceActivityManager.findWorkspacesInStatus(
             eq(WorkspaceStatus.STOPPED), anyLong(), anyInt(), anyLong()))
-        .thenReturn(new Page<>(emptyList(), 0, 1, 0));
+        .thenReturn(new Page<>(singletonList("ws-1"), 0, 1, 1));
 
     Response response =
         given()
@@ -142,6 +143,7 @@ public class WorkspaceActivityServiceTest {
             .get(URI.create(SERVICE_PATH + "?status=STOPPED&threshold=15&minDuration=55"));
 
     assertEquals(response.getStatusCode(), 200);
+    assertEquals(response.getBody().print(), "[\"ws-1\"]");
     verify(workspaceActivityManager, times(1))
         .findWorkspacesInStatus(
             eq(WorkspaceStatus.STOPPED), eq(15L), eq(Pages.DEFAULT_PAGE_SIZE), eq(0L));
