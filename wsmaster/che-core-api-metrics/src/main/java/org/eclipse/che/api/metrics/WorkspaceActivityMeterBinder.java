@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.activity;
+package org.eclipse.che.api.metrics;
 
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityManager;
 
 @Singleton
 public class WorkspaceActivityMeterBinder implements MeterBinder {
@@ -34,6 +35,7 @@ public class WorkspaceActivityMeterBinder implements MeterBinder {
     for (WorkspaceStatus s : WorkspaceStatus.values()) {
       Gauge.builder("workspaces.in.status", activityManager, __ -> count(s))
           .tag("status", s.name())
+          .tag("area", "workspace")
           .description("The number of workspaces in a given status")
           .register(registry);
     }

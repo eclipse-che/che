@@ -39,6 +39,7 @@ import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.installer.server.InstallerModule;
 import org.eclipse.che.api.installer.server.impl.InstallersProvider;
 import org.eclipse.che.api.installer.shared.model.Installer;
+import org.eclipse.che.api.metrics.WsMasterMetricsModule;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.system.server.SystemModule;
 import org.eclipse.che.api.user.server.TokenValidator;
@@ -320,6 +321,7 @@ public class WsMasterModule extends AbstractModule {
         .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
 
     install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
+    install(new WsMasterMetricsModule());
   }
 
   private void configureMultiUserMode(
@@ -402,6 +404,8 @@ public class WsMasterModule extends AbstractModule {
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 
     bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(true);
+
+    install(new WsMasterMetricsModule());
   }
 
   private void configureJwtProxySecureProvisioner(String infrastructure) {

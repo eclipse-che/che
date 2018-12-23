@@ -48,5 +48,6 @@
         <module>che-core-api-system-shared</module>
         <module>che-core-api-logger-shared</module>
         <module>che-core-api-logger</module>
+        <module>che-core-api-metrics</module>
     </modules>
 </project>
