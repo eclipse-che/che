@@ -57,7 +57,6 @@ public class URLFactoryBuilderTest {
 
   @Test
   public void checkDefaultConfiguration() throws Exception {
-
     Map<String, String> attributes = new HashMap<>();
     attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, defaultEditor);
     attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultPlugin);

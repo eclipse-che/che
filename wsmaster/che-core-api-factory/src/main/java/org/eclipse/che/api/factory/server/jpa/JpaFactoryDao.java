@@ -96,7 +96,7 @@ public class JpaFactoryDao implements FactoryDao {
   }
 
   @Override
-  @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+  @Transactional(rollbackOn = {ServerException.class})
   public FactoryImpl getById(String id) throws NotFoundException, ServerException {
     requireNonNull(id);
     try {
@@ -111,7 +111,7 @@ public class JpaFactoryDao implements FactoryDao {
   }
 
   @Override
-  @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
+  @Transactional(rollbackOn = {ServerException.class})
   public Page<FactoryImpl> getByAttributes(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException {
     checkArgument(maxItems >= 0, "The number of items to return can't be negative.");
@@ -136,16 +136,21 @@ public class JpaFactoryDao implements FactoryDao {
   }
 
   @Override
-  @Transactional(rollbackOn = {RuntimeException.class, ServerException.class})
-  public Page<FactoryImpl> getByUser(String userId, int maxItems, long skipCount) {
+  @Transactional(rollbackOn = {ServerException.class})
+  public Page<FactoryImpl> getByUser(String userId, int maxItems, long skipCount)
+      throws ServerException {
     requireNonNull(userId);
     final Pair<String, String> factoryCreator = Pair.of("creator.userId", userId);
-    long totalCount = countFactoriesByAttributes(singletonList(factoryCreator));
-    return new Page<>(
-        getFactoriesByAttributes(maxItems, skipCount, singletonList(factoryCreator)),
-        skipCount,
-        maxItems,
-        totalCount);
+    try {
+      long totalCount = countFactoriesByAttributes(singletonList(factoryCreator));
+      return new Page<>(
+          getFactoriesByAttributes(maxItems, skipCount, singletonList(factoryCreator)),
+          skipCount,
+          maxItems,
+          totalCount);
+    } catch (RuntimeException ex) {
+      throw new ServerException(ex.getMessage(), ex);
+    }
   }
 
   private List<FactoryImpl> getFactoriesByAttributes(
