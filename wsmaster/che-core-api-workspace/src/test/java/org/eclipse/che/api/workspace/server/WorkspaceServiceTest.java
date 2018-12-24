@@ -43,7 +43,9 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.jayway.restassured.response.Response;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.account.shared.model.Account;
@@ -57,6 +59,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
+import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -113,6 +116,9 @@ public class WorkspaceServiceTest {
 
   @SuppressWarnings("unused")
   private static final EnvironmentFilter FILTER = new EnvironmentFilter();
+
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
+  private CheJsonProvider jsonProvider = new CheJsonProvider(Collections.emptySet());
 
   @Mock private WorkspaceManager wsManager;
   @Mock private MachineTokenProvider machineTokenProvider;
