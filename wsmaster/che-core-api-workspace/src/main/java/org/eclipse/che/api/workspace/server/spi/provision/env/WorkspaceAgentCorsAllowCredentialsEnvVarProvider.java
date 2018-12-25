@@ -19,24 +19,25 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Add environment variable that defines allowed origins for {@link CheCorsFilterConfig} of WS Agent
+ * Add environment variable that defines support for requests with credentials for {@link
+ * CheCorsFilterConfig} of WS Agent
  *
  * @author Mykhailo Kuznietsov
  */
-public class WorkspaceAgentCorsAllowedOriginsEnvVarProvider implements EnvVarProvider {
+public class WorkspaceAgentCorsAllowCredentialsEnvVarProvider implements EnvVarProvider {
 
-  private String wsAgentCorsAllowedOrigins;
+  private String wsAgentCorsAllowCredentials;
 
   @Inject
-  public WorkspaceAgentCorsAllowedOriginsEnvVarProvider(
-      @Nullable @Named("che.wsagent.cors.allowed_origins") String wsAgentCorsAllowedOrigins) {
-    this.wsAgentCorsAllowedOrigins = wsAgentCorsAllowedOrigins;
+  public WorkspaceAgentCorsAllowCredentialsEnvVarProvider(
+      @Nullable @Named("che.wsagent.cors.allow_credentials") String wsAgentCorsAllowCredentials) {
+    this.wsAgentCorsAllowCredentials = wsAgentCorsAllowCredentials;
   }
 
   @Override
   public Pair<String, String> get(RuntimeIdentity runtimeIdentity) throws InfrastructureException {
-    return wsAgentCorsAllowedOrigins == null
+    return wsAgentCorsAllowCredentials == null
         ? null
-        : Pair.of("CHE_WSAGENT_CORS_ALLOWED__ORIGINS", wsAgentCorsAllowedOrigins);
+        : Pair.of("CHE_WSAGENT_CORS_ALLOW__CREDENTIALS", wsAgentCorsAllowCredentials);
   }
 }

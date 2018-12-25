@@ -100,7 +100,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectTabByName(APP_CLASS_NAME);
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void shouldDisplayJavaDocOfClassMethod() throws Exception {
     // given
     final String expectedJavadocHtmlText =
@@ -210,7 +210,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.waitProposalDocumentationHTML("UPDATE. Implementation of Book interface.");
   }
 
-  @Test
+  @Test(groups = UNDER_REPAIR)
   public void shouldDisplayJavaDocOfJreClass() throws IOException {
     // when
     editor.waitActive();
