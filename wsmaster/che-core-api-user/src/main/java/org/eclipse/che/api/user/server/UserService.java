@@ -223,4 +223,10 @@ public class UserService extends Service {
   private static String userId() {
     return EnvironmentContext.getCurrent().getSubject().getUserId();
   }
+
+  @GET
+  @Path("test")
+  public void test() {
+    throw new RuntimeException("test exception");
+  }
 }
