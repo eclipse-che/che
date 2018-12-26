@@ -39,6 +39,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Dmytro Nochevnov */
+@Test(groups = UNDER_REPAIR)
 public class AutocompleteProposalJavaDocTest {
   private static final String PROJECT = "multi-module-java-with-ext-libs";
 
