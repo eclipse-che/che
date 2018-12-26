@@ -169,7 +169,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
    *     inconsistent status (e.g. stop(interrupt) might not be allowed during start)
    * @throws InfrastructureException when any other error occurs
    */
-  public final void stop(Map<String, String> stopOptions) throws InfrastructureException {
+  public void stop(Map<String, String> stopOptions) throws InfrastructureException {
     TracingTags.WORKSPACE_ID.set(getContext().getIdentity()::getWorkspaceId);
 
     markStopping();
@@ -202,7 +202,7 @@ public abstract class InternalRuntime<T extends RuntimeContext> {
   public abstract Map<String, String> getProperties();
 
   /** @return the Context */
-  public final T getContext() {
+  public T getContext() {
     return context;
   }
 
