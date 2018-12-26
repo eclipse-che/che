@@ -30,8 +30,8 @@ import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
-import org.eclipse.che.api.devfile.server.DevfileSchemaValidator;
 import org.eclipse.che.api.devfile.server.DevfileService;
+import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
@@ -141,6 +141,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.factory.server.FactoryService.class);
     install(new org.eclipse.che.api.factory.server.jpa.FactoryJpaModule());
 
+    // Service-specific factory resolvers.
     Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
         Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
     factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);

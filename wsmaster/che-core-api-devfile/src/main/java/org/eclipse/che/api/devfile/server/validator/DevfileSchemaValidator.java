@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.devfile.server.validator;
 
 import static java.lang.String.format;
 
@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.devfile.server.DevfileFormatException;
+import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 
 /** Validates YAML devfile content against given JSON schema. */
 @Singleton
@@ -36,13 +38,14 @@ public class DevfileSchemaValidator {
   private DevfileSchemaProvider schemaProvider;
 
   @Inject
-  DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
+  public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
     this.schemaProvider = schemaProvider;
     this.validator = JsonSchemaFactory.byDefault().getValidator();
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
 
-  JsonNode validateBySchema(String yamlContent, boolean verbose) throws DevfileFormatException {
+  public JsonNode validateBySchema(String yamlContent, boolean verbose)
+      throws DevfileFormatException {
     ProcessingReport report;
     JsonNode data;
     try {

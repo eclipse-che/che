@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.devfile.server.validator;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
@@ -25,6 +25,7 @@ import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Tool;
+import org.eclipse.che.api.devfile.server.DevfileFormatException;
 
 /** Validates devfile logical integrity. */
 @Singleton

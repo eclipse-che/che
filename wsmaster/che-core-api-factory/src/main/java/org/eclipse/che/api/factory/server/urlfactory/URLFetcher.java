@@ -9,11 +9,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.urlfactory;
+package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.ByteStreams;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +27,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
-import org.apache.commons.compress.utils.BoundedInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,8 +41,8 @@ public class URLFetcher {
   /** Logger. */
   private static final Logger LOG = LoggerFactory.getLogger(URLFetcher.class);
 
-  /** Maximum size of allowed data. (40KB) */
-  protected static final long MAXIMUM_READ_BYTES = 40 * 1000;
+  /** Maximum size of allowed data. (80KB) */
+  protected static final long MAXIMUM_READ_BYTES = 80 * 1024;
 
   /** The Compiled REGEX PATTERN that can be used for http|https git urls */
   final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");
@@ -77,7 +78,7 @@ public class URLFetcher {
     try (InputStream inputStream = urlConnection.getInputStream();
         BufferedReader reader =
             new BufferedReader(
-                new InputStreamReader(new BoundedInputStream(inputStream, getLimit()), UTF_8))) {
+                new InputStreamReader(ByteStreams.limit(inputStream, getLimit()), UTF_8))) {
       value = reader.lines().collect(Collectors.joining("\n"));
     } catch (IOException e) {
       // we shouldn't fetch if check is done before
@@ -104,6 +105,7 @@ public class URLFetcher {
    * @return if the url ends with .git will return the url without .git otherwise return the url as
    *     it is
    */
+  @VisibleForTesting
   String sanitized(String url) {
     if (url != null) {
       final Matcher matcher = GIT_HTTP_URL_PATTERN.matcher(url);

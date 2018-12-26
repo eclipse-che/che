@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.devfile.server.schema;
 
 import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
 import static org.eclipse.che.commons.lang.IoUtil.getResource;

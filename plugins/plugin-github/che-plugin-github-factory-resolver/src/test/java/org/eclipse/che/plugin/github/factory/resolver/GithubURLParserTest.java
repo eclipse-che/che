@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import org.eclipse.che.plugin.urlfactory.URLFetcher;
+import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -37,7 +37,7 @@ public class GithubURLParserTest {
   @Mock private URLFetcher urlFetcher;
 
   /** Instance of component that will be tested. */
-  @InjectMocks private GithubURLParserImpl githubUrlParser;
+  @InjectMocks private GithubURLParser githubUrlParser;
 
   /** Check invalid url (not a github one) */
   @Test(expectedExceptions = IllegalArgumentException.class)
@@ -113,17 +113,18 @@ public class GithubURLParserTest {
             "<div class=\"TableObject gh-header-meta\">\n"
                 + "    <div class=\"TableObject-item\">\n"
                 + "        <div class=\"State State--green\">\n"
-                + "          <svg class=\"octicon octicon-git-pull-request\" viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"/></svg>\n"
-                + "          Open\n"
-                + "        </div>\n"
-                + "    </div>"
+                + "    <svg class=\"octicon octicon-git-pull-request\" viewBox=\"0 0 12 16\" version=\"1.1\" width=\"12\" height=\"16\" aria-hidden=\"true\"><path fill-rule=\"evenodd\" d=\"M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z\"/></svg>\n"
+                + "      Open\n"
+                + "  </div>\n"
+                + "\n"
+                + "    </div>\n"
                 + "    <div class=\"TableObject-item TableObject-item--primary\">\n"
-                + "          <a class=\"author pull-header-username css-truncate css-truncate-target expandable\" data-hovercard-user-id=\"436777\" data-octo-click=\"hovercard-link-click\" data-octo-dimensions=\"link_type:self\" href=\"/benoitf\">benoitf</a>\n"
-                + "  merged 1 commit into\n"
+                + "          <a class=\"author pull-header-username css-truncate css-truncate-target expandable\" data-hovercard-type=\"user\" data-hovercard-url=\"/hovercards?user_id=1651062\" data-octo-click=\"hovercard-link-click\" data-octo-dimensions=\"link_type:self\" href=\"/mshaposhnik\">mshaposhnik</a>\n"
+                + "   wants to merge 1 commit into\n"
                 + "\n"
                 + "\n"
                 + "\n"
-                + "  <span title=\"eclipse/che:master\" class=\"commit-ref css-truncate user-select-contain expandable \"><span class=\"css-truncate-target\">master</span></span>\n"
+                + "  <span title=\"eclipse/che:cleanup-e2e-theia\" class=\"commit-ref css-truncate user-select-contain expandable \"><span class=\"css-truncate-target\">master</span></span>\n"
                 + "\n"
                 + "from\n"
                 + "\n"
