@@ -1,7 +1,7 @@
 version: '2'
 services:
   selenium_hub:
-    image: selenium/hub:3.14.0-curium
+    image: selenium/hub:3.141.59-dubnium
     container_name: selenium_hub
     ports:
       - 4444:4444
@@ -20,7 +20,7 @@ services:
       - selenium_grid_internal
 
   chromenode:
-    image: selenium/node-chrome${NODE_CHROME_DEBUG_SUFFIX}:3.14.0-curium
+    image: selenium/node-chrome${NODE_CHROME_DEBUG_SUFFIX}:3.141.59-dubnium
     depends_on:
       - selenium_hub
     environment:
