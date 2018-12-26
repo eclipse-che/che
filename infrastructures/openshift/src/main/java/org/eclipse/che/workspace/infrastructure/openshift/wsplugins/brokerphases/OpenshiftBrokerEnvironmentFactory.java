@@ -40,13 +40,15 @@ public class OpenshiftBrokerEnvironmentFactory
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
+      @Named("che.workspace.plugin_broker.init.image") String initBrokerImage,
       @Named("che.workspace.plugin_broker.images") Map<String, String> pluginTypeToImage) {
     super(
         cheWebsocketEndpoint,
         brokerPullPolicy,
         authEnableEnvVarProvider,
         machineTokenEnvVarProvider,
-        pluginTypeToImage);
+        pluginTypeToImage,
+        initBrokerImage);
   }
 
   @Override
