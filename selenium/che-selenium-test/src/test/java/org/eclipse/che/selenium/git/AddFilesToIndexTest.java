@@ -210,6 +210,7 @@ public class AddFilesToIndexTest {
     loader.waitOnClosed();
 
     // Check status and add to index all files
+    projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     git.waitGitStatusBarWithMess(STATUS_MESSAGE_AFTER_EDIT);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
