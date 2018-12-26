@@ -54,6 +54,9 @@ public class MethodModel {
   /** Type of the field associated to this method. */
   private String fieldType;
 
+  /** Name of setter or with* method argument */
+  private String argumentName;
+
   /**
    * Build a new model around the DTO method.
    *
@@ -145,5 +148,13 @@ public class MethodModel {
     return this.getName().equals(methodModelOther.getName())
         && this.returnType.equals(methodModelOther.returnType)
         && Arrays.equals(this.parameters.toArray(), methodModelOther.parameters.toArray());
+  }
+
+  public String getArgumentName() {
+    return argumentName;
+  }
+
+  public void setArgumentName(String argumentName) {
+    this.argumentName = argumentName;
   }
 }

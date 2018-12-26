@@ -85,14 +85,14 @@ export module <dto.packageName> {
     <endif>
     <! Generate setter code !>
     <if(method.setter)>
-    <method.name>(<method.fieldName> : <method.fieldType>) : void {
-      this.<method.fieldName> = <method.fieldName>;
+    <method.name>(<method.argumentName> : <method.fieldType>) : void {
+      this.<method.fieldName> = <method.argumentName>;
     \}
     <endif>
     <! Generate with code !>
     <if(method.with)>
-    <method.name>(<method.fieldName> : <method.fieldType>) : <method.returnType> {
-      this.<method.fieldName> = <method.fieldName>;
+    <method.name>(<method.argumentName> : <method.fieldType>) : <method.returnType> {
+      this.<method.fieldName> = <method.argumentName>;
       return this;
     \}
     <endif>

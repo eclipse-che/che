@@ -14,8 +14,11 @@ package org.eclipse.che.plugin.typescript.dto;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.shared.DelegateTo;
 
 /**
@@ -69,7 +72,13 @@ public class DTOHelper {
     char[] c = type.toCharArray();
     c[0] = Character.toLowerCase(c[0]);
 
-    String val = new String(c);
+    return new String(c);
+  }
+
+  /** Compute argument name from the stringified string type */
+  public static String getArgumentName(String type) {
+
+    String val = getFieldName(type);
 
     // replace reserved keyword
     if ("arguments".equals(val)) {
@@ -79,30 +88,34 @@ public class DTOHelper {
   }
 
   /** Extract field name from the getter method */
-  public static String getGetterFieldName(Method method) {
+  public static Pair<String, String> getGetterFieldName(Method method) {
     String methodName = method.getName();
     if (methodName.startsWith("get")) {
-      return getFieldName(methodName.substring(3));
+      String name = methodName.substring(3);
+      return Pair.of(getFieldName(name), getArgumentName(name));
     } else if (methodName.startsWith("is")) {
-      return getFieldName(methodName.substring(2));
+      String name = methodName.substring(2);
+      return Pair.of(getFieldName(name), getArgumentName(name));
     }
     throw new IllegalArgumentException("Invalid getter method" + method.getName());
   }
 
   /** Extract field name from the setter method */
-  public static String getSetterFieldName(Method method) {
+  public static Pair<String, String> getSetterFieldName(Method method) {
     String methodName = method.getName();
     if (methodName.startsWith("set")) {
-      return getFieldName(methodName.substring(3));
+      String name = methodName.substring(3);
+      return Pair.of(getFieldName(name), getArgumentName(name));
     }
     throw new IllegalArgumentException("Invalid setter method" + method.getName());
   }
 
-  /** Extract field name from the with method */
-  public static String getWithFieldName(Method method) {
+  /** Extract field name and argument name from the with method */
+  public static Pair<String, String> getWithFieldName(Method method) {
     String methodName = method.getName();
     if (methodName.startsWith("with")) {
-      return getFieldName(methodName.substring(4));
+      String name = methodName.substring(4);
+      return Pair.of(getFieldName(name), getArgumentName(name));
     }
     throw new IllegalArgumentException("Invalid with method" + method.getName());
   }
@@ -177,9 +190,16 @@ public class DTOHelper {
       ParameterizedType parameterizedType = (ParameterizedType) type;
       Type rawType = parameterizedType.getRawType();
       return convertParametrizedTypeDTS(type, parameterizedType, rawType, containerType);
-    } else if (String.class.equals(type) || (type instanceof Class && ((Class) type).isEnum())) {
+    } else if (String.class.equals(type)) {
       // Maybe find a better enum type for typescript
       return "string";
+
+    } else if ((type instanceof Class && ((Class) type).isEnum())) {
+
+      Object[] constants = ((Class) type).getEnumConstants();
+      return Arrays.stream(constants)
+          .map(o -> "\'" + o.toString() + "\'")
+          .collect(Collectors.joining(" | "));
     } else if (Integer.class.equals(type)
         || Integer.TYPE.equals(type)
         || Long.class.equals(type)

@@ -106,11 +106,19 @@ describe("DTO serialization tests", () => {
     });
 
     it("check d.ts types", () => {
-        const customDto: che.plugin.typescript.MySimple = {
-            id: 1
-        }
+        const customDto: che.plugin.typescript.MyCustom = {
+            internal: {
+                internalValue: "foo"
+            },
+            status: "SHUTDOWN",
+            customMap: {"bar": { name: "foo"}},
+            arguments: [{}, {},]
+        };
 
-        expect(customDto).to.eql({id: 1} as che.plugin.typescript.MySimple)
+
+        expect(customDto.internal).to.eql({ internalValue: "foo" } as che.plugin.typescript.internal.Internal);
+        expect(customDto.customMap).to.have.property("bar");
+        expect(customDto.customMap["bar"].name).to.eql("foo");
     });
 
 

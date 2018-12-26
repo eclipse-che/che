@@ -10,7 +10,7 @@ export namespace <namespaces.namespace> {
   <! BEGIN declare interfaces !>
 <namespaces.dtoInterfaces: { dto |
   // <dto.name>
-  export interface <dto.dtsName> {
+  export interface <dto.dtsName> <if(dto.extendsDto)>extends <dto.interfaces><endif> {
      <! BEGIN declare fields !>
   <dto.fieldAttributeModels:{ field |
   <field.name>?: <if(field.map)> { [key: <field.mapKeyType>]: <field.mapValueType>; \}<else><field.dtsType><endif>;
