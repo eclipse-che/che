@@ -23,13 +23,19 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
+import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.schedule.ScheduleDelay;
+import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +52,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class WorkspaceActivityManager {
+
   public static final long MINIMAL_TIMEOUT = 300_000L;
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
@@ -55,7 +62,9 @@ public class WorkspaceActivityManager {
   private final long defaultTimeout;
   private final WorkspaceActivityDao activityDao;
   private final EventService eventService;
-  private final EventSubscriber<?> workspaceEventsSubscriber;
+  private final EventSubscriber<WorkspaceStatusEvent> updateStatusChangedTimestampSubscriber;
+  private final EventSubscriber<WorkspaceCreatedEvent> setCreatedTimestampSubscriber;
+  private final EventSubscriber<BeforeWorkspaceRemovedEvent> workspaceActivityRemover;
 
   protected final WorkspaceManager workspaceManager;
 
@@ -76,36 +85,39 @@ public class WorkspaceActivityManager {
               + " minutes). This may cause problems with workspace components startup and/or premature workspace shutdown.");
     }
 
-    this.workspaceEventsSubscriber =
-        new EventSubscriber<WorkspaceStatusEvent>() {
+    //noinspection Convert2Lambda
+    this.setCreatedTimestampSubscriber =
+        new EventSubscriber<WorkspaceCreatedEvent>() {
           @Override
-          public void onEvent(WorkspaceStatusEvent event) {
-            switch (event.getStatus()) {
-              case RUNNING:
-                try {
-                  Workspace workspace = workspaceManager.getWorkspace(event.getWorkspaceId());
-                  if (workspace.getAttributes().remove(WORKSPACE_STOPPED_BY) != null) {
-                    workspaceManager.updateWorkspace(event.getWorkspaceId(), workspace);
-                  }
-                } catch (Exception ex) {
-                  LOG.warn(
-                      "Failed to remove stopped information attribute for workspace "
-                          + event.getWorkspaceId());
-                }
-                update(event.getWorkspaceId(), System.currentTimeMillis());
-                break;
-              case STOPPED:
-                try {
-                  activityDao.removeExpiration(event.getWorkspaceId());
-                } catch (ServerException e) {
-                  LOG.error(e.getLocalizedMessage(), e);
-                }
-                break;
-              default:
-                // do nothing
+          public void onEvent(WorkspaceCreatedEvent event) {
+            try {
+              long createdTime =
+                  Long.parseLong(
+                      event.getWorkspace().getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+              activityDao.setCreatedTime(event.getWorkspace().getId(), createdTime);
+            } catch (ServerException | NumberFormatException x) {
+              LOG.warn("Failed to record workspace created time in workspace activity.", x);
             }
           }
         };
+
+    this.workspaceActivityRemover =
+        new CascadeEventSubscriber<BeforeWorkspaceRemovedEvent>() {
+          @Override
+          public void onCascadeEvent(BeforeWorkspaceRemovedEvent event) throws Exception {
+            activityDao.removeActivity(event.getWorkspace().getId());
+          }
+        };
+
+    this.updateStatusChangedTimestampSubscriber = new UpdateStatusChangedTimestampSubscriber();
+  }
+
+  @VisibleForTesting
+  @PostConstruct
+  void subscribe() {
+    eventService.subscribe(updateStatusChangedTimestampSubscriber, WorkspaceStatusEvent.class);
+    eventService.subscribe(setCreatedTimestampSubscriber, WorkspaceCreatedEvent.class);
+    eventService.subscribe(workspaceActivityRemover, BeforeWorkspaceRemovedEvent.class);
   }
 
   /**
@@ -118,11 +130,27 @@ public class WorkspaceActivityManager {
     try {
       long timeout = getIdleTimeout(wsId);
       if (timeout > 0) {
-        activityDao.setExpiration(new WorkspaceExpiration(wsId, activityTime + timeout));
+        activityDao.setExpirationTime(wsId, activityTime + timeout);
       }
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
+  }
+
+  /**
+   * Finds workspaces that have been in the provided status since before the provided time.
+   *
+   * @param status the status of the workspaces
+   * @param threshold the stop-gap time
+   * @param maxItems max items on the results page
+   * @param skipCount how many items of the result to skip
+   * @return the list of workspaces ids that have been in the provided status before the provided
+   *     time.
+   * @throws ServerException on error
+   */
+  public Page<String> findWorkspacesInStatus(
+      WorkspaceStatus status, long threshold, int maxItems, long skipCount) throws ServerException {
+    return activityDao.findInStatusSince(threshold, status, maxItems, skipCount);
   }
 
   protected long getIdleTimeout(String wsId) {
@@ -163,9 +191,49 @@ public class WorkspaceActivityManager {
     }
   }
 
-  @VisibleForTesting
-  @PostConstruct
-  public void subscribe() {
-    eventService.subscribe(workspaceEventsSubscriber);
+  private class UpdateStatusChangedTimestampSubscriber
+      implements EventSubscriber<WorkspaceStatusEvent> {
+    @Override
+    public void onEvent(WorkspaceStatusEvent event) {
+      long now = System.currentTimeMillis();
+      String workspaceId = event.getWorkspaceId();
+      WorkspaceStatus status = event.getStatus();
+
+      // first, record the activity
+      try {
+        activityDao.setStatusChangeTime(workspaceId, status, now);
+      } catch (ServerException e) {
+        LOG.warn(
+            "Failed to record workspace activity. Workspace: {}, status: {}",
+            workspaceId,
+            status.toString(),
+            e);
+      }
+
+      // now do any special handling
+      switch (status) {
+        case RUNNING:
+          try {
+            Workspace workspace = workspaceManager.getWorkspace(workspaceId);
+            if (workspace.getAttributes().remove(WORKSPACE_STOPPED_BY) != null) {
+              workspaceManager.updateWorkspace(workspaceId, workspace);
+            }
+          } catch (Exception ex) {
+            LOG.warn(
+                "Failed to remove stopped information attribute for workspace {}", workspaceId);
+          }
+          WorkspaceActivityManager.this.update(workspaceId, now);
+          break;
+        case STOPPED:
+          try {
+            activityDao.removeExpiration(workspaceId);
+          } catch (ServerException e) {
+            LOG.error(e.getLocalizedMessage(), e);
+          }
+          break;
+        default:
+          // do nothing
+      }
+    }
   }
 }

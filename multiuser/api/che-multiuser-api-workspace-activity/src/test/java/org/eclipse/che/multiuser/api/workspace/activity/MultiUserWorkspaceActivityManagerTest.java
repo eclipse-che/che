@@ -21,7 +21,6 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
-import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -89,8 +88,8 @@ public class MultiUserWorkspaceActivityManagerTest {
 
     activityManager.update(wsId, activityTime);
 
-    WorkspaceExpiration expected = new WorkspaceExpiration(wsId, activityTime + USER_LIMIT_TIMEOUT);
-    verify(workspaceActivityDao, times(1)).setExpiration(eq(expected));
+    verify(workspaceActivityDao, times(1))
+        .setExpirationTime(eq(wsId), eq(activityTime + USER_LIMIT_TIMEOUT));
     verify(resourceManager).getAvailableResources(eq("account123"));
   }
 
@@ -102,8 +101,8 @@ public class MultiUserWorkspaceActivityManagerTest {
 
     activityManager.update(wsId, activityTime);
 
-    WorkspaceExpiration expected = new WorkspaceExpiration(wsId, activityTime + DEFAULT_TIMEOUT);
-    verify(workspaceActivityDao, times(1)).setExpiration(eq(expected));
+    verify(workspaceActivityDao, times(1))
+        .setExpirationTime(eq(wsId), eq(activityTime + DEFAULT_TIMEOUT));
     verify(resourceManager).getAvailableResources(eq("account123"));
   }
 }

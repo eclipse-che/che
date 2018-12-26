@@ -48,6 +48,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
@@ -82,6 +83,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private final AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
   private final MachineTokenEnvVarProvider machineTokenEnvVarProvider;
   private final Map<String, String> pluginTypeToImage;
+  private final String initBrokerImage;
 
   @Inject
   public BrokerEnvironmentFactory(
@@ -89,12 +91,14 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
-      @Named("che.workspace.plugin_broker.images") Map<String, String> pluginTypeToImage) {
+      @Named("che.workspace.plugin_broker.images") Map<String, String> pluginTypeToImage,
+      @Named("che.workspace.plugin_broker.init.image") String initBrokerImage) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.brokerPullPolicy = brokerPullPolicy;
     this.authEnableEnvVarProvider = authEnableEnvVarProvider;
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
     this.pluginTypeToImage = pluginTypeToImage;
+    this.initBrokerImage = initBrokerImage;
   }
 
   /**
@@ -143,6 +147,12 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
 
       brokersResult.oneMoreBroker();
     }
+
+    // Add init broker that cleans up /plugins
+    BrokerConfig brokerConfig = createBrokerConfig(runtimeID, null, envVars, initBrokerImage, pod);
+    pod.getSpec().getInitContainers().add(brokerConfig.container);
+    brokersConfigs.machines.put(brokerConfig.machineName, brokerConfig.machineConfig);
+
     return doCreate(brokersConfigs);
   }
 
@@ -154,14 +164,15 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   }
 
   private Container newContainer(
-      RuntimeIdentity runtimeId, List<EnvVar> envVars, String image, String brokerVolumeName) {
-    final Container container =
+      RuntimeIdentity runtimeId,
+      List<EnvVar> envVars,
+      String image,
+      @Nullable String brokerVolumeName) {
+    final ContainerBuilder cb =
         new ContainerBuilder()
             .withName(generateUniqueName(CONTAINER_NAME_SUFFIX))
             .withImage(image)
             .withArgs(
-                "-metas",
-                CONF_FOLDER + "/" + CONFIG_FILE,
                 "-push-endpoint",
                 cheWebsocketEndpoint,
                 "-runtime-id",
@@ -171,12 +182,12 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                     MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
                     runtimeId.getOwnerId()))
             .withImagePullPolicy(brokerPullPolicy)
-            .withVolumeMounts(
-                new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null))
-            .withEnv(envVars)
-            .withNewResources()
-            .endResources()
-            .build();
+            .withEnv(envVars);
+    if (brokerVolumeName != null) {
+      cb.withVolumeMounts(new VolumeMount(CONF_FOLDER + "/", null, brokerVolumeName, true, null));
+      cb.addToArgs("-metas", CONF_FOLDER + "/" + CONFIG_FILE);
+    }
+    Container container = cb.build();
     Containers.addRamLimit(container, "250Mi");
     Containers.addRamRequest(container, "250Mi");
     return container;
@@ -208,16 +219,20 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
 
   private BrokerConfig createBrokerConfig(
       RuntimeIdentity runtimeId,
-      Collection<PluginMeta> pluginsMeta,
+      @Nullable Collection<PluginMeta> pluginsMeta,
       List<EnvVar> envVars,
       String image,
       Pod pod) {
 
     BrokerConfig brokerConfig = new BrokerConfig();
-    brokerConfig.configMapName = generateUniqueName(CONFIG_MAP_NAME_SUFFIX);
-    brokerConfig.configMapVolume = generateUniqueName(BROKER_VOLUME);
-    brokerConfig.configMap = newConfigMap(brokerConfig.configMapName, pluginsMeta);
-    brokerConfig.container = newContainer(runtimeId, envVars, image, brokerConfig.configMapVolume);
+    String configMapVolume = null;
+    if (pluginsMeta != null) {
+      brokerConfig.configMapName = generateUniqueName(CONFIG_MAP_NAME_SUFFIX);
+      brokerConfig.configMapVolume = generateUniqueName(BROKER_VOLUME);
+      brokerConfig.configMap = newConfigMap(brokerConfig.configMapName, pluginsMeta);
+      configMapVolume = brokerConfig.configMapVolume;
+    }
+    brokerConfig.container = newContainer(runtimeId, envVars, image, configMapVolume);
     brokerConfig.machineName = Names.machineName(pod, brokerConfig.container);
     brokerConfig.machineConfig = new InternalMachineConfig();
     brokerConfig
