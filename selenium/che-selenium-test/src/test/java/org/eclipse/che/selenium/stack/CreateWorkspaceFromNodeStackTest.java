@@ -91,11 +91,16 @@ public class CreateWorkspaceFromNodeStackTest {
   public void checkAngularPatternfyStarterProjectCommands() {
     By textOnPreviewPage = By.xpath("//span[text()='UNIFIED MANAGEMENT EXPERIENCE']");
 
-    consoles.executeCommandFromProjectExplorer(
-        ANGULAR_PROJECT,
-        BUILD_GOAL,
-        INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(ANGULAR_PROJECT),
-        "bower_components/font-awesome");
+    try {
+      consoles.executeCommandFromProjectExplorer(
+          ANGULAR_PROJECT,
+          BUILD_GOAL,
+          INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(ANGULAR_PROJECT),
+          "bower_components/font-awesome");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/12259");
+    }
 
     consoles.executeCommandFromProjectExplorer(
         ANGULAR_PROJECT, RUN_GOAL, RUN_COMMAND_ITEM.getItem(ANGULAR_PROJECT), "Waiting...");

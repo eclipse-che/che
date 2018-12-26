@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsCons
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_NODEJS;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -31,6 +32,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -86,11 +88,16 @@ public class CreateWorkspaceFromCentosNodeStackTest {
   public void checkAngularPatternfyStarterProjectCommands() {
     By textOnPreviewPage = By.xpath("//span[text()='UNIFIED MANAGEMENT EXPERIENCE']");
 
-    consoles.executeCommandFromProjectExplorer(
-        ANGULAR_PROJECT,
-        BUILD_GOAL,
-        INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(ANGULAR_PROJECT),
-        "bower_components/font-awesome");
+    try {
+      consoles.executeCommandFromProjectExplorer(
+          ANGULAR_PROJECT,
+          BUILD_GOAL,
+          INSTALL_DEPENDENCIES_COMMAND_ITEM.getItem(ANGULAR_PROJECT),
+          "bower_components/font-awesome");
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/12259");
+    }
 
     consoles.executeCommandFromProjectExplorer(
         ANGULAR_PROJECT, RUN_GOAL, RUN_COMMAND_ITEM.getItem(ANGULAR_PROJECT), "Waiting...");
