@@ -42,7 +42,7 @@ import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
@@ -59,7 +59,7 @@ public class DevfileManagerTest {
 
   private DevfileManager devfileManager;
 
-  @BeforeClass
+  @BeforeMethod
   public void setUp() throws Exception {
     schemaValidator = spy(new DevfileSchemaValidator(new DevfileSchemaProvider()));
     integrityValidator = spy(new DevfileIntegrityValidator());
@@ -72,10 +72,9 @@ public class DevfileManagerTest {
   public void testValidateAndConvert() throws Exception {
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-    devfileManager.convert(yamlContent, true);
+    devfileManager.parse(yamlContent, true);
     verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
     verify(integrityValidator).validateDevfile(any(Devfile.class));
-    verify(devfileConverter).devFileToWorkspaceConfig(any(Devfile.class));
   }
 
   @Test(
@@ -85,10 +84,9 @@ public class DevfileManagerTest {
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"))
             .concat("foos:");
-    devfileManager.convert(yamlContent, true);
+    devfileManager.parse(yamlContent, true);
     verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
     verifyNoMoreInteractions(integrityValidator);
-    verifyNoMoreInteractions(devfileConverter);
   }
 
   @Test
@@ -110,7 +108,12 @@ public class DevfileManagerTest {
               }
               throw new NotFoundException("ws not found");
             });
-    devfileManager.createWorkspace(createConfig());
+    String yamlContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
+    Devfile devfile = devfileManager.parse(yamlContent, true);
+    // when
+    devfileManager.createWorkspace(devfile);
+    // then
     verify(workspaceManager).createWorkspace(captor.capture(), anyString(), anyMap());
     assertEquals("petclinic-dev-environment_2", captor.getValue().getName());
   }

@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.restassured.http.ContentType;
@@ -55,6 +56,7 @@ public class DevfileServiceTest {
 
   @Mock private DevfileManager devfileManager;
   private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
+  private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
   private static final Subject SUBJECT = new SubjectImpl("user", "user123", "token", false);
 
@@ -80,14 +82,14 @@ public class DevfileServiceTest {
   }
 
   @Test
-  public void shouldAcceptDevFileAndFindAvailableName() throws Exception {
-    ArgumentCaptor<WorkspaceConfigImpl> captor = ArgumentCaptor.forClass(WorkspaceConfigImpl.class);
-
-    WorkspaceImpl ws = createWorkspace(WorkspaceStatus.STOPPED);
-    when(devfileManager.convert(anyString(), anyBoolean())).thenReturn(createConfig());
-    when(devfileManager.createWorkspace(any(WorkspaceConfigImpl.class))).thenReturn(ws);
+  public void shouldAcceptDevFileContentAndCreateWorkspace() throws Exception {
+    ArgumentCaptor<Devfile> captor = ArgumentCaptor.forClass(Devfile.class);
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
+    Devfile devfile = createDevfile(yamlContent);
+    WorkspaceImpl ws = createWorkspace(WorkspaceStatus.STOPPED);
+    when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
+    when(devfileManager.createWorkspace(any(Devfile.class))).thenReturn(ws);
     final Response response =
         given()
             .auth()
@@ -99,7 +101,12 @@ public class DevfileServiceTest {
 
     assertEquals(response.getStatusCode(), 201);
     verify(devfileManager).createWorkspace(captor.capture());
-    assertEquals(ws.getConfig(), captor.getValue());
+    assertEquals(devfile, captor.getValue());
+  }
+
+  private Devfile createDevfile(String yamlContent) throws IOException {
+    JsonNode node = mapper.readTree(yamlContent);
+    return mapper.treeToValue(node, Devfile.class);
   }
 
   @Test

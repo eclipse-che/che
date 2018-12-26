@@ -42,9 +42,9 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
+import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
@@ -122,16 +122,15 @@ public class DevfileService extends Service {
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
-    WorkspaceConfigImpl workspaceConfig;
+    WorkspaceImpl workspace;
     try {
-      workspaceConfig = devfileManager.convert(data, verbose);
+      Devfile devfile = devfileManager.parse(data, verbose);
+      workspace = devfileManager.createWorkspace(devfile);
     } catch (DevfileFormatException e) {
       throw new BadRequestException(e.getMessage());
     } catch (JsonProcessingException e) {
       throw new ServerException(e.getMessage());
     }
-
-    final WorkspaceImpl workspace = devfileManager.createWorkspace(workspaceConfig);
     return Response.status(201)
         .entity(asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext())))
         .build();

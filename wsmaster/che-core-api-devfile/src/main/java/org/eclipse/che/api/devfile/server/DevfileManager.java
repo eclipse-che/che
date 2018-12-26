@@ -54,38 +54,53 @@ public class DevfileManager {
   }
 
   /**
-   * Creates {@link WorkspaceConfigImpl} from given devfile content. Performs schema and integrity
-   * validation of input data before conversion.
+   * Creates {@link Devfile} from given devfile content. Performs schema and integrity validation of
+   * input data.
    *
    * @param devfileContent raw content of devfile
    * @param verbose when true, method returns more explained validation error messages if any
-   * @return WorkspaceConfig created from the devfile
+   * @return Devfile object created from the source content
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws JsonProcessingException when parsing error occurs
    */
-  public WorkspaceConfigImpl convert(String devfileContent, boolean verbose)
+  public Devfile parse(String devfileContent, boolean verbose)
       throws DevfileFormatException, JsonProcessingException {
     JsonNode parsed = schemaValidator.validateBySchema(devfileContent, verbose);
-    Devfile devFile = objectMapper.treeToValue(parsed, Devfile.class);
-    integrityValidator.validateDevfile(devFile);
-    return devfileConverter.devFileToWorkspaceConfig(devFile);
+    Devfile devfile = objectMapper.treeToValue(parsed, Devfile.class);
+    integrityValidator.validateDevfile(devfile);
+    return devfile;
   }
 
   /**
-   * Creates workspace from given {@link WorkspaceConfigImpl} with available name search
+   * Creates {@link WorkspaceImpl} from given devfile with available name search
    *
-   * @param workspaceConfig initial workspace configuration
-   * @return created workspace instance
+   * @param devfile source devfile
+   * @return created {@link WorkspaceImpl} instance
+   * @throws DevfileFormatException when devfile integrity validation fail
    * @throws ValidationException when incoming configuration or attributes are not valid
    * @throws ConflictException when any conflict occurs
    * @throws NotFoundException when user account is not found
    * @throws ServerException when other error occurs
    */
-  public WorkspaceImpl createWorkspace(WorkspaceConfigImpl workspaceConfig)
-      throws ServerException, ConflictException, NotFoundException, ValidationException {
+  public WorkspaceImpl createWorkspace(Devfile devfile)
+      throws ServerException, DevfileFormatException, ConflictException, NotFoundException,
+          ValidationException {
+    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
         findAvailableName(workspaceConfig), namespace, emptyMap());
+  }
+
+  /**
+   * Creates {@link WorkspaceConfigImpl} from given devfile with integrity validation
+   *
+   * @param devfile source devfile
+   * @return created {@link WorkspaceConfigImpl} instance
+   * @throws DevfileFormatException when devfile integrity validation fail
+   */
+  public WorkspaceConfigImpl createWorkspaceConfig(Devfile devfile) throws DevfileFormatException {
+    integrityValidator.validateDevfile(devfile);
+    return devfileConverter.devFileToWorkspaceConfig(devfile);
   }
 
   /**
