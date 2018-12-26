@@ -93,7 +93,7 @@ public class CheckoutReferenceTest {
   }
 
   @Test(priority = 1)
-  public void checkoutReferenceByHashCommit() throws Exception {
+  public void checkoutReferenceByHashCommit() {
     // preconditions
     String branchDetachedMess = String.format("(detached from %s)", sha1);
     String hashCommit = sha1.substring(0, 8);
@@ -104,15 +104,14 @@ public class CheckoutReferenceTest {
     projectExplorer.waitProjectExplorer();
     git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME, BLANK);
 
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(String.format("%s/%s", PROJECT_NAME, JS_FILE));
+    // open test file
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(PROJECT_NAME, JS_FILE);
     editor.waitActive();
     editor.waitTextIntoEditor(UPDATE_FILE);
 
     // check current reference
     menu.runCommand(GIT, STATUS);
     git.waitGitStatusBarWithMess("On branch " + DEFAULT_BRANCH);
-
     projectExplorer.waitReferenceName(DEFAULT_BRANCH);
 
     // check the name of the default branch
@@ -125,12 +124,10 @@ public class CheckoutReferenceTest {
 
     // perform checkout reference to wrong hash commit
     performCheckoutReference(wrongHashCommit);
-
     git.waitGitStatusBarWithMess(failMessage);
 
     // perform git checkout by not fully hash of specific commit
     performCheckoutReference(hashCommit);
-
     editor.selectTabByName(JS_FILE);
     editor.waitTextIntoEditor(CHANGE_FILE);
     editor.waitTextNotPresentIntoEditor(UPDATE_FILE);
@@ -138,7 +135,6 @@ public class CheckoutReferenceTest {
     // check current reference
     menu.runCommand(GIT, STATUS);
     git.waitGitStatusBarWithMess("HEAD detached at " + hashCommit);
-
     projectExplorer.waitReferenceName(sha1);
 
     // switch to default branch
@@ -146,22 +142,17 @@ public class CheckoutReferenceTest {
     menu.runCommand(GIT, BRANCHES);
     git.waitBranchInTheListWithCoState(branchDetachedMess);
     git.selectBranchAndClickCheckoutBtn(DEFAULT_BRANCH);
-
     openBranchPanelAndWaitRefHeadName(DEFAULT_BRANCH);
-
     editor.selectTabByName(JS_FILE);
     editor.waitTextIntoEditor(UPDATE_FILE);
 
     // perform git checkout by hash of specific commit
     performCheckoutReference(sha1);
-
     openBranchPanelAndWaitRefHeadName(branchDetachedMess);
 
     // check the git history
     openGitHistoryForm();
-
     assertTrue(gitHistory.getTopCommitRevision().contains(hashCommit));
-
     git.clickOnHistoryRowInСommitsList(0);
     git.waitContentInHistoryEditor(COMMIT_MESSAGE);
     git.closeGitHistoryForm();
@@ -171,26 +162,21 @@ public class CheckoutReferenceTest {
   public void checkoutReferenceByTagName() {
     // git checkout to wrong tag name
     performCheckoutReference("version1");
-
     git.waitGitStatusBarWithMess(MESSAGE_TAG_WRONG);
 
     // git checkout to tag 'version_1'
     performCheckoutReference(TAG_NAME_1);
-
     openBranchPanelAndWaitRefHeadName(BRANCH_DETACHED_TAG_1);
-
     editor.selectTabByName(JS_FILE);
     editor.waitTextIntoEditor(CHANGE_FILE_1);
 
     // check current reference
     menu.runCommand(GIT, STATUS);
     git.waitGitStatusBarWithMess("HEAD detached at " + TAG_NAME_1);
-
     projectExplorer.waitReferenceName(TAG_NAME_1);
 
     // check the git history
     openGitHistoryForm();
-
     git.clickOnHistoryRowInСommitsList(0);
     git.waitContentInHistoryEditor(COMMIT_MESSAGE_TAG_1);
     git.closeGitHistoryForm();
@@ -204,9 +190,7 @@ public class CheckoutReferenceTest {
 
     // switch to another tag
     performCheckoutReference(TAG_NAME_2);
-
     openBranchPanelAndWaitRefHeadName(BRANCH_DETACHED_TAG_2);
-
     editor.selectTabByName(JS_FILE);
     editor.waitTextIntoEditor(CHANGE_FILE_2);
   }

@@ -130,6 +130,8 @@ public class InitializeAndDeleteLocalRepositoryTest {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT);
     menu.waitCommandIsDisabledInMenu(TestMenuCommandsConstants.Git.DELETE_REPOSITORY);
     seleniumWebDriver.navigate().refresh();
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickRevealToItemWithJavaScript(PATH_FOR_EXPAND);
     projectExplorer.waitItem(PATH_FOR_EXPAND);
   }
