@@ -87,7 +87,6 @@ import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
@@ -342,10 +341,7 @@ public class JpaEntitiesCascadeRemovalTest {
     assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
     assertTrue(sshDao.get(user.getId()).isEmpty());
     assertTrue(workspaceDao.getByNamespace(account.getName(), 30, 0).isEmpty());
-    assertTrue(
-        factoryDao
-            .getByAttribute(0, 0, singletonList(Pair.of("creator.userId", user.getId())))
-            .isEmpty());
+    assertTrue(factoryDao.getByUser(user.getId(), 30, 0).isEmpty());
     // Check workers and parent entity is removed
     assertTrue(workspaceDao.getByNamespace(user2.getId(), 30, 0).isEmpty());
     assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);

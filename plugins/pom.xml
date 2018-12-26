@@ -48,7 +48,6 @@
         <module>plugin-nodejs-debugger</module>
         <module>plugin-php</module>
         <module>plugin-languageserver</module>
-        <module>plugin-urlfactory</module>
         <module>plugin-json</module>
         <module>plugin-composer</module>
         <module>plugin-zend-debugger</module>
