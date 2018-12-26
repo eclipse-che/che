@@ -101,7 +101,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.selectTabByName(APP_CLASS_NAME);
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void shouldDisplayJavaDocOfClassMethod() throws Exception {
     // given
     final String expectedJavadocHtmlText =
@@ -155,7 +155,7 @@ public class AutocompleteProposalJavaDocTest {
     checkProposalDocumentationHTML("<p>No documentation found.</p>\n");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void shouldDisplayAnotherModuleClassJavaDoc() throws IOException {
     // when
     editor.waitActive();
@@ -211,7 +211,7 @@ public class AutocompleteProposalJavaDocTest {
     editor.waitProposalDocumentationHTML("UPDATE. Implementation of Book interface.");
   }
 
-  @Test(groups = UNDER_REPAIR)
+  @Test
   public void shouldDisplayJavaDocOfJreClass() throws IOException {
     // when
     editor.waitActive();
