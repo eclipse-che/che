@@ -87,10 +87,12 @@ public class NavigationByKeyboardTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     consoles.closeProcessesArea();
   }
 

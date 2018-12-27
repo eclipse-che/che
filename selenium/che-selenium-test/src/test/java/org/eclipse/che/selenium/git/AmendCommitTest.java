@@ -44,8 +44,7 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.GITHUB)
 public class AmendCommitTest {
   private static final String PROJECT_NAME = NameGenerator.generate("AmendCommit_", 4);
-  private static final String PATH_TO_FILE =
-      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java";
+  private static final String JAVA_FILE_TAB_NAME = "AppController";
   private static final String CHANGE_CONTENT = "<!--change content-->";
   private static final String COMMIT_MESSAGE = "first commit";
   private static final String NOTHING_TO_COMMIT =
@@ -141,7 +140,7 @@ public class AmendCommitTest {
     git.closeGitHistoryForm();
 
     // perform amend previous commit
-    projectExplorer.openItemByPath(PATH_TO_FILE);
+    editor.selectTabByName(JAVA_FILE_TAB_NAME);
     editor.waitActive();
     editor.setCursorToLine(12);
     editor.selectLineAndDelete();

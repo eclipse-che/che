@@ -62,6 +62,7 @@ public class HttpProbe extends Probe {
     } finally {
       if (httpURLConnection != null) {
         httpURLConnection.disconnect();
+        this.httpURLConnection = null;
       }
     }
   }
@@ -74,6 +75,7 @@ public class HttpProbe extends Probe {
   @Override
   public void cancel() {
     httpURLConnection.disconnect();
+    this.httpURLConnection = null;
   }
 
   private boolean isConnectionSuccessful(HttpURLConnection conn) {

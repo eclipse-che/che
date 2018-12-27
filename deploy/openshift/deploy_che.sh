@@ -19,6 +19,9 @@
 # --------------
 # Print Che logo
 # --------------
+
+set -e
+
 export TERM=xterm
 
 echo
@@ -54,6 +57,7 @@ HELP="
 --debug - Deploy Che in a debug mode, create and expose debug route
 --image-che - Override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
 --secure | -s - Deploy Che with SSL enabled
+--setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
@@ -86,6 +90,10 @@ case $key in
     ;;
     --no-pull)
     IMAGE_PULL_POLICY=IfNotPresent
+    shift
+    ;;
+    --setup-ocp-oauth)
+    export SETUP_OCP_OAUTH=true
     shift
     ;;
     --postgres-debug)
@@ -144,11 +152,33 @@ export IMAGE_KEYCLOAK=${IMAGE_KEYCLOAK:-${DEFAULT_IMAGE_KEYCLOAK}}
 DEFAULT_KEYCLOAK_IMAGE_TAG="nightly"
 export KEYCLOAK_IMAGE_TAG=${KEYCLOAK_IMAGE_TAG:-${DEFAULT_KEYCLOAK_IMAGE_TAG}}
 
-KEYCLOAK_IMAGE_PULL_POLICY="Always"
-export ${KEYCLOAK_IMAGE_PULL_POLICY:-${DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY}}
+DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY="Always"
+export KEYCLOAK_IMAGE_PULL_POLICY=${KEYCLOAK_IMAGE_PULL_POLICY:-${DEFAULT_KEYCLOAK_IMAGE_PULL_POLICY}}
 
 DEFAULT_ENABLE_SSL="false"
 export ENABLE_SSL=${ENABLE_SSL:-${DEFAULT_ENABLE_SSL}}
+
+DEFAULT_OPENSHIFT_USERNAME="developer"
+export OPENSHIFT_USERNAME=${OPENSHIFT_USERNAME:-${DEFAULT_OPENSHIFT_USERNAME}}
+
+DEFAULT_OPENSHIFT_PASSWORD="developer"
+export OPENSHIFT_PASSWORD=${OPENSHIFT_PASSWORD:-${DEFAULT_OPENSHIFT_PASSWORD}}
+
+
+DEFAULT_OCP_OAUTH_CLIENT_ID=ocp-client
+export OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID:-${DEFAULT_OCP_OAUTH_CLIENT_ID}}
+
+DEFAULT_OCP_OAUTH_CLIENT_SECRET=ocp-client-secret
+export OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET:-${DEFAULT_OCP_OAUTH_CLIENT_SECRET}}
+
+DEFAULT_OCP_IDENTITY_PROVIDER_ID=openshift-v3
+export OCP_IDENTITY_PROVIDER_ID=${OCP_IDENTITY_PROVIDER_ID:-${DEFAULT_OCP_IDENTITY_PROVIDER_ID}}
+
+DEFAULT_KEYCLOAK_USER=admin
+export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
+
+DEFAULT_KEYCLOAK_PASSWORD=admin
+export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
 
 DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG="latest"
 export PLUGIN_REGISTRY_IMAGE_TAG=${PLUGIN_REGISTRY_IMAGE_TAG:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG}}
@@ -233,6 +263,7 @@ isLoggedIn() {
     exit 1
   else
     CONTEXT=$(${OC_BINARY} whoami -c)
+    OPENSHIFT_ENDPOINT=$(oc whoami -c --show-context=false --show-server=true)
     printInfo "Active session found. Your current context is: ${CONTEXT}"
   fi
 }
@@ -274,6 +305,7 @@ wait_for_postgres() {
       printError "Deployment timeout. Aborting."
       exit 1
     fi
+    printInfo "Postgres successfully deployed"
 }
 
 wait_for_keycloak() {
@@ -296,6 +328,7 @@ wait_for_keycloak() {
       printError "Deployment timeout. Aborting."
       exit 1
     fi
+    printInfo "Keycloak successfully deployed"
 }
 
 wait_for_che() {
@@ -442,7 +475,14 @@ ${CHE_VAR_ARRAY}"
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
         # create secret with OpenShift certificate
-        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$(cat /var/lib/origin/openshift.local.config/master/ca.crt)"
+
+        if [[ -z ${OPENSHIFT_CERT} ]]; then
+          DEFAULT_OPENSHIFT_CERT_PATH=/var/lib/origin/openshift.local.config/master/ca.crt
+          export OPENSHIFT_CERT_PATH=${OPENSHIFT_CERT_PATH:-${DEFAULT_OPENSHIFT_CERT_PATH}}
+          OPENSHIFT_CERT="$(cat $OPENSHIFT_CERT_PATH)"
+        fi
+
+        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/openshift-certificate-secret.yaml -p CERTIFICATE="$OPENSHIFT_CERT"
       fi
 
       ${OC_BINARY} new-app -f ${BASE_DIR}/templates/multi/keycloak-template.yaml \
@@ -457,16 +497,21 @@ ${CHE_VAR_ARRAY}"
       wait_for_keycloak
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
+        printInfo "Registering oAuth client in OpenShift"
         # register oAuth client in OpenShift
-        $OC_BINARY login -u "system:admin" > /dev/null
+        printInfo "Logging as \"system:admin\""
+        $OC_BINARY login -u "system:admin"
         KEYCLOAK_ROUTE=$($OC_BINARY get route/keycloak --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
-        $OC_BINARY new-app -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
+
+        $OC_BINARY process -f ${BASE_DIR}/templates/multi/oauth-client.yaml \
           -p REDIRECT_URI="${HTTP_PROTOCOL}://${KEYCLOAK_ROUTE}/auth/realms/che/broker/${OCP_IDENTITY_PROVIDER_ID}/endpoint" \
           -p OCP_OAUTH_CLIENT_ID=${OCP_OAUTH_CLIENT_ID} \
-          -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET}
+          -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET} | oc apply -f -
 
         # register OpenShift Identity Provider in Keycloak
-        $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}" > /dev/null
+        printInfo "Registering oAuth client in Keycloak"
+        printInfo "Logging as \"${OPENSHIFT_USERNAME}\""
+        $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}"
         KEYCLOAK_POD_NAME=$(${OC_BINARY} get pod --namespace=${CHE_OPENSHIFT_PROJECT} -l app=keycloak --no-headers | awk '{print $1}')
         ${OC_BINARY} exec ${KEYCLOAK_POD_NAME} -- /opt/jboss/keycloak/bin/kcadm.sh create identity-provider/instances -r che \
           -s alias=${OCP_IDENTITY_PROVIDER_ID} \

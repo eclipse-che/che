@@ -234,7 +234,7 @@ remove_che_from_ocp() {
 		done
 		echo "Done!"
 	else
-		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exists."
+		echo "[CHE] Project \"${CHE_OPENSHIFT_PROJECT}\" does NOT exist."
 	fi
 
 }

@@ -29,6 +29,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Allows to create ephemeral workspaces (with no PVC attached) based on workspace config
@@ -42,10 +44,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 @Singleton
 public class EphemeralWorkspaceAdapter {
+  private static final Logger LOG = LoggerFactory.getLogger(CommonPVCStrategy.class);
+
   private static final String EPHEMERAL_VOLUME_NAME_PREFIX = "ephemeral-che-workspace-";
 
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+    LOG.debug("Provisioning PVC strategy for workspace '{}'", identity.getWorkspaceId());
     for (Pod pod : k8sEnv.getPods().values()) {
       PodSpec podSpec = pod.getSpec();
 

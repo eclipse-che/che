@@ -85,7 +85,7 @@ class InMemoryResourceStore implements ResourceStore {
         intercept(resource);
 
         return false;
-      } else { // such resource doesn't exists, then simply add it
+      } else { // such resource doesn't exist, then simply add it
         final int posIndex = -index - 1; // negate inverted index into positive one
         final int size = container.length;
         final Resource[] tmpContainer = copyOf(container, size + 1);

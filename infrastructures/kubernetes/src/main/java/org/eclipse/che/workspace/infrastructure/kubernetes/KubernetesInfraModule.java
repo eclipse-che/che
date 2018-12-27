@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy.PER_WORKSPACE_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.DefaultHostIngressExternalServerExposer.DEFAULT_HOST_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostIngressExternalServerExposer.MULTI_HOST_STRATEGY;
@@ -42,6 +43,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.RemoveNamespaceOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspacePVCCleaner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumeStrategyProvider;
@@ -99,6 +101,7 @@ public class KubernetesInfraModule extends AbstractModule {
     MapBinder<String, WorkspaceVolumesStrategy> volumesStrategies =
         MapBinder.newMapBinder(binder(), String.class, WorkspaceVolumesStrategy.class);
     volumesStrategies.addBinding(COMMON_STRATEGY).to(CommonPVCStrategy.class);
+    volumesStrategies.addBinding(PER_WORKSPACE_STRATEGY).to(PerWorkspacePVCStrategy.class);
     volumesStrategies.addBinding(UNIQUE_STRATEGY).to(UniqueWorkspacePVCStrategy.class);
     bind(WorkspaceVolumesStrategy.class).toProvider(WorkspaceVolumeStrategyProvider.class);
 
@@ -180,8 +183,8 @@ public class KubernetesInfraModule extends AbstractModule {
         .addBinding("Che Editor")
         .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
     pluginBrokers
-        .addBinding("Theia remote plugin")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia_remote.image")));
+        .addBinding("Theia plugin")
+        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia.image")));
     pluginBrokers
         .addBinding("VS Code extension")
         .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.vscode.image")));

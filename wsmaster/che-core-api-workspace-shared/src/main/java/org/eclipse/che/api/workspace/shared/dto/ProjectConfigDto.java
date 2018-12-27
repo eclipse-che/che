@@ -50,7 +50,7 @@ public interface ProjectConfigDto extends ProjectConfig {
   ProjectConfigDto withDescription(String description);
 
   @Override
-  @FactoryParameter(obligation = MANDATORY)
+  @FactoryParameter(obligation = OPTIONAL)
   String getType();
 
   void setType(String type);

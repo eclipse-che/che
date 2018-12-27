@@ -70,6 +70,7 @@ public class CheckIntelligenceCommandFromToolbarTest {
     waitOnAvailablePreviewPage(currentWindow, "Enter your name");
     consoles.waitExpectedTextIntoConsole(" Server startup in");
     seleniumWebDriver.navigate().refresh();
+    ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitProjectExplorer();
     consoles.selectProcessByTabName(PROJECT_NAME + ": build and run");
     consoles.waitExpectedTextIntoConsole(" Server startup in");

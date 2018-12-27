@@ -16,6 +16,7 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 
@@ -24,6 +25,7 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
  *
  * @author Florent Benoit
  */
+@Singleton
 public class GithubSourceStorageBuilder {
 
   /**
@@ -42,7 +44,7 @@ public class GithubSourceStorageBuilder {
     }
     return newDto(SourceStorageDto.class)
         .withLocation(githubUrl.repositoryLocation())
-        .withType("git")
+        .withType("github")
         .withParameters(parameters);
   }
 }

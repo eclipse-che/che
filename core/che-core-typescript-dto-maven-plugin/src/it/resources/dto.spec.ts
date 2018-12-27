@@ -11,6 +11,8 @@
  */
 import {org} from './dto';
 
+import {che} from './dtoD'
+
 let expect = require('chai').expect;
 
 class DTOBuilder {
@@ -103,6 +105,21 @@ describe("DTO serialization tests", () => {
         expect(myCustomDTO.toJson()).to.eql(myCustomDTOFromSource.toJson());
     });
 
+    it("check d.ts types", () => {
+        const customDto: che.plugin.typescript.MyCustom = {
+            internal: {
+                internalValue: "foo"
+            },
+            status: "SHUTDOWN",
+            customMap: {"bar": { name: "foo"}},
+            arguments: [{}, {},]
+        };
+
+
+        expect(customDto.internal).to.eql({ internalValue: "foo" } as che.plugin.typescript.internal.Internal);
+        expect(customDto.customMap).to.have.property("bar");
+        expect(customDto.customMap["bar"].name).to.eql("foo");
+    });
 
 
 

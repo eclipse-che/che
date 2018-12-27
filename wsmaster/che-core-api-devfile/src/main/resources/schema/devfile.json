@@ -12,7 +12,6 @@
   "required": [
     "specVersion",
     "name",
-    "projects",
     "tools",
     "commands"
   ],

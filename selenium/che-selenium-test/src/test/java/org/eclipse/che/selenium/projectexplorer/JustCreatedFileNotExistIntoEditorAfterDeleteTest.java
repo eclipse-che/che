@@ -21,6 +21,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -46,6 +47,7 @@ public class JustCreatedFileNotExistIntoEditorAfterDeleteTest {
   @Inject private AskDialog askDialog;
   @Inject private Menu menu;
   @Inject private Loader loader;
+  @Inject private Consoles consoles;
   @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
@@ -57,6 +59,8 @@ public class JustCreatedFileNotExistIntoEditorAfterDeleteTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
 public class InitializeAndDeleteLocalRepositoryTest {
   private static final String PROJECT_NAME = NameGenerator.generate("InitAndDelLocalRepo-", 4);
   private static final String PATH_FOR_EXPAND =
-      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/";
+      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java";
   private static final String ASK_DIALOG_TEXT =
       "Do you want to initialize the local repository " + PROJECT_NAME + "?";
   private static final String DELETE_REPO_TEXT =
@@ -97,7 +97,8 @@ public class InitializeAndDeleteLocalRepositoryTest {
     git.waitGitStatusBarWithMess("On branch master");
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByPath(PATH_FOR_EXPAND + "AppController.java");
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_FOR_EXPAND);
+    projectExplorer.waitItem(PATH_FOR_EXPAND);
     loader.waitOnClosed();
 
     // Check git log
@@ -129,6 +130,9 @@ public class InitializeAndDeleteLocalRepositoryTest {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT);
     menu.waitCommandIsDisabledInMenu(TestMenuCommandsConstants.Git.DELETE_REPOSITORY);
     seleniumWebDriver.navigate().refresh();
-    projectExplorer.waitItem(PATH_FOR_EXPAND + "AppController.java");
+    projectExplorer.waitProjectExplorer();
+    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_FOR_EXPAND);
+    projectExplorer.waitItem(PATH_FOR_EXPAND);
   }
 }

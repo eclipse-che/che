@@ -25,6 +25,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
  * Data object for storing workspace expiration times.
  *
  * @author Max Shaposhnik (mshaposh@redhat.com)
+ * @deprecated since 6.16.0, use {@link WorkspaceActivity} instead
  */
 @Entity(name = "WorkspaceExpiration")
 @NamedQueries({
@@ -33,6 +34,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
       query = "SELECT e FROM WorkspaceExpiration e WHERE e.expiration < :expiration")
 })
 @Table(name = "che_workspace_expiration")
+@Deprecated
 public class WorkspaceExpiration {
 
   @Id

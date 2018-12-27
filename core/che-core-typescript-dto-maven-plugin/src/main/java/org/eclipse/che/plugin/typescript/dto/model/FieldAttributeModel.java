@@ -12,6 +12,7 @@
 package org.eclipse.che.plugin.typescript.dto.model;
 
 import static org.eclipse.che.plugin.typescript.dto.DTOHelper.convertType;
+import static org.eclipse.che.plugin.typescript.dto.DTOHelper.convertTypeForDTS;
 
 import com.google.gson.internal.Primitives;
 import java.lang.reflect.ParameterizedType;
@@ -65,16 +66,31 @@ public class FieldAttributeModel {
   /** type is a Enum object. */
   private boolean isEnum;
 
+  /** Map key type */
+  private String mapKeyType;
+
+  /** Map value type */
+  private String mapValueType;
+
+  /** Dto type for d.ts */
+  private String dtsType;
+
+  /** Dto class where this field declared */
+  private Class declarationClass;
+
   /**
    * Build a new field model based on the name and Java type
    *
    * @param fieldName the name of the field
    * @param type the Java raw type that will allow further analyzes
+   * @param declarationClass
    */
-  public FieldAttributeModel(String fieldName, Type type) {
+  public FieldAttributeModel(String fieldName, Type type, Class declarationClass) {
     this.fieldName = fieldName;
     this.type = type;
     this.typeName = convertType(type);
+    this.dtsType = convertTypeForDTS(declarationClass, type);
+    this.declarationClass = declarationClass;
 
     if (typeName.startsWith("Array<") || typeName.startsWith("Map<")) {
       this.needInitialize = true;
@@ -113,12 +129,18 @@ public class FieldAttributeModel {
       }
     } else if (Map.class.equals(rawType)) {
       isMap = true;
+      mapKeyType =
+          convertTypeForDTS(declarationClass, parameterizedType.getActualTypeArguments()[0]);
       if (parameterizedType.getActualTypeArguments()[1] instanceof Class
           && ((Class) parameterizedType.getActualTypeArguments()[1])
               .isAnnotationPresent(DTO.class)) {
+
         isMapOfDto = true;
         dtoImpl = convertType(parameterizedType.getActualTypeArguments()[1]) + "Impl";
       }
+
+      mapValueType =
+          convertTypeForDTS(declarationClass, parameterizedType.getActualTypeArguments()[1]);
     }
   }
 
@@ -176,5 +198,17 @@ public class FieldAttributeModel {
 
   public String getSimpleType() {
     return this.typeName;
+  }
+
+  public String getMapKeyType() {
+    return mapKeyType;
+  }
+
+  public String getMapValueType() {
+    return mapValueType;
+  }
+
+  public String getDtsType() {
+    return dtsType;
   }
 }

@@ -10,7 +10,7 @@
 
 context('TypeScript', () => {
     before(() => {
-        cy.visit('http://localhost:3000');
+        cy.visit('http://localhost:3100');
 
         // maybe it's possible to wait for an element being displayed/hidden
         cy.wait(10000);
@@ -82,7 +82,7 @@ context('TypeScript', () => {
             });
 
         }).then(() => {
-            cy.get('.p-Widget.p-TabBar.theia-app-centers.theia-app-main.ps').contains(FILENAME).click({ force: true });
+            cy.get('.p-Widget.p-TabBar.theia-app-centers.theia-app-main').contains(FILENAME).click({ force: true });
         }).then(() => {
             cy.window().then((win: any) => {
                 win.monaco.editor.getModels()[0].setValue('export class HelloWorld {\n  constructor() {}\n foo(): invalid {\n }\n}\n');
@@ -91,6 +91,8 @@ context('TypeScript', () => {
         }).then(() => {
             // now, search if there is an invalid syntax
             cy.get('.lines-content.monaco-editor-background').contains('invalid').should('have.class', 'mtk11');
+        }).then(() => {
+            cy.visit('http://localhost:3100');
         });
     })
 });

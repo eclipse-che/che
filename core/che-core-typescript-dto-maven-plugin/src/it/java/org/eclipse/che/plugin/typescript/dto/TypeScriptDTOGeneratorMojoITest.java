@@ -48,10 +48,14 @@ public class TypeScriptDTOGeneratorMojoITest {
      */
     private static final String GENERATED_DTO_NAME = "my-typescript-test-module.ts";
 
+    private static final String GENERATED_DTO_DTS_NAME = "my-typescript-test-module.d.ts";
+
     /**
      * DTO new name
      */
     private static final String DTO_FILENAME = "dto.ts";
+
+    private static final String DTO_DTS_FILENAME = "dtoD.d.ts";
 
     /**
      * DTO test name
@@ -251,7 +255,7 @@ public class TypeScriptDTOGeneratorMojoITest {
         // search DTO
         Path p = this.buildDirectory;
         final int maxDepth = 10;
-        Stream<Path> matches = java.nio.file.Files.find(p, maxDepth, (path, basicFileAttributes) -> path.getFileName().toString().equals(GENERATED_DTO_NAME));
+        Stream<Path> matches = java.nio.file.Files.find( p, maxDepth, (path, basicFileAttributes) -> path.getFileName().toString().equals(GENERATED_DTO_NAME));
 
         // take first
         Optional<Path> optionalPath = matches.findFirst();
@@ -263,6 +267,19 @@ public class TypeScriptDTOGeneratorMojoITest {
 
         //copy it in test resources folder where package.json is
         java.nio.file.Files.copy(generatedDtoPath, this.rootPath.resolve(DTO_FILENAME), StandardCopyOption.REPLACE_EXISTING);
+
+        matches = java.nio.file.Files.find( p, maxDepth, (path, basicFileAttributes) -> path.getFileName().toString().equals(GENERATED_DTO_DTS_NAME));
+
+        // take first
+        optionalPath = matches.findFirst();
+        if (!optionalPath.isPresent()) {
+            throw new IllegalStateException("Unable to find generated DTO file named '" + GENERATED_DTO_DTS_NAME + "'. Check it has been generated first");
+        }
+
+        generatedDtoPath = optionalPath.get();
+
+        //copy it in test resources folder where package.json is
+        java.nio.file.Files.copy(generatedDtoPath, this.rootPath.resolve(DTO_DTS_FILENAME), StandardCopyOption.REPLACE_EXISTING);
 
         // setup command line
         List<String> command = getDockerExec();

@@ -24,6 +24,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.ConfigureClasspath;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.Menu;
@@ -48,6 +49,7 @@ public class CreateProjectInSelectedFolderTest {
   @Inject private ProjectExplorer explorer;
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
+  @Inject private Consoles consoles;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private Wizard projectWizard;
   @Inject private ConfigureClasspath selectPath;
@@ -64,6 +66,8 @@ public class CreateProjectInSelectedFolderTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

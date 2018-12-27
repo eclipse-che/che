@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginCo
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.IGNORED;
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
@@ -36,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -69,9 +71,7 @@ public class JavaTestPluginJunit4Test {
   @Inject private Loader loader;
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Menu menu;
-
   @Inject private TestWorkspace ws;
-
   @Inject private Ide ide;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
@@ -93,11 +93,19 @@ public class JavaTestPluginJunit4Test {
         ProjectTemplates.CONSOLE_JAVA_SIMPLE);
 
     ide.open(ws);
-    loader.waitOnClosed();
+    ide.waitOpenedWorkspaceIsReadyToUse();
+
     projectExplorer.waitItem(JUNIT4_PROJECT);
-    projectExplorer.quickExpandWithJavaScript();
-    runCompileCommandByPallete(compileCommand);
+    consoles.waitJDTLSProjectResolveFinishedMessage(JUNIT4_PROJECT);
     notifications.waitProgressPopupPanelClose();
+    projectExplorer.quickExpandWithJavaScript();
+
+    try {
+      runCompileCommandByPallete(compileCommand);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/12220");
+    }
   }
 
   private void runCompileCommandByPallete(CompileCommand compileCommand) {

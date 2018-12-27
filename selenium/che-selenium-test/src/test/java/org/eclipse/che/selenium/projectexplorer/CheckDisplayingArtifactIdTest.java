@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuCons
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.Preferences;
@@ -40,6 +41,7 @@ public class CheckDisplayingArtifactIdTest {
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private TestProjectServiceClient projectServiceClient;
   @Inject private Menu menu;
+  @Inject private Consoles consoles;
   @Inject private Preferences preferences;
 
   @BeforeClass
@@ -50,6 +52,8 @@ public class CheckDisplayingArtifactIdTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test

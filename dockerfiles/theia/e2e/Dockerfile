@@ -7,7 +7,7 @@
 
 # Use upstream image
 FROM ${BUILD_ORGANIZATION}/${BUILD_PREFIX}-theia:${BUILD_TAG} as theia
-FROM cypress/base:8
+FROM cypress/browsers:chrome67
 
 USER root
 ENV HOME=/root

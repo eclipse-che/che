@@ -11,53 +11,62 @@
 ###
 # Builder Image
 #
-FROM node:8.12.0-alpine as builder
-
-ARG GITHUB_TOKEN
-
-# Install basic software used for checking github API rate limit
-RUN apk add --update --no-cache curl jq expect
+FROM ${BUILD_ORGANIZATION}/${BUILD_PREFIX}-theia-dev:${BUILD_TAG} as builder
+WORKDIR ${HOME}
 
 # define in env variable GITHUB_TOKEN only if it is defined
 # else check if github rate limit is enough, else will abort requiring to set GITHUB_TOKEN value
-ADD src/builder/check-github-limit.sh /tmp/builder/scripts/check-github-limit.sh
-RUN /tmp/builder/scripts/check-github-limit.sh
-
-# Install tools required to build theia
-RUN apk add make gcc g++ python git bash
+ARG GITHUB_TOKEN
 
 # Define upstream version of theia to use
-ARG THEIA_VERSION=0.3.16
-
-ENV THEIA_VERSION=${THEIA_VERSION} \
-    HOME=/home/theia
-WORKDIR ${HOME}
-
-# add eclipse che theia generator
-RUN yarn global add @eclipse-che/theia-generator@0.0.1-1543478099
-
-# Add patches
-ADD src/patches /home/theia-build/patches
+ARG THEIA_VERSION=0.3.18
 
 # Invalidate cache if there is a new commit
-ADD https://api.github.com/repos/theia-ide/theia/git/refs/tags/v${THEIA_VERSION} /tmp/sha1-repository
-# Build theia from source code and publish artifacts locally
-ADD src/builder/clone.sh /tmp/builder/scripts/clone.sh
-RUN /tmp/builder/scripts/clone.sh
+ADD https://api.github.com/repos/theia-ide/theia/git/refs/tags/v${THEIA_VERSION} /tmp/.sha1-repository
+
+# Check github limit
+RUN if [ ! -z "${GITHUB_TOKEN-}" ]; then \
+      export GITHUB_TOKEN=$GITHUB_TOKEN; \
+      echo "Setting GITHUB_TOKEN value as provided"; \
+    else \
+      export GITHUB_LIMIT=$(curl -s 'https://api.github.com/rate_limit' | jq '.rate .remaining'); \
+      echo "Current API rate limit https://api.github.com is ${GITHUB_LIMIT}"; \
+      if [ "${GITHUB_LIMIT}" -lt 10 ]; then \
+        printf "\033[0;31m\n\n\nRate limit on https://api.github.com is reached so in order to build this image, "; \
+        printf "the build argument GITHUB_TOKEN needs to be provided so build will not fail.\n\n\n\033[0m"; \
+        exit 1; \
+      else \
+        echo "GITHUB_TOKEN variable is not set but https://api.github.com rate limit has enough slots"; \
+      fi \
+    fi
+
+# Clone theia
+RUN git clone --branch v${THEIA_VERSION}  --single-branch --depth 1 https://github.com/theia-ide/theia ${HOME}/theia-source-code
+
+# Add patches
+ADD src/patches ${HOME}/patches
+
+# Apply patches
+RUN if [ -d "${HOME}/patches/${THEIA_VERSION}" ]; then \
+      echo "Applying patches for Theia version ${THEIA_VERSION}"; \
+      for file in $(find "${HOME}/patches/${THEIA_VERSION}" -name '*.patch'); do \
+        echo "Patching with ${file}"; \
+        cd ${HOME}/theia-source-code && patch -p1 < ${file}; \
+      done \
+    fi
 
 # Generate che-theia
-RUN cd ${HOME}/theia-source-code && che:theia init
+WORKDIR ${HOME}/theia-source-code
+RUN che:theia init
 
 # Compile Theia
-RUN cd ${HOME}/theia-source-code && yarn
-
+RUN yarn
 
 # Run into production mode
-ADD src/builder/production-mode.sh /tmp/builder/scripts/production-mode.sh
-RUN /tmp/builder/scripts/production-mode.sh
+RUN che:theia production
 
 # change permissions
-RUN find ${HOME}/theia-source-code/production -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; 2>log.txt
+RUN find production -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \; 2>log.txt
 
 ###
 # Runtime Image
@@ -71,7 +80,7 @@ ENV USE_LOCAL_GIT=true \
     LOCAL_GIT_DIRECTORY=/usr \
     GIT_EXEC_PATH=/usr/libexec/git-core
 
-EXPOSE 3000 3030
+EXPOSE 3100 3130
 
 # Install sudo
 # Install Java for java extension
@@ -114,7 +123,7 @@ RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh theia \
     # Change permissions to allow editing of files for openshift user
     && find ${HOME} -exec sh -c "chgrp 0 {}; chmod g+rwX {}" \;
 
-COPY --chown=theia:root --from=builder /home/theia/theia-source-code/production /home/theia
+COPY --chown=theia:root --from=builder /home/theia-dev/theia-source-code/production /home/theia
 USER theia
 WORKDIR /projects
 ADD src/entrypoint.sh /entrypoint.sh

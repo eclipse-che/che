@@ -225,7 +225,6 @@ public class PluginMetaRetriever {
         meta.getName(), CHE_PLUGIN_OBJECT_ERROR, id, version, "Name is missing.");
     requireNotNullNorEmpty(
         meta.getType(), CHE_PLUGIN_OBJECT_ERROR, id, version, "Type is missing.");
-    requireNotNullNorEmpty(meta.getUrl(), CHE_PLUGIN_OBJECT_ERROR, id, version, "URL is missing.");
   }
 
   @VisibleForTesting

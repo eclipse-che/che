@@ -20,7 +20,7 @@
                     "type": "ide"
                   },
                   "protocol": "http",
-                  "port": "3000",
+                  "port": "3100",
                   "path": "/"
                 },
                 "theia-dev": {
@@ -28,7 +28,7 @@
                     "type": "ide-dev"
                   },
                   "protocol": "http",
-                  "port": "3030"
+                  "port": "3130"
                 }
               },
               "installers": [],
@@ -96,7 +96,7 @@
               "servers": {
                 "theia": {
                   "protocol": "http",
-                  "port": "3000",
+                  "port": "3100",
                   "path": "/",
                   "attributes": {
                     "type": "ide",
@@ -106,7 +106,7 @@
                 },
                 "theia-dev": {
                   "protocol": "http",
-                  "port": "3030",
+                  "port": "3130",
                   "attributes": {
                     "type": "ide-dev"
                   }
@@ -184,7 +184,7 @@
               "servers": {
                 "theia": {
                   "protocol": "http",
-                  "port": "3000",
+                  "port": "3100",
                   "path": "/",
                   "attributes": {
                     "type": "ide",
@@ -194,7 +194,7 @@
                 },
                 "theia-dev": {
                   "protocol": "http",
-                  "port": "3030",
+                  "port": "3130",
                   "attributes": {
                     "type": "ide-dev"
                   }
@@ -1834,7 +1834,7 @@
           }
         },
         {
-          "commandLine": "scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
+          "commandLine": "MAVEN_OPTS='-Xmx100m' && scl enable rh-maven33 'mvn clean install -f ${current.project.path}'",
           "name": "clean build",
           "type": "mvn",
           "attributes": {
@@ -2360,6 +2360,108 @@
     "stackIcon": {
       "name": "type-ceylon.svg",
       "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "nodejs-postgres",
+    "creator": "Ibrahim Jarif",
+    "name": "Nodejs and Postgres Stack",
+    "description": "Nodejs stack with Postgres",
+    "scope": "advanced",
+    "tags": [
+      "nodejs-postgres",
+      "npm",
+      "postgres"
+    ],
+    "components": [
+      {
+        "name": "Node.js",
+        "version": "8.11.3"
+      },
+      {
+        "name": "NPM",
+        "version": "5.6.0"
+      },
+      {
+        "name": "Postgres",
+        "version": "9.6"
+      }
+    ],
+    "workspaceConfig": {
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "database": {
+              "attributes": {
+                "memoryLimitBytes": "547483648"
+              },
+              "servers": {
+                "postgres": {
+                  "attributes": {},
+                  "port": "5432",
+                  "protocol": "tcp"
+                }
+              },
+              "volumes": {
+                "postgresdata": {
+                  "path": "/var/lib/pgsql/data"
+                }
+              },
+              "installers": [
+                "org.eclipse.che.exec",
+                "org.eclipse.che.terminal"
+              ],
+              "env": {
+                "POSTGRESQL_ADMIN_PASSWORD": "adminpassword",
+                "POSTGRESQL_DATABASE": "my_data",
+                "POSTGRESQL_USER": "user",
+                "POSTGRESQL_PASSWORD": "password"
+              }
+            },
+            "nodejs": {
+              "attributes": {
+                "memoryLimitBytes": "1147483648"
+              },
+              "servers": {
+                "node": {
+                  "attributes": {},
+                  "port": "8080",
+                  "protocol": "http"
+                }
+              },
+              "volumes": {},
+              "installers": [
+                "org.eclipse.che.exec",
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ls.js-ts",
+                "org.eclipse.che.ws-agent"
+              ],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "openshift",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: nodejs-postgres-pod\n   annotations:\n    org.eclipse.che.container.nodejs.machine_name: nodejs\n    org.eclipse.che.container.database.machine_name: database\n  spec:\n   containers:\n    - \n     image: quay.io/openshiftio/che-centos-nodejs\n     name: nodejs\n     ports:\n      - \n       containerPort: 8080\n       protocol: TCP\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: centos/postgresql-96-centos7\n     name: database\n     ports:\n      - \n       containerPort: 5432\n       protocol: TCP\n     resources:\n      limits:\n       memory: 512Mi\n     env:\n      - \n       name: POSTGRESQL_USER\n       value: user\n      - \n       name: POSTGRESQL_PASSWORD\n       value: password\n      - \n       name: POSTGRESQL_DATABASE\n       value: my_data\n      - \n       name: POSTGRESQL_ADMIN_PASSWORD\n       value: adminpassword\n",
+            "contentType": "text/x-yaml"
+          }
+        }
+      },
+      "projects": [],
+      "name": "default",
+      "attributes": {},
+      "commands": [
+        {
+          "commandLine": "cd ${current.project.path} && node .",
+          "name": "Run",
+          "attributes": {
+            "goal": "Run",
+            "previewUrl": "${server.node}"
+          },
+          "type": "custom"
+        }
+      ],
+      "links": []
     }
   },
   {

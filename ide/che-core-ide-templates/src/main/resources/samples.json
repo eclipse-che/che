@@ -424,7 +424,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} \nnode app/app.js",
+        "commandLine": "cd ${current.project.path} \n node .",
         "attributes": {
           "previewUrl": "${server.3000/tcp}",
           "goal": "Run"
@@ -594,6 +594,42 @@
     "tags": [
       "cpp",
       "gcc"
+    ]
+  },
+  {
+    "name": "nodejs-crud-sample",
+    "displayName": "Nodejs Postgres Sample",
+    "path": "/nodejs-crud",
+    "description": "Express app with Postgres database",
+    "projectType": "node-js",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "javascript"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/nodeshift-starters/nodejs-rest-http-crud.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "install dependencies",
+        "type": "custom",
+        "commandLine": "cd ${current.project.path} \nnpm install",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "nodejs-postgres"
     ]
   },
   {

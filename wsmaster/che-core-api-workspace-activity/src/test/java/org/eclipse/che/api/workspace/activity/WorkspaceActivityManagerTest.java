@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -18,30 +20,40 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.testng.AssertJUnit.assertEquals;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.stream.Stream;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.shared.Constants;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
+import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+/** Tests for {@link WorkspaceActivityManager} */
 @Listeners(value = MockitoTestNGListener.class)
-/** Tests for {@link WorkspaceActivityNotifier} */
 public class WorkspaceActivityManagerTest {
+
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
 
   @Mock private WorkspaceManager workspaceManager;
 
-  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> captor;
+  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceCreatedEvent>> createEventCaptor;
+  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> statusChangeEventCaptor;
+  @Captor private ArgumentCaptor<EventSubscriber<BeforeWorkspaceRemovedEvent>> removeEventCaptor;
 
   @Mock private Account account;
   @Mock private WorkspaceImpl workspace;
@@ -71,23 +83,22 @@ public class WorkspaceActivityManagerTest {
 
     activityManager.update(wsId, activityTime);
 
-    WorkspaceExpiration expected = new WorkspaceExpiration(wsId, activityTime + DEFAULT_TIMEOUT);
-    verify(workspaceActivityDao, times(1)).setExpiration(eq(expected));
+    verify(workspaceActivityDao, times(1))
+        .setExpirationTime(eq(wsId), eq(activityTime + DEFAULT_TIMEOUT));
   }
 
   @Test
   public void shouldAddWorkspaceForTrackActivityWhenWorkspaceRunning() throws Exception {
     final String wsId = "testWsId";
-    activityManager.subscribe();
-    verify(eventService).subscribe(captor.capture());
-    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = subscribeAndGetStatusEventSubscriber();
+
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
             .withStatus(WorkspaceStatus.RUNNING)
             .withWorkspaceId(wsId));
-    ArgumentCaptor<WorkspaceExpiration> captor = ArgumentCaptor.forClass(WorkspaceExpiration.class);
-    verify(workspaceActivityDao, times(1)).setExpiration(captor.capture());
-    assertEquals(captor.getValue().getWorkspaceId(), wsId);
+    ArgumentCaptor<String> wsIdCaptor = ArgumentCaptor.forClass(String.class);
+    verify(workspaceActivityDao, times(1)).setExpirationTime(wsIdCaptor.capture(), any(long.class));
+    assertEquals(wsIdCaptor.getValue(), wsId);
   }
 
   @Test
@@ -95,9 +106,7 @@ public class WorkspaceActivityManagerTest {
     final String wsId = "testWsId";
     final long expiredTime = 1000L;
     activityManager.update(wsId, expiredTime);
-    activityManager.subscribe();
-    verify(eventService).subscribe(captor.capture());
-    final EventSubscriber<WorkspaceStatusEvent> subscriber = captor.getValue();
+    final EventSubscriber<WorkspaceStatusEvent> subscriber = subscribeAndGetStatusEventSubscriber();
 
     subscriber.onEvent(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
@@ -105,5 +114,76 @@ public class WorkspaceActivityManagerTest {
             .withWorkspaceId(wsId));
 
     verify(workspaceActivityDao, times(1)).removeExpiration(eq(wsId));
+  }
+
+  @Test
+  public void shouldRecordWorkspaceCreation() throws Exception {
+    String wsId = "1";
+
+    EventSubscriber<WorkspaceCreatedEvent> subscriber = subscribeAndGetCreatedSubscriber();
+
+    subscriber.onEvent(
+        new WorkspaceCreatedEvent(
+            DtoFactory.newDto(WorkspaceDto.class)
+                .withId(wsId)
+                .withAttributes(ImmutableMap.of(Constants.CREATED_ATTRIBUTE_NAME, "15"))));
+
+    verify(workspaceActivityDao, times(1)).setCreatedTime(eq(wsId), eq(15L));
+  }
+
+  @Test(dataProvider = "wsStatus")
+  public void shouldRecordWorkspaceStatusChange(WorkspaceStatus status) throws Exception {
+    String wsId = "1";
+
+    EventSubscriber<WorkspaceStatusEvent> subscriber = subscribeAndGetStatusEventSubscriber();
+
+    subscriber.onEvent(
+        DtoFactory.newDto(WorkspaceStatusEvent.class).withStatus(status).withWorkspaceId(wsId));
+
+    verify(workspaceActivityDao, times(1)).setStatusChangeTime(eq(wsId), eq(status), anyLong());
+  }
+
+  @Test
+  public void shouldRemoveActivityWhenWorkspaceRemoved() throws Exception {
+    String wsId = "1";
+
+    EventSubscriber<BeforeWorkspaceRemovedEvent> subscriber = subscribeAndGetRemoveSubscriber();
+
+    subscriber.onEvent(
+        new BeforeWorkspaceRemovedEvent(
+            new WorkspaceImpl(DtoFactory.newDto(WorkspaceDto.class).withId(wsId), null)));
+
+    verify(workspaceActivityDao, times(1)).removeActivity(eq(wsId));
+  }
+
+  @DataProvider(name = "wsStatus")
+  public Object[][] getWorkspaceStatus() {
+    return Stream.of(WorkspaceStatus.values())
+        .map(s -> new WorkspaceStatus[] {s})
+        .toArray(Object[][]::new);
+  }
+
+  private EventSubscriber<WorkspaceStatusEvent> subscribeAndGetStatusEventSubscriber() {
+    subscribeToEventService();
+    return statusChangeEventCaptor.getValue();
+  }
+
+  private EventSubscriber<WorkspaceCreatedEvent> subscribeAndGetCreatedSubscriber() {
+    subscribeToEventService();
+    return createEventCaptor.getValue();
+  }
+
+  private EventSubscriber<BeforeWorkspaceRemovedEvent> subscribeAndGetRemoveSubscriber() {
+    subscribeToEventService();
+    return removeEventCaptor.getValue();
+  }
+
+  private void subscribeToEventService() {
+    activityManager.subscribe();
+    verify(eventService).subscribe(createEventCaptor.capture(), eq(WorkspaceCreatedEvent.class));
+    verify(eventService)
+        .subscribe(statusChangeEventCaptor.capture(), eq(WorkspaceStatusEvent.class));
+    verify(eventService)
+        .subscribe(removeEventCaptor.capture(), eq(BeforeWorkspaceRemovedEvent.class));
   }
 }
