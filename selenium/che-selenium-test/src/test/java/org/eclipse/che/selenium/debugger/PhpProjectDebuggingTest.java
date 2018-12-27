@@ -45,13 +45,11 @@ import org.testng.annotations.Test;
 public class PhpProjectDebuggingTest {
 
   private static final Logger LOG = LoggerFactory.getLogger(PhpProjectDebuggingTest.class);
-  private static final String PROJECT = "php-tests";
+  protected static final String PROJECT = "php-tests";
   private static final String PATH_TO_INDEX_PHP = PROJECT + "/index.php";
   private static final String PATH_TO_LIB_PHP = PROJECT + "/lib.php";
 
   private static final String DEBUG_PHP_SCRIPT_COMMAND_NAME = "debug php script";
-  private static final String START_APACHE_COMMAND_NAME = "start apache";
-  private static final String STOP_APACHE_COMMAND_NAME = "stop apache";
   private static final int NON_DEFAULT_DEBUG_PORT = 10140;
   private static final String START_DEBUG_PARAMETERS =
       "?start_debug=1&debug_host=localhost&debug_port=" + NON_DEFAULT_DEBUG_PORT;
@@ -61,7 +59,7 @@ public class PhpProjectDebuggingTest {
 
   @Inject private Ide ide;
 
-  @Inject private ProjectExplorer projectExplorer;
+  @Inject protected ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private DebugPanel debugPanel;
   @Inject private PhpDebugConfig debugConfig;
@@ -99,7 +97,7 @@ public class PhpProjectDebuggingTest {
     debugPanel.removeAllBreakpoints();
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU, TestMenuCommandsConstants.Run.END_DEBUG_SESSION);
-    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, PROJECT, STOP_APACHE_COMMAND_NAME);
+    invokeStopCommandWithContextMenu();
 
     // remove debug configuration
     menu.runCommand(
@@ -178,7 +176,7 @@ public class PhpProjectDebuggingTest {
     editor.closeAllTabs();
 
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
-    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, PROJECT, START_APACHE_COMMAND_NAME);
+    invokeStartCommandWithContextMenu();
 
     startWebPhpScriptInDebugMode();
 
@@ -234,5 +232,13 @@ public class PhpProjectDebuggingTest {
     return String.format(
         "//*[@id=\"%1$s/%2$s\" or @id=\"topmenu/Run/Debug/Debug '%2$s'\"]",
         TestMenuCommandsConstants.Run.DEBUG, PROJECT);
+  }
+
+  protected void invokeStartCommandWithContextMenu() {
+    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, PROJECT, "start apache");
+  }
+
+  protected void invokeStopCommandWithContextMenu() {
+    projectExplorer.invokeCommandWithContextMenu(COMMON_GOAL, PROJECT, "stop apache");
   }
 }

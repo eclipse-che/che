@@ -41,7 +41,6 @@ public class CppProjectDebuggingTest {
   private static final String PROJECT = "cpp-tests";
   private static final String PATH_TO_PROGRAM = PROJECT + "/hello.cc";
   private static final int DEBUG_PORT = 8001;
-
   private static final String MAKE_AND_DEBUG_COMMAND_NAME = "make and debug";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.ECLIPSE_CPP_GCC)
@@ -51,7 +50,7 @@ public class CppProjectDebuggingTest {
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private DebugPanel debugPanel;
+  @Inject protected DebugPanel debugPanel;
   @Inject private CppDebugConfig debugConfig;
   @Inject private NotificationsPopupPanel notifications;
   @Inject private Menu menu;
@@ -121,7 +120,7 @@ public class CppProjectDebuggingTest {
     // then
     editor.waitTabFileWithSavedStatus("hello.cc");
     debugPanel.waitDebugHighlightedText("  return \"Hello World, \" + name + \"!\";");
-    debugPanel.waitTextInVariablesPanel("name =");
+    waitTextInVariablesPanel();
     debugPanel.waitTextInVariablesPanel("\"man\"");
 
     // when
@@ -136,5 +135,9 @@ public class CppProjectDebuggingTest {
     return String.format(
         "//*[@id=\"%1$s/%2$s\" or @id=\"topmenu/Run/Debug/Debug '%2$s'\"]",
         TestMenuCommandsConstants.Run.DEBUG, PROJECT);
+  }
+
+  protected void waitTextInVariablesPanel() {
+    debugPanel.waitTextInVariablesPanel("name =");
   }
 }
