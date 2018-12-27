@@ -22,6 +22,7 @@ import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.factory.FactoryTemplate;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
+import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.PullRequestPanel;
@@ -39,6 +40,7 @@ public class CheckFactoryWithSparseCheckoutTest {
   @Inject private PullRequestPanel pullRequestPanel;
   @Inject private TestGitHubRepository testRepo;
   @Inject private TestFactoryInitializer testFactoryInitializer;
+  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   private TestFactory testFactory;
@@ -74,6 +76,8 @@ public class CheckFactoryWithSparseCheckoutTest {
   @Test
   public void acceptFactoryWithSparseCheckout() {
     testFactory.authenticateAndOpen();
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(projectName);
 

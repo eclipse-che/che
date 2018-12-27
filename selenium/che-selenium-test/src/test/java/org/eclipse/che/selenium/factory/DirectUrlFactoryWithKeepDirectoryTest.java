@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.selenium.factory;
 
+import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
+import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
 
@@ -20,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -34,7 +35,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = TestGroup.GITHUB)
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithKeepDirectoryTest {
 
   @Inject private ProjectExplorer projectExplorer;
