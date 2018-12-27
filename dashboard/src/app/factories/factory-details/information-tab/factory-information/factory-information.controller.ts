@@ -13,6 +13,7 @@
 import {CheAPI} from '../../../../../components/api/che-api.factory';
 import {CheNotification} from '../../../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../../../components/service/confirm-dialog/confirm-dialog.service';
+import {CheBranding} from '../../../../../components/branding/che-branding.factory';
 
 /**
  * Controller for a factory information.
@@ -20,7 +21,7 @@ import {ConfirmDialogService} from '../../../../../components/service/confirm-di
  */
 export class FactoryInformationController {
 
-  static $inject = ['$scope', 'cheAPI', 'cheNotification', '$location', '$log', '$timeout', 'lodash', '$filter', '$q', 'confirmDialogService'];
+  static $inject = ['$scope', 'cheAPI', 'cheNotification', '$location', '$log', '$timeout', 'lodash', '$filter', '$q', 'cheBranding', 'confirmDialogService'];
 
   private confirmDialogService: ConfirmDialogService;
   private cheAPI: CheAPI;
@@ -47,6 +48,7 @@ export class FactoryInformationController {
   private workspaceConfig: any;
   private origName: string;
   private isEditorContentChanged: boolean = false;
+  private factoryDocs: string;
 
   /**
    * Default constructor that is using resource injection
@@ -60,6 +62,7 @@ export class FactoryInformationController {
               lodash: any,
               $filter: ng.IFilterService,
               $q: ng.IQService,
+              cheBranding: CheBranding,
               confirmDialogService: ConfirmDialogService) {
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
@@ -70,6 +73,7 @@ export class FactoryInformationController {
     this.lodash = lodash;
     this.$filter = $filter;
     this.confirmDialogService = confirmDialogService;
+    this.factoryDocs = cheBranding.getDocs().factory;
 
     this.timeoutPromise = null;
     $scope.$on('$destroy', () => {
