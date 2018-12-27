@@ -148,11 +148,7 @@ public class CreateWorkspaceFromNodeStackTest {
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     ide.waitOpenedWorkspaceIsReadyToUse();
 
-    try {
-      consoles.waitPreviewUrlIsPresent();
-    } catch (TimeoutException ex) {
-      fail("Known random failure https://github.com/eclipse/che/issues/11419", ex);
-    }
+    consoles.waitPreviewUrlIsPresent();
 
     consoles.checkWebElementVisibilityAtPreviewPage(textOnPreviewPage);
 

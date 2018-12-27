@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.languageserver;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Profile.PREFERENCES;
@@ -172,7 +173,7 @@ public class YamlFileEditingTest {
     editor.waitTextIntoEditor("spec:");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = FLAKY)
   public void checkHoverFeature() {
     editor.selectTabByName("deployment.yaml");
 
@@ -192,7 +193,7 @@ public class YamlFileEditingTest {
             + "http://releases\\.k8s\\.io/HEAD/docs/devel/api\\-conventions\\.md\\#resources");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = FLAKY)
   public void checkCodeValidation() {
     editor.selectTabByName("deployment.yaml");
     editor.waitAllMarkersInvisibility(ERROR);

@@ -79,6 +79,7 @@ initVariables() {
     PRODUCT_HOST=$(detectDockerInterfaceIp)
     PRODUCT_PORT=8080
     INCLUDE_TESTS_UNDER_REPAIR=false
+    INCLUDE_FLAKY_TESTS=false
 
     unset DEBUG_OPTIONS
     unset MAVEN_OPTIONS
@@ -151,6 +152,7 @@ checkParameters() {
         elif [[ "$var" == --multiuser ]]; then :
         elif [[ "$var" =~ --exclude=.* ]]; then :
         elif [[ "$var" =~ --include-tests-under-repair ]]; then :
+        elif [[ "$var" =~ --include-flaky-tests ]]; then :
 
         else
             printHelp
@@ -213,6 +215,9 @@ applyCustomOptions() {
 
         elif [[ "$var" == --include-tests-under-repair ]]; then
             INCLUDE_TESTS_UNDER_REPAIR=true
+
+        elif [[ "$var" == --include-flaky-tests ]]; then
+            INCLUDE_FLAKY_TESTS=true
 
         fi
     done
@@ -424,6 +429,7 @@ Other options:
     --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
                                         Default value is 0, that means that test workspaces are created on demand.
     --include-tests-under-repair        Include tests which belong to group 'UNDER REPAIR'
+    --include-flaky-tests               Include tests which randomly failed and so belong to group 'FLAKY'
 
 HOW TO of usage:
     Test Eclipse Che single user assembly:
@@ -441,8 +447,8 @@ HOW TO of usage:
     Run suite:
         ${CALLER} <...> --suite=<PATH_TO_SUITE>
 
-    Include tests which belong to group 'UNDER REPAIR'
-        ./selenium-tests.sh --include-tests-under-repair
+    Include tests which belong to groups 'UNDER REPAIR' and 'FLAKY'
+        ./selenium-tests.sh --include-tests-under-repair --include-flaky-tests
 
     Rerun failed tests:
         ${CALLER} <...> --failed-tests
@@ -737,6 +743,10 @@ getExcludedGroups() {
 
     if [[ ${INCLUDE_TESTS_UNDER_REPAIR} == false ]]; then
       excludeParamArray+=( 'under_repair' )
+    fi
+
+    if [[ ${INCLUDE_FLAKY_TESTS} == false ]]; then
+      excludeParamArray+=( 'flaky' )
     fi
 
     echo $(IFS=$','; echo "${excludeParamArray[*]}")

@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -31,6 +32,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Mihail Kuznyetsov */
+@Test(groups = FLAKY)
 public class CheckFactoryWithPerClickCreatePolicyTest {
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;

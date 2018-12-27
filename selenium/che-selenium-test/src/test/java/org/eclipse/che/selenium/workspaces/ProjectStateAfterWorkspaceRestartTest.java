@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.STOP_WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
@@ -33,6 +34,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev on 10.03.16 */
+@Test(groups = FLAKY)
 public class ProjectStateAfterWorkspaceRestartTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String EXP_TEXT_NOT_PRESENT =
