@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.api.core.jsonrpc.impl;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -24,7 +22,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Named;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
@@ -63,20 +60,6 @@ public class ServerSideRequestProcessorConfigurator implements RequestProcessorC
     ((ThreadPoolExecutor) defaultExecutorService)
         .setRejectedExecutionHandler(
             (r, executor) -> LOG.warn("Message {} rejected for execution", r));
-  }
-
-  @PreDestroy
-  private void preDestroy() {
-    defaultExecutorService.shutdown();
-    try {
-      if (defaultExecutorService.awaitTermination(3, SECONDS)) {
-        defaultExecutorService.shutdownNow();
-        defaultExecutorService.awaitTermination(5, SECONDS);
-      }
-    } catch (InterruptedException ie) {
-      defaultExecutorService.shutdownNow();
-      Thread.currentThread().interrupt();
-    }
   }
 
   @Override

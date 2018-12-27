@@ -13,6 +13,7 @@ package org.eclipse.che.api.core.jsonrpc.commons;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.eclipse.che.api.core.websocket.impl.WebsocketIdService.SEPARATOR;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.List;
@@ -70,7 +71,7 @@ public class JsonRpcMessageReceiver implements WebSocketMessageReceiver {
     List<String> messages = jsonRpcUnmarshaller.unmarshalArray(message);
     for (String innerMessage : messages) {
       if (jsonRpcQualifier.isJsonRpcRequest(innerMessage)) {
-        String endpointId = combinedEndpointId.split("<-:->")[1];
+        String endpointId = combinedEndpointId.split(SEPARATOR)[1];
         ProcessRequestTask task = new ProcessRequestTask(combinedEndpointId, innerMessage);
         requestProcessor.process(endpointId, task);
       } else if (jsonRpcQualifier.isJsonRpcResponse(innerMessage)) {

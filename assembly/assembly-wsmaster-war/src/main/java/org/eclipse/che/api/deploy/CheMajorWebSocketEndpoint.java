@@ -19,12 +19,10 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.websocket.server.ServerEndpoint;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
-import org.eclipse.che.api.core.jsonrpc.impl.ServerSideRequestProcessor;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
@@ -70,28 +68,14 @@ public class CheMajorWebSocketEndpoint extends BasicWebSocketEndpoint {
     ThreadFactory factory =
         new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-            .setNameFormat(ServerSideRequestProcessor.class.getSimpleName() + "-%d")
+            .setNameFormat(CheMajorWebSocketEndpoint.class.getSimpleName() + "-%d")
             .setDaemon(true)
             .build();
 
     executor =
         new ThreadPoolExecutor(0, maxPoolSize, 60L, SECONDS, new SynchronousQueue<>(), factory);
     executor.setRejectedExecutionHandler(
-        (r, __) -> LOG.warn("Message {} rejected for execution", r));
+        (r, __) -> LOG.error("Message {} rejected for execution", r));
     requestProcessorConfigurator.put(getEndpointId(), () -> executor);
-  }
-
-  @PreDestroy
-  private void preDestroy() {
-    executor.shutdown();
-    try {
-      if (executor.awaitTermination(3, SECONDS)) {
-        executor.shutdownNow();
-        executor.awaitTermination(3, SECONDS);
-      }
-    } catch (InterruptedException ie) {
-      executor.shutdownNow();
-      Thread.currentThread().interrupt();
-    }
   }
 }
