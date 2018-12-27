@@ -9,11 +9,12 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.urlfactory;
+package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.util.Collections.singletonList;
 
 import java.util.List;
+import java.util.function.Supplier;
 import javax.inject.Singleton;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
@@ -33,22 +34,22 @@ public class ProjectConfigDtoMerger {
    *
    * <ul>
    *   <li>no projects --> add whole project
-   *   <li>if projects
+   *   <li>if projects:
    *       <ul>
-   *         <li>: if there is only one project: add source if missing
+   *         <li>if there is only one project: add source if missing
    *         <li>if many projects: do nothing
    *       </ul>
    * </ul>
    *
-   * @param factory
-   * @param computedProjectConfig
-   * @return
+   * @param factory source factory
+   * @param configSupplier supplier which can compute project config on demand
+   * @return factory with merged project sources
    */
-  public FactoryDto merge(FactoryDto factory, ProjectConfigDto computedProjectConfig) {
+  public FactoryDto merge(FactoryDto factory, Supplier<ProjectConfigDto> configSupplier) {
 
     final List<ProjectConfigDto> projects = factory.getWorkspace().getProjects();
     if (projects == null || projects.isEmpty()) {
-      factory.getWorkspace().setProjects(singletonList(computedProjectConfig));
+      factory.getWorkspace().setProjects(singletonList(configSupplier.get()));
       return factory;
     }
 
@@ -56,7 +57,7 @@ public class ProjectConfigDtoMerger {
     if (projects.size() == 1) {
       ProjectConfigDto projectConfig = projects.get(0);
       if (projectConfig.getSource() == null)
-        projectConfig.setSource(computedProjectConfig.getSource());
+        projectConfig.setSource(configSupplier.get().getSource());
     }
 
     return factory;

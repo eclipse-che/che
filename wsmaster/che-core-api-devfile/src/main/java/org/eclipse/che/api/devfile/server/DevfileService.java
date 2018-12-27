@@ -11,13 +11,11 @@
  */
 package org.eclipse.che.api.devfile.server;
 
-import static java.util.Collections.emptyMap;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.annotations.Api;
@@ -45,39 +43,29 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
-import org.eclipse.che.commons.env.EnvironmentContext;
 
 @Api(value = "/devfile", description = "Devfile REST API")
 @Path("/devfile")
 public class DevfileService extends Service {
 
   private WorkspaceLinksGenerator linksGenerator;
-  private DevfileSchemaValidator schemaValidator;
-  private DevfileIntegrityValidator integrityValidator;
   private DevfileSchemaProvider schemaCachedProvider;
-  private WorkspaceManager workspaceManager;
   private ObjectMapper objectMapper;
-  private DevfileConverter devfileConverter;
+  private DevfileManager devfileManager;
 
   @Inject
   public DevfileService(
       WorkspaceLinksGenerator linksGenerator,
-      DevfileSchemaValidator schemaValidator,
-      DevfileIntegrityValidator integrityValidator,
       DevfileSchemaProvider schemaCachedProvider,
-      WorkspaceManager workspaceManager) {
+      DevfileManager devfileManager) {
     this.linksGenerator = linksGenerator;
-    this.schemaValidator = schemaValidator;
-    this.integrityValidator = integrityValidator;
     this.schemaCachedProvider = schemaCachedProvider;
-    this.workspaceManager = workspaceManager;
+    this.devfileManager = devfileManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
-    this.devfileConverter = new DevfileConverter();
   }
 
   /**
@@ -134,22 +122,15 @@ public class DevfileService extends Service {
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
-    Devfile devFile;
-    WorkspaceConfigImpl workspaceConfig;
+    WorkspaceImpl workspace;
     try {
-      JsonNode parsed = schemaValidator.validateBySchema(data, verbose);
-      devFile = objectMapper.treeToValue(parsed, Devfile.class);
-      integrityValidator.validateDevfile(devFile);
-      workspaceConfig = devfileConverter.devFileToWorkspaceConfig(devFile);
-    } catch (IOException e) {
-      throw new ServerException(e.getMessage());
+      Devfile devfile = devfileManager.parse(data, verbose);
+      workspace = devfileManager.createWorkspace(devfile);
     } catch (DevfileFormatException e) {
       throw new BadRequestException(e.getMessage());
+    } catch (JsonProcessingException e) {
+      throw new ServerException(e.getMessage());
     }
-
-    final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
-    WorkspaceImpl workspace =
-        workspaceManager.createWorkspace(findAvailableName(workspaceConfig), namespace, emptyMap());
     return Response.status(201)
         .entity(asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext())))
         .build();
@@ -158,8 +139,6 @@ public class DevfileService extends Service {
   /**
    * Generates the devfile based on an existing workspace. Key is workspace id or
    * namespace/workspace_name
-   *
-   * @see WorkspaceManager#getByKey(String)
    */
   @GET
   @Path("/{key:.*}")
@@ -185,33 +164,11 @@ public class DevfileService extends Service {
                   }))
           @PathParam("key")
           String key)
-      throws NotFoundException, ServerException, BadRequestException, ConflictException {
+      throws NotFoundException, ServerException, BadRequestException, ConflictException,
+          JsonProcessingException {
     validateKey(key);
-    WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
-    try {
-      Devfile workspaceDevFile = devfileConverter.workspaceToDevFile(workspace.getConfig());
-      // Write object as YAML
-      return Response.ok().entity(objectMapper.writeValueAsString(workspaceDevFile)).build();
-    } catch (JsonProcessingException e) {
-      throw new ServerException(e.getMessage(), e);
-    } catch (WorkspaceExportException e) {
-      throw new ConflictException(e.getMessage());
-    }
-  }
-
-  private WorkspaceConfigImpl findAvailableName(WorkspaceConfigImpl config) throws ServerException {
-    String nameCandidate = config.getName();
-    String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
-    int counter = 0;
-    while (true) {
-      try {
-        workspaceManager.getWorkspace(nameCandidate, namespace);
-        nameCandidate = config.getName() + "_" + ++counter;
-      } catch (NotFoundException nf) {
-        config.setName(nameCandidate);
-        break;
-      }
-    }
-    return config;
+    return Response.ok()
+        .entity(objectMapper.writeValueAsString(devfileManager.exportWorkspace(key)))
+        .build();
   }
 }

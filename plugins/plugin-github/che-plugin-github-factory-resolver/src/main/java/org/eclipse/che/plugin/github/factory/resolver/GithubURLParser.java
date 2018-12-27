@@ -11,26 +11,86 @@
  */
 package org.eclipse.che.plugin.github.factory.resolver;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.validation.constraints.NotNull;
+import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
+
 /**
- * Interface for Gitlab repository URL parsers.
+ * Parser of String Github URLs and provide {@link GithubUrl} objects.
  *
- * @author Max Shaposhnik
+ * @author Florent Benoit
  */
-public interface GithubURLParser {
+@Singleton
+public class GithubURLParser {
+
+  /** Fetcher to grab PR data */
+  @Inject private URLFetcher urlFetcher;
 
   /**
-   * Check if the URL is a valid Github url for the given provider.
-   *
-   * @param url a not null string representation of URL
-   * @return {@code true} if the URL is a valid url for the given provider.
+   * Regexp to find repository details (repository name, project name and branch and subfolder)
+   * Examples of valid URLs are in the test class.
    */
-  boolean isValid(String url);
+  protected static final Pattern GITHUB_PATTERN =
+      Pattern.compile(
+          "^(?:http)(?:s)?(?:\\:\\/\\/)github.com/(?<repoUser>[^/]++)/(?<repoName>[^/]++)((?:/tree/(?<branchName>[^/]++)(?:/(?<subFolder>.*))?)|(/pull/(?<pullRequestId>[^/]++)))?$");
 
-  /**
-   * Provides a parsed URL object of the given provider type.
-   *
-   * @param url URL to transform into a managed object
-   * @return managed url object
-   */
-  GithubUrl parse(String url);
+  /** Regexp to find repository and branch name from PR link */
+  protected static final Pattern PR_DATA_PATTERN =
+      Pattern.compile(
+          ".*<div class=\"State[\\s|\\S]+(?<prState>Closed|Open|Merged)[\\s|\\S]+<\\/div>[\\s|\\S]+into[\\s]+(from[\\s]*)*<span title=\"(?<prRepoUser>[^\\\\/]+)\\/(?<prRepoName>[^\\:]+):(?<prBranch>[^\\\"]+).*",
+          Pattern.DOTALL);
+
+  public boolean isValid(@NotNull String url) {
+    return GITHUB_PATTERN.matcher(url).matches();
+  }
+
+  public GithubUrl parse(String url) {
+    // Apply github url to the regexp
+    Matcher matcher = GITHUB_PATTERN.matcher(url);
+    if (!matcher.matches()) {
+      throw new IllegalArgumentException(
+          String.format(
+              "The given github url %s is not a valid URL github url. It should start with https://github.com/<user>/<repo>",
+              url));
+    }
+
+    String repoUser = matcher.group("repoUser");
+    String repoName = matcher.group("repoName");
+    String branchName = matcher.group("branchName");
+
+    String pullRequestId = matcher.group("pullRequestId");
+    if (pullRequestId != null) {
+      // there is a Pull Request ID, analyze content to extract repository and branch to use
+      String prData = this.urlFetcher.fetch(url);
+      Matcher prMatcher = PR_DATA_PATTERN.matcher(prData);
+      if (prMatcher.matches()) {
+        String prState = prMatcher.group("prState");
+        if (!"open".equalsIgnoreCase(prState)) {
+          throw new IllegalArgumentException(
+              String.format(
+                  "The given Pull Request url %s is not Opened, (found %s), thus it can't be opened as branch may have been removed.",
+                  url, prState));
+        }
+        repoUser = prMatcher.group("prRepoUser");
+        repoName = prMatcher.group("prRepoName");
+        branchName = prMatcher.group("prBranch");
+      } else {
+        throw new IllegalArgumentException(
+            String.format(
+                "The given Pull Request github url %s is not a valid Pull Request URL github url. Unable to extract the data",
+                url));
+      }
+    }
+
+    return new GithubUrl()
+        .withUsername(repoUser)
+        .withRepository(repoName)
+        .withBranch(branchName)
+        .withSubfolder(matcher.group("subFolder"))
+        .withDevfileFilename(".devfile")
+        .withFactoryFilename(".factory.json");
+  }
 }
