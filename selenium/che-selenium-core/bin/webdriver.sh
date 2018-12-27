@@ -428,8 +428,8 @@ Other options:
     --skip-sources-validation           Fast build. Skips source validation and enforce plugins
     --workspace-pool-size=[<SIZE>|auto] Size of test workspace pool.
                                         Default value is 0, that means that test workspaces are created on demand.
-    --include-tests-under-repair        Include tests which belong to group 'UNDER REPAIR'
-    --include-flaky-tests               Include tests which randomly failed and so belong to group 'FLAKY'
+    --include-tests-under-repair        Include tests which permanently fail and so belong to group 'UNDER REPAIR'
+    --include-flaky-tests               Include tests which randomly fail and so belong to group 'FLAKY'
 
 HOW TO of usage:
     Test Eclipse Che single user assembly:
