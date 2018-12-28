@@ -110,12 +110,6 @@ public class KeycloakCliClient {
           format("update users/%s -r che --set email=%s %s 2>&1", userId, email, authPartOfCommand);
       executor.execute(setEmailCommand);
 
-      String addUserRoleToUserCommand =
-          format(
-              "add-roles -r che --uusername %s --rolename user %s 2>&1",
-              username, authPartOfCommand);
-      executor.execute(addUserRoleToUserCommand);
-
       String addReadTokenRoleToUserCommand =
           format(
               "add-roles -r che --uusername %s --cclientid broker --rolename read-token %s 2>&1",
