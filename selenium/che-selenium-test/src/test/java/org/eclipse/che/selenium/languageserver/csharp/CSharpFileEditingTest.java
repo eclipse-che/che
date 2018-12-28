@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver.csharp;
 
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
@@ -42,7 +43,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = UNDER_REPAIR)
 public class CSharpFileEditingTest {
 
   private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
@@ -81,12 +81,12 @@ public class CSharpFileEditingTest {
     initLanguageServer();
   }
 
-  @Test
+  @Test(groups = FLAKY)
   public void checkCodeEditing() {
     checkCodeValidation();
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void checkInitializingAfterFirstStarting() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/Program.cs");
 

@@ -16,7 +16,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FILE_STRUCTURE;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SIMPLE;
 import static org.openqa.selenium.Keys.ESCAPE;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.net.URL;
@@ -29,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriverException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -164,13 +162,7 @@ public class FileStructureNodesTest {
     menu.runCommand(ASSISTANT, FILE_STRUCTURE);
     fileStructure.waitFileStructureFormIsOpen(JAVA_FILE_NAME);
 
-    try {
-      fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
-    } catch (WebDriverException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known random failure https://github.com/eclipse/che/issues/8300");
-    }
-
+    fileStructure.waitExpectedTextInFileStructure(ITEMS_CLASS);
     fileStructure.type("get");
     fileStructure.waitExpectedTextInFileStructure(ITEMS_FILTERED_GET);
     fileStructure.type(ESCAPE.toString());
