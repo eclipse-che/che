@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.FAILED;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -38,6 +39,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = FLAKY)
 public class JavaTestPluginJunit4CheckRunSuitesAndScopesTest {
   private static final String JUNIT4_PROJECT = "junit4-tests-with-separeted-suites";
 

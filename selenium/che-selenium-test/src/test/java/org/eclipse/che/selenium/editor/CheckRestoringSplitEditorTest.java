@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.editor;
 
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_JAVA_MULTIMODULE;
@@ -43,6 +44,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = FLAKY)
 public class CheckRestoringSplitEditorTest {
   private String javaClassName = "AppController.java";
   private String readmeFileName = "README.md";
