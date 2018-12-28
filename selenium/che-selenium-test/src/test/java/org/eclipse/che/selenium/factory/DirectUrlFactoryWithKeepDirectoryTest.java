@@ -11,41 +11,30 @@
  */
 package org.eclipse.che.selenium.factory;
 
+import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
+import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
-import static org.testng.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.pageobject.Events;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = TestGroup.GITHUB)
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithKeepDirectoryTest {
 
-  @Inject private ProjectExplorer projectExplorer;
   @Inject private TestFactoryInitializer testFactoryInitializer;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private Events events;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TestProjectServiceClient projectServiceClient;
-  @Inject private DefaultTestUser testUser;
   @Inject private TestGitHubRepository testRepo;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
 
   private TestFactory testFactoryWithKeepDir;
 
@@ -65,27 +54,26 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
   }
 
   @Test
-  public void factoryWithDirectUrlWithKeepDirectory() throws Exception {
-    String repoName = testRepo.getName();
+  public void factoryWithDirectUrlWithKeepDirectory() {
+    String repositoryName = testRepo.getName();
     testFactoryWithKeepDir.authenticateAndOpen();
-    projectExplorer.waitProjectExplorer();
-    notificationsPopupPanel.waitProgressPopupPanelClose();
-    events.clickEventLogBtn();
-    events.waitExpectedMessage("Project " + repoName + " imported", UPDATING_PROJECT_TIMEOUT_SEC);
 
-    projectExplorer.waitItem(repoName);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItem(repoName + "/my-lib/pom.xml");
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitNotificationEqualsTo("Che Workspace: Finished cloning projects.");
+    theiaIde.waitNotificationDisappearance(
+        "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
-    String wsId =
-        workspaceServiceClient
-            .getByName(seleniumWebDriver.getWorkspaceNameFromBrowserUrl(), testUser.getName())
-            .getId();
+    theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectsRootItem();
 
-    List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
-    assertTrue(visibleItems.containsAll(ImmutableList.of(repoName, "my-lib", "src", "pom.xml")));
+    theiaProjectTree.waitItem(repositoryName);
+    theiaProjectTree.openItem(repositoryName + "/my-lib");
+    theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
-    String projectType = projectServiceClient.getFirstProject(wsId).getType();
-    assertTrue(projectType.equals("blank"));
+    Assert.assertTrue(theiaProjectTree.isItemVisible(repositoryName + "/my-lib/pom.xml"));
+    Assert.assertFalse(theiaProjectTree.isItemVisible(repositoryName + "/my-webapp"));
   }
 }

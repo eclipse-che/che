@@ -12,35 +12,29 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
+import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
+import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
-import org.eclipse.che.selenium.core.SeleniumWebDriver;
-import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
-import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
-import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.pageobject.Events;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.PullRequestPanel;
-import org.openqa.selenium.NoSuchElementException;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
+import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
+import org.openqa.selenium.Keys;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = TestGroup.GITHUB)
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithSpecificBranchTest {
   private static final String SECOND_BRANCH_NAME = "contrib";
 
@@ -48,20 +42,11 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Named(AUXILIARY)
   private TestGitHubRepository testAuxiliaryRepo;
 
-  @Inject
-  @Named("github.auxiliary.username")
-  private String gitHubAuxiliaryUserName;
-
-  @Inject private ProjectExplorer projectExplorer;
-  @Inject private DefaultTestUser testUser;
   @Inject private TestFactoryInitializer testFactoryInitializer;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private Events events;
-  @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private PullRequestPanel pullRequestPanel;
-  @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
+  @Inject private TheiaTerminal theiaTerminal;
+  @Inject private TheiaProposalForm theiaProposalForm;
 
   private TestFactory testFactoryWithSpecificBranch;
 
@@ -81,59 +66,50 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
   @AfterClass
   public void deleteTestBranch() throws Exception {
-    if (workspaceServiceClient.exists(gitHubAuxiliaryUserName, testUser.getName())) {
-      testFactoryWithSpecificBranch.delete();
-    }
-  }
-
-  @AfterClass
-  public void restoreContributionTabPreference() throws Exception {
-    testUserPreferencesServiceClient.restoreDefaultContributionTabPreference();
+    testFactoryWithSpecificBranch.delete();
   }
 
   @Test
-  public void factoryWithDirectUrlWithSpecificBranch() throws Exception {
+  public void factoryWithDirectUrlWithSpecificBranch() {
     String repositoryName = testAuxiliaryRepo.getName();
+    final String wsTheiaIdeTerminalTitle = "che-workspace-pod/theia-ide terminal 0";
+    List<String> expectedItemsAfterCloning = Arrays.asList("my-lib", "my-webapp", "src", "pom.xml");
 
-    try {
-      testFactoryWithSpecificBranch.authenticateAndOpen();
-    } catch (NoSuchElementException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("https://github.com/eclipse/che/issues/8671");
-    }
+    testFactoryWithSpecificBranch.authenticateAndOpen();
 
-    projectExplorer.waitProjectExplorer();
-    notificationsPopupPanel.waitProgressPopupPanelClose();
-    events.clickEventLogBtn();
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitNotificationEqualsTo("Che Workspace: Finished cloning projects.");
+    theiaIde.waitNotificationDisappearance(
+        "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
-    events.waitExpectedMessage(
-        "Project " + repositoryName + " imported", UPDATING_PROJECT_TIMEOUT_SEC);
-    events.waitExpectedMessage(
-        "Successfully configured and cloned source code of " + repositoryName,
-        UPDATING_PROJECT_TIMEOUT_SEC);
-    events.waitExpectedMessage(
-        String.format(
-            "Project: %s | cloned from: %s | remote branch: refs/remotes/origin/%s | local branch: %s",
-            repositoryName, repositoryName, SECOND_BRANCH_NAME, SECOND_BRANCH_NAME),
-        UPDATING_PROJECT_TIMEOUT_SEC);
+    theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectsRootItem();
 
-    projectExplorer.waitAndSelectItem(repositoryName);
-    pullRequestPanel.waitOpenPanel();
+    theiaProjectTree.waitItem(repositoryName);
+    theiaProjectTree.openItem(repositoryName + "/my-lib");
+    theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
-    projectExplorer.expandPathInProjectExplorer(repositoryName + "/my-lib");
-    projectExplorer.waitItem(repositoryName + "/my-lib/pom.xml");
+    expectedItemsAfterCloning.forEach(
+        name -> {
+          theiaProjectTree.isItemVisible(repositoryName + "/" + name);
+        });
 
-    String wsId =
-        workspaceServiceClient
-            .getByName(seleniumWebDriver.getWorkspaceNameFromBrowserUrl(), testUser.getName())
-            .getId();
+    // check specific branch
+    openTerminalByProposal("che-workspace-pod/theia-ide");
+    theiaTerminal.waitTab(wsTheiaIdeTerminalTitle);
+    theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
+    theiaTerminal.performCommand("cd " + repositoryName);
+    theiaTerminal.performCommand("git status");
+    theiaTerminal.waitTerminalOutput("On branch " + SECOND_BRANCH_NAME, 0);
+  }
 
-    List<String> visibleItems = projectExplorer.getNamesOfAllOpenItems();
-    assertTrue(
-        visibleItems.containsAll(
-            ImmutableList.of(repositoryName, "my-lib", "my-webapp", "src", "pom.xml")));
-
-    String projectType = testProjectServiceClient.getFirstProject(wsId).getType();
-    assertTrue(projectType.equals("blank"));
+  private void openTerminalByProposal(String proposalText) {
+    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, "`");
+    theiaProposalForm.waitProposal(proposalText);
+    theiaProposalForm.clickOnProposal(proposalText);
+    theiaProposalForm.waitFormDisappearance();
   }
 }
