@@ -12,8 +12,7 @@
   "required": [
     "specVersion",
     "name",
-    "tools",
-    "commands"
+    "tools"
   ],
   "properties": {
     "specVersion": {
