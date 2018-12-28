@@ -20,7 +20,6 @@ import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
 import org.eclipse.che.api.devfile.model.Action;
@@ -76,14 +75,14 @@ public class DevfileIntegrityValidator {
                     "Multiple editor tools found: '%s', '%s'",
                     editorTool.getName(), tool.getName()));
           }
-          checkFieldNotSet(tool, "local", tool::getLocal);
+          checkFieldNotSet(tool, "local", tool.getLocal());
           editorTool = tool;
           break;
         case PLUGIN_TOOL_TYPE:
-          checkFieldNotSet(tool, "local", tool::getLocal);
+          checkFieldNotSet(tool, "local", tool.getLocal());
           break;
         case KUBERNETES_TOOL_TYPE:
-          checkFieldNotSet(tool, "id", tool::getId);
+          checkFieldNotSet(tool, "id", tool.getId());
           break;
         default:
           throw new DevfileFormatException(
@@ -93,9 +92,9 @@ public class DevfileIntegrityValidator {
     return existingNames;
   }
 
-  private void checkFieldNotSet(Tool tool, String fieldName, Supplier<String> fieldSupplier)
+  private void checkFieldNotSet(Tool tool, String fieldName, String fieldValue)
       throws DevfileFormatException {
-    if (!isNullOrEmpty(fieldSupplier.get())) {
+    if (!isNullOrEmpty(fieldValue)) {
       throw new DevfileFormatException(
           format(
               "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
