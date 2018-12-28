@@ -471,7 +471,7 @@ public class WorkspaceRuntimes {
         firstNonNull(
             sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY)), "undefined");
     LOG.info(
-        "Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
+        "Workspace '{}/{}' with id '{}' is stopping by user '{}'",
         workspace.getNamespace(),
         workspace.getConfig().getName(),
         workspace.getId(),
@@ -511,7 +511,7 @@ public class WorkspaceRuntimes {
           statuses.remove(workspaceId);
         }
         LOG.info(
-            "Workspace '{}/{}' with id '{}' stopped by user '{}'",
+            "Workspace '{}/{}' with id '{}' is stopped by user '{}'",
             workspace.getNamespace(),
             workspace.getConfig().getName(),
             workspaceId,
@@ -889,6 +889,13 @@ public class WorkspaceRuntimes {
             identity.getOwnerId());
       }
 
+      LOG.info(
+          "Runtime '{}:{}:{}' is stopping abnormally. Reason: {}",
+          workspaceId,
+          identity.getEnvName(),
+          identity.getOwnerId(),
+          event.getReason());
+
       publishWorkspaceStatusEvent(
           workspaceId,
           STOPPING,
@@ -919,6 +926,13 @@ public class WorkspaceRuntimes {
             identity.getEnvName(),
             identity.getOwnerId());
       }
+
+      LOG.info(
+          "Runtime '{}:{}:{}' is stopped abnormally. Reason: {}",
+          workspaceId,
+          identity.getEnvName(),
+          identity.getOwnerId(),
+          event.getReason());
 
       publishWorkspaceStatusEvent(
           workspaceId,
