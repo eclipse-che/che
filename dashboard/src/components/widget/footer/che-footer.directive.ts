@@ -81,6 +81,7 @@ export class CheFooter {
       supportHelpTitle: '@cheSupportHelpTitle',
       supportEmail: '@cheSupportEmail',
       logo: '@cheLogo',
+      docs: '@cheDocs',
       version: '@cheVersion',
       productName: '@cheProductName',
       links: '=cheLinks',

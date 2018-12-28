@@ -32,6 +32,9 @@ interface IBranding {
   docs?: {
     stack?: string;
     workspace?: string;
+    factory?: string;
+    organization?: string;
+    general?: string;
   };
   workspace?: {
     priorityStacks?: Array<string>;
@@ -58,6 +61,9 @@ const DEFAULT_CLI_NAME = 'che.env';
 const DEFAULT_CLI_CONFIG_NAME = 'CHE';
 const DEFAULT_DOCS_STACK = '/docs/getting-started/runtime-stacks/index.html';
 const DEFAULT_DOCS_WORKSPACE = '/docs/getting-started/intro/index.html';
+const DEFAULT_DOCS_ORGANIZATION = '/docs/organizations.html';
+const DEFAULT_DOCS_FACTORY = '/docs/factories-getting-started.html';
+const DEFAULT_DOCS_GENERAL = '/docs';
 const DEFAULT_WORKSPACE_PRIORITY_STACKS = ['Java', 'Java-MySQL', 'Blank'];
 const DEFAULT_WORKSPACE_DEFAULT_STACK = 'java-mysql';
 const DEFAULT_WORKSPACE_CREATION_LINK = '#/create-workspace';
@@ -281,12 +287,15 @@ export class CheBranding {
 
   /**
    * Returns object with docs URLs.
-   * @returns {{stack: string, workspace: string}}
+   * @returns {{stack: string, workspace: string, factory: string, organization: string, general: string}}
    */
-  getDocs(): { stack: string; workspace: string } {
+  getDocs(): { stack: string; workspace: string; factory: string; organization: string; general: string } {
     return {
       stack: this.brandingData.docs && this.brandingData.docs.stack ? this.brandingData.docs.stack : DEFAULT_DOCS_STACK,
-      workspace: this.brandingData.docs && this.brandingData.docs.workspace ? this.brandingData.docs.workspace : DEFAULT_DOCS_WORKSPACE
+      workspace: this.brandingData.docs && this.brandingData.docs.workspace ? this.brandingData.docs.workspace : DEFAULT_DOCS_WORKSPACE,
+      factory: this.brandingData.docs && this.brandingData.docs.factory ? this.brandingData.docs.factory : DEFAULT_DOCS_FACTORY,
+      organization: this.brandingData.docs && this.brandingData.docs.organization ? this.brandingData.docs.organization : DEFAULT_DOCS_ORGANIZATION,
+      general: this.brandingData.docs && this.brandingData.docs.general ? this.brandingData.docs.general : DEFAULT_DOCS_GENERAL
     };
   }
 
