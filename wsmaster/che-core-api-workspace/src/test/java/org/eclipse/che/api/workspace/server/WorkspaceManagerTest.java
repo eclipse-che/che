@@ -559,7 +559,7 @@ public class WorkspaceManagerTest {
             })
         .when(runtimes)
         .injectRuntime(workspace);
-    lenient().when(runtimes.isAnyRunning()).thenReturn(true);
+    lenient().when(runtimes.isAnyActive()).thenReturn(true);
 
     return runtime;
   }
