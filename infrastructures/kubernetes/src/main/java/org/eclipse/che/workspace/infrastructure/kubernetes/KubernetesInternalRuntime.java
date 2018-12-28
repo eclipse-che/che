@@ -46,6 +46,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -900,6 +901,34 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             format(
                 "Unrecoverable event occurred: '%s', '%s', '%s'",
                 reason, message, podEvent.getPodName())));
+  }
+
+  /**
+   * Returns true if the runtime is working normally, or returns false if the runtime has
+   * inconsistent state and should be stopped immediately
+   *
+   * <p>Runtime is considered as inconsistent if all its pods don't exist anymore. In this case, all
+   * workspace servers are not available and it doesn't make sense to keep it RUNNING.
+   *
+   * <p>Runtime is considered as consistent if there is at least one existing pod because existing
+   * pod may provide user needed services and there is no need to stop such workspaces.
+   *
+   * @throws InfrastructureException if any exception occurs during check performing
+   */
+  public boolean isConsistent() throws InfrastructureException {
+    Set<String> podNames =
+        getInternalMachines()
+            .values()
+            .stream()
+            .map(KubernetesMachineImpl::getPodName)
+            .collect(Collectors.toSet());
+    for (String podName : podNames) {
+      if (namespace.deployments().get(podName).isPresent()) {
+        return true;
+      }
+    }
+    // runtime has only non-existing pods
+    return false;
   }
 
   private class ServerReadinessHandler implements Consumer<String> {
