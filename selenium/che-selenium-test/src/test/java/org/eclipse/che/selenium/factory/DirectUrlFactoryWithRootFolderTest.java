@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.factory;
 
-import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
@@ -31,7 +30,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = {GITHUB, OPENSHIFT, FLAKY})
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithRootFolderTest {
 
   @Inject private TestFactoryInitializer testFactoryInitializer;
