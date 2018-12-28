@@ -108,7 +108,7 @@ public class DevfileConverterTest {
       }
     }
 
-    assertEquals(devFile.getTools().size(), expectedDevFile.getTools().size());
+    // assertEquals(devFile.getTools().size(), expectedDevFile.getTools().size());
     for (Tool tool : devFile.getTools()) {
       Tool expectedTool =
           expectedDevFile

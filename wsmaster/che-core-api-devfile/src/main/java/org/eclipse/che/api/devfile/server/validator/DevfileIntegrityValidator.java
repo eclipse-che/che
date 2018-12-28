@@ -11,13 +11,16 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
 import org.eclipse.che.api.devfile.model.Action;
@@ -73,9 +76,14 @@ public class DevfileIntegrityValidator {
                     "Multiple editor tools found: '%s', '%s'",
                     editorTool.getName(), tool.getName()));
           }
+          checkFieldNotSet(tool, "local", tool::getLocal);
           editorTool = tool;
           break;
         case PLUGIN_TOOL_TYPE:
+          checkFieldNotSet(tool, "local", tool::getLocal);
+          break;
+        case KUBERNETES_TOOL_TYPE:
+          checkFieldNotSet(tool, "id", tool::getId);
           break;
         default:
           throw new DevfileFormatException(
@@ -83,6 +91,16 @@ public class DevfileIntegrityValidator {
       }
     }
     return existingNames;
+  }
+
+  private void checkFieldNotSet(Tool tool, String fieldName, Supplier<String> fieldSupplier)
+      throws DevfileFormatException {
+    if (!isNullOrEmpty(fieldSupplier.get())) {
+      throw new DevfileFormatException(
+          format(
+              "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
+              tool.getType(), fieldName, tool.getName()));
+    }
   }
 
   private void validateCommands(Devfile devfile, Set<String> toolNames)

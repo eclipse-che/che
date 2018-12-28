@@ -21,6 +21,8 @@ public class Constants {
 
   public static final String PLUGIN_TOOL_TYPE = "chePlugin";
 
+  public static final String KUBERNETES_TOOL_TYPE = "kubernetes";
+
   /**
    * Workspace attribute which contains comma-separated list of mappings of tool id to its name
    * Example value:
