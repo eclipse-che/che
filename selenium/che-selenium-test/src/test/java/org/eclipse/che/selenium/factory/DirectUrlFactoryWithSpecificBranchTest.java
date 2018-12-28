@@ -20,6 +20,8 @@ import com.google.inject.Inject;
 import com.google.inject.name.Named;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.che.selenium.core.client.TestGitHubRepository;
 import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
@@ -71,6 +73,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   public void factoryWithDirectUrlWithSpecificBranch() {
     String repositoryName = testAuxiliaryRepo.getName();
     final String wsTheiaIdeTerminalTitle = "che-workspace-pod/theia-ide terminal 0";
+    List<String> expectedItemsAfterCloning = Arrays.asList("my-lib", "my-webapp", "src", "pom.xml");
 
     testFactoryWithSpecificBranch.authenticateAndOpen();
 
@@ -86,8 +89,13 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaProjectTree.waitProjectsRootItem();
 
     theiaProjectTree.waitItem(repositoryName);
-    theiaProjectTree.openItem(repositoryName);
-    theiaProjectTree.waitItemSelected(repositoryName);
+    theiaProjectTree.openItem(repositoryName + "/my-lib");
+    theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
+
+    expectedItemsAfterCloning.forEach(
+        name -> {
+          theiaProjectTree.isItemVisible(repositoryName + "/" + name);
+        });
 
     // check specific branch
     openTerminalByProposal("che-workspace-pod/theia-ide");

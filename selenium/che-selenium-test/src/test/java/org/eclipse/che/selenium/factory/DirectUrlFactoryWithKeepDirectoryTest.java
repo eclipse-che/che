@@ -70,10 +70,9 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
     theiaProjectTree.waitProjectsRootItem();
 
     theiaProjectTree.waitItem(repositoryName);
-    theiaProjectTree.openItem(repositoryName);
-    theiaProjectTree.waitItemSelected(repositoryName);
+    theiaProjectTree.openItem(repositoryName + "/my-lib");
+    theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
-    theiaProjectTree.expandPathAndOpenFile(repositoryName + "/my-lib", "pom.xml");
     Assert.assertTrue(theiaProjectTree.isItemVisible(repositoryName + "/my-lib/pom.xml"));
     Assert.assertFalse(theiaProjectTree.isItemVisible(repositoryName + "/my-webapp"));
   }

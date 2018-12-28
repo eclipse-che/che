@@ -91,8 +91,6 @@ public class DirectUrlFactoryWithRootFolderTest {
         "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
     theiaProjectTree.waitItem(repositoryName);
-    theiaProjectTree.openItem(repositoryName);
-    theiaProjectTree.waitItemSelected(repositoryName);
 
     expectedItemsAfterCloning.forEach(
         name -> {
