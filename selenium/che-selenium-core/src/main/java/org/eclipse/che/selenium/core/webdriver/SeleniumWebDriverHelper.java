@@ -1201,8 +1201,7 @@ public class SeleniumWebDriverHelper {
   public void waitOpenedSomeWin() {
     webDriverWaitFactory
         .get(WIDGET_TIMEOUT_SEC)
-        .until(
-            (ExpectedCondition<Boolean>) driver -> seleniumWebDriver.getWindowHandles().size() > 1);
+        .until((ExpectedCondition<Boolean>) driver -> isTwoOrMoreWindowsOpened());
   }
 
   /**

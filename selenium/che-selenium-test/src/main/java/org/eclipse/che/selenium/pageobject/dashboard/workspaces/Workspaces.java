@@ -118,7 +118,10 @@ public class Workspaces {
   public void waitErrorNotificationContainsText(String expectedText) {
     final String textAttribute = "che-error-text";
     seleniumWebDriverHelper.waitAttributeContainsValue(
-        By.xpath(ERROR_NOTIFICATION_MESSAGE_XPATH), textAttribute, expectedText);
+        By.xpath(ERROR_NOTIFICATION_MESSAGE_XPATH),
+        textAttribute,
+        expectedText,
+        ELEMENT_TIMEOUT_SEC);
   }
 
   public void waitProgressBarInvisibility() {
