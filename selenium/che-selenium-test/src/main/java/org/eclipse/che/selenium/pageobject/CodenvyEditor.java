@@ -976,7 +976,7 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()), WIDGET_TIMEOUT_SEC);
   }
 
   /**

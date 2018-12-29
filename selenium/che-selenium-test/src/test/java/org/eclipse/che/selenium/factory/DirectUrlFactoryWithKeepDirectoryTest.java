@@ -13,7 +13,9 @@ package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -28,7 +30,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {GITHUB, OPENSHIFT})
+@Test(groups = {GITHUB, OPENSHIFT, UNDER_REPAIR})
 public class DirectUrlFactoryWithKeepDirectoryTest {
 
   @Inject private TestFactoryInitializer testFactoryInitializer;
@@ -74,6 +76,12 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
     Assert.assertTrue(theiaProjectTree.isItemVisible(repositoryName + "/my-lib/pom.xml"));
-    Assert.assertFalse(theiaProjectTree.isItemVisible(repositoryName + "/my-webapp"));
+
+    try {
+      Assert.assertFalse(theiaProjectTree.isItemVisible(repositoryName + "/my-webapp"));
+    } catch (AssertionError ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/12311");
+    }
   }
 }

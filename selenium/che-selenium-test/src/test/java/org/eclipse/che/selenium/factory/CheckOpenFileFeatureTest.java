@@ -67,6 +67,7 @@ public class CheckOpenFileFeatureTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @AfterClass
