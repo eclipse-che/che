@@ -61,6 +61,7 @@ public class SplitEditorFeatureTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     createProject(PROJECT_NAME);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
