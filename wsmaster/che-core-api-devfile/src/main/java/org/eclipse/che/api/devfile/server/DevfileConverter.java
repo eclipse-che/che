@@ -19,6 +19,7 @@ import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATT
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
@@ -123,6 +124,7 @@ public class DevfileConverter {
           pluginsStringJoiner.add(tool.getId());
           break;
         case KUBERNETES_TOOL_TYPE:
+        case OPENSHIFT_TOOL_TYPE:
           continue; // this kind of tools shouldn't be present in mapping
         default:
           throw new DevfileFormatException(

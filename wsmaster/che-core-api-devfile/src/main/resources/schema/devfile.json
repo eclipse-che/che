@@ -112,7 +112,7 @@
             ]
           },
           "local": {
-            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' type tools.",
+            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type tools.",
             "type": "string",
             "examples": [
               "petclinic-app.yaml"

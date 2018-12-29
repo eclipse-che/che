@@ -13,6 +13,7 @@ package org.eclipse.che.api.devfile.server.validator;
 
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,6 +74,19 @@ public class DevfileIntegrityValidatorTest {
     broken
         .getTools()
         .add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE).withId("anyId"));
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Tool of type '"
+              + OPENSHIFT_TOOL_TYPE
+              + "' cannot contain 'id' field, please check 'k8s' tool")
+  public void shouldThrowExceptionOnUnsupportedOpenshiftToolField() throws Exception {
+    Devfile broken = copyOf(initialDevfile);
+    broken.getTools().add(new Tool().withName("k8s").withType(OPENSHIFT_TOOL_TYPE).withId("anyId"));
     // when
     integrityValidator.validateDevfile(broken);
   }

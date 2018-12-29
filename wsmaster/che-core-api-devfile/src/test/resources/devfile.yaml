@@ -28,8 +28,11 @@ tools:
   - name: jdt.ls
     type: chePlugin
     id: eclipse/theia-jdtls:0.0.3
-  - name: recipe
+  - name: k8s-recipe
     type: kubernetes
+    local: petclinic-app.yaml
+  - name: os-recipe
+    type: openshift
     local: petclinic-app.yaml
 commands:
   - name: build

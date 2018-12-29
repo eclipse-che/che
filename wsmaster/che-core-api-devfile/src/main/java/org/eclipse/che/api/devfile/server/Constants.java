@@ -23,6 +23,8 @@ public class Constants {
 
   public static final String KUBERNETES_TOOL_TYPE = "kubernetes";
 
+  public static final String OPENSHIFT_TOOL_TYPE = "openshift";
+
   /**
    * Workspace attribute which contains comma-separated list of mappings of tool id to its name
    * Example value:

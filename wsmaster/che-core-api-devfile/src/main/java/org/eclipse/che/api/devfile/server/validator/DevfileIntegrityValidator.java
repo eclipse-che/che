@@ -16,6 +16,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
 import java.util.HashSet;
@@ -82,6 +83,7 @@ public class DevfileIntegrityValidator {
           checkFieldNotSet(tool, "local", tool.getLocal());
           break;
         case KUBERNETES_TOOL_TYPE:
+        case OPENSHIFT_TOOL_TYPE:
           checkFieldNotSet(tool, "id", tool.getId());
           break;
         default:
