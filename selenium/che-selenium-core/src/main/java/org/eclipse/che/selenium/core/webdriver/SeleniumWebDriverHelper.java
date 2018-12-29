@@ -16,7 +16,6 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.APPLICATION_START_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
 import static org.openqa.selenium.Keys.ARROW_LEFT;
@@ -51,6 +50,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
@@ -1183,16 +1183,24 @@ public class SeleniumWebDriverHelper {
     webDriverWaitFactory
         .get(timeout)
         .until(
-            (ExpectedCondition<Boolean>)
-                driver -> {
-                  waitAndSwitchToFrame(By.id("ide-application-iframe"), PREPARING_WS_TIMEOUT_SEC);
-                  if (isVisible(By.id("gwt-debug-projectTree"))) {
-                    return true;
-                  }
+            new ExpectedCondition<Boolean>() {
+              private boolean switchedToFrame;
 
-                  seleniumWebDriver.switchTo().parentFrame();
-                  return false;
-                });
+              @Override
+              public Boolean apply(WebDriver driver) {
+                if (!switchedToFrame) {
+                  try {
+                    waitAndSwitchToFrame(By.id("ide-application-iframe"));
+                    switchedToFrame = true;
+                  } catch (NoSuchElementException | TimeoutException e) {
+                    driver.switchTo().parentFrame();
+                    return false;
+                  }
+                }
+
+                return isVisible(By.id("gwt-debug-projectTree"));
+              }
+            });
 
     return seleniumWebDriver.getWindowHandle();
   }

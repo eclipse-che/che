@@ -131,9 +131,6 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     newWorkspace.selectStack(JAVA);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
-    // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
-    // possible to read logs in case of test failure
-    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE_NAME, NEW_TEST_USER);
 
     // switch to the Eclipse Che IDE and wait until workspace is ready to use
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();

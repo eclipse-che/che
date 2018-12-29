@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.PreDestroy;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.TestUser;
 import org.slf4j.Logger;
@@ -115,34 +116,16 @@ public class CheTestWorkspace implements TestWorkspace {
   public CheTestWorkspace(
       String name, TestUser owner, TestWorkspaceServiceClient testWorkspaceServiceClient) {
     this.testWorkspaceServiceClient = testWorkspaceServiceClient;
-
-    try {
-      if (!testWorkspaceServiceClient.exists(name, owner.getName())) {
-        LOG.warn(format("Workspace name='%s' owner='%s' didn't found.", name, owner.getName()));
-      }
-    } catch (Exception e) {
-      LOG.warn(
-          "Failed to check existence of workspace name='{}' owner='{}'", name, owner.getName());
-    }
-
-    this.future =
-        CompletableFuture.runAsync(
-            () -> {
-              try {
-                Workspace wsConfig = testWorkspaceServiceClient.getByName(name, owner.getName());
-                id.set(wsConfig.getId());
-              } catch (Exception e) {
-                LOG.warn(
-                    "Failed to obtain id of workspace name='{}' owner='{}'", name, owner.getName());
-              }
-            });
-
     this.name = name;
     this.owner = owner;
   }
 
   @Override
   public void await() throws InterruptedException, ExecutionException {
+    if (future == null) {
+      return;
+    }
+
     future.get();
   }
 
@@ -152,7 +135,23 @@ public class CheTestWorkspace implements TestWorkspace {
   }
 
   @Override
+  @Nullable
   public String getId() throws ExecutionException, InterruptedException {
+    if (future == null) {
+      try {
+        Workspace wsConfig = testWorkspaceServiceClient.getByName(name, owner.getName());
+        id.set(wsConfig.getId());
+        return id.get();
+      } catch (Exception e) {
+        String errorMessage =
+            format("Failed to obtain id of workspace name='%s' owner='%s'", name, owner.getName());
+
+        LOG.warn(errorMessage, e);
+
+        return null;
+      }
+    }
+
     return future.thenApply(aVoid -> id.get()).get();
   }
 
