@@ -488,7 +488,7 @@ public class CodenvyEditor {
    * @param expectedText text which should be present in the editor
    */
   public void waitTextIntoEditor(final String expectedText) {
-    waitTextIntoEditor(expectedText, ELEMENT_TIMEOUT_SEC);
+    waitTextIntoEditor(expectedText, WIDGET_TIMEOUT_SEC);
   }
 
   /**
