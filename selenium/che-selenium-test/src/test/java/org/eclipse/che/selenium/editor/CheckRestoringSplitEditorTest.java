@@ -15,7 +15,7 @@ import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_JAVA_MULTIMODULE;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPIT_HORISONTALLY;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPLIT_HORIZONTALLY;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.SPLIT_VERTICALLY;
 import static org.testng.Assert.fail;
 
@@ -138,7 +138,7 @@ public class CheckRestoringSplitEditorTest {
     loader.waitOnClosed();
     editor.waitActive();
     editor.openAndWaitContextMenuForTabByName(javaClassTab);
-    editor.runActionForTabFromContextMenu(SPIT_HORISONTALLY);
+    editor.runActionForTabFromContextMenu(SPLIT_HORIZONTALLY);
     editor.selectTabByIndexEditorWindowAndOpenMenu(0, javaClassTab);
     editor.runActionForTabFromContextMenu(SPLIT_VERTICALLY);
     loader.waitOnClosed();
