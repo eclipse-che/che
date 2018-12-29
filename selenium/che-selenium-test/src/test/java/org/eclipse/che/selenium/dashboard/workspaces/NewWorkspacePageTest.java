@@ -264,8 +264,8 @@ public class NewWorkspacePageTest {
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          JAVA,
           JAVA_MYSQL,
+          JAVA,
           BLANK,
           JAVA_THEIA_DOCKER,
           RAILS,

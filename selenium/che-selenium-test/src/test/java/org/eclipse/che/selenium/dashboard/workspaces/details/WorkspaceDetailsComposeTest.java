@@ -12,11 +12,13 @@
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace.STOPPED;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.ENV_VARIABLES;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.MACHINES;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
@@ -35,6 +37,7 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceEnvVariables;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceMachines;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -75,6 +78,7 @@ public class WorkspaceDetailsComposeTest {
     workspaceServiceClient.delete(WORKSPACE, testUser.getName());
   }
 
+  @Test
   public void workingWithEnvVariables() {
     workspaceDetails.selectTabInWorkspaceMenu(ENV_VARIABLES);
 
@@ -118,6 +122,7 @@ public class WorkspaceDetailsComposeTest {
     clickOnSaveButton();
   }
 
+  @Test(groups = UNDER_REPAIR)
   public void workingWithMachines() {
     String machineName = "new_machine";
 
@@ -147,7 +152,7 @@ public class WorkspaceDetailsComposeTest {
     workspaceMachines.checkMachineExists("machine");
   }
 
-  @Test(priority = 1)
+  @Test(priority = 1, groups = UNDER_REPAIR)
   public void startWorkspaceAndCheckChanges() {
     // check that created machine exists in the Process Console tree
     workspaceDetails.clickOpenInIdeWsBtn();
@@ -185,9 +190,19 @@ public class WorkspaceDetailsComposeTest {
     // add new machine and check it exists
     workspaceMachines.clickOnAddMachineButton();
     workspaceMachines.checkAddNewMachineDialogIsOpen();
+
+    // wait for 'Name:' input field is ready text changing
+    WaitUtils.sleepQuietly(2);
+
     workspaceMachines.setMachineNameInDialog(machineName);
     workspaceDetails.clickOnAddButtonInDialogWindow();
-    workspaceMachines.checkMachineExists(machineName);
+
+    try {
+      workspaceMachines.checkMachineExists(machineName);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/8909");
+    }
   }
 
   private void createVariable(String varName, String varValue) {

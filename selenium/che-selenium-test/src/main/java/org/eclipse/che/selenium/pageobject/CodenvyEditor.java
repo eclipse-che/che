@@ -488,7 +488,7 @@ public class CodenvyEditor {
    * @param expectedText text which should be present in the editor
    */
   public void waitTextIntoEditor(final String expectedText) {
-    waitTextIntoEditor(expectedText, WIDGET_TIMEOUT_SEC);
+    waitTextIntoEditor(expectedText, ELEMENT_TIMEOUT_SEC);
   }
 
   /**
@@ -976,7 +976,7 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()), WIDGET_TIMEOUT_SEC);
   }
 
   /**

@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.pageobject.theia;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.theia.TheiaIde.Locators.NOTIFICATION_CLOSE_BUTTON;
@@ -98,7 +99,7 @@ public class TheiaIde {
   public void waitNotificationEqualsTo(String expectedText) {
     final String notificationXpath = getNotificationEqualsToXpath(expectedText);
 
-    seleniumWebDriverHelper.waitVisibility(By.xpath(notificationXpath));
+    seleniumWebDriverHelper.waitVisibility(By.xpath(notificationXpath), ELEMENT_TIMEOUT_SEC);
   }
 
   public boolean isNotificationEqualsTo(String notificationText) {
