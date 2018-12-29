@@ -58,6 +58,7 @@ HELP="
 --image-che - Override default Che image. Example: --image-che=org/repo:tag. Tag is mandatory!
 --secure | -s - Deploy Che with SSL enabled
 --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
+--deploy-che-plugin-registry - deploy Che plugin registry
 ===================================
 ENV vars: this script automatically detect envs vars beginning with "CHE_" and passes them to Che deployments:
 CHE_IMAGE_REPO - Che server Docker image, defaults to "eclipse-che-server"
@@ -106,6 +107,10 @@ case $key in
     ;;
     --debug)
     CHE_DEBUG_SERVER=true
+    shift
+    ;;
+    --deploy-che-plugin-registry)
+    DEPLOY_CHE_PLUGIN_REGISTRY=true
     shift
     ;;
     --help)
