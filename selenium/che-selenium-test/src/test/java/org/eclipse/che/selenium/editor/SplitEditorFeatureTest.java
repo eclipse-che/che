@@ -45,7 +45,7 @@ public class SplitEditorFeatureTest {
   private static final String NEW_NAME_TXT_FILE = "NewREADME";
   private static final String TEXT = "some text";
 
-  private final String tabNameJavaFile = getTabNameJavaFile();
+  private final String javaFileName = getJavaFileNameFromTabTitle();
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -71,31 +71,31 @@ public class SplitEditorFeatureTest {
   @Test
   public void checkSplitEditorWindow() {
     editor.waitActive();
-    editor.openAndWaitContextMenuForTabByName(tabNameJavaFile);
+    editor.openAndWaitContextMenuForTabByName(javaFileName);
     editor.runActionForTabFromContextMenu(SPLIT_HORIZONTALLY);
 
-    editor.waitCountTabsWithProvidedName(2, tabNameJavaFile);
+    editor.waitCountTabsWithProvidedName(2, javaFileName);
 
-    editor.selectTabByIndexEditorWindowAndOpenMenu(0, tabNameJavaFile);
+    editor.selectTabByIndexEditorWindowAndOpenMenu(0, javaFileName);
     editor.runActionForTabFromContextMenu(SPLIT_VERTICALLY);
-    editor.waitCountTabsWithProvidedName(3, tabNameJavaFile);
-    editor.selectTabByIndexEditorWindow(1, tabNameJavaFile);
-    editor.waitTabSelection(1, tabNameJavaFile);
+    editor.waitCountTabsWithProvidedName(3, javaFileName);
+    editor.selectTabByIndexEditorWindow(1, javaFileName);
+    editor.waitTabSelection(1, javaFileName);
     editor.waitActive();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.UP.toString());
     editor.typeTextIntoEditor(TEXT);
 
-    selectSplittedTabAndWaitExpectedText(0, tabNameJavaFile, TEXT);
+    selectSplittedTabAndWaitExpectedText(0, javaFileName, TEXT);
 
-    selectSplittedTabAndWaitExpectedText(1, tabNameJavaFile, TEXT);
+    selectSplittedTabAndWaitExpectedText(1, javaFileName, TEXT);
 
-    selectSplittedTabAndWaitExpectedText(2, tabNameJavaFile, TEXT);
+    selectSplittedTabAndWaitExpectedText(2, javaFileName, TEXT);
   }
 
   @Test(priority = 1)
   public void checkFocusInCurrentWindow() {
-    editor.selectTabByIndexEditorWindow(1, tabNameJavaFile);
+    editor.selectTabByIndexEditorWindow(1, javaFileName);
     editor.waitActive();
     projectExplorer.openItemByPath(PATH_TEXT_FILE);
     editor.waitTabIsPresent(TEXT_FILE);
@@ -106,7 +106,7 @@ public class SplitEditorFeatureTest {
 
   @Test(priority = 2)
   public void checkRefactoring() {
-    editor.selectTabByIndexEditorWindow(2, tabNameJavaFile);
+    editor.selectTabByIndexEditorWindow(2, javaFileName);
     editor.waitActive();
     waitAndSelectItem();
 
@@ -185,13 +185,13 @@ public class SplitEditorFeatureTest {
     editor.waitTextInDefinedSplitEditor(tabIndex + 1, LOAD_PAGE_TIMEOUT_SEC, expectedText);
   }
 
-  protected String getTabNameJavaFile() {
+  protected String getJavaFileNameFromTabTitle() {
     return "GreetingController";
   }
 
   protected void expandProjectExplorerAndOpenFile() {
     String pathToFile = PROJECT_NAME + "/src/main/java/org.eclipse.che.examples";
-    String javaFileName = tabNameJavaFile + ".java";
+    String javaFileName = this.javaFileName + ".java";
     projectExplorer.expandPathInProjectExplorerAndOpenFile(pathToFile, javaFileName);
     loader.waitOnClosed();
   }

@@ -111,7 +111,7 @@ public class AutocompleteProposalJavaDocTest {
         "concat(String part1, String part2, char divider) : String App");
 
     // then
-    checkProposalDocumentationHTML(getJavadocHtmlText());
+    checkProposalDocumentationHTML(getExpectedJavadocHtmlText());
   }
 
   @Test
@@ -221,7 +221,7 @@ public class AutocompleteProposalJavaDocTest {
     }
   }
 
-  protected String getJavadocHtmlText() {
+  protected String getExpectedJavadocHtmlText() {
     return "<p><strong>Deprecated</strong>  <em>As of version 1.0, use <a href=\"jdt://contents/commons-lang-2.6.jar/org.apache.commons.lang/StringUtils.class?=app/%5C/home%5C/user%5C/.m2%5C/repository%5C/commons-lang%5C/commons-lang%5C/2.6%5C/commons-lang-2.6.jar%3Corg.apache.commons.lang%28StringUtils.class#3169\">org.apache.commons.lang.StringUtils.join(Object [], char)</a></em></p>\n"
         + "<p>Returns concatination of two strings into one divided by special symbol.</p>\n"
         + "<ul>\n"
