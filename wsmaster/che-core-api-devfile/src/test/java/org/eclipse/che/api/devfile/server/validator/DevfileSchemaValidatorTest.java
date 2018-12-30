@@ -34,6 +34,14 @@ public class DevfileSchemaValidatorTest {
     schemaValidator.validateBySchema(devFileYamlContent, false);
   }
 
+  @Test
+  public void shouldValidateCorrectYamlWithoutCommandsBySchema() throws Exception {
+    String devFileYamlContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile_no_commands.yaml"));
+    // when
+    schemaValidator.validateBySchema(devFileYamlContent, false);
+  }
+
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
