@@ -12,12 +12,13 @@
 package org.eclipse.che.selenium.editor;
 
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator;
+import static org.eclipse.che.selenium.pageobject.CodenvyEditor.TabActionLocator.*;
+import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
+import static org.testng.Assert.assertTrue;
 
 import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
-import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -29,86 +30,85 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.Refactor;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.openqa.selenium.Keys;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class SplitEditorFeatureTest {
 
-  private static final String PROJECT_NAME =
+  protected static final String PROJECT_NAME =
       NameGenerator.generate(SplitEditorFeatureTest.class.getSimpleName(), 4);
-  private static final String PATH_TEXT_FILE = PROJECT_NAME + "/README.md";
-  private static final String PATH_JAVA_FILE =
-      PROJECT_NAME + "/src/main/java/org/eclipse/che/examples/GreetingController.java";
-  private static final String NAME_JAVA_CLASS = "GreetingController";
+  private static final String TEXT_FILE = "README.md";
+  private static final String PATH_TEXT_FILE = PROJECT_NAME + "/" + TEXT_FILE;
   private static final String NEW_NAME = "NewName";
   private static final String NEW_NAME_JAVA = "NewName.java";
   private static final String NEW_NAME_TXT_FILE = "NewREADME";
-
   private static final String TEXT = "some text";
 
+  private final String javaFileName = getJavaFileNameFromTabTitle();
+
   @Inject private TestWorkspace workspace;
-  @Inject private DefaultTestUser defaultTestUser;
   @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
+  @Inject protected ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private CodenvyEditor editor;
+  @Inject protected CodenvyEditor editor;
   @Inject private AskForValueDialog askForValueDialog;
   @Inject private Menu menu;
   @Inject private Refactor refactor;
-  @Inject private Wizard wizard;
+  @Inject protected Wizard wizard;
   @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
-    String pathToFile = PROJECT_NAME + "/src/main/java/org.eclipse.che.examples";
-    String javaFileName = "GreetingController.java";
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     createProject(PROJECT_NAME);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(pathToFile, javaFileName);
-    loader.waitOnClosed();
+    expandProjectExplorerAndOpenFile();
   }
 
   @Test
   public void checkSplitEditorWindow() {
     editor.waitActive();
-    editor.openAndWaitContextMenuForTabByName(NAME_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(TabActionLocator.SPIT_HORISONTALLY);
+    editor.openAndWaitContextMenuForTabByName(javaFileName);
+    editor.runActionForTabFromContextMenu(SPLIT_HORIZONTALLY);
 
-    editor.waitCountTabsWithProvidedName(2, NAME_JAVA_CLASS);
+    editor.waitCountTabsWithProvidedName(2, javaFileName);
 
-    editor.selectTabByIndexEditorWindowAndOpenMenu(0, NAME_JAVA_CLASS);
-    editor.runActionForTabFromContextMenu(TabActionLocator.SPLIT_VERTICALLY);
-    editor.waitCountTabsWithProvidedName(3, NAME_JAVA_CLASS);
-
-    editor.selectTabByIndexEditorWindow(1, NAME_JAVA_CLASS);
+    editor.selectTabByIndexEditorWindowAndOpenMenu(0, javaFileName);
+    editor.runActionForTabFromContextMenu(SPLIT_VERTICALLY);
+    editor.waitCountTabsWithProvidedName(3, javaFileName);
+    editor.selectTabByIndexEditorWindow(1, javaFileName);
+    editor.waitTabSelection(1, javaFileName);
     editor.waitActive();
     editor.typeTextIntoEditor(Keys.ENTER.toString());
     editor.typeTextIntoEditor(Keys.UP.toString());
     editor.typeTextIntoEditor(TEXT);
 
-    selectSplittedTabAndWaitExpectedText(0, NAME_JAVA_CLASS, TEXT);
+    selectSplittedTabAndWaitExpectedText(0, javaFileName, TEXT);
 
-    selectSplittedTabAndWaitExpectedText(1, NAME_JAVA_CLASS, TEXT);
+    selectSplittedTabAndWaitExpectedText(1, javaFileName, TEXT);
 
-    selectSplittedTabAndWaitExpectedText(2, NAME_JAVA_CLASS, TEXT);
+    selectSplittedTabAndWaitExpectedText(2, javaFileName, TEXT);
   }
 
   @Test(priority = 1)
   public void checkFocusInCurrentWindow() {
-    editor.selectTabByIndexEditorWindow(1, NAME_JAVA_CLASS);
+    editor.selectTabByIndexEditorWindow(1, javaFileName);
+    editor.waitActive();
     projectExplorer.openItemByPath(PATH_TEXT_FILE);
-    Assert.assertTrue(editor.tabIsPresentOnce("README.md"));
+    editor.waitTabIsPresent(TEXT_FILE);
+    editor.waitTabFocusing(0, TEXT_FILE);
+    editor.waitActive();
+    assertTrue(editor.tabIsPresentOnce(TEXT_FILE));
   }
 
   @Test(priority = 2)
   public void checkRefactoring() {
-    editor.selectTabByIndexEditorWindow(2, NAME_JAVA_CLASS);
+    editor.selectTabByIndexEditorWindow(2, javaFileName);
     editor.waitActive();
-    projectExplorer.waitAndSelectItem(PATH_JAVA_FILE);
+    waitAndSelectItem();
 
     projectExplorer.launchRefactorByKeyboard();
     refactor.typeAndWaitNewName(NEW_NAME_JAVA);
@@ -157,7 +157,7 @@ public class SplitEditorFeatureTest {
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
     wizard.waitCreateProjectWizardForm();
     wizard.typeProjectNameOnWizard(projectName);
-    wizard.selectSample(Wizard.SamplesName.WEB_JAVA_SPRING);
+    selectSample();
     wizard.clickCreateButton();
     loader.waitOnClosed();
     wizard.waitCloseProjectConfigForm();
@@ -180,13 +180,29 @@ public class SplitEditorFeatureTest {
   private void selectSplittedTabAndWaitExpectedText(
       int tabIndex, String tabName, String expectedText) {
     editor.selectTabByIndexEditorWindow(tabIndex, tabName);
+    editor.waitTabSelection(tabIndex, tabName);
     editor.waitActive();
     editor.waitTextInDefinedSplitEditor(tabIndex + 1, LOAD_PAGE_TIMEOUT_SEC, expectedText);
   }
 
-  private void selectSplittedTabAndWaitTextIsNotPresent(int tabIndex, String tabName, String text) {
-    editor.selectTabByIndexEditorWindow(tabIndex, tabName);
-    editor.waitActive();
-    editor.waitTextIsNotPresentInDefinedSplitEditor(tabIndex + 1, LOAD_PAGE_TIMEOUT_SEC, text);
+  protected String getJavaFileNameFromTabTitle() {
+    return "GreetingController";
+  }
+
+  protected void expandProjectExplorerAndOpenFile() {
+    String pathToFile = PROJECT_NAME + "/src/main/java/org.eclipse.che.examples";
+    String javaFileName = this.javaFileName + ".java";
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(pathToFile, javaFileName);
+    loader.waitOnClosed();
+  }
+
+  protected void waitAndSelectItem() {
+    String pathToJavaFile =
+        PROJECT_NAME + "/src/main/java/org/eclipse/che/examples/GreetingController.java";
+    projectExplorer.waitAndSelectItem(pathToJavaFile);
+  }
+
+  protected void selectSample() {
+    wizard.selectSample(WEB_JAVA_SPRING);
   }
 }

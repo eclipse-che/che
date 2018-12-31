@@ -221,7 +221,7 @@ public class CodenvyEditor {
     REOPEN_CLOSED_TAB(By.id("contextMenu/Reopen Closed Tab")),
     PIN_UNPIN_TAB(By.id("contextMenu/Pin/Unpin Tab")),
     SPLIT_VERTICALLY(By.id("contextMenu/Split Pane In Two Columns")),
-    SPIT_HORISONTALLY(By.id("contextMenu/Split Pane In Two Rows"));
+    SPLIT_HORIZONTALLY(By.id("contextMenu/Split Pane In Two Rows"));
 
     @SuppressWarnings("ImmutableEnumChecker")
     private final By id;
