@@ -82,22 +82,39 @@
         "type": "object",
         "required": [
           "name",
-          "type",
-          "id"
+          "type"
+        ],
+        "oneOf" : [
+          {
+            "required": [
+              "id"
+            ]},
+          {
+            "required": [
+              "local"
+            ]}
         ],
         "properties": {
           "name": {
+            "description": "Describes the name of the tool. Should be unique per tool set.",
             "type": "string",
             "examples": [
               "mvn-stack"
             ]
           },
           "type": {
-            "description": "Describes type or tool, e.g. whether it is and plugin or editor or other type",
+            "description": "Describes type of the tool, e.g. whether it is an plugin or editor or other type",
             "type": "string",
             "examples": [
               "chePlugin",
               "cheEditor"
+            ]
+          },
+          "local": {
+            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type tools.",
+            "type": "string",
+            "examples": [
+              "petclinic-app.yaml"
             ]
           },
           "id": {
@@ -121,6 +138,7 @@
         ],
         "properties": {
           "name": {
+            "description": "Describes the name of the command. Should be unique per commands set.",
             "type": "string",
             "examples": [
               "build"
