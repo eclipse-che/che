@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.selenium.factory;
 
-import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
@@ -20,7 +20,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories.A
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -42,20 +41,19 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
-@Test(groups = FLAKY)
 public class CheckOpenFileFeatureTest {
-  private static final String PROJECT_NAME = CheckOpenFileFeatureTest.class.getSimpleName();
-  private static final String OPEN_FILE_URL = "/CheckOpenFileFeatureTest/pom.xml";
-  private static final String FACTORY_NAME = NameGenerator.generate("factory", 4);
+  private static final String PROJECT_NAME = generate("project", 4);
+  private static final String OPEN_FILE_URL = "/" + PROJECT_NAME + "/pom.xml";
+  private static final String FACTORY_NAME = generate("factory", 4);
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;
   @Inject private DashboardFactories dashboardFactories;
   @Inject private Ide ide;
   @Inject private LoadingBehaviorPage loadingBehaviorPage;
-  @Inject private CodenvyEditor editor;
+  @Inject protected CodenvyEditor editor;
   @Inject private Loader loader;
-  @Inject private Wizard wizard;
+  @Inject protected Wizard wizard;
   @Inject private Menu menu;
   @Inject private TestWorkspace testWorkspace;
   @Inject private DefaultTestUser user;
@@ -67,7 +65,6 @@ public class CheckOpenFileFeatureTest {
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
-    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @AfterClass
@@ -97,7 +94,7 @@ public class CheckOpenFileFeatureTest {
     projectExplorer.waitItem(PROJECT_NAME);
 
     try {
-      editor.waitTabIsPresent("web-java-spring", WIDGET_TIMEOUT_SEC);
+      waitTabIsPresent();
     } catch (TimeoutException ex) {
       // remove try-catch block after issue has been resolved
       fail("Known random failure https://github.com/eclipse/che/issues/11001");
@@ -110,7 +107,7 @@ public class CheckOpenFileFeatureTest {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.waitCreateProjectWizardForm();
     wizard.typeProjectNameOnWizard(projectName);
-    wizard.selectSample(WEB_JAVA_SPRING);
+    selectSample();
     wizard.clickCreateButton();
     loader.waitOnClosed();
     wizard.waitCloseProjectConfigForm();
@@ -118,5 +115,13 @@ public class CheckOpenFileFeatureTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(projectName);
     loader.waitOnClosed();
+  }
+
+  protected void waitTabIsPresent() {
+    editor.waitTabIsPresent("web-java-spring", WIDGET_TIMEOUT_SEC);
+  }
+
+  protected void selectSample() {
+    wizard.selectSample(WEB_JAVA_SPRING);
   }
 }
