@@ -64,6 +64,7 @@ public class DevfileIntegrityValidator {
   private Set<String> validateTools(Devfile devfile) throws DevfileFormatException {
     Set<String> existingNames = new HashSet<>();
     Tool editorTool = null;
+    Tool recipeTool = null;
     for (Tool tool : devfile.getTools()) {
       if (!existingNames.add(tool.getName())) {
         throw new DevfileFormatException(format("Duplicate tool name found:'%s'", tool.getName()));
@@ -84,7 +85,14 @@ public class DevfileIntegrityValidator {
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
+          if (recipeTool != null) {
+            throw new DevfileFormatException(
+                format(
+                    "Multiple non plugin or editor type tools found: '%s', '%s'",
+                    recipeTool.getName(), tool.getName()));
+          }
           checkFieldNotSet(tool, "id", tool.getId());
+          recipeTool = tool;
           break;
         default:
           throw new DevfileFormatException(

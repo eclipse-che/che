@@ -125,7 +125,9 @@ public class DevfileConverter {
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
-          continue; // this kind of tools shouldn't be present in mapping
+          // this kind of tool ignored here since it contain only reference to tool configuration
+          // which should be resolved and provisioned into workspace config recipe separately.
+          continue;
         default:
           throw new DevfileFormatException(
               format("Unsupported tool %s type provided: %s", tool.getName(), tool.getType()));
