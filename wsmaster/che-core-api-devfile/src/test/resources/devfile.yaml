@@ -28,6 +28,9 @@ tools:
   - name: jdt.ls
     type: chePlugin
     id: eclipse/theia-jdtls:0.0.3
+  - name: os-recipe
+    type: openshift
+    local: petclinic-app.yaml
 commands:
   - name: build
     actions:
