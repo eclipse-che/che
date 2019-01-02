@@ -37,7 +37,7 @@ public class MetricsServletModule extends ServletModule {
     meterMultibinder.addBinding().toProvider(TomcatMetricsProvider.class);
 
     bind(Manager.class).toInstance(getManager(getServletContext()));
-    filter("/*").through(ServerErrorResponceMetricsFilter.class);
+    filter("/*").through(ApiResponceMetricFilter.class);
   }
 
   private Manager getManager(ServletContext servletContext) {

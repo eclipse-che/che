@@ -25,11 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class ServerErrorResponceMetricsFilter implements Filter {
+public class ApiResponceMetricFilter implements Filter {
 
-  private static Logger LOG = LoggerFactory.getLogger(ServerErrorResponceMetricsFilter.class);
+  private static Logger LOG = LoggerFactory.getLogger(ApiResponceMetricFilter.class);
 
-  @Inject ServerErrorCounter serverErrorCounter;
+  @Inject ApiResponseCounter apiResponseCoutner;
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {}
@@ -41,9 +41,21 @@ public class ServerErrorResponceMetricsFilter implements Filter {
     filterChain.doFilter(servletRequest, servletResponse);
     if (servletResponse instanceof HttpServletResponse) {
       HttpServletResponse hts = (HttpServletResponse) servletResponse;
+      if (hts.getStatus() / 100 == 2) {
+        apiResponseCoutner.incrementSuccessResponseCounter();
+        LOG.info("incremented200");
+      }
+      if (hts.getStatus() / 100 == 3) {
+        apiResponseCoutner.incrementRedirectResonseCounter();
+        LOG.info("incremented300");
+      }
+      if (hts.getStatus() / 100 == 4) {
+        apiResponseCoutner.incrementClientErrorResponseCounter();
+        LOG.info("incremented400");
+      }
       if (hts.getStatus() / 100 == 5) {
-        serverErrorCounter.incrementCounter();
-        LOG.info("incremented");
+        apiResponseCoutner.incrementServerErrorResponceCounter();
+        LOG.info("incremented500");
       }
     }
   }
