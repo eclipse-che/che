@@ -11,8 +11,11 @@
  */
 package org.eclipse.che.selenium.core.executor.hotupdate;
 
+import static java.lang.String.format;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -35,14 +38,19 @@ public class HotUpdateUtil {
   private static final int TIMEOUT_FOR_FINISH_UPDATE_IN_SECONDS = 600;
   private static final int DELAY_BETWEEN_ATTEMPTS_IN_MILLISECS = 5000;
   private static final String PODS_LIST_COMMAND = "get pods | awk 'NR > 1 {print $1}'";
-  private static final String COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT =
-      "get dc | grep che | awk '{print $2}'";
-  private static final String COMMAND_TO_GET_NAME_OF_CHE_DEPLOYMENT =
-      "get dc | grep che | awk '{print $1}'";
+  private static final String COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT_TEMPLATE =
+      "get dc | grep %s | awk '{print $2}'";
+  private static final String COMMAND_TO_GET_NAME_OF_CHE_DEPLOYMENT_TEMPLATE =
+      "get dc | grep %s | awk '{print $1}'";
   private static final String UPDATE_COMMAND_TEMPLATE = "rollout latest %s";
+  private static final String DEFAULT_CHE_OPENSHIFT_POD = "che";
 
   private final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
   private final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+
+  @Inject(optional = true)
+  @Named("che.openshift.pod")
+  private String cheOpenshiftPod;
 
   @Inject
   public HotUpdateUtil(
@@ -109,7 +117,7 @@ public class HotUpdateUtil {
    * @throws Exception
    */
   public void executeMasterPodUpdateCommand() throws Exception {
-    String updateCommand = String.format(UPDATE_COMMAND_TEMPLATE, getMasterPodName());
+    String updateCommand = format(UPDATE_COMMAND_TEMPLATE, getMasterPodName());
     openShiftCliCommandExecutor.execute(updateCommand);
   }
 
@@ -130,7 +138,7 @@ public class HotUpdateUtil {
   public int getMasterPodRevision() {
     try {
       return Integer.parseInt(
-          openShiftCliCommandExecutor.execute(COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT));
+          openShiftCliCommandExecutor.execute(getRevisionOfCheDeploymentCommand()));
     } catch (IOException ex) {
       throw new RuntimeException(ex.getLocalizedMessage(), ex);
     }
@@ -143,10 +151,22 @@ public class HotUpdateUtil {
    */
   public String getMasterPodName() {
     try {
-      return openShiftCliCommandExecutor.execute(COMMAND_TO_GET_NAME_OF_CHE_DEPLOYMENT);
+      return openShiftCliCommandExecutor.execute(getNameOfCheDeploymentCommand());
     } catch (IOException ex) {
       throw new RuntimeException(ex.getLocalizedMessage(), ex);
     }
+  }
+
+  private String getRevisionOfCheDeploymentCommand() {
+    return format(
+        COMMAND_TO_GET_REVISION_OF_CHE_DEPLOYMENT_TEMPLATE,
+        cheOpenshiftPod != null ? cheOpenshiftPod : DEFAULT_CHE_OPENSHIFT_POD);
+  }
+
+  private String getNameOfCheDeploymentCommand() {
+    return format(
+        COMMAND_TO_GET_NAME_OF_CHE_DEPLOYMENT_TEMPLATE,
+        cheOpenshiftPod != null ? cheOpenshiftPod : DEFAULT_CHE_OPENSHIFT_POD);
   }
 
   private List<String> getPods() throws Exception {
