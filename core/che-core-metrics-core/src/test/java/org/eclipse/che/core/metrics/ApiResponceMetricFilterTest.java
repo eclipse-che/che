@@ -14,19 +14,15 @@ package org.eclipse.che.core.metrics;
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.config.RedirectConfig.redirectConfig;
 import static com.jayway.restassured.config.RestAssuredConfig.newConfig;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
-import com.jayway.restassured.response.Response;
 import java.net.URI;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
 import org.everrest.assured.EverrestJetty;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -60,7 +56,7 @@ public class ApiResponceMetricFilterTest {
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .get(SECURE_PATH +  "/service/success")
+        .get(SECURE_PATH + "/service/success")
         .then()
         .statusCode(status);
 
@@ -79,7 +75,7 @@ public class ApiResponceMetricFilterTest {
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .get(SECURE_PATH +  "/service/redirect")
+        .get(SECURE_PATH + "/service/redirect")
         .then()
         .statusCode(status);
 
@@ -97,7 +93,7 @@ public class ApiResponceMetricFilterTest {
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .get(SECURE_PATH +  "/service/clienterror")
+        .get(SECURE_PATH + "/service/clienterror")
         .then()
         .statusCode(status);
 
@@ -112,18 +108,17 @@ public class ApiResponceMetricFilterTest {
     dummyService.setStatusToReturn(status);
 
     given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .when()
-            .get(SECURE_PATH +  "/service/servererror")
-            .then()
-            .statusCode(status);
+        .auth()
+        .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+        .when()
+        .get(SECURE_PATH + "/service/servererror")
+        .then()
+        .statusCode(status);
 
     verify(apiResponseCounter).incrementServerErrorResponceCounter();
     verify(apiResponseCounter, never()).incrementSuccessResponseCounter();
     verify(apiResponseCounter, never()).incrementRedirectResonseCounter();
     verify(apiResponseCounter, never()).incrementClientErrorResponseCounter();
-
   }
 
   @Path("/service")
@@ -144,16 +139,16 @@ public class ApiResponceMetricFilterTest {
     @GET
     @Path("/redirect")
     public javax.ws.rs.core.Response redirect() {
-      return javax.ws.rs.core.Response.temporaryRedirect(URI.create("localhost")).status(statusToReturn).build();
+      return javax.ws.rs.core.Response.temporaryRedirect(URI.create("localhost"))
+          .status(statusToReturn)
+          .build();
     }
-
 
     @GET
     @Path("/clienterror")
     public javax.ws.rs.core.Response clientError() {
       return javax.ws.rs.core.Response.status(statusToReturn).build();
     }
-
 
     @GET
     @Path("/servererror")
@@ -181,5 +176,4 @@ public class ApiResponceMetricFilterTest {
   public Object[][] serverErrors() {
     return new Object[][] {{500}, {501}, {502}, {503}, {504}};
   }
-
 }

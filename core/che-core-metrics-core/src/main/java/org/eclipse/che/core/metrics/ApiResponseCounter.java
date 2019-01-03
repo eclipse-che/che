@@ -28,21 +28,21 @@ public class ApiResponseCounter implements MeterBinder {
   public void bindTo(MeterRegistry registry) {
     successResponseCounter =
         Counter.builder("che.server.api.response.success")
-            .description("Che Server Tomcat success (2xx responses)")
+            .description("Che Server Tomcat success responses (2xx responses)")
             .tags("code=200", "area=http")
             .register(registry);
     redirectResponseCounter =
         Counter.builder("che.server.api.response.redirect")
-            .description("Che Server Tomcat redirects (3xx responses)")
+            .description("Che Server Tomcat redirect responses (3xx responses)")
             .tags("code=300", "area=http")
             .register(registry);
     clientErrorResponseCounter =
-        Counter.builder("che.server.api.response.client_error")
+        Counter.builder("che.server.api.response.client.error")
             .description("Che Server Tomcat client errors (4xx responses)")
             .tags("code=400", "area=http")
             .register(registry);
     serverErrorResponseCounter =
-        Counter.builder("che.server.api.response.server_error")
+        Counter.builder("che.server.api.response.server.error")
             .description("Che Server Tomcat server errors (5xx responses)")
             .tags("code=500", "area=http")
             .register(registry);
