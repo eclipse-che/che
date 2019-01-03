@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver.php;
 
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
@@ -109,7 +110,7 @@ public class PhpAssistantFeaturesTest {
     editor.waitTextIntoEditor(EXPECTED_ORIGINAL_TEXT);
   }
 
-  @Test
+  @Test(groups = FLAKY)
   public void hoverShouldBeDisplayedWithExpectedText() {
     projectExplorer.openItemByPath(PATH_TO_INDEX_PHP);
     editor.waitActive();

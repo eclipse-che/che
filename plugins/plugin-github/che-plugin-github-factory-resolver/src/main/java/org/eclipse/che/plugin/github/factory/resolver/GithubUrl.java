@@ -39,11 +39,11 @@ public class GithubUrl {
   /** Subfolder if any */
   private String subfolder;
 
-  /** Dockerfile filename */
-  private String dockerfileFilename;
-
   /** Factory json filename */
   private String factoryFilename;
+
+  /** Devfile filename */
+  private String devfileFilename;
 
   /**
    * Creation of this instance is made by the parser so user may not need to create a new instance
@@ -80,16 +80,16 @@ public class GithubUrl {
   }
 
   /**
-   * Gets dockerfile file name of this github url
+   * Gets devfile file name of this github url
    *
-   * @return the dockerfile file name
+   * @return the devfile file name
    */
-  public String getDockerfileFilename() {
-    return this.dockerfileFilename;
+  public String getDevfileFilename() {
+    return this.devfileFilename;
   }
 
-  protected GithubUrl withDockerfileFilename(String dockerfileFilename) {
-    this.dockerfileFilename = dockerfileFilename;
+  protected GithubUrl withDevfileFilename(String devfileFilename) {
+    this.devfileFilename = devfileFilename;
     return this;
   }
 
@@ -144,32 +144,32 @@ public class GithubUrl {
   }
 
   /**
-   * Provides the location to dockerfile
-   *
-   * @return location of dockerfile in a repository
-   */
-  protected String dockerFileLocation() {
-    return new StringJoiner("/")
-        .add("https://raw.githubusercontent.com")
-        .add(username)
-        .add(repository)
-        .add(branch)
-        .add(dockerfileFilename)
-        .toString();
-  }
-
-  /**
    * Provides the location to factory json file
    *
    * @return location of factory json file in a repository
    */
-  protected String factoryJsonFileLocation() {
+  protected String factoryFileLocation() {
     return new StringJoiner("/")
         .add("https://raw.githubusercontent.com")
         .add(username)
         .add(repository)
         .add(branch)
         .add(factoryFilename)
+        .toString();
+  }
+
+  /**
+   * Provides the location to devfile yaml file
+   *
+   * @return location of devfile yaml file in a repository
+   */
+  protected String devfileFileLocation() {
+    return new StringJoiner("/")
+        .add("https://raw.githubusercontent.com")
+        .add(username)
+        .add(repository)
+        .add(branch)
+        .add(devfileFilename)
         .toString();
   }
 

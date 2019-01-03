@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.factory.Factory;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
@@ -118,9 +119,8 @@ public class FactoryManager {
    * @return stored data, if specified attributes is correct
    * @throws ServerException when any server errors occurs
    */
-  @SuppressWarnings("unchecked")
-  public <T extends List<? extends Factory>> T getByAttribute(
+  public Page<? extends Factory> getByAttribute(
       int maxItems, int skipCount, List<Pair<String, String>> attributes) throws ServerException {
-    return (T) factoryDao.getByAttribute(maxItems, skipCount, attributes);
+    return factoryDao.getByAttributes(maxItems, skipCount, attributes);
   }
 }

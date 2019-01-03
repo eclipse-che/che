@@ -11,11 +11,12 @@
  */
 package org.eclipse.che.selenium.factory;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestGitConstants.CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE;
+import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
@@ -25,6 +26,7 @@ import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.LoadingBehaviorPage;
@@ -42,9 +44,8 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CreateNamedFactoryFromDashboardTest {
-  private static final String PROJECT_NAME =
-      CreateNamedFactoryFromDashboardTest.class.getSimpleName();
-  private static final String FACTORY_NAME = NameGenerator.generate("factory", 4);
+  protected static final String PROJECT_NAME = generate("project", 4);;
+  private static final String FACTORY_NAME = generate("factory", 4);
 
   @Inject private TestWorkspace testWorkspace;
   @Inject private Ide ide;
@@ -59,22 +60,24 @@ public class CreateNamedFactoryFromDashboardTest {
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestProjectServiceClient testProjectServiceClient;
-  @Inject private Wizard wizard;
+  @Inject protected Wizard wizard;
   @Inject private Menu menu;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestFactoryServiceClient factoryServiceClient;
   @Inject private PullRequestPanel pullRequestPanel;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
     ide.open(testWorkspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitExpectedTextIntoConsole("Initialized language server");
 
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
-    wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
+    selectSampleProject();
   }
 
   @AfterClass
@@ -91,6 +94,7 @@ public class CreateNamedFactoryFromDashboardTest {
   @Test
   public void createFactoryFromDashBoard() throws ExecutionException, InterruptedException {
     String currentWin = seleniumWebDriver.getWindowHandle();
+
     dashboard.open();
     dashboardFactories.selectFactoriesOnNavBar();
     dashboardFactories.waitAllFactoriesPage();
@@ -101,9 +105,11 @@ public class CreateNamedFactoryFromDashboardTest {
     dashboardFactories.waitJsonFactoryIsNotEmpty();
     dashboard.waitNotificationIsClosed();
     dashboardFactories.clickFactoryIDUrl();
+
     seleniumWebDriverHelper.switchToNextWindow(currentWin);
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
+
     projectExplorer.waitItem(PROJECT_NAME);
     events.clickEventLogBtn();
     events.waitExpectedMessage(CONFIGURING_PROJECT_AND_CLONING_SOURCE_CODE);
@@ -113,5 +119,9 @@ public class CreateNamedFactoryFromDashboardTest {
     pullRequestPanel.waitOpenPanel();
     projectExplorer.openItemByPath(PROJECT_NAME);
     mavenPluginStatusBar.waitClosingInfoPanel();
+  }
+
+  protected void selectSampleProject() {
+    wizard.selectProjectAndCreate(WEB_JAVA_SPRING, PROJECT_NAME);
   }
 }

@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.format;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.CUSTOM;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.ASSISTANT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.NAVIGATE_TO_FILE;
@@ -86,20 +87,20 @@ public class NavigateToFileTest {
     projectExplorer.waitItem(PROJECT_NAME_2);
   }
 
-  @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
+  @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects", groups = FLAKY)
   public void shouldNavigateToFileForFirstProject(
       String inputValueForChecking, Map<Integer, String> expectedValues) {
     // Open the project one and check function 'Navigate To File'
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 1);
   }
 
-  @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects")
+  @Test(dataProvider = "dataForCheckingTheSameFileInDifferentProjects", groups = FLAKY)
   public void shouldDoNavigateToFileForSecondProject(
       String inputValueForChecking, Map<Integer, String> expectedValues) {
     launchNavigateToFileAndCheckResults(inputValueForChecking, expectedValues, 2);
   }
 
-  @Test(dataProvider = "dataToNavigateToFileCreatedOutsideIDE")
+  @Test(dataProvider = "dataToNavigateToFileCreatedOutsideIDE", groups = FLAKY)
   public void shouldNavigateToFileWithJustCreatedFiles(
       String inputValueForChecking, Map<Integer, String> expectedValues) throws Exception {
 

@@ -21,6 +21,9 @@
   },
   "docs" : {
     "stack" : "/docs/creating-starting-workspaces.html",
-    "workspace" : "/docs/what-are-workspaces.html"
+    "workspace" : "/docs/what-are-workspaces.html",
+    "factory" : "/docs/factories-getting-started.html",
+    "organization": "/docs/organizations.html",
+    "general": "/docs"
   }
 }

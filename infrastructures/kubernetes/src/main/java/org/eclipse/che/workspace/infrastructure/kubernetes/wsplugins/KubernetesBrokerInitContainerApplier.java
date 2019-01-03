@@ -86,7 +86,7 @@ public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironmen
     }
 
     workspaceEnvironment.getConfigMaps().putAll(brokerEnvironment.getConfigMaps());
-    workspacePod.getSpec().setInitContainers(brokerPod.getSpec().getContainers());
+    workspacePod.getSpec().getInitContainers().addAll(brokerPod.getSpec().getContainers());
     workspacePod.getSpec().getVolumes().addAll(brokerPod.getSpec().getVolumes());
   }
 }

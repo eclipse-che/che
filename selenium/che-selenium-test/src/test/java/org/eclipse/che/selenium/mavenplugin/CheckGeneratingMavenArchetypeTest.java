@@ -57,6 +57,7 @@ public class CheckGeneratingMavenArchetypeTest {
             PROJECT_NAME + "/src/test/java/" + GROUP_ID + "/AppTest.java",
             PROJECT_NAME + "/pom.xml");
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     menu.runCommand(
         TestMenuCommandsConstants.Workspace.WORKSPACE,
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);

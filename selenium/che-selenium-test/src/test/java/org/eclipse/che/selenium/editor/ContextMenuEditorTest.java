@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.editor;
 
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.CLOSE;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FIND;
@@ -270,7 +271,7 @@ public class ContextMenuEditorTest {
     editor.closeFileByNameWithSaving("ModelAndView.class");
   }
 
-  @Test(priority = 6, alwaysRun = true)
+  @Test(priority = 6, alwaysRun = true, groups = FLAKY)
   public void checkRefactoring() {
     final String editorTabName = "Test1";
     final String renamedEditorTabName = "Zclass";

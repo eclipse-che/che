@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.factory.Button;
 import org.eclipse.che.api.factory.server.model.impl.ActionImpl;
 import org.eclipse.che.api.factory.server.model.impl.AuthorImpl;
@@ -213,9 +214,9 @@ public class FactoryDaoTest {
   public void shouldGetFactoryByIdAttribute() throws Exception {
     final FactoryImpl factory = factories[0];
     final List<Pair<String, String>> attributes = ImmutableList.of(Pair.of("id", factory.getId()));
-    final List<FactoryImpl> result = factoryDao.getByAttribute(1, 0, attributes);
+    final Page<FactoryImpl> result = factoryDao.getByAttributes(1, 0, attributes);
 
-    assertEquals(new HashSet<>(result), ImmutableSet.of(factory));
+    assertEquals(new HashSet<>(result.getItems()), ImmutableSet.of(factory));
   }
 
   @Test(dependsOnMethods = "shouldUpdateFactory")
@@ -231,17 +232,25 @@ public class FactoryDaoTest {
     factory3.getPolicies().setReferer("ref2");
     factoryDao.update(factory1);
     factoryDao.update(factory3);
-    final List<FactoryImpl> result = factoryDao.getByAttribute(factories.length, 0, attributes);
+    final Page<FactoryImpl> result = factoryDao.getByAttributes(factories.length, 0, attributes);
 
-    assertEquals(new HashSet<>(result), ImmutableSet.of(factories[0], factories[2], factories[4]));
+    assertEquals(
+        new HashSet<>(result.getItems()),
+        ImmutableSet.of(factories[0], factories[2], factories[4]));
   }
 
   @Test
   public void shouldFindAllFactoriesWhenAttributesNotSpecified() throws Exception {
     final List<Pair<String, String>> attributes = emptyList();
-    final List<FactoryImpl> result = factoryDao.getByAttribute(factories.length, 0, attributes);
+    final Page<FactoryImpl> result = factoryDao.getByAttributes(factories.length, 0, attributes);
 
-    assertEquals(new HashSet<>(result), new HashSet<>(asList(factories)));
+    assertEquals(new HashSet<>(result.getItems()), new HashSet<>(asList(factories)));
+  }
+
+  @Test
+  public void shouldFindAllFactoriesOfSpecifiedUser() throws Exception {
+    final Page<FactoryImpl> result = factoryDao.getByUser(users[1].getId(), 30, 0);
+    assertEquals(new HashSet<>(result.getItems()), new HashSet<>(asList(factories[1])));
   }
 
   @Test(expectedExceptions = NotFoundException.class, dependsOnMethods = "shouldGetFactoryById")
