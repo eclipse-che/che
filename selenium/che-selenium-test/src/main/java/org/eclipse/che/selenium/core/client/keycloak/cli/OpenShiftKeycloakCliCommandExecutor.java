@@ -26,15 +26,26 @@ import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
  */
 @Singleton
 public class OpenShiftKeycloakCliCommandExecutor implements KeycloakCliCommandExecutor {
-  private static final String DEFAULT_OPENSHIFT_CHE_NAMESPACE = "eclipse-che";
+  private static final String DEFAULT_CHE_OPENSHIFT_PROJECT = "eclipse-che";
+  private static final String DEFAULT_KEYCLOAK_APP = "keycloak";
+  private static final String DEFAULT_INTERNAL_PATH_TO_KEYCLOAK_CLI =
+      "/opt/jboss/keycloak/bin/kcadm.sh";
 
   private String keycloakPodName;
 
   @Inject private OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
 
   @Inject(optional = true)
-  @Named("env.openshift.che.namespace")
-  private String openShiftCheNamespace;
+  @Named("che.openshift.project")
+  private String cheOpenshiftProject;
+
+  @Inject(optional = true)
+  @Named("env.keycloak.openshift.app")
+  private String keycloakApp;
+
+  @Inject(optional = true)
+  @Named("env.keycloak.cli.internal.path")
+  private String internalPathToKeycloakCli;
 
   @Override
   public String execute(String command) throws IOException {
@@ -43,7 +54,13 @@ public class OpenShiftKeycloakCliCommandExecutor implements KeycloakCliCommandEx
     }
 
     String openShiftKeycloakCliCommand =
-        format("exec %s -- /opt/jboss/keycloak/bin/kcadm.sh %s", keycloakPodName, command);
+        format(
+            "exec %s -- %s %s",
+            keycloakPodName,
+            internalPathToKeycloakCli != null
+                ? internalPathToKeycloakCli
+                : DEFAULT_INTERNAL_PATH_TO_KEYCLOAK_CLI,
+            command);
 
     return openShiftCliCommandExecutor.execute(openShiftKeycloakCliCommand);
   }
@@ -52,20 +69,17 @@ public class OpenShiftKeycloakCliCommandExecutor implements KeycloakCliCommandEx
     // obtain name of keycloak pod
     String getKeycloakPodNameCommand =
         format(
-            "get pod --namespace=%s -l app=keycloak --no-headers | awk '{print $1}'",
-            openShiftCheNamespace != null
-                ? openShiftCheNamespace
-                : DEFAULT_OPENSHIFT_CHE_NAMESPACE);
+            "get pod --namespace=%s -l app=%s --no-headers | awk '{print $1}'",
+            cheOpenshiftProject != null ? cheOpenshiftProject : DEFAULT_CHE_OPENSHIFT_PROJECT,
+            keycloakApp != null ? keycloakApp : DEFAULT_KEYCLOAK_APP);
 
     keycloakPodName = openShiftCliCommandExecutor.execute(getKeycloakPodNameCommand);
 
     if (keycloakPodName.trim().isEmpty()) {
       String errorMessage =
           format(
-              "Keycloak pod is not found at namespace %s at OpenShift instance.",
-              openShiftCheNamespace != null
-                  ? openShiftCheNamespace
-                  : DEFAULT_OPENSHIFT_CHE_NAMESPACE);
+              "Keycloak pod is not found at project %s at OpenShift instance.",
+              cheOpenshiftProject != null ? cheOpenshiftProject : DEFAULT_CHE_OPENSHIFT_PROJECT);
 
       throw new RuntimeException(errorMessage);
     }

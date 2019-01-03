@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
+import org.eclipse.che.selenium.core.client.keycloak.KeycloakSettings;
+import org.eclipse.che.selenium.core.client.keycloak.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -44,15 +46,18 @@ public class KeycloakCliClient {
 
   private final TestUserFactory<DefaultTestUser> defaultTestUserFactory;
   private final TestUserFactory<TestUserImpl> testUserFactory;
+  private final KeycloakSettings keycloakSettings;
 
   @Inject private KeycloakCliCommandExecutor executor;
 
   @Inject
   public KeycloakCliClient(
       TestUserFactory<TestUserImpl> testUserFactory,
-      TestUserFactory<DefaultTestUser> defaultTestUserFactory) {
+      TestUserFactory<DefaultTestUser> defaultTestUserFactory,
+      TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient) {
     this.testUserFactory = testUserFactory;
     this.defaultTestUserFactory = defaultTestUserFactory;
+    this.keycloakSettings = testKeycloakSettingsServiceClient.read();
   }
 
   public TestUserImpl createUser(RemovableUserProvider testUserProvider) throws IOException {
@@ -85,13 +90,13 @@ public class KeycloakCliClient {
   private String doCreateUser(String username, String email, String password) throws IOException {
     String authPartOfCommand =
         format(
-            "--no-config --server http://localhost:8080/auth --user %s --password %s --realm master",
+            "--no-config --server http://0.0.0.0:8080/auth --user %s --password %s --realm master",
             adminTestUserProvider.get().getName(), adminTestUserProvider.get().getPassword());
 
     String createUserCommand =
         format(
-            "create users -r che -s username=%s -s enabled=true %s 2>&1",
-            username, authPartOfCommand);
+            "create users -r %s -s username=%s -s enabled=true %s 2>&1",
+            getCheKeycloakRealm(), username, authPartOfCommand);
     String response = executor.execute(createUserCommand);
     if (!response.contains("Created new user with id ")) {
       throw new IOException("Test user creation error: " + response);
@@ -99,27 +104,23 @@ public class KeycloakCliClient {
 
     String userId = extractUserId(response);
 
-    try {
-      String setTestUsersPermanentPasswordCommand =
-          format(
-              "set-password -r che --username %s --new-password %s %s 2>&1",
-              username, password, authPartOfCommand);
-      executor.execute(setTestUsersPermanentPasswordCommand);
+    String setTestUsersPermanentPasswordCommand =
+        format(
+            "set-password -r %s --username %s --new-password %s %s 2>&1",
+            getCheKeycloakRealm(), username, password, authPartOfCommand);
+    executor.execute(setTestUsersPermanentPasswordCommand);
 
-      String setEmailCommand =
-          format("update users/%s -r che --set email=%s %s 2>&1", userId, email, authPartOfCommand);
-      executor.execute(setEmailCommand);
+    String setEmailCommand =
+        format(
+            "update users/%s -r %s --set email=%s %s 2>&1",
+            userId, getCheKeycloakRealm(), email, authPartOfCommand);
+    executor.execute(setEmailCommand);
 
-      String addReadTokenRoleToUserCommand =
-          format(
-              "add-roles -r che --uusername %s --cclientid broker --rolename read-token %s 2>&1",
-              username, authPartOfCommand);
-      executor.execute(addReadTokenRoleToUserCommand);
-    } catch (IOException e) {
-      // clean up user
-      delete(userId, username);
-      throw e;
-    }
+    String addReadTokenRoleToUserCommand =
+        format(
+            "add-roles -r %s --uusername %s --cclientid broker --rolename read-token %s 2>&1",
+            getCheKeycloakRealm(), username, authPartOfCommand);
+    executor.execute(addReadTokenRoleToUserCommand);
 
     return userId;
   }
@@ -128,13 +129,13 @@ public class KeycloakCliClient {
   public void setupAdmin(AdminTestUser adminTestUser) {
     String authPartOfCommand =
         format(
-            "--no-config --server http://localhost:8080/auth --user %s --password %s --realm master",
+            "--no-config --server http://0.0.0.0:8080/auth --user %s --password %s --realm master",
             adminTestUser.getName(), adminTestUser.getPassword());
 
     String addReadTokenRoleToUserCommand =
         format(
-            "add-roles -r che --uusername %s --cclientid broker --rolename read-token %s 2>&1",
-            adminTestUser.getName(), authPartOfCommand);
+            "add-roles -r %s --uusername %s --cclientid broker --rolename read-token %s 2>&1",
+            getCheKeycloakRealm(), adminTestUser.getName(), authPartOfCommand);
 
     try {
       executor.execute(addReadTokenRoleToUserCommand);
@@ -161,8 +162,9 @@ public class KeycloakCliClient {
   private void delete(String userId, String username) throws IOException {
     String commandToDeleteUser =
         format(
-            "delete users/%s -r che -s username=%s --no-config --server http://localhost:8080/auth --user %s --password %s --realm master 2>&1",
+            "delete users/%s -r %s -s username=%s --no-config --server http://0.0.0.0:8080/auth --user %s --password %s --realm master 2>&1",
             userId,
+            getCheKeycloakRealm(),
             username,
             adminTestUserProvider.get().getName(),
             adminTestUserProvider.get().getPassword());
@@ -170,5 +172,9 @@ public class KeycloakCliClient {
     executor.execute(commandToDeleteUser);
 
     LOG.info("Test user with name='{}' has been removed.", username);
+  }
+
+  private String getCheKeycloakRealm() {
+    return keycloakSettings.getKeycloakRealm();
   }
 }
