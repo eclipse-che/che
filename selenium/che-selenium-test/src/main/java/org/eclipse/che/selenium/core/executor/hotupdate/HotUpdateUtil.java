@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import org.eclipse.che.selenium.core.client.TestUserPreferencesServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a set of methods which make easier to do updating of the che pod and wait of the updating
@@ -137,6 +138,9 @@ public class HotUpdateUtil {
    */
   public int getMasterPodRevision() {
     try {
+      String getRevisionOfCheDeploymentCommand = getRevisionOfCheDeploymentCommand();
+      LoggerFactory.getLogger(this.getClass())
+          .info("getRevisionOfCheDeploymentCommand: " + getRevisionOfCheDeploymentCommand);
       return Integer.parseInt(
           openShiftCliCommandExecutor.execute(getRevisionOfCheDeploymentCommand()));
     } catch (IOException ex) {
@@ -151,6 +155,10 @@ public class HotUpdateUtil {
    */
   public String getMasterPodName() {
     try {
+      String getNameOfCheDeploymentCommand = getNameOfCheDeploymentCommand();
+      LoggerFactory.getLogger(this.getClass())
+          .info("getNameOfCheDeploymentCommand: " + getNameOfCheDeploymentCommand);
+
       return openShiftCliCommandExecutor.execute(getNameOfCheDeploymentCommand());
     } catch (IOException ex) {
       throw new RuntimeException(ex.getLocalizedMessage(), ex);

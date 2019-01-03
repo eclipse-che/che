@@ -14,11 +14,12 @@ package org.eclipse.che.selenium.core.client.keycloak.cli;
 import static java.lang.String.format;
 
 import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
+import org.eclipse.che.selenium.core.client.keycloak.KeycloakSettings;
+import org.eclipse.che.selenium.core.client.keycloak.TestKeycloakSettingsServiceClient;
 import org.eclipse.che.selenium.core.provider.AdminTestUserProvider;
 import org.eclipse.che.selenium.core.provider.RemovableUserProvider;
 import org.eclipse.che.selenium.core.user.AdminTestUser;
@@ -40,26 +41,23 @@ public class KeycloakCliClient {
   private static final Pattern EXTRACT_USER_ID_PATTERN =
       Pattern.compile("^.*Created new user with id '(.*)'.*$", Pattern.DOTALL);
 
-  private static final String DEFAULT_CHE_KEYCLOAK_REALM = "che";
-
   // we need to inject AdminTestUser separately to avoid circular dependency error
   @Inject private AdminTestUserProvider adminTestUserProvider;
 
   private final TestUserFactory<DefaultTestUser> defaultTestUserFactory;
   private final TestUserFactory<TestUserImpl> testUserFactory;
+  private final KeycloakSettings keycloakSettings;
 
   @Inject private KeycloakCliCommandExecutor executor;
-
-  @Inject(optional = true)
-  @Named("che.keycloak.realm")
-  private String cheKeycloakRealm;
 
   @Inject
   public KeycloakCliClient(
       TestUserFactory<TestUserImpl> testUserFactory,
-      TestUserFactory<DefaultTestUser> defaultTestUserFactory) {
+      TestUserFactory<DefaultTestUser> defaultTestUserFactory,
+      TestKeycloakSettingsServiceClient testKeycloakSettingsServiceClient) {
     this.testUserFactory = testUserFactory;
     this.defaultTestUserFactory = defaultTestUserFactory;
+    this.keycloakSettings = testKeycloakSettingsServiceClient.read();
   }
 
   public TestUserImpl createUser(RemovableUserProvider testUserProvider) throws IOException {
@@ -177,6 +175,6 @@ public class KeycloakCliClient {
   }
 
   private String getCheKeycloakRealm() {
-    return cheKeycloakRealm != null ? cheKeycloakRealm : DEFAULT_CHE_KEYCLOAK_REALM;
+    return keycloakSettings.getKeycloakRealm();
   }
 }
