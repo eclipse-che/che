@@ -31,23 +31,25 @@ public class ApiResponceMetricFilter implements Filter {
   public void init(FilterConfig filterConfig) throws ServletException {}
 
   @Override
-  public void doFilter(
-      ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
       throws IOException, ServletException {
-    filterChain.doFilter(servletRequest, servletResponse);
-    if (servletResponse instanceof HttpServletResponse) {
-      HttpServletResponse hts = (HttpServletResponse) servletResponse;
-      if (hts.getStatus() / 100 == 2) {
-        apiResponseCounter.incrementSuccessResponseCounter();
-      }
-      if (hts.getStatus() / 100 == 3) {
-        apiResponseCounter.incrementRedirectResonseCounter();
-      }
-      if (hts.getStatus() / 100 == 4) {
-        apiResponseCounter.incrementClientErrorResponseCounter();
-      }
-      if (hts.getStatus() / 100 == 5) {
-        apiResponseCounter.incrementServerErrorResponceCounter();
+    filterChain.doFilter(request, response);
+    if (response instanceof HttpServletResponse) {
+      HttpServletResponse httpResponse = (HttpServletResponse) response;
+      int status = httpResponse.getStatus() / 100;
+      switch (status) {
+        case 2:
+          apiResponseCounter.incrementSuccessResponseCounter();
+          break;
+        case 3:
+          apiResponseCounter.incrementRedirectResponseCounter();
+          break;
+        case 4:
+          apiResponseCounter.incrementClientErrorResponseCounter();
+          break;
+        case 5:
+          apiResponseCounter.incrementServerErrorResponceCounter();
+          break;
       }
     }
   }

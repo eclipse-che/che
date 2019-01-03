@@ -61,7 +61,7 @@ public class ApiResponceMetricFilterTest {
         .statusCode(status);
 
     verify(apiResponseCounter).incrementSuccessResponseCounter();
-    verify(apiResponseCounter, never()).incrementRedirectResonseCounter();
+    verify(apiResponseCounter, never()).incrementRedirectResponseCounter();
     verify(apiResponseCounter, never()).incrementClientErrorResponseCounter();
     verify(apiResponseCounter, never()).incrementServerErrorResponceCounter();
   }
@@ -79,7 +79,7 @@ public class ApiResponceMetricFilterTest {
         .then()
         .statusCode(status);
 
-    verify(apiResponseCounter).incrementRedirectResonseCounter();
+    verify(apiResponseCounter).incrementRedirectResponseCounter();
     verify(apiResponseCounter, never()).incrementSuccessResponseCounter();
     verify(apiResponseCounter, never()).incrementClientErrorResponseCounter();
     verify(apiResponseCounter, never()).incrementServerErrorResponceCounter();
@@ -99,7 +99,7 @@ public class ApiResponceMetricFilterTest {
 
     verify(apiResponseCounter).incrementClientErrorResponseCounter();
     verify(apiResponseCounter, never()).incrementSuccessResponseCounter();
-    verify(apiResponseCounter, never()).incrementRedirectResonseCounter();
+    verify(apiResponseCounter, never()).incrementRedirectResponseCounter();
     verify(apiResponseCounter, never()).incrementServerErrorResponceCounter();
   }
 
@@ -117,7 +117,7 @@ public class ApiResponceMetricFilterTest {
 
     verify(apiResponseCounter).incrementServerErrorResponceCounter();
     verify(apiResponseCounter, never()).incrementSuccessResponseCounter();
-    verify(apiResponseCounter, never()).incrementRedirectResonseCounter();
+    verify(apiResponseCounter, never()).incrementRedirectResponseCounter();
     verify(apiResponseCounter, never()).incrementClientErrorResponseCounter();
   }
 

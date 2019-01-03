@@ -52,7 +52,7 @@ public class ApiResponseCounter implements MeterBinder {
     successResponseCounter.increment();
   }
 
-  public void incrementRedirectResonseCounter() {
+  public void incrementRedirectResponseCounter() {
     redirectResponseCounter.increment();
   }
 
