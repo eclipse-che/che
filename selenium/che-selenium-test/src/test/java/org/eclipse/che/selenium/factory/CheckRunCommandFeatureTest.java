@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.factory;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
@@ -19,14 +20,12 @@ import static org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories.A
 
 import com.google.inject.Inject;
 import java.util.concurrent.ExecutionException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestFactoryServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
-import org.eclipse.che.selenium.pageobject.CodenvyEditor;
 import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -42,18 +41,16 @@ import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
 public class CheckRunCommandFeatureTest {
-  private static final String PROJECT_NAME = CheckRunCommandFeatureTest.class.getSimpleName();
-  private static final String NAME_BUILD_COMMAND = PROJECT_NAME + ": build and run";
-  private static final String FACTORY_NAME = NameGenerator.generate("factory", 4);
+  protected static final String PROJECT_NAME = generate("project", 4);
+  private static final String FACTORY_NAME = generate("factory", 4);
 
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Dashboard dashboard;
-  @Inject private DashboardFactories dashboardFactories;
+  @Inject protected DashboardFactories dashboardFactories;
   @Inject private Ide ide;
   @Inject private LoadingBehaviorPage loadingBehaviorPage;
-  @Inject private CodenvyEditor editor;
   @Inject private Loader loader;
-  @Inject private Wizard wizard;
+  @Inject protected Wizard wizard;
   @Inject private Menu menu;
   @Inject private TestWorkspace testWorkspace;
   @Inject private DefaultTestUser user;
@@ -76,9 +73,12 @@ public class CheckRunCommandFeatureTest {
 
   @Test
   public void checkRunCommandFeatureTest() throws ExecutionException, InterruptedException {
+    // wait the jdt.ls server is started
+    consoles.waitExpectedTextIntoConsole("Initialized language server");
     createProject(PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
+
     dashboard.open();
     dashboard.selectFactoriesOnDashbord();
     dashboardFactories.clickOnAddFactoryBtn();
@@ -86,11 +86,13 @@ public class CheckRunCommandFeatureTest {
     dashboardFactories.setFactoryName(FACTORY_NAME);
     dashboardFactories.clickOnCreateFactoryBtn();
     dashboardFactories.selectAction(RUN_COMMAND);
-    dashboardFactories.enterParamValue(NAME_BUILD_COMMAND);
+    enterParamValueOnDashboardFactories();
     dashboardFactories.clickAddOnAddAction();
     dashboardFactories.clickOnOpenFactory();
+
     String currentWin = seleniumWebDriver.getWindowHandle();
     seleniumWebDriverHelper.switchToNextWindow(currentWin);
+
     loadingBehaviorPage.waitWhileLoadPageIsClosed();
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -103,7 +105,7 @@ public class CheckRunCommandFeatureTest {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.waitCreateProjectWizardForm();
     wizard.typeProjectNameOnWizard(projectName);
-    wizard.selectSample(WEB_JAVA_SPRING);
+    selectSample();
     wizard.clickCreateButton();
     loader.waitOnClosed();
     wizard.waitCloseProjectConfigForm();
@@ -111,5 +113,14 @@ public class CheckRunCommandFeatureTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(projectName);
     loader.waitOnClosed();
+  }
+
+  protected void selectSample() {
+    wizard.selectSample(WEB_JAVA_SPRING);
+  }
+
+  protected void enterParamValueOnDashboardFactories() {
+    String nameBuildCommand = PROJECT_NAME + ": build and run";
+    dashboardFactories.enterParamValue(nameBuildCommand);
   }
 }
