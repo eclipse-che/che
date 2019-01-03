@@ -21,15 +21,11 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class ApiResponceMetricFilter implements Filter {
 
-  private static Logger LOG = LoggerFactory.getLogger(ApiResponceMetricFilter.class);
-
-  @Inject ApiResponseCounter apiResponseCoutner;
+  @Inject protected ApiResponseCounter apiResponseCounter;
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {}
@@ -42,20 +38,16 @@ public class ApiResponceMetricFilter implements Filter {
     if (servletResponse instanceof HttpServletResponse) {
       HttpServletResponse hts = (HttpServletResponse) servletResponse;
       if (hts.getStatus() / 100 == 2) {
-        apiResponseCoutner.incrementSuccessResponseCounter();
-        LOG.info("incremented200");
+        apiResponseCounter.incrementSuccessResponseCounter();
       }
       if (hts.getStatus() / 100 == 3) {
-        apiResponseCoutner.incrementRedirectResonseCounter();
-        LOG.info("incremented300");
+        apiResponseCounter.incrementRedirectResonseCounter();
       }
       if (hts.getStatus() / 100 == 4) {
-        apiResponseCoutner.incrementClientErrorResponseCounter();
-        LOG.info("incremented400");
+        apiResponseCounter.incrementClientErrorResponseCounter();
       }
       if (hts.getStatus() / 100 == 5) {
-        apiResponseCoutner.incrementServerErrorResponceCounter();
-        LOG.info("incremented500");
+        apiResponseCounter.incrementServerErrorResponceCounter();
       }
     }
   }
