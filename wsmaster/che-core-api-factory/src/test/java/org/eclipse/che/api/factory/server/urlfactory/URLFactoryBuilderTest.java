@@ -44,6 +44,7 @@ public class URLFactoryBuilderTest {
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
 
+  @Mock private DevfileEnvironmentProvisioner environmentProvisioner;
   @Mock private DevfileManager devfileManager;
 
   /** Tested instance. */
@@ -52,7 +53,8 @@ public class URLFactoryBuilderTest {
   @BeforeClass
   public void setUp() {
     this.urlFactoryBuilder =
-        new URLFactoryBuilder(defaultEditor, defaultPlugin, urlFetcher, devfileManager);
+        new URLFactoryBuilder(
+            defaultEditor, defaultPlugin, environmentProvisioner, urlFetcher, devfileManager);
   }
 
   @Test
