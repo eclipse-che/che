@@ -35,22 +35,7 @@ public class ApiResponceMetricFilter implements Filter {
       throws IOException, ServletException {
     filterChain.doFilter(request, response);
     if (response instanceof HttpServletResponse) {
-      HttpServletResponse httpResponse = (HttpServletResponse) response;
-      int status = httpResponse.getStatus() / 100;
-      switch (status) {
-        case 2:
-          apiResponseCounter.incrementSuccessResponseCounter();
-          break;
-        case 3:
-          apiResponseCounter.incrementRedirectResponseCounter();
-          break;
-        case 4:
-          apiResponseCounter.incrementClientErrorResponseCounter();
-          break;
-        case 5:
-          apiResponseCounter.incrementServerErrorResponceCounter();
-          break;
-      }
+      apiResponseCounter.handleStatus(((HttpServletResponse) response).getStatus());
     }
   }
 
