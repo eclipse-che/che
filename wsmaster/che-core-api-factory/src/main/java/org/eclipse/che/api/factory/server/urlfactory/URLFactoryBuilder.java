@@ -12,6 +12,7 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
@@ -90,10 +91,11 @@ public class URLFactoryBuilder {
    * Build a factory using the provided devfile
    *
    * @param devfileLocation location of devfile
+   * @param fileUrlComposer optional service-specific composer of URL's to the file raw content
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
-      String devfileLocation, @Nullable Function<String, String> localFileLocator)
+      String devfileLocation, @Nullable Function<String, String> fileUrlComposer)
       throws BadRequestException, ServerException {
     if (devfileLocation == null) {
       return Optional.empty();
@@ -105,11 +107,11 @@ public class URLFactoryBuilder {
     try {
       Devfile devfile = devfileManager.parse(devfileYamlContent, false);
       Optional<EnvironmentImpl> environment =
-          devfileEnvironmentProvisioner.tryProvision(devfile, localFileLocator);
+          devfileEnvironmentProvisioner.tryProvision(devfile, fileUrlComposer);
       WorkspaceConfigImpl wsConfig = devfileManager.createWorkspaceConfig(devfile);
       if (environment.isPresent()) {
         wsConfig.setDefaultEnv("default");
-        wsConfig.getEnvironments().put("default", environment.get());
+        wsConfig.setEnvironments(singletonMap("default", environment.get()));
       }
       return Optional.of(
           newDto(FactoryDto.class)

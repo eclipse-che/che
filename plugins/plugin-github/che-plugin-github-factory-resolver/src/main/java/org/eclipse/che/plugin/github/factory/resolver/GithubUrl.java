@@ -144,7 +144,7 @@ public class GithubUrl {
   }
 
   /**
-   * Provides the location to factory json file
+   * Provides location to raw content of the factory json file
    *
    * @return location of factory json file in a repository
    */
@@ -159,7 +159,7 @@ public class GithubUrl {
   }
 
   /**
-   * Provides the location to devfile yaml file
+   * Provides location to raw content of the devfile yaml file
    *
    * @return location of devfile yaml file in a repository
    */
@@ -173,13 +173,18 @@ public class GithubUrl {
         .toString();
   }
 
-  protected String localFileLocation(String localFileName) {
+  /**
+   * Provides location to raw content of specified file
+   *
+   * @return location of specified file in a repository
+   */
+  protected String rawFileLocation(String fileName) {
     return new StringJoiner("/")
         .add("https://raw.githubusercontent.com")
         .add(username)
         .add(repository)
         .add(branch)
-        .add(localFileName)
+        .add(fileName)
         .toString();
   }
 

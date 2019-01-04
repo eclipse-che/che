@@ -27,6 +27,9 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
+/**
+ * Creates workspace environment from specific tool in devfile if any.
+ */
 @Singleton
 public class DevfileEnvironmentProvisioner {
 
@@ -37,8 +40,20 @@ public class DevfileEnvironmentProvisioner {
     this.urlFetcher = urlFetcher;
   }
 
+  /**
+   * Finds an recipe-type tool (openshift or kubernetes) in devfile and
+   * tries to provision {@link EnvironmentImpl} from it. If such tools are present in devfile,
+   * an file URL composer function MUST be provided to allow to fetch recipe content.
+   *
+   * @param devfile source devfile
+   * @param fileUrlComposer optional service-specific composer of URL's to the file raw content
+   * @return provisioned enviromnent
+   * @throws BadRequestException
+   *         when there is recipe-type tool present in devfile but no URL composer provided
+   *         when file specified in local section of the tool is unreachable or empty
+   */
   public Optional<EnvironmentImpl> tryProvision(
-      Devfile devfile, @Nullable Function<String, String> localFileLocator)
+      Devfile devfile, @Nullable Function<String, String> fileUrlComposer)
       throws BadRequestException {
     Optional<Tool> recipeToolOptional =
         devfile
@@ -54,12 +69,12 @@ public class DevfileEnvironmentProvisioner {
     }
     final Tool recipeTool = recipeToolOptional.get();
     final String type = recipeTool.getType();
-    if (localFileLocator == null) {
+    if (fileUrlComposer == null) {
       throw new BadRequestException(
           "This kind of URL's does not support '" + type + "' type tools.");
     }
 
-    String localFileContent = urlFetcher.fetch(localFileLocator.apply(recipeTool.getLocal()));
+    String localFileContent = urlFetcher.fetch(fileUrlComposer.apply(recipeTool.getLocal()));
     if (isNullOrEmpty(localFileContent)) {
       throw new BadRequestException(
           "The local file '"
