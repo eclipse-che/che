@@ -104,8 +104,8 @@ public class KubernetesEnvironmentFactory
     Map<String, Deployment> deployments = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
     Map<String, ConfigMap> configMaps = new HashMap<>();
+    Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     boolean isAnyIngressPresent = false;
-    boolean isAnyPVCPresent = false;
     boolean isAnySecretPresent = false;
     for (HasMetadata object : list.getItems()) {
       if (object instanceof Pod) {
@@ -122,7 +122,8 @@ public class KubernetesEnvironmentFactory
       } else if (object instanceof Ingress) {
         isAnyIngressPresent = true;
       } else if (object instanceof PersistentVolumeClaim) {
-        isAnyPVCPresent = true;
+        PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
+        pvcs.put(pvc.getMetadata().getName(), pvc);
       } else if (object instanceof Secret) {
         isAnySecretPresent = true;
       } else if (object instanceof ConfigMap) {
@@ -138,11 +139,6 @@ public class KubernetesEnvironmentFactory
       warnings.add(
           new WarningImpl(
               Warnings.INGRESSES_IGNORED_WARNING_CODE, Warnings.INGRESSES_IGNORED_WARNING_MESSAGE));
-    }
-
-    if (isAnyPVCPresent) {
-      warnings.add(
-          new WarningImpl(Warnings.PVC_IGNORED_WARNING_CODE, Warnings.PVC_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnySecretPresent) {
@@ -161,6 +157,7 @@ public class KubernetesEnvironmentFactory
             .setPods(pods)
             .setDeployments(deployments)
             .setServices(services)
+            .setPersistentVolumeClaims(pvcs)
             .setIngresses(new HashMap<>())
             .setPersistentVolumeClaims(new HashMap<>())
             .setSecrets(new HashMap<>())

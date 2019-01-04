@@ -19,8 +19,6 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_MESSAGE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.PVC_IGNORED_WARNING_CODE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.PVC_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.SECRET_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.SECRET_IGNORED_WARNING_MESSAGE;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,6 +42,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
@@ -52,6 +51,8 @@ import io.fabric8.kubernetes.api.model.PodTemplateSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
@@ -88,7 +89,7 @@ public class KubernetesEnvironmentFactoryTest {
   public static final String MACHINE_NAME_1 = "machine1";
   public static final String MACHINE_NAME_2 = "machine2";
 
-  private KubernetesEnvironmentFactory k8sEnvironmentFactory;
+  private KubernetesEnvironmentFactory k8sEnvFactory;
 
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesEnvironmentValidator k8sEnvValidator;
@@ -96,7 +97,7 @@ public class KubernetesEnvironmentFactoryTest {
   @Mock private InternalEnvironment internalEnvironment;
   @Mock private InternalRecipe internalRecipe;
   @Mock private KubernetesListMixedOperation listMixedOperation;
-  @Mock private KubernetesList validatedObjects;
+  @Mock private KubernetesList parsedList;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
@@ -109,13 +110,13 @@ public class KubernetesEnvironmentFactoryTest {
 
   @BeforeMethod
   public void setup() throws Exception {
-    k8sEnvironmentFactory =
+    k8sEnvFactory =
         new KubernetesEnvironmentFactory(
             null, null, null, clientFactory, k8sEnvValidator, memoryProvisioner);
     when(clientFactory.create()).thenReturn(client);
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
-    when(serverGettable.get()).thenReturn(validatedObjects);
+    when(serverGettable.get()).thenReturn(parsedList);
     lenient().when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
     when(internalRecipe.getContentType()).thenReturn(YAML_RECIPE);
     when(internalRecipe.getContent()).thenReturn("recipe content");
@@ -123,12 +124,48 @@ public class KubernetesEnvironmentFactoryTest {
   }
 
   @Test
+  public void shouldCreateK8sEnvironmentWithServicesFromRecipe() throws Exception {
+    // given
+    Service service1 =
+        new ServiceBuilder().withNewMetadata().withName("service1").endMetadata().build();
+    Service service2 =
+        new ServiceBuilder().withNewMetadata().withName("service2").endMetadata().build();
+    when(parsedList.getItems()).thenReturn(asList(service1, service2));
+
+    // when
+    KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    // then
+    assertEquals(k8sEnv.getServices().size(), 2);
+    assertEquals(k8sEnv.getServices().get("service1"), service1);
+    assertEquals(k8sEnv.getServices().get("service2"), service2);
+  }
+
+  @Test
+  public void shouldCreateK8sEnvironmentWithPVCsFromRecipe() throws Exception {
+    // given
+    PersistentVolumeClaim pvc1 =
+        new PersistentVolumeClaimBuilder().withNewMetadata().withName("pvc1").endMetadata().build();
+    PersistentVolumeClaim pvc2 =
+        new PersistentVolumeClaimBuilder().withNewMetadata().withName("pvc2").endMetadata().build();
+    when(parsedList.getItems()).thenReturn(asList(pvc1, pvc2));
+
+    // when
+    KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    // then
+    assertEquals(k8sEnv.getPersistentVolumeClaims().size(), 2);
+    assertEquals(k8sEnv.getPersistentVolumeClaims().get("pvc1"), pvc1);
+    assertEquals(k8sEnv.getPersistentVolumeClaims().get("pvc2"), pvc2);
+  }
+
+  @Test
   public void ignoreIgressesWhenRecipeContainsThem() throws Exception {
     final List<HasMetadata> objects = asList(new Ingress(), new Ingress());
-    when(validatedObjects.getItems()).thenReturn(objects);
+    when(parsedList.getItems()).thenReturn(objects);
 
     final KubernetesEnvironment parsed =
-        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+        k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
     assertTrue(parsed.getIngresses().isEmpty());
     assertEquals(parsed.getWarnings().size(), 1);
@@ -138,27 +175,12 @@ public class KubernetesEnvironmentFactoryTest {
   }
 
   @Test
-  public void ignorePVCsWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> pvc = singletonList(new PersistentVolumeClaim());
-    when(validatedObjects.getItems()).thenReturn(pvc);
-
-    final KubernetesEnvironment parsed =
-        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
-
-    assertTrue(parsed.getPersistentVolumeClaims().isEmpty());
-    assertEquals(parsed.getWarnings().size(), 1);
-    assertEquals(
-        parsed.getWarnings().get(0),
-        new WarningImpl(PVC_IGNORED_WARNING_CODE, PVC_IGNORED_WARNING_MESSAGE));
-  }
-
-  @Test
   public void ignoreSecretsWhenRecipeContainsThem() throws Exception {
     final List<HasMetadata> recipeObjects = singletonList(new Secret());
-    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+    when(parsedList.getItems()).thenReturn(recipeObjects);
 
     final KubernetesEnvironment parsed =
-        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+        k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
     assertTrue(parsed.getSecrets().isEmpty());
     assertEquals(parsed.getWarnings().size(), 1);
@@ -172,46 +194,42 @@ public class KubernetesEnvironmentFactoryTest {
     ConfigMap configMap =
         new ConfigMapBuilder().withNewMetadata().withName("test-configmap").endMetadata().build();
     final List<HasMetadata> recipeObjects = singletonList(configMap);
-    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+    when(parsedList.getItems()).thenReturn(recipeObjects);
 
     final KubernetesEnvironment parsed =
-        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+        k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
     assertEquals(parsed.getConfigMaps().size(), 1);
-    assertEquals(
-        parsed.getConfigMaps().values().iterator().next().getMetadata().getName(),
-        configMap.getMetadata().getName());
+    assertEquals(parsed.getConfigMaps().get("test-configmap"), configMap);
   }
 
   @Test
   public void addPodsWhenRecipeContainsThem() throws Exception {
+    // given
     Pod pod =
         new PodBuilder()
             .withNewMetadata()
-            .withName("pod-test")
+            .withName("pod")
             .endMetadata()
-            .withNewSpec()
-            .endSpec()
+            .withSpec(new PodSpec())
             .build();
+    when(parsedList.getItems()).thenReturn(singletonList(pod));
 
-    final List<HasMetadata> recipeObjects = singletonList(pod);
-    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+    // when
+    KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    final KubernetesEnvironment parsed =
-        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+    // then
+    assertEquals(k8sEnv.getPodsCopy().size(), 1);
+    assertEquals(k8sEnv.getPodsCopy().get("pod"), pod);
 
-    assertEquals(parsed.getPodsCopy().size(), 1);
-    assertEquals(
-        parsed.getPodsCopy().values().iterator().next().getMetadata().getName(),
-        pod.getMetadata().getName());
-    assertEquals(parsed.getPodsData().size(), 1);
-    assertEquals(
-        parsed.getPodsData().values().iterator().next().getMetadata().getName(),
-        pod.getMetadata().getName());
+    assertEquals(k8sEnv.getPodsData().size(), 1);
+    assertEquals(k8sEnv.getPodsData().get("pod").getMetadata(), pod.getMetadata());
+    assertEquals(k8sEnv.getPodsData().get("pod").getSpec(), pod.getSpec());
   }
 
   @Test
   public void addDeploymentsWhenRecipeContainsThem() throws Exception {
+    // given
     PodTemplateSpec podTemplate =
         new PodTemplateSpecBuilder()
             .withNewMetadata()
@@ -231,23 +249,25 @@ public class KubernetesEnvironmentFactoryTest {
             .build();
 
     final List<HasMetadata> recipeObjects = singletonList(deployment);
-    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+    when(parsedList.getItems()).thenReturn(recipeObjects);
 
-    final KubernetesEnvironment parsed =
-        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+    // when
+    final KubernetesEnvironment k8sEnv =
+        k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertEquals(parsed.getDeploymentsCopy().size(), 1);
+    // then
+    assertEquals(k8sEnv.getDeploymentsCopy().size(), 1);
+    assertEquals(k8sEnv.getDeploymentsCopy().get("deployment-test"), deployment);
+
+    assertEquals(k8sEnv.getPodsData().size(), 1);
     assertEquals(
-        parsed.getDeploymentsCopy().values().iterator().next().getMetadata().getName(),
-        deployment.getMetadata().getName());
-    assertEquals(parsed.getPodsData().size(), 1);
-    assertEquals(
-        parsed.getPodsData().values().iterator().next().getMetadata().getName(),
-        podTemplate.getMetadata().getName());
+        k8sEnv.getPodsData().get("deployment-test").getMetadata(), podTemplate.getMetadata());
+    assertEquals(k8sEnv.getPodsData().get("deployment-test").getSpec(), podTemplate.getSpec());
   }
 
   @Test
   public void bothPodsAndDeploymentsIncludedInPodData() throws Exception {
+    // given
     PodTemplateSpec podTemplate =
         new PodTemplateSpecBuilder()
             .withNewMetadata()
@@ -273,24 +293,21 @@ public class KubernetesEnvironmentFactoryTest {
             .withNewSpec()
             .endSpec()
             .build();
-    final List<HasMetadata> recipeObjects = asList(deployment, pod);
-    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+    when(parsedList.getItems()).thenReturn(asList(deployment, pod));
 
-    final KubernetesEnvironment parsed =
-        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+    // when
+    final KubernetesEnvironment k8sEnv =
+        k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertEquals(parsed.getPodsData().size(), 2);
-    assertTrue(
-        parsed
-            .getPodsData()
-            .values()
-            .stream()
-            .allMatch(
-                podData -> {
-                  String name = podData.getMetadata().getName();
-                  return name.equals(podTemplate.getMetadata().getName())
-                      || name.equals(pod.getMetadata().getName());
-                }));
+    // then
+    assertEquals(k8sEnv.getPodsData().size(), 2);
+
+    assertEquals(
+        k8sEnv.getPodsData().get("deployment-test").getMetadata(), podTemplate.getMetadata());
+    assertEquals(k8sEnv.getPodsData().get("deployment-test").getSpec(), podTemplate.getSpec());
+
+    assertEquals(k8sEnv.getPodsData().get("bare-pod").getMetadata(), pod.getMetadata());
+    assertEquals(k8sEnv.getPodsData().get("bare-pod").getSpec(), pod.getSpec());
   }
 
   @Test(
@@ -335,7 +352,7 @@ public class KubernetesEnvironmentFactoryTest {
             mockPod(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
             mockPod(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
 
-    k8sEnvironmentFactory.addRamAttributes(machines, pods);
+    k8sEnvFactory.addRamAttributes(machines, pods);
 
     verify(memoryProvisioner)
         .provision(eq(machineConfig1), eq(firstMachineRamLimit), eq(firstMachineRamRequest));
