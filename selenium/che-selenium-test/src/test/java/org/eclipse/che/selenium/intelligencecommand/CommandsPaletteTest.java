@@ -11,10 +11,15 @@
  */
 package org.eclipse.che.selenium.intelligencecommand;
 
+import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SUCCESS;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.CUSTOM_TYPE;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
+import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
+
 import com.google.inject.Inject;
-import org.eclipse.che.selenium.core.constant.TestBuildConstants;
-import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.Consoles;
@@ -32,13 +37,14 @@ import org.testng.annotations.Test;
 
 /** @author Sergey Skorik */
 public class CommandsPaletteTest {
-  private static final String PROJECT_NAME = "cop";
+  protected static final String PROJECT_NAME = "project";
+  protected static final String COMMAND = PROJECT_NAME + ": build";
   private static final String customCommandName = "newCustom";
 
   @Inject private TestWorkspace testWorkspace;
-  @Inject private CommandsPalette cop;
+  @Inject protected CommandsPalette commandsPalette;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private Consoles consoles;
+  @Inject protected Consoles consoles;
   @Inject private Menu menu;
   @Inject private CommandsEditor commandsEditor;
   @Inject private CommandsExplorer commandsExplorer;
@@ -46,7 +52,7 @@ public class CommandsPaletteTest {
   @Inject private AskDialog askDialog;
   @Inject private Ide ide;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private Wizard wizard;
+  @Inject protected Wizard wizard;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -55,53 +61,45 @@ public class CommandsPaletteTest {
 
   @Test
   public void commandPaletteTest() {
-    // Create a java spring project
+    // Create a test project
     projectExplorer.waitProjectExplorer();
-    menu.runCommand(
-        TestMenuCommandsConstants.Workspace.WORKSPACE,
-        TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
-    wizard.selectProjectAndCreate(Wizard.SamplesName.WEB_JAVA_SPRING, PROJECT_NAME);
+    menu.runCommand(WORKSPACE, CREATE_PROJECT);
+    selectSampleProject();
     notificationsPopupPanel.waitProgressPopupPanelClose();
+    consoles.waitJDTLSProjectResolveFinishedMessage();
 
     // Open and close COP by hot keys
-    cop.openCommandPaletteByHotKeys();
-    cop.closeCommandPalette();
+    commandsPalette.openCommandPaletteByHotKeys();
+    commandsPalette.closeCommandPalette();
 
     // Start a command by Enter key
-    cop.openCommandPalette();
-    cop.startCommandByEnterKey(PROJECT_NAME + ": build");
-    consoles.waitExpectedTextIntoConsole(TestBuildConstants.BUILD_SUCCESS, 120);
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByEnterKey(COMMAND);
+    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, EXPECTED_MESS_IN_CONSOLE_SEC);
 
     // Start a command by double click
-    cop.openCommandPalette();
-    cop.startCommandByDoubleClick(PROJECT_NAME + ": debug");
-    consoles.waitExpectedTextIntoConsole("Server startup in", 120);
+    commandsPalette.openCommandPalette();
+    startCommandByDoubleClick();
 
     // Start commands from list after search
-    cop.openCommandPalette();
-    cop.searchAndStartCommand("tomcat");
-    cop.startCommandByDoubleClick(PROJECT_NAME + ": stop");
-    consoles.waitTabNameProcessIsPresent(PROJECT_NAME + ": stop tomcat");
+    commandsPalette.openCommandPalette();
+    startCommandFromSearchList();
 
     // Select commands from keyboard navigation (arrow buttons and "Enter" button)
-    cop.openCommandPalette();
-    cop.moveAndStartCommand(CommandsPalette.MoveTypes.DOWN, 3);
-    consoles.waitTabNameProcessIsPresent(PROJECT_NAME + ": run tomcat");
-    consoles.waitExpectedTextIntoConsole("Server startup in", 120);
+    commandsPalette.openCommandPalette();
+    selectCommandByKeyboardNavigation();
   }
 
   @Test(priority = 1)
   public void newCommandTest() {
     projectExplorer.waitProjectExplorer();
-    commandsBuilder(
-        TestIntelligentCommandsConstants.CommandsGoals.COMMON_GOAL,
-        TestIntelligentCommandsConstants.CommandsTypes.CUSTOM_TYPE);
-    cop.openCommandPaletteByHotKeys();
-    cop.startCommandByDoubleClick(customCommandName);
-    consoles.waitExpectedTextIntoConsole("hello", 120);
+    commandsBuilder(COMMON_GOAL, CUSTOM_TYPE);
+    commandsPalette.openCommandPalette();
+    commandsPalette.startCommandByDoubleClick(customCommandName);
+    consoles.waitExpectedTextIntoConsole("hello", EXPECTED_MESS_IN_CONSOLE_SEC);
     commandDelete(customCommandName);
-    cop.openCommandPalette();
-    cop.commandIsNotExists(customCommandName);
+    commandsPalette.openCommandPalette();
+    commandsPalette.commandIsNotExists(customCommandName);
   }
 
   private void commandsBuilder(String goalName, String commandType) {
@@ -124,5 +122,26 @@ public class CommandsPaletteTest {
     askDialog.confirmAndWaitClosed();
     loader.waitOnClosed();
     commandsExplorer.waitRemoveCommandFromExplorerByName(commandName);
+  }
+
+  protected void selectSampleProject() {
+    wizard.selectProjectAndCreate(WEB_JAVA_SPRING, PROJECT_NAME);
+  }
+
+  protected void startCommandByDoubleClick() {
+    commandsPalette.startCommandByDoubleClick(PROJECT_NAME + ": debug");
+    consoles.waitExpectedTextIntoConsole("Server startup in", EXPECTED_MESS_IN_CONSOLE_SEC);
+  }
+
+  protected void startCommandFromSearchList() {
+    commandsPalette.searchAndStartCommand("tomcat");
+    commandsPalette.startCommandByDoubleClick(PROJECT_NAME + ": stop");
+    consoles.waitTabNameProcessIsPresent(PROJECT_NAME + ": stop tomcat");
+  }
+
+  protected void selectCommandByKeyboardNavigation() {
+    commandsPalette.moveAndStartCommand(CommandsPalette.MoveTypes.DOWN, 3);
+    consoles.waitTabNameProcessIsPresent(PROJECT_NAME + ": run tomcat");
+    consoles.waitExpectedTextIntoConsole("Server startup in", EXPECTED_MESS_IN_CONSOLE_SEC);
   }
 }
