@@ -37,7 +37,7 @@ public class CheckShowHideHiddenFilesTest {
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
-  @Inject private Wizard projectWizard;
+  @Inject protected Wizard projectWizard;
   @Inject private Consoles consoles;
 
   @BeforeClass
@@ -81,7 +81,7 @@ public class CheckShowHideHiddenFilesTest {
         TestMenuCommandsConstants.Workspace.CREATE_PROJECT);
     projectWizard.waitCreateProjectWizardForm();
     projectWizard.typeProjectNameOnWizard(projectName);
-    projectWizard.selectSample(Wizard.SamplesName.WEB_JAVA_SPRING);
+    selectSampleProject();
     projectWizard.clickCreateButton();
     loader.waitOnClosed();
     projectWizard.waitCloseProjectConfigForm();
@@ -89,5 +89,9 @@ public class CheckShowHideHiddenFilesTest {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(projectName);
     loader.waitOnClosed();
+  }
+
+  protected void selectSampleProject() {
+    projectWizard.selectSample(Wizard.SamplesName.WEB_JAVA_SPRING);
   }
 }
