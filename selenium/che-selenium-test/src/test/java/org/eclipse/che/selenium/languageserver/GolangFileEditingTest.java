@@ -54,7 +54,6 @@ public class GolangFileEditingTest {
 
   private static final String PROJECT_NAME = "desktop-go-simple";
   private static final String GO_FILE_NAME = "main.go";
-  private static final String LS_INIT_MESSAGE = "Finished running tool: /usr/local/go/bin/go build";
   private static final String FORMATTED_CODE =
       "package main\n"
           + "\n"
@@ -97,7 +96,7 @@ public class GolangFileEditingTest {
 
   @Inject private Ide ide;
   @Inject private Menu menu;
-  @Inject private Consoles consoles;
+  @Inject protected Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
@@ -120,7 +119,7 @@ public class GolangFileEditingTest {
 
     // check Golang language sever initialized
     consoles.selectProcessByTabName("dev-machine");
-    consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
+    waitExpectedTextIntoConsole();
   }
 
   @Test(priority = 1)
@@ -314,6 +313,7 @@ public class GolangFileEditingTest {
     // go to from second node
     openFindPanelAndPrintInputTetx("print");
     editor.pressArrowDown();
+    https: // github.com/eclipse/che/issues/10524
     assistantFindPanel.waitActionNodeSelection(textSecondNode);
     editor.pressEnter();
     assistantFindPanel.waitFormIsClosed();
@@ -356,5 +356,10 @@ public class GolangFileEditingTest {
 
     textFirstNode = assistantFindPanel.getActionNodeText(0);
     textSecondNode = assistantFindPanel.getActionNodeText(1);
+  }
+
+  protected void waitExpectedTextIntoConsole() {
+    String lsInitMessage = "Finished running tool: /usr/local/go/bin/go build";
+    consoles.waitExpectedTextIntoConsole(lsInitMessage);
   }
 }

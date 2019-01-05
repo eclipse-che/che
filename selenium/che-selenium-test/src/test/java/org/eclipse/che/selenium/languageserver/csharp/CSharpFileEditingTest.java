@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.languageserver.csharp;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
@@ -22,7 +23,6 @@ import static org.openqa.selenium.Keys.BACK_SPACE;
 import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestCommandServiceClient;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -45,25 +45,25 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 public class CSharpFileEditingTest {
 
-  private final String PROJECT_NAME = NameGenerator.generate("AspProject", 4);
-  private final String LANGUAGE_SERVER_INIT_MESSAGE =
+  protected final String PROJECT_NAME = generate("dotnet-web-simple-", 4);
+  protected final String LANGUAGE_SERVER_INIT_MESSAGE =
       "Initialized language server 'org.eclipse.che.plugin.csharp.languageserver";
-  private final String NAME_OF_EDITING_FILE = "Program.cs";
+  protected final String NAME_OF_EDITING_FILE = "Program.cs";
 
   @InjectTestWorkspace(template = WorkspaceTemplate.UBUNTU_LSP)
   private TestWorkspace workspace;
 
   @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
+  @Inject protected ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private CodenvyEditor editor;
+  @Inject protected CodenvyEditor editor;
   @Inject private Menu menu;
   @Inject private Wizard wizard;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private TestCommandServiceClient testCommandServiceClient;
   @Inject private CommandsPalette commandsPalette;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
-  @Inject private Consoles consoles;
+  @Inject protected Consoles consoles;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -115,7 +115,7 @@ public class CSharpFileEditingTest {
     checkAutocompletion();
   }
 
-  private void initLanguageServer() {
+  protected void initLanguageServer() {
     projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/" + NAME_OF_EDITING_FILE);
     projectExplorer.openItemByPath(PROJECT_NAME + "/" + NAME_OF_EDITING_FILE);
     consoles.selectProcessByTabName("dev-machine");
