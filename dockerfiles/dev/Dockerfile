@@ -13,7 +13,8 @@ FROM registry.centos.org/che-stacks/centos-stack-base
 
 EXPOSE 4403 8080 8000 9876 22
 
-RUN sudo yum -y update && \
+RUN sudo yum -y install epel-release && \
+    sudo yum -y update && \
     sudo yum -y install  \
            rh-maven35 \
            plexus-classworlds \
