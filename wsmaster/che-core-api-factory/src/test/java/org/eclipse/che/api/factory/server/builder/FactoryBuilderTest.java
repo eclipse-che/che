@@ -173,7 +173,7 @@ public class FactoryBuilderTest {
   @Test(
       expectedExceptions = ConflictException.class,
       expectedExceptionsMessageRegExp =
-          "You are missing a mandatory parameter \"workspace.projects\\[1\\].type\". .*")
+          "You are missing a mandatory parameter \"workspace.projects\\[1\\].path\". .*")
   public void shouldThrowExceptionWithMessagePointingToMissingMandatoryParameter()
       throws Exception {
     factoryBuilder = new FactoryBuilder(sourceProjectParametersValidator);
@@ -196,7 +196,7 @@ public class FactoryBuilderTest {
             .withAttributes(singletonMap("key", singletonList("value")))
             .withDescription("description")
             .withName("test")
-            .withPath("/test");
+            .withPath("");
     FactoryDto factory = prepareFactory();
     factory.getWorkspace().setProjects(asList(project, project2));
 

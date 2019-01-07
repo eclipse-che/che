@@ -11,13 +11,7 @@
  */
 package org.eclipse.che.plugin.typescript.dto.model;
 
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.convertType;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.getGetterFieldName;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.getSetterFieldName;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.getWithFieldName;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.isDtoGetter;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.isDtoSetter;
-import static org.eclipse.che.plugin.typescript.dto.DTOHelper.isDtoWith;
+import static org.eclipse.che.plugin.typescript.dto.DTOHelper.*;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -26,6 +20,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.dto.shared.DTO;
 
 /**
  * * Model of the DTO It includes attributes/fields and methods.
@@ -45,6 +42,10 @@ public class DtoModel {
 
   /** Model for the attributes of this interface (for generating implementation) */
   private List<FieldAttributeModel> fieldAttributeModels;
+
+  private String interfaces;
+
+  private boolean extendsDto;
 
   /**
    * Build a new model for the given DTO class by scanning it.
@@ -90,7 +91,17 @@ public class DtoModel {
         .forEach(
             field ->
                 fieldAttributeModels.add(
-                    new FieldAttributeModel(field.getKey(), field.getValue())));
+                    new FieldAttributeModel(field.getKey(), field.getValue(), dto)));
+
+    String interfaces =
+        Arrays.stream(this.dto.getInterfaces())
+            .filter(i -> i.getAnnotation(DTO.class) != null)
+            .map(i -> convertTypeForDTS(this.dto, i))
+            .collect(Collectors.joining(", "));
+    if (!interfaces.isEmpty()) {
+      this.interfaces = interfaces;
+      this.extendsDto = true;
+    }
   }
 
   /**
@@ -102,9 +113,10 @@ public class DtoModel {
   protected void analyzeDtoGetterMethod(Method method, MethodModel methodModel) {
     methodModel.setGetter(true);
     Type fieldType = method.getGenericReturnType();
-    String fieldName = getGetterFieldName(method);
-    fieldAttributes.put(fieldName, fieldType);
-    methodModel.setFieldName(fieldName);
+    Pair<String, String> names = getGetterFieldName(method);
+    fieldAttributes.put(names.first, fieldType);
+    methodModel.setFieldName(names.first);
+    methodModel.setArgumentName(names.second);
     methodModel.setFieldType(convertType(fieldType));
   }
 
@@ -118,9 +130,10 @@ public class DtoModel {
     methodModel.setSetter(true);
     // add the parameter
     Type fieldType = method.getGenericParameterTypes()[0];
-    String fieldName = getSetterFieldName(method);
-    fieldAttributes.put(fieldName, fieldType);
-    methodModel.setFieldName(fieldName);
+    Pair<String, String> names = getSetterFieldName(method);
+    fieldAttributes.put(names.first, fieldType);
+    methodModel.setFieldName(names.first);
+    methodModel.setArgumentName(names.second);
     methodModel.setFieldType(convertType(fieldType));
   }
 
@@ -134,9 +147,10 @@ public class DtoModel {
     methodModel.setWith(true);
     // add the parameter
     Type fieldType = method.getGenericParameterTypes()[0];
-    String fieldName = getWithFieldName(method);
-    fieldAttributes.put(fieldName, fieldType);
-    methodModel.setFieldName(fieldName);
+    Pair<String, String> names = getWithFieldName(method);
+    fieldAttributes.put(names.first, fieldType);
+    methodModel.setFieldName(names.first);
+    methodModel.setArgumentName(names.second);
     methodModel.setFieldType(convertType(fieldType));
   }
 
@@ -152,6 +166,16 @@ public class DtoModel {
    */
   public String getPackageName() {
     return this.dto.getPackage().getName();
+  }
+
+  /**
+   * Gets the package name of this interface, without 'dto', 'shared', 'api' sections and
+   * 'org.eclipse.' prefix
+   *
+   * @return the package name of this interface
+   */
+  public String getDTSPackageName() {
+    return convertToDTSPackageName(this.dto);
   }
 
   /**
@@ -180,5 +204,22 @@ public class DtoModel {
    */
   public List<MethodModel> getMethods() {
     return this.methods;
+  }
+
+  /**
+   * Gets the FQN of this interface like foo.bar.HelloWorld, but without 'Dto' suffix
+   *
+   * @return the name of the interface
+   */
+  public String getDtsName() {
+    return convertToDTSName(this.dto);
+  }
+
+  public String getInterfaces() {
+    return interfaces;
+  }
+
+  public boolean isExtendsDto() {
+    return extendsDto;
   }
 }

@@ -57,6 +57,7 @@ public class CheckMavenPluginTest {
     testProjectServiceClient.importProject(
         workspace.getId(), get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);

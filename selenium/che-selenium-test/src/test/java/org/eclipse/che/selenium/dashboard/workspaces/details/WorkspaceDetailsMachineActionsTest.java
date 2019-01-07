@@ -47,7 +47,7 @@ public class WorkspaceDetailsMachineActionsTest {
   private static final String SPECIAL_CHARACTERS_ERRORS_MESSAGE =
       "The name should not contain special characters like space, dollar, etc.";
   private static final String NAME_WITH_SPECIAL_CHARACTERS = "@#$^&*(!";
-  private static final String MAX_VALID_NAME = NameGenerator.generate("max_name", 120);
+  private static final String MAX_VALID_NAME = NameGenerator.generate("max-name", 120);
   private static final String TOO_BIG_NAME = NameGenerator.generate(MAX_VALID_NAME, 1);
   private static final String TOO_BIG_RAM_SIZE = "1000";
   private static final String MAX_VALID_RAM_VALUE = "100";

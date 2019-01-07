@@ -20,7 +20,7 @@
        ng-href="{{'mailto:' + cheFooterController.supportEmail + cheFooterController.getWishEmailSubject(cheFooterController.productName)}}">Make a wish</a>
     <a class="che-footer-button-blue che-footer-button" id="footer-email" ng-if="cheFooterController.email"
        ng-href="{{'mailto:' + cheFooterController.email.address + cheFooterController.getEmailSubject(cheFooterController.email.subject)}}">{{cheFooterController.email.title}}</a>
-    <a class="che-footer-button-blue che-footer-button" id="footer-docs" href="/docs" target="_blank">Docs</a>
+    <a class="che-footer-button-blue che-footer-button" id="footer-docs" ng-if="cheFooterController.docs" ng-href="{{cheFooterController.docs}}" target="_blank">Docs</a>
     <a class="che-footer-button-blue che-footer-button" id="footer-support" ng-if="cheFooterController.supportHelpPath && cheFooterController.supportHelpTitle"
        ng-href="{{cheFooterController.supportHelpPath}}" target="_blank">{{cheFooterController.supportHelpTitle}}</a>
 

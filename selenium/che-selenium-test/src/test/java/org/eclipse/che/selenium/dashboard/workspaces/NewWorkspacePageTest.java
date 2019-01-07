@@ -80,8 +80,8 @@ public class NewWorkspacePageTest {
 
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_QUICK_START_STACKS =
       asList(
-          JAVA,
           BLANK,
+          JAVA,
           DOT_NET,
           ANDROID,
           CPP,
@@ -99,8 +99,8 @@ public class NewWorkspacePageTest {
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
       asList(
-          JAVA,
           BLANK,
+          JAVA,
           DOT_NET,
           ANDROID,
           CPP,
@@ -117,9 +117,9 @@ public class NewWorkspacePageTest {
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
       asList(
+          BLANK,
           JAVA,
           JAVA_MYSQL,
-          BLANK,
           DOT_NET,
           ANDROID,
           CPP,
@@ -133,8 +133,8 @@ public class NewWorkspacePageTest {
 
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
       asList(
-          JAVA,
           BLANK,
+          JAVA,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -159,8 +159,8 @@ public class NewWorkspacePageTest {
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_SINGLE_MACHINE_STACKS =
       asList(
-          JAVA,
           BLANK,
+          JAVA,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -185,8 +185,8 @@ public class NewWorkspacePageTest {
 
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
-          JAVA,
           BLANK,
+          JAVA,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -264,8 +264,8 @@ public class NewWorkspacePageTest {
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          JAVA,
           JAVA_MYSQL,
+          JAVA,
           BLANK,
           JAVA_THEIA_DOCKER,
           RAILS,

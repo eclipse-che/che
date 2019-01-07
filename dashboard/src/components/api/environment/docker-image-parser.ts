@@ -31,9 +31,9 @@ export class DockerimageParser implements IParser {
       throw new TypeError(`Docker image shouldn't contain any whitespace character.`);
     }
 
-    const re = /^([^:]+)(?::([^:]+))?$/;
-    //            |          |
-    //            |          |_ tag
+    const re = /^([a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)(:\d*)?)(\/?[a-z0-9]+(?:(?:(?:[._]|__|[-]*)[a-z0-9]+)+)*)+(:(?![.-])[\w.-]{0,127})?$/;
+    //            |                                                                                                    |
+    //            |                                                                                                    |_ tag
     //            |_ repository
 
     const match = re.exec(content);
@@ -42,9 +42,9 @@ export class DockerimageParser implements IParser {
     }
 
     const obj = {} as IDockerimage;
-    obj.repository = match[1];
-    if (match[2]) {
-      obj.tag = match[2];
+    obj.repository = match[4] ? content.substr(0, content.indexOf(match[4])) : content;
+    if (match[4]) {
+      obj.tag = match[4].substr(1);
     }
 
     return obj;

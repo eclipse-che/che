@@ -291,6 +291,82 @@ public class KubernetesInternalRuntimeTest {
   }
 
   @Test
+  public void shouldReturnTrueIfAllPodsExistOnRuntimeConsistencyChecking() throws Exception {
+    // given
+    KubernetesMachineImpl machine1 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine1", "pod1", "container 1", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine2 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine2", "pod1", "container 2", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine3 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine3", "pod2", "container 1", null, emptyMap(), emptyMap());
+    machinesCache.put(IDENTITY, machine1);
+    machinesCache.put(IDENTITY, machine2);
+    machinesCache.put(IDENTITY, machine3);
+
+    doReturn(Optional.of(mock(Pod.class))).when(deployments).get(anyString());
+
+    // when
+    boolean isConsistent = internalRuntime.isConsistent();
+
+    // then
+    assertTrue(isConsistent);
+  }
+
+  @Test
+  public void shouldReturnTrueIfOnlyOnePodExistsOnRuntimeConsistencyChecking() throws Exception {
+    // given
+    KubernetesMachineImpl machine1 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine1", "pod1", "container 1", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine2 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine2", "pod1", "container 2", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine3 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine3", "pod2", "container 1", null, emptyMap(), emptyMap());
+    machinesCache.put(IDENTITY, machine1);
+    machinesCache.put(IDENTITY, machine2);
+    machinesCache.put(IDENTITY, machine3);
+
+    doReturn(Optional.of(mock(Pod.class))).when(deployments).get("pod1");
+    doReturn(Optional.empty()).when(deployments).get("pod2");
+
+    // when
+    boolean isConsistent = internalRuntime.isConsistent();
+
+    // then
+    assertTrue(isConsistent);
+  }
+
+  @Test
+  public void shouldReturnFalseIfAllPodsExistOnRuntimeConsistencyChecking() throws Exception {
+    // given
+    KubernetesMachineImpl machine1 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine1", "pod1", "container 1", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine2 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine2", "pod1", "container 2", null, emptyMap(), emptyMap());
+    KubernetesMachineImpl machine3 =
+        new KubernetesMachineImpl(
+            WORKSPACE_ID, "machine3", "pod2", "container 1", null, emptyMap(), emptyMap());
+    machinesCache.put(IDENTITY, machine1);
+    machinesCache.put(IDENTITY, machine2);
+    machinesCache.put(IDENTITY, machine3);
+
+    doReturn(Optional.empty()).when(deployments).get(anyString());
+
+    // when
+    boolean isConsistent = internalRuntime.isConsistent();
+
+    // then
+    assertFalse(isConsistent);
+  }
+
+  @Test
   public void startsKubernetesEnvironment() throws Exception {
     when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
     when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));

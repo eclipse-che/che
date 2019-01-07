@@ -69,7 +69,7 @@ public class JsonFileEditingTest {
 
   @Inject private Ide ide;
   @Inject private Menu menu;
-  @Inject private Wizard wizard;
+  @Inject protected Wizard wizard;
   @Inject private Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private PullRequestPanel pullRequestPanel;
@@ -226,9 +226,13 @@ public class JsonFileEditingTest {
     projectExplorer.waitProjectExplorer();
 
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
-    wizard.selectSample(NODEJS_HELLO_WORLD);
+    selectSampleProject();
     wizard.typeProjectNameOnWizard(PROJECT_NAME);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
+  }
+
+  protected void selectSampleProject() {
+    wizard.selectSample(NODEJS_HELLO_WORLD);
   }
 }

@@ -87,7 +87,7 @@ public class CreateWorkspaceOnDashboardTest {
 
     // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
     // possible to read logs in case of test failure
-    testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
+    testWorkspace = testWorkspaceProvider.getWorkspace(WS_NAME, defaultTestUser);
 
     seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 

@@ -16,39 +16,31 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.Response;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.everrest.assured.EverrestJetty;
-import org.everrest.core.Filter;
-import org.everrest.core.GenericContainerRequest;
-import org.everrest.core.RequestFilter;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -62,14 +54,9 @@ public class DevfileServiceTest {
 
   @Mock private WorkspaceLinksGenerator linksGenerator;
 
-  @Mock private WorkspaceManager workspaceManager;
-  @Mock private EnvironmentContext environmentContext;
-  @Mock private DevfileIntegrityValidator integrityValidator;
+  @Mock private DevfileManager devfileManager;
   private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
-  private DevfileSchemaValidator validator;
-
-  @SuppressWarnings("unused")
-  private static final EnvironmentFilter FILTER = new EnvironmentFilter();
+  private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
   private static final Subject SUBJECT = new SubjectImpl("user", "user123", "token", false);
 
@@ -78,10 +65,7 @@ public class DevfileServiceTest {
 
   @BeforeMethod
   public void initService() {
-    this.validator = spy(new DevfileSchemaValidator(schemaProvider));
-    this.devFileService =
-        new DevfileService(
-            linksGenerator, validator, integrityValidator, schemaProvider, workspaceManager);
+    this.devFileService = new DevfileService(linksGenerator, schemaProvider, devfileManager);
   }
 
   @Test
@@ -98,25 +82,14 @@ public class DevfileServiceTest {
   }
 
   @Test
-  public void shouldAcceptDevFileAndFindAvailableName() throws Exception {
-    ArgumentCaptor<WorkspaceConfigImpl> captor = ArgumentCaptor.forClass(WorkspaceConfigImpl.class);
-    EnvironmentContext.setCurrent(environmentContext);
-    WorkspaceImpl ws = mock(WorkspaceImpl.class);
-    when(workspaceManager.createWorkspace(any(), eq(SUBJECT.getUserName()), anyMap()))
-        .thenReturn(createWorkspace(WorkspaceStatus.STOPPED));
+  public void shouldAcceptDevFileContentAndCreateWorkspace() throws Exception {
+    ArgumentCaptor<Devfile> captor = ArgumentCaptor.forClass(Devfile.class);
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-    when(workspaceManager.getWorkspace(anyString(), anyString()))
-        .thenAnswer(
-            invocation -> {
-              String wsname = invocation.getArgument(0);
-              if (wsname.equals("petclinic-dev-environment")
-                  || wsname.equals("petclinic-dev-environment_1")) {
-                return ws;
-              }
-              throw new NotFoundException("ws not found");
-            });
-
+    Devfile devfile = createDevfile(yamlContent);
+    WorkspaceImpl ws = createWorkspace(WorkspaceStatus.STOPPED);
+    when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
+    when(devfileManager.createWorkspace(any(Devfile.class))).thenReturn(ws);
     final Response response =
         given()
             .auth()
@@ -127,16 +100,19 @@ public class DevfileServiceTest {
             .post(SECURE_PATH + "/devfile");
 
     assertEquals(response.getStatusCode(), 201);
-    verify(validator).validateBySchema(eq(yamlContent), eq(false));
-    verify(workspaceManager).createWorkspace(captor.capture(), eq(SUBJECT.getUserName()), anyMap());
-    assertEquals("petclinic-dev-environment_2", captor.getValue().getName());
+    verify(devfileManager).createWorkspace(captor.capture());
+    assertEquals(devfile, captor.getValue());
+  }
+
+  private Devfile createDevfile(String yamlContent) throws IOException {
+    JsonNode node = mapper.readTree(yamlContent);
+    return mapper.treeToValue(node, Devfile.class);
   }
 
   @Test
   public void shouldCreateDevFileFromWorkspace() throws Exception {
     ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-    when(workspaceManager.getWorkspace(anyString()))
-        .thenReturn(createWorkspace(WorkspaceStatus.STOPPED));
+    when(devfileManager.exportWorkspace(anyString())).thenReturn(new Devfile());
 
     final Response response =
         given()
@@ -160,17 +136,9 @@ public class DevfileServiceTest {
         .build();
   }
 
-  private WorkspaceConfig createConfig() throws IOException, JsonParseException {
+  private WorkspaceConfigImpl createConfig() throws IOException, JsonParseException {
     String jsonContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
     return JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
-  }
-
-  @Filter
-  public static class EnvironmentFilter implements RequestFilter {
-    @Override
-    public void doFilter(GenericContainerRequest request) {
-      EnvironmentContext.getCurrent().setSubject(SUBJECT);
-    }
   }
 }

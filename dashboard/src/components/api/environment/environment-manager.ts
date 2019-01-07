@@ -146,7 +146,10 @@ export abstract class EnvironmentManager {
    * @returns {string}
    */
   getUniqueMachineName(environment: che.IWorkspaceEnvironment, namePrefix?: string): string {
-    let newMachineName =  namePrefix ? namePrefix : 'new-machine';
+    let newMachineName =  'new-machine';
+    if (namePrefix) {
+      newMachineName = `${namePrefix}/${newMachineName}`;
+    }
     const usedMachinesNames: Array<string> = environment && environment.machines ? Object.keys(environment.machines) : [];
     for (let pos: number = 1; pos < 1000; pos++) {
       if (usedMachinesNames.indexOf(newMachineName + pos.toString()) === -1) {

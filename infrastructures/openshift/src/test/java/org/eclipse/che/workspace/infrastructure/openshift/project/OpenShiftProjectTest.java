@@ -73,7 +73,6 @@ public class OpenShiftProjectTest {
 
   @BeforeMethod
   public void setUp() throws Exception {
-    lenient().when(clientFactory.create()).thenReturn(kubernetesClient);
     lenient().when(clientFactory.create(anyString())).thenReturn(kubernetesClient);
     lenient().when(clientFactory.createOC()).thenReturn(openShiftClient);
     lenient().when(clientFactory.createOC(anyString())).thenReturn(openShiftClient);

@@ -70,11 +70,13 @@ public class KeycloakTestAuthServiceClient extends AbstractKeycloakTestAuthServi
     }
   }
 
+  @Override
   protected KeycloakToken loginRequest(String username, String password) {
     return requestToken(
         PASSWORD, ImmutableList.of(Pair.of("username", username), Pair.of("password", password)));
   }
 
+  @Override
   protected KeycloakToken refreshRequest(KeycloakToken prevToken) {
     return requestToken(
         REFRESH_TOKEN, ImmutableList.of(Pair.of("refresh_token", prevToken.getRefreshToken())));
