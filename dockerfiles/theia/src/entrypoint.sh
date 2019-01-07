@@ -67,8 +67,16 @@ set +o posix
 # on callback, kill the last background process, which is `tail -f /dev/null` and execute the specified handler
 trap 'responsible_shutdown' SIGHUP SIGTERM SIGINT
 
-# run che
 cd ${HOME}
+
+# disable CDN based on an environment variable.
+shopt -s nocasematch
+if [ "${NOCDN}" == "true" ]; then
+  sed -i 's/\.buildScripts\(\)/.buildScriptsWithoutCdn()/' lib/index.html
+fi
+shopt -u nocasematch
+
+# run che
 node src-gen/backend/main.js /projects --hostname=0.0.0.0 --port=${THEIA_PORT} &
 
 PID=$!
