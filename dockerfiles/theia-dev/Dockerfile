@@ -35,6 +35,9 @@ ENV HOME=/home/theia-dev \
     LOCAL_GIT_DIRECTORY=/usr \
     GIT_EXEC_PATH=/usr/libexec/git-core
 
+# Define package of the theia generator to use
+ARG THEIA_GENERATOR_PACKAGE=@eclipse-che/theia-generator@0.0.1-1547456396
+
 WORKDIR ${HOME}
 
 # Exposing Theia ports
@@ -44,7 +47,7 @@ EXPOSE 3000 3030
 RUN npm config set prefix "${HOME}/.npm-global" && \
     echo "--global-folder \"${HOME}/.yarn-global\"" > ${HOME}/.yarnrc && \
     # add eclipse che theia generator
-    yarn global add @eclipse-che/theia-generator@0.0.1-1547456396 && \
+    yarn global add ${THEIA_GENERATOR_PACKAGE} && \
     # Generate .passwd.template \
     cat /etc/passwd | \
     sed s#root:x.*#theia-dev:x:\${USER_ID}:\${GROUP_ID}::${HOME}:/bin/bash#g \
