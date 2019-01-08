@@ -16,18 +16,19 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import javax.inject.Singleton;
 
-@Singleton
 /**
  * Metric binding for Che API responses, that are grouped by http status codes.
  *
  * @author Mykhailo Kuznietsov
  */
+@Singleton
 public class ApiResponseCounter implements MeterBinder {
-  protected Counter informationalResponseCounter;
-  protected Counter successResponseCounter;
-  protected Counter redirectResponseCounter;
-  protected Counter clientErrorResponseCounter;
-  protected Counter serverErrorResponseCounter;
+  // package private access for visibility in tests
+  Counter informationalResponseCounter;
+  Counter successResponseCounter;
+  Counter redirectResponseCounter;
+  Counter clientErrorResponseCounter;
+  Counter serverErrorResponseCounter;
 
   @Override
   public void bindTo(MeterRegistry registry) {

@@ -22,10 +22,15 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
+/**
+ * Filter for tracking all HTTP requests through {@link ApiResponseCounter}
+ *
+ * @author Mykhailo Kuznietsov
+ */
 @Singleton
 public class ApiResponseMetricFilter implements Filter {
 
-  @Inject protected ApiResponseCounter apiResponseCounter;
+  @Inject private ApiResponseCounter apiResponseCounter;
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {}
