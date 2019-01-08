@@ -20,6 +20,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityManager;
 
+/** Provides metrics of workspace activity. */
 @Singleton
 public class WorkspaceActivityMeterBinder implements MeterBinder {
 

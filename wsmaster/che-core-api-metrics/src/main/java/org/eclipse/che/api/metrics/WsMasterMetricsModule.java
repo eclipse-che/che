@@ -15,6 +15,10 @@ import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import io.micrometer.core.instrument.binder.MeterBinder;
 
+/**
+ * A Guice module to bind all our metric binders to a single multi-binder. The set of all metric
+ * binders is used to produce the Prometheus metrics on request.
+ */
 public class WsMasterMetricsModule extends AbstractModule {
 
   @Override
