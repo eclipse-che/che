@@ -176,6 +176,7 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
+  @Transactional(rollbackOn = ServerException.class)
   public long countWorkspacesInStatus(WorkspaceStatus status, long timestamp)
       throws ServerException {
     try {

@@ -156,6 +156,12 @@ public class WorkspaceActivityManagerTest {
     verify(workspaceActivityDao, times(1)).removeActivity(eq(wsId));
   }
 
+  @Test
+  public void shouldCountWorkspacesInStatus() throws Exception {
+    activityManager.countWorkspacesInStatus(WorkspaceStatus.STARTING, 0L);
+    verify(workspaceActivityDao).countWorkspacesInStatus(eq(WorkspaceStatus.STARTING), eq(0L));
+  }
+
   @DataProvider(name = "wsStatus")
   public Object[][] getWorkspaceStatus() {
     return Stream.of(WorkspaceStatus.values())
