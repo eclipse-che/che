@@ -27,12 +27,11 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
-/**
- * Creates workspace environment from specific tool in devfile if any.
- */
+/** Creates workspace environment from specific tool in devfile if any. */
 @Singleton
 public class DevfileEnvironmentProvisioner {
 
+  public static final String DEFAULT_RECIPE_CONTENT_TYPE = "application/x-yaml";
   private final URLFetcher urlFetcher;
 
   @Inject
@@ -41,16 +40,15 @@ public class DevfileEnvironmentProvisioner {
   }
 
   /**
-   * Finds an recipe-type tool (openshift or kubernetes) in devfile and
-   * tries to provision {@link EnvironmentImpl} from it. If such tools are present in devfile,
-   * an file URL composer function MUST be provided to allow to fetch recipe content.
+   * Finds an recipe-type tool (openshift or kubernetes) in devfile and tries to provision {@link
+   * EnvironmentImpl} from it. If such tools are present in devfile, an file URL composer function
+   * MUST be provided to allow to fetch recipe content.
    *
    * @param devfile source devfile
    * @param fileUrlComposer optional service-specific composer of URL's to the file raw content
    * @return provisioned enviromnent
-   * @throws BadRequestException
-   *         when there is recipe-type tool present in devfile but no URL composer provided
-   *         when file specified in local section of the tool is unreachable or empty
+   * @throws BadRequestException when there is recipe-type tool present in devfile but no URL
+   *     composer provided when file specified in local section of the tool is unreachable or empty
    */
   public Optional<EnvironmentImpl> tryProvision(
       Devfile devfile, @Nullable Function<String, String> fileUrlComposer)
@@ -84,7 +82,7 @@ public class DevfileEnvironmentProvisioner {
               + "' is unreachable or empty.");
     }
     // TODO: it would be great to check there is real yaml and not binary etc
-    RecipeImpl recipe = new RecipeImpl(type, "application/x-yaml", localFileContent, null);
+    RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, localFileContent, null);
     return Optional.of(new EnvironmentImpl(recipe, emptyMap()));
   }
 }
