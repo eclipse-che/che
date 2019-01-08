@@ -26,6 +26,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+/**
+ * Test for {@link ApiResponseMetricFilter} functionality
+ *
+ * @author Mykhailo Kuznietsov
+ */
 @Listeners({EverrestJetty.class, MockitoTestNGListener.class})
 public class ApiResponseMetricFilterTest {
 
