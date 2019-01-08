@@ -35,7 +35,8 @@ public class ApiResponseCounter implements MeterBinder {
     informationalResponseCounter =
         Counter.builder("che.server.api.response")
             .description("Che Server Tomcat informational responses (1xx responses)")
-            .tags("code=1xx", "area=http")
+            .tag("code", "1xx")
+            .tag("area", "http")
             .register(registry);
     successResponseCounter =
         Counter.builder("che.server.api.response")
