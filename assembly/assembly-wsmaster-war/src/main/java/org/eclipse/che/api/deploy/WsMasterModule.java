@@ -290,6 +290,7 @@ public class WsMasterModule extends AbstractModule {
     }
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       install(new org.eclipse.che.core.metrics.MetricsModule());
+      install(new WsMasterMetricsModule());
     }
   }
 
@@ -322,7 +323,6 @@ public class WsMasterModule extends AbstractModule {
         .to(org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache.class);
 
     install(new org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule());
-    install(new WsMasterMetricsModule());
   }
 
   private void configureMultiUserMode(
@@ -405,8 +405,6 @@ public class WsMasterModule extends AbstractModule {
     bind(PermissionChecker.class).to(PermissionCheckerImpl.class);
 
     bindConstant().annotatedWith(Names.named("che.agents.auth_enabled")).to(true);
-
-    install(new WsMasterMetricsModule());
   }
 
   private void configureJwtProxySecureProvisioner(String infrastructure) {
