@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.factory.server.urlfactory.DevfileEnvironmentProvisioner.DEFAULT_RECIPE_CONTENT_TYPE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -38,33 +39,34 @@ public class DevfileEnvironmentProvisionerTest {
   public static final String LOCAL_FILENAME = "local.yaml";
   public static final String TOOL_NAME = "foo";
 
-  @Mock
-  private URLFetcher urlFetcher;
+  @Mock private URLFetcher urlFetcher;
 
-  @InjectMocks
-  private DevfileEnvironmentProvisioner provisioner;
+  @InjectMocks private DevfileEnvironmentProvisioner provisioner;
 
-
-  @Test(expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp =
-      "This kind of URL's does not support '" + KUBERNETES_TOOL_TYPE + "' type tools.")
+  @Test(
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp =
+          "This kind of URL's does not support '" + KUBERNETES_TOOL_TYPE + "' type tools.")
   public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoURLComposerGiven() throws Exception {
-    Tool tool  = new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
+    Tool tool =
+        new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
     Devfile devfile = new Devfile();
     devfile.setTools(singletonList(tool));
 
     provisioner.tryProvision(devfile, null);
   }
 
-
-  @Test(expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp =
-      "The local file '"
-          + LOCAL_FILENAME
-          + "' defined in tool  '"
-          + TOOL_NAME
-          + "' is unreachable or empty.")
+  @Test(
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp =
+          "The local file '"
+              + LOCAL_FILENAME
+              + "' defined in tool  '"
+              + TOOL_NAME
+              + "' is unreachable or empty.")
   public void shouldThrowExceptionWhenRecipeContentIsNull() throws Exception {
-    Tool tool = new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME)
-        .withName(TOOL_NAME);
+    Tool tool =
+        new Tool().withType(OPENSHIFT_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
     Devfile devfile = new Devfile();
     devfile.setTools(singletonList(tool));
     when(urlFetcher.fetch(anyString())).thenReturn(null);
@@ -73,21 +75,41 @@ public class DevfileEnvironmentProvisionerTest {
   }
 
   @Test
-  public void shouldReturnEnvironmentWithCorrectRecipeTypeAndContent() throws Exception {
+  public void shouldReturnEnvironmentWithCorrectRecipeTypeAndContentFromK8SList() throws Exception {
     final String content = "apiVersion: v1\n kind: List";
-    Tool tool = new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME)
-        .withName(TOOL_NAME);
+    Tool tool =
+        new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
     Devfile devfile = new Devfile();
     devfile.setTools(singletonList(tool));
     when(urlFetcher.fetch(anyString())).thenReturn(content);
 
-    Optional<EnvironmentImpl> result = provisioner
-        .tryProvision(devfile, s -> "http://foo.bar/local.yaml");
+    Optional<EnvironmentImpl> result =
+        provisioner.tryProvision(devfile, s -> "http://foo.bar/local.yaml");
 
     assertTrue(result.isPresent());
     RecipeImpl recipe = result.get().getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), KUBERNETES_TOOL_TYPE);
+    assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
+    assertEquals(recipe.getContent(), content);
+  }
+
+  @Test
+  public void shouldReturnEnvironmentWithCorrectRecipeTypeAndContentFromOSList() throws Exception {
+    final String content = "apiVersion: v1\n kind: List";
+    Tool tool =
+        new Tool().withType(OPENSHIFT_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
+    Devfile devfile = new Devfile();
+    devfile.setTools(singletonList(tool));
+    when(urlFetcher.fetch(anyString())).thenReturn(content);
+
+    Optional<EnvironmentImpl> result =
+        provisioner.tryProvision(devfile, s -> "http://foo.bar/local.yaml");
+
+    assertTrue(result.isPresent());
+    RecipeImpl recipe = result.get().getRecipe();
+    assertNotNull(recipe);
+    assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
     assertEquals(recipe.getContent(), content);
   }

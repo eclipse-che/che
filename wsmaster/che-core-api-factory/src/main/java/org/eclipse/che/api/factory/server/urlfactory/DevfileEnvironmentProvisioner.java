@@ -31,7 +31,8 @@ import org.eclipse.che.commons.annotation.Nullable;
 @Singleton
 public class DevfileEnvironmentProvisioner {
 
-  public static final String DEFAULT_RECIPE_CONTENT_TYPE = "application/x-yaml";
+  static final String DEFAULT_RECIPE_CONTENT_TYPE = "application/x-yaml";
+
   private final URLFetcher urlFetcher;
 
   @Inject
