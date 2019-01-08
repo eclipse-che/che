@@ -19,8 +19,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ApiResponseCounterTest {
-  ApiResponseCounter apiResponseCounter;
-  MeterRegistry registry;
+  private ApiResponseCounter apiResponseCounter;
+  private MeterRegistry registry;
 
   @BeforeMethod
   public void setup() {
@@ -31,10 +31,42 @@ public class ApiResponseCounterTest {
   }
 
   @Test
+  public void test1xxResponses() {
+    apiResponseCounter.handleStatus(500);
+
+    RequiredSearch meter = registry.get("che.server.api.response");
+    registry.getMeters();
+  }
+
+  @Test
+  public void test2xxResponses() {
+    apiResponseCounter.handleStatus(500);
+
+    RequiredSearch meter = registry.get("che.server.api.response");
+    registry.getMeters();
+  }
+
+  @Test
+  public void test3xxResponses() {
+    apiResponseCounter.handleStatus(500);
+
+    RequiredSearch meter = registry.get("che.server.api.response");
+    registry.getMeters();
+  }
+
+  @Test
+  public void test4xxResponses() {
+    apiResponseCounter.handleStatus(500);
+
+    RequiredSearch meter = registry.get("che.server.api.response");
+    registry.getMeters();
+  }
+
+  @Test
   public void testServerError() {
     apiResponseCounter.handleStatus(500);
 
-    RequiredSearch meter = registry.get("che.server.api.response.success");
+    RequiredSearch meter = registry.get("che.server.api.response");
     registry.getMeters();
   }
 

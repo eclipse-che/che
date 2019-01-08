@@ -27,15 +27,15 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 @Listeners({EverrestJetty.class, MockitoTestNGListener.class})
-public class ApiResponceMetricFilterTest {
+public class ApiResponseMetricFilterTest {
 
   @Mock ApiResponseCounter apiResponseCounter;
 
-  @InjectMocks private ApiResponceMetricFilter filter;
+  @InjectMocks private ApiResponseMetricFilter filter;
 
   @BeforeMethod
   public void setUp() {
-    filter = new ApiResponceMetricFilter();
+    filter = new ApiResponseMetricFilter();
   }
 
   @Test

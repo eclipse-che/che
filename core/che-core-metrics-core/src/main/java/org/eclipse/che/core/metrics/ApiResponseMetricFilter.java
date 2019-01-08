@@ -23,7 +23,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
 
 @Singleton
-public class ApiResponceMetricFilter implements Filter {
+public class ApiResponseMetricFilter implements Filter {
 
   @Inject protected ApiResponseCounter apiResponseCounter;
 

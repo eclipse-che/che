@@ -18,7 +18,7 @@ import javax.inject.Singleton;
 
 @Singleton
 /**
- * Metrics
+ * Metric binding for Che API responses, that are grouped by http status codes.
  *
  * @author Mykhailo Kuznietsov
  */
@@ -32,29 +32,33 @@ public class ApiResponseCounter implements MeterBinder {
   @Override
   public void bindTo(MeterRegistry registry) {
     informationalResponseCounter =
-        Counter.builder("che.server.api.response.informational")
+        Counter.builder("che.server.api.response")
             .description("Che Server Tomcat informational responses (1xx responses)")
             .tags("code=1xx", "area=http")
             .register(registry);
     successResponseCounter =
-        Counter.builder("che.server.api.response.success")
+        Counter.builder("che.server.api.response")
             .description("Che Server Tomcat success responses (2xx responses)")
-            .tags("code=2xx", "area=http")
+            .tag("code", "2xx")
+            .tag("area", "http")
             .register(registry);
     redirectResponseCounter =
-        Counter.builder("che.server.api.response.redirect")
+        Counter.builder("che.server.api.response")
             .description("Che Server Tomcat redirect responses (3xx responses)")
-            .tags("code=3xx", "area=http")
+            .tag("code", "3xx")
+            .tag("area", "http")
             .register(registry);
     clientErrorResponseCounter =
-        Counter.builder("che.server.api.response.client.error")
+        Counter.builder("che.server.api.response")
             .description("Che Server Tomcat client errors (4xx responses)")
-            .tags("code=4xx", "area=http")
+            .tag("code", "4xx")
+            .tag("area", "http")
             .register(registry);
     serverErrorResponseCounter =
-        Counter.builder("che.server.api.response.server.error")
+        Counter.builder("che.server.api.response")
             .description("Che Server Tomcat server errors (5xx responses)")
-            .tags("code=5xx", "area=http")
+            .tag("code", "5xx")
+            .tag("area", "http")
             .register(registry);
   }
 
