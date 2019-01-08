@@ -34,8 +34,10 @@ import org.eclipse.che.selenium.core.constant.TestGitConstants;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.testng.annotations.BeforeClass;
@@ -52,6 +54,9 @@ public class CheckoutToRemoteBranchTest {
   private static final String SECOND_BRANCH = "second_branch";
   private static final String NAME_REMOTE_REPO = "origin";
   private static final String PULL_MSG = "Already up-to-date";
+  private static final String MASTER_CHECKED_POPUP_MSG = "Branch 'master' is checked out";
+  private static final String SECOND_BRANCH_CHECKED_POPUP_MSG =
+      "Branch 'second_branch' is checked out";
   private static String COMMIT_MESS = "commitchk_remote";
   private static final String GIT_STATUS_MESS =
       " On branch second_branch\n" + " nothing to commit, working directory clean";
@@ -67,9 +72,11 @@ public class CheckoutToRemoteBranchTest {
 
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private Menu menu;
   @Inject private Git git;
+  @Inject private Menu menu;
+  @Inject private Events events;
   @Inject private CodenvyEditor editor;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestGitHubKeyUploader testGitHubKeyUploader;
 
@@ -98,6 +105,9 @@ public class CheckoutToRemoteBranchTest {
 
     projectExplorer.waitProjectExplorer();
     git.importJavaApp(testRepo.getSshUrl(), PROJECT_NAME, MAVEN);
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
+    events.clickEventLogBtn();
+    events.waitExpectedMessage(MASTER_CHECKED_POPUP_MSG);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // git checkout to the 'second_branch'
@@ -116,7 +126,7 @@ public class CheckoutToRemoteBranchTest {
 
     performGitPush();
 
-    // import from github to the second project
+    // import from github the second project
     git.importJavaApp(testRepo.getHtmlUrl(), PROJECT_NAME2, MAVEN);
     projectExplorer.waitAndSelectItem(PROJECT_NAME2);
 
@@ -136,19 +146,21 @@ public class CheckoutToRemoteBranchTest {
     git.waitCommitInHistoryForm(COMMIT_MESS);
   }
 
-  private void checkoutToSecondRemoteBranch() throws Exception {
+  private void checkoutToSecondRemoteBranch() {
     menu.runCommand(GIT, BRANCHES);
     git.waitBranchInTheList(MASTER_BRANCH);
     git.waitBranchInTheList(ORIGIN_MASTER_BRANCH);
     git.waitBranchInTheList(ORIGIN_SECOND_BRANCH);
     git.selectBranchAndClickCheckoutBtn(ORIGIN_SECOND_BRANCH);
     git.waitGitCompareBranchFormIsClosed();
+    notificationsPopupPanel.waitExpectedMessageOnProgressPanelAndClose(
+        SECOND_BRANCH_CHECKED_POPUP_MSG);
     menu.runCommand(GIT, BRANCHES);
     git.waitBranchInTheListWithCoState(SECOND_BRANCH);
     git.closeBranchesForm();
   }
 
-  private void performGitPull() throws InterruptedException {
+  private void performGitPull() {
     menu.runCommand(GIT, REMOTES_TOP, PULL);
     git.waitPullFormToOpen();
     git.waitPullRemoteRepository(NAME_REMOTE_REPO);

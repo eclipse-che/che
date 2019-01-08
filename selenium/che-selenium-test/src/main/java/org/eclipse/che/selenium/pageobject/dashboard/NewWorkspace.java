@@ -565,7 +565,10 @@ public class NewWorkspace {
   }
 
   public void clickOnCreateButtonAndOpenInIDE() {
-    seleniumWebDriverHelper.waitAndClick(bottomCreateWorkspaceButton);
+    // need to move cursor to button to avoid failure https://github.com/eclipse/che/issues/12309
+    seleniumWebDriverHelper.waitVisibility(bottomCreateWorkspaceButton);
+    seleniumWebDriverHelper.moveCursorTo(bottomCreateWorkspaceButton);
+    bottomCreateWorkspaceButton.click();
   }
 
   public void clickOnCreateButtonAndEditWorkspace() {

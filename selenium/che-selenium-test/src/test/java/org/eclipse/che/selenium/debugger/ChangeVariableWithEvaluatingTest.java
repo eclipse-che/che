@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
@@ -45,8 +46,10 @@ import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = FLAKY)
 public class ChangeVariableWithEvaluatingTest {
   private static final String PROJECT_NAME_CHANGE_VARIABLE =
       NameGenerator.generate(ChangeVariableWithEvaluatingTest.class.getSimpleName(), 2);
@@ -111,6 +114,7 @@ public class ChangeVariableWithEvaluatingTest {
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME_CHANGE_VARIABLE);
   }
 
+  @Test
   public void changeVariableTest() throws Exception {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();

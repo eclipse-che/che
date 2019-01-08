@@ -219,7 +219,19 @@ public class WorkspaceRuntimes {
     }
   }
 
-  private InternalRuntime<?> getInternalRuntime(String workspaceId)
+  /**
+   * Returns {@link InternalRuntime} implementation for workspace with the specified id.
+   *
+   * <p>If memory-storage does not contain internal runtime, then runtime will be recovered if it is
+   * active. Otherwise, an exception will be thrown.
+   *
+   * @param workspaceId identifier of workspace to fetch runtime
+   * @return {@link InternalRuntime} implementation for workspace with the specified id.
+   * @throws InfrastructureException if any infrastructure exception occurs
+   * @throws ServerException if there is no active runtime for the specified workspace
+   * @throws ServerException if any other exception occurs
+   */
+  public InternalRuntime<?> getInternalRuntime(String workspaceId)
       throws InfrastructureException, ServerException {
     try (Unlocker ignored = lockService.writeLock(workspaceId)) {
       InternalRuntime<?> runtime = runtimes.get(workspaceId);
@@ -459,7 +471,7 @@ public class WorkspaceRuntimes {
         firstNonNull(
             sessionUserNameOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY)), "undefined");
     LOG.info(
-        "Workspace '{}/{}' with id '{}' is being stopped by user '{}'",
+        "Workspace '{}/{}' with id '{}' is stopping by user '{}'",
         workspace.getNamespace(),
         workspace.getConfig().getName(),
         workspace.getId(),
@@ -499,7 +511,7 @@ public class WorkspaceRuntimes {
           statuses.remove(workspaceId);
         }
         LOG.info(
-            "Workspace '{}/{}' with id '{}' stopped by user '{}'",
+            "Workspace '{}/{}' with id '{}' is stopped by user '{}'",
             workspace.getNamespace(),
             workspace.getConfig().getName(),
             workspaceId,
@@ -718,22 +730,33 @@ public class WorkspaceRuntimes {
     return isStartRefused.compareAndSet(false, true);
   }
 
+  /** Returns workspace ids which has {@link WorkspaceStatus#RUNNING} runtimes. */
+  public Set<String> getRunning() {
+    return statuses
+        .asMap()
+        .entrySet()
+        .stream()
+        .filter(e -> RUNNING == e.getValue())
+        .map(Entry::getKey)
+        .collect(toSet());
+  }
+
   /**
    * Gets the workspaces identifiers managed by this component. If an identifier is present in set
    * then that workspace wasn't stopped at the moment of method execution.
    *
-   * @return workspaces identifiers for those workspaces that are running(not stopped), or an empty
-   *     set if there is no a single running workspace
+   * @return workspaces identifiers for those workspaces that are active(not stopped), or an empty
+   *     set if there is no a single active workspace
    */
-  public Set<String> getRunning() {
+  public Set<String> getActive() {
     return ImmutableSet.copyOf(statuses.asMap().keySet());
   }
 
   /**
-   * Returns true if there is at least one workspace running(it's status is different from {@link
+   * Returns true if there is at least one workspace active(it's status is different from {@link
    * WorkspaceStatus#STOPPED}), otherwise returns false.
    */
-  public boolean isAnyRunning() {
+  public boolean isAnyActive() {
     return !statuses.asMap().isEmpty();
   }
 
@@ -866,6 +889,13 @@ public class WorkspaceRuntimes {
             identity.getOwnerId());
       }
 
+      LOG.info(
+          "Runtime '{}:{}:{}' is stopping abnormally. Reason: {}",
+          workspaceId,
+          identity.getEnvName(),
+          identity.getOwnerId(),
+          event.getReason());
+
       publishWorkspaceStatusEvent(
           workspaceId,
           STOPPING,
@@ -896,6 +926,13 @@ public class WorkspaceRuntimes {
             identity.getEnvName(),
             identity.getOwnerId());
       }
+
+      LOG.info(
+          "Runtime '{}:{}:{}' is stopped abnormally. Reason: {}",
+          workspaceId,
+          identity.getEnvName(),
+          identity.getOwnerId(),
+          event.getReason());
 
       publishWorkspaceStatusEvent(
           workspaceId,

@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_NG_TEST_DROP_DAWN_ITEM;
@@ -45,6 +46,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Dmytro Nochevnov */
+@Test(groups = FLAKY)
 public class JavaTestPluginTestNgTest {
 
   private static final String PROJECT = "testng-tests";
@@ -104,7 +106,13 @@ public class JavaTestPluginTestNgTest {
     loader.waitOnClosed();
     projectExplorer.waitItem(PROJECT);
     notifications.waitProgressPopupPanelClose();
-    runCompileCommandByPallete(compileCommand);
+
+    try {
+      runCompileCommandByPallete(compileCommand);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/12220");
+    }
   }
 
   @Test

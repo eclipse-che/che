@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.debugger;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.testng.Assert.assertTrue;
@@ -42,34 +43,31 @@ import org.eclipse.che.selenium.pageobject.debug.DebugPanel;
 import org.eclipse.che.selenium.pageobject.debug.JavaDebugConfig;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.openqa.selenium.Keys;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
+@Test(groups = FLAKY)
 public class StepIntoStepOverStepReturnWithChangeVariableTest {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(StepIntoStepOverStepReturnWithChangeVariableTest.class);
-  private static final String PROJECT = NameGenerator.generate("project", 4);
-  private static final String START_DEBUG = "startDebug";
+  protected static final String PROJECT = NameGenerator.generate("project", 4);
+  protected static final String START_DEBUG = "startDebug";
   private static final String CLEAN_TOMCAT = "cleanTomcat";
-  private static final String BUILD = "build";
+  protected static final String BUILD = "build";
 
   private DebuggerUtils debugUtils = new DebuggerUtils();
 
-  @Inject private TestWorkspace ws;
+  @Inject protected TestWorkspace ws;
   @Inject private Ide ide;
 
   @Inject private ProjectExplorer projectExplorer;
-  @Inject private Consoles consoles;
+  @Inject protected Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
-  @Inject private DebugPanel debugPanel;
+  @Inject protected DebugPanel debugPanel;
   @Inject private JavaDebugConfig debugConfig;
-  @Inject private TestCommandServiceClient testCommandServiceClient;
-  @Inject private TestWorkspaceServiceClient workspaceServiceClient;
+  @Inject protected TestCommandServiceClient testCommandServiceClient;
+  @Inject protected TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Loader loader;
   @Inject private CommandsPalette commandsPalette;
@@ -84,21 +82,8 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         PROJECT,
         ProjectTemplates.MAVEN_SPRING);
 
-    testCommandServiceClient.createCommand(
-        "cp /projects/"
-            + PROJECT
-            + "/target/qa-spring-sample-1.0-SNAPSHOT.war /home/user/tomcat8/webapps/ROOT.war"
-            + " && "
-            + "/home/user/tomcat8/bin/catalina.sh jpda run",
-        START_DEBUG,
-        TestCommandsConstants.CUSTOM,
-        ws.getId());
-
-    testCommandServiceClient.createCommand(
-        "mvn clean install -f /projects/" + PROJECT,
-        BUILD,
-        TestCommandsConstants.CUSTOM,
-        ws.getId());
+    createStartDebugCommmand();
+    createBuildCommand();
 
     testCommandServiceClient.createCommand(
         "/home/user/tomcat8/bin/shutdown.sh && rm -rf /home/user/tomcat8/webapps/*",
@@ -111,9 +96,9 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
   }
 
   @AfterMethod
-  public void shutDownTomCatAndCleanWebApp() {
+  public void shutDownAndCleanWebApp() {
     editor.closeAllTabs();
-    debugPanel.stopDebuggerWithUiAndCleanUpTomcat(CLEAN_TOMCAT);
+    stopDebuggerAndCleanUp();
     projectExplorer.clickOnProjectExplorerTab();
   }
 
@@ -122,7 +107,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(START_DEBUG);
-    consoles.waitExpectedTextIntoConsole(" Server startup in");
+    waitExpectedTextIntoConsole();
     editor.setCursorToLine(35);
     editor.setInactiveBreakpoint(35);
     menu.runCommand(
@@ -134,12 +119,7 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
         TestMenuCommandsConstants.Run.DEBUG,
         TestMenuCommandsConstants.Run.DEBUG + "/" + PROJECT);
     editor.waitActiveBreakpoint(35);
-    String appUrl =
-        workspaceServiceClient
-                .getServerFromDevMachineBySymbolicName(ws.getId(), "tomcat8")
-                .getUrl()
-                .replace("tcp", "http")
-            + "/spring/guess";
+    String appUrl = getApplicationUrl();
     String requestMess = "numGuess=6&submit=Ok";
     CompletableFuture<String> requestToApplication =
         debugUtils.gotoDebugAppAndSendRequest(
@@ -179,18 +159,18 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     }
   }
 
-  // @Test(priority = 1)
+  @Test(priority = 1)
   public void shouldOpenDebuggingFile() {
     buildProjectAndOpenMainClass();
     commandsPalette.openCommandPalette();
     commandsPalette.startCommandByDoubleClick(START_DEBUG);
-    consoles.waitExpectedTextIntoConsole(" Server startup in");
-    editor.setInactiveBreakpoint(26);
+    waitExpectedTextIntoConsole();
+    editor.setInactiveBreakpoint(27);
     seleniumWebDriver
         .switchTo()
         .activeElement()
         .sendKeys(Keys.SHIFT.toString() + Keys.F9.toString());
-    editor.waitActiveBreakpoint(26);
+    editor.waitActiveBreakpoint(27);
   }
 
   private void buildProjectAndOpenMainClass() {
@@ -203,5 +183,41 @@ public class StepIntoStepOverStepReturnWithChangeVariableTest {
     projectExplorer.quickRevealToItemWithJavaScript(absPathToClass);
     projectExplorer.openItemByPath(absPathToClass);
     editor.waitActive();
+  }
+
+  protected void createStartDebugCommmand() throws Exception {
+    testCommandServiceClient.createCommand(
+        "cp /projects/"
+            + PROJECT
+            + "/target/qa-spring-sample-1.0-SNAPSHOT.war /home/user/tomcat8/webapps/ROOT.war"
+            + " && "
+            + "/home/user/tomcat8/bin/catalina.sh jpda run",
+        START_DEBUG,
+        TestCommandsConstants.CUSTOM,
+        ws.getId());
+  }
+
+  protected void createBuildCommand() throws Exception {
+    testCommandServiceClient.createCommand(
+        "mvn clean install -f /projects/" + PROJECT,
+        BUILD,
+        TestCommandsConstants.CUSTOM,
+        ws.getId());
+  }
+
+  protected void stopDebuggerAndCleanUp() {
+    debugPanel.stopDebuggerWithUiAndCleanUpTomcat(CLEAN_TOMCAT);
+  }
+
+  protected void waitExpectedTextIntoConsole() {
+    consoles.waitExpectedTextIntoConsole(" Server startup in");
+  }
+
+  protected String getApplicationUrl() throws Exception {
+    return workspaceServiceClient
+            .getServerFromDevMachineBySymbolicName(ws.getId(), "tomcat8")
+            .getUrl()
+            .replace("tcp", "http")
+        + "/spring/guess";
   }
 }

@@ -68,12 +68,13 @@ public class CreateNewJavaFilesFromContextMenuTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void createNewFileFromContextMenuTest() throws Exception {
     projectExplorer.waitItem(PROJECT_NAME);
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
     // go to folder for creation files

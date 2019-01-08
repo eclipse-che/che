@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM_ID;
 import static org.testng.Assert.fail;
@@ -165,7 +166,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal("" + Keys.ESCAPE + Keys.ESCAPE);
   }
 
-  @Test
+  @Test(groups = FLAKY)
   public void shouldResizeTerminal() {
     openMC("/");
 
@@ -208,7 +209,7 @@ public class WorkingWithTerminalTest {
     }
   }
 
-  @Test
+  @Test(groups = FLAKY)
   public void shouldNavigateToMC() {
     openMC("/");
 

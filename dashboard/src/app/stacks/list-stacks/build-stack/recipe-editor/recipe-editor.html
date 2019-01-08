@@ -22,7 +22,7 @@
              type="hidden"
              ng-model="recipeEditorController.recipeContent"
              custom-validator="recipeEditorController.isRecipeValid()"
-             required>
+             >
     <div class="error-message">
       <div ng-message="required"
            ng-if="recipeEditorController.isFormDirty">The recipe is required.</div>

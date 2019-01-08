@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.pageobject.dashboard.account;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.EDIT_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.EMAIL_FIELD;
 import static org.eclipse.che.selenium.pageobject.dashboard.account.DashboardAccount.Locators.FIRST_NAME_FIELD;
@@ -80,6 +81,8 @@ public class DashboardAccount {
 
   public void waitPageIsLoaded() {
     asList(EMAIL_FIELD, LOGIN_FIELD, FIRST_NAME_FIELD, LAST_NAME_FIELD, EDIT_BUTTON)
-        .forEach(locator -> seleniumWebDriverHelper.waitVisibility(By.name(locator)));
+        .forEach(
+            locator ->
+                seleniumWebDriverHelper.waitVisibility(By.name(locator), ELEMENT_TIMEOUT_SEC));
   }
 }

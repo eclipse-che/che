@@ -18,6 +18,7 @@ import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEME
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.REDRAW_UI_ELEMENTS_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_LINES_XPATH;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ACTIVE_TAB_FILE_NAME;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.Locators.ALL_TABS_XPATH;
@@ -220,7 +221,7 @@ public class CodenvyEditor {
     REOPEN_CLOSED_TAB(By.id("contextMenu/Reopen Closed Tab")),
     PIN_UNPIN_TAB(By.id("contextMenu/Pin/Unpin Tab")),
     SPLIT_VERTICALLY(By.id("contextMenu/Split Pane In Two Columns")),
-    SPIT_HORISONTALLY(By.id("contextMenu/Split Pane In Two Rows"));
+    SPLIT_HORIZONTALLY(By.id("contextMenu/Split Pane In Two Rows"));
 
     @SuppressWarnings("ImmutableEnumChecker")
     private final By id;
@@ -487,7 +488,7 @@ public class CodenvyEditor {
    * @param expectedText text which should be present in the editor
    */
   public void waitTextIntoEditor(final String expectedText) {
-    waitTextIntoEditor(expectedText, ELEMENT_TIMEOUT_SEC);
+    waitTextIntoEditor(expectedText, WIDGET_TIMEOUT_SEC);
   }
 
   /**
@@ -975,7 +976,7 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()));
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()), WIDGET_TIMEOUT_SEC);
   }
 
   /**

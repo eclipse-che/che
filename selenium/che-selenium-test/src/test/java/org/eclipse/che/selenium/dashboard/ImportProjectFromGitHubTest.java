@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
@@ -126,9 +127,15 @@ public class ImportProjectFromGitHubTest {
 
   private void connectGithubAccount() {
     projectSourcePage.clickOnConnectGithubAccountButton();
+
+    seleniumWebDriverHelper.waitOpenedSomeWin();
     seleniumWebDriverHelper.switchToNextWindow(ideWin);
 
+    // workaround to avoid freezing blank popup window in chrome-node 3.141.59-dubnium
+    sleepQuietly(5);
+
     projectSourcePage.waitAuthorizationPageOpened();
+
     projectSourcePage.typeLogin(gitHubUsername);
     projectSourcePage.typePassword(gitHubPassword);
     projectSourcePage.clickOnSignInButton();

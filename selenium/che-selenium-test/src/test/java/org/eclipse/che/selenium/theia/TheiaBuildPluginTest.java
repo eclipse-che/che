@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.theia;
 
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
@@ -40,7 +41,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = OPENSHIFT)
+@Test(groups = {OPENSHIFT, UNDER_REPAIR})
 public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
   private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";
@@ -105,8 +106,16 @@ public class TheiaBuildPluginTest {
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitForm();
     theiaProposalForm.enterTextToSearchField(yeomanWizardSearchSequence);
+    theiaProposalForm.waitProposal("Yeoman Wizard");
     theiaProposalForm.clickOnProposal("Yeoman Wizard");
-    theiaProposalForm.waitForm();
+
+    try {
+      theiaProposalForm.waitForm();
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/12315");
+    }
+
     theiaProposalForm.enterTextToSearchField(pluginNameSearchSequence);
     seleniumWebDriverHelper.pressEnter();
     theiaProposalForm.clickOnProposal(backendPluginDescription);

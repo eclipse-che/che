@@ -18,6 +18,8 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DI
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
@@ -121,6 +123,11 @@ public class DevfileConverter {
         case PLUGIN_TOOL_TYPE:
           pluginsStringJoiner.add(tool.getId());
           break;
+        case KUBERNETES_TOOL_TYPE:
+        case OPENSHIFT_TOOL_TYPE:
+          // this kind of tool ignored here since it contain only reference to tool configuration
+          // which should be resolved and provisioned into workspace config recipe separately.
+          continue;
         default:
           throw new DevfileFormatException(
               format("Unsupported tool %s type provided: %s", tool.getName(), tool.getType()));

@@ -17,6 +17,8 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.A
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_PROJECT_SYMBOL;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.FIND_REFERENCES;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.GO_TO_SYMBOL;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Assistant.Refactoring.REFACTORING;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.RENAME;
 import static org.eclipse.che.selenium.core.workspace.WorkspaceTemplate.UBUNTU_GO;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.ContextMenuLocator.FORMAT;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
@@ -52,7 +54,6 @@ public class GolangFileEditingTest {
 
   private static final String PROJECT_NAME = "desktop-go-simple";
   private static final String GO_FILE_NAME = "main.go";
-  private static final String LS_INIT_MESSAGE = "Finished running tool: /usr/local/go/bin/go build";
   private static final String FORMATTED_CODE =
       "package main\n"
           + "\n"
@@ -65,7 +66,7 @@ public class GolangFileEditingTest {
           + " fmt.Printf(\"Hello, world. Sqrt(2) = %v\\n\", math.Sqrt(2))\n"
           + "}";
 
-  private static final String REFERENCES_NOTJHING_TO_SHOW_TEXT = "Nothing to show";
+  private static final String REFERENCES_NOTHING_TO_SHOW_TEXT = "Nothing to show";
 
   private static final String[] REFERENCES_EXPECTED_TEXT = {
     "/desktop-go-simple/towers.go\nFrom:19:5 To:19:10",
@@ -95,7 +96,7 @@ public class GolangFileEditingTest {
 
   @Inject private Ide ide;
   @Inject private Menu menu;
-  @Inject private Consoles consoles;
+  @Inject protected Consoles consoles;
   @Inject private CodenvyEditor editor;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private TestProjectServiceClient testProjectServiceClient;
@@ -118,7 +119,7 @@ public class GolangFileEditingTest {
 
     // check Golang language sever initialized
     consoles.selectProcessByTabName("dev-machine");
-    consoles.waitExpectedTextIntoConsole(LS_INIT_MESSAGE);
+    waitExpectedTextIntoConsole();
   }
 
   @Test(priority = 1)
@@ -197,23 +198,6 @@ public class GolangFileEditingTest {
     editor.clickOnCloseFileIcon("print.go");
   }
 
-  @Test(priority = 1, groups = UNDER_REPAIR)
-  public void checkRenameFeature() {
-    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
-    editor.waitTabIsPresent("towers.go");
-    editor.goToCursorPositionVisible(22, 5);
-    editor.waitTextElementsActiveLine("if n == 1");
-    editor.launchLocalRefactor();
-    editor.doRenamingByLanguageServerField("k");
-
-    try {
-      editor.waitTextElementsActiveLine("if k == 1");
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/11907");
-    }
-  }
-
   @Test(priority = 1)
   public void checkFindReferencesFeature() {
     projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
@@ -222,7 +206,7 @@ public class GolangFileEditingTest {
     // check the LS info panel when is 'Nothing to show'
     editor.goToPosition(12, 1);
     menu.runCommand(ASSISTANT, FIND_REFERENCES);
-    findReferencesConsoleTab.waitExpectedTextInLsPanel(REFERENCES_NOTJHING_TO_SHOW_TEXT);
+    findReferencesConsoleTab.waitExpectedTextInLsPanel(REFERENCES_NOTHING_TO_SHOW_TEXT);
 
     // check element in the editor
     editor.goToPosition(19, 5);
@@ -329,6 +313,7 @@ public class GolangFileEditingTest {
     // go to from second node
     openFindPanelAndPrintInputTetx("print");
     editor.pressArrowDown();
+    https: // github.com/eclipse/che/issues/10524
     assistantFindPanel.waitActionNodeSelection(textSecondNode);
     editor.pressEnter();
     assistantFindPanel.waitFormIsClosed();
@@ -351,6 +336,17 @@ public class GolangFileEditingTest {
     }
   }
 
+  @Test(priority = 2)
+  public void checkRenameFeature() {
+    projectExplorer.openItemByPath(PROJECT_NAME + "/towers.go");
+    editor.waitTabIsPresent("towers.go");
+    editor.goToCursorPositionVisible(22, 5);
+
+    // has to be changed when https://github.com/eclipse/che/issues/11907 resolved
+    menu.runCommand(ASSISTANT, REFACTORING);
+    menu.waitCommandIsNotPresentInMenu(RENAME);
+  }
+
   private void openFindPanelAndPrintInputTetx(String inputText) {
     editor.selectTabByName("towers.go");
     menu.runCommand(ASSISTANT, FIND_PROJECT_SYMBOL);
@@ -360,5 +356,10 @@ public class GolangFileEditingTest {
 
     textFirstNode = assistantFindPanel.getActionNodeText(0);
     textSecondNode = assistantFindPanel.getActionNodeText(1);
+  }
+
+  protected void waitExpectedTextIntoConsole() {
+    String lsInitMessage = "Finished running tool: /usr/local/go/bin/go build";
+    consoles.waitExpectedTextIntoConsole(lsInitMessage);
   }
 }

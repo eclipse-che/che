@@ -80,6 +80,7 @@ public class KubernetesInfraModule extends AbstractModule {
     factories.addBinding(Constants.NO_ENVIRONMENT_RECIPE_TYPE).to(NoEnvironmentFactory.class);
 
     bind(RuntimeInfrastructure.class).to(KubernetesInfrastructure.class);
+    bind(InconsistentRuntimesDetector.class).asEagerSingleton();
 
     bind(new TypeLiteral<KubernetesEnvironmentProvisioner<KubernetesEnvironment>>() {})
         .to(KubernetesEnvironmentProvisioner.KubernetesEnvironmentProvisionerImpl.class);

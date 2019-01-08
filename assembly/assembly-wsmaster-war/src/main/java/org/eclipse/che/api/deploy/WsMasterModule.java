@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.deploy;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.inject.matcher.Matchers.subclassesOf;
 import static org.eclipse.che.inject.Matchers.names;
 import static org.eclipse.che.multiuser.api.permission.server.SystemDomain.SYSTEM_DOMAIN_ACTIONS;
@@ -31,8 +30,8 @@ import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
-import org.eclipse.che.api.devfile.server.DevfileSchemaValidator;
 import org.eclipse.che.api.devfile.server.DevfileService;
+import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
@@ -64,10 +63,11 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariabl
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowCredentialsEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsAllowedOriginsEnvVarProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentCorsEnabledEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
-import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceMavenServerJavaOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNamespaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
@@ -141,6 +141,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.factory.server.FactoryService.class);
     install(new org.eclipse.che.api.factory.server.jpa.FactoryJpaModule());
 
+    // Service-specific factory resolvers.
     Multibinder<FactoryParametersResolver> factoryParametersResolverMultibinder =
         Multibinder.newSetBinder(binder(), FactoryParametersResolver.class);
     factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);
@@ -192,13 +193,10 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(ProjectsRootEnvVariableProvider.class);
     envVarProviders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
-    envVarProviders.addBinding().to(WorkspaceMavenServerJavaOptsEnvVariableProvider.class);
 
-    // propagate CORS allowed origin evn variable to WS agent only if corresponding env variable
-    // is defined on master
-    if (!isNullOrEmpty(System.getenv("CHE_WSAGENT_CORS_ALLOWED__ORIGINS"))) {
-      envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
-    }
+    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
+    envVarProviders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)

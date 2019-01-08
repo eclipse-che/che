@@ -1,0 +1,74 @@
+################################################################
+# Global configuration
+################################################################
+
+debug = false
+logLevel = "INFO"
+[traefikLog]
+  filePath = "/home/user/agent/traefik/traefik.log"
+[accessLog]
+  filePath = "/home/user/agent/traefik/access.log"
+
+
+# Entrypoints to be used by frontends that do not specify any entrypoint.
+# Each frontend can specify its own entrypoints.
+#
+# Optional
+# Default: ["http"]
+#
+defaultEntryPoints = ["http"]
+
+# Entrypoints definition
+#
+# Optional
+# Default:
+[entryPoints]
+    [entryPoints.http]
+    address = ":8085"
+    [entryPoints.http2]
+    address = ":8087"
+
+################################################################
+# Web configuration backend
+################################################################
+
+# Enable web configuration backend
+#[web]
+
+# Web administration port
+#
+# Required
+#
+#address = ":8086"
+
+
+
+[file]
+
+[backends]
+  [backends.ide]
+      [backends.ide.servers.server1]
+             url = "http://localhost:8080"
+  [backends.chemaster]
+        [backends.chemaster.servers.server1]
+             url = "http://che-host:8080"
+[frontends]
+  [frontends.frontend2]
+    priority = 10
+    backend = "chemaster"
+    passHostHeader = true
+    [frontends.frontend2.routes.api]
+    rule = "PathPrefix:/api/"
+  [frontends.frontend1]
+    priority = 5
+    backend = "ide"
+    passHostHeader = true
+    [frontends.frontend1.redirect]
+      regex = "^(http|https)://(.*)/gwt/ide/sidecar/entrypoint"
+      replacement = "$1://$2/che_workspace_namespace_placeholder/che_workspace_name_placeholder"
+    [frontends.frontend1.routes.ide]
+    rule = "PathPrefix: /; AddPrefix: /ide"
+  [frontends.frontend3]
+    backend = "ide"
+    passHostHeader = true
+    entrypoints = ["http2"]

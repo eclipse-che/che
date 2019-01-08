@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.testrunner;
 
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.RUN_MENU;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Run.TEST;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.TEST_DROP_DAWN_ITEM;
@@ -18,6 +19,7 @@ import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginCo
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.IGNORED;
 import static org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole.JunitMethodsState.PASSED;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.nio.file.Paths;
@@ -36,10 +38,12 @@ import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsPalette;
 import org.eclipse.che.selenium.pageobject.plugins.JavaTestRunnerPluginConsole;
+import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Dmytro Nochevnov */
+@Test(groups = FLAKY)
 public class JavaTestPluginJunit4Test {
 
   private static final String JUNIT4_PROJECT = "junit4-tests";
@@ -98,7 +102,12 @@ public class JavaTestPluginJunit4Test {
     notifications.waitProgressPopupPanelClose();
     projectExplorer.quickExpandWithJavaScript();
 
-    runCompileCommandByPallete(compileCommand);
+    try {
+      runCompileCommandByPallete(compileCommand);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known random failure https://github.com/eclipse/che/issues/12220");
+    }
   }
 
   private void runCompileCommandByPallete(CompileCommand compileCommand) {

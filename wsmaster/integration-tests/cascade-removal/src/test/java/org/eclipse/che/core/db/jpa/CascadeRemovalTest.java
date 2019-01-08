@@ -61,8 +61,8 @@ import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
-import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
 import org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
@@ -174,7 +174,7 @@ public class CascadeRemovalTest {
                             PreferenceEntity.class,
                             WorkspaceImpl.class,
                             WorkspaceConfigImpl.class,
-                            WorkspaceExpiration.class,
+                            WorkspaceActivity.class,
                             ProjectConfigImpl.class,
                             EnvironmentImpl.class,
                             MachineConfigImpl.class,
@@ -277,6 +277,8 @@ public class CascadeRemovalTest {
     assertTrue(preferenceDao.getPreferences(user.getId()).isEmpty());
     assertTrue(sshDao.get(user.getId()).isEmpty());
     assertTrue(workspaceDao.getByNamespace(user.getName(), 30, 0).isEmpty());
+    assertNull(notFoundToNull(() -> workspaceActivityDao.findActivity(workspace1.getId())));
+    assertNull(notFoundToNull(() -> workspaceActivityDao.findActivity(workspace2.getId())));
   }
 
   @Test(dataProvider = "beforeUserRemoveRollbackActions")
@@ -346,10 +348,10 @@ public class CascadeRemovalTest {
     workspaceDao.create(workspace1 = createWorkspace("workspace1", account));
     workspaceDao.create(workspace2 = createWorkspace("workspace2", account));
 
-    workspaceActivityDao.setExpiration(
-        new WorkspaceExpiration(workspace1.getId(), System.currentTimeMillis()));
-    workspaceActivityDao.setExpiration(
-        new WorkspaceExpiration(workspace2.getId(), System.currentTimeMillis()));
+    workspaceActivityDao.setCreatedTime(workspace1.getId(), System.currentTimeMillis());
+    workspaceActivityDao.setCreatedTime(workspace2.getId(), System.currentTimeMillis());
+    workspaceActivityDao.setExpirationTime(workspace1.getId(), System.currentTimeMillis());
+    workspaceActivityDao.setExpirationTime(workspace2.getId(), System.currentTimeMillis());
 
     sshDao.create(sshPair1 = createSshPair(user.getId(), "service", "name1"));
     sshDao.create(sshPair2 = createSshPair(user.getId(), "service", "name2"));
@@ -364,8 +366,8 @@ public class CascadeRemovalTest {
     sshDao.remove(sshPair1.getOwner(), sshPair1.getService(), sshPair1.getName());
     sshDao.remove(sshPair2.getOwner(), sshPair2.getService(), sshPair2.getName());
 
-    workspaceActivityDao.removeExpiration(workspace1.getId());
-    workspaceActivityDao.removeExpiration(workspace2.getId());
+    workspaceActivityDao.removeActivity(workspace1.getId());
+    workspaceActivityDao.removeActivity(workspace2.getId());
 
     k8sMachines.remove(k8sRuntimeState.getRuntimeId());
     k8sRuntimes.remove(k8sRuntimeState.getRuntimeId());

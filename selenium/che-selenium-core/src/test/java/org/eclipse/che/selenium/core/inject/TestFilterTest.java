@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.core.inject;
 
 import static org.eclipse.che.selenium.core.TestGroup.DOCKER;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.K8S;
 import static org.eclipse.che.selenium.core.TestGroup.MULTIUSER;
@@ -73,7 +74,7 @@ public class TestFilterTest {
         CHE_SINGLEUSER,
         Infrastructure.OPENSHIFT
       },
-      {new String[] {OPENSHIFT, UNDER_REPAIR}, GITHUB, CHE_MULTIUSER, Infrastructure.DOCKER},
+      {new String[] {OPENSHIFT, FLAKY}, GITHUB, CHE_MULTIUSER, Infrastructure.DOCKER},
       {new String[] {MULTIUSER}, SOME_GROUP, CHE_SINGLEUSER, Infrastructure.DOCKER},
       {
         new String[] {OPENSHIFT, OSIO}, EMPTY_EXCLUDED_GROUPS, CHE_SINGLEUSER, Infrastructure.DOCKER

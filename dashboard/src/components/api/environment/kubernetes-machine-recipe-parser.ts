@@ -137,6 +137,6 @@ export class KubernetesMachineRecipeParser implements IParser {
    * @returns {boolean}
    */
   private testName(name: string): boolean {
-    return /^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/.test(name);
+    return /^[a-z0-9]([-a-z0-9]*[a-z0-9])?$/.test(name);
   }
 }
