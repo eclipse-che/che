@@ -70,7 +70,7 @@ public class DevfileEnvironmentProvisioner {
     final String type = recipeTool.getType();
     if (fileUrlComposer == null) {
       throw new BadRequestException(
-          "This kind of URL's does not support '" + type + "' type tools.");
+          "This kind of factory URL's does not support '" + type + "' type tools.");
     }
 
     String localFileContent = urlFetcher.fetch(fileUrlComposer.apply(recipeTool.getLocal()));

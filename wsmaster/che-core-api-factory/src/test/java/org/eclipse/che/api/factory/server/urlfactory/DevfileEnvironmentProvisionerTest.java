@@ -46,7 +46,7 @@ public class DevfileEnvironmentProvisionerTest {
   @Test(
       expectedExceptions = BadRequestException.class,
       expectedExceptionsMessageRegExp =
-          "This kind of URL's does not support '" + KUBERNETES_TOOL_TYPE + "' type tools.")
+          "This kind of factory URL's does not support '" + KUBERNETES_TOOL_TYPE + "' type tools.")
   public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoURLComposerGiven() throws Exception {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
