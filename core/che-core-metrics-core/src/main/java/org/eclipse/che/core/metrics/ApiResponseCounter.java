@@ -82,6 +82,8 @@ public class ApiResponseCounter implements MeterBinder {
       case 5:
         serverErrorResponseCounter.increment();
         break;
+      default:
+        // should not happen
     }
   }
 }
