@@ -383,20 +383,18 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
    * @returns {string}
    */
   getUniqueMachineName(environment: che.IWorkspaceEnvironment): string {
-    const usedMachinesNames: Array<string> = environment && environment.machines ? Object.keys(environment.machines) : [];
-    const podNames = usedMachinesNames.map((name: string) => {
-      return this.splitName(name)[0];
-    });
-    let namePrefix = 'pod';
-    for (let pos = 1; pos < 1000; pos++) {
-      if (podNames.indexOf(namePrefix + pos.toString()) === -1) {
-        namePrefix += pos.toString();
-        break;
-      }
+    const envRecipe = this.parseRecipe(environment.recipe.content);
+    if (!envRecipe || !angular.isArray(envRecipe.items)) {
+      return super.getUniqueMachineName(environment);
     }
-    namePrefix += '/machine';
+    const pod = envRecipe.items.find((podItem: IPodItem) => {
+      return podItem && podItem.kind === POD;
+    });
+    if (!pod  || !pod.metadata || !pod.metadata.name) {
+      return super.getUniqueMachineName(environment);
+    }
 
-    return super.getUniqueMachineName(environment, namePrefix);
+    return super.getUniqueMachineName(environment, pod.metadata.name);
   }
 
   /**
@@ -445,7 +443,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
         if (!pod.kind || pod.kind !== POD || pod.metadata.name !== machineRecipe.metadata.name) {
           return false;
         }
-        return angular.equals(machineRecipePod, this.getMachinePod(pod));
+        return machineRecipePod.metadata.name === this.getMachinePod(pod).metadata.name;
       });
       if (usedPodIndex === -1) {
         recipe.items.push(machineRecipe);

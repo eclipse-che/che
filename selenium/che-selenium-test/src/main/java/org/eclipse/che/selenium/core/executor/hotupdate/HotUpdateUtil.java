@@ -41,8 +41,8 @@ public class HotUpdateUtil {
       "get dc | grep che | awk '{print $1}'";
   private static final String UPDATE_COMMAND_TEMPLATE = "rollout latest %s";
 
-  private final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
-  private final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
+  protected final OpenShiftCliCommandExecutor openShiftCliCommandExecutor;
+  protected final TestUserPreferencesServiceClient testUserPreferencesServiceClient;
 
   @Inject
   public HotUpdateUtil(

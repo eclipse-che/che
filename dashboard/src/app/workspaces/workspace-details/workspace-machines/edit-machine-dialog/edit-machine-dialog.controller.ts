@@ -38,6 +38,7 @@ export class EditMachineDialogController {
   private cheEnvironmentRegistry: CheEnvironmentRegistry;
   private environmentManager: EnvironmentManager;
   private isAdd: boolean;
+  private isKubernetes: boolean;
   private machineName: string;
   private usedMachinesNames: Array<string>;
   private environment: che.IWorkspaceEnvironment;
@@ -74,7 +75,7 @@ export class EditMachineDialogController {
     this.deepFreeze(this.originEnvironment);
     this.previousStateEnvironment = angular.copy(this.originEnvironment);
     this.currentStateEnvironment = angular.copy(this.originEnvironment);
-
+    this.isKubernetes = this.cheRecipeService.isKubernetes(this.currentStateEnvironment.recipe);
     this.usedMachinesNames = Object.keys(this.currentStateEnvironment.machines).filter((machineName: string) => {
       return this.isAdd || machineName !== this.machineName;
     });
@@ -103,7 +104,7 @@ export class EditMachineDialogController {
     if (!this.machine || !this.machine.recipe) {
       return;
     }
-    this.machineName = angular.copy(this.environmentManager.getMachineName(this.machine));
+    this.machineName = this.environmentManager.getMachineName(this.machine);
     this.machineRAM = this.environmentManager.getMemoryLimit(this.machine);
     // update memory limit
     this.environmentManager.setMemoryLimit(this.machine, this.machineRAM);
@@ -144,19 +145,24 @@ export class EditMachineDialogController {
     if (this.machineRAM !== this.environmentManager.getMemoryLimit(this.originMachine)) {
       return true;
     }
+    if (this.isKubernetes) {
+      return !angular.equals(this.machine.recipe.spec, this.originMachine.recipe.spec);
+    }
     return !angular.equals(this.machine.recipe, this.originMachine.recipe);
   }
 
   /**
    * Update machine's name if it change.
    * @param {string} name
+   * @param {boolean} isValid
    */
-  onNameChange(name: string): void {
-    const oldMachineName = this.isAdd ? this.machine.name : this.machineName;
-    this.machineName = name;
+  onNameChange(name: string, isValid: boolean): void {
+    if (!isValid) {
+      return;
+    }
+    const oldMachineName = this.isAdd ? this.machine.name : this.getFullName(this.machineName);
     const machineName = this.getFullName(name);
-    const oldEnvironment = this.isAdd ? this.currentStateEnvironment : this.previousStateEnvironment;
-    const environment = this.environmentManager.renameMachine(oldEnvironment, oldMachineName, machineName);
+    const environment = this.environmentManager.renameMachine(this.currentStateEnvironment, oldMachineName, machineName);
     const machines = this.environmentManager.getMachines(environment);
     const machineIndex = machines.findIndex((machine: IEnvironmentManagerMachine) => {
       return machine.name === machineName;
@@ -167,6 +173,7 @@ export class EditMachineDialogController {
     this.machine.recipe = machines[machineIndex].recipe;
     this.currentStateEnvironment = this.environmentManager.getEnvironment(environment, machines);
     this.stringifyMachineRecipe();
+    this.machine.name = this.getFullName(name);
   }
 
   /**
@@ -176,7 +183,7 @@ export class EditMachineDialogController {
   isRecipeValid(): che.IValidation {
     try {
       this.machine.recipe = this.environmentManager.parseMachineRecipe(this.machineRecipeScript);
-      if (this.cheRecipeService.isOpenshift(this.currentStateEnvironment.recipe)) {
+      if (this.isKubernetes) {
         const newPod = this.machine.recipe.metadata.name;
         const oldPod = this.originMachine.recipe.metadata.name;
         if (newPod !== oldPod && this.usedMachinesNames.map((name: string) => {
@@ -234,7 +241,7 @@ export class EditMachineDialogController {
       // checks machine name changes
       const newMachineName = this.environmentManager.getMachineName(this.machine);
       if (this.machineName !== newMachineName) {
-        this.onNameChange(newMachineName);
+        this.machineName = newMachineName;
       }
       // checks memory limit changes
       this.checkMemoryLimitChanges();
@@ -309,7 +316,7 @@ export class EditMachineDialogController {
           this.currentStateEnvironment = this.environmentManager.addMachine(this.currentStateEnvironment, this.machine);
           const name = this.environmentManager.getMachineName(this.machine);
           if (!this.currentStateEnvironment.machines[this.getFullName(name)]) {
-            this.onNameChange(name);
+            this.machineName = name;
           }
         }
       }

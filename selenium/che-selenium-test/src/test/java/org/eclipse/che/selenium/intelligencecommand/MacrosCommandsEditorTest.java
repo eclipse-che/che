@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.intelligencecommand;
 
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
@@ -22,7 +23,6 @@ import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.Com
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.project.ProjectTemplates;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -38,9 +38,9 @@ import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraiev */
 public class MacrosCommandsEditorTest {
-  private static final String PROJ_NAME = NameGenerator.generate("MacrosCommandsEditorTest-", 4);
-  private static final String PATH_TO_FILE = PROJ_NAME + "/src/Main.java";
-  private static final String PATH_TO_ROOT_FOLDER = "/projects/" + PROJ_NAME;
+  private static final String PROJECT_NAME = generate("MacrosCommandsEditorTest-", 4);
+  private static final String PATH_TO_FILE = PROJECT_NAME + "/src/Main.java";
+  private static final String PATH_TO_ROOT_FOLDER = "/projects/" + PROJECT_NAME;
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -55,15 +55,15 @@ public class MacrosCommandsEditorTest {
   public void prepare() throws Exception {
     URL resource = getClass().getResource("/projects/java-project-with-additional-source-folder");
     testProjectServiceClient.importProject(
-        ws.getId(), Paths.get(resource.toURI()), PROJ_NAME, ProjectTemplates.PLAIN_JAVA);
+        ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(ws);
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJ_NAME);
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test(priority = 1)
   public void checkCommandMacrosIntoCommandLine() {
     projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJ_NAME);
+    projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     projectExplorer.waitItem(PATH_TO_FILE);
     projectExplorer.openItemByPath(PATH_TO_FILE);
@@ -80,6 +80,7 @@ public class MacrosCommandsEditorTest {
     commandsEditor.selectMacroLinkInCommandsEditor(EDITOR_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("rel");
     commandsEditor.waitTextIntoSearchMacroField("rel");
+
     String[] macrosItems = {
       "${current.project.relpath}",
       "${editor.current.file.relpath}",
@@ -87,13 +88,14 @@ public class MacrosCommandsEditorTest {
       "Path relative to the /projects folder to the selected file in Editor",
       "Path relative to the /projects folder in project tree"
     };
+
     for (String macrosItem : macrosItems) {
       commandsEditor.waitTextIntoMacrosContainer(macrosItem);
     }
     commandsEditor.enterMacroCommandByEnter("${explorer.current.file.relpath}");
     commandsEditor.waitTextIntoEditor("echo ${explorer.current.file.relpath}");
     commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoConsole("/" + PROJ_NAME + "/src/Main.java");
+    consoles.waitExpectedTextIntoConsole("/" + PROJECT_NAME + "/src/Main.java");
     commandsEditor.setCursorToLine(1);
     commandsEditor.selectLineAndDelete();
     commandsEditor.waitActive();
@@ -117,19 +119,11 @@ public class MacrosCommandsEditorTest {
     commandsEditor.selectMacroLinkInCommandsEditor(PREVIEW_MACROS_LINK);
     commandsEditor.typeTextIntoSearchMacroField("server.");
     commandsEditor.waitTextIntoSearchMacroField("server.");
-    String[] macrosItems = {
-      "${server.codeserver}",
-      "${server.exec-agent/http}",
-      "${server.exec-agent/ws}",
-      "${server.terminal}",
-      "${server.tomcat8-debug}",
-      "${server.tomcat8}",
-      "${server.wsagent/http}",
-      "${server.wsagent/ws}"
-    };
-    for (String macrosItem : macrosItems) {
+
+    for (String macrosItem : getArraytMacrosItems()) {
       commandsEditor.waitTextIntoMacrosContainer(macrosItem);
     }
+
     commandsEditor.enterMacroCommandByEnter("${server.wsagent/http}");
     commandsEditor.waitTextIntoEditor("${server.wsagent/http");
     commandsEditor.clickOnRunButton();
@@ -157,5 +151,19 @@ public class MacrosCommandsEditorTest {
     loader.waitOnClosed();
     commandsExplorer.waitCommandInExplorerByName(JAVA_NAME);
     commandsEditor.waitTabIsPresent(JAVA_NAME);
+  }
+
+  protected String[] getArraytMacrosItems() {
+    String[] macrosItems = {
+      "${server.codeserver}",
+      "${server.exec-agent/http}",
+      "${server.exec-agent/ws}",
+      "${server.terminal}",
+      "${server.tomcat8-debug}",
+      "${server.tomcat8}",
+      "${server.wsagent/http}",
+      "${server.wsagent/ws}"
+    };
+    return macrosItems;
   }
 }
