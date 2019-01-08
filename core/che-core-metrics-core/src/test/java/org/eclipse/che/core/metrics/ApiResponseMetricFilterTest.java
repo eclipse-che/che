@@ -44,7 +44,7 @@ public class ApiResponseMetricFilterTest {
   }
 
   @Test
-  public void shouldIncrementCounterOnSuccessResponses(int status) {
+  public void shouldHandleStatusOnHttpRequest(int status) {
 
     given()
         .auth()
