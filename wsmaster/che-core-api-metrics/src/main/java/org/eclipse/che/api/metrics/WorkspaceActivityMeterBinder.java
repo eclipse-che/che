@@ -33,7 +33,7 @@ public class WorkspaceActivityMeterBinder implements MeterBinder {
   @Override
   public void bindTo(MeterRegistry registry) {
     for (WorkspaceStatus s : WorkspaceStatus.values()) {
-      Gauge.builder("workspaces.in.status", activityManager, __ -> count(s))
+      Gauge.builder("che.workspace.status", activityManager, __ -> count(s))
           .tag("status", s.name())
           .tag("area", "workspace")
           .description("The number of workspaces in a given status")
