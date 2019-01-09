@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -158,8 +159,16 @@ public class WorkspaceActivityManagerTest {
 
   @Test
   public void shouldCountWorkspacesInStatus() throws Exception {
-    activityManager.countWorkspacesInStatus(WorkspaceStatus.STARTING, 0L);
+    // given
+    when(workspaceActivityDao.countWorkspacesInStatus(eq(WorkspaceStatus.STARTING), eq(0L)))
+        .thenReturn(15L);
+
+    // when
+    long count = activityManager.countWorkspacesInStatus(WorkspaceStatus.STARTING, 0L);
+
+    // then
     verify(workspaceActivityDao).countWorkspacesInStatus(eq(WorkspaceStatus.STARTING), eq(0L));
+    assertEquals(15L, count);
   }
 
   @DataProvider(name = "wsStatus")
