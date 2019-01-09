@@ -15,6 +15,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Metric binding for Che API responses, that are grouped by http status codes.
@@ -23,6 +25,8 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class ApiResponseCounter implements MeterBinder {
+  private static final Logger LOG = LoggerFactory.getLogger(ApiResponseCounter.class);
+
   // package private access for visibility in tests
   Counter informationalResponseCounter;
   Counter successResponseCounter;
@@ -84,6 +88,7 @@ public class ApiResponseCounter implements MeterBinder {
         break;
       default:
         // should not happen
+        LOG.warn("Unhandled HTTP status ", status);
     }
   }
 }
