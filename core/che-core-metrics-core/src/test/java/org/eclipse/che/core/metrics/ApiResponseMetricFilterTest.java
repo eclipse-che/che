@@ -38,19 +38,16 @@ public class ApiResponseMetricFilterTest {
 
   @InjectMocks private ApiResponseMetricFilter filter;
 
-  @BeforeMethod
-  public void setUp() {
-    filter = new ApiResponseMetricFilter();
-  }
-
   @Test
-  public void shouldHandleStatusOnHttpRequest(int status) {
+  public void shouldHandleStatusOnHttpRequest() {
+    // requesting a non existing resource, so 404 is expected
+    int status = 404;
 
     given()
         .auth()
         .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
         .when()
-        .get(SECURE_PATH + "/service/success")
+        .get(SECURE_PATH + "/service")
         .then()
         .statusCode(status);
 
