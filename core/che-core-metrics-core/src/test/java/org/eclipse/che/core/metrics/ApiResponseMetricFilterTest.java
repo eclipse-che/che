@@ -19,9 +19,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import org.everrest.assured.EverrestJetty;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -36,9 +36,15 @@ import org.testng.annotations.Test;
 })
 public class ApiResponseMetricFilterTest {
 
-  @Mock ApiResponseCounter apiResponseCounter;
+  @Mock private ApiResponseCounter apiResponseCounter;
 
-  @InjectMocks private ApiResponseMetricFilter filter;
+  private ApiResponseMetricFilter filter;
+
+  @BeforeMethod
+  public void setUp() {
+    filter = new ApiResponseMetricFilter();
+    filter.setApiResponseCounter(apiResponseCounter);
+  }
 
   @Test
   public void shouldHandleStatusOnHttpRequest() {

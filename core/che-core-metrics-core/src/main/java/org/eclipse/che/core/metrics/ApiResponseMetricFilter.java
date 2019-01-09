@@ -33,8 +33,8 @@ public class ApiResponseMetricFilter implements Filter {
   private ApiResponseCounter apiResponseCounter;
 
   @Inject
-  public ApiResponseMetricFilter(ApiResponseCounter apiResponseCounter) {
-    this.apiResponseCounter = apiResponseCounter;
+  public void setApiResponseCounter(ApiResponseCounter counter) {
+    this.apiResponseCounter = counter;
   }
 
   @Override
