@@ -125,6 +125,11 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
   }
 
   @Override
+  public long countWorkspacesInStatus(WorkspaceStatus status, long timestamp) {
+    return findInStatusSince(timestamp, status, Integer.MAX_VALUE, 0).getItemsCount();
+  }
+
+  @Override
   public WorkspaceActivity findActivity(String workspaceId) {
     return workspaceActivities.computeIfAbsent(workspaceId, __ -> new WorkspaceActivity());
   }

@@ -153,6 +153,11 @@ public class WorkspaceActivityManager {
     return activityDao.findInStatusSince(threshold, status, maxItems, skipCount);
   }
 
+  public long countWorkspacesInStatus(WorkspaceStatus status, long threshold)
+      throws ServerException {
+    return activityDao.countWorkspacesInStatus(status, threshold);
+  }
+
   protected long getIdleTimeout(String wsId) {
     return defaultTimeout;
   }
