@@ -22,7 +22,6 @@ import org.everrest.assured.EverrestJetty;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -31,7 +30,10 @@ import org.testng.annotations.Test;
  *
  * @author Mykhailo Kuznietsov
  */
-@Listeners({EverrestJetty.class, MockitoTestNGListener.class})
+@Listeners({
+  MockitoTestNGListener.class,
+  EverrestJetty.class,
+})
 public class ApiResponseMetricFilterTest {
 
   @Mock ApiResponseCounter apiResponseCounter;

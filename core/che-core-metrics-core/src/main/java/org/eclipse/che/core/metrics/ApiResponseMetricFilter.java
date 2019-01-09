@@ -32,13 +32,13 @@ public class ApiResponseMetricFilter implements Filter {
 
   private ApiResponseCounter apiResponseCounter;
 
-  @Override
-  public void init(FilterConfig filterConfig) throws ServletException {}
-
   @Inject
   public ApiResponseMetricFilter(ApiResponseCounter apiResponseCounter) {
     this.apiResponseCounter = apiResponseCounter;
   }
+
+  @Override
+  public void init(FilterConfig filterConfig) throws ServletException {}
 
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain)
@@ -48,11 +48,6 @@ public class ApiResponseMetricFilter implements Filter {
       apiResponseCounter.handleStatus(((HttpServletResponse) response).getStatus());
     }
   }
-
-//  @Inject
-//  public void setApiResponseCounter(ApiResponseCounter counter) {
-//    this.apiResponseCounter = counter;
-//  }
 
   @Override
   public void destroy() {}
