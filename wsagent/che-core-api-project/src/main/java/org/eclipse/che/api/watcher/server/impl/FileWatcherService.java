@@ -254,6 +254,7 @@ public class FileWatcherService {
     suspended.compareAndSet(true, false);
     running.compareAndSet(false, true);
 
+    outer:
     while (running.get()) {
       try {
         WatchKey watchKey = service.take();
@@ -269,33 +270,35 @@ public class FileWatcherService {
           continue;
         }
 
-        List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
+        for (List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
+            !watchEvents.isEmpty();
+            watchEvents = watchKey.pollEvents()) {
+          if (suspended.get()) {
+            resetAndRemove(watchKey, dir);
 
-        if (suspended.get()) {
-          resetAndRemove(watchKey, dir);
-
-          LOG.debug("File watchers are running in suspended mode - skipping.");
-          continue;
-        }
-
-        for (WatchEvent<?> event : watchEvents) {
-          Kind<?> kind = event.kind();
-
-          if (kind == OVERFLOW) {
-            LOG.warn("Detected file system events overflowing");
-            continue;
+            LOG.debug("File watchers are running in suspended mode - skipping.");
+            continue outer;
           }
 
-          WatchEvent<Path> ev = cast(event);
-          Path item = ev.context();
-          Path path = dir.resolve(item).toAbsolutePath();
+          for (WatchEvent<?> event : watchEvents) {
+            Kind<?> kind = event.kind();
 
-          if (excludePatternsRegistry.isExcluded(path)) {
-            LOG.debug("Path is within exclude list, skipping...");
-            continue;
+            if (kind == OVERFLOW) {
+              LOG.warn("Detected file system events overflowing");
+              continue outer;
+            }
+
+            WatchEvent<Path> ev = cast(event);
+            Path item = ev.context();
+            Path path = dir.resolve(item).toAbsolutePath();
+
+            if (excludePatternsRegistry.isExcluded(path)) {
+              LOG.debug("Path is within exclude list, skipping...");
+              continue;
+            }
+
+            handler.handle(path, kind);
           }
-
-          handler.handle(path, kind);
         }
 
         resetAndRemove(watchKey, dir);
