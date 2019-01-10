@@ -29,6 +29,7 @@ import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.Pair;
 
 /**
  * Creates workspace environment from specific tool in devfile if any.
@@ -48,20 +49,20 @@ public class DevfileEnvironmentFactory {
   }
 
   /**
-   * Finds an recipe-type tool (openshift or kubernetes) in devfile and tries to provision {@link
+   * Finds an recipe-type tool (openshift or kubernetes) in devfile and tries to create {@link
    * EnvironmentImpl} from it. If such tool is present in devfile, an file URL composer function
    * MUST be provided to allow to fetch recipe content.
    *
    * @param devfile source devfile
-   * @param fileUrlComposer optional service-specific composer of URL's to the file raw content
-   * @return constructed environment
-   * @throws BadRequestException when there is more than one recipe-type tool in devfile
+   * @param fileUrlProvider optional service-specific provider of URL's to the file raw content
+   * @return optional pair of the recipe-type tool name and newly constructed environment from it
+   * @throws BadRequestException when there is more than one recipe-type tool specified in devfile
    * @throws BadRequestException when there is no URL provider for recipe-type tool present in
    *     devfile
    * @throws BadRequestException when recipe-type tool content is unreachable or empty
    */
-  public Optional<EnvironmentImpl> tryProvision(
-      Devfile devfile, @Nullable Function<String, String> fileUrlComposer)
+  public Optional<Pair<String, EnvironmentImpl>> create(
+      Devfile devfile, @Nullable Function<String, String> fileUrlProvider)
       throws BadRequestException {
     List<Tool> recipeToolList =
         devfile
@@ -83,12 +84,12 @@ public class DevfileEnvironmentFactory {
     }
     final Tool recipeTool = recipeToolList.get(0);
     final String type = recipeTool.getType();
-    if (fileUrlComposer == null) {
+    if (fileUrlProvider == null) {
       throw new BadRequestException(
           format("This kind of factory URL's does not support '%s' type tools.", type));
     }
 
-    String localFileContent = urlFetcher.fetch(fileUrlComposer.apply(recipeTool.getLocal()));
+    String localFileContent = urlFetcher.fetch(fileUrlProvider.apply(recipeTool.getLocal()));
     if (isNullOrEmpty(localFileContent)) {
       throw new BadRequestException(
           format(
@@ -97,6 +98,6 @@ public class DevfileEnvironmentFactory {
     }
     // TODO: it would be great to check there is real yaml and not binary etc
     RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, localFileContent, null);
-    return Optional.of(new EnvironmentImpl(recipe, emptyMap()));
+    return Optional.of(new Pair<>(recipeTool.getName(), new EnvironmentImpl(recipe, emptyMap())));
   }
 }

@@ -30,6 +30,7 @@ import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.commons.lang.Pair;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -56,7 +57,7 @@ public class DevfileEnvironmentFactoryTest {
     Devfile devfile = new Devfile();
     devfile.setTools(singletonList(tool));
 
-    provisioner.tryProvision(devfile, null);
+    provisioner.create(devfile, null);
   }
 
   @Test
@@ -65,7 +66,7 @@ public class DevfileEnvironmentFactoryTest {
     Devfile devfile = new Devfile();
     devfile.setTools(singletonList(tool));
 
-    assertFalse(provisioner.tryProvision(devfile, null).isPresent());
+    assertFalse(provisioner.create(devfile, null).isPresent());
   }
 
   @Test(
@@ -81,7 +82,7 @@ public class DevfileEnvironmentFactoryTest {
     devfile.setTools(Arrays.asList(tool, tool2));
     when(urlFetcher.fetch(anyString())).thenReturn(null);
 
-    provisioner.tryProvision(devfile, s -> "http://foo.bar/local.yaml");
+    provisioner.create(devfile, s -> "http://foo.bar/local.yaml");
   }
 
   @Test(
@@ -99,7 +100,7 @@ public class DevfileEnvironmentFactoryTest {
     devfile.setTools(singletonList(tool));
     when(urlFetcher.fetch(anyString())).thenReturn(null);
 
-    provisioner.tryProvision(devfile, s -> "http://foo.bar/local.yaml");
+    provisioner.create(devfile, s -> "http://foo.bar/local.yaml");
   }
 
   @Test
@@ -111,11 +112,12 @@ public class DevfileEnvironmentFactoryTest {
     devfile.setTools(singletonList(tool));
     when(urlFetcher.fetch(anyString())).thenReturn(content);
 
-    Optional<EnvironmentImpl> result =
-        provisioner.tryProvision(devfile, s -> "http://foo.bar/local.yaml");
+    Optional<Pair<String, EnvironmentImpl>> result =
+        provisioner.create(devfile, s -> "http://foo.bar/local.yaml");
 
     assertTrue(result.isPresent());
-    RecipeImpl recipe = result.get().getRecipe();
+    assertEquals(result.get().first, TOOL_NAME);
+    RecipeImpl recipe = result.get().second.getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), KUBERNETES_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
@@ -131,11 +133,12 @@ public class DevfileEnvironmentFactoryTest {
     devfile.setTools(singletonList(tool));
     when(urlFetcher.fetch(anyString())).thenReturn(content);
 
-    Optional<EnvironmentImpl> result =
-        provisioner.tryProvision(devfile, s -> "http://foo.bar/local.yaml");
+    Optional<Pair<String, EnvironmentImpl>> result =
+        provisioner.create(devfile, s -> "http://foo.bar/local.yaml");
 
     assertTrue(result.isPresent());
-    RecipeImpl recipe = result.get().getRecipe();
+    assertEquals(result.get().first, TOOL_NAME);
+    RecipeImpl recipe = result.get().second.getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);

@@ -37,6 +37,7 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -91,11 +92,11 @@ public class URLFactoryBuilder {
    * Build a factory using the provided devfile
    *
    * @param devfileLocation location of devfile
-   * @param fileUrlComposer optional service-specific composer of URL's to the file raw content
+   * @param fileUrlProvider optional service-specific provider of URL's to the file raw content
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
-      String devfileLocation, @Nullable Function<String, String> fileUrlComposer)
+      String devfileLocation, @Nullable Function<String, String> fileUrlProvider)
       throws BadRequestException, ServerException {
     if (devfileLocation == null) {
       return Optional.empty();
@@ -106,12 +107,13 @@ public class URLFactoryBuilder {
     }
     try {
       Devfile devfile = devfileManager.parse(devfileYamlContent, false);
-      Optional<EnvironmentImpl> environment =
-          devfileEnvironmentFactory.tryProvision(devfile, fileUrlComposer);
+      Optional<Pair<String, EnvironmentImpl>> environmentPair =
+          devfileEnvironmentFactory.create(devfile, fileUrlProvider);
       WorkspaceConfigImpl wsConfig = devfileManager.createWorkspaceConfig(devfile);
-      if (environment.isPresent()) {
-        wsConfig.setDefaultEnv("default");
-        wsConfig.setEnvironments(singletonMap("default", environment.get()));
+      if (environmentPair.isPresent()) {
+        final String environmentName = environmentPair.get().first;
+        wsConfig.setDefaultEnv(environmentName);
+        wsConfig.setEnvironments(singletonMap(environmentName, environmentPair.get().second));
       }
       return Optional.of(
           newDto(FactoryDto.class)
