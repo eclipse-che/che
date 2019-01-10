@@ -186,5 +186,8 @@ public class KubernetesInfraModule extends AbstractModule {
     pluginBrokers
         .addBinding("Theia plugin")
         .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia.image")));
+    pluginBrokers
+        .addBinding("VS Code extension")
+        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.vscode.image")));
   }
 }
