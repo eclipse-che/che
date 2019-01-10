@@ -111,6 +111,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
       } else if (object instanceof Pod) {
         Pod pod = (Pod) object;
+        checkNotNull(pod.getMetadata(), "Pod metadata must not be null");
         pods.put(pod.getMetadata().getName(), pod);
       } else if (object instanceof Service) {
         Service service = (Service) object;
