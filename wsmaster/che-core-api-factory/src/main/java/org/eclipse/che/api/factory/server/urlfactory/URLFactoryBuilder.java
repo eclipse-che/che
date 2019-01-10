@@ -51,7 +51,7 @@ public class URLFactoryBuilder {
   private final String defaultCheEditor;
   private final String defaultChePlugins;
 
-  private final DevfileEnvironmentProvisioner devfileEnvironmentProvisioner;
+  private final DevfileEnvironmentFactory devfileEnvironmentFactory;
   private final URLFetcher urlFetcher;
   private final DevfileManager devfileManager;
 
@@ -59,12 +59,12 @@ public class URLFactoryBuilder {
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
-      DevfileEnvironmentProvisioner devfileEnvironmentProvisioner,
+      DevfileEnvironmentFactory devfileEnvironmentFactory,
       URLFetcher urlFetcher,
       DevfileManager devfileManager) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
-    this.devfileEnvironmentProvisioner = devfileEnvironmentProvisioner;
+    this.devfileEnvironmentFactory = devfileEnvironmentFactory;
     this.urlFetcher = urlFetcher;
     this.devfileManager = devfileManager;
   }
@@ -107,7 +107,7 @@ public class URLFactoryBuilder {
     try {
       Devfile devfile = devfileManager.parse(devfileYamlContent, false);
       Optional<EnvironmentImpl> environment =
-          devfileEnvironmentProvisioner.tryProvision(devfile, fileUrlComposer);
+          devfileEnvironmentFactory.tryProvision(devfile, fileUrlComposer);
       WorkspaceConfigImpl wsConfig = devfileManager.createWorkspaceConfig(devfile);
       if (environment.isPresent()) {
         wsConfig.setDefaultEnv("default");

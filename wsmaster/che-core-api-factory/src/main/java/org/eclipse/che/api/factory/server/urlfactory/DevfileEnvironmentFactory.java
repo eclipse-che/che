@@ -12,10 +12,13 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.inject.Inject;
@@ -27,34 +30,39 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 
-/** Creates workspace environment from specific tool in devfile if any. */
+/**
+ * Creates workspace environment from specific tool in devfile if any.
+ *
+ * @author Max Shaposhnyk
+ */
 @Singleton
-public class DevfileEnvironmentProvisioner {
+public class DevfileEnvironmentFactory {
 
   static final String DEFAULT_RECIPE_CONTENT_TYPE = "application/x-yaml";
 
   private final URLFetcher urlFetcher;
 
   @Inject
-  public DevfileEnvironmentProvisioner(URLFetcher urlFetcher) {
+  public DevfileEnvironmentFactory(URLFetcher urlFetcher) {
     this.urlFetcher = urlFetcher;
   }
 
   /**
    * Finds an recipe-type tool (openshift or kubernetes) in devfile and tries to provision {@link
-   * EnvironmentImpl} from it. If such tools are present in devfile, an file URL composer function
+   * EnvironmentImpl} from it. If such tool is present in devfile, an file URL composer function
    * MUST be provided to allow to fetch recipe content.
    *
    * @param devfile source devfile
    * @param fileUrlComposer optional service-specific composer of URL's to the file raw content
-   * @return provisioned enviromnent
-   * @throws BadRequestException when there is recipe-type tool present in devfile but no URL
-   *     composer provided when file specified in local section of the tool is unreachable or empty
+   * @return constructed environment
+   * @throws BadRequestException when there is no URL provider for recipe-type tool present in
+   *     devfile
+   * @throws BadRequestException when recipe-type tool content is unreachable or empty
    */
   public Optional<EnvironmentImpl> tryProvision(
       Devfile devfile, @Nullable Function<String, String> fileUrlComposer)
       throws BadRequestException {
-    Optional<Tool> recipeToolOptional =
+    List<Tool> recipeToolList =
         devfile
             .getTools()
             .stream()
@@ -62,25 +70,29 @@ public class DevfileEnvironmentProvisioner {
                 tool ->
                     tool.getType().equals(KUBERNETES_TOOL_TYPE)
                         || tool.getType().equals(OPENSHIFT_TOOL_TYPE))
-            .findFirst();
-    if (!recipeToolOptional.isPresent()) {
+            .collect(toList());
+    if (recipeToolList.isEmpty()) {
       return Optional.empty();
     }
-    final Tool recipeTool = recipeToolOptional.get();
+    if (recipeToolList.size() > 1) {
+      throw new BadRequestException(
+          format(
+              "Multiple non plugin or editor type tools found (%d) but expected only one.",
+              recipeToolList.size()));
+    }
+    final Tool recipeTool = recipeToolList.get(0);
     final String type = recipeTool.getType();
     if (fileUrlComposer == null) {
       throw new BadRequestException(
-          "This kind of factory URL's does not support '" + type + "' type tools.");
+          format("This kind of factory URL's does not support '%s' type tools.", type));
     }
 
     String localFileContent = urlFetcher.fetch(fileUrlComposer.apply(recipeTool.getLocal()));
     if (isNullOrEmpty(localFileContent)) {
       throw new BadRequestException(
-          "The local file '"
-              + recipeTool.getLocal()
-              + "' defined in tool  '"
-              + recipeTool.getName()
-              + "' is unreachable or empty.");
+          format(
+              "The local file '%s' defined in tool  '%s' is unreachable or empty.",
+              recipeTool.getLocal(), recipeTool.getName()));
     }
     // TODO: it would be great to check there is real yaml and not binary etc
     RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, localFileContent, null);

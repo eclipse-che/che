@@ -44,7 +44,7 @@ public class URLFactoryBuilderTest {
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
 
-  @Mock private DevfileEnvironmentProvisioner environmentProvisioner;
+  @Mock private DevfileEnvironmentFactory environmentProvisioner;
   @Mock private DevfileManager devfileManager;
 
   /** Tested instance. */
