@@ -55,6 +55,7 @@ public class DevfileEnvironmentFactory {
    * @param devfile source devfile
    * @param fileUrlComposer optional service-specific composer of URL's to the file raw content
    * @return constructed environment
+   * @throws BadRequestException when there is more than one recipe-type tool in devfile
    * @throws BadRequestException when there is no URL provider for recipe-type tool present in
    *     devfile
    * @throws BadRequestException when recipe-type tool content is unreachable or empty
