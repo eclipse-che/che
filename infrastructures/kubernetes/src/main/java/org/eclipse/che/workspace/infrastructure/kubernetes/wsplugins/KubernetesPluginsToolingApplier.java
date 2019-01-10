@@ -47,6 +47,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
+import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_TYPE_ATTRIBUTE;
+
 /**
  * Applies Che plugins tooling configuration to a kubernetes internal runtime object.
  *
@@ -194,6 +196,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .build();
 
     InternalMachineConfig machineConfig = machineResolver.resolve();
+    machineConfig.getAttributes().put(CONTAINER_TYPE_ATTRIBUTE, "tool-container");
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
     sidecarRelatedCommands.forEach(c -> c.getAttributes().put("machineName", machineName));

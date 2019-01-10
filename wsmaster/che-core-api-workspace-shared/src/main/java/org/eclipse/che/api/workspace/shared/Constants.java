@@ -162,5 +162,7 @@ public final class Constants {
 
   public static final String NO_ENVIRONMENT_RECIPE_TYPE = "no-environment";
 
+  public static final String CONTAINER_TYPE_ATTRIBUTE = "type";
+
   private Constants() {}
 }
