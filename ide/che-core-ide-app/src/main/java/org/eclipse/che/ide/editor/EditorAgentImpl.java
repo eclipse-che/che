@@ -308,9 +308,9 @@ public class EditorAgentImpl
       VirtualFile file, EditorPartStack editorPartStackConsumer, OpenEditorCallback callback) {
 
     addToOpeningFilesList(file.getLocation(), editorPartStackConsumer);
-    Set<FileType> fileTypesByFileName = getFileTypesByFileName(file.getName());
+    Set<FileType> fileTypesByFile = getFileTypesByFile(file);
     Optional<FileType> registeredFileType =
-        fileTypesByFileName
+        fileTypesByFile
             .stream()
             .filter(fileType -> editorRegistry.getEditor(fileType) instanceof AsyncEditorProvider)
             .findAny();
@@ -325,14 +325,16 @@ public class EditorAgentImpl
                     file, callback, fileType, editor, editorPartStackConsumer, editorProvider);
               });
     } else {
-      FileType fileType = fileTypesByFileName.stream().findAny().orElse(unknownFileType);
+      FileType fileType = fileTypesByFile.stream().findAny().orElse(unknownFileType);
       final EditorProvider editorProvider = editorRegistry.getEditor(fileType);
       final EditorPartPresenter editor = editorProvider.getEditor();
       initEditor(file, callback, fileType, editor, editorPartStackConsumer, editorProvider);
     }
   }
 
-  private Set<FileType> getFileTypesByFileName(String name) {
+  private Set<FileType> getFileTypesByFile(VirtualFile file) {
+    String name = file.getName();
+
     if (isNullOrEmpty(name)) {
       return emptySet();
     }
@@ -722,9 +724,15 @@ public class EditorAgentImpl
     }
     final boolean active = file.hasKey("ACTIVE") && file.getBoolean("ACTIVE");
 
-    final FileType fileType = fileTypeRegistry.getFileTypeByFile(resourceFile);
-    final EditorProvider provider = editorRegistry.getEditor(fileType);
-    if (provider instanceof AsyncEditorProvider) {
+    Set<FileType> fileTypesByFile = getFileTypesByFile(resourceFile);
+    Optional<FileType> registeredFileType =
+        fileTypesByFile
+            .stream()
+            .filter(fileType -> editorRegistry.getEditor(fileType) instanceof AsyncEditorProvider)
+            .findAny();
+    if (registeredFileType.isPresent()) {
+      FileType fileType = registeredFileType.get();
+      final EditorProvider provider = editorRegistry.getEditor(fileType);
       ((AsyncEditorProvider) provider)
           .createEditor(resourceFile)
           .then(
@@ -745,6 +753,8 @@ public class EditorAgentImpl
                         });
               });
     } else {
+      FileType fileType = fileTypesByFile.stream().findAny().orElse(unknownFileType);
+      final EditorProvider provider = editorRegistry.getEditor(fileType);
       EditorPartPresenter editor = provider.getEditor();
       restoreInitEditor(
               resourceFile,
