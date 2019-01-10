@@ -12,18 +12,24 @@
 package org.eclipse.che.ide.editor;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.gwt.regexp.shared.RegExp.compile;
 import static java.lang.Boolean.parseBoolean;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.FAIL;
 import static org.eclipse.che.ide.api.notification.StatusNotification.Status.WARNING;
 import static org.eclipse.che.ide.api.parts.PartStackType.EDITING;
+import static org.eclipse.che.ide.util.NameUtils.getFileExtension;
 
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.name.Named;
 import com.google.web.bindery.event.shared.EventBus;
 import elemental.json.Json;
 import elemental.json.JsonArray;
@@ -34,6 +40,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
@@ -119,6 +126,7 @@ public class EditorAgentImpl
   private final PromiseProvider promiseProvider;
   private final ResourceProvider resourceProvider;
   private final NotificationManager notificationManager;
+  private final FileType unknownFileType;
   private List<EditorPartPresenter> dirtyEditors;
   private EditorPartPresenter activeEditor;
   private PartPresenter activePart;
@@ -135,7 +143,8 @@ public class EditorAgentImpl
       EditorContentSynchronizer editorContentSynchronizer,
       PromiseProvider promiseProvider,
       ResourceProvider resourceProvider,
-      NotificationManager notificationManager) {
+      NotificationManager notificationManager,
+      @Named("defaultFileType") FileType unknownFileType) {
     this.eventBus = eventBus;
     this.fileTypeRegistry = fileTypeRegistry;
     this.preferencesManager = preferencesManager;
@@ -147,6 +156,7 @@ public class EditorAgentImpl
     this.promiseProvider = promiseProvider;
     this.resourceProvider = resourceProvider;
     this.notificationManager = notificationManager;
+    this.unknownFileType = unknownFileType;
     this.openedEditors = newArrayList();
     this.openingEditorsPathsToStacks = new HashMap<>();
     this.openedEditorsToProviders = new HashMap<>();
@@ -298,23 +308,57 @@ public class EditorAgentImpl
       VirtualFile file, EditorPartStack editorPartStackConsumer, OpenEditorCallback callback) {
 
     addToOpeningFilesList(file.getLocation(), editorPartStackConsumer);
+    Set<FileType> fileTypesByFileName = getFileTypesByFileName(file.getName());
+    Optional<FileType> registeredFileType =
+        fileTypesByFileName
+            .stream()
+            .filter(fileType -> editorRegistry.getEditor(fileType) instanceof AsyncEditorProvider)
+            .findAny();
+    if (registeredFileType.isPresent()) {
+      FileType fileType = registeredFileType.get();
+      final EditorProvider editorProvider = editorRegistry.getEditor(fileType);
+      ((AsyncEditorProvider) editorProvider)
+          .createEditor(file)
+          .then(
+              editor -> {
+                initEditor(
+                    file, callback, fileType, editor, editorPartStackConsumer, editorProvider);
+              });
+    } else {
+      FileType fileType = fileTypesByFileName.stream().findAny().orElse(unknownFileType);
+      final EditorProvider editorProvider = editorRegistry.getEditor(fileType);
+      final EditorPartPresenter editor = editorProvider.getEditor();
+      initEditor(file, callback, fileType, editor, editorPartStackConsumer, editorProvider);
+    }
+  }
 
-    final FileType fileType = fileTypeRegistry.getFileTypeByFile(file);
-    final EditorProvider editorProvider = editorRegistry.getEditor(fileType);
-    if (editorProvider instanceof AsyncEditorProvider) {
-      AsyncEditorProvider provider = (AsyncEditorProvider) editorProvider;
-      Promise<EditorPartPresenter> promise = provider.createEditor(file);
-      if (promise != null) {
-        promise.then(
-            editor -> {
-              initEditor(file, callback, fileType, editor, editorPartStackConsumer, editorProvider);
-            });
-        return;
-      }
+  private Set<FileType> getFileTypesByFileName(String name) {
+    if (isNullOrEmpty(name)) {
+      return emptySet();
     }
 
-    final EditorPartPresenter editor = editorProvider.getEditor();
-    initEditor(file, callback, fileType, editor, editorPartStackConsumer, editorProvider);
+    Set<FileType> typesByNamePattern =
+        fileTypeRegistry
+            .getFileTypes()
+            .stream()
+            .filter(
+                type ->
+                    type.getNamePatterns()
+                        .stream()
+                        .anyMatch(namePattern -> compile(namePattern).test(name)))
+            .collect(toSet());
+
+    String fileExtension = getFileExtension(name);
+    if (isNullOrEmpty(fileExtension)) {
+      return typesByNamePattern;
+    }
+
+    Set<FileType> fileTypes =
+        typesByNamePattern
+            .stream()
+            .filter(type -> fileExtension.equals(type.getExtension()))
+            .collect(toSet());
+    return fileTypes.isEmpty() ? typesByNamePattern : fileTypes;
   }
 
   private void initEditor(
