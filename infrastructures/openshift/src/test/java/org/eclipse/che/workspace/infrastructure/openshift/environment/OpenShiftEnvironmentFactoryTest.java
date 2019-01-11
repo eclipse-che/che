@@ -192,7 +192,12 @@ public class OpenShiftEnvironmentFactoryTest {
   public void createdPod() throws Exception {
     final List<HasMetadata> recipeObjects =
         singletonList(
-            new PodBuilder().withMetadata(new ObjectMeta()).withSpec(new PodSpec()).build());
+            new PodBuilder()
+                .withNewMetadata()
+                .withName("test")
+                .endMetadata()
+                .withSpec(new PodSpec())
+                .build());
     when(validatedObjects.getItems()).thenReturn(recipeObjects);
 
     final KubernetesEnvironment parsed =
