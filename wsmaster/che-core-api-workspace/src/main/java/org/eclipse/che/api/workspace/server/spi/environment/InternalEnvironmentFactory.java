@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
+import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_TYPE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.USER_CONTAINER;
+
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,14 +103,17 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
           throw new InfrastructureException(e);
         }
 
-        machines.put(
-            machineEntry.getKey(),
+        InternalMachineConfig internalMachineConfig =
             new InternalMachineConfig(
                 installers,
                 normalizeServers(machineConfig.getServers()),
                 machineConfig.getEnv(),
                 machineConfig.getAttributes(),
-                machineConfig.getVolumes()));
+                machineConfig.getVolumes());
+
+        internalMachineConfig.getAttributes().put(CONTAINER_TYPE_ATTRIBUTE, USER_CONTAINER);
+
+        machines.put(machineEntry.getKey(), internalMachineConfig);
       }
 
       machinesValidator.validate(machines);

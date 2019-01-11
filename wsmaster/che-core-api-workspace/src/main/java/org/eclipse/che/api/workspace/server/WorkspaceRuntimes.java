@@ -28,7 +28,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_N
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_RUNTIMES_ID_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
-import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_TYPE_ATTRIBUTE;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -341,10 +340,6 @@ public class WorkspaceRuntimes {
           createInternalEnvironment(
               environment, workspaceConfig.getAttributes(), workspaceConfig.getCommands());
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
-
-      internalEnv.getMachines()
-              .values()
-              .forEach(internalMachineConf -> internalMachineConf.getAttributes().put(CONTAINER_TYPE_ATTRIBUTE, "user-container"));
 
       InternalRuntime runtime = runtimeContext.getRuntime();
 

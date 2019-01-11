@@ -14,6 +14,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_TYPE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.TOOL_CONTAINER;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
 import com.google.common.annotations.Beta;
@@ -46,8 +48,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
-
-import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_TYPE_ATTRIBUTE;
 
 /**
  * Applies Che plugins tooling configuration to a kubernetes internal runtime object.
@@ -196,7 +196,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .build();
 
     InternalMachineConfig machineConfig = machineResolver.resolve();
-    machineConfig.getAttributes().put(CONTAINER_TYPE_ATTRIBUTE, "tool-container");
+    machineConfig.getAttributes().put(CONTAINER_TYPE_ATTRIBUTE, TOOL_CONTAINER);
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
     sidecarRelatedCommands.forEach(c -> c.getAttributes().put("machineName", machineName));
