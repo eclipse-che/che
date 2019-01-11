@@ -30,6 +30,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -62,6 +63,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -291,8 +293,37 @@ public class KubernetesEnvironmentFactoryTest {
                 }));
   }
 
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Pod metadata must not be null")
+  public void exceptionOnPodWithNoMetadata() throws Exception {
+    final List<HasMetadata> recipeObjects = singletonList(new PodBuilder().build());
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+  }
+
   @Test
-  public void testProvisionRamAttributesIsInvoked() throws Exception {
+  public void createdPod() throws Exception {
+    final List<HasMetadata> recipeObjects =
+        singletonList(
+            new PodBuilder()
+                .withNewMetadata()
+                .withName("test")
+                .endMetadata()
+                .withSpec(new PodSpec())
+                .build());
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertFalse(parsed.getPodsData().isEmpty());
+    assertEquals(parsed.getWarnings().size(), 0);
+  }
+
+  @Test
+  public void testProvisionRamAttributesIsInvoked() {
     final long firstMachineRamLimit = 3072;
     final long firstMachineRamRequest = 1536;
     final long secondMachineRamLimit = 1024;
