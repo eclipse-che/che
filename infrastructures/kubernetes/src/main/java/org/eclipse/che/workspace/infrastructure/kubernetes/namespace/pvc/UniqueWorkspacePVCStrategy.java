@@ -107,7 +107,6 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       return;
     }
     LOG.debug("Provisioning PVC strategy for workspace '{}'", workspaceId);
-    final Map<String, PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims();
     // fetches all existing PVCs related to given workspace and groups them by volume name
     final Map<String, PersistentVolumeClaim> volumeName2PVC =
         groupByVolumeName(
@@ -115,17 +114,8 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
                 .create(workspaceId)
                 .persistentVolumeClaims()
                 .getByLabel(CHE_WORKSPACE_ID_LABEL, workspaceId));
-    for (PodData pod : k8sEnv.getPodsData().values()) {
-      final PodSpec podSpec = pod.getSpec();
-      List<Container> containers = new ArrayList<>();
-      containers.addAll(podSpec.getContainers());
-      containers.addAll(podSpec.getInitContainers());
-      for (Container container : containers) {
-        final String machineName = Names.machineName(pod, container);
-        Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
-        addMachineVolumes(workspaceId, claims, volumeName2PVC, pod, container, volumes);
-      }
-    }
+
+    provisionCheVolumes(volumeName2PVC, k8sEnv, workspaceId);
     LOG.debug("PVC strategy provisioning done for workspace '{}'", workspaceId);
   }
 
@@ -154,14 +144,49 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     }
   }
 
+  @Override
+  public void cleanup(Workspace workspace) throws InfrastructureException {
+    if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
+      return;
+    }
+    String workspaceId = workspace.getId();
+    factory
+        .create(workspaceId)
+        .persistentVolumeClaims()
+        .delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspaceId));
+  }
+
+  private void provisionCheVolumes(
+      Map<String, PersistentVolumeClaim> volumeName2PVC,
+      KubernetesEnvironment k8sEnv,
+      String workspaceId)
+      throws InfrastructureException {
+    for (PodData pod : k8sEnv.getPodsData().values()) {
+      final PodSpec podSpec = pod.getSpec();
+      List<Container> containers = new ArrayList<>();
+      containers.addAll(podSpec.getContainers());
+      containers.addAll(podSpec.getInitContainers());
+      for (Container container : containers) {
+        final String machineName = Names.machineName(pod, container);
+        Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
+        addMachineVolumes(
+            workspaceId,
+            k8sEnv.getPersistentVolumeClaims(),
+            volumeName2PVC,
+            pod,
+            container,
+            volumes);
+      }
+    }
+  }
+
   private void addMachineVolumes(
       String workspaceId,
       Map<String, PersistentVolumeClaim> provisionedClaims,
       Map<String, PersistentVolumeClaim> existingVolumeName2PVC,
       PodData pod,
       Container container,
-      Map<String, Volume> volumes)
-      throws InfrastructureException {
+      Map<String, Volume> volumes) {
     if (volumes.isEmpty()) {
       return;
     }
@@ -199,21 +224,9 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
               newVolumeMount(
                   pvc.getMetadata().getName(),
                   volumePath,
-                  getSubPath(workspaceId, volumeName, Names.machineName(pod, container))));
+                  getVolumeSubPath(workspaceId, volumeName, Names.machineName(pod, container))));
       addVolumeIfAbsent(pod.getSpec(), pvc.getMetadata().getName());
     }
-  }
-
-  @Override
-  public void cleanup(Workspace workspace) throws InfrastructureException {
-    if (EphemeralWorkspaceUtility.isEphemeral(workspace)) {
-      return;
-    }
-    String workspaceId = workspace.getId();
-    factory
-        .create(workspaceId)
-        .persistentVolumeClaims()
-        .delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, workspaceId));
   }
 
   private void addVolumeIfAbsent(PodSpec podSpec, String pvcUniqueName) {
@@ -222,18 +235,9 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     }
   }
 
-  private String getSubPath(String workspaceId, String volumeName, String machineName) {
-    // logs must be located inside the folder related to the machine because few machines can
-    // contain the identical agents and in this case, a conflict is possible.
-    if (LOGS_VOLUME_NAME.equals(volumeName)) {
-      return workspaceId + '/' + volumeName + '/' + machineName;
-    }
-    return workspaceId + '/' + volumeName;
-  }
-
   /** Groups list of given PVCs by volume name */
   private Map<String, PersistentVolumeClaim> groupByVolumeName(
-      Collection<PersistentVolumeClaim> pvcs) throws InfrastructureException {
+      Collection<PersistentVolumeClaim> pvcs) {
     final Map<String, PersistentVolumeClaim> grouped = new HashMap<>();
     for (PersistentVolumeClaim pvc : pvcs) {
       final ObjectMeta metadata = pvc.getMetadata();
@@ -245,5 +249,14 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
       }
     }
     return grouped;
+  }
+
+  private String getVolumeSubPath(String workspaceId, String volumeName, String machineName) {
+    // logs must be located inside the folder related to the machine because few machines can
+    // contain the identical agents and in this case, a conflict is possible.
+    if (LOGS_VOLUME_NAME.equals(volumeName)) {
+      return workspaceId + '/' + volumeName + '/' + machineName;
+    }
+    return workspaceId + '/' + volumeName;
   }
 }
