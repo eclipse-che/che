@@ -177,6 +177,23 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
 
   @Override
   @Transactional(rollbackOn = ServerException.class)
+  public long countWorkspacesInStatus(WorkspaceStatus status, long timestamp)
+      throws ServerException {
+    try {
+      String queryName = "WorkspaceActivity.get" + firstUpperCase(status.name()) + "SinceCount";
+
+      return managerProvider
+          .get()
+          .createNamedQuery(queryName, Long.class)
+          .setParameter("time", timestamp)
+          .getSingleResult();
+    } catch (RuntimeException e) {
+      throw new ServerException(e.getLocalizedMessage(), e);
+    }
+  }
+
+  @Override
+  @Transactional(rollbackOn = ServerException.class)
   public WorkspaceActivity findActivity(String workspaceId) throws ServerException {
     try {
       EntityManager em = managerProvider.get();

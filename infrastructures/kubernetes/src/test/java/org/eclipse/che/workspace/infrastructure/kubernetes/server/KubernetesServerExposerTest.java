@@ -37,6 +37,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.mockito.Mock;
@@ -86,12 +87,14 @@ public class KubernetesServerExposerTest {
 
     kubernetesEnvironment =
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
+
+    PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     this.serverExposer =
         new KubernetesServerExposer<>(
             externalServerExposerStrategy,
             secureServerExposer,
             MACHINE_NAME,
-            pod,
+            podData,
             container,
             kubernetesEnvironment);
   }

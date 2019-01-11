@@ -85,7 +85,7 @@ public class DeployBrokerTest {
     when(k8sNamespace.deployments()).thenReturn(k8sDeployments);
 
     pod = new PodBuilder().withNewMetadata().withName(PLUGIN_BROKER_POD_NAME).endMetadata().build();
-    when(k8sEnvironment.getPods()).thenReturn(ImmutableMap.of(PLUGIN_BROKER_POD_NAME, pod));
+    when(k8sEnvironment.getPodsCopy()).thenReturn(ImmutableMap.of(PLUGIN_BROKER_POD_NAME, pod));
     when(k8sEnvironment.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", configMap));
 
     when(k8sDeployments.create(any())).thenReturn(pod);
@@ -146,7 +146,7 @@ public class DeployBrokerTest {
           "Plugin broker environment must have only one pod\\. Workspace `workspaceId` contains `0` pods\\.")
   public void shouldThrowExceptionIfThereIsNoAnyPodsInEnvironment() throws Exception {
     // given
-    when(k8sEnvironment.getPods()).thenReturn(emptyMap());
+    when(k8sEnvironment.getPodsCopy()).thenReturn(emptyMap());
 
     // when
     deployBrokerPhase.execute();
@@ -158,7 +158,7 @@ public class DeployBrokerTest {
           "Plugin broker environment must have only one pod\\. Workspace `workspaceId` contains `2` pods\\.")
   public void shouldThrowExceptionIfThereAreMoreThanOnePodsInEnvironment() throws Exception {
     // given
-    when(k8sEnvironment.getPods()).thenReturn(ImmutableMap.of("pod1", pod, "pod2", pod));
+    when(k8sEnvironment.getPodsCopy()).thenReturn(ImmutableMap.of("pod1", pod, "pod2", pod));
 
     // when
     deployBrokerPhase.execute();

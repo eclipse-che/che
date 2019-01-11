@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.openshift.api.model.Route;
 import java.util.HashMap;
@@ -63,13 +64,14 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
   public OpenShiftEnvironment(
       InternalEnvironment internalEnvironment,
       Map<String, Pod> pods,
+      Map<String, Deployment> deployments,
       Map<String, Service> services,
       Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> pvcs,
       Map<String, Secret> secrets,
       Map<String, ConfigMap> configMaps,
       Map<String, Route> routes) {
-    super(internalEnvironment, pods, services, ingresses, pvcs, secrets, configMaps);
+    super(internalEnvironment, pods, deployments, services, ingresses, pvcs, secrets, configMaps);
     setType(TYPE);
     this.routes = routes;
   }
@@ -79,13 +81,24 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
       Map<String, InternalMachineConfig> machines,
       List<Warning> warnings,
       Map<String, Pod> pods,
+      Map<String, Deployment> deployments,
       Map<String, Service> services,
       Map<String, Ingress> ingresses,
       Map<String, PersistentVolumeClaim> pvcs,
       Map<String, Secret> secrets,
       Map<String, ConfigMap> configMaps,
       Map<String, Route> routes) {
-    super(internalRecipe, machines, warnings, pods, services, ingresses, pvcs, secrets, configMaps);
+    super(
+        internalRecipe,
+        machines,
+        warnings,
+        pods,
+        deployments,
+        services,
+        ingresses,
+        pvcs,
+        secrets,
+        configMaps);
     setType(TYPE);
     this.routes = routes;
   }
@@ -134,6 +147,12 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
     }
 
     @Override
+    public Builder setDeployments(Map<String, Deployment> deployments) {
+      this.deployments.putAll(deployments);
+      return this;
+    }
+
+    @Override
     public Builder setServices(Map<String, Service> services) {
       this.services.putAll(services);
       return this;
@@ -176,7 +195,15 @@ public class OpenShiftEnvironment extends KubernetesEnvironment {
 
     public OpenShiftEnvironment build() {
       return new OpenShiftEnvironment(
-          internalEnvironment, pods, services, ingresses, pvcs, secrets, configMaps, routes);
+          internalEnvironment,
+          pods,
+          deployments,
+          services,
+          ingresses,
+          pvcs,
+          secrets,
+          configMaps,
+          routes);
     }
   }
 }

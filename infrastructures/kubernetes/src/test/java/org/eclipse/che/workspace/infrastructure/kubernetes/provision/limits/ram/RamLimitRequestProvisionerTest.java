@@ -20,7 +20,6 @@ import static org.testng.Assert.assertEquals;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
@@ -30,6 +29,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -54,7 +54,6 @@ public class RamLimitRequestProvisionerTest {
 
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private RuntimeIdentity identity;
-  @Mock private Pod pod;
   @Mock private InternalMachineConfig internalMachineConfig;
   @Mock private MemoryAttributeProvisioner memoryAttributeProvisioner;
 
@@ -68,7 +67,6 @@ public class RamLimitRequestProvisionerTest {
     ramProvisioner = new RamLimitRequestProvisioner(memoryAttributeProvisioner);
     container = new Container();
     container.setName(CONTAINER_NAME);
-    when(k8sEnv.getPods()).thenReturn(of(POD_NAME, pod));
     when(k8sEnv.getMachines()).thenReturn(of(MACHINE_NAME, internalMachineConfig));
     when(internalMachineConfig.getAttributes())
         .thenReturn(
@@ -79,10 +77,9 @@ public class RamLimitRequestProvisionerTest {
                 RAM_REQUEST_ATTRIBUTE));
     final ObjectMeta podMetadata = mock(ObjectMeta.class);
     when(podMetadata.getName()).thenReturn(POD_NAME);
-    when(pod.getMetadata()).thenReturn(podMetadata);
     final PodSpec podSpec = mock(PodSpec.class);
     when(podSpec.getContainers()).thenReturn(Collections.singletonList(container));
-    when(pod.getSpec()).thenReturn(podSpec);
+    when(k8sEnv.getPodsData()).thenReturn(of(POD_NAME, new PodData(podSpec, podMetadata)));
   }
 
   @Test

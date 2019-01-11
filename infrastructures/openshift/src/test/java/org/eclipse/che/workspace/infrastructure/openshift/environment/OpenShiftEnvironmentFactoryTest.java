@@ -17,8 +17,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
-import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.CONFIG_MAP_IGNORED_WARNING_CODE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.CONFIG_MAP_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.PVC_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.PVC_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.ROUTES_IGNORED_WARNING_MESSAGE;
@@ -38,6 +36,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.DoneableKubernetesList;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -47,9 +46,13 @@ import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PodTemplateSpec;
+import io.fabric8.kubernetes.api.model.PodTemplateSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
 import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
 import io.fabric8.openshift.api.model.Route;
@@ -164,18 +167,129 @@ public class OpenShiftEnvironmentFactoryTest {
   }
 
   @Test
-  public void ignoreConfigMapsWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> recipeObjects = singletonList(new ConfigMap());
+  public void addConfigMapsWhenRecipeContainsThem() throws Exception {
+    ConfigMap configMap =
+        new ConfigMapBuilder().withNewMetadata().withName("test-configmap").endMetadata().build();
+    final List<HasMetadata> recipeObjects = singletonList(configMap);
     when(validatedObjects.getItems()).thenReturn(recipeObjects);
 
     final KubernetesEnvironment parsed =
         osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertTrue(parsed.getConfigMaps().isEmpty());
-    assertEquals(parsed.getWarnings().size(), 1);
+    assertEquals(parsed.getConfigMaps().size(), 1);
     assertEquals(
-        parsed.getWarnings().get(0),
-        new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
+        parsed.getConfigMaps().values().iterator().next().getMetadata().getName(),
+        configMap.getMetadata().getName());
+  }
+
+  @Test
+  public void addPodsWhenRecipeContainsThem() throws Exception {
+    Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("pod-test")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+
+    final List<HasMetadata> recipeObjects = singletonList(pod);
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertEquals(parsed.getPodsCopy().size(), 1);
+    assertEquals(
+        parsed.getPodsCopy().values().iterator().next().getMetadata().getName(),
+        pod.getMetadata().getName());
+    assertEquals(parsed.getPodsData().size(), 1);
+    assertEquals(
+        parsed.getPodsData().values().iterator().next().getMetadata().getName(),
+        pod.getMetadata().getName());
+  }
+
+  @Test
+  public void addDeploymentsWhenRecipeContainsThem() throws Exception {
+    PodTemplateSpec podTemplate =
+        new PodTemplateSpecBuilder()
+            .withNewMetadata()
+            .withName("deployment-pod")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withNewMetadata()
+            .withName("deployment-test")
+            .endMetadata()
+            .withNewSpec()
+            .withTemplate(podTemplate)
+            .endSpec()
+            .build();
+
+    final List<HasMetadata> recipeObjects = singletonList(deployment);
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertEquals(parsed.getDeploymentsCopy().size(), 1);
+    assertEquals(
+        parsed.getDeploymentsCopy().values().iterator().next().getMetadata().getName(),
+        deployment.getMetadata().getName());
+    assertEquals(parsed.getPodsData().size(), 1);
+    assertEquals(
+        parsed.getPodsData().values().iterator().next().getMetadata().getName(),
+        podTemplate.getMetadata().getName());
+  }
+
+  @Test
+  public void bothPodsAndDeploymentsIncludedInPodData() throws Exception {
+    PodTemplateSpec podTemplate =
+        new PodTemplateSpecBuilder()
+            .withNewMetadata()
+            .withName("deployment-pod")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withNewMetadata()
+            .withName("deployment-test")
+            .endMetadata()
+            .withNewSpec()
+            .withTemplate(podTemplate)
+            .endSpec()
+            .build();
+    Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("bare-pod")
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    final List<HasMetadata> recipeObjects = asList(deployment, pod);
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertEquals(parsed.getPodsData().size(), 2);
+    assertTrue(
+        parsed
+            .getPodsData()
+            .values()
+            .stream()
+            .allMatch(
+                podData -> {
+                  String name = podData.getMetadata().getName();
+                  return name.equals(podTemplate.getMetadata().getName())
+                      || name.equals(pod.getMetadata().getName());
+                }));
   }
 
   @Test(

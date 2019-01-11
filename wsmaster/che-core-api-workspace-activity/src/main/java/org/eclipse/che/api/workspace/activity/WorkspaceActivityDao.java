@@ -103,6 +103,12 @@ public interface WorkspaceActivityDao {
       long timestamp, WorkspaceStatus status, int maxItems, long skipCount) throws ServerException;
 
   /**
+   * Similar to {@link #findInStatusSince(long, WorkspaceStatus, int, long)} but merely provides the
+   * caller with count of the workspaces in the given state, not their IDs.
+   */
+  long countWorkspacesInStatus(WorkspaceStatus status, long timestamp) throws ServerException;
+
+  /**
    * Returns the workspace activity record of the provided workspace.
    *
    * @param workspaceId the id of the workspace

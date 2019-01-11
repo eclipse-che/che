@@ -13,8 +13,8 @@
 
 import {KubernetesEnvironmentManager} from './kubernetes-environment-manager';
 import {IEnvironmentManagerMachine, IEnvironmentManagerMachineServer} from './environment-manager-machine';
-import {IPodList} from './kubernetes-environment-recipe-parser';
-import {IPodItem, IPodItemContainer} from './kubernetes-machine-recipe-parser';
+import {ISupportedItemList} from './kubernetes-environment-recipe-parser';
+import {IPodItem, IPodItemContainer, getPodItemOrNull, ISupportedListItem} from './kubernetes-machine-recipe-parser';
 import {CheRecipeTypes} from '../recipe/che-recipe-types';
 
 /**
@@ -104,11 +104,15 @@ describe('KubernetesEnvironmentManager', () => {
 
       let getEnvironmentSource = (environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): string => {
         const [podName, containerName] = machine.name.split(/\//);
-        const recipe: IPodList = jsyaml.load(environment.recipe.content);
-        const machinePodItem = recipe.items.find((machinePodItem: IPodItem) => {
+        const recipe: ISupportedItemList = jsyaml.load(environment.recipe.content);
+        const machinePodItem = getPodItemOrNull(recipe.items.find((item: ISupportedListItem) => {
+          const machinePodItem = getPodItemOrNull(item);
+          if (!machinePodItem) {
+            return false;
+          }
           const podItemName = machinePodItem.metadata.name ? machinePodItem.metadata.name : machinePodItem.metadata.generateName;
           return podItemName === podName;
-        });
+        }));
         const podContainer = machinePodItem.spec.containers.find((podContainer: IPodItemContainer) => {
           return podContainer.name === containerName;
         });
@@ -187,11 +191,16 @@ describe('KubernetesEnvironmentManager', () => {
       let getEnvironmentSource = (environment: che.IWorkspaceEnvironment, machine: IEnvironmentManagerMachine): string => {
         const podName = machine.recipe.metadata.name;
         const containerName = machine.recipe.spec.containers[0].name;
-        const recipe: IPodList = jsyaml.load(environment.recipe.content);
-        const machinePodItem = recipe.items.find((machinePodItem: IPodItem) => {
+        const recipe: ISupportedItemList = jsyaml.load(environment.recipe.content);
+        const machinePodItem = getPodItemOrNull(recipe.items.find((item: ISupportedListItem) => {
+          const machinePodItem = getPodItemOrNull(item);
+          if (!machinePodItem) {
+            return false;
+          }
           const podItemName = machinePodItem.metadata.name ? machinePodItem.metadata.name : machinePodItem.metadata.generateName;
           return podItemName === podName;
-        });
+        }));
+
         const podContainer = machinePodItem.spec.containers.find((podContainer: IPodItemContainer) => {
           return podContainer.name === containerName;
         });

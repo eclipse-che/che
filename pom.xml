@@ -41,6 +41,7 @@
         <module>assembly</module>
         <module>selenium</module>
         <module>dockerfiles</module>
+        <module>typescript-dto</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
@@ -434,6 +435,11 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-logger-shared</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-metrics</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>

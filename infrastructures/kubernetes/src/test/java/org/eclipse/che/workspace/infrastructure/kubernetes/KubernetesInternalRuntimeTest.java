@@ -53,12 +53,14 @@ import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.IntOrStringBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodSpec;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.ServiceSpec;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
@@ -215,6 +217,14 @@ public class KubernetesInternalRuntimeTest {
                   mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
                   mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
 
+  private final ImmutableMap<String, Deployment> deploymentsMap =
+      ImmutableMap.of(
+          WORKSPACE_POD_NAME,
+          mockDeployment(
+              ImmutableList.of(
+                  mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1),
+                  mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
+
   @Mock(answer = Answers.RETURNS_MOCKS)
   private OptionalTracer tracer;
 
@@ -279,10 +289,10 @@ public class KubernetesInternalRuntimeTest {
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(ingresses.wait(anyString(), anyLong(), any(), any())).thenReturn(ingress);
-    when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(deployments.deploy(any(Pod.class))).thenAnswer(a -> a.getArguments()[0]);
     when(k8sEnv.getServices()).thenReturn(allServices);
     when(k8sEnv.getIngresses()).thenReturn(allIngresses);
-    when(k8sEnv.getPods()).thenReturn(podsMap);
+    when(k8sEnv.getPodsCopy()).thenReturn(podsMap);
     when(k8sEnv.getCommands()).thenReturn(new ArrayList<>(singletonList(envCommand)));
 
     when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
@@ -376,7 +386,7 @@ public class KubernetesInternalRuntimeTest {
     verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
     verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
     verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(secrets).create(any());
@@ -387,6 +397,86 @@ public class KubernetesInternalRuntimeTest {
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
         new MachineStatusEvent[] {newEvent(M2_NAME, STARTING), newEvent(M2_NAME, RUNNING)});
+    verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
+    verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
+    verify(serversChecker, times(2)).startAsync(any());
+    verify(namespace.deployments(), times(1)).stopWatch();
+  }
+
+  @Test
+  public void startKubernetesEnvironmentWithDeploymentsInsteadOfPods() throws Exception {
+    when(k8sEnv.getPodsCopy()).thenReturn(emptyMap());
+    when(k8sEnv.getDeploymentsCopy()).thenReturn(deploymentsMap);
+    when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
+    when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
+    when(deployments.deploy(any(Deployment.class)))
+        .thenAnswer(
+            a -> {
+              Deployment deployment = (Deployment) a.getArguments()[0];
+              return new PodBuilder()
+                  .withMetadata(deployment.getSpec().getTemplate().getMetadata())
+                  .withSpec(deployment.getSpec().getTemplate().getSpec())
+                  .build();
+            });
+
+    internalRuntime.start(emptyMap());
+
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
+    verify(deployments).deploy(any(Deployment.class));
+    verify(ingresses).create(any());
+    verify(services).create(any());
+    verify(secrets).create(any());
+    verify(configMaps).create(any());
+    verify(namespace.deployments(), times(1)).watchEvents(any());
+    verify(bootstrapper, times(2)).bootstrapAsync();
+    verify(eventService, times(4)).publish(any());
+    verifyOrderedEventsChains(
+        new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
+        new MachineStatusEvent[] {newEvent(M2_NAME, STARTING), newEvent(M2_NAME, RUNNING)});
+    verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
+    verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
+    verify(serversChecker, times(2)).startAsync(any());
+    verify(namespace.deployments(), times(1)).stopWatch();
+  }
+
+  @Test
+  public void startKubernetesEnvironmentWithDeploymentsAndPods() throws Exception {
+    when(k8sEnv.getDeploymentsCopy()).thenReturn(deploymentsMap);
+    when(k8sEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
+    when(k8sEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
+    when(deployments.deploy(any(Deployment.class)))
+        .thenAnswer(
+            a -> {
+              Deployment deployment = (Deployment) a.getArguments()[0];
+              return new PodBuilder()
+                  .withMetadata(deployment.getSpec().getTemplate().getMetadata())
+                  .withSpec(deployment.getSpec().getTemplate().getSpec())
+                  .build();
+            });
+
+    internalRuntime.start(emptyMap());
+
+    verify(toolingProvisioner).provision(IDENTITY, startSynchronizer, k8sEnv);
+    verify(internalEnvironmentProvisioner).provision(IDENTITY, k8sEnv);
+    verify(kubernetesEnvironmentProvisioner).provision(k8sEnv, IDENTITY);
+    verify(deployments).deploy(any(Deployment.class));
+    verify(deployments).deploy(any(Pod.class));
+    verify(ingresses).create(any());
+    verify(services).create(any());
+    verify(secrets).create(any());
+    verify(configMaps).create(any());
+    verify(namespace.deployments(), times(1)).watchEvents(any());
+    verify(bootstrapper, times(2)).bootstrapAsync();
+    verify(eventService, times(6)).publish(any());
+    verifyOrderedEventsChains(
+        new MachineStatusEvent[] {
+          newEvent(M1_NAME, STARTING), newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)
+        },
+        new MachineStatusEvent[] {
+          newEvent(M2_NAME, STARTING), newEvent(M2_NAME, STARTING), newEvent(M2_NAME, RUNNING)
+        });
     verify(serverCheckerFactory).create(IDENTITY, M1_NAME, emptyMap());
     verify(serverCheckerFactory).create(IDENTITY, M2_NAME, emptyMap());
     verify(serversChecker, times(2)).startAsync(any());
@@ -433,7 +523,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(namespace.deployments(), times(2)).watchEvents(any());
@@ -454,7 +544,7 @@ public class KubernetesInternalRuntimeTest {
 
     internalRuntime.start(emptyMap());
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(namespace.deployments(), times(1)).watchEvents(any());
@@ -492,13 +582,13 @@ public class KubernetesInternalRuntimeTest {
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
-    when(k8sEnv.getPods()).thenReturn(allPods);
+    when(k8sEnv.getPodsCopy()).thenReturn(allPods);
     doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
 
     try {
       internalRuntime.start(emptyMap());
     } catch (Exception rethrow) {
-      verify(deployments).deploy(any());
+      verify(deployments).deploy(any(Pod.class));
       verify(ingresses).create(any());
       verify(services).create(any());
       verify(bootstrapper, atLeastOnce()).bootstrapAsync();
@@ -844,16 +934,45 @@ public class KubernetesInternalRuntimeTest {
   }
 
   private static Pod mockPod(List<Container> containers) {
-    final Pod pod = mock(Pod.class);
-    final PodSpec spec = mock(PodSpec.class);
-    mockName(WORKSPACE_POD_NAME, pod);
-    when(spec.getContainers()).thenReturn(containers);
-    when(pod.getSpec()).thenReturn(spec);
-    when(pod.getMetadata().getLabels())
-        .thenReturn(
-            ImmutableMap.of(
-                POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME));
+    final Pod pod =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName(WORKSPACE_POD_NAME)
+            .withLabels(
+                ImmutableMap.of(
+                    POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME))
+            .endMetadata()
+            .withNewSpec()
+            .withContainers(containers)
+            .endSpec()
+            .build();
     return pod;
+  }
+
+  private static Deployment mockDeployment(List<Container> containers) {
+    final Deployment deployment =
+        new DeploymentBuilder()
+            .withNewMetadata()
+            .withName(WORKSPACE_POD_NAME)
+            .withLabels(
+                ImmutableMap.of(
+                    POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME))
+            .endMetadata()
+            .withNewSpec()
+            .withNewTemplate()
+            .withNewSpec()
+            .withContainers(containers)
+            .endSpec()
+            .withNewMetadata()
+            .withName(WORKSPACE_POD_NAME)
+            .withLabels(
+                ImmutableMap.of(
+                    POD_SELECTOR, WORKSPACE_POD_NAME, CHE_ORIGINAL_NAME_LABEL, WORKSPACE_POD_NAME))
+            .endMetadata()
+            .endTemplate()
+            .endSpec()
+            .build();
+    return deployment;
   }
 
   private static Service mockService() {

@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -48,10 +49,10 @@ public class KubernetesEnvironmentValidatorTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Environment should contain at least 1 pod")
+      expectedExceptionsMessageRegExp = "Environment should contain at least 1 pod or deployment")
   public void shouldThrowExceptionWhenEnvDoesNotHaveAnyPods() throws Exception {
     // given
-    when(kubernetesEnvironment.getPods()).thenReturn(emptyMap());
+    when(kubernetesEnvironment.getPodsData()).thenReturn(emptyMap());
 
     // when
     environmentValidator.validate(kubernetesEnvironment);
@@ -64,10 +65,12 @@ public class KubernetesEnvironmentValidatorTest {
   public void shouldThrowExceptionWhenMachineIsDeclaredButThereIsNotContainerInKubernetesRecipe()
       throws Exception {
     // given
+    String podName = "pod1";
     Pod pod = createPod("pod1", "main");
-    when(kubernetesEnvironment.getPods()).thenReturn(ImmutableMap.of("pod1", pod));
+    PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
+    when(kubernetesEnvironment.getPodsData()).thenReturn(ImmutableMap.of(podName, podData));
     when(kubernetesEnvironment.getMachines())
-        .thenReturn(ImmutableMap.of("pod1/db", mock(InternalMachineConfig.class)));
+        .thenReturn(ImmutableMap.of(podName + "/db", mock(InternalMachineConfig.class)));
 
     // when
     environmentValidator.validate(kubernetesEnvironment);

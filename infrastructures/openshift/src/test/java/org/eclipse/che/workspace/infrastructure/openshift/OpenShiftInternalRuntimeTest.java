@@ -213,10 +213,10 @@ public class OpenShiftInternalRuntimeTest {
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container)));
     when(services.create(any())).thenAnswer(a -> a.getArguments()[0]);
     when(routes.create(any())).thenAnswer(a -> a.getArguments()[0]);
-    when(deployments.deploy(any())).thenAnswer(a -> a.getArguments()[0]);
+    when(deployments.deploy(any(Pod.class))).thenAnswer(a -> a.getArguments()[0]);
     when(osEnv.getServices()).thenReturn(allServices);
     when(osEnv.getRoutes()).thenReturn(allRoutes);
-    when(osEnv.getPods()).thenReturn(allPods);
+    when(osEnv.getPodsCopy()).thenReturn(allPods);
     when(osEnv.getSecrets()).thenReturn(ImmutableMap.of("secret", new Secret()));
     when(osEnv.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", new ConfigMap()));
   }
@@ -227,12 +227,12 @@ public class OpenShiftInternalRuntimeTest {
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
-    when(osEnv.getPods()).thenReturn(allPods);
+    when(osEnv.getPodsCopy()).thenReturn(allPods);
     when(unrecoverablePodEventListenerFactory.isConfigured()).thenReturn(true);
 
     internalRuntime.startMachines();
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(routes).create(any());
     verify(services).create(any());
     verify(secrets).create(any());
@@ -250,11 +250,11 @@ public class OpenShiftInternalRuntimeTest {
     final Container container2 = mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT);
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(POD_NAME, mockPod(ImmutableList.of(container1, container2)));
-    when(osEnv.getPods()).thenReturn(allPods);
+    when(osEnv.getPodsCopy()).thenReturn(allPods);
 
     internalRuntime.startMachines();
 
-    verify(deployments).deploy(any());
+    verify(deployments).deploy(any(Pod.class));
     verify(routes).create(any());
     verify(services).create(any());
 

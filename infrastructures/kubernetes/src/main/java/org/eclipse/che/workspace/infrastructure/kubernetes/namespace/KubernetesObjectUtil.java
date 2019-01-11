@@ -45,6 +45,11 @@ public class KubernetesObjectUtil {
       target.setMetadata(metadata = new ObjectMeta());
     }
 
+    putLabel(target.getMetadata(), key, value);
+  }
+
+  /** Adds label to target Kubernetes object. */
+  public static void putLabel(ObjectMeta metadata, String key, String value) {
     Map<String, String> labels = metadata.getLabels();
     if (labels == null) {
       metadata.setLabels(labels = new HashMap<>());

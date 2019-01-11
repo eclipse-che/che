@@ -33,10 +33,5 @@ public final class Warnings {
   public static final String SECRET_IGNORED_WARNING_MESSAGE =
       "Secrets specified in OpenShift recipe are ignored.";
 
-  public static final int CONFIG_MAP_IGNORED_WARNING_CODE =
-      org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.CONFIG_MAP_IGNORED_WARNING_CODE;
-  public static final String CONFIG_MAP_IGNORED_WARNING_MESSAGE =
-      "Config maps specified in OpenShift recipe are ignored.";
-
   private Warnings() {}
 }
