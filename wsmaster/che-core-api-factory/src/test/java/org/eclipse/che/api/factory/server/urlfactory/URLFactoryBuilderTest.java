@@ -105,7 +105,7 @@ public class URLFactoryBuilderTest {
   }
 
   @Test
-  public void checkWithCustomDevfile() throws Exception {
+  public void checkWithCustomDevfileAndRecipe() throws Exception {
 
     Devfile devfile = new Devfile();
     WorkspaceConfigImpl workspaceConfigImpl = new WorkspaceConfigImpl();
