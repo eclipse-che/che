@@ -318,7 +318,7 @@ public class KubernetesEnvironmentFactoryTest {
     final KubernetesEnvironment parsed =
         k8sEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertFalse(parsed.getPods().isEmpty());
+    assertFalse(parsed.getPodsData().isEmpty());
     assertEquals(parsed.getWarnings().size(), 0);
   }
 

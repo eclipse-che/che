@@ -317,7 +317,7 @@ public class OpenShiftEnvironmentFactoryTest {
     final KubernetesEnvironment parsed =
         osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertFalse(parsed.getPods().isEmpty());
+    assertFalse(parsed.getPodsData().isEmpty());
     assertEquals(parsed.getWarnings().size(), 0);
   }
 
