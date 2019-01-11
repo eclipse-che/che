@@ -11,16 +11,18 @@
  */
 package org.eclipse.che.api.factory.server.urlfactory;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import com.google.common.base.Strings;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -31,8 +33,11 @@ import org.eclipse.che.api.devfile.server.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -47,6 +52,7 @@ public class URLFactoryBuilder {
   private final String defaultCheEditor;
   private final String defaultChePlugins;
 
+  private final DevfileEnvironmentFactory devfileEnvironmentFactory;
   private final URLFetcher urlFetcher;
   private final DevfileManager devfileManager;
 
@@ -54,10 +60,12 @@ public class URLFactoryBuilder {
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
+      DevfileEnvironmentFactory devfileEnvironmentFactory,
       URLFetcher urlFetcher,
       DevfileManager devfileManager) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
+    this.devfileEnvironmentFactory = devfileEnvironmentFactory;
     this.urlFetcher = urlFetcher;
     this.devfileManager = devfileManager;
   }
@@ -72,7 +80,7 @@ public class URLFactoryBuilder {
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
       final String factoryJsonContent = urlFetcher.fetch(jsonFileLocation);
-      if (!Strings.isNullOrEmpty(factoryJsonContent)) {
+      if (!isNullOrEmpty(factoryJsonContent)) {
         return Optional.of(
             DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class));
       }
@@ -84,20 +92,29 @@ public class URLFactoryBuilder {
    * Build a factory using the provided devfile
    *
    * @param devfileLocation location of devfile
+   * @param fileUrlProvider optional service-specific provider of URL's to the file raw content
    * @return a factory or null if devfile is not found
    */
-  public Optional<FactoryDto> createFactoryFromDevfile(String devfileLocation)
+  public Optional<FactoryDto> createFactoryFromDevfile(
+      String devfileLocation, @Nullable Function<String, String> fileUrlProvider)
       throws BadRequestException, ServerException {
     if (devfileLocation == null) {
       return Optional.empty();
     }
     final String devfileYamlContent = urlFetcher.fetch(devfileLocation);
-    if (Strings.isNullOrEmpty(devfileYamlContent)) {
+    if (isNullOrEmpty(devfileYamlContent)) {
       return Optional.empty();
     }
     try {
       Devfile devfile = devfileManager.parse(devfileYamlContent, false);
+      Optional<Pair<String, EnvironmentImpl>> environmentPair =
+          devfileEnvironmentFactory.create(devfile, fileUrlProvider);
       WorkspaceConfigImpl wsConfig = devfileManager.createWorkspaceConfig(devfile);
+      if (environmentPair.isPresent()) {
+        final String environmentName = environmentPair.get().first;
+        wsConfig.setDefaultEnv(environmentName);
+        wsConfig.setEnvironments(singletonMap(environmentName, environmentPair.get().second));
+      }
       return Optional.of(
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)

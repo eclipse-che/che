@@ -52,7 +52,7 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
       throws BadRequestException, ServerException {
     // create factory from the following devfile location
     return urlFactoryBuilder
-        .createFactoryFromDevfile(factoryParameters.get(URL_PARAMETER_NAME))
+        .createFactoryFromDevfile(factoryParameters.get(URL_PARAMETER_NAME), null)
         .orElse(null);
   }
 }

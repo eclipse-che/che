@@ -139,10 +139,6 @@ export class StackValidationService {
     // add machines validation
     let machines = environment.machines;
     let keys: Array<string> = machines ? Object.keys(machines) : [];
-    if (keys.length === 0) {
-      isValid = false;
-      errors.push('The machine is empty.');
-    }
     keys.forEach((key: string) => {
       let machine: che.IEnvironmentMachine = environment.machines[key];
       let machineValidation: che.IValidation = this.getMachineValidation(machine);
