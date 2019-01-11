@@ -109,6 +109,10 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     boolean isAnyRoutePresent = false;
     boolean isAnySecretPresent = false;
     for (HasMetadata object : list.getItems()) {
+      checkNotNull(object.getKind(), "Environment contains object without specified kind field");
+      checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
+      checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
+
       if (object instanceof DeploymentConfig) {
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
       } else if (object instanceof Pod) {
@@ -190,6 +194,13 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {
     if (object == null) {
       throw new ValidationException(errorMessage);
+    }
+  }
+
+  private void checkNotNull(Object object, String messageFmt, Object... messageArguments)
+      throws ValidationException {
+    if (object == null) {
+      throw new ValidationException(format(messageFmt, messageArguments));
     }
   }
 }

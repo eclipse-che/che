@@ -27,7 +27,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -40,6 +39,7 @@ import io.fabric8.kubernetes.api.model.DoneableKubernetesList;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -49,14 +49,14 @@ import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.PodTemplateSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
-import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
 import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
-import io.fabric8.openshift.api.model.Route;
+import io.fabric8.openshift.api.model.RouteBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -160,7 +160,10 @@ public class OpenShiftEnvironmentFactoryTest {
 
   @Test
   public void ignoreRoutesWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> objects = asList(new Route(), new Route());
+    final List<HasMetadata> objects =
+        asList(
+            new RouteBuilder().withNewMetadata().withName("route1").endMetadata().build(),
+            new RouteBuilder().withNewMetadata().withName("route2").endMetadata().build());
     when(parsedList.getItems()).thenReturn(objects);
 
     final OpenShiftEnvironment parsed =
@@ -175,7 +178,9 @@ public class OpenShiftEnvironmentFactoryTest {
 
   @Test
   public void ignoreSecretsWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> recipeObjects = singletonList(new Secret());
+    final List<HasMetadata> recipeObjects =
+        singletonList(
+            new SecretBuilder().withNewMetadata().withName("secret").endMetadata().build());
     when(parsedList.getItems()).thenReturn(recipeObjects);
 
     final OpenShiftEnvironment parsed =
@@ -313,31 +318,37 @@ public class OpenShiftEnvironmentFactoryTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Pod metadata must not be null")
-  public void exceptionOnPodWithNoMetadata() throws Exception {
-    final List<HasMetadata> recipeObjects = singletonList(new PodBuilder().build());
-    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+      expectedExceptionsMessageRegExp = "Environment contains object without specified kind field")
+  public void exceptionOnObjectWithNoKindSpecified() throws Exception {
+    HasMetadata object = mock(HasMetadata.class);
+    when(object.getKind()).thenReturn(null);
+    when(parsedList.getItems()).thenReturn(singletonList(object));
 
-    osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+    osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
 
-  @Test
-  public void createdPod() throws Exception {
-    final List<HasMetadata> recipeObjects =
-        singletonList(
-            new PodBuilder()
-                .withNewMetadata()
-                .withName("test")
-                .endMetadata()
-                .withSpec(new PodSpec())
-                .build());
-    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "MyObject metadata must not be null")
+  public void exceptionOnObjectWithNoMetadataSpecified() throws Exception {
+    HasMetadata object = mock(HasMetadata.class);
+    when(object.getKind()).thenReturn("MyObject");
+    when(object.getMetadata()).thenReturn(null);
+    when(parsedList.getItems()).thenReturn(singletonList(object));
 
-    final KubernetesEnvironment parsed =
-        osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+    osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+  }
 
-    assertFalse(parsed.getPodsData().isEmpty());
-    assertEquals(parsed.getWarnings().size(), 0);
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "MyObject name must not be null")
+  public void exceptionOnObjectWithNoNameSpecified() throws Exception {
+    HasMetadata object = mock(HasMetadata.class);
+    when(object.getKind()).thenReturn("MyObject");
+    when(object.getMetadata()).thenReturn(new ObjectMetaBuilder().withName(null).build());
+    when(parsedList.getItems()).thenReturn(singletonList(object));
+
+    osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
 
   @Test
