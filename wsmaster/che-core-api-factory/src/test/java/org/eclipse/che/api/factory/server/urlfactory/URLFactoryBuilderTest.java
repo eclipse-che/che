@@ -124,9 +124,9 @@ public class URLFactoryBuilderTest {
     FactoryDto factory =
         urlFactoryBuilder.createFactoryFromDevfile(myLocation, s -> myLocation + ".list").get();
 
-    WorkspaceConfigDto expectedWorkspaceConfigImpl = asDto(workspaceConfigImpl);
-    expectedWorkspaceConfigImpl.setDefaultEnv("name");
-    expectedWorkspaceConfigImpl.setEnvironments(singletonMap("name", asDto(expectedEnv)));
-    assertEquals(factory.getWorkspace(), expectedWorkspaceConfigImpl);
+    WorkspaceConfigDto expectedWorkspaceConfig = asDto(workspaceConfigImpl);
+    expectedWorkspaceConfig.setDefaultEnv("name");
+    expectedWorkspaceConfig.setEnvironments(singletonMap("name", asDto(expectedEnv)));
+    assertEquals(factory.getWorkspace(), expectedWorkspaceConfig);
   }
 }
