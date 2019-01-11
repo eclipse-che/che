@@ -178,7 +178,8 @@ public class OpenShiftEnvironmentFactoryTest {
         new WarningImpl(CONFIG_MAP_IGNORED_WARNING_CODE, CONFIG_MAP_IGNORED_WARNING_MESSAGE));
   }
 
-  @Test(expectedExceptions = ValidationException.class,
+  @Test(
+      expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp = "Pod metadata must not be null")
   public void exceptionOnPodWithNoMetadata() throws Exception {
     final List<HasMetadata> recipeObjects = singletonList(new PodBuilder().build());
@@ -189,8 +190,9 @@ public class OpenShiftEnvironmentFactoryTest {
 
   @Test
   public void createdPod() throws Exception {
-    final List<HasMetadata> recipeObjects = singletonList(
-        new PodBuilder().withMetadata(new ObjectMeta()).withSpec(new PodSpec()).build());
+    final List<HasMetadata> recipeObjects =
+        singletonList(
+            new PodBuilder().withMetadata(new ObjectMeta()).withSpec(new PodSpec()).build());
     when(validatedObjects.getItems()).thenReturn(recipeObjects);
 
     final KubernetesEnvironment parsed =
