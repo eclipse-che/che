@@ -112,6 +112,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       } else if (object instanceof Pod) {
         Pod pod = (Pod) object;
         checkNotNull(pod.getMetadata(), "Pod metadata must not be null");
+        checkNotNull(pod.getMetadata().getName(), "Pod metadata name must not be null");
         pods.put(pod.getMetadata().getName(), pod);
       } else if (object instanceof Service) {
         Service service = (Service) object;
