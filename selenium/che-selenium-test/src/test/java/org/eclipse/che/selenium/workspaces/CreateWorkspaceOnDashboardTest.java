@@ -42,7 +42,7 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceOnDashboardTest {
 
   private static final String WS_NAME = generate("workspace", 4);
-  private static final String PROJECT_NAME = "web-java-spring";
+  protected static final String PROJECT_NAME = "test-project";
   private static final String PATH_TO_EXPAND = "/src/main/java/org.eclipse.che.examples";
   private static final String PATH_JAVA_FILE =
       PROJECT_NAME + "/src/main/java/org/eclipse/che/examples/GreetingController.java";
@@ -50,14 +50,14 @@ public class CreateWorkspaceOnDashboardTest {
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
-  @Inject private ProjectExplorer projectExplorer;
+  @Inject protected ProjectExplorer projectExplorer;
   @Inject private NewWorkspace newWorkspace;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private ToastLoader toastLoader;
   @Inject private Workspaces workspaces;
-  @Inject private CodenvyEditor editor;
+  @Inject protected CodenvyEditor editor;
   @Inject private Dashboard dashboard;
-  @Inject private Wizard wizard;
+  @Inject protected Wizard wizard;
   @Inject private Menu menu;
   @Inject private Ide ide;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
@@ -96,7 +96,7 @@ public class CreateWorkspaceOnDashboardTest {
 
     // Import the "web-java-spring" project
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
-    wizard.selectProjectAndCreate(WEB_JAVA_SPRING, PROJECT_NAME);
+    selectSampleProject();
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
     // wait that type of the added project folder has PROJECT FOLDER status
@@ -105,13 +105,29 @@ public class CreateWorkspaceOnDashboardTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // open a file in the Editor
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + PATH_TO_EXPAND);
-    projectExplorer.openItemByPath(PATH_JAVA_FILE);
+    expandPathInProjectExplorer();
+    openItemByPath();
     editor.waitActive();
-    editor.waitTabIsPresent("GreetingController");
+    waitTabIsPresent();
 
     // stop the workspace
     menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
+  }
+
+  protected void selectSampleProject() {
+    wizard.selectProjectAndCreate(WEB_JAVA_SPRING, PROJECT_NAME);
+  }
+
+  protected void expandPathInProjectExplorer() {
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + PATH_TO_EXPAND);
+  }
+
+  protected void openItemByPath() {
+    projectExplorer.openItemByPath(PATH_JAVA_FILE);
+  }
+
+  protected void waitTabIsPresent() {
+    editor.waitTabIsPresent("GreetingController");
   }
 }

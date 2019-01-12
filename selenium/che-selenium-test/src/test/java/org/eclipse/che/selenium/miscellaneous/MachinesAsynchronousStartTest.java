@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.SAVE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.MACHINES;
@@ -20,7 +21,6 @@ import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspace
 import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -40,15 +40,16 @@ import org.testng.annotations.Test;
 
 @Test(groups = OPENSHIFT)
 public class MachinesAsynchronousStartTest {
-  private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
+  private static final String WORKSPACE_NAME = generate("test-workspace-", 4);
   private static final String MACHINE_NAME = "dev-machine";
-  private static final String IMAGE_NAME = "eclipse/ubuntu_jdk8";
-  private static final String IMAGE_NAME_SUFFIX = NameGenerator.generate("", 4);
-  private static final String NOT_EXISTED_IMAGE_NAME = IMAGE_NAME + IMAGE_NAME_SUFFIX;
+  private static final String IMAGE_NAME_SUFFIX = generate("-", 4);
   private static final String SUCCESS_NOTIFICATION_TEST = "Workspace updated.";
   private static final String GET_WORKSPACE_EVENTS_COMMAND_TEMPLATE =
       "get event --no-headers=true | grep %s | awk '{print $7 \" \" $8}'";
-  private static final String EXPECTED_ERROR_NOTIFICATION_TEXT =
+
+  private final String IMAGE_NAME = getImageName();
+  protected final String NOT_EXISTED_IMAGE_NAME = IMAGE_NAME + IMAGE_NAME_SUFFIX;
+  private final String EXPECTED_ERROR_NOTIFICATION_TEXT =
       format(
           "Unrecoverable event occurred: 'Failed', 'Failed to pull image \"%s\": "
               + "rpc error: code = Unknown desc = Error response from daemon: pull "
@@ -56,7 +57,7 @@ public class MachinesAsynchronousStartTest {
           NOT_EXISTED_IMAGE_NAME, NOT_EXISTED_IMAGE_NAME);
 
   @Inject private Dashboard dashboard;
-  @Inject private Workspaces workspaces;
+  @Inject protected Workspaces workspaces;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestWorkspaceServiceClient testWorkspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
@@ -118,7 +119,7 @@ public class MachinesAsynchronousStartTest {
   public void checkWorkspace() {
     // check behavior of the broken workspace
     workspaces.clickOnWorkspaceStopStartButton(WORKSPACE_NAME);
-    workspaces.waitErrorNotificationContainsText(EXPECTED_ERROR_NOTIFICATION_TEXT);
+    waitErrorNotificationContainsText();
 
     // check openshift events log
     waitEvent("Failed");
@@ -148,5 +149,13 @@ public class MachinesAsynchronousStartTest {
     webDriverWaitFactory
         .get(timeoutInSeconds, delayBetweenRequestsInSeconds)
         .until((ExpectedCondition<Boolean>) driver -> eventIsPresent(event));
+  }
+
+  protected String getImageName() {
+    return "eclipse/ubuntu_jdk8";
+  }
+
+  protected void waitErrorNotificationContainsText() {
+    workspaces.waitErrorNotificationContainsText(EXPECTED_ERROR_NOTIFICATION_TEXT);
   }
 }

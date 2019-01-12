@@ -37,18 +37,18 @@ import org.testng.annotations.Test;
  * @author Aleksandr Shmaraev
  */
 public class ResolveDependencyAfterRecreateProjectTest {
-  private static final String PROJECT_NAME1 = generate("project1", 4);
-  private static final String PROJECT_NAME2 = generate("project2", 4);
+  protected static final String PROJECT_NAME1 = generate("project1", 4);
+  protected static final String PROJECT_NAME2 = generate("project2", 4);
   private static final String PATH_TO_EXPAND = "/src/main/java/org.eclipse.che.examples";
   private static final String PATH_TO_FILE =
       "/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
+  @Inject protected ProjectExplorer projectExplorer;
   @Inject private CodenvyEditor editor;
   @Inject private Menu menu;
-  @Inject private Wizard wizard;
+  @Inject protected Wizard wizard;
   @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private AskDialog askDialog;
@@ -64,8 +64,8 @@ public class ResolveDependencyAfterRecreateProjectTest {
     createProjectFromUI(PROJECT_NAME1);
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME1);
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME1 + PATH_TO_EXPAND);
-    projectExplorer.openItemByPath(PROJECT_NAME1 + PATH_TO_FILE);
+    expandPathInProjectExplorer(PROJECT_NAME1);
+    openItemByPath(PROJECT_NAME1);
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
 
@@ -73,8 +73,8 @@ public class ResolveDependencyAfterRecreateProjectTest {
     createProjectFromUI(PROJECT_NAME2);
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME2);
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME2 + PATH_TO_EXPAND);
-    projectExplorer.openItemByPath(PROJECT_NAME2 + PATH_TO_FILE);
+    expandPathInProjectExplorer(PROJECT_NAME2);
+    openItemByPath(PROJECT_NAME2);
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
   }
@@ -96,7 +96,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
   private void createProjectFromUI(String nameOfTheProject) {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectTypeProject(MAVEN);
-    wizard.selectSample(WEB_JAVA_SPRING);
+    selectSampleProject();
     wizard.typeProjectNameOnWizard(nameOfTheProject);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
@@ -104,5 +104,17 @@ public class ResolveDependencyAfterRecreateProjectTest {
     projectExplorer.waitItem(nameOfTheProject);
     mavenPluginStatusBar.waitClosingInfoPanel();
     notificationsPopupPanel.waitProgressPopupPanelClose();
+  }
+
+  protected void selectSampleProject() {
+    wizard.selectSample(WEB_JAVA_SPRING);
+  }
+
+  protected void expandPathInProjectExplorer(String projectName) {
+    projectExplorer.expandPathInProjectExplorer(projectName + PATH_TO_EXPAND);
+  }
+
+  protected void openItemByPath(String projectName) {
+    projectExplorer.openItemByPath(projectName + PATH_TO_FILE);
   }
 }
