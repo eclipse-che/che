@@ -16,6 +16,7 @@ package org.eclipse.che.core.db.schema;
  *
  * @author Yevhenii Voevodin
  */
+@SuppressWarnings("serial")
 public class SchemaInitializationException extends Exception {
 
   public SchemaInitializationException(String message, Throwable cause) {

@@ -19,6 +19,7 @@ import org.eclipse.che.core.db.DBErrorCode;
  *
  * @author Yevhenii Voevodin
  */
+@SuppressWarnings("serial")
 public class DetailedRollbackException extends RollbackException {
 
   private DBErrorCode code;

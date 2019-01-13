@@ -16,6 +16,7 @@ package org.eclipse.che.api.installer.server.exception;
  *
  * @author Anatoliy Bazko
  */
+@SuppressWarnings("serial")
 public class InstallerException extends Exception {
   public InstallerException(String message) {
     super(message);

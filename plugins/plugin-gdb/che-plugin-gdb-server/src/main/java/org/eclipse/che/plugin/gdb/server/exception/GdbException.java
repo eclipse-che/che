@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.gdb.server.exception;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 
 /** @author Anatoliy Bazko */
+@SuppressWarnings("serial")
 public class GdbException extends DebuggerException {
   public GdbException(String message) {
     super(message);

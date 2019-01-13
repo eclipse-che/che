@@ -25,6 +25,7 @@ import org.eclipse.che.multiuser.resource.model.Resource;
  *
  * @author Sergii Leschenko
  */
+@SuppressWarnings("serial")
 public class NoEnoughResourcesException extends Exception {
   private static final String MESSAGE =
       "Account has %s resources to use, but operation requires %s. It requires more %s.";

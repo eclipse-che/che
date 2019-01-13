@@ -20,6 +20,7 @@ import org.eclipse.che.core.db.DBErrorCode;
  * @author Anton Korneta
  * @see DBErrorCode#INTEGRITY_CONSTRAINT_VIOLATION
  */
+@SuppressWarnings("serial")
 public class IntegrityConstraintViolationException extends DetailedRollbackException {
 
   public IntegrityConstraintViolationException(String message, Throwable cause) {

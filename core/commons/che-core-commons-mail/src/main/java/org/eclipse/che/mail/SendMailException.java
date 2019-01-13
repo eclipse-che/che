@@ -12,6 +12,7 @@
 package org.eclipse.che.mail;
 
 /** Exception happened during mail sending * */
+@SuppressWarnings("serial")
 public class SendMailException extends Exception {
 
   public SendMailException(String message, Throwable cause) {

@@ -16,6 +16,7 @@ package org.eclipse.che.infrastructure.docker.client.exception;
  *
  * @author Anton Korneta
  */
+@SuppressWarnings("serial")
 public class ImageNotFoundException extends DockerException {
 
   public ImageNotFoundException(String message) {

@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.nodejsdbg.server.exception;
 import org.eclipse.che.api.debugger.server.exceptions.DebuggerException;
 
 /** @author Anatoliy Bazko */
+@SuppressWarnings("serial")
 public class NodeJsDebuggerException extends DebuggerException {
   public NodeJsDebuggerException(String message) {
     super(message);

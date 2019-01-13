@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
  *
  * @author Stéphane Daviet
  */
+@SuppressWarnings("serial")
 public class DockerFileException extends ApiException {
   public DockerFileException(ServiceError serviceError) {
     super(serviceError);

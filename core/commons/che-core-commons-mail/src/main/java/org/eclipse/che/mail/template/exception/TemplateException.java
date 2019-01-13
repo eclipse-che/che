@@ -16,6 +16,7 @@ package org.eclipse.che.mail.template.exception;
  *
  * @author Sergii Leshchenko
  */
+@SuppressWarnings("serial")
 public class TemplateException extends Exception {
 
   public TemplateException(String message) {

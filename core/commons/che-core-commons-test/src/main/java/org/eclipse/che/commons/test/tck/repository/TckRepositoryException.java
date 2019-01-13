@@ -20,6 +20,7 @@ import java.util.Collection;
  *
  * @author Yevhenii Voevodin
  */
+@SuppressWarnings("serial")
 public class TckRepositoryException extends Exception {
 
   public TckRepositoryException(String message) {

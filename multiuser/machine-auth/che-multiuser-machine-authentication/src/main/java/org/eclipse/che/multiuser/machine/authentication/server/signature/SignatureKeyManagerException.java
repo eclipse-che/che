@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.multiuser.machine.authentication.server.signature;
 
+@SuppressWarnings("serial")
 public class SignatureKeyManagerException extends Exception {
   public SignatureKeyManagerException(String message) {
     super(message);

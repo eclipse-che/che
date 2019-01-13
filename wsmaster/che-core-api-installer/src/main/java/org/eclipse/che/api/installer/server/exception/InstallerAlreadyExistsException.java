@@ -18,6 +18,7 @@ import org.eclipse.che.api.installer.server.impl.InstallerFqn;
  *
  * @author Anatolii Bazko
  */
+@SuppressWarnings("serial")
 public class InstallerAlreadyExistsException extends InstallerException {
   public InstallerAlreadyExistsException(String message) {
     super(message);

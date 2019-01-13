@@ -16,6 +16,7 @@ package org.eclipse.che.inject;
  *
  * @author Sergii Kabashniuk
  */
+@SuppressWarnings("serial")
 public class ConfigurationException extends RuntimeException {
   public ConfigurationException(String message) {
     super(message);

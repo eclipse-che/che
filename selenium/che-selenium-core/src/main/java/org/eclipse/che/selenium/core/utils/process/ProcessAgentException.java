@@ -14,6 +14,7 @@ package org.eclipse.che.selenium.core.utils.process;
 import java.io.IOException;
 
 /** @author Dmytro Nochevnov */
+@SuppressWarnings("serial")
 public class ProcessAgentException extends IOException {
   public ProcessAgentException(String message, Throwable cause) {
     super(message, cause);

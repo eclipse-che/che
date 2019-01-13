@@ -16,6 +16,7 @@ package org.eclipse.che.api.installer.server.exception;
  *
  * @author Anatolii Bazko
  */
+@SuppressWarnings("serial")
 public class InstallerNotFoundException extends InstallerException {
   public InstallerNotFoundException(String message) {
     super(message);

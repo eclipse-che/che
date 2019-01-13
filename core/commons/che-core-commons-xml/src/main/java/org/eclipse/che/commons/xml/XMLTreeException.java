@@ -12,6 +12,7 @@
 package org.eclipse.che.commons.xml;
 
 /** @author Eugene Voevodin */
+@SuppressWarnings("serial")
 public class XMLTreeException extends RuntimeException {
 
   public static XMLTreeException wrap(Exception ex) {

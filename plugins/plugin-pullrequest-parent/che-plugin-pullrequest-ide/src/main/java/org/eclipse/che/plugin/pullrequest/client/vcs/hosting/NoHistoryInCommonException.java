@@ -16,6 +16,7 @@ package org.eclipse.che.plugin.pullrequest.client.vcs.hosting;
  *
  * @author Anton Korneta
  */
+@SuppressWarnings("serial")
 public class NoHistoryInCommonException extends Exception {
 
   public NoHistoryInCommonException(String msg) {

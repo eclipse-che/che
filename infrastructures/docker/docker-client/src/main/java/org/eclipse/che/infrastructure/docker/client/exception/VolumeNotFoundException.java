@@ -16,6 +16,7 @@ package org.eclipse.che.infrastructure.docker.client.exception;
  *
  * @author Alexander Garagatyi
  */
+@SuppressWarnings("serial")
 public class VolumeNotFoundException extends DockerException {
   public VolumeNotFoundException(String message) {
     super(message, 404);

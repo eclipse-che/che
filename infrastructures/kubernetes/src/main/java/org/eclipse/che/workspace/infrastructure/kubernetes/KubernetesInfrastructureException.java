@@ -20,6 +20,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
  *
  * @author Sergii Leshchenko
  */
+@SuppressWarnings("serial")
 public class KubernetesInfrastructureException extends InfrastructureException {
   public KubernetesInfrastructureException(KubernetesClientException e) {
     super(extractMessage(e), e);

@@ -12,6 +12,7 @@
 package org.eclipse.che.plugin.nodejsdbg.server.exception;
 
 /** @author Anatoliy Bazko */
+@SuppressWarnings("serial")
 public class NodeJsDebuggerTerminatedException extends NodeJsDebuggerException {
   public NodeJsDebuggerTerminatedException(String message) {
     super(message);

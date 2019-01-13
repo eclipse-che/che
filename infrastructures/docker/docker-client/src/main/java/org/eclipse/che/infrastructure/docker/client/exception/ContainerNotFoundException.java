@@ -16,6 +16,7 @@ package org.eclipse.che.infrastructure.docker.client.exception;
  *
  * @author Mykola Morhun
  */
+@SuppressWarnings("serial")
 public class ContainerNotFoundException extends DockerException {
 
   public ContainerNotFoundException(String message) {

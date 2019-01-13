@@ -16,6 +16,7 @@ package org.eclipse.che.infrastructure.docker.client.exception;
  *
  * @author Alexander Garagatyi
  */
+@SuppressWarnings("serial")
 public class ExecNotFoundException extends DockerException {
 
   public ExecNotFoundException(String message) {

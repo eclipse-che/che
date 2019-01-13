@@ -19,6 +19,7 @@ import org.eclipse.che.core.db.DBErrorCode;
  * @author Yevhenii Voevodin
  * @see DBErrorCode#DUPLICATE_KEY
  */
+@SuppressWarnings("serial")
 public class DuplicateKeyException extends DetailedRollbackException {
 
   public DuplicateKeyException(String message, Throwable cause) {

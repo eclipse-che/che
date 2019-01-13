@@ -22,6 +22,7 @@ import org.eclipse.che.dto.server.DtoFactory;
  * @author Yevhenii Voevodin
  * @see LimitsCheckingWorkspaceManager
  */
+@SuppressWarnings("serial")
 public class LimitExceededException extends ServerException {
 
   public LimitExceededException(String message) {

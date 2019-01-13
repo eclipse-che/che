@@ -13,6 +13,7 @@ package org.eclipse.che.multiuser.machine.authentication.server;
 
 import io.jsonwebtoken.JwtException;
 
+@SuppressWarnings("serial")
 public class NotMachineTokenJwtException extends JwtException {
 
   public NotMachineTokenJwtException() {

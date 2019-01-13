@@ -12,6 +12,7 @@
 package org.eclipse.che.plugin.gdb.server.exception;
 
 /** @author Anatoliy Bazko */
+@SuppressWarnings("serial")
 public class GdbTerminatedException extends GdbException {
   public GdbTerminatedException(String message) {
     super(message);

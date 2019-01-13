@@ -19,6 +19,7 @@ import org.eclipse.che.api.core.BadRequestException;
  * @see org.eclipse.che.api.installer.server.impl.InstallerFqn#parse(String)
  * @author Sergii Leshchenko
  */
+@SuppressWarnings("serial")
 public class IllegalInstallerKeyException extends InstallerException {
   public IllegalInstallerKeyException(String message) {
     super(message);

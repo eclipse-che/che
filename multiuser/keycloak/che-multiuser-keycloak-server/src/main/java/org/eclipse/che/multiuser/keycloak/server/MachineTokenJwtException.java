@@ -13,6 +13,7 @@ package org.eclipse.che.multiuser.keycloak.server;
 
 import io.jsonwebtoken.JwtException;
 
+@SuppressWarnings("serial")
 public class MachineTokenJwtException extends JwtException {
 
   public MachineTokenJwtException() {

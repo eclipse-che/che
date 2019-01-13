@@ -34,6 +34,7 @@ import org.eclipse.che.dto.server.DtoFactoryVisitor;
  * direction).
  */
 public class DtoTemplate {
+  @SuppressWarnings("serial")
   public static class MalformedDtoInterfaceException extends RuntimeException {
     public MalformedDtoInterfaceException(String msg) {
       super(msg);
@@ -216,7 +217,8 @@ public class DtoTemplate {
       builder.append("import com.google.gwt.json.client.*;\n");
       builder.append("import com.google.inject.Singleton;\n");
     }
-    builder.append("\n\n@SuppressWarnings({\"unchecked\", \"cast\", \"MissingOverride\"})\n");
+    builder.append(
+        "\n\n@SuppressWarnings({\"unchecked\", \"cast\", \"MissingOverride\", \"serial\"})\n");
     if ("client".equals(implType)) {
       builder.append("@Singleton\n");
       builder.append("@ClientDtoFactoryVisitor\n");

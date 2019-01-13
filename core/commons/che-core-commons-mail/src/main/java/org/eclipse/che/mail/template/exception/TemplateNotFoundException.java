@@ -16,6 +16,7 @@ package org.eclipse.che.mail.template.exception;
  *
  * @author Anton Korneta
  */
+@SuppressWarnings("serial")
 public class TemplateNotFoundException extends TemplateException {
 
   public TemplateNotFoundException(String message) {

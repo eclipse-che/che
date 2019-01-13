@@ -14,6 +14,7 @@ package org.eclipse.che.infrastructure.docker.client.exception;
 import java.io.IOException;
 
 /** @author andrew00x */
+@SuppressWarnings("serial")
 public class DockerException extends IOException {
   private final int status;
   private final String originError;
