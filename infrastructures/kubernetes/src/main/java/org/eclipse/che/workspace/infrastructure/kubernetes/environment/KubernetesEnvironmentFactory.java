@@ -105,8 +105,8 @@ public class KubernetesEnvironmentFactory
     Map<String, Service> services = new HashMap<>();
     Map<String, ConfigMap> configMaps = new HashMap<>();
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
+    Map<String, Secret> secrets = new HashMap<>();
     boolean isAnyIngressPresent = false;
-    boolean isAnySecretPresent = false;
     for (HasMetadata object : list.getItems()) {
       checkNotNull(object.getKind(), "Environment contains object without specified kind field");
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
@@ -127,7 +127,8 @@ public class KubernetesEnvironmentFactory
         PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
         pvcs.put(pvc.getMetadata().getName(), pvc);
       } else if (object instanceof Secret) {
-        isAnySecretPresent = true;
+        Secret secret = (Secret) object;
+        secrets.put(secret.getMetadata().getName(), secret);
       } else if (object instanceof ConfigMap) {
         ConfigMap configMap = (ConfigMap) object;
         configMaps.put(configMap.getMetadata().getName(), configMap);
@@ -143,12 +144,6 @@ public class KubernetesEnvironmentFactory
               Warnings.INGRESSES_IGNORED_WARNING_CODE, Warnings.INGRESSES_IGNORED_WARNING_MESSAGE));
     }
 
-    if (isAnySecretPresent) {
-      warnings.add(
-          new WarningImpl(
-              Warnings.SECRET_IGNORED_WARNING_CODE, Warnings.SECRET_IGNORED_WARNING_MESSAGE));
-    }
-
     addRamAttributes(machines, pods.values());
 
     KubernetesEnvironment k8sEnv =
@@ -162,7 +157,7 @@ public class KubernetesEnvironmentFactory
             .setPersistentVolumeClaims(pvcs)
             .setIngresses(new HashMap<>())
             .setPersistentVolumeClaims(new HashMap<>())
-            .setSecrets(new HashMap<>())
+            .setSecrets(secrets)
             .setConfigMaps(configMaps)
             .build();
 

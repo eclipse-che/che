@@ -35,7 +35,6 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -43,7 +42,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.Warnings;
 
 /**
  * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
@@ -107,7 +105,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     Map<String, ConfigMap> configMaps = new HashMap<>();
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     Map<String, Route> routes = new HashMap<>();
-    boolean isAnySecretPresent = false;
+    Map<String, Secret> secrets = new HashMap<>();
     for (HasMetadata object : list.getItems()) {
       checkNotNull(object.getKind(), "Environment contains object without specified kind field");
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
@@ -133,7 +131,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
         PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
         pvcs.put(pvc.getMetadata().getName(), pvc);
       } else if (object instanceof Secret) {
-        isAnySecretPresent = true;
+        Secret secret = (Secret) object;
+        secrets.put(secret.getMetadata().getName(), secret);
       } else if (object instanceof ConfigMap) {
         ConfigMap configMap = (ConfigMap) object;
         configMaps.put(configMap.getMetadata().getName(), configMap);
@@ -141,12 +140,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
         throw new ValidationException(
             format("Found unknown object type '%s'", object.getMetadata()));
       }
-    }
-
-    if (isAnySecretPresent) {
-      warnings.add(
-          new WarningImpl(
-              Warnings.SECRET_IGNORED_WARNING_CODE, Warnings.SECRET_IGNORED_WARNING_MESSAGE));
     }
 
     addRamAttributes(machines, pods.values());
@@ -160,7 +153,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setDeployments(deployments)
             .setServices(services)
             .setPersistentVolumeClaims(pvcs)
-            .setSecrets(new HashMap<>())
+            .setSecrets(secrets)
             .setConfigMaps(configMaps)
             .setRoutes(routes)
             .build();
