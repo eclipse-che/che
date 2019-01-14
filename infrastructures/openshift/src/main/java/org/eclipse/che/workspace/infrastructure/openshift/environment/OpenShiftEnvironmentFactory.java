@@ -106,7 +106,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     Map<String, Service> services = new HashMap<>();
     Map<String, ConfigMap> configMaps = new HashMap<>();
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
-    boolean isAnyRoutePresent = false;
+    Map<String, Route> routes = new HashMap<>();
     boolean isAnySecretPresent = false;
     for (HasMetadata object : list.getItems()) {
       checkNotNull(object.getKind(), "Environment contains object without specified kind field");
@@ -127,7 +127,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
         Service service = (Service) object;
         services.put(service.getMetadata().getName(), service);
       } else if (object instanceof Route) {
-        isAnyRoutePresent = true;
+        Route route = (Route) object;
+        routes.put(route.getMetadata().getName(), route);
       } else if (object instanceof PersistentVolumeClaim) {
         PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
         pvcs.put(pvc.getMetadata().getName(), pvc);
@@ -140,12 +141,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
         throw new ValidationException(
             format("Found unknown object type '%s'", object.getMetadata()));
       }
-    }
-
-    if (isAnyRoutePresent) {
-      warnings.add(
-          new WarningImpl(
-              Warnings.ROUTE_IGNORED_WARNING_CODE, Warnings.ROUTES_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnySecretPresent) {
@@ -167,7 +162,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setPersistentVolumeClaims(pvcs)
             .setSecrets(new HashMap<>())
             .setConfigMaps(configMaps)
-            .setRoutes(new HashMap<>())
+            .setRoutes(routes)
             .build();
 
     envValidator.validate(osEnv);

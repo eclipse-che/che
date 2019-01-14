@@ -18,11 +18,6 @@ package org.eclipse.che.workspace.infrastructure.openshift;
  */
 public final class Warnings {
 
-  public static final int ROUTE_IGNORED_WARNING_CODE = 5100;
-  public static final String ROUTES_IGNORED_WARNING_MESSAGE =
-      "Routes specified in OpenShift recipe are ignored. "
-          + "To expose ports please define servers in machine configuration.";
-
   public static final int SECRET_IGNORED_WARNING_CODE =
       org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.SECRET_IGNORED_WARNING_CODE;
   public static final String SECRET_IGNORED_WARNING_MESSAGE =
