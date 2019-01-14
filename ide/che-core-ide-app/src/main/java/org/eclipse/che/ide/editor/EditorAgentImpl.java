@@ -35,13 +35,7 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.util.ArrayOf;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -360,7 +354,10 @@ public class EditorAgentImpl
             .stream()
             .filter(type -> fileExtension.equals(type.getExtension()))
             .collect(toSet());
-    return fileTypes.isEmpty() ? typesByNamePattern : fileTypes;
+    fileTypes = fileTypes.isEmpty() ? typesByNamePattern : fileTypes;
+    return fileTypes.isEmpty()
+        ? Collections.singleton(fileTypeRegistry.getFileTypeByExtension(fileExtension))
+        : fileTypes;
   }
 
   private void initEditor(
