@@ -336,7 +336,6 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
     List<Either<TextDocumentEdit, ResourceOperation>> edits = new ArrayList<>();
     for (RenameProject project : projects) {
       project.getTextDocumentEdits().forEach(edit -> edits.add(Either.forLeft(edit)));
-      ;
     }
     workspaceEditAction.applyWorkspaceEdit(new WorkspaceEdit(edits));
   }
