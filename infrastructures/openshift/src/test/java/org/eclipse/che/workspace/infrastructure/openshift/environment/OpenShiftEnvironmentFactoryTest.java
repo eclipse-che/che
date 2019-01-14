@@ -17,8 +17,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
-import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.ROUTES_IGNORED_WARNING_MESSAGE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.ROUTE_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.SECRET_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.SECRET_IGNORED_WARNING_MESSAGE;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +54,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
 import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
+import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.InputStream;
@@ -158,22 +157,18 @@ public class OpenShiftEnvironmentFactoryTest {
     assertEquals(osEnv.getPersistentVolumeClaims().get("pvc2"), pvc2);
   }
 
-  @Test
-  public void ignoreRoutesWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> objects =
-        asList(
-            new RouteBuilder().withNewMetadata().withName("route1").endMetadata().build(),
-            new RouteBuilder().withNewMetadata().withName("route2").endMetadata().build());
-    when(parsedList.getItems()).thenReturn(objects);
+  public void addRoutesWhenRecipeContainsThem() throws Exception {
+    Route route = new RouteBuilder().withNewMetadata().withName("test-route").endMetadata().build();
+    final List<HasMetadata> recipeObjects = singletonList(route);
+    when(parsedList.getItems()).thenReturn(recipeObjects);
 
     final OpenShiftEnvironment parsed =
         osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertTrue(parsed.getRoutes().isEmpty());
-    assertEquals(parsed.getWarnings().size(), 1);
+    assertEquals(parsed.getRoutes().size(), 1);
     assertEquals(
-        parsed.getWarnings().get(0),
-        new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
+        parsed.getRoutes().get("test-route").getMetadata().getName(),
+        route.getMetadata().getName());
   }
 
   @Test
