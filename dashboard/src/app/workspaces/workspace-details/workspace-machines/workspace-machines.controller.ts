@@ -289,13 +289,19 @@ export class WorkspaceMachinesController {
     if (!this.machines || !memoryLimitGBytes) {
       return;
     }
-    const memoryLimitBytesWithUnit = this.$filter('changeMemoryUnit')(memoryLimitGBytes, [MemoryUnit[MemoryUnit.GB], MemoryUnit[MemoryUnit.B]]);
-    const memoryLimitBytes = this.getNumber(memoryLimitBytesWithUnit);
     const machine: IEnvironmentManagerMachine = this.machines.find((machine: IEnvironmentManagerMachine) => {
       return machine && machine.name === name;
     });
 
-    if (machine && this.environmentManager.getMemoryLimit(machine).toString() !== memoryLimitBytes.toString()) {
+    if (!machine) {
+      return;
+    } 
+
+    const currentMemoryLimitBytes = this.environmentManager.getMemoryLimit(machine);
+    const currentMemoryLimitGBytes = currentMemoryLimitBytes === -1 ? 0 : this.getNumber(this.$filter('changeMemoryUnit')(currentMemoryLimitBytes, [MemoryUnit[MemoryUnit.B], MemoryUnit[MemoryUnit.GB]]));
+    if (memoryLimitGBytes !== currentMemoryLimitGBytes) {
+      const memoryLimitBytesWithUnit = this.$filter('changeMemoryUnit')(memoryLimitGBytes, [MemoryUnit[MemoryUnit.GB], MemoryUnit[MemoryUnit.B]]);
+      const memoryLimitBytes = this.getNumber(memoryLimitBytesWithUnit);
       this.environmentManager.setMemoryLimit(machine, memoryLimitBytes);
       const environment = this.environmentManager.getEnvironment(this.environment, this.machines);
       this.updateEnvironment(environment);
