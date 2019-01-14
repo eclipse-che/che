@@ -11,18 +11,31 @@
  */
 package org.eclipse.che.api.factory.server.urlfactory;
 
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
+import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -44,6 +57,7 @@ public class URLFactoryBuilderTest {
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
 
+  @Mock private DevfileEnvironmentFactory environmentFactory;
   @Mock private DevfileManager devfileManager;
 
   /** Tested instance. */
@@ -52,7 +66,8 @@ public class URLFactoryBuilderTest {
   @BeforeClass
   public void setUp() {
     this.urlFactoryBuilder =
-        new URLFactoryBuilder(defaultEditor, defaultPlugin, urlFetcher, devfileManager);
+        new URLFactoryBuilder(
+            defaultEditor, defaultPlugin, environmentFactory, urlFetcher, devfileManager);
   }
 
   @Test
@@ -87,5 +102,31 @@ public class URLFactoryBuilderTest {
     FactoryDto factory = urlFactoryBuilder.createFactoryFromJson(myLocation).get();
 
     assertEquals(templateFactory, factory);
+  }
+
+  @Test
+  public void checkWithCustomDevfileAndRecipe() throws Exception {
+
+    Devfile devfile = new Devfile();
+    WorkspaceConfigImpl workspaceConfigImpl = new WorkspaceConfigImpl();
+    String myLocation = "http://foo-location/";
+    RecipeImpl expectedRecipe =
+        new RecipeImpl(KUBERNETES_TOOL_TYPE, "application/x-yaml", "content", "");
+    EnvironmentImpl expectedEnv = new EnvironmentImpl(expectedRecipe, emptyMap());
+
+    when(urlFetcher.fetch(anyString())).thenReturn("random_content");
+    when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
+    when(devfileManager.createWorkspaceConfig(any(Devfile.class))).thenReturn(workspaceConfigImpl);
+
+    when(environmentFactory.create(any(Devfile.class), any()))
+        .thenReturn(Optional.of(new Pair<>("name", expectedEnv)));
+
+    FactoryDto factory =
+        urlFactoryBuilder.createFactoryFromDevfile(myLocation, s -> myLocation + ".list").get();
+
+    WorkspaceConfigDto expectedWorkspaceConfig = asDto(workspaceConfigImpl);
+    expectedWorkspaceConfig.setDefaultEnv("name");
+    expectedWorkspaceConfig.setEnvironments(singletonMap("name", asDto(expectedEnv)));
+    assertEquals(factory.getWorkspace(), expectedWorkspaceConfig);
   }
 }

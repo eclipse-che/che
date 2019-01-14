@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -61,6 +62,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
@@ -84,8 +86,8 @@ public class OpenShiftEnvironmentFactoryTest {
 
   private static final String YAML_RECIPE = "application/x-yaml";
   private static final long BYTES_IN_MB = 1024 * 1024;
-  public static final String MACHINE_NAME_1 = "machine1";
-  public static final String MACHINE_NAME_2 = "machine2";
+  private static final String MACHINE_NAME_1 = "machine1";
+  private static final String MACHINE_NAME_2 = "machine2";
 
   private OpenShiftEnvironmentFactory osEnvironmentFactory;
 
@@ -290,8 +292,37 @@ public class OpenShiftEnvironmentFactoryTest {
                 }));
   }
 
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp = "Pod metadata must not be null")
+  public void exceptionOnPodWithNoMetadata() throws Exception {
+    final List<HasMetadata> recipeObjects = singletonList(new PodBuilder().build());
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+  }
+
   @Test
-  public void testProvisionRamAttributesIsInvoked() throws Exception {
+  public void createdPod() throws Exception {
+    final List<HasMetadata> recipeObjects =
+        singletonList(
+            new PodBuilder()
+                .withNewMetadata()
+                .withName("test")
+                .endMetadata()
+                .withSpec(new PodSpec())
+                .build());
+    when(validatedObjects.getItems()).thenReturn(recipeObjects);
+
+    final KubernetesEnvironment parsed =
+        osEnvironmentFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertFalse(parsed.getPodsData().isEmpty());
+    assertEquals(parsed.getWarnings().size(), 0);
+  }
+
+  @Test
+  public void testProvisionRamAttributesIsInvoked() {
     final long firstMachineRamLimit = 3072 * BYTES_IN_MB;
     final long secondMachineRamLimit = 1024 * BYTES_IN_MB;
     final long firstMachineRamRequest = 1536 * BYTES_IN_MB;

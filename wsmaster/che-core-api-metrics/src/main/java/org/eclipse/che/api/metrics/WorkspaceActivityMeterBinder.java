@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.api.metrics;
 
+import static org.eclipse.che.api.metrics.WorkspaceBinders.withStandardTags;
+import static org.eclipse.che.api.metrics.WorkspaceBinders.workspaceMetric;
+
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
@@ -34,9 +37,8 @@ public class WorkspaceActivityMeterBinder implements MeterBinder {
   @Override
   public void bindTo(MeterRegistry registry) {
     for (WorkspaceStatus s : WorkspaceStatus.values()) {
-      Gauge.builder("che.workspace.status", () -> count(s))
-          .tag("status", s.name())
-          .tag("area", "workspace")
+      Gauge.builder(workspaceMetric("status"), () -> count(s))
+          .tags(withStandardTags("status", s.name()))
           .description("The number of workspaces in a given status")
           .register(registry);
     }
