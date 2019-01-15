@@ -102,6 +102,7 @@ import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ReferenceParams;
 import org.eclipse.lsp4j.RenameParams;
+import org.eclipse.lsp4j.ResourceOperation;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentEdit;
@@ -218,7 +219,7 @@ public class TextDocumentService {
 
           @Override
           public boolean canDo(ExtendedLanguageServer server) {
-            return truish(server.getCapabilities().getCodeActionProvider());
+            return isImplemented(server.getCapabilities().getCodeActionProvider());
           }
 
           @Override
@@ -800,8 +801,7 @@ public class TextDocumentService {
         new LSOperation<ExtendedLanguageServer, WorkspaceEdit>() {
           @Override
           public boolean canDo(ExtendedLanguageServer server) {
-            Boolean renameProvider = server.getCapabilities().getRenameProvider();
-            return renameProvider != null && renameProvider;
+            return isImplemented(server.getCapabilities().getRenameProvider());
           }
 
           @Override
@@ -830,14 +830,21 @@ public class TextDocumentService {
     ExtendedWorkspaceEdit result = new ExtendedWorkspaceEdit();
     List<ExtendedTextDocumentEdit> edits = new ArrayList<>();
     if (workspaceEdit.getDocumentChanges() != null) {
-      for (TextDocumentEdit documentEdit : workspaceEdit.getDocumentChanges()) {
-        ExtendedTextDocumentEdit edit = new ExtendedTextDocumentEdit();
-        edit.setTextDocument(documentEdit.getTextDocument());
-        edit.getTextDocument().setUri(removePrefixUri(edit.getTextDocument().getUri()));
-        edit.setEdits(
-            convertToExtendedEdit(
-                documentEdit.getEdits(), removeUriScheme(documentEdit.getTextDocument().getUri())));
-        edits.add(edit);
+      for (Either<TextDocumentEdit, ResourceOperation> documentChange :
+          workspaceEdit.getDocumentChanges()) {
+        if (documentChange.isLeft()) {
+          // since we're not announcing our capability to handle resource edits in initialization,
+          // we should not get any resoure changes
+          TextDocumentEdit documentEdit = documentChange.getLeft();
+          ExtendedTextDocumentEdit edit = new ExtendedTextDocumentEdit();
+          edit.setTextDocument(documentEdit.getTextDocument());
+          edit.getTextDocument().setUri(removePrefixUri(edit.getTextDocument().getUri()));
+          edit.setEdits(
+              convertToExtendedEdit(
+                  documentEdit.getEdits(),
+                  removeUriScheme(documentEdit.getTextDocument().getUri())));
+          edits.add(edit);
+        }
       }
     } else if (workspaceEdit.getChanges() != null) {
       for (Entry<String, List<TextEdit>> entry : workspaceEdit.getChanges().entrySet()) {
@@ -1042,5 +1049,13 @@ public class TextDocumentService {
 
   private boolean truish(Boolean b) {
     return b != null && b;
+  }
+
+  private <T> boolean isImplemented(Either<Boolean, T> capability) {
+    if (capability.isLeft()) {
+      return truish(capability.getLeft());
+    } else {
+      return capability.getRight() != null;
+    }
   }
 }

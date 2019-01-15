@@ -90,6 +90,8 @@ export class CheEditorController {
       lineNumbers: true,
       onLoad: (editor: IEditor) => {
         $timeout(() => {
+          //to avoid Ctrl+Z clear the content
+          editor.getDoc().clearHistory();
           editor.refresh();
         }, 2500);
         const doc = editor.getDoc();
@@ -144,7 +146,7 @@ export class CheEditorController {
             }
 
             this.editorForm.$setValidity('custom-validator', this.editorState.isValid, null);
-          }, 2500);
+          }, 500);
         });
       }
     };
