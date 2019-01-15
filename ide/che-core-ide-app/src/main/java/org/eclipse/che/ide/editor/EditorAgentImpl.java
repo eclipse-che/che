@@ -17,6 +17,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.gwt.regexp.shared.RegExp.compile;
 import static java.lang.Boolean.parseBoolean;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.ide.api.notification.StatusNotification.DisplayMode.EMERGE_MODE;
@@ -35,7 +36,13 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.util.ArrayOf;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
@@ -356,7 +363,7 @@ public class EditorAgentImpl
             .collect(toSet());
     fileTypes = fileTypes.isEmpty() ? typesByNamePattern : fileTypes;
     return fileTypes.isEmpty()
-        ? Collections.singleton(fileTypeRegistry.getFileTypeByExtension(fileExtension))
+        ? singleton(fileTypeRegistry.getFileTypeByExtension(fileExtension))
         : fileTypes;
   }
 
