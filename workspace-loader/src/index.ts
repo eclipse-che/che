@@ -298,8 +298,8 @@ export class WorkspaceLoader {
 
     connectMasterApi(): Promise<CheJsonRpcMasterApi> {
         return new Promise((resolve, reject) => {
-            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
-            const master = new CheJsonRpcMasterApi(new WebsocketClient(), entryPoint);
+            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT;
+            const master = new CheJsonRpcMasterApi(new WebsocketClient(), entryPoint, this);
             master.connect(entryPoint)
                 .then(() => resolve(master))
                 .catch((error: any) => reject(error));

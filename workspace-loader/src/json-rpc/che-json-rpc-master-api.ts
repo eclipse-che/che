@@ -12,6 +12,7 @@
 'use strict';
 import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import { ICommunicationClient, CODE_REQUEST_TIMEOUT, CommunicationClientEvent } from './json-rpc-client';
+import { WorkspaceLoader } from '../index';
 
 enum MasterChannels {
   ENVIRONMENT_OUTPUT = <any>'runtime/log',
@@ -36,11 +37,14 @@ export class CheJsonRpcMasterApi {
   private fetchingClientIdTimeout = 5000;
 
   private client: ICommunicationClient;
+  private loader: WorkspaceLoader;
 
   constructor(client: ICommunicationClient,
-              entryPoint: string) {
+              entryPoint: string,
+              loader: WorkspaceLoader) {
     this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
     this.client = client;
+    this.loader = loader;
 
     client.addListener('open', () => this.onConnectionOpen());
     client.addListener('close', (event: any) => {
@@ -107,6 +111,7 @@ export class CheJsonRpcMasterApi {
    * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
    */
   connect(entryPoint: string): Promise<any> {
+    entryPoint += this.loader.getAuthenticationToken();
     if (this.clientId) {
       let clientId = `clientId=${this.clientId}`;
       // in case of reconnection
@@ -119,9 +124,8 @@ export class CheJsonRpcMasterApi {
       }
       entryPoint += clientId;
     }
-    return this.cheJsonRpcApi.connect(entryPoint).then(() => {
-      return this.fetchClientId();
-    });
+    return this.cheJsonRpcApi.connect(entryPoint).then(() =>
+      this.fetchClientId());
   }
 
   /**
