@@ -55,7 +55,10 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
       @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
       PVCSubPathHelper pvcSubPathHelper,
       KubernetesNamespaceFactory factory,
-      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter) {
+      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
+      PVCProvisioner pvcProvisioner,
+      PodsVolumes podsVolumes,
+      SubPathPrefixes subpathPrefixes) {
     super(
         pvcName,
         pvcQuantity,
@@ -63,7 +66,10 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
         preCreateDirs,
         pvcSubPathHelper,
         factory,
-        ephemeralWorkspaceAdapter);
+        ephemeralWorkspaceAdapter,
+        pvcProvisioner,
+        podsVolumes,
+        subpathPrefixes);
     this.pvcNamePrefix = pvcName;
     this.factory = factory;
     this.pvcAccessMode = pvcAccessMode;

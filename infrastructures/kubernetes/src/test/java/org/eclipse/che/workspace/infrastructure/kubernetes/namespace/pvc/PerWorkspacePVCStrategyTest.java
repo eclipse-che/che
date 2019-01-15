@@ -58,6 +58,10 @@ public class PerWorkspacePVCStrategyTest {
   @Mock private KubernetesPersistentVolumeClaims pvcs;
   @Mock private EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
 
+  @Mock private PVCProvisioner volumeConverter;
+  @Mock private PodsVolumes podsVolumes;
+  @Mock private SubPathPrefixes subpathPrefixes;
+
   private PerWorkspacePVCStrategy strategy;
 
   @BeforeMethod
@@ -70,7 +74,10 @@ public class PerWorkspacePVCStrategyTest {
             true,
             pvcSubPathHelper,
             factory,
-            ephemeralWorkspaceAdapter);
+            ephemeralWorkspaceAdapter,
+            volumeConverter,
+            podsVolumes,
+            subpathPrefixes);
 
     lenient().when(factory.create(WORKSPACE_ID)).thenReturn(k8sNamespace);
     lenient().when(k8sNamespace.persistentVolumeClaims()).thenReturn(pvcs);
