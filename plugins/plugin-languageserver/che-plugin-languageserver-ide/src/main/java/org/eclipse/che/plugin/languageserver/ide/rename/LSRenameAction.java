@@ -27,7 +27,9 @@ import org.eclipse.che.ide.api.editor.texteditor.TextEditor;
 import org.eclipse.che.ide.api.parts.WorkspaceAgent;
 import org.eclipse.che.plugin.languageserver.ide.LanguageServerLocalization;
 import org.eclipse.che.plugin.languageserver.ide.editor.LanguageServerEditorConfiguration;
+import org.eclipse.lsp4j.RenameOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 /** Action for rename feature */
 @Singleton
@@ -65,12 +67,20 @@ public class LSRenameAction extends AbstractPerspectiveAction {
       if (configuration instanceof LanguageServerEditorConfiguration) {
         ServerCapabilities capabilities =
             ((LanguageServerEditorConfiguration) configuration).getServerCapabilities();
-        presentation.setEnabledAndVisible(
-            capabilities.getRenameProvider() != null && capabilities.getRenameProvider());
+        presentation.setEnabledAndVisible(isRenameEnabled(capabilities));
         return;
       }
     }
     presentation.setEnabledAndVisible(false);
+  }
+
+  private boolean isRenameEnabled(ServerCapabilities capabilities) {
+    Either<Boolean, RenameOptions> capability = capabilities.getRenameProvider();
+    if (capability.isLeft()) {
+      return Boolean.TRUE.equals(capability.getLeft());
+    } else {
+      return capability.getRight() != null;
+    }
   }
 
   @Override

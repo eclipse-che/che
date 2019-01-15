@@ -53,10 +53,12 @@ import org.eclipse.che.plugin.languageserver.ide.util.DtoBuildHelper;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.RenameParams;
+import org.eclipse.lsp4j.ResourceOperation;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.slf4j.Logger;
 
 /** Main controller for rename feature, calls rename and shows rename edits */
@@ -331,9 +333,9 @@ public class RenamePresenter extends BasePresenter implements ActionDelegate {
   }
 
   private void applyRename(List<RenameProject> projects) {
-    List<TextDocumentEdit> edits = new ArrayList<>();
+    List<Either<TextDocumentEdit, ResourceOperation>> edits = new ArrayList<>();
     for (RenameProject project : projects) {
-      edits.addAll(project.getTextDocumentEdits());
+      project.getTextDocumentEdits().forEach(edit -> edits.add(Either.forLeft(edit)));
     }
     workspaceEditAction.applyWorkspaceEdit(new WorkspaceEdit(edits));
   }
