@@ -154,6 +154,7 @@
                         <classe>org.eclipse.lsp4j.Position</classe>
                         <classe>org.eclipse.lsp4j.WorkspaceEdit</classe>
                         <classe>org.eclipse.lsp4j.ResourceChange</classe>
+                        <classe>org.eclipse.lsp4j.ResourceOperation</classe>
                         <classe>org.eclipse.lsp4j.RenameParams</classe>
                         <classe>org.eclipse.lsp4j.TextDocumentIdentifier</classe>
                         <classe>org.eclipse.lsp4j.TextEdit</classe>

@@ -79,7 +79,7 @@ export class CheEditor implements ng.IDirective {
               <ng-form name="cheEditorController.editorForm">
                 <textarea ui-codemirror="cheEditorController.editorOptions"
                           aria-label="editor"
-                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 500, 'blur': 0 }, allowInvalid: true }"
+                          ng-model-options="{ updateOn: 'default blur', debounce: { 'default': 100, 'blur': 0 }, allowInvalid: true }"
                           ng-model="cheEditorController.editorContent"></textarea>
                 <div class="validator-checks">
                   <div ng-messages="cheEditorController.editorForm.$invalid">

@@ -17,9 +17,11 @@ import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import javax.inject.Singleton;
+import org.eclipse.lsp4j.CodeActionOptions;
 import org.eclipse.lsp4j.CodeLensOptions;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.DocumentOnTypeFormattingOptions;
+import org.eclipse.lsp4j.RenameOptions;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelpOptions;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
@@ -197,7 +199,7 @@ public class ServerCapabilitiesAccumulator implements BinaryOperator<ServerCapab
     private ServerCapabilities compute() {
 
       ServerCapabilities result = new ServerCapabilities();
-      result.setCodeActionProvider(or(ServerCapabilities::getCodeActionProvider));
+      result.setCodeActionProvider(or(ServerCapabilitiesOverlay::getCodeActionProvider));
       result.setCodeLensProvider(getCodeLensProvider());
       result.setCompletionProvider(getCompletionProvider());
       result.setDefinitionProvider(or(ServerCapabilities::getDefinitionProvider));
@@ -209,12 +211,36 @@ public class ServerCapabilitiesAccumulator implements BinaryOperator<ServerCapab
       result.setDocumentSymbolProvider(or(ServerCapabilities::getDocumentSymbolProvider));
       result.setHoverProvider(or(ServerCapabilities::getHoverProvider));
       result.setReferencesProvider(or(ServerCapabilities::getReferencesProvider));
-      result.setRenameProvider(or(ServerCapabilities::getRenameProvider));
+      result.setRenameProvider(or(ServerCapabilitiesOverlay::getRenameProvider));
       result.setSignatureHelpProvider(getSignatureHelpProvider());
       result.setTextDocumentSync(getTextDocumentSync());
       result.setWorkspaceSymbolProvider(or(ServerCapabilities::getWorkspaceSymbolProvider));
 
       return result;
+    }
+
+    private static Boolean getCodeActionProvider(ServerCapabilities cap) {
+      Either<Boolean, CodeActionOptions> codeActionProvider = cap.getCodeActionProvider();
+      if (codeActionProvider == null) {
+        return false;
+      }
+      if (codeActionProvider.isRight()) {
+        return codeActionProvider.getRight() != null;
+      } else {
+        return codeActionProvider.getLeft();
+      }
+    }
+
+    private static Boolean getRenameProvider(ServerCapabilities cap) {
+      Either<Boolean, RenameOptions> provider = cap.getRenameProvider();
+      if (provider == null) {
+        return false;
+      }
+      if (provider.isRight()) {
+        return provider.getRight() != null;
+      } else {
+        return provider.getLeft();
+      }
     }
   }
 }
