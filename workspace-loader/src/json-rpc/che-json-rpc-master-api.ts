@@ -52,7 +52,7 @@ export class CheJsonRpcMasterApi {
         case 1000: // normal close
           break;
         default:
-          this.connect(entryPoint);
+          this.connect(entryPoint).catch(console.error);
       }
     });
   }
