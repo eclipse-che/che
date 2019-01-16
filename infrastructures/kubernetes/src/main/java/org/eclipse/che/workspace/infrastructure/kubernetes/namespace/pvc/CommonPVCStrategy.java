@@ -129,14 +129,16 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   }
 
   /**
-   * May be overridden by child class for changing common scope. Like common per user or common per
-   * workspace.
+   * Creates PVC objects that should be used for the specified runtime identity.
    *
-   * @param identity runtime identity that needs PVC
-   * @return pvc name that should be used for the specified runtime identity
+   * <p>May be overridden by child class for changing common scope. Like common per user or common
+   * per workspace.
+   *
+   * @param runtimeId runtime identity that needs PVC
+   * @return pvc that should be used for the specified runtime identity
    */
-  protected String getCommonPVCName(RuntimeIdentity identity) {
-    return configuredPVCName;
+  protected PersistentVolumeClaim createCommonPVC(RuntimeIdentity runtimeId) {
+    return newPVC(configuredPVCName, pvcAccessMode, pvcQuantity);
   }
 
   @Override
@@ -254,10 +256,9 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
 
   private PersistentVolumeClaim replacePVCsWithCommon(
       KubernetesEnvironment k8sEnv, RuntimeIdentity identity) {
-    String commonPVCName = getCommonPVCName(identity);
-    final PersistentVolumeClaim commonPVC = newPVC(commonPVCName, pvcAccessMode, pvcQuantity);
+    final PersistentVolumeClaim commonPVC = createCommonPVC(identity);
     k8sEnv.getPersistentVolumeClaims().clear();
-    k8sEnv.getPersistentVolumeClaims().put(commonPVCName, commonPVC);
+    k8sEnv.getPersistentVolumeClaims().put(commonPVC.getMetadata().getName(), commonPVC);
     return commonPVC;
   }
 

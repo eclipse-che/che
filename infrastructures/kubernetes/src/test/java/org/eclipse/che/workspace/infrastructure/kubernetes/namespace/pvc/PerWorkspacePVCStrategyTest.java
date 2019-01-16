@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -77,12 +78,13 @@ public class PerWorkspacePVCStrategyTest {
   }
 
   @Test
-  public void shouldReturnCommonPVCNameSuffixedWithWorkspaceId() throws Exception {
+  public void shouldReturnPVCPerWorkspace() throws Exception {
     // when
-    String commonPVCName = strategy.getCommonPVCName(IDENTITY);
+    PersistentVolumeClaim commonPVC = strategy.createCommonPVC(IDENTITY);
 
     // then
-    assertEquals(commonPVCName, PVC_NAME_PREFIX + "-" + WORKSPACE_ID);
+    assertEquals(commonPVC.getMetadata().getName(), PVC_NAME_PREFIX + "-" + WORKSPACE_ID);
+    assertEquals(commonPVC.getMetadata().getLabels().get(CHE_WORKSPACE_ID_LABEL), WORKSPACE_ID);
   }
 
   @Test
