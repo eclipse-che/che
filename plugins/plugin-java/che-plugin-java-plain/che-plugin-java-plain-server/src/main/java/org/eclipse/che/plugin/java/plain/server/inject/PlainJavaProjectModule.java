@@ -17,6 +17,7 @@ import com.google.inject.AbstractModule;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.plugin.java.plain.server.ProjectsListener;
 import org.eclipse.che.plugin.java.plain.server.generator.PlainJavaProjectGenerator;
 import org.eclipse.che.plugin.java.plain.server.projecttype.PlainJavaInitHandler;
 import org.eclipse.che.plugin.java.plain.server.projecttype.PlainJavaProjectType;
@@ -33,5 +34,6 @@ public class PlainJavaProjectModule extends AbstractModule {
 
     bind(ClasspathUpdaterService.class);
     bind(PlainJavaProjectSourceFolderWatcher.class).asEagerSingleton();
+    bind(ProjectsListener.class).asEagerSingleton();
   }
 }

@@ -17,24 +17,13 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.ide.ext.java.shared.Constants.OUTPUT_FOLDER;
 import static org.eclipse.che.ide.ext.java.shared.Constants.SOURCE_FOLDER;
-import static org.eclipse.che.plugin.java.plain.server.projecttype.PlainJavaProjectUpdateUtil.notifyClientOnProjectUpdate;
-import static org.eclipse.che.plugin.java.plain.server.projecttype.PlainJavaProjectUpdateUtil.updateProjectConfig;
-import static org.eclipse.che.plugin.java.plain.shared.PlainJavaProjectConstants.DEFAULT_SOURCE_FOLDER_VALUE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import org.eclipse.che.api.core.BadRequestException;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.fs.server.PathTransformer;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.api.project.server.type.ReadonlyValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProvider;
 import org.eclipse.che.api.project.server.type.ValueProviderFactory;
@@ -42,8 +31,6 @@ import org.eclipse.che.api.project.server.type.ValueStorageException;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.languageserver.NotifyJsonRpcTransmitter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * {@link ValueProviderFactory} for Plain Java project type. Factory crates a class which provides
@@ -53,15 +40,9 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class PlainJavaValueProviderFactory implements ValueProviderFactory {
-  private static final Logger LOG = LoggerFactory.getLogger(PlainJavaValueProviderFactory.class);
 
   private final PathTransformer transformer;
   private final JavaLanguageServerExtensionService extensionService;
-  private final NotifyJsonRpcTransmitter notifyTransmitter;
-  private final ProjectManager projectManager;
-
-  @SuppressWarnings("unused")
-  private final EventService eventService;
 
   @Inject
   public PlainJavaValueProviderFactory(
@@ -72,31 +53,11 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
       EventService eventService) {
     this.transformer = transformer;
     this.extensionService = extensionService;
-    this.notifyTransmitter = notifyTransmitter;
-    this.projectManager = projectManager;
-    this.eventService = eventService;
-    eventService.subscribe(this::onProjectUpdated, ProjectUpdatedEvent.class);
   }
 
   @Override
   public ValueProvider newInstance(String wsPath) {
     return new PlainJavaValueProvider(wsPath);
-  }
-
-  private void onProjectUpdated(ProjectUpdatedEvent event) {
-    try {
-      updateProjectConfig(projectManager, event.getProjectPath()).get();
-    } catch (BadRequestException
-        | ConflictException
-        | ForbiddenException
-        | IOException
-        | InterruptedException
-        | ExecutionException
-        | ServerException
-        | NotFoundException e) {
-      LOG.error(e.getMessage());
-    }
-    notifyClientOnProjectUpdate(notifyTransmitter, event.getProjectPath());
   }
 
   private class PlainJavaValueProvider extends ReadonlyValueProvider {
@@ -144,13 +105,10 @@ public class PlainJavaValueProviderFactory implements ValueProviderFactory {
             format("Failed to get '%s'. ", SOURCE_FOLDER), e.getCause());
       }
 
-      List<String> filteredResult =
-          sourceFolders
-              .stream()
-              .map(it -> it.startsWith(wsPath) ? it.substring(wsPath.length() + 1) : it)
-              .collect(toList());
-
-      return sourceFolders.isEmpty() ? singletonList(DEFAULT_SOURCE_FOLDER_VALUE) : filteredResult;
+      return sourceFolders
+          .stream()
+          .map(it -> it.startsWith(wsPath) ? it.substring(wsPath.length() + 1) : it)
+          .collect(toList());
     }
   }
 }

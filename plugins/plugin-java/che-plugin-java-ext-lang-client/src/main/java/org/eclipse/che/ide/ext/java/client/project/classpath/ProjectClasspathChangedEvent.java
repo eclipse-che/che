@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.ide.project.node;
+package org.eclipse.che.ide.ext.java.client.project.classpath;
 
 import com.google.gwt.event.shared.EventHandler;
 import com.google.gwt.event.shared.GwtEvent;
@@ -24,14 +24,7 @@ public class ProjectClasspathChangedEvent
     void onProjectClasspathChanged(ProjectClasspathChangedEvent event);
   }
 
-  private static Type<ProjectClasspathChangedHandler> TYPE;
-
-  public static Type<ProjectClasspathChangedHandler> getType() {
-    if (TYPE == null) {
-      TYPE = new Type<>();
-    }
-    return TYPE;
-  }
+  public static final Type<ProjectClasspathChangedHandler> TYPE = new Type<>();
 
   public ProjectClasspathChangedEvent(String projectPath) {
     this.projectPath = projectPath;
