@@ -27,10 +27,10 @@ import org.eclipse.che.ide.api.resources.ResourceChangedEvent.ResourceChangedHan
 import org.eclipse.che.ide.api.resources.ResourceDelta;
 import org.eclipse.che.ide.dto.DtoFactory;
 import org.eclipse.che.ide.ext.java.client.JavaResources;
+import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathChangedEvent;
+import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathChangedEvent.ProjectClasspathChangedHandler;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.client.tree.JavaNodeFactory;
-import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
-import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent.ProjectClasspathChangedHandler;
 import org.eclipse.che.ide.project.node.SyntheticNode;
 import org.eclipse.che.ide.project.node.SyntheticNodeUpdateEvent;
 import org.eclipse.che.ide.resource.Path;
@@ -68,7 +68,7 @@ public class LibrariesNode extends SyntheticNode<Path>
     this.eventBus = eventBus;
 
     eventBus.addHandler(ResourceChangedEvent.getType(), this);
-    eventBus.addHandler(ProjectClasspathChangedEvent.getType(), this);
+    eventBus.addHandler(ProjectClasspathChangedEvent.TYPE, this);
   }
 
   @Override

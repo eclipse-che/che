@@ -227,7 +227,8 @@ public abstract class ResourceNode<R extends Resource> extends AbstractTreeNode
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
-    if (!(o instanceof ResourceNode)) return false;
+    if (o == null) return false;
+    if (o.getClass() != getClass()) return false;
     ResourceNode<?> that = (ResourceNode<?>) o;
     return Objects.equal(resource, that.resource);
   }
