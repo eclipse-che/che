@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityManager;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.multiuser.resource.api.type.TimeoutResourceType;
 import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
@@ -50,12 +51,13 @@ public class MultiUserWorkspaceActivityManager extends WorkspaceActivityManager 
   @Inject
   public MultiUserWorkspaceActivityManager(
       WorkspaceManager workspaceManager,
+      WorkspaceRuntimes workspaceRuntimes,
       WorkspaceActivityDao activityDao,
       EventService eventService,
       AccountManager accountManager,
       ResourceManager resourceManager,
       @Named("che.limits.workspace.idle.timeout") long defaultTimeout) {
-    super(workspaceManager, activityDao, eventService, defaultTimeout);
+    super(workspaceManager, workspaceRuntimes, activityDao, eventService, defaultTimeout);
     this.accountManager = accountManager;
     this.resourceManager = resourceManager;
     this.defaultTimeout = defaultTimeout;
