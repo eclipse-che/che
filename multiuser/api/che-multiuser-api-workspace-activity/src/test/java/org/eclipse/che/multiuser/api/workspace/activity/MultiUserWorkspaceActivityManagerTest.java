@@ -22,6 +22,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.multiuser.resource.api.type.TimeoutResourceType;
@@ -44,6 +45,7 @@ public class MultiUserWorkspaceActivityManagerTest {
   @Mock private ResourceManager resourceManager;
 
   @Mock private WorkspaceManager workspaceManager;
+  @Mock private WorkspaceRuntimes workspaceRuntimes;
 
   @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> captor;
 
@@ -60,6 +62,7 @@ public class MultiUserWorkspaceActivityManagerTest {
     activityManager =
         new MultiUserWorkspaceActivityManager(
             workspaceManager,
+            workspaceRuntimes,
             workspaceActivityDao,
             eventService,
             accountManager,

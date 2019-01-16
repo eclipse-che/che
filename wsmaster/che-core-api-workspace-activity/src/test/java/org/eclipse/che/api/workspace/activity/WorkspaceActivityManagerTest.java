@@ -28,6 +28,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
@@ -51,6 +52,7 @@ public class WorkspaceActivityManagerTest {
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
 
   @Mock private WorkspaceManager workspaceManager;
+  @Mock private WorkspaceRuntimes workspaceRuntimes;
 
   @Captor private ArgumentCaptor<EventSubscriber<WorkspaceCreatedEvent>> createEventCaptor;
   @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> statusChangeEventCaptor;
@@ -68,7 +70,11 @@ public class WorkspaceActivityManagerTest {
   private void setUp() throws Exception {
     activityManager =
         new WorkspaceActivityManager(
-            workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT);
+            workspaceManager,
+            workspaceRuntimes,
+            workspaceActivityDao,
+            eventService,
+            DEFAULT_TIMEOUT);
 
     lenient().when(account.getName()).thenReturn("accountName");
     lenient().when(account.getId()).thenReturn("account123");

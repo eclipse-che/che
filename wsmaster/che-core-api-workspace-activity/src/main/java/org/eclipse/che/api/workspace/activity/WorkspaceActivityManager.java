@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
@@ -67,14 +68,17 @@ public class WorkspaceActivityManager {
   private final EventSubscriber<BeforeWorkspaceRemovedEvent> workspaceActivityRemover;
 
   protected final WorkspaceManager workspaceManager;
+  private final WorkspaceRuntimes workspaceRuntimes;
 
   @Inject
   public WorkspaceActivityManager(
       WorkspaceManager workspaceManager,
+      WorkspaceRuntimes workspaceRuntimes,
       WorkspaceActivityDao activityDao,
       EventService eventService,
       @Named("che.limits.workspace.idle.timeout") long timeout) {
     this.workspaceManager = workspaceManager;
+    this.workspaceRuntimes = workspaceRuntimes;
     this.eventService = eventService;
     this.activityDao = activityDao;
     this.defaultTimeout = timeout;
@@ -167,10 +171,80 @@ public class WorkspaceActivityManager {
       delayParameterName = "che.workspace.activity_check_scheduler_period_s")
   private void invalidate() {
     try {
-      activityDao.findExpired(System.currentTimeMillis()).forEach(this::stopExpired);
+      stopAllExpired();
+      checkValidExpiration();
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
+  }
+
+  private void stopAllExpired() throws ServerException {
+    activityDao.findExpired(System.currentTimeMillis()).forEach(this::stopExpired);
+  }
+
+  private void checkValidExpiration() throws ServerException {
+    for (String runningWsId : workspaceRuntimes.getRunning()) {
+      WorkspaceActivity activity = activityDao.findActivity(runningWsId);
+      if (activity == null) {
+        LOG.warn(
+            "Found a running workspace {} without any activity record. This shouldn't really"
+                + " happen but is being rectified by adding a new activity record for it.",
+            runningWsId);
+
+        try {
+          Workspace workspace = workspaceManager.getWorkspace(runningWsId);
+          long createdTime =
+              Long.parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+
+          activity = new WorkspaceActivity();
+          activity.setWorkspaceId(runningWsId);
+          activity.setCreated(createdTime);
+          activity.setStatus(WorkspaceStatus.RUNNING);
+          activity.setLastRunning(System.currentTimeMillis());
+
+          long idleTimeout = getIdleTimeout(runningWsId);
+          if (idleTimeout > 0) {
+            // only set the expiration if it is used...
+            activity.setExpiration(System.currentTimeMillis() + idleTimeout);
+          }
+
+          activityDao.createActivity(activity);
+        } catch (NotFoundException e) {
+          LOG.error(
+              "Detected a running workspace {} but could not find its record.", runningWsId, e);
+        } catch (ConflictException e) {
+          LOG.debug(
+              "Activity record created while we were trying to rectify its absence for a"
+                  + " running workspace {}.",
+              runningWsId);
+        }
+      } else {
+        long idleTimeout = getIdleTimeout(runningWsId);
+        if (idleTimeout == 0) {
+          // expiry not used at all...
+          continue;
+        }
+
+        long expectedExpiryTime =
+            valueOrDefault(activity.getLastRunning(), System.currentTimeMillis()) + idleTimeout;
+        long actualExpiryTime = valueOrDefault(activity.getExpiration(), 0);
+
+        if (actualExpiryTime != expectedExpiryTime) {
+          LOG.debug(
+              "Detected expiry time out of sync with the expected. Based on the last time"
+                  + " the workspace {} has started, the expiry should be {} but was found to be {}."
+                  + " Rectifying.",
+              runningWsId,
+              expectedExpiryTime,
+              actualExpiryTime);
+          update(runningWsId, expectedExpiryTime);
+        }
+      }
+    }
+  }
+
+  private static long valueOrDefault(Long value, long defaultValue) {
+    return value == null ? defaultValue : value;
   }
 
   private void stopExpired(String workspaceId) {
