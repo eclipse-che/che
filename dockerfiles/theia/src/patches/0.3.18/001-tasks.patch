@@ -1,0 +1,64 @@
+diff --git a/packages/task/src/node/process/process-task.ts b/packages/task/src/node/process/process-task.ts
+index b6fa83c..d309529 100644
+--- a/packages/task/src/node/process/process-task.ts
++++ b/packages/task/src/node/process/process-task.ts
+@@ -15,7 +15,7 @@
+  ********************************************************************************/
+ 
+ import { injectable, inject, named } from 'inversify';
+-import { ILogger, } from '@theia/core/lib/common/';
++import { ILogger } from '@theia/core/lib/common/';
+ import { Process } from '@theia/process/lib/node';
+ import { Task, TaskOptions } from '../task';
+ import { TaskManager } from '../task-manager';
+diff --git a/packages/task/src/node/task-server.ts b/packages/task/src/node/task-server.ts
+index a0788e7..d46a080 100644
+--- a/packages/task/src/node/task-server.ts
++++ b/packages/task/src/node/task-server.ts
+@@ -39,13 +39,13 @@ export class TaskServerImpl implements TaskServer {
+         // do nothing
+     }
+ 
+-    getTasks(context?: string | undefined): Promise<TaskInfo[]> {
++    async getTasks(context?: string | undefined): Promise<TaskInfo[]> {
+         const taskInfo: TaskInfo[] = [];
+ 
+         const tasks = this.taskManager.getTasks(context);
+         if (tasks !== undefined) {
+             for (const task of tasks) {
+-                taskInfo.push(task.getRuntimeInfo());
++                taskInfo.push(await task.getRuntimeInfo());
+             }
+         }
+         this.logger.debug(`getTasks(): about to return task information for ${taskInfo.length} tasks`);
+@@ -62,7 +62,7 @@ export class TaskServerImpl implements TaskServer {
+             this.fireTaskExitedEvent(event);
+         });
+ 
+-        const taskInfo = task.getRuntimeInfo();
++        const taskInfo = await task.getRuntimeInfo();
+         this.fireTaskCreatedEvent(taskInfo);
+         return taskInfo;
+     }
+diff --git a/packages/task/src/node/task.ts b/packages/task/src/node/task.ts
+index f6b78a1..f8d621a 100644
+--- a/packages/task/src/node/task.ts
++++ b/packages/task/src/node/task.ts
+@@ -15,7 +15,7 @@
+  ********************************************************************************/
+ 
+ import { injectable } from 'inversify';
+-import { ILogger, Emitter, Event } from '@theia/core/lib/common/';
++import { ILogger, Emitter, Event, MaybePromise } from '@theia/core/lib/common/';
+ import { TaskManager } from './task-manager';
+ import { TaskInfo, TaskExitedEvent, TaskConfiguration } from '../common/task-protocol';
+ 
+@@ -53,7 +53,7 @@ export abstract class Task {
+     }
+ 
+     /** Returns runtime information about task. */
+-    abstract getRuntimeInfo(): TaskInfo;
++    abstract getRuntimeInfo(): MaybePromise<TaskInfo>;
+ 
+     get id() {
+         return this.taskId;
