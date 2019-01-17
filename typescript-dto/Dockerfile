@@ -28,8 +28,10 @@ ADD package.json /che/package.json
 
 COPY ./index.d.ts /che/index.d.ts
 
+ADD publish.sh publish.sh
+
 ARG NPM_AUTH_TOKEN
 
 ARG CHE_VERSION
 
-RUN cd /che && yarn publish  --registry=https://registry.npmjs.org/ --no-git-tag-version --new-version ${CHE_VERSION}
+RUN cd /che && ../publish.sh ${CHE_VERSION}
