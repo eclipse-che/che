@@ -69,6 +69,7 @@ import org.eclipse.che.api.project.server.notification.PreProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectDeletedEvent;
 import org.eclipse.che.api.project.server.notification.ProjectItemModifiedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.CopyOptions;
@@ -224,10 +225,14 @@ public class ProjectServiceApi {
       wsPath = absolutize(wsPath);
       projectConfigDto.setPath(wsPath);
     }
-    boolean registeredEarly = projectManager.isRegistered(wsPath);
+
+    RegisteredProject previous = projectManager.getOrNull(wsPath);
+
     RegisteredProject updated = projectManager.update(projectConfigDto);
-    if (!registeredEarly) { // if project config set firstly we will fire event project created
+    if (previous == null) { // if project config set firstly we will fire event project created
       eventService.publish(new ProjectCreatedEvent(updated.getPath()));
+    } else {
+      eventService.publish(new ProjectUpdatedEvent(wsPath, previous));
     }
 
     return asDto(updated);

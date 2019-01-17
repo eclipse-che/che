@@ -19,7 +19,7 @@ RUN mkdir -p /tmp/agent ;\
     mkdir -p /home/user/agent/traefik ;\
     wget -O /home/user/agent/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.7.5/traefik_linux-amd64"; \
     chmod +x /home/user/agent/traefik/traefik;\
-    wget -O /tmp/tomcat8.zip "https://oss.sonatype.org/content/repositories/releases/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.15.0/che-tomcat8-slf4j-logback-6.15.0.zip" ;\
+    wget -O /tmp/tomcat8.zip "https://oss.sonatype.org/content/repositories/releases/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.16.0/che-tomcat8-slf4j-logback-6.16.0.zip" ;\
     unzip /tmp/tomcat8.zip -d /home/user/agent/wsagent;
 
 COPY traefik.toml traefik_conf.sh /home/user/agent/traefik/

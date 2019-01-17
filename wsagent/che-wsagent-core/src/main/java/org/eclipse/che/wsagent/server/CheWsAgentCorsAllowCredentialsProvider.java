@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.core.cors;
+package org.eclipse.che.wsagent.server;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;

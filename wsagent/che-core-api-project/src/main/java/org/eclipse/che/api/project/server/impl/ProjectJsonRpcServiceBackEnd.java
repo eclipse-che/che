@@ -44,6 +44,7 @@ import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.notification.ProjectCreatedEvent;
+import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.api.project.server.type.ProjectTypeResolution;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.project.shared.dto.ImportProgressRecordDto;
@@ -138,14 +139,18 @@ public class ProjectJsonRpcServiceBackEnd {
   private UpdateResponseDto updateInternally(UpdateRequestDto request)
       throws ServerException, ConflictException, ForbiddenException, BadRequestException,
           NotFoundException {
-    String wsPath = request.getWsPath();
     ProjectConfigDto config = request.getConfig();
-    Map<String, String> options = request.getOptions();
+    RegisteredProject previous = projectManager.getOrNull(request.getWsPath());
 
     RegisteredProject registeredProject = projectManager.update(config);
     ProjectConfigDto projectConfigDto = asDto(registeredProject);
     UpdateResponseDto response = newDto(UpdateResponseDto.class);
     response.setConfig(projectConfigDto);
+    if (previous == null) { // if project config set firstly we will fire event project created
+      eventService.publish(new ProjectCreatedEvent(request.getWsPath()));
+    } else {
+      eventService.publish(new ProjectUpdatedEvent(request.getWsPath(), previous));
+    }
 
     return response;
   }
