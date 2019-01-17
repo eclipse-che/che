@@ -491,7 +491,10 @@ public class ProjectServiceApi {
     String dstWsPath = resolve(newParentWsPath, name);
 
     if (projectManager.isRegistered(wsPath)) {
+      eventService.publish(new PreProjectDeletedEvent(wsPath));
       projectManager.move(wsPath, dstWsPath, overwrite);
+      eventService.publish(new ProjectDeletedEvent(wsPath));
+      eventService.publish(new ProjectCreatedEvent(dstWsPath));
     } else {
       fsManager.move(wsPath, dstWsPath, overwrite, true);
     }
