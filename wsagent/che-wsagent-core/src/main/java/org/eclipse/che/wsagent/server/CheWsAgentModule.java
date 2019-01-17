@@ -16,8 +16,6 @@ import com.google.inject.name.Names;
 import java.net.URI;
 import org.eclipse.che.MachineTokenProvider;
 import org.eclipse.che.UriApiEndpointProvider;
-import org.eclipse.che.api.core.cors.CheWsAgentCorsAllowCredentialsProvider;
-import org.eclipse.che.api.core.cors.CheWsAgentCorsAllowedOriginsProvider;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.wsagent.server.appstate.AppStateService;
 
