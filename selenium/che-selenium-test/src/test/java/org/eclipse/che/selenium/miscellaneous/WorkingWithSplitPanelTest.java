@@ -54,8 +54,8 @@ public class WorkingWithSplitPanelTest {
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
   @Inject private Menu menu;
-  @Inject protected Loader loader;
-  @Inject protected CheTerminal terminal;
+  @Inject private Loader loader;
+  @Inject private CheTerminal terminal;
   @Inject private Consoles consoles;
   @Inject private MultiSplitPanel multiSplitPanel;
   @Inject private AskDialog askDialog;
@@ -131,7 +131,11 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
     terminal.waitTerminalIsNotEmpty(2); // terminal.waitTerminalIsNotEmpty(2)
     loader.waitOnClosed();
-    typeIntoTerminalAndCheckTerminalIsNotEmpty();
+    terminal.typeIntoActiveTerminal(getCommandToCheckTerminal());
+    terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
+    terminal.waitTerminalIsNotEmpty(3);
+    loader.waitOnClosed();
+    checkExpectedTextIsPresent();
     multiSplitPanel.waitTabProcessIsNotPresent(2, BUILD_COMM);
   }
 
@@ -204,13 +208,17 @@ public class WorkingWithSplitPanelTest {
     projectExplorer.clickOnProjectExplorerTab();
   }
 
-  protected void typeIntoTerminalAndCheckTerminalIsNotEmpty() {
-    terminal.typeIntoActiveTerminal("mc");
-    terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
-    terminal.waitTerminalIsNotEmpty(3);
-    loader.waitOnClosed();
-    String visibleTextFromTerminal = terminal.getVisibleTextFromTerminal(3);
+  protected String getCommandToCheckTerminal() {
+    return "mc";
+  }
+
+  protected void checkExpectedTextIsPresent() {
+    String visibleTextFromTerminal = getExpectedContentOfTerminal();
     stream(checkMcTerminal)
         .forEach(content -> assertTrue(visibleTextFromTerminal.contains(content)));
+  }
+
+  private String getExpectedContentOfTerminal() {
+    return terminal.getVisibleTextFromTerminal(3);
   }
 }

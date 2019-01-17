@@ -61,7 +61,7 @@ public class OpenInTerminalTest {
 
   @SuppressWarnings("unused")
   @Inject
-  protected CheTerminal terminal;
+  private CheTerminal terminal;
 
   @SuppressWarnings("unused")
   @Inject
@@ -136,7 +136,7 @@ public class OpenInTerminalTest {
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
     terminal.waitTerminalTab(2);
-    waitTextInTerminal();
+    terminal.waitTextInTerminal(2, getExpectedTextInTerminal());
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME + FILE);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + FILE);
@@ -167,7 +167,7 @@ public class OpenInTerminalTest {
     terminal.waitTextInTerminal(2, PROJECT_NAME);
   }
 
-  protected void waitTextInTerminal() throws Exception {
-    terminal.waitTextInTerminal(2, PROJECT_NAME + PATH_TO_EXPAND);
+  protected String getExpectedTextInTerminal() throws Exception {
+    return PROJECT_NAME + PATH_TO_EXPAND;
   }
 }
