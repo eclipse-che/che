@@ -1,17 +1,22 @@
 # How to Build Theia Image
 
-## Build image manually
+## Build image manually using build scripts
+To build Theia image manually You could use build.sh scripts.
+Dockerfile uses multi-stage build feature, so first of all You need build builder image -
+theia-dev:
+
 Example:
-using build script:
 
-```
-./build.sh --build-args:GITHUB_TOKEN=$GITHUB_TOKEN,THEIA_VERSION=0.3.10 --tag:0.3.10-nightly
+```shell
+$ ../theia-dev/build.sh
 ```
 
-with native docker:
+Than You can build Theia image.
 
-```
-docker build -t eclipse/che-theia:0.3.10-nightly --build-arg GITHUB_TOKEN=${GITHUB_TOKEN} --build-arg THEIA_VERSION=0.3.10 .
+Example:
+
+```bash
+$ ./build.sh --build-args:GITHUB_TOKEN=$GITHUB_TOKEN,THEIA_VERSION=0.3.18
 ```
 
 ## Theia version
