@@ -64,8 +64,8 @@ public class ResolveDependencyAfterRecreateProjectTest {
     createProjectFromUI(PROJECT_NAME1);
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME1);
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME1 + PATH_TO_EXPAND);
-    projectExplorer.openItemByPath(PROJECT_NAME1 + PATH_TO_FILE);
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME1 + getPathToExpand());
+    projectExplorer.openItemByPath(PROJECT_NAME1 + getPathToFile());
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
 
@@ -73,8 +73,8 @@ public class ResolveDependencyAfterRecreateProjectTest {
     createProjectFromUI(PROJECT_NAME2);
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME2);
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME2 + PATH_TO_EXPAND);
-    projectExplorer.openItemByPath(PROJECT_NAME2 + PATH_TO_FILE);
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME2 + getPathToExpand());
+    projectExplorer.openItemByPath(PROJECT_NAME2 + getPathToFile());
     editor.waitActive();
     editor.waitAllMarkersInvisibility(ERROR);
   }
@@ -96,7 +96,7 @@ public class ResolveDependencyAfterRecreateProjectTest {
   private void createProjectFromUI(String nameOfTheProject) {
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
     wizard.selectTypeProject(MAVEN);
-    wizard.selectSample(WEB_JAVA_SPRING);
+    wizard.selectSample(getSampleProjectName());
     wizard.typeProjectNameOnWizard(nameOfTheProject);
     wizard.clickCreateButton();
     wizard.waitCloseProjectConfigForm();
@@ -104,5 +104,17 @@ public class ResolveDependencyAfterRecreateProjectTest {
     projectExplorer.waitItem(nameOfTheProject);
     mavenPluginStatusBar.waitClosingInfoPanel();
     notificationsPopupPanel.waitProgressPopupPanelClose();
+  }
+
+  protected String getSampleProjectName() {
+    return WEB_JAVA_SPRING;
+  }
+
+  protected String getPathToExpand() {
+    return PATH_TO_EXPAND;
+  }
+
+  protected String getPathToFile() {
+    return PATH_TO_FILE;
   }
 }

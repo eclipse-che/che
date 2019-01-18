@@ -13,14 +13,16 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.ActionButton.SAVE_BUTTON;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.MACHINES;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.selenium.core.TestGroup;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.executor.OpenShiftCliCommandExecutor;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
@@ -33,22 +35,24 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.EditMachineForm;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetailsMachines;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.ExpectedCondition;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = OPENSHIFT)
+@Test(groups = {TestGroup.OPENSHIFT, UNDER_REPAIR})
 public class MachinesAsynchronousStartTest {
-  private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
+  private static final String WORKSPACE_NAME = generate("test-workspace-", 4);
   private static final String MACHINE_NAME = "dev-machine";
-  private static final String IMAGE_NAME = "eclipse/ubuntu_jdk8";
-  private static final String IMAGE_NAME_SUFFIX = NameGenerator.generate("", 4);
-  private static final String NOT_EXISTED_IMAGE_NAME = IMAGE_NAME + IMAGE_NAME_SUFFIX;
   private static final String SUCCESS_NOTIFICATION_TEST = "Workspace updated.";
   private static final String GET_WORKSPACE_EVENTS_COMMAND_TEMPLATE =
       "get event --no-headers=true | grep %s | awk '{print $7 \" \" $8}'";
-  private static final String EXPECTED_ERROR_NOTIFICATION_TEXT =
+
+  protected final String IMAGE_NAME = getImageName();
+  protected final String IMAGE_NAME_SUFFIX = generate("-", 4);
+  protected final String NOT_EXISTED_IMAGE_NAME = IMAGE_NAME + IMAGE_NAME_SUFFIX;
+  protected final String EXPECTED_ERROR_NOTIFICATION_TEXT =
       format(
           "Unrecoverable event occurred: 'Failed', 'Failed to pull image \"%s\": "
               + "rpc error: code = Unknown desc = Error response from daemon: pull "
@@ -118,7 +122,12 @@ public class MachinesAsynchronousStartTest {
   public void checkWorkspace() {
     // check behavior of the broken workspace
     workspaces.clickOnWorkspaceStopStartButton(WORKSPACE_NAME);
-    workspaces.waitErrorNotificationContainsText(EXPECTED_ERROR_NOTIFICATION_TEXT);
+    try {
+      workspaces.waitErrorNotificationContainsText(getExpectedErrorNotificationText());
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/12419");
+    }
 
     // check openshift events log
     waitEvent("Failed");
@@ -148,5 +157,13 @@ public class MachinesAsynchronousStartTest {
     webDriverWaitFactory
         .get(timeoutInSeconds, delayBetweenRequestsInSeconds)
         .until((ExpectedCondition<Boolean>) driver -> eventIsPresent(event));
+  }
+
+  protected String getImageName() {
+    return "eclipse/ubuntu_jdk8";
+  }
+
+  protected String getExpectedErrorNotificationText() {
+    return EXPECTED_ERROR_NOTIFICATION_TEXT;
   }
 }
