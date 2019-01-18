@@ -106,7 +106,7 @@ public class PhpProjectDebuggingTest {
     debugConfig.removeConfig(PROJECT);
   }
 
-  @Test()
+  @Test
   public void shouldDebugCliPhpScriptFromFirstLine() {
     // when
     menu.runCommand(

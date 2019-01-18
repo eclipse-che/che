@@ -67,7 +67,7 @@ public class WorkingWithTerminalTest {
   @Inject private Ide ide;
   @Inject private Loader loader;
   @Inject private Consoles consoles;
-  @Inject protected CheTerminal terminal;
+  @Inject private CheTerminal terminal;
   @Inject private TestWorkspace workspace;
   @Inject private PanelSelector panelSelector;
   @Inject private ProjectExplorer projectExplorer;
@@ -243,7 +243,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal("touch a.txt" + Keys.ENTER);
 
     terminal.typeIntoActiveTerminal("ls" + Keys.ENTER);
-    waitTextInFirstTerminal();
+    terminal.waitTextInFirstTerminal(getExpectedContent());
   }
 
   @Test(groups = UNDER_REPAIR)
@@ -382,9 +382,7 @@ public class WorkingWithTerminalTest {
     terminal.waitTextInFirstTerminal("Modify time");
   }
 
-  protected void waitTextInFirstTerminal() {
-    terminal.waitTextInFirstTerminal("che");
-    terminal.waitTextInFirstTerminal("a.txt");
-    terminal.waitTextInFirstTerminal("tomcat8");
+  protected String[] getExpectedContent() {
+    return new String[] {"che", "a.txt", "tomcat8"};
   }
 }
