@@ -16,6 +16,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_B
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.time.Clock;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -70,6 +71,8 @@ public class WorkspaceActivityManager {
   protected final WorkspaceManager workspaceManager;
   private final WorkspaceRuntimes workspaceRuntimes;
 
+  private final Clock clock;
+
   @Inject
   public WorkspaceActivityManager(
       WorkspaceManager workspaceManager,
@@ -77,11 +80,30 @@ public class WorkspaceActivityManager {
       WorkspaceActivityDao activityDao,
       EventService eventService,
       @Named("che.limits.workspace.idle.timeout") long timeout) {
+
+    this(
+        workspaceManager,
+        workspaceRuntimes,
+        activityDao,
+        eventService,
+        timeout,
+        Clock.systemDefaultZone());
+  }
+
+  @VisibleForTesting
+  WorkspaceActivityManager(
+      WorkspaceManager workspaceManager,
+      WorkspaceRuntimes workspaceRuntimes,
+      WorkspaceActivityDao activityDao,
+      EventService eventService,
+      long timeout,
+      Clock clock) {
     this.workspaceManager = workspaceManager;
     this.workspaceRuntimes = workspaceRuntimes;
     this.eventService = eventService;
     this.activityDao = activityDao;
     this.defaultTimeout = timeout;
+    this.clock = clock;
     if (timeout > 0 && timeout < MINIMAL_TIMEOUT) {
       LOG.warn(
           "Value of property \"che.limits.workspace.idle.timeout\" is below recommended minimum ("
@@ -169,82 +191,280 @@ public class WorkspaceActivityManager {
   @ScheduleDelay(
       initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
       delayParameterName = "che.workspace.activity_check_scheduler_period_s")
-  private void invalidate() {
+  @VisibleForTesting
+  void validate() {
     try {
       stopAllExpired();
-      checkValidExpiration();
+      checkActivityRecordValidity();
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
     }
   }
 
   private void stopAllExpired() throws ServerException {
-    activityDao.findExpired(System.currentTimeMillis()).forEach(this::stopExpired);
+    activityDao.findExpired(clock.millis()).forEach(this::stopExpired);
   }
 
-  private void checkValidExpiration() throws ServerException {
+  private void checkActivityRecordValidity() throws ServerException {
     for (String runningWsId : workspaceRuntimes.getRunning()) {
       WorkspaceActivity activity = activityDao.findActivity(runningWsId);
       if (activity == null) {
         LOG.warn(
-            "Found a running workspace {} without any activity record. This shouldn't really"
-                + " happen but is being rectified by adding a new activity record for it.",
+            "Found a running workspace {} without any activity record. This shouldn't really happen"
+                + " but is being rectified by adding a new activity record for it.",
             runningWsId);
-
         try {
-          Workspace workspace = workspaceManager.getWorkspace(runningWsId);
-          long createdTime =
-              Long.parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
-
-          activity = new WorkspaceActivity();
-          activity.setWorkspaceId(runningWsId);
-          activity.setCreated(createdTime);
-          activity.setStatus(WorkspaceStatus.RUNNING);
-          activity.setLastRunning(System.currentTimeMillis());
-
-          long idleTimeout = getIdleTimeout(runningWsId);
-          if (idleTimeout > 0) {
-            // only set the expiration if it is used...
-            activity.setExpiration(System.currentTimeMillis() + idleTimeout);
-          }
-
-          activityDao.createActivity(activity);
+          createMissingActivityRecord(runningWsId);
         } catch (NotFoundException e) {
           LOG.error(
-              "Detected a running workspace {} but could not find its record.", runningWsId, e);
+              "Detected a running workspace {} but could not find" + " its record.",
+              runningWsId,
+              e);
         } catch (ConflictException e) {
           LOG.debug(
-              "Activity record created while we were trying to rectify its absence for a"
-                  + " running workspace {}.",
+              "Activity record created while we were trying to rectify its absence for a running"
+                  + " workspace {}.",
               runningWsId);
         }
       } else {
+        // what are we trying to handle here?
+        // 1) make sure that the activity record has a valid created time
+        // 2) make sure activity record as at least 1 activity record - if it lacks last_running,
+        //    we look at last_starting and if even that is not there we make sure there is at least
+        //    created_time - the last_* are not mandatory, but the created_time should be present
+        // 3) absence of last_running - this can either happen very shortly after the workspace
+        //    has started and the schedule of this method coincided with it starting. or there has
+        //    been some kind of problem.
+        // 4) absence of expiry - again this should only happen shortly after the workspace has
+        //    started if the schedule of this method managed to read the activity before the expiry
+        //    time has been persisted in the event handler. Otherwise it is a problem.
+
+        if (activity.getCreated() == null) {
+          try {
+            rectifyCreatedTime(activity);
+          } catch (NotFoundException e) {
+            LOG.error(
+                "Detected a running workspace {} but could not find" + " its record.",
+                runningWsId,
+                e);
+          }
+        }
+
+        // let's use a single value for the current time in all the code below
+        long now = clock.millis();
+
+        boolean noLastRunningTime = activity.getLastRunning() == null;
+
+        // this value is the last recorded activity of any kind on the workspace.
+        // Even though we tried to recover the created_time in the code above, it might still happen
+        // that we failed to do that and that no other activity exists on the workspace.
+        // That's why in the code below we still have to account for the possibility of this value
+        // being null.
+        Long lastKnownActivity =
+            maxOf(
+                activity.getCreated(),
+                activity.getLastStarting(),
+                activity.getLastRunning(),
+                activity.getLastStopping(),
+                activity.getLastStopped());
+
+        if (noLastRunningTime) {
+          rectifyNoLastRunningTime(runningWsId, activity, now, lastKnownActivity);
+        } else if (lastKnownActivity != null && lastKnownActivity > activity.getLastRunning()) {
+          LOG.warn(
+              "Workspace {} has been found running yet there is an activity on it newer than the"
+                  + " last running time. This should not happen. Resetting the last running time to"
+                  + " the newest activity time. The activity record is this: ",
+              runningWsId,
+              activity.toString());
+          activityDao.setStatusChangeTime(runningWsId, WorkspaceStatus.RUNNING, lastKnownActivity);
+          activity.setLastRunning(lastKnownActivity);
+        }
+
+        // check whether we even need to do anything about expiry. If we're configured with
+        // idle-timeout of 0 then expiration is not used at all.
         long idleTimeout = getIdleTimeout(runningWsId);
         if (idleTimeout == 0) {
-          // expiry not used at all...
           continue;
         }
 
-        long expectedExpiryTime =
-            valueOrDefault(activity.getLastRunning(), System.currentTimeMillis()) + idleTimeout;
-        long actualExpiryTime = valueOrDefault(activity.getExpiration(), 0);
-
-        if (actualExpiryTime != expectedExpiryTime) {
-          LOG.debug(
-              "Detected expiry time out of sync with the expected. Based on the last time"
-                  + " the workspace {} has started, the expiry should be {} but was found to be {}."
-                  + " Rectifying.",
-              runningWsId,
-              expectedExpiryTime,
-              actualExpiryTime);
-          update(runningWsId, expectedExpiryTime);
+        if (activity.getExpiration() == null) {
+          rectifyExpirationTime(
+              runningWsId, activity, now, noLastRunningTime, lastKnownActivity, idleTimeout);
         }
       }
     }
   }
 
-  private static long valueOrDefault(Long value, long defaultValue) {
-    return value == null ? defaultValue : value;
+  private void createMissingActivityRecord(String workspaceId)
+      throws ServerException, ConflictException, NotFoundException {
+    Workspace workspace = workspaceManager.getWorkspace(workspaceId);
+    long createdTime =
+        Long.parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+
+    WorkspaceActivity activity = new WorkspaceActivity();
+    activity.setWorkspaceId(workspaceId);
+    activity.setCreated(createdTime);
+    activity.setStatus(WorkspaceStatus.RUNNING);
+    activity.setLastRunning(clock.millis());
+
+    long idleTimeout = getIdleTimeout(workspaceId);
+    if (idleTimeout > 0) {
+      // only set the expiration if it is used
+      activity.setExpiration(clock.millis() + idleTimeout);
+    }
+
+    activityDao.createActivity(activity);
+  }
+
+  private void rectifyCreatedTime(WorkspaceActivity activity)
+      throws ServerException, NotFoundException {
+    try {
+      Workspace workspace = workspaceManager.getWorkspace(activity.getWorkspaceId());
+      long createdTime =
+          Long.parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+      LOG.warn(
+          "Workspace {} doesn't have any information about when it was created or last seen"
+              + " starting. Setting the created time to {}.",
+          activity.getWorkspaceId(),
+          createdTime);
+      activityDao.setCreatedTime(activity.getWorkspaceId(), createdTime);
+      activity.setCreated(createdTime);
+    } catch (NumberFormatException e) {
+      LOG.error(
+          "Failed to read the created time of the workspace {} from its attributes.",
+          activity.getWorkspaceId(),
+          e);
+    }
+  }
+
+  private void rectifyExpirationTime(
+      String runningWsId,
+      WorkspaceActivity activity,
+      long now,
+      boolean noLastRunningTime,
+      Long lastKnownActivity,
+      long idleTimeout) {
+    // define the error message upfront to make it easier to follow the actual logic
+    final String noActivityFoundWhileHandlingExpiration =
+        "Found no expiration time on workspace {}. No prior activity was found on the  workspace."
+            + " To restore the normal function, the expiration time has been set to {}.";
+    final String noExpirationWithoutLastRunning =
+        "Found no expiration time on workspace {} and no  record of the last time it started. The"
+            + " expiration has been set to {}";
+    final String noExpirationAfterThresholdTime =
+        "Found no expiration time on workspace {}. This  was detected {}ms after the workspace has"
+            + " been recorded running which is suspicious.  Please consider filing a bug report. To"
+            + " restore the normal function, the expiration  time has been set to {}.";
+    final String noExpirationBeforeThresholdTime =
+        "Found no expiration time on workspace {}. This  was detected {}ms after the workspace has"
+            + " been recorded running which is most probably caused by the schedule coinciding with"
+            + " the workspace actually entering the running state. Not rectifying the expiration at"
+            + " the moment and leaving that for the next iteration.";
+
+    // if this happens within 1 second of the last transition to having been started,
+    // let's just consider it a case of coincidence between this periodic check and the event
+    // handler setting the expiration time. Let's just do our work here in either case,
+    // because the difference in times set by this method and the event handler will be very
+    // small and we make sure that we don't enter the state where a running workspace doesn't
+    // have any expiry period in case there was a problem.
+
+    // first figure out the expiration time. The last running time has been initialized
+    // in the code above, so we can safely assume it is non-null, here.
+    long lastTime = activity.getLastRunning();
+
+    if (lastKnownActivity == null) {
+      // here, we have no prior record of any activity. Even thought the code above tried to
+      // fix that, we don't want to report on the half-way fixed state. Let's just fix the
+      // expiration-related part of the problem and report that we fixed it from the original
+      // "condition" of the activity record.
+      update(runningWsId, lastTime);
+      LOG.warn(noActivityFoundWhileHandlingExpiration, runningWsId, lastTime);
+    } else if (noLastRunningTime) {
+      // the DB contained no record of the last time the workspace was running, but we found
+      // it running anyway. The last_running time was already set to "now" in the code above
+      // but we want to report about the expiration being set regardless of that fact.
+      update(runningWsId, lastTime);
+      LOG.warn(noExpirationWithoutLastRunning, runningWsId, lastTime);
+    } else {
+      // we have a record of the workspace entering the running state in the DB but we don't
+      // have any expiration timestamp yet. This looks like a coincidence between the schedule
+      // of this method and the workspace actually starting. Let's just give the DB a second
+      // leeway before we log a warning and fix the issue.
+      long timeAfterRunning = now - lastTime;
+
+      if (timeAfterRunning > 1000) {
+        update(runningWsId, lastTime);
+        LOG.warn(noExpirationAfterThresholdTime, runningWsId, timeAfterRunning, lastTime);
+      } else {
+        LOG.debug(noExpirationBeforeThresholdTime, runningWsId, timeAfterRunning, lastTime);
+      }
+    }
+  }
+
+  private void rectifyNoLastRunningTime(
+      String runningWsId, WorkspaceActivity activity, long now, Long lastKnownActivity)
+      throws ServerException {
+    // k, so we don't have the information about when the workspace was last started here.
+    // This is most probably because of the coincidence of the schedule of this method and
+    // the workspace being started. On the other hand, it also can happen if the wsmaster is
+    // stopped at some unfortunate point in time, which would lead to it never be set until
+    // the workspace is manually restarted.
+    // Therefore we should do something about this. The only sensible thing to do here is to
+    // persist the current time as the last running time. In case of coincidence with the
+    // event handler, the difference between the 2 different timestamps will be small, so no
+    // harm will be done. In the case of there being no value due to the server having been
+    // interrupted in the past, we have no idea what the value might have been, so again,
+    // the current time stamp seems like the best choice we have.
+
+    activityDao.setStatusChangeTime(runningWsId, WorkspaceStatus.RUNNING, now);
+    activity.setLastRunning(now);
+
+    if (lastKnownActivity == null) {
+      LOG.warn(
+          "Workspace {} had no information about the last activity on it yet was found running. The"
+              + " last seen running time of the workspace has been reset to {}. Please consider"
+              + " filing a bug report with any suspicious log messages prior to this one.",
+          runningWsId,
+          now);
+    } else if (lastKnownActivity < now - 300_000) {
+      // if the workspace's last activity was more than 5 mins ago (improbably long time
+      // for a workspace startup, pulled out of thin air), we want to log a
+      // message that we're recovering the last running time, because of some weird
+      // circumstances that most probably have happened in the meantime.
+      LOG.warn(
+          "Workspace {} had no information about the last time it has started yet was found"
+              + " running. The last activity recorded on it was more than 5 minutes ago. Please"
+              + " consider filing a bug report with attached logs for the period between the last"
+              + " recorded activity at timestamp {} and {}. The last seen running time of the"
+              + " workspace has been reset to {}.",
+          runningWsId,
+          lastKnownActivity,
+          now,
+          now);
+    } else {
+      LOG.debug(
+          "Workspace {} had no information about"
+              + " the last time it has started yet was found running. The activity record (with the"
+              + " rectified last running time) looks like this: {}",
+          runningWsId,
+          activity);
+    }
+  }
+
+  private static Long maxOf(Long... values) {
+    Long max = null;
+    for (Long v : values) {
+      if (v == null) {
+        continue;
+      }
+
+      if (max == null || v > max) {
+        max = v;
+      }
+    }
+
+    return max;
   }
 
   private void stopExpired(String workspaceId) {
@@ -274,7 +494,7 @@ public class WorkspaceActivityManager {
       implements EventSubscriber<WorkspaceStatusEvent> {
     @Override
     public void onEvent(WorkspaceStatusEvent event) {
-      long now = System.currentTimeMillis();
+      long now = clock.millis();
       String workspaceId = event.getWorkspaceId();
       WorkspaceStatus status = event.getStatus();
 
