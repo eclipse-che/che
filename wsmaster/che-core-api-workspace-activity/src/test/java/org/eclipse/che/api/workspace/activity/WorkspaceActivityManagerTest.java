@@ -11,33 +11,23 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
-import static java.util.Collections.singleton;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.stream.Stream;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
@@ -61,7 +51,6 @@ public class WorkspaceActivityManagerTest {
   private static final long DEFAULT_TIMEOUT = 60_000L; // 1 minute
 
   @Mock private WorkspaceManager workspaceManager;
-  @Mock private WorkspaceRuntimes workspaceRuntimes;
 
   @Captor private ArgumentCaptor<EventSubscriber<WorkspaceCreatedEvent>> createEventCaptor;
   @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> statusChangeEventCaptor;
@@ -74,20 +63,12 @@ public class WorkspaceActivityManagerTest {
   @Mock private EventService eventService;
 
   private WorkspaceActivityManager activityManager;
-  private ManualClock clock;
 
   @BeforeMethod
   private void setUp() throws Exception {
-    clock = new ManualClock();
-
     activityManager =
         new WorkspaceActivityManager(
-            workspaceManager,
-            workspaceRuntimes,
-            workspaceActivityDao,
-            eventService,
-            DEFAULT_TIMEOUT,
-            clock);
+            workspaceManager, workspaceActivityDao, eventService, DEFAULT_TIMEOUT);
 
     lenient().when(account.getName()).thenReturn("accountName");
     lenient().when(account.getId()).thenReturn("account123");
@@ -190,153 +171,6 @@ public class WorkspaceActivityManagerTest {
     assertEquals(15L, count);
   }
 
-  @Test
-  public void shouldStopAllExpiredWorkspaces() throws Exception {
-    when(workspaceActivityDao.findExpired(anyLong())).thenReturn(Arrays.asList("1", "2", "3"));
-
-    activityManager.validate();
-
-    verify(workspaceActivityDao, times(3)).removeExpiration(anyString());
-    verify(workspaceActivityDao).removeExpiration(eq("1"));
-    verify(workspaceActivityDao).removeExpiration(eq("2"));
-    verify(workspaceActivityDao).removeExpiration(eq("3"));
-  }
-
-  @Test
-  public void shouldRecreateMissingActivityRecord() throws Exception {
-    // given
-    String id = "1";
-    when(workspaceRuntimes.getRunning()).thenReturn(singleton(id));
-    when(workspaceActivityDao.findActivity(eq(id))).thenReturn(null);
-    when(workspaceManager.getWorkspace(eq(id)))
-        .thenReturn(
-            WorkspaceImpl.builder()
-                .setId(id)
-                .setAttributes(ImmutableMap.of(Constants.CREATED_ATTRIBUTE_NAME, "15"))
-                .build());
-
-    // when
-    clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    activityManager.validate();
-
-    // then
-    ArgumentCaptor<WorkspaceActivity> captor = ArgumentCaptor.forClass(WorkspaceActivity.class);
-    verify(workspaceActivityDao).createActivity(captor.capture());
-    WorkspaceActivity created = captor.getValue();
-    assertEquals(id, created.getWorkspaceId());
-    assertEquals(Long.valueOf(15), created.getCreated());
-    assertEquals(WorkspaceStatus.RUNNING, created.getStatus());
-    assertNotNull(created.getLastRunning());
-    assertEquals(clock.millis(), (long) created.getLastRunning());
-    assertNotNull(created.getExpiration());
-    assertEquals(clock.millis() + DEFAULT_TIMEOUT, (long) created.getExpiration());
-  }
-
-  @Test
-  public void shouldRestoreCreatedTimeOnInvalidActivityRecord() throws Exception {
-    // given
-    String id = "1";
-    WorkspaceActivity invalidActivity = new WorkspaceActivity();
-    invalidActivity.setWorkspaceId(id);
-    when(workspaceRuntimes.getRunning()).thenReturn(singleton(id));
-    when(workspaceActivityDao.findActivity(eq(id))).thenReturn(invalidActivity);
-    when(workspaceManager.getWorkspace(eq(id)))
-        .thenReturn(
-            WorkspaceImpl.builder()
-                .setId(id)
-                .setAttributes(ImmutableMap.of(Constants.CREATED_ATTRIBUTE_NAME, "15"))
-                .build());
-
-    // when
-    activityManager.validate();
-
-    // then
-    verify(workspaceActivityDao).setCreatedTime(eq(id), eq(15L));
-  }
-
-  @Test
-  public void shouldRestoreLastRunningTimeOnInvalidActivityRecordUsingCreatedTime()
-      throws Exception {
-    // given
-    String id = "1";
-    WorkspaceActivity invalidActivity = new WorkspaceActivity();
-    invalidActivity.setWorkspaceId(id);
-    invalidActivity.setCreated(15);
-    when(workspaceRuntimes.getRunning()).thenReturn(singleton(id));
-    when(workspaceActivityDao.findActivity(eq(id))).thenReturn(invalidActivity);
-
-    // when
-    clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    activityManager.validate();
-
-    // then
-    verify(workspaceActivityDao, never()).setCreatedTime(eq(id), anyLong());
-    verify(workspaceActivityDao)
-        .setStatusChangeTime(eq(id), eq(WorkspaceStatus.RUNNING), eq(clock.millis()));
-  }
-
-  @Test
-  public void shouldRestoreLastRunningTimeOnInvalidActivityRecordUsingLastStartingTime()
-      throws Exception {
-    // given
-    String id = "1";
-    WorkspaceActivity invalidActivity = new WorkspaceActivity();
-    invalidActivity.setWorkspaceId(id);
-    invalidActivity.setLastStarting(10);
-    when(workspaceRuntimes.getRunning()).thenReturn(singleton(id));
-    when(workspaceActivityDao.findActivity(eq(id))).thenReturn(invalidActivity);
-    when(workspaceManager.getWorkspace(eq(id)))
-        .thenReturn(
-            WorkspaceImpl.builder()
-                .setId(id)
-                .setAttributes(ImmutableMap.of(Constants.CREATED_ATTRIBUTE_NAME, "15"))
-                .build());
-
-    // when
-    clock.forward(Duration.of(1, ChronoUnit.SECONDS));
-    activityManager.validate();
-
-    // then
-    verify(workspaceActivityDao).setCreatedTime(eq(id), eq(15L));
-    verify(workspaceActivityDao)
-        .setStatusChangeTime(eq(id), eq(WorkspaceStatus.RUNNING), eq(clock.millis()));
-  }
-
-  @Test
-  public void shouldRestoreExpirationTimeMoreThanASecondAfterRunning() throws Exception {
-    long lastRunning = clock.millis();
-    String id = "1";
-    WorkspaceActivity invalidActivity = new WorkspaceActivity();
-    invalidActivity.setWorkspaceId(id);
-    invalidActivity.setLastRunning(lastRunning);
-    when(workspaceRuntimes.getRunning()).thenReturn(singleton(id));
-    when(workspaceActivityDao.findActivity(eq(id))).thenReturn(invalidActivity);
-
-    // when
-    clock.forward(Duration.of(1500, ChronoUnit.MILLIS));
-    activityManager.validate();
-
-    // then
-    verify(workspaceActivityDao).setExpirationTime(eq(id), eq(lastRunning + DEFAULT_TIMEOUT));
-  }
-
-  @Test
-  public void shouldNotRestoreExpirationTimeLessThanASecondAfterRunning() throws Exception {
-    String id = "1";
-    WorkspaceActivity invalidActivity = new WorkspaceActivity();
-    invalidActivity.setWorkspaceId(id);
-    invalidActivity.setLastRunning(clock.millis());
-    when(workspaceRuntimes.getRunning()).thenReturn(singleton(id));
-    when(workspaceActivityDao.findActivity(eq(id))).thenReturn(invalidActivity);
-
-    // when
-    clock.forward(Duration.of(900, ChronoUnit.MILLIS));
-    activityManager.validate();
-
-    // then
-    verify(workspaceActivityDao, never()).setExpirationTime(anyString(), anyLong());
-  }
-
   @DataProvider(name = "wsStatus")
   public Object[][] getWorkspaceStatus() {
     return Stream.of(WorkspaceStatus.values())
@@ -366,36 +200,5 @@ public class WorkspaceActivityManagerTest {
         .subscribe(statusChangeEventCaptor.capture(), eq(WorkspaceStatusEvent.class));
     verify(eventService)
         .subscribe(removeEventCaptor.capture(), eq(BeforeWorkspaceRemovedEvent.class));
-  }
-
-  private static final class ManualClock extends Clock {
-    private Instant instant;
-
-    public ManualClock() {
-      instant = Instant.now();
-    }
-
-    @Override
-    public ZoneId getZone() {
-      return ZoneId.systemDefault();
-    }
-
-    @Override
-    public Clock withZone(ZoneId zone) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Instant instant() {
-      return instant;
-    }
-
-    public void forward(Duration duration) {
-      instant = instant.plus(duration);
-    }
-
-    public void back(Duration duration) {
-      instant = instant.minus(duration);
-    }
   }
 }

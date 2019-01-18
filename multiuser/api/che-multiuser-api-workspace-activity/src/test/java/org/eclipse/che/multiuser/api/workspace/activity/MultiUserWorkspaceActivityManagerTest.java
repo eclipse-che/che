@@ -62,7 +62,6 @@ public class MultiUserWorkspaceActivityManagerTest {
     activityManager =
         new MultiUserWorkspaceActivityManager(
             workspaceManager,
-            workspaceRuntimes,
             workspaceActivityDao,
             eventService,
             accountManager,
