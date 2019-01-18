@@ -20,17 +20,28 @@ import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.plugin.web.typescript.TypeScriptLanguageServerConfig;
 import org.eclipse.che.plugin.web.typescript.TypeScriptProjectType;
+import org.eclipse.che.plugin.web.vue.VueLanguageServerConfig;
+import org.eclipse.che.plugin.web.vue.VueProjectType;
 
 /** The module that contains configuration of the server side part of the Web plugin */
 @DynaModule
 public class WebModule extends AbstractModule {
   @Override
   protected void configure() {
+    // TypeScript Configuration
     newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(TypeScriptProjectType.class);
 
     newMapBinder(binder(), String.class, LanguageServerConfig.class)
         .addBinding("org.eclipse.che.plugin.web.typescript")
         .to(TypeScriptLanguageServerConfig.class)
+        .asEagerSingleton();
+
+    // Vue Configuration
+    newSetBinder(binder(), ProjectTypeDef.class).addBinding().to(VueProjectType.class);
+
+    newMapBinder(binder(), String.class, LanguageServerConfig.class)
+        .addBinding("org.eclipse.che.plugin.web.vue")
+        .to(VueLanguageServerConfig.class)
         .asEagerSingleton();
   }
 }
