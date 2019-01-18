@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.EDIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.FIND;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
@@ -30,7 +31,6 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
@@ -53,23 +53,23 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class FindTextFeatureTest {
 
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
+  private static final String PROJECT_NAME = generate("project", 4);
   private static final int SUM_FOUND_OCCURRENCES = 313;
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
+  @Inject protected ProjectExplorer projectExplorer;
   @Inject private Loader loader;
   @Inject private CodenvyEditor editor;
-  @Inject private Menu menu;
+  @Inject protected Menu menu;
   @Inject private ConfigureClasspath configureClasspath;
   @Inject private CheTerminal terminal;
-  @Inject private FindText findTextPage;
+  @Inject protected FindText findTextPage;
   @Inject private TestProjectServiceClient testProjectServiceClient;
   @Inject private Consoles consoles;
   @Inject private PanelSelector panelSelector;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private Wizard wizard;
+  @Inject protected NotificationsPopupPanel notificationsPopupPanel;
+  @Inject protected Wizard wizard;
 
   @BeforeClass
   public void setUp() throws Exception {
