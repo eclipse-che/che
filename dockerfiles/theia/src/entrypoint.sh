@@ -72,7 +72,7 @@ cd ${HOME}
 # disable CDN based on an environment variable.
 shopt -s nocasematch
 if [ "${NOCDN}" == "true" ]; then
-  sed -i 's/\.buildScripts\(\)/.buildScriptsWithoutCdn()/' lib/index.html
+  sed -i 's/\.buildScripts/.buildScriptsWithoutCdn/' lib/index.html
 fi
 shopt -u nocasematch
 
