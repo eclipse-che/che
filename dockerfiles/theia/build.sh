@@ -16,13 +16,12 @@ if ! skip_tests; then
   bash "${base_dir}"/e2e/build.sh "$@"
 fi
 
-mkdir -p ${base_dir}/theia_artifacts
-${base_dir}/extract-for-cdn.sh $IMAGE_NAME ${base_dir}/theia_artifacts
-LABEL_CONTENT=$(cat ${base_dir}/theia_artifacts/cdn.json)
+mkdir -p "${base_dir}/theia_artifacts"
+"${base_dir}"/extract-for-cdn.sh "$IMAGE_NAME" "${base_dir}/theia_artifacts"
+LABEL_CONTENT=$(cat "${base_dir}"/theia_artifacts/cdn.json)
 if [ "${LABEL_CONTENT}" != "" ]; then
   BUILD_ARGS+="--label che-plugin.cdn.artifacts=$(echo ${LABEL_CONTENT} | sed 's/ //g') "
   echo "Rebuilding with CDN label..."
   build
   "${base_dir}"/push-cdn-files-to-akamai.sh
 fi
-
