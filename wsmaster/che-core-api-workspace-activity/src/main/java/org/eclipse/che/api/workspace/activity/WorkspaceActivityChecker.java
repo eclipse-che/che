@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Is in charge of checking the validity of the workspace activity records. The sole important
- * method is {@link #validate()} which is run on a schedule to periodically check the validity
- * of the records and report the potential error conditions.
+ * method is {@link #validate()} which is run on a schedule to periodically check the validity of
+ * the records and report the potential error conditions.
  *
  * @author Lukas Krejci
  */
