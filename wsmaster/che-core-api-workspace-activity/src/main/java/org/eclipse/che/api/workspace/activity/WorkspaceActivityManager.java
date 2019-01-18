@@ -362,15 +362,8 @@ public class WorkspaceActivityManager {
             + " the workspace actually entering the running state. Not rectifying the expiration at"
             + " the moment and leaving that for the next iteration.";
 
-    // if this happens within 1 second of the last transition to having been started,
-    // let's just consider it a case of coincidence between this periodic check and the event
-    // handler setting the expiration time. Let's just do our work here in either case,
-    // because the difference in times set by this method and the event handler will be very
-    // small and we make sure that we don't enter the state where a running workspace doesn't
-    // have any expiry period in case there was a problem.
-
     // first figure out the expiration time. The last running time has been initialized
-    // in the code above, so we can safely assume it is non-null, here.
+    // on the activity before this method is called, so we can safely assume it is non-null here.
     long lastTime = activity.getLastRunning();
 
     if (lastKnownActivity == null) {
@@ -390,7 +383,8 @@ public class WorkspaceActivityManager {
       // we have a record of the workspace entering the running state in the DB but we don't
       // have any expiration timestamp yet. This looks like a coincidence between the schedule
       // of this method and the workspace actually starting. Let's just give the DB a second
-      // leeway before we log a warning and fix the issue.
+      // leeway before we log a warning and fix the issue. Note that that means that we only fix
+      // the issue, if it still exists, on the next scheduled execution of this method.
       long timeAfterRunning = now - lastTime;
 
       if (timeAfterRunning > 1000) {
