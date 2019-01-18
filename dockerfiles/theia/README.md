@@ -11,7 +11,7 @@ Example:
 $ ../theia-dev/build.sh
 ```
 
-Than You can build Theia image.
+After that, You can build Theia image.
 
 Example:
 
