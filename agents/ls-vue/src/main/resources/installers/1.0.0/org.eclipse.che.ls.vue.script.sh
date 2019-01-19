@@ -1,5 +1,17 @@
 #!/bin/bash
 
+#
+# Copyright (c) 2012-2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# Contributors:
+#   Sébastiend Demanou - initial API and implementation
+#
+
 is_current_user_root() {
     test "$(id -u)" = 0
 }
