@@ -15,16 +15,19 @@ import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.DevfileEnvironmentFactory.DEFAULT_RECIPE_CONTENT_TYPE;
-import static org.testng.AssertJUnit.assertEquals;
-import static org.testng.AssertJUnit.assertNotNull;
-import static org.testng.AssertJUnit.assertTrue;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.model.Tool;
@@ -123,12 +126,14 @@ public class DevfileEnvironmentFactoryTest {
     String yamlRecipeContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
 
+    final Map<String, String> selector =
+        Collections.singletonMap("app.kubernetes.io/component", "webapp");
     Tool tool =
         new Tool()
             .withType(OPENSHIFT_TOOL_TYPE)
             .withLocal(LOCAL_FILENAME)
             .withName(TOOL_NAME)
-            .withSelector(Collections.singletonMap("app.kubernetes.io/component", "webapp"));
+            .withSelector(selector);
 
     Optional<Pair<String, EnvironmentImpl>> result =
         factory.createEnvironment(tool, s -> yamlRecipeContent);
@@ -139,7 +144,13 @@ public class DevfileEnvironmentFactoryTest {
     assertNotNull(recipe);
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
-    assertEquals(toK8SList(recipe.getContent()), toK8SList(yamlRecipeContent));
+
+    KubernetesList expectedK8SList = toK8SList(yamlRecipeContent);
+    List<HasMetadata> itemsList = toK8SList(yamlRecipeContent).getItems();
+    itemsList.removeIf(
+        e -> !e.getMetadata().getLabels().entrySet().containsAll(selector.entrySet()));
+    expectedK8SList.setItems(itemsList);
+    assertEquals(toK8SList(recipe.getContent()), expectedK8SList);
   }
 
   private KubernetesList toK8SList(String content) {

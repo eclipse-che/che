@@ -27,17 +27,13 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.model.Tool;
-import org.eclipse.che.api.devfile.server.DevfileEnvironmentFactory;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -59,7 +55,6 @@ public class URLFactoryBuilderTest {
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
 
-  @Mock private DevfileEnvironmentFactory environmentFactory;
   @Mock private DevfileManager devfileManager;
 
   /** Tested instance. */
@@ -68,8 +63,7 @@ public class URLFactoryBuilderTest {
   @BeforeClass
   public void setUp() {
     this.urlFactoryBuilder =
-        new URLFactoryBuilder(
-            defaultEditor, defaultPlugin, environmentFactory, urlFetcher, devfileManager);
+        new URLFactoryBuilder(defaultEditor, defaultPlugin, urlFetcher, devfileManager);
   }
 
   @Test
@@ -115,20 +109,18 @@ public class URLFactoryBuilderTest {
     RecipeImpl expectedRecipe =
         new RecipeImpl(KUBERNETES_TOOL_TYPE, "application/x-yaml", "content", "");
     EnvironmentImpl expectedEnv = new EnvironmentImpl(expectedRecipe, emptyMap());
+    workspaceConfigImpl.setEnvironments(singletonMap("name", expectedEnv));
+    workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetch(anyString())).thenReturn("random_content");
     when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
-    when(devfileManager.createWorkspaceConfig(any(Devfile.class), any())).thenReturn(workspaceConfigImpl);
-
-    when(environmentFactory.createEnvironment(any(Tool.class), any()))
-        .thenReturn(Optional.of(new Pair<>("name", expectedEnv)));
+    when(devfileManager.createWorkspaceConfig(any(Devfile.class), any()))
+        .thenReturn(workspaceConfigImpl);
 
     FactoryDto factory =
         urlFactoryBuilder.createFactoryFromDevfile(myLocation, s -> myLocation + ".list").get();
 
     WorkspaceConfigDto expectedWorkspaceConfig = asDto(workspaceConfigImpl);
-    expectedWorkspaceConfig.setDefaultEnv("name");
-    expectedWorkspaceConfig.setEnvironments(singletonMap("name", asDto(expectedEnv)));
     assertEquals(factory.getWorkspace(), expectedWorkspaceConfig);
   }
 }

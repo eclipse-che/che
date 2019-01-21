@@ -28,7 +28,6 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.DevfileEnvironmentFactory;
 import org.eclipse.che.api.devfile.server.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
@@ -50,7 +49,6 @@ public class URLFactoryBuilder {
   private final String defaultCheEditor;
   private final String defaultChePlugins;
 
-  private final DevfileEnvironmentFactory devfileEnvironmentFactory;
   private final URLFetcher urlFetcher;
   private final DevfileManager devfileManager;
 
@@ -58,12 +56,10 @@ public class URLFactoryBuilder {
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
-      DevfileEnvironmentFactory devfileEnvironmentFactory,
       URLFetcher urlFetcher,
       DevfileManager devfileManager) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
-    this.devfileEnvironmentFactory = devfileEnvironmentFactory;
     this.urlFetcher = urlFetcher;
     this.devfileManager = devfileManager;
   }
@@ -105,8 +101,11 @@ public class URLFactoryBuilder {
     }
     try {
       Devfile devfile = devfileManager.parse(devfileYamlContent, false);
-      WorkspaceConfigImpl wsConfig = devfileManager.createWorkspaceConfig(devfile,
-          local -> fileUrlProvider != null ? urlFetcher.fetch(fileUrlProvider.apply(local)) : null);
+      WorkspaceConfigImpl wsConfig =
+          devfileManager.createWorkspaceConfig(
+              devfile,
+              local ->
+                  fileUrlProvider != null ? urlFetcher.fetch(fileUrlProvider.apply(local)) : null);
       return Optional.of(
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
