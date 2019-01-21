@@ -43,7 +43,7 @@ context('Check Extensions are installed', () => {
        'github-extension',
        '@eclipse-che/theia-activity-tracker',
        '@eclipse-che/theia-task-extension',
-       'che-theia-terminal',
+       '@eclipse-che/theia-terminal',
        '@eclipse-che/theia-dashboard-extension']);
     });
 
