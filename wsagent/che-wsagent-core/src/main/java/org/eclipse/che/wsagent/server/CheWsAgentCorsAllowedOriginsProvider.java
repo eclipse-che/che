@@ -84,10 +84,7 @@ public class CheWsAgentCorsAllowedOriginsProvider implements Provider<String> {
     if (ideUrl != null) {
       return UriBuilder.fromUri(ideUrl).replacePath(null).build().toString();
     }
-    return UriBuilder.fromUri(apiExternal)
-        .replacePath(null)
-        .build()
-        .toString();
+    return UriBuilder.fromUri(apiExternal).replacePath(null).build().toString();
   }
 
   private String getIdeUrl(WorkspaceDto workspaceDto) {
