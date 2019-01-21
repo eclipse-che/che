@@ -10,7 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {ISupportedListItem, KubernetesMachineRecipeParser} from './kubernetes-machine-recipe-parser';
+import {ISupportedListItem, KubernetesMachineRecipeParser, isSupportedItem} from './kubernetes-machine-recipe-parser';
 import {IParser} from './parser';
 
 export interface ISupportedItemList {
@@ -79,12 +79,18 @@ export class KubernetesEnvironmentRecipeParser implements IParser {
     if (!angular.isArray(items) || items.length === 0) {
       throw new TypeError(`Recipe kubernetes list should contain at least one 'item'.`);
     } else {
-      items.forEach((item: ISupportedListItem) => {
+      items.forEach((item: any) => {
         if (!item) {
           return;
         }
         // skip services
         if (item.kind && item.kind.toLowerCase() === 'service') {
+          return;
+        }
+        if (!isSupportedItem(item)) {
+          // should throw a TypeError here but this code is currently used to validate OpenShift recipes
+          // (which support Routes) as well as Kubernetes recipes, so we need to ignore some elements
+          // rather than complain. Returning here prevents warning about typos in the `kind` section.
           return;
         }
         this.machineRecipeParser.validate(item);
