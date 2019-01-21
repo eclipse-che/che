@@ -117,15 +117,13 @@ public class DevfileIntegrityValidator {
 
   private void checkMapFieldNotSet(Tool tool, String fieldName, Map<String, String> fieldValue)
       throws DevfileFormatException {
-    if (fieldValue == null) {
+    if (fieldValue == null || fieldValue.isEmpty()) {
       return;
     }
-    if (!fieldValue.isEmpty()) {
-      throw new DevfileFormatException(
-          format(
-              "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
-              tool.getType(), fieldName, tool.getName()));
-    }
+    throw new DevfileFormatException(
+        format(
+            "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
+            tool.getType(), fieldName, tool.getName()));
   }
 
   private void validateCommands(Devfile devfile, Set<String> toolNames)

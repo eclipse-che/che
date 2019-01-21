@@ -24,6 +24,7 @@ import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Optional;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.model.Tool;
@@ -104,6 +105,30 @@ public class DevfileEnvironmentFactoryTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
     Tool tool =
         new Tool().withType(OPENSHIFT_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
+
+    Optional<Pair<String, EnvironmentImpl>> result =
+        factory.createEnvironment(tool, s -> yamlRecipeContent);
+
+    assertTrue(result.isPresent());
+    assertEquals(result.get().first, TOOL_NAME);
+    RecipeImpl recipe = result.get().second.getRecipe();
+    assertNotNull(recipe);
+    assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
+    assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
+    assertEquals(toK8SList(recipe.getContent()), toK8SList(yamlRecipeContent));
+  }
+
+  @Test
+  public void shouldFilterRecipeWithGivenSelectors() throws Exception {
+    String yamlRecipeContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+
+    Tool tool =
+        new Tool()
+            .withType(OPENSHIFT_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withName(TOOL_NAME)
+            .withSelector(Collections.singletonMap("app.kubernetes.io/component", "webapp"));
 
     Optional<Pair<String, EnvironmentImpl>> result =
         factory.createEnvironment(tool, s -> yamlRecipeContent);

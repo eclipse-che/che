@@ -110,9 +110,7 @@ public class DevfileService extends Service {
         code = 400,
         message =
             "Provided devfile syntactically incorrect, doesn't match with actual schema or has integrity violations"),
-    @ApiResponse(
-        code = 403,
-        message = "The user does not have access to create a new workspace"),
+    @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response createFromYaml(
@@ -152,9 +150,7 @@ public class DevfileService extends Service {
               + "this user must be the owner of the exported workspace")
   @ApiResponses({
     @ApiResponse(code = 200, message = "The workspace successfully exported"),
-    @ApiResponse(
-        code = 403,
-        message = "The user does not have access to create a new workspace"),
+    @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
   public Response createFromWorkspace(

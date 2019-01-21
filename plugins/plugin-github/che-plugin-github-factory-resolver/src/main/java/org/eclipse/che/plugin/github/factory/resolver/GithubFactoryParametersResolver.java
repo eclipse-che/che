@@ -86,7 +86,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     // no need to check null value of url parameter as accept() method has performed the check
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
-    // createfactory from the following location if location exists, else create default factory
+    // create factory from the following location if location exists, else create default factory
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(githubUrl.devfileFileLocation(), githubUrl::rawFileLocation)
