@@ -19,17 +19,12 @@ import static org.mockito.Mockito.*;
 import org.eclipse.che.account.api.AccountManager;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.core.notification.EventSubscriber;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.multiuser.resource.api.type.TimeoutResourceType;
 import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -45,9 +40,6 @@ public class MultiUserWorkspaceActivityManagerTest {
   @Mock private ResourceManager resourceManager;
 
   @Mock private WorkspaceManager workspaceManager;
-  @Mock private WorkspaceRuntimes workspaceRuntimes;
-
-  @Captor private ArgumentCaptor<EventSubscriber<WorkspaceStatusEvent>> captor;
 
   @Mock private Account account;
   @Mock private WorkspaceImpl workspace;

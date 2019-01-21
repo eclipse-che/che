@@ -54,7 +54,7 @@ public class WorkspaceActivityCheckerTest {
   @Mock private EventService eventService;
 
   @BeforeMethod
-  private void setUp() {
+  public void setUp() {
     clock = new ManualClock();
 
     WorkspaceActivityManager activityManager =
