@@ -42,10 +42,7 @@ if [ -f /etc/centos-release ]; then
  else
     FILE="/etc/os-release"
     LINUX_TYPE=$(cat $FILE | grep ^ID= | tr '[:upper:]' '[:lower:]')
-    LINUX_VERSION=$(cat $FILE | grep ^VERSION_ID=)
 fi
-
-MACHINE_TYPE=$(uname -m)
 
 mkdir -p ${CHE_DIR}
 mkdir -p ${LS_DIR}
