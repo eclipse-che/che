@@ -125,7 +125,7 @@ public class FactoryService extends Service {
   @ApiResponses({
     @ApiResponse(code = 200, message = "Factory successfully created"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
-    @ApiResponse(code = 403, message = "User does not have rights to create factory"),
+    @ApiResponse(code = 403, message = "User does not have rights to createEnvironment factory"),
     @ApiResponse(code = 409, message = "When factory with given name and creator already exists"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
@@ -284,7 +284,7 @@ public class FactoryService extends Service {
   @Produces(APPLICATION_JSON)
   @ApiOperation(
       value = "Construct factory from workspace",
-      notes = "This call returns a Factory.json that is used to create a factory")
+      notes = "This call returns a Factory.json that is used to createEnvironment a factory")
   @ApiResponses({
     @ApiResponse(code = 200, message = "Response contains requested factory JSON"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
@@ -320,7 +320,7 @@ public class FactoryService extends Service {
     @ApiResponse(code = 500, message = "Internal server error")
   })
   public FactoryDto resolveFactory(
-      @ApiParam(value = "Parameters provided to create factories") Map<String, String> parameters,
+      @ApiParam(value = "Parameters provided to createEnvironment factories") Map<String, String> parameters,
       @ApiParam(
               value = "Whether or not to validate values like it is done when accepting a Factory",
               allowableValues = "true,false",
@@ -333,7 +333,7 @@ public class FactoryService extends Service {
     // check parameter
     requiredNotNull(parameters, "Factory build parameters");
 
-    // search matching resolver and create factory from matching resolver
+    // search matching resolver and createEnvironment factory from matching resolver
     FactoryDto resolvedFactory =
         factoryParametersResolverHolder
             .getFactoryParametersResolver(parameters)
@@ -387,7 +387,7 @@ public class FactoryService extends Service {
         usersWorkspace.getConfig().getProjects().stream().filter(predicate).collect(toList());
     checkArgument(
         !filtered.isEmpty(),
-        "Unable to create factory from this workspace, "
+        "Unable to createEnvironment factory from this workspace, "
             + "because it does not contains projects with source storage");
     usersWorkspace.getConfig().setProjects(filtered);
   }

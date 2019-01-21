@@ -20,6 +20,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -89,10 +90,10 @@ public class DevfileManager {
    * @throws NotFoundException when user account is not found
    * @throws ServerException when other error occurs
    */
-  public WorkspaceImpl createWorkspace(Devfile devfile)
+  public WorkspaceImpl createWorkspace(Devfile devfile, FileContentProvider fileContentProvider)
       throws ServerException, DevfileFormatException, ConflictException, NotFoundException,
-          ValidationException {
-    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile);
+          ValidationException, BadRequestException {
+    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, fileContentProvider);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
         findAvailableName(workspaceConfig), namespace, emptyMap());
@@ -105,9 +106,11 @@ public class DevfileManager {
    * @return created {@link WorkspaceConfigImpl} instance
    * @throws DevfileFormatException when devfile integrity validation fail
    */
-  public WorkspaceConfigImpl createWorkspaceConfig(Devfile devfile) throws DevfileFormatException {
+  public WorkspaceConfigImpl createWorkspaceConfig(
+      Devfile devfile, FileContentProvider fileContentProvider)
+      throws DevfileFormatException, BadRequestException {
     integrityValidator.validateDevfile(devfile);
-    return devfileConverter.devFileToWorkspaceConfig(devfile);
+    return devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
   }
 
   /**

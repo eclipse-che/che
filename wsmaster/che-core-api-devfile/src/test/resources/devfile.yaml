@@ -30,7 +30,11 @@ tools:
     id: eclipse/theia-jdtls:0.0.3
   - name: os-recipe
     type: openshift
-    local: petclinic-app.yaml
+    local: petclinic.yaml
+    selector:
+      app.kubernetes.io/name: mysql
+      app.kubernetes.io/component: database
+      app.kubernetes.io/part-of: petclinic
 commands:
   - name: build
     actions:

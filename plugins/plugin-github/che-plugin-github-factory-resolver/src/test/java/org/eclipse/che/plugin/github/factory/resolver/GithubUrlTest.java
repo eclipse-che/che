@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class GithubUrlTest {
 
-  /** Parser used to create the url. */
+  /** Parser used to createEnvironment the url. */
   @InjectMocks private GithubURLParser githubUrlParser;
 
   /** Instance of the url created */

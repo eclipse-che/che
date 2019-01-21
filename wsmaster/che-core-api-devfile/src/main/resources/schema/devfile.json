@@ -4,6 +4,11 @@
       "id": "propertyList",
       "type": "object",
       "javaType": "java.util.Map<String, String>"
+    },
+    "selector" : {
+      "id": "selector",
+      "type": "object",
+      "javaType": "java.util.Map<String, String>"
     }
   },
   "$schema": "http://json-schema.org/draft-07/schema#",
@@ -122,6 +127,15 @@
             "description": "Describes the tool FQN",
             "examples": [
               "eclipse/maven-jdk8:1.0.0"
+            ]
+          },
+          "selector": {
+            "$ref": "#/definitions/selector",
+            "description": "Describes the objects selector for the recipe type tools",
+            "examples": [
+              "app.kubernetes.io/name: mysql",
+              "app.kubernetes.io/component: database",
+              "app.kubernetes.io/part-of: petclinic"
             ]
           }
         }

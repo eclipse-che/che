@@ -12,7 +12,6 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
@@ -29,15 +28,14 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.server.DevfileEnvironmentFactory;
 import org.eclipse.che.api.devfile.server.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -71,7 +69,7 @@ public class URLFactoryBuilder {
   }
 
   /**
-   * Build a factory using the provided json file or create default one
+   * Build a factory using the provided json file or createEnvironment default one
    *
    * @param jsonFileLocation location of factory json file
    * @return a factory or null if factory json in not found
@@ -107,14 +105,8 @@ public class URLFactoryBuilder {
     }
     try {
       Devfile devfile = devfileManager.parse(devfileYamlContent, false);
-      Optional<Pair<String, EnvironmentImpl>> environmentPair =
-          devfileEnvironmentFactory.create(devfile, fileUrlProvider);
-      WorkspaceConfigImpl wsConfig = devfileManager.createWorkspaceConfig(devfile);
-      if (environmentPair.isPresent()) {
-        final String environmentName = environmentPair.get().first;
-        wsConfig.setDefaultEnv(environmentName);
-        wsConfig.setEnvironments(singletonMap(environmentName, environmentPair.get().second));
-      }
+      WorkspaceConfigImpl wsConfig = devfileManager.createWorkspaceConfig(devfile,
+          local -> fileUrlProvider != null ? urlFetcher.fetch(fileUrlProvider.apply(local)) : null);
       return Optional.of(
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)

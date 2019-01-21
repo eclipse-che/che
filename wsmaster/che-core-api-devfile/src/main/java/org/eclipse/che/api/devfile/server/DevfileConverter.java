@@ -14,6 +14,7 @@ package org.eclipse.che.api.devfile.server;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
@@ -32,6 +33,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
@@ -39,12 +42,21 @@ import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.commons.lang.Pair;
 
 /** Helps to convert devfile into workspace config and back. */
 public class DevfileConverter {
+
+  private DevfileEnvironmentFactory devfileEnvironmentFactory;
+
+  @Inject
+  public DevfileConverter(DevfileEnvironmentFactory devfileEnvironmentFactory) {
+    this.devfileEnvironmentFactory = devfileEnvironmentFactory;
+  }
 
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) throws WorkspaceExportException {
 
@@ -99,8 +111,9 @@ public class DevfileConverter {
     return devfile;
   }
 
-  public WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devfile)
-      throws DevfileFormatException {
+  public WorkspaceConfigImpl devFileToWorkspaceConfig(
+      Devfile devfile, FileContentProvider fileContentProvider)
+      throws DevfileFormatException, BadRequestException {
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
@@ -125,8 +138,13 @@ public class DevfileConverter {
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
-          // this kind of tool ignored here since it contain only reference to tool configuration
-          // which should be resolved and provisioned into workspace config recipe separately.
+          Optional<Pair<String, EnvironmentImpl>> environmentPair =
+              devfileEnvironmentFactory.createEnvironment(tool, fileContentProvider);
+          if (environmentPair.isPresent()) {
+            final String environmentName = environmentPair.get().first;
+            config.setDefaultEnv(environmentName);
+            config.setEnvironments(singletonMap(environmentName, environmentPair.get().second));
+          }
           continue;
         default:
           throw new DevfileFormatException(

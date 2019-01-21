@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.model.Tool;
+import org.eclipse.che.api.devfile.server.DevfileEnvironmentFactory;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -116,9 +118,9 @@ public class URLFactoryBuilderTest {
 
     when(urlFetcher.fetch(anyString())).thenReturn("random_content");
     when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
-    when(devfileManager.createWorkspaceConfig(any(Devfile.class))).thenReturn(workspaceConfigImpl);
+    when(devfileManager.createWorkspaceConfig(any(Devfile.class), any())).thenReturn(workspaceConfigImpl);
 
-    when(environmentFactory.create(any(Devfile.class), any()))
+    when(environmentFactory.createEnvironment(any(Tool.class), any()))
         .thenReturn(Optional.of(new Pair<>("name", expectedEnv)));
 
     FactoryDto factory =

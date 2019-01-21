@@ -35,7 +35,7 @@ import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 @Singleton
 public class GithubFactoryParametersResolver implements FactoryParametersResolver {
 
-  /** Parser which will allow to check validity of URLs and create objects. */
+  /** Parser which will allow to check validity of URLs and createEnvironment objects. */
   private GithubURLParser githubUrlParser;
 
   /** Builder allowing to build objects from github URL. */
@@ -86,7 +86,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     // no need to check null value of url parameter as accept() method has performed the check
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
-    // create factory from the following location if location exists, else create default factory
+    // createEnvironment factory from the following location if location exists, else createEnvironment default factory
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(githubUrl.devfileFileLocation(), githubUrl::rawFileLocation)
