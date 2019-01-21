@@ -7,10 +7,19 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 
-image=$1
-destination=$2
+help() {
+  echo "$0 should be used with 2 parameters: <docker image reference> <local folder where files should be extracted>"
+}
+
+image="$1"
+destination="$2"
+if [ "${image}" == "" -o "${destination}" == "" ]; then
+  help
+  exit 1
+fi
+
 container=$(docker create "$image")
-if [ -f "$destination" ]; then
+if [ -d "$destination" ]; then
   rm -Rf "$destination"
 fi
 mkdir -p "$destination"
