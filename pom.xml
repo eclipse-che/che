@@ -50,7 +50,7 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.dashboard.version>6.17.0</che.dashboard.version>
+        <che.dashboard.version>6.17.1</che.dashboard.version>
         <che.docs.version>6.17.0</che.docs.version>
         <che.lib.version>6.17.0</che.lib.version>
         <che.ls.jdt.version>0.0.3</che.ls.jdt.version>
