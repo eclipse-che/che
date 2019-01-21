@@ -19,7 +19,7 @@ fi
 echo "Extracting artifacts for the CDN"
 mkdir -p "${base_dir}/theia_artifacts"
 "${base_dir}"/extract-for-cdn.sh "$IMAGE_NAME" "${base_dir}/theia_artifacts"
-LABEL_CONTENT=$(cat "${base_dir}"/theia_artifacts/cdn.json 2>/dev/null)
+LABEL_CONTENT=$(cat "${base_dir}"/theia_artifacts/cdn.json || true 2>/dev/null)
 if [ "${LABEL_CONTENT}" != "" ]; then
   BUILD_ARGS+="--label che-plugin.cdn.artifacts=$(echo ${LABEL_CONTENT} | sed 's/ //g') "
   echo "Rebuilding with CDN label..."
