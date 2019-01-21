@@ -52,6 +52,9 @@ NPM version number and file paths are added automatically by the Che-Theia CDN s
 
 For example, using JSDelivr, the following build argument should be added: `MONACO_CDN_PREFIX=https://cdn.jsdelivr.net/npm/`. 
 
+Alternatively, if `CDN_PREFIX` and `MONACO_CDN_PREFIX` are provided as **environment variables**, the corresponding build arguments
+will be added automatically by the `build.sh` script. This will make CDN support configuration easier in CI builds.
+
 **Important note:** When CDN support is enabled, you should use the `build.sh` command to build the docker image (as show above), instead of the
 native-docker way.
 

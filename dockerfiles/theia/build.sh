@@ -11,6 +11,15 @@ base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
 init --name:theia "$@"
+
+if [ "${CDN_PREFIX:-}" != "" ]; then
+  BUILD_ARGS+="--build-arg CDN_PREFIX=${CDN_PREFIX} "
+fi
+
+if [ "${MONACO_CDN_PREFIX:-}" != "" ]; then
+  BUILD_ARGS+="--build-arg MONACO_CDN_PREFIX=${MONACO_CDN_PREFIX} "
+fi
+
 build
 if ! skip_tests; then
   bash "${base_dir}"/e2e/build.sh "$@"
