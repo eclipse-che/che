@@ -247,7 +247,7 @@ public class FactoryImpl implements Factory {
         + '}';
   }
 
-  /** Helps to createEnvironment the instance of {@link FactoryImpl}. */
+  /** Helps to create the instance of {@link FactoryImpl}. */
   public static class FactoryImplBuilder {
 
     private String id;

@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class GithubFactoryParametersResolverTest {
 
-  /** Parser which will allow to check validity of URLs and createEnvironment objects. */
+  /** Parser which will allow to check validity of URLs and create objects. */
   @Spy private GithubURLParser githubUrlParser = new GithubURLParser();
 
   /** Converter allowing to convert github URL to other objects. */
@@ -60,7 +60,7 @@ public class GithubFactoryParametersResolverTest {
   /** ProjectDtoMerger */
   @Mock private ProjectConfigDtoMerger projectConfigDtoMerger = new ProjectConfigDtoMerger();
 
-  /** Parser which will allow to check validity of URLs and createEnvironment objects. */
+  /** Parser which will allow to check validity of URLs and create objects. */
   @Mock private URLFactoryBuilder urlFactoryBuilder;
 
   /** Capturing the project config DTO supplier parameter. */

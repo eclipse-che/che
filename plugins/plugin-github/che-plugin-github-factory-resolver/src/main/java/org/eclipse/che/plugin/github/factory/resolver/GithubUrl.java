@@ -46,7 +46,7 @@ public class GithubUrl {
   private String devfileFilename;
 
   /**
-   * Creation of this instance is made by the parser so user may not need to createEnvironment a new instance
+   * Creation of this instance is made by the parser so user may not need to create a new instance
    * directly
    */
   protected GithubUrl() {}
