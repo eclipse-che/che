@@ -271,7 +271,7 @@ public class FileWatcherService {
         }
 
         List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
-        while(!watchEvents.isEmpty()) {
+        while (!watchEvents.isEmpty()) {
           if (suspended.get()) {
             resetAndRemove(watchKey, dir);
 
