@@ -20,21 +20,17 @@ import static org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind.SOURCE;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.api.promises.client.PromiseProvider;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.resources.Project;
 import org.eclipse.che.ide.api.resources.Resource;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.ide.ext.java.shared.ClasspathEntryKind;
-import org.eclipse.che.ide.project.node.ProjectClasspathChangedEvent;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.plugin.java.plain.client.service.ClasspathUpdaterServiceClient;
 
@@ -44,15 +40,11 @@ import org.eclipse.che.plugin.java.plain.client.service.ClasspathUpdaterServiceC
  * @author Valeriy Svydenko
  */
 @Singleton
-public class ClasspathResolver
-    implements ProjectClasspathChangedEvent.ProjectClasspathChangedHandler {
+public class ClasspathResolver {
   private static final String WORKSPACE_PATH = "/projects";
 
   private final ClasspathUpdaterServiceClient classpathUpdater;
-  private final JavaLanguageExtensionServiceClient extensionService;
-  private final PromiseProvider promiseProvider;
   private final NotificationManager notificationManager;
-  private final EventBus eventBus;
   private final AppContext appContext;
   private final DtoFactory dtoFactory;
 
@@ -64,21 +56,13 @@ public class ClasspathResolver
   @Inject
   public ClasspathResolver(
       ClasspathUpdaterServiceClient classpathUpdater,
-      JavaLanguageExtensionServiceClient extensionService,
-      PromiseProvider promiseProvider,
       NotificationManager notificationManager,
-      EventBus eventBus,
       AppContext appContext,
       DtoFactory dtoFactory) {
     this.classpathUpdater = classpathUpdater;
-    this.extensionService = extensionService;
-    this.promiseProvider = promiseProvider;
     this.notificationManager = notificationManager;
-    this.eventBus = eventBus;
     this.appContext = appContext;
     this.dtoFactory = dtoFactory;
-
-    this.eventBus.addHandler(ProjectClasspathChangedEvent.getType(), this);
   }
 
   /** Reads and parses classpath entries. */
@@ -159,23 +143,5 @@ public class ClasspathResolver
   /** Returns list of projects from classpath. */
   public Set<String> getProjects() {
     return projects;
-  }
-
-  @Override
-  public void onProjectClasspathChanged(ProjectClasspathChangedEvent event) {
-    getEntriesFromServer(event.getProject())
-        .then(
-            entries -> {
-              eventBus.fireEvent(new ClasspathChangedEvent(event.getProject(), entries));
-            });
-  }
-
-  private Promise<List<ClasspathEntry>> getEntriesFromServer(String projectPath) {
-    return extensionService
-        .classpathTree(projectPath)
-        .catchErrorPromise(
-            error -> {
-              return promiseProvider.reject(error);
-            });
   }
 }

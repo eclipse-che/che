@@ -11,12 +11,10 @@
  */
 package org.eclipse.che.plugin.java.languageserver;
 
-import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.removePrefixUri;
 import static org.eclipse.che.api.languageserver.util.JsonUtil.convertToJson;
-import static org.eclipse.che.plugin.java.languageserver.dto.DtoServerImpls.UpdateMavenModulesInfoDto.fromJson;
-import static org.eclipse.che.plugin.maven.shared.MavenAttributes.MAVEN_ID;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.InputStream;
@@ -26,20 +24,25 @@ import java.lang.reflect.Proxy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.PreDestroy;
+import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.jsonrpc.commons.JsonRpcException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.languageserver.LanguageServerConfig;
 import org.eclipse.che.api.languageserver.ProcessCommunicationProvider;
@@ -47,11 +50,12 @@ import org.eclipse.che.api.languageserver.service.FileContentAccess;
 import org.eclipse.che.api.languageserver.util.DynamicWrapper;
 import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.api.project.server.impl.RootDirPathProvider;
-import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
+import org.eclipse.che.api.project.shared.Constants.Services;
+import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.jdt.ls.extension.api.Notifications;
 import org.eclipse.che.jdt.ls.extension.api.dto.ProgressReport;
 import org.eclipse.che.jdt.ls.extension.api.dto.StatusReport;
-import org.eclipse.che.jdt.ls.extension.api.dto.UpdateMavenModulesInfo;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -77,6 +81,7 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   private final ProjectManager projectManager;
   private final ProjectsSynchronizer projectSynchronizer;
   private final AtomicBoolean isStarted = new AtomicBoolean(false);
+  private final ExecutorService notificationHandler;
 
   @Inject
   public JavaLanguageServerLauncher(
@@ -94,11 +99,27 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
     this.eventService = eventService;
     this.projectManager = projectManager;
     this.projectSynchronizer = projectSynchronizer;
+    this.notificationHandler =
+        Executors.newSingleThreadScheduledExecutor(
+            new ThreadFactoryBuilder()
+                .setNameFormat("Jdtls Notification Handler")
+                .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
+                .setDaemon(true)
+                .build());
 
     launchScript = Paths.get(System.getenv("HOME"), "che/ls-java/launch.sh");
   }
 
+  @PreDestroy
+  public void shutDown() {
+    notificationHandler.shutdownNow();
+  }
+
   public void sendStatusReport(StatusReport report) {
+    notificationHandler.execute(() -> handleStatusReport(report));
+  }
+
+  private void handleStatusReport(StatusReport report) {
     LOG.info("{}: {}", report.getType(), report.getMessage());
     if ("Started".equals(report.getType())) {
       isStarted.set(true);
@@ -122,22 +143,22 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
                 CompletableFuture.runAsync(
                     () -> projectSynchronizer.synchronize(registeredProject.getPath()));
               }
-              if (!registeredProject.getProblems().isEmpty()) {
-                try {
-
-                  projectManager.update(registeredProject);
-                  eventService.publish(new ProjectUpdatedEvent(registeredProject.getPath()));
-                } catch (ForbiddenException
-                    | ServerException
-                    | NotFoundException
-                    | ConflictException
-                    | BadRequestException e) {
-                  LOG.error(
-                      String.format(
-                          "Failed to update project '%s' configuration",
-                          registeredProject.getName()),
-                      e);
-                }
+              try {
+                projectManager.update(registeredProject);
+                eventService.publish(new ProjectClassPathChangedEvent(registeredProject.getPath()));
+                notifyTransmitter.sendNotification(
+                    new ExecuteCommandParams(
+                        Notifications.UPDATE_PROJECTS_CLASSPATH,
+                        Collections.singletonList(registeredProject.getPath())));
+              } catch (ForbiddenException
+                  | ServerException
+                  | NotFoundException
+                  | ConflictException
+                  | BadRequestException e) {
+                LOG.error(
+                    String.format(
+                        "Failed to update project '%s' configuration", registeredProject.getName()),
+                    e);
               }
             });
   }
@@ -153,79 +174,82 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
   }
 
   public CompletableFuture<Object> executeClientCommand(ExecuteCommandParams params) {
-    return executeCliendCommandTransmitter.executeClientCommand(analyzeParams(params));
+    return executeCliendCommandTransmitter.executeClientCommand(params);
   }
 
   public void sendNotification(ExecuteCommandParams params) {
-    notifyTransmitter.sendNotification(analyzeParams(params));
+    // reading from language server is blocked while processing this method: if we
+    // want to do calls to langauge server, need to handle notifications async
+    notificationHandler.execute(() -> handleNotification(params));
   }
 
-  private ExecuteCommandParams analyzeParams(ExecuteCommandParams params) {
+  private void handleNotification(ExecuteCommandParams params) {
     String command = params.getCommand();
     List<Object> arguments = params.getArguments();
     switch (command) {
       case Notifications.UPDATE_PROJECTS_CLASSPATH:
-      case Notifications.UPDATE_ON_PROJECT_CLASSPATH_CHANGED:
-        List<Object> fixedPathList = new ArrayList<>(arguments.size());
-        for (Object uri : arguments) {
-          fixedPathList.add(removePrefixUri(convertToJson(uri).getAsString()));
+        {
+          List<Object> fixedPathList = new ArrayList<>(arguments.size());
+          for (Object uri : arguments) {
+            String uriString = convertToJson(uri).getAsString();
+            String projectPath = removePrefixUri(uriString);
+            fixedPathList.add(projectPath);
+            projectManager
+                .get(projectPath)
+                .ifPresent(
+                    project -> {
+                      try {
+                        LOG.info("updating projectconfig for {}", projectPath);
+                        eventService.publish(new ProjectClassPathChangedEvent(project.getPath()));
+                        projectManager.update(project);
+                      } catch (ForbiddenException
+                          | ServerException
+                          | NotFoundException
+                          | ConflictException
+                          | BadRequestException e) {
+                        throw toJsonRpcException(e);
+                      }
+                    });
+          }
+          params.setArguments(fixedPathList);
+          notifyClient(params);
+
+          break;
         }
-        params.setArguments(fixedPathList);
-        break;
-      case Notifications.UPDATE_PROJECT:
-      case Notifications.UPDATE_PROJECT_CONFIG:
-        Object projectUri = arguments.get(0);
-        params.setArguments(
-            singletonList(removePrefixUri(convertToJson(projectUri).getAsString())));
-        break;
-      case Notifications.UPDATE_MAVEN_MODULE:
-        updateMavenModules(params, arguments);
-        break;
-      default:
-        break;
-    }
-    return params;
-  }
+      case Notifications.MAVEN_PROJECT_CREATED:
+        {
+          List<Object> fixedPathList = new ArrayList<>(arguments.size());
+          for (Object uri : arguments) {
+            String uriString = convertToJson(uri).getAsString();
+            String projectPath = removePrefixUri(uriString);
+            fixedPathList.add(projectPath);
+            projectSynchronizer.ensureMavenProject(projectPath);
+          }
+          params.setArguments(fixedPathList);
+          notifyClient(params);
 
-  private void updateMavenModules(ExecuteCommandParams params, List<Object> arguments) {
-    List<Object> newParameters = new LinkedList<>();
-    UpdateMavenModulesInfo updateModulesInfo = fromJson(arguments.get(0).toString());
-    String projectUri = removePrefixUri(updateModulesInfo.getProjectUri());
-    for (String uri : updateModulesInfo.getAdded()) {
-      addMavenProjectType(Paths.get(projectUri, uri).toString(), newParameters);
-    }
-    for (String uri : updateModulesInfo.getRemoved()) {
-      removeMavenProjectType(Paths.get(projectUri, uri).toString(), newParameters);
-    }
-    params.setCommand(Notifications.UPDATE_PROJECT);
-    params.setArguments(newParameters);
-  }
-
-  private void removeMavenProjectType(String projectPath, List<Object> parameters) {
-    try {
-      if (projectManager.getOrNull(projectPath) != null) {
-        projectManager.removeType(projectPath, MAVEN_ID);
-        parameters.add(projectPath);
-      }
-    } catch (ServerException
-        | ForbiddenException
-        | ConflictException
-        | NotFoundException
-        | BadRequestException e) {
-      LOG.error("Can't remove project: " + projectPath, e);
+          break;
+        }
     }
   }
 
-  private void addMavenProjectType(String projectPath, List<Object> parameters) {
-    try {
-      projectManager.setType(projectPath, MAVEN_ID, false);
-      parameters.add(projectPath);
-    } catch (ConflictException
-        | ServerException
-        | NotFoundException
-        | BadRequestException
-        | ForbiddenException e) {
-      LOG.error("Can't add new project: " + projectPath, e);
+  void notifyClient(ExecuteCommandParams params) {
+    notifyTransmitter.sendNotification(params);
+  }
+
+  private JsonRpcException toJsonRpcException(ApiException e) {
+    if (e instanceof ForbiddenException) {
+      return new JsonRpcException(Services.FORBIDDEN, e.getMessage());
+    } else if (e instanceof ServerException) {
+      return new JsonRpcException(Services.SERVER_ERROR, e.getMessage());
+    } else if (e instanceof NotFoundException) {
+      return new JsonRpcException(Services.NOT_FOUND, e.getMessage());
+    } else if (e instanceof ConflictException) {
+      return new JsonRpcException(Services.CONFLICT, e.getMessage());
+    } else if (e instanceof BadRequestException) {
+      return new JsonRpcException(Services.BAD_REQUEST, e.getMessage());
+    } else {
+      return new JsonRpcException(-27000, e.getMessage());
     }
   }
 
@@ -307,9 +331,32 @@ public class JavaLanguageServerLauncher implements LanguageServerConfig {
                 Proxy.newProxyInstance(
                     getClass().getClassLoader(),
                     new Class[] {LanguageServer.class, FileContentAccess.class},
-                    new DynamicWrapper(new JavaLSWrapper(proxy), proxy));
+                    new DynamicWrapper(
+                        new JavaLSWrapper(JavaLanguageServerLauncher.this, proxy), proxy));
         return wrapped;
       }
     };
+  }
+
+  public void pomChanged(String uri) {
+    String pomPath = removePrefixUri(uri);
+    projectManager
+        .getClosest(pomPath)
+        .ifPresent(
+            project -> {
+              try {
+                LOG.info("updating projectconfig for {}", project.getPath());
+                projectManager.update(project);
+                notifyClient(
+                    new ExecuteCommandParams(
+                        Constants.POM_CHANGED, Collections.singletonList(pomPath)));
+              } catch (ForbiddenException
+                  | ServerException
+                  | NotFoundException
+                  | ConflictException
+                  | BadRequestException e) {
+                throw toJsonRpcException(e);
+              }
+            });
   }
 }

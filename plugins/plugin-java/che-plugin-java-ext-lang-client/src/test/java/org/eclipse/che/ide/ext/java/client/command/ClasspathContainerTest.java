@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 import com.google.web.bindery.event.shared.EventBus;
 import java.util.List;
 import org.eclipse.che.api.promises.client.Promise;
-import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
+import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathChangedEvent;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.junit.Before;
@@ -50,7 +50,7 @@ public class ClasspathContainerTest {
 
   @Test
   public void changedClasspathHandlerShouldBeAdded() throws Exception {
-    verify(eventBus).addHandler(ClasspathChangedEvent.TYPE, classpathContainer);
+    verify(eventBus).addHandler(ProjectClasspathChangedEvent.TYPE, classpathContainer);
   }
 
   @Test

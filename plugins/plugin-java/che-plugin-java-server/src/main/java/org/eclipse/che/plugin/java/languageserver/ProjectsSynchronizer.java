@@ -27,7 +27,6 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.api.project.shared.RegisteredProject;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
@@ -67,15 +66,18 @@ public class ProjectsSynchronizer {
     Set<String> mavenProjects;
     try {
       mavenProjects = new HashSet<>(service.getMavenProjects(rootPath, 1, TimeUnit.HOURS));
-
       for (String mavenProjectPath : mavenProjects) {
-        Optional<RegisteredProject> project = projectManager.get(mavenProjectPath);
-        if (!project.isPresent()) {
-          doCreateProject(mavenProjectPath);
-        }
+        ensureMavenProject(mavenProjectPath);
       }
     } catch (JsonSyntaxException | InterruptedException | ExecutionException | TimeoutException e) {
       LOG.error("Error getting maven projects", e);
+    }
+  }
+
+  public void ensureMavenProject(String mavenProjectPath) {
+    Optional<RegisteredProject> project = projectManager.get(mavenProjectPath);
+    if (!project.isPresent()) {
+      doCreateProject(mavenProjectPath);
     }
   }
 
@@ -87,7 +89,6 @@ public class ProjectsSynchronizer {
     projectConfig.setName(projectPath.substring(projectPath.lastIndexOf("/") + 1));
     try {
       projectManager.update(projectConfig);
-      eventService.publish(new ProjectUpdatedEvent(projectPath));
     } catch (ConflictException
         | ForbiddenException
         | NotFoundException

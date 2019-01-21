@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.project.server.notification;
 
+import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.notification.EventOrigin;
 
 /**
@@ -22,17 +23,19 @@ import org.eclipse.che.api.core.notification.EventOrigin;
 public class ProjectUpdatedEvent {
 
   private String projectPath;
+  private ProjectConfig oldConfig;
 
-  public ProjectUpdatedEvent(String projectPath) {
+  public ProjectUpdatedEvent(String projectPath, ProjectConfig oldConfig) {
     this.projectPath = projectPath;
+    this.oldConfig = oldConfig;
   }
 
   public String getProjectPath() {
     return projectPath;
   }
 
-  public void setProjectPath(String projectPath) {
-    this.projectPath = projectPath;
+  public ProjectConfig getOldConfig() {
+    return oldConfig;
   }
 
   @Override
