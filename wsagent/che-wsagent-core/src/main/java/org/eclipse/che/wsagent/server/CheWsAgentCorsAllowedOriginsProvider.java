@@ -33,8 +33,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  *   <li>If set che.wsagent.cors.allowed_origins
  *   <li>Server with "ide" attribute in workspace config
- *   <li>Server from url of "ide" link in workspace config
- *   <li>che.api
+ *   <li>che.api.external
  * </ul>
  */
 public class CheWsAgentCorsAllowedOriginsProvider implements Provider<String> {
@@ -85,7 +84,7 @@ public class CheWsAgentCorsAllowedOriginsProvider implements Provider<String> {
     if (ideUrl != null) {
       return UriBuilder.fromUri(ideUrl).replacePath(null).build().toString();
     }
-    return UriBuilder.fromUri(workspaceDto.getLinks().getOrDefault("ide", apiExternal))
+    return UriBuilder.fromUri(apiExternal)
         .replacePath(null)
         .build()
         .toString();
