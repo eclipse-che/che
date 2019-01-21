@@ -95,7 +95,6 @@ import org.eclipse.che.api.languageserver.LanguageServerException;
 import org.eclipse.che.api.languageserver.LanguageServerInitializer;
 import org.eclipse.che.api.languageserver.LanguageServiceUtils;
 import org.eclipse.che.api.project.server.ProjectManager;
-import org.eclipse.che.api.project.server.notification.ProjectUpdatedEvent;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.jdt.ls.extension.api.Commands;
 import org.eclipse.che.jdt.ls.extension.api.Severity;
@@ -939,7 +938,6 @@ public class JavaLanguageServerExtensionService {
                 if (!projectConfig.getProblems().isEmpty()) {
                   try {
                     projectManager.update(projectConfig);
-                    eventService.publish(new ProjectUpdatedEvent(projectPath));
                   } catch (Exception e) {
                     LOG.error(
                         String.format("Failed to update project '%s' configuration", projectUri),

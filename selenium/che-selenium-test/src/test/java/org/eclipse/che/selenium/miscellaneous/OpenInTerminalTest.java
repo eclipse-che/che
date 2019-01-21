@@ -45,7 +45,7 @@ public class OpenInTerminalTest {
 
   @SuppressWarnings("unused")
   @Inject
-  private TestWorkspace workspace;
+  protected TestWorkspace workspace;
 
   @SuppressWarnings("unused")
   @Inject
@@ -126,7 +126,7 @@ public class OpenInTerminalTest {
    * </pre>
    */
   @Test
-  public void openFolderInTerminalTest() {
+  public void openFolderInTerminalTest() throws Exception {
     seleniumWebDriver.navigate().refresh();
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
@@ -136,7 +136,7 @@ public class OpenInTerminalTest {
     projectExplorer.waitContextMenu();
     projectExplorer.clickOnItemInContextMenu(OPEN_IN_TERMINAL);
     terminal.waitTerminalTab(2);
-    terminal.waitTextInTerminal(2, PROJECT_NAME + PATH_TO_EXPAND);
+    terminal.waitTextInTerminal(2, getExpectedTextInTerminal());
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME + FILE);
     projectExplorer.openContextMenuByPathSelectedItem(PROJECT_NAME + FILE);
@@ -165,5 +165,9 @@ public class OpenInTerminalTest {
     seleniumWebDriverHelper.sendKeys(Keys.chord(ALT, SHIFT, F12));
     terminal.waitTerminalTab(2);
     terminal.waitTextInTerminal(2, PROJECT_NAME);
+  }
+
+  protected String getExpectedTextInTerminal() throws Exception {
+    return PROJECT_NAME + PATH_TO_EXPAND;
   }
 }

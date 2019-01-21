@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.plainjava;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.JAVA_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.RUN_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.JAVA_TYPE;
@@ -25,7 +24,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.W
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.SubMenuNew.FOLDER;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -49,12 +47,10 @@ import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor;
 import org.eclipse.che.selenium.pageobject.intelligent.CommandsExplorer;
 import org.openqa.selenium.Keys;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Aleksandr Shmaraev */
-@Test(groups = UNDER_REPAIR)
 public class RunPlainJavaProjectTest {
   private static final String PROJECT_NAME = "run-plain-java-project";
   private static final String NEW_PACKAGE = "base.test";
@@ -119,11 +115,11 @@ public class RunPlainJavaProjectTest {
     // create the instance of the library
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
     codenvyEditor.waitActive();
-    codenvyEditor.setCursorToLine(19);
+    codenvyEditor.setCursorToLine(20);
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("Mockito mockito = new Mockito();");
     codenvyEditor.waitTextIntoEditor("Mockito mockito = new Mockito();");
-    codenvyEditor.waitMarkerInPosition(ERROR, 19);
+    codenvyEditor.waitMarkerInPosition(ERROR, 20);
 
     // check code assist
     codenvyEditor.launchPropositionAssistPanel();
@@ -135,11 +131,11 @@ public class RunPlainJavaProjectTest {
     // create the instance of new Java class
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/nba/MainClass.java");
     codenvyEditor.waitActive();
-    codenvyEditor.setCursorToLine(22);
+    codenvyEditor.setCursorToLine(23);
     codenvyEditor.typeTextIntoEditor(Keys.TAB.toString());
     codenvyEditor.typeTextIntoEditor("A a = new A();");
     codenvyEditor.waitTextIntoEditor("A a = new A();");
-    codenvyEditor.waitMarkerInPosition(ERROR, 22);
+    codenvyEditor.waitMarkerInPosition(ERROR, 23);
 
     // check the code assist
     codenvyEditor.launchPropositionAssistPanel();
@@ -221,14 +217,7 @@ public class RunPlainJavaProjectTest {
     projectWizard.waitCreateProjectWizardForm();
     projectWizard.selectTypeProject(typeProject);
     projectWizard.clickNextButton();
-
-    try {
-      projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/11516");
-    }
-
+    projectWizard.waitExpTextInSourceFolder("src", Wizard.TypeFolder.SOURCE_FOLDER);
     projectWizard.clickSaveButton();
     projectWizard.waitCloseProjectConfigForm();
   }

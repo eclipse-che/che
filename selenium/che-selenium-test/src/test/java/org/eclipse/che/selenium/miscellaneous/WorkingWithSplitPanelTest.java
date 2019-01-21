@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.util.Arrays.stream;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.GIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.STATUS;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.COMMON_GOAL;
@@ -21,7 +22,6 @@ import static org.testng.Assert.assertTrue;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants;
@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
 /** @author Aleksandr Shmaraev */
 public class WorkingWithSplitPanelTest {
 
-  private static final String PROJECT_NAME = NameGenerator.generate("MultiSplitPane", 4);
+  private static final String PROJECT_NAME = generate("MultiSplitPane", 4);
   private static final String BUILD_COMM = "newMaven";
   private static final String[] checkMcTerminal = {"Left", "File", "Command", "Options", "Right"};
 
@@ -131,13 +131,11 @@ public class WorkingWithSplitPanelTest {
     multiSplitPanel.waitTabProcessIsPresent(1, "Terminal-2");
     terminal.waitTerminalIsNotEmpty(2); // terminal.waitTerminalIsNotEmpty(2)
     loader.waitOnClosed();
-    terminal.typeIntoActiveTerminal("mc");
+    terminal.typeIntoActiveTerminal(getCommandToCheckTerminal());
     terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
     terminal.waitTerminalIsNotEmpty(3);
     loader.waitOnClosed();
-    String visibleTextFromTerminal = terminal.getVisibleTextFromTerminal(3);
-    stream(checkMcTerminal)
-        .forEach(content -> assertTrue(visibleTextFromTerminal.contains(content)));
+    checkExpectedTextIsPresent();
     multiSplitPanel.waitTabProcessIsNotPresent(2, BUILD_COMM);
   }
 
@@ -208,5 +206,19 @@ public class WorkingWithSplitPanelTest {
     commandsEditor.clickOnCancelCommandEditorButton();
     loader.waitOnClosed();
     projectExplorer.clickOnProjectExplorerTab();
+  }
+
+  protected String getCommandToCheckTerminal() {
+    return "mc";
+  }
+
+  protected void checkExpectedTextIsPresent() {
+    String visibleTextFromTerminal = getExpectedContentOfTerminal();
+    stream(checkMcTerminal)
+        .forEach(content -> assertTrue(visibleTextFromTerminal.contains(content)));
+  }
+
+  private String getExpectedContentOfTerminal() {
+    return terminal.getVisibleTextFromTerminal(3);
   }
 }

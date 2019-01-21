@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.ide.ext.java.client;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_ASSISTANT;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_FILE_NEW;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_PROJECT;
@@ -18,10 +19,12 @@ import static org.eclipse.che.ide.api.action.IdeActions.GROUP_RIGHT_STATUS_PANEL
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
+import com.google.web.bindery.event.shared.EventBus;
 import org.eclipse.che.ide.api.action.ActionManager;
 import org.eclipse.che.ide.api.action.DefaultActionGroup;
 import org.eclipse.che.ide.api.action.IdeActions;
 import org.eclipse.che.ide.api.action.Separator;
+import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.constraints.Anchor;
 import org.eclipse.che.ide.api.constraints.Constraints;
 import org.eclipse.che.ide.api.extension.Extension;
@@ -31,6 +34,7 @@ import org.eclipse.che.ide.api.icon.Icon;
 import org.eclipse.che.ide.api.icon.IconRegistry;
 import org.eclipse.che.ide.api.keybinding.KeyBindingAgent;
 import org.eclipse.che.ide.api.keybinding.KeyBuilder;
+import org.eclipse.che.ide.api.workspace.event.WsAgentServerRunningEvent;
 import org.eclipse.che.ide.ext.java.client.action.FileStructureAction;
 import org.eclipse.che.ide.ext.java.client.action.FindUsagesAction;
 import org.eclipse.che.ide.ext.java.client.action.MarkDirAsSourceAction;
@@ -48,6 +52,7 @@ import org.eclipse.che.ide.ext.java.client.progressor.background.ProgressMonitor
 import org.eclipse.che.ide.ext.java.client.refactoring.move.CutJavaSourceAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.move.MoveAction;
 import org.eclipse.che.ide.ext.java.client.refactoring.rename.RenameRefactoringAction;
+import org.eclipse.che.ide.ext.java.client.service.CustomNotificationReceiver;
 import org.eclipse.che.ide.ext.java.shared.Constants;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
@@ -70,6 +75,9 @@ public class JavaExtension {
   @Inject
   public JavaExtension(
       FileTypeRegistry fileTypeRegistry,
+      AppContext appContext,
+      EventBus eventBus,
+      CustomNotificationReceiver customNotificationReceiver,
       @Named("JavaFileType") FileType javaFile,
       @Named("JavaClassFileType") FileType classFile,
       @Named("JspFileType") FileType jspFile) {
@@ -78,6 +86,16 @@ public class JavaExtension {
     fileTypeRegistry.registerFileType(javaFile);
     fileTypeRegistry.registerFileType(jspFile);
     fileTypeRegistry.registerFileType(classFile);
+
+    eventBus.addHandler(
+        WsAgentServerRunningEvent.TYPE,
+        e -> {
+          customNotificationReceiver.subscribe();
+        });
+
+    if (appContext.getWorkspace().getStatus() == RUNNING) {
+      customNotificationReceiver.subscribe();
+    }
   }
 
   @Inject

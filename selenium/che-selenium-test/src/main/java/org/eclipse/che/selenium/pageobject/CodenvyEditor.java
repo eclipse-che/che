@@ -976,7 +976,17 @@ public class CodenvyEditor {
    * @param markerLocator marker's type, defined in {@link MarkerLocator}
    */
   public void waitAllMarkersInvisibility(MarkerLocator markerLocator) {
-    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()), WIDGET_TIMEOUT_SEC);
+    waitAllMarkersInvisibility(markerLocator, WIDGET_TIMEOUT_SEC);
+  }
+
+  /**
+   * Waits until all markers with specified {@code markerLocator} be invisible
+   *
+   * @param markerLocator marker's type, defined in {@link MarkerLocator}
+   * @param timeout is timeout in seconds defined by user
+   */
+  public void waitAllMarkersInvisibility(MarkerLocator markerLocator, int timeout) {
+    seleniumWebDriverHelper.waitInvisibility(By.xpath(markerLocator.get()), timeout);
   }
 
   /**

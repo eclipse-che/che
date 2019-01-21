@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2018-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>che-parent</artifactId>
+        <groupId>org.eclipse.che</groupId>
+        <version>6.18.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <groupId>org.eclipse.che.typescript.dto</groupId>
+    <artifactId>che-typescript-dto</artifactId>
+    <packaging>pom</packaging>
+    <name>Che TypeScript DTO Generate and Publish</name>
+    <inceptionYear>2018</inceptionYear>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${basedir}</directory>
+                            <includes>
+                                <include>index.d.ts</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>codenvy-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>generate-dts</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec executable="bash" failonerror="true">
+                                            <arg value="-c" />
+                                            <arg value="docker run -i --rm -v &quot;$HOME/.m2:/root/.m2&quot;
+                                            -v &quot;${basedir}/dto-pom.xml:/usr/src/mymaven/pom.xml&quot;
+                                            -w /usr/src/mymaven maven:3.3-jdk-8
+                                            /bin/bash -c &quot;mvn -q -U -DskipTests=true -Dfindbugs.skip=true -Dskip-validate-sources install
+                                            &amp;&amp; cat target/dts-dto-typescript.d.ts&quot; >>
+                                            index.d.ts" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>build-image</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- build workspace loader with maven in docker -->
+                                        <exec dir="${basedir}" executable="docker" failonerror="true">
+                                            <arg value="build" />
+                                            <arg value="-t" />
+                                            <arg value="eclipse-che-ts-api" />
+                                            <arg value="--build-arg" />
+                                            <arg value="CHE_VERSION=${che.version}" />
+                                            <arg value="--build-arg" />
+                                            <arg value="NPM_AUTH_TOKEN=${NPM_AUTH_TOKEN}" />
+                                            <arg value="." />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

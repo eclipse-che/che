@@ -94,8 +94,8 @@ public class KubernetesEnvironment extends InternalEnvironment {
       Map<String, ConfigMap> configMaps) {
     super(internalEnvironment);
     setType(TYPE);
-    this.pods = pods;
-    this.deployments = deployments;
+    this.pods = new HashMap<>(pods);
+    this.deployments = new HashMap<>(deployments);
     this.services = services;
     this.ingresses = ingresses;
     this.persistentVolumeClaims = persistentVolumeClaims;
