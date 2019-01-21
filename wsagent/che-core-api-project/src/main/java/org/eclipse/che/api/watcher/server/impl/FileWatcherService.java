@@ -270,9 +270,8 @@ public class FileWatcherService {
           continue;
         }
 
-        for (List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
-            !watchEvents.isEmpty();
-            watchEvents = watchKey.pollEvents()) {
+        List<WatchEvent<?>> watchEvents = watchKey.pollEvents();
+        while(!watchEvents.isEmpty()) {
           if (suspended.get()) {
             resetAndRemove(watchKey, dir);
 
@@ -299,6 +298,8 @@ public class FileWatcherService {
 
             handler.handle(path, kind);
           }
+
+          watchEvents = watchKey.pollEvents();
         }
 
         resetAndRemove(watchKey, dir);
