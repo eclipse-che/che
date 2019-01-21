@@ -224,7 +224,7 @@ public class FactoryDaoTest {
     final List<Pair<String, String>> attributes =
         ImmutableList.of(
             Pair.of("policies.referer", "referrer"),
-            Pair.of("policies.createEnvironment", "perClick"),
+            Pair.of("policies.create", "perClick"),
             Pair.of("workspace.defaultEnv", "env1"));
     final FactoryImpl factory1 = factories[1];
     final FactoryImpl factory3 = factories[3];

@@ -53,7 +53,7 @@ public class FactoryEditValidatorImplTest {
   }
 
   /**
-   * Check when user is not same than the one than createEnvironment the factory
+   * Check when user is not same than the one than create the factory
    *
    * @throws ApiException
    */
@@ -70,7 +70,7 @@ public class FactoryEditValidatorImplTest {
   }
 
   /**
-   * Check when user is the same than the one than createEnvironment the factory
+   * Check when user is the same than the one than create the factory
    *
    * @throws ApiException
    */

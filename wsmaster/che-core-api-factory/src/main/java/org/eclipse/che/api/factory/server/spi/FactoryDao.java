@@ -30,7 +30,7 @@ public interface FactoryDao {
   /**
    * Creates factory.
    *
-   * @param factory factory to createEnvironment
+   * @param factory factory to create
    * @return created factory
    * @throws NullPointerException when {@code factory} is null
    * @throws ConflictException when {@code factory} with given name and creator already exists

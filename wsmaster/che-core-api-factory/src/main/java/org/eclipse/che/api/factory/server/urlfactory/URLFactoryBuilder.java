@@ -69,7 +69,7 @@ public class URLFactoryBuilder {
   }
 
   /**
-   * Build a factory using the provided json file or createEnvironment default one
+   * Build a factory using the provided json file or create default one
    *
    * @param jsonFileLocation location of factory json file
    * @return a factory or null if factory json in not found

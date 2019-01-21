@@ -532,7 +532,7 @@ public class FactoryServiceTest {
         .when(acceptValidator)
         .validateOnAccept(any());
 
-    // createEnvironment factory
+    // create factory
     final FactoryDto expectFactory =
         newDto(FactoryDto.class).withV(CURRENT_VERSION).withName("matchingResolverFactory");
 
