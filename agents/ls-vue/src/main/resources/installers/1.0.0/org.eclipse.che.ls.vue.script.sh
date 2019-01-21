@@ -35,13 +35,13 @@ LS_LAUNCHER=${LS_DIR}/launch.sh
 
 if [ -f /etc/centos-release ]; then
     FILE="/etc/centos-release"
-    LINUX_TYPE=$(cat $FILE | awk '{print $1}')
- elif [ -f /etc/redhat-release ]; then
+    LINUX_TYPE=$(awk '{print $1}' < $FILE)
+elif [ -f /etc/redhat-release ]; then
     FILE="/etc/redhat-release"
-    LINUX_TYPE=$(cat $FILE | cut -c 1-8)
- else
+    LINUX_TYPE=$(cut -c 1-8 < $FILE)
+else
     FILE="/etc/os-release"
-    LINUX_TYPE=$(cat $FILE | grep ^ID= | tr '[:upper:]' '[:lower:]')
+    LINUX_TYPE=$(grep ^ID= < $FILE | tr '[:upper:]' '[:lower:]')
 fi
 
 mkdir -p ${CHE_DIR}
