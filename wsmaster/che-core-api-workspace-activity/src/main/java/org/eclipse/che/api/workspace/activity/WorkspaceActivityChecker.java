@@ -143,12 +143,12 @@ public class WorkspaceActivityChecker {
         // that we failed to do that and that no other activity exists on the workspace.
         // That's why in the code below we still have to account for the possibility of this value
         // being null.
-        Long lastKnownActivity = newestActivity(activity);
+        Long latestActivityTime = getLatestActivityTime(activity);
 
         // we get true if there was no last running time before
-        boolean noLastRunningTime = rectifyLastRunningTime(activity, now, lastKnownActivity);
+        boolean noLastRunningTime = rectifyLastRunningTime(activity, now, latestActivityTime);
 
-        rectifyExpirationTime(activity, now, noLastRunningTime, lastKnownActivity, idleTimeout);
+        rectifyExpirationTime(activity, now, noLastRunningTime, latestActivityTime, idleTimeout);
       }
     }
   }
@@ -156,15 +156,15 @@ public class WorkspaceActivityChecker {
   private void createMissingActivityRecord(String runningWsId, long idleTimeout)
       throws ServerException {
     LOG.warn(
-        "Found a running workspace {} without any activity record. This shouldn't really happen"
+        "Found a running workspace '{}' without any activity record. This shouldn't really happen"
             + " but is being rectified by adding a new activity record for it.",
         runningWsId);
     try {
       Workspace workspace = workspaceManager.getWorkspace(runningWsId);
       long createdTime;
       try {
-        createdTime = Long
-            .parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+        createdTime =
+            Long.parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
       } catch (NumberFormatException e) {
         LOG.error(
             "Failed to read the created time of the workspace '{}' from its attributes. Using the"
@@ -187,12 +187,11 @@ public class WorkspaceActivityChecker {
 
       activityDao.createActivity(activity);
     } catch (NotFoundException e) {
-      LOG.error(
-          "Detected a running workspace {} but could not find" + " its record.", runningWsId, e);
+      LOG.error("Detected a running workspace '{}' but could not find its record.", runningWsId, e);
     } catch (ConflictException e) {
       LOG.debug(
           "Activity record created while we were trying to rectify its absence for a running"
-              + " workspace {}.",
+              + " workspace '{}'.",
           runningWsId);
     }
   }
@@ -221,7 +220,7 @@ public class WorkspaceActivityChecker {
             Long.parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
 
         LOG.warn(
-            "Workspace {} doesn't have any information about when it was created or last seen"
+            "Workspace '{}' doesn't have any information about when it was created or last seen"
                 + " starting. Setting the created time to {}.",
             activity.getWorkspaceId(),
             createdTime);
@@ -266,14 +265,13 @@ public class WorkspaceActivityChecker {
    * @param activity the activity record of the running workspace with a rectified last running time
    * @param now the current time we're working with
    * @param noLastRunningTime true if there has been no prior record of the last running time
-   * @param lastKnownActivity the time of the last known activity detected before the last running
-   *     time rectification
+   * @param latestActivityTime the time of the last known activity detected before the last running
    */
   private void rectifyExpirationTime(
       WorkspaceActivity activity,
       long now,
       boolean noLastRunningTime,
-      Long lastKnownActivity,
+      Long latestActivityTime,
       long idleTimeout) {
 
     // we don't need any rectifications if there already is an expiration time set or if expiration
@@ -286,26 +284,26 @@ public class WorkspaceActivityChecker {
 
     // define the error message upfront to make it easier to follow the actual logic
     final String noActivityFoundWhileHandlingExpiration =
-        "Found no expiration time on workspace {}. No prior activity was found on the  workspace."
+        "Found no expiration time on workspace '{}'. No prior activity was found on the workspace."
             + " To restore the normal function, the expiration time has been set to {}.";
     final String noExpirationWithoutLastRunning =
-        "Found no expiration time on workspace {} and no  record of the last time it started. The"
+        "Found no expiration time on workspace '{}' and no record of the last time it started. The"
             + " expiration has been set to {}";
     final String noExpirationAfterThresholdTime =
-        "Found no expiration time on workspace {}. This  was detected {}ms after the workspace has"
-            + " been recorded running which is suspicious.  Please consider filing a bug report. To"
-            + " restore the normal function, the expiration  time has been set to {}.";
+        "Found no expiration time on workspace '{}'. This was detected {}ms after the workspace"
+            + " has been recorded running which is suspicious. Please consider filing a bug"
+            + " report. To restore the normal function, the expiration time has been set to {}.";
     final String noExpirationBeforeThresholdTime =
-        "Found no expiration time on workspace {}. This  was detected {}ms after the workspace has"
-            + " been recorded running which is most probably caused by the schedule coinciding with"
-            + " the workspace actually entering the running state. Not rectifying the expiration at"
-            + " the moment and leaving that for the next iteration.";
+        "Found no expiration time on workspace '{}'. This was detected {}ms after the workspace"
+            + " has been recorded running which is most probably caused by the schedule coinciding"
+            + " with the workspace actually entering the running state. Not rectifying the"
+            + " expiration at the moment and leaving that for the next iteration.";
 
     // first figure out the expiration time. The last running time has been initialized
     // on the activity before this method is called, so we can safely assume it is non-null here.
     long lastTime = activity.getLastRunning();
 
-    if (lastKnownActivity == null) {
+    if (latestActivityTime == null) {
       // here, we have no prior record of any activity. Even though there were attempts to fix that
       // prior to calling this method, we don't want to report on the half-way fixed state.
       // Let's just fix the expiration-related part of the problem and report that we fixed it from
@@ -349,26 +347,26 @@ public class WorkspaceActivityChecker {
    *
    * @param activity the activity record
    * @param now the current time we're working with
-   * @param lastKnownActivity the time of the last known activity on the workspace, if any
+   * @param latestActivityTime the time of the last known activity on the workspace, if any
    * @return true if the last running time was null before and was rectified, false if the last
    *     running time was not null.
    * @throws ServerException
    */
   private boolean rectifyLastRunningTime(
-      WorkspaceActivity activity, long now, Long lastKnownActivity) throws ServerException {
+      WorkspaceActivity activity, long now, Long latestActivityTime) throws ServerException {
     String wsId = activity.getWorkspaceId();
     if (activity.getLastRunning() == null) {
-      rectifyNoLastRunningTime(wsId, activity, now, lastKnownActivity);
+      rectifyNoLastRunningTime(wsId, activity, now, latestActivityTime);
       return true;
-    } else if (lastKnownActivity != null && lastKnownActivity > activity.getLastRunning()) {
+    } else if (latestActivityTime != null && latestActivityTime > activity.getLastRunning()) {
       LOG.warn(
-          "Workspace {} has been found running yet there is an activity on it newer than the"
+          "Workspace '{}' has been found running yet there is an activity on it newer than the"
               + " last running time. This should not happen. Resetting the last running time to"
               + " the newest activity time. The activity record is this: ",
           wsId,
           activity.toString());
-      activityDao.setStatusChangeTime(wsId, WorkspaceStatus.RUNNING, lastKnownActivity);
-      activity.setLastRunning(lastKnownActivity);
+      activityDao.setStatusChangeTime(wsId, WorkspaceStatus.RUNNING, latestActivityTime);
+      activity.setLastRunning(latestActivityTime);
     }
 
     // there was a running time before
@@ -376,9 +374,9 @@ public class WorkspaceActivityChecker {
   }
 
   private void rectifyNoLastRunningTime(
-      String runningWsId, WorkspaceActivity activity, long now, Long lastKnownActivity)
+      String runningWsId, WorkspaceActivity activity, long now, Long latestActivityTime)
       throws ServerException {
-    // k, so we don't have the information about when the workspace was last started here.
+    // We don't have the information about when the workspace was last started here.
     // This is most probably because of the coincidence of the schedule of this method and
     // the workspace being started. On the other hand, it also can happen if the wsmaster is
     // stopped at some unfortunate point in time, which would lead to it never be set until
@@ -393,31 +391,31 @@ public class WorkspaceActivityChecker {
     activityDao.setStatusChangeTime(runningWsId, WorkspaceStatus.RUNNING, now);
     activity.setLastRunning(now);
 
-    if (lastKnownActivity == null) {
+    if (latestActivityTime == null) {
       LOG.warn(
-          "Workspace {} had no information about the last activity on it yet was found running. The"
-              + " last seen running time of the workspace has been reset to {}. Please consider"
+          "Workspace '{}' had no information about the last activity on it yet was found running."
+              + " The last seen running time of the workspace has been reset to {}. Please consider"
               + " filing a bug report with any suspicious log messages prior to this one.",
           runningWsId,
           now);
-    } else if (lastKnownActivity < now - 300_000) {
+    } else if (latestActivityTime < now - 300_000) {
       // if the workspace's last activity was more than 5 mins ago (improbably long time
       // for a workspace startup, pulled out of thin air), we want to log a
       // message that we're recovering the last running time, because of some weird
       // circumstances that most probably have happened in the meantime.
       LOG.warn(
-          "Workspace {} had no information about the last time it has started yet was found"
+          "Workspace '{}' had no information about the last time it has started yet was found"
               + " running. The last activity recorded on it was more than 5 minutes ago. Please"
               + " consider filing a bug report with attached logs for the period between the last"
               + " recorded activity at timestamp {} and {}. The last seen running time of the"
               + " workspace has been reset to {}.",
           runningWsId,
-          lastKnownActivity,
+          latestActivityTime,
           now,
           now);
     } else {
       LOG.debug(
-          "Workspace {} had no information about"
+          "Workspace '{}' had no information about"
               + " the last time it has started yet was found running. The activity record (with the"
               + " rectified last running time) looks like this: {}",
           runningWsId,
