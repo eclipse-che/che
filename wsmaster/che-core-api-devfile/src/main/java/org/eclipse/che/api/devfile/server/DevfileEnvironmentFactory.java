@@ -12,6 +12,7 @@
 package org.eclipse.che.api.devfile.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
@@ -22,10 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Singleton;
@@ -46,7 +43,6 @@ public class DevfileEnvironmentFactory {
   static final String DEFAULT_RECIPE_CONTENT_TYPE = "application/x-yaml";
 
   private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-  private final KubernetesClient client = new DefaultKubernetesClient();
 
   /**
    * Consumes an recipe-type tool (openshift or kubernetes) from devfile and tries to create {@link
@@ -79,11 +75,7 @@ public class DevfileEnvironmentFactory {
               recipeTool.getLocal(), recipeTool.getName()));
     }
 
-    final KubernetesList list =
-        client
-            .lists()
-            .load(new ByteArrayInputStream(recipeFileContent.getBytes(StandardCharsets.UTF_8)))
-            .get();
+    final KubernetesList list = unmarshal(recipeFileContent, KubernetesList.class);
 
     if (recipeTool.getSelector() != null && !recipeTool.getSelector().isEmpty()) {
       List<HasMetadata> itemsList = list.getItems();
