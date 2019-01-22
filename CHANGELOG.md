@@ -6,14 +6,7 @@
 **Merged pull requests:**
 
 - bump che-ls-jdt version [\#12484](https://github.com/eclipse/che/pull/12484) ([riuvshin](https://github.com/riuvshin))
-- RELEASE: Update CHANGELOG [\#12481](https://github.com/eclipse/che/pull/12481) ([riuvshin](https://github.com/riuvshin))
-- \[theia-dev\] generator: use latest tagged version [\#12477](https://github.com/eclipse/che/pull/12477) ([benoitf](https://github.com/benoitf))
-- CORS: use internal or external api url depending on needs [\#12476](https://github.com/eclipse/che/pull/12476) ([skabashnyuk](https://github.com/skabashnyuk))
-- Selenium: Add/Delete 'try-catch' according to known issues [\#12473](https://github.com/eclipse/che/pull/12473) ([artaleks9](https://github.com/artaleks9))
-- Fix outdated theia image readme file [\#12468](https://github.com/eclipse/che/pull/12468) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
-- update typescript dto-pom versions [\#12464](https://github.com/eclipse/che/pull/12464) ([riuvshin](https://github.com/riuvshin))
 - Selenium: Refactor selenium tests from the 'miscellaneous' package [\#12402](https://github.com/eclipse/che/pull/12402) ([artaleks9](https://github.com/artaleks9))
-- Added support of PVC in Kuberentes/OpenShift recipe [\#12335](https://github.com/eclipse/che/pull/12335) ([sleshchenko](https://github.com/sleshchenko))
 
 
 ## [6.17.0](https://github.com/eclipse/che/tree/6.17.0) (2019-01-18)
