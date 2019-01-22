@@ -50,7 +50,7 @@ public class DevfileEnvironmentFactory {
 
   /**
    * Consumes an recipe-type tool (openshift or kubernetes) from devfile and tries to create {@link
-   * EnvironmentImpl} from it (including filtering if list items using selectors, if necessary). An
+   * EnvironmentImpl} from it (including filtering of list items using selectors, if necessary). An
    * {@link LocalFileContentProvider} MUST be provided in order to fetch recipe content.
    *
    * @param recipeTool the recipe-type tool
