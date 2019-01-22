@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-ide-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.17.1-SNAPSHOT</version>
+        <version>6.17.1</version>
     </parent>
     <artifactId>che-core-ide-ui</artifactId>
     <packaging>gwt-lib</packaging>

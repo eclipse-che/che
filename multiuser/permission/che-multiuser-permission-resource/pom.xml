@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-permission</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.17.1-SNAPSHOT</version>
+        <version>6.17.1</version>
     </parent>
     <artifactId>che-multiuser-permission-resource</artifactId>
     <name>Che Multiuser :: Resource :: Permissions</name>

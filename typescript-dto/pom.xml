@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.17.1-SNAPSHOT</version>
+        <version>6.17.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>org.eclipse.che.typescript.dto</groupId>
@@ -60,7 +60,7 @@
                                     <target>
                                         <exec executable="bash" failonerror="true">
                                             <arg value="-c" />
-                                            <arg value="docker run -i --rm -v &quot;$HOME/.m2:/root/.m2&quot; -v &quot;${basedir}/dto-pom.xml:/usr/src/mymaven/pom.xml&quot; -w /usr/src/mymaven maven:3.3-jdk-8                                             /bin/bash -c &quot;mvn -q -U -DskipTests=true -Dfindbugs.skip=true -Dskip-validate-sources install                                             &amp;&amp; cat target/dts-dto-typescript.d.ts&quot; &gt;&gt;                                             index.d.ts" />
+                                            <arg value="docker run -i --rm -v &quot;$HOME/.m2:/root/.m2&quot; -v &quot;${basedir}/dto-pom.xml:/usr/src/mymaven/pom.xml&quot; -w /usr/src/mymaven maven:3.3-jdk-8 /bin/bash -c &quot;mvn -q -U -DskipTests=true -Dfindbugs.skip=true -Dskip-validate-sources install                                             &amp;&amp; cat target/dts-dto-typescript.d.ts&quot; &gt;&gt;                                             index.d.ts" />
                                         </exec>
                                     </target>
                                 </configuration>

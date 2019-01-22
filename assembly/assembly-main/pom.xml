@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.17.1-SNAPSHOT</version>
+        <version>6.17.1</version>
     </parent>
     <artifactId>assembly-main</artifactId>
     <packaging>pom</packaging>
