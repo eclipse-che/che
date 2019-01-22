@@ -20,5 +20,18 @@
         <version>6.18.0-SNAPSHOT</version>
     </parent>
     <artifactId>ls-vue-agent</artifactId>
-    <name>Language Server VueJS Agent</name>
+    <name>Language Server Vue Agent</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*.sh</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
