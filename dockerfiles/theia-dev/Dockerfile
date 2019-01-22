@@ -47,7 +47,7 @@ EXPOSE 3000 3030
 RUN npm config set prefix "${HOME}/.npm-global" && \
     echo "--global-folder \"${HOME}/.yarn-global\"" > ${HOME}/.yarnrc && \
     # add eclipse che theia generator
-    yarn global add ${THEIA_GENERATOR_PACKAGE} && \
+    yarn global add yo @theia/generator-plugin@0.0.1-1540209403 ${THEIA_GENERATOR_PACKAGE} && \
     # Generate .passwd.template \
     cat /etc/passwd | \
     sed s#root:x.*#theia-dev:x:\${USER_ID}:\${GROUP_ID}::${HOME}:/bin/bash#g \
