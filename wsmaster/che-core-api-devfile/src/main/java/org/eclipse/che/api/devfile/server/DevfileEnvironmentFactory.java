@@ -21,6 +21,7 @@ import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Singleton;
@@ -70,20 +71,26 @@ public class DevfileEnvironmentFactory {
               "The local file '%s' defined in tool  '%s' is unreachable or empty.",
               recipeTool.getLocal(), recipeTool.getName()));
     }
+    try {
+      final KubernetesList list = unmarshal(recipeFileContent, KubernetesList.class);
 
-    final KubernetesList list = unmarshal(recipeFileContent, KubernetesList.class);
-
-    if (recipeTool.getSelector() != null && !recipeTool.getSelector().isEmpty()) {
-      List<HasMetadata> itemsList = list.getItems();
-      itemsList.removeIf(
-          e ->
-              !e.getMetadata()
-                  .getLabels()
-                  .entrySet()
-                  .containsAll(recipeTool.getSelector().entrySet()));
-      list.setItems(itemsList);
+      if (recipeTool.getSelector() != null && !recipeTool.getSelector().isEmpty()) {
+        List<HasMetadata> itemsList = list.getItems();
+        itemsList.removeIf(
+            e ->
+                !e.getMetadata()
+                    .getLabels()
+                    .entrySet()
+                    .containsAll(recipeTool.getSelector().entrySet()));
+        list.setItems(itemsList);
+      }
+      RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, asYaml(list), null);
+      return Optional.of(new Pair<>(recipeTool.getName(), new EnvironmentImpl(recipe, emptyMap())));
+    } catch (KubernetesClientException ex) {
+      throw new BadRequestException(
+          format(
+              "Unable to serialize or deserialize specified local file content for tool '%s'",
+              recipeTool.getName()));
     }
-    RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, asYaml(list), null);
-    return Optional.of(new Pair<>(recipeTool.getName(), new EnvironmentImpl(recipe, emptyMap())));
   }
 }

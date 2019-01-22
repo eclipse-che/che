@@ -83,6 +83,18 @@ public class DevfileEnvironmentFactoryTest {
     factory.createEnvironment(tool, s -> "");
   }
 
+  @Test(
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp =
+          "Unable to serialize or deserialize specified local file content for tool '"
+              + TOOL_NAME
+              + "'")
+  public void shouldThrowExceptionWhenRecipeContentIsUnparseable() throws Exception {
+    Tool tool =
+        new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
+    factory.createEnvironment(tool, s -> "some_unparseable_content");
+  }
+
   @Test
   public void shouldReturnEnvironmentWithCorrectRecipeTypeAndContentFromK8SList() throws Exception {
     String yamlRecipeContent =
