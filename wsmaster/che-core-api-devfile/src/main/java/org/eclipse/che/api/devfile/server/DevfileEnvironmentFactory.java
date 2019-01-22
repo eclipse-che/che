@@ -71,8 +71,8 @@ public class DevfileEnvironmentFactory {
           format("There is no content provider registered for '%s' type tools.", type));
     }
 
-    String localFileContent = recipeFileContentProvider.fetchContent(recipeTool.getLocal());
-    if (isNullOrEmpty(localFileContent)) {
+    String recipeFileContent = recipeFileContentProvider.fetchContent(recipeTool.getLocal());
+    if (isNullOrEmpty(recipeFileContent)) {
       throw new BadRequestException(
           format(
               "The local file '%s' defined in tool  '%s' is unreachable or empty.",
@@ -82,7 +82,7 @@ public class DevfileEnvironmentFactory {
     final KubernetesList list =
         client
             .lists()
-            .load(new ByteArrayInputStream(localFileContent.getBytes(StandardCharsets.UTF_8)))
+            .load(new ByteArrayInputStream(recipeFileContent.getBytes(StandardCharsets.UTF_8)))
             .get();
 
     if (recipeTool.getSelector() != null && !recipeTool.getSelector().isEmpty()) {
