@@ -86,6 +86,11 @@ public class WorkspaceActivityChecker {
   void validate() {
     try {
       stopAllExpired();
+    } catch (ServerException e) {
+      LOG.error(e.getLocalizedMessage(), e);
+    }
+
+    try {
       checkActivityRecordValidity();
     } catch (ServerException e) {
       LOG.error(e.getLocalizedMessage(), e);
