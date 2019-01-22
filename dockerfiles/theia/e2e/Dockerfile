@@ -11,6 +11,7 @@ FROM cypress/browsers:chrome67
 
 USER root
 ENV HOME=/root
+ENV NOCDN=true
 
 CMD /root/docker-run.sh
 RUN yarn global add typescript@2.9.2 node-gyp
