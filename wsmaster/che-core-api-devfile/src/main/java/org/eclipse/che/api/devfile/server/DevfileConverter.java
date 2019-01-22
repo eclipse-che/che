@@ -112,7 +112,7 @@ public class DevfileConverter {
   }
 
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
-      Devfile devfile, LocalFileContentProvider localFileContentProvider)
+      Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
       throws DevfileFormatException, BadRequestException {
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
@@ -139,7 +139,7 @@ public class DevfileConverter {
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
           Optional<Pair<String, EnvironmentImpl>> environmentPair =
-              devfileEnvironmentFactory.createEnvironment(tool, localFileContentProvider);
+              devfileEnvironmentFactory.createEnvironment(tool, recipeFileContentProvider);
           if (environmentPair.isPresent()) {
             final String environmentName = environmentPair.get().first;
             config.setDefaultEnv(environmentName);

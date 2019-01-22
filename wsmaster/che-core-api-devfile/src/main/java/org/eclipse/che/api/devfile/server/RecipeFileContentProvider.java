@@ -18,7 +18,7 @@ package org.eclipse.che.api.devfile.server;
  * @author Max Shaposhnyk
  */
 @FunctionalInterface
-public interface LocalFileContentProvider {
+public interface RecipeFileContentProvider {
 
   String fetchContent(String local);
 }

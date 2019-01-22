@@ -91,10 +91,10 @@ public class DevfileManager {
    * @throws ServerException when other error occurs
    */
   public WorkspaceImpl createWorkspace(
-      Devfile devfile, LocalFileContentProvider localFileContentProvider)
+      Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
       throws ServerException, DevfileFormatException, ConflictException, NotFoundException,
           ValidationException, BadRequestException {
-    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, localFileContentProvider);
+    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, recipeFileContentProvider);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
         findAvailableName(workspaceConfig), namespace, emptyMap());
@@ -108,10 +108,10 @@ public class DevfileManager {
    * @throws DevfileFormatException when devfile integrity validation fail
    */
   public WorkspaceConfigImpl createWorkspaceConfig(
-      Devfile devfile, LocalFileContentProvider localFileContentProvider)
+      Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
       throws DevfileFormatException, BadRequestException {
     integrityValidator.validateDevfile(devfile);
-    return devfileConverter.devFileToWorkspaceConfig(devfile, localFileContentProvider);
+    return devfileConverter.devFileToWorkspaceConfig(devfile, recipeFileContentProvider);
   }
 
   /**
