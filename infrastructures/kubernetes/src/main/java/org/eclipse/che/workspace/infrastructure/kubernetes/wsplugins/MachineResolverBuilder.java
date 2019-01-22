@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
+import org.eclipse.che.commons.lang.Pair;
 
 /** @author Alexander Garagatyi */
 public class MachineResolverBuilder {
@@ -25,17 +26,23 @@ public class MachineResolverBuilder {
   private String defaultSidecarMemorySizeAttribute;
   private List<ChePluginEndpoint> containerEndpoints;
   private Map<String, String> wsAttributes;
+  private Pair<String, String> projectsRootPathEnvVar;
+  private String pluginId;
 
   public MachineResolver build() {
     if (container == null
         || cheContainer == null
         || defaultSidecarMemorySizeAttribute == null
         || wsAttributes == null
-        || containerEndpoints == null) {
+        || containerEndpoints == null
+        || projectsRootPathEnvVar == null
+        || pluginId == null) {
       throw new IllegalStateException();
     }
 
     return new MachineResolver(
+        pluginId,
+        projectsRootPathEnvVar,
         container,
         cheContainer,
         defaultSidecarMemorySizeAttribute,
@@ -66,6 +73,17 @@ public class MachineResolverBuilder {
 
   public MachineResolverBuilder setAttributes(Map<String, String> wsConfigAttributes) {
     this.wsAttributes = wsConfigAttributes;
+    return this;
+  }
+
+  public MachineResolverBuilder setProjectsRootPathEnvVar(
+      Pair<String, String> projectsRootPathEnvVar) {
+    this.projectsRootPathEnvVar = projectsRootPathEnvVar;
+    return this;
+  }
+
+  public MachineResolverBuilder setPluginId(String pluginId) {
+    this.pluginId = pluginId;
     return this;
   }
 }
