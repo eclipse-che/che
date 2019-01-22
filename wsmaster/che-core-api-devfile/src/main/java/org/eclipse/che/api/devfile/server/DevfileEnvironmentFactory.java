@@ -50,11 +50,11 @@ public class DevfileEnvironmentFactory {
 
   /**
    * Consumes an recipe-type tool (openshift or kubernetes) from devfile and tries to create {@link
-   * EnvironmentImpl} from it. An {@link LocalFileContentProvider} MUST be provided in order to
-   * fetch recipe content.
+   * EnvironmentImpl} from it (including filtering if list items using selectors, if necessary). An
+   * {@link LocalFileContentProvider} MUST be provided in order to fetch recipe content.
    *
    * @param recipeTool the recipe-type tool
-   * @param localFileContentProvider service-specific provider of file content
+   * @param localFileContentProvider service-specific provider of recipe file content
    * @return optional pair of the recipe-type tool name and newly constructed environment from it
    * @throws BadRequestException when there is no content provider for recipe-type tool
    * @throws BadRequestException when recipe-type tool content is unreachable or empty
