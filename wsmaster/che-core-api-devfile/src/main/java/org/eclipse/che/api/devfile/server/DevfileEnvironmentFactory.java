@@ -12,15 +12,13 @@
 package org.eclipse.che.api.devfile.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static io.fabric8.kubernetes.client.utils.Serialization.asYaml;
 import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import java.util.List;
@@ -41,8 +39,6 @@ import org.eclipse.che.commons.lang.Pair;
 public class DevfileEnvironmentFactory {
 
   static final String DEFAULT_RECIPE_CONTENT_TYPE = "application/x-yaml";
-
-  private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
   /**
    * Consumes an recipe-type tool (openshift or kubernetes) from devfile and tries to create {@link
@@ -87,14 +83,7 @@ public class DevfileEnvironmentFactory {
                   .containsAll(recipeTool.getSelector().entrySet()));
       list.setItems(itemsList);
     }
-    String listValue = null;
-    try {
-      listValue = objectMapper.writeValueAsString(list);
-    } catch (JsonProcessingException e) {
-      e.printStackTrace();
-    }
-
-    RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, listValue, null);
+    RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, asYaml(list), null);
     return Optional.of(new Pair<>(recipeTool.getName(), new EnvironmentImpl(recipe, emptyMap())));
   }
 }
