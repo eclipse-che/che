@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2019 Red Hat, Inc.
+# Copyright (c) 2018-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -29,7 +29,7 @@ echo "Extracting artifacts for the CDN"
 mkdir -p "${base_dir}/theia_artifacts"
 "${base_dir}"/extract-for-cdn.sh "$IMAGE_NAME" "${base_dir}/theia_artifacts"
 LABEL_CONTENT=$(cat "${base_dir}"/theia_artifacts/cdn.json || true 2>/dev/null)
-if [ "${LABEL_CONTENT}" != "" ]; then
+if [ -n "${LABEL_CONTENT}" ]; then
   BUILD_ARGS+="--label che-plugin.cdn.artifacts=$(echo ${LABEL_CONTENT} | sed 's/ //g') "
   echo "Rebuilding with CDN label..."
   build
