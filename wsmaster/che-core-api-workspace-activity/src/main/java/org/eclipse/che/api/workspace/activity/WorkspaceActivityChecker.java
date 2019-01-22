@@ -161,8 +161,18 @@ public class WorkspaceActivityChecker {
         runningWsId);
     try {
       Workspace workspace = workspaceManager.getWorkspace(runningWsId);
-      long createdTime =
-          Long.parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+      long createdTime;
+      try {
+        createdTime = Long
+            .parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+      } catch (NumberFormatException e) {
+        LOG.error(
+            "Failed to read the created time of the workspace '{}' from its attributes. Using the"
+                + " current time.",
+            runningWsId,
+            e);
+        createdTime = clock.millis();
+      }
 
       WorkspaceActivity activity = new WorkspaceActivity();
       activity.setWorkspaceId(runningWsId);
@@ -198,29 +208,53 @@ public class WorkspaceActivityChecker {
    * @throws ServerException on error when fetching workspace from workspace manager
    */
   private void rectifyCreatedTime(WorkspaceActivity activity) throws ServerException {
-    if (activity.getCreated() == null) {
+    if (activity.getCreated() != null) {
+      // nothing to do
+      return;
+    }
+
+    try {
+      Workspace workspace = workspaceManager.getWorkspace(activity.getWorkspaceId());
+      long createdTime;
       try {
-        Workspace workspace = workspaceManager.getWorkspace(activity.getWorkspaceId());
-        long createdTime =
+        createdTime =
             Long.parseLong(workspace.getAttributes().get(Constants.CREATED_ATTRIBUTE_NAME));
+
         LOG.warn(
             "Workspace {} doesn't have any information about when it was created or last seen"
                 + " starting. Setting the created time to {}.",
             activity.getWorkspaceId(),
             createdTime);
-        activityDao.setCreatedTime(activity.getWorkspaceId(), createdTime);
-        activity.setCreated(createdTime);
       } catch (NumberFormatException e) {
-        LOG.error(
-            "Failed to read the created time of the workspace {} from its attributes.",
-            activity.getWorkspaceId(),
-            e);
-      } catch (NotFoundException e) {
-        LOG.error(
-            "Detected a running workspace {} but could not find" + " its record.",
-            activity.getWorkspaceId(),
-            e);
+        Long oldestActivityTime = getOldestActivityTime(activity);
+        if (oldestActivityTime == null) {
+          long now = clock.millis();
+          LOG.error(
+              "Failed to read the created time of the workspace '{}' from its attributes. Using"
+                  + " the current time ({}) for it because no other activity was ever recorded on"
+                  + " the workspace.",
+              activity.getWorkspaceId(),
+              now,
+              e);
+          createdTime = now;
+        } else {
+          LOG.error(
+              "Failed to read the created time of the workspace '{}' from its attributes. Using"
+                  + " the oldest activity time found on it ({}) as its created time.",
+              activity.getWorkspaceId(),
+              oldestActivityTime,
+              e);
+          createdTime = oldestActivityTime;
+        }
       }
+
+      activityDao.setCreatedTime(activity.getWorkspaceId(), createdTime);
+      activity.setCreated(createdTime);
+    } catch (NotFoundException e) {
+      LOG.error(
+          "Detected a running workspace '{}' but could not find" + " its record.",
+          activity.getWorkspaceId(),
+          e);
     }
   }
 
@@ -391,7 +425,16 @@ public class WorkspaceActivityChecker {
     }
   }
 
-  private static Long newestActivity(WorkspaceActivity activity) {
+  private static Long getOldestActivityTime(WorkspaceActivity activity) {
+    return minOf(
+        activity.getCreated(),
+        activity.getLastStarting(),
+        activity.getLastRunning(),
+        activity.getLastStopping(),
+        activity.getLastStopped());
+  }
+
+  private static Long getLatestActivityTime(WorkspaceActivity activity) {
     return maxOf(
         activity.getCreated(),
         activity.getLastStarting(),
@@ -413,5 +456,20 @@ public class WorkspaceActivityChecker {
     }
 
     return max;
+  }
+
+  private static Long minOf(Long... values) {
+    Long min = null;
+    for (Long v : values) {
+      if (v == null) {
+        continue;
+      }
+
+      if (min == null || v < min) {
+        min = v;
+      }
+    }
+
+    return min;
   }
 }
