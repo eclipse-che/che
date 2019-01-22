@@ -90,10 +90,11 @@ public class DevfileManager {
    * @throws NotFoundException when user account is not found
    * @throws ServerException when other error occurs
    */
-  public WorkspaceImpl createWorkspace(Devfile devfile, FileContentProvider fileContentProvider)
+  public WorkspaceImpl createWorkspace(
+      Devfile devfile, LocalFileContentProvider localFileContentProvider)
       throws ServerException, DevfileFormatException, ConflictException, NotFoundException,
           ValidationException, BadRequestException {
-    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, fileContentProvider);
+    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, localFileContentProvider);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
         findAvailableName(workspaceConfig), namespace, emptyMap());
@@ -107,10 +108,10 @@ public class DevfileManager {
    * @throws DevfileFormatException when devfile integrity validation fail
    */
   public WorkspaceConfigImpl createWorkspaceConfig(
-      Devfile devfile, FileContentProvider fileContentProvider)
+      Devfile devfile, LocalFileContentProvider localFileContentProvider)
       throws DevfileFormatException, BadRequestException {
     integrityValidator.validateDevfile(devfile);
-    return devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
+    return devfileConverter.devFileToWorkspaceConfig(devfile, localFileContentProvider);
   }
 
   /**

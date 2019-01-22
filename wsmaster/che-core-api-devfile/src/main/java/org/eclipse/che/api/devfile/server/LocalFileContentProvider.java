@@ -11,8 +11,14 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+/**
+ * Fetches content of file described in local field of recipe-type {@link
+ * org.eclipse.che.api.devfile.model.Tool}
+ *
+ * @author Max Shaposhnyk
+ */
 @FunctionalInterface
-public interface FileContentProvider {
+public interface LocalFileContentProvider {
 
   String fetchContent(String local);
 }

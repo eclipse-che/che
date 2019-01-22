@@ -50,27 +50,28 @@ public class DevfileEnvironmentFactory {
 
   /**
    * Consumes an recipe-type tool (openshift or kubernetes) from devfile and tries to create {@link
-   * EnvironmentImpl} from it. An {@link FileContentProvider} MUST be provided in order to fetch
-   * recipe content.
+   * EnvironmentImpl} from it. An {@link LocalFileContentProvider} MUST be provided in order to
+   * fetch recipe content.
    *
    * @param recipeTool the recipe-type tool
-   * @param fileContentProvider service-specific provider of file content
+   * @param localFileContentProvider service-specific provider of file content
    * @return optional pair of the recipe-type tool name and newly constructed environment from it
    * @throws BadRequestException when there is no content provider for recipe-type tool
    * @throws BadRequestException when recipe-type tool content is unreachable or empty
    */
   public Optional<Pair<String, EnvironmentImpl>> createEnvironment(
-      Tool recipeTool, FileContentProvider fileContentProvider) throws BadRequestException {
+      Tool recipeTool, LocalFileContentProvider localFileContentProvider)
+      throws BadRequestException {
     final String type = recipeTool.getType();
     if (!KUBERNETES_TOOL_TYPE.equals(type) && !OPENSHIFT_TOOL_TYPE.equals(type)) {
       throw new BadRequestException("Environment cannot be created from such type of tool.");
     }
-    if (fileContentProvider == null) {
+    if (localFileContentProvider == null) {
       throw new BadRequestException(
           format("There is no content provider registered for '%s' type tools.", type));
     }
 
-    String localFileContent = fileContentProvider.fetchContent(recipeTool.getLocal());
+    String localFileContent = localFileContentProvider.fetchContent(recipeTool.getLocal());
     if (isNullOrEmpty(localFileContent)) {
       throw new BadRequestException(
           format(
