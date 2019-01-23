@@ -24,6 +24,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,8 +98,20 @@ public class KubernetesEnvironmentFactory
                 + "application/x-yaml, text/yaml, text/x-yaml");
     }
 
-    final KubernetesList list =
-        clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
+    final KubernetesList list;
+    try {
+      list =
+          clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
+    } catch (KubernetesClientException e) {
+      // KubernetesClient wraps the error when a JsonMappingException occurs so we need the cause
+      String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
+      if (message.contains("\n")) {
+        // Clean up message if it comes from JsonMappingException. Format is e.g.
+        // `No resource type found for:v1#Route1\n at [...]`
+        message = message.split("\\n", 2)[0];
+      }
+      throw new ValidationException(format("Could not parse Kubernetes recipe: %s", message));
+    }
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Deployment> deployments = new HashMap<>();
@@ -134,7 +147,9 @@ public class KubernetesEnvironmentFactory
         configMaps.put(configMap.getMetadata().getName(), configMap);
       } else {
         throw new ValidationException(
-            format("Found unknown object type '%s'", object.getMetadata()));
+            format(
+                "Found unknown object type in recipe -- name: '%s', kind: '%s'",
+                object.getMetadata().getName(), object.getKind()));
       }
     }
 
