@@ -15,6 +15,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
 
 import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.EmptyDirVolumeSource;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -35,8 +37,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Allows to create ephemeral workspaces (with no PVC attached) based on workspace config
  * `persistVolumes` attribute. If `persistVolumes` attribute is set to false, workspace volumes
- * would be created as `emptyDir` regardless of the PVC strategy. When a workspace Pod is removed
- * for any reason, the data in the `emptyDir` volume is deleted forever.
+ * would be created as `emptyDir` regardless of the PVC strategy. User-defined PVCs will be removed
+ * from environment and the corresponding PVC volumes in Pods will be replaced with `emptyDir`
+ * volumes. When a workspace Pod is removed for any reason, the data in the `emptyDir` volume is
+ * deleted forever.
  *
  * @see <a href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir">emptyDir</a>
  * @author Ilya Buziuk
@@ -44,6 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 public class EphemeralWorkspaceAdapter {
+
   private static final Logger LOG = LoggerFactory.getLogger(CommonPVCStrategy.class);
 
   private static final String EPHEMERAL_VOLUME_NAME_PREFIX = "ephemeral-che-workspace-";
@@ -51,36 +56,53 @@ public class EphemeralWorkspaceAdapter {
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
     LOG.debug("Provisioning PVC strategy for workspace '{}'", identity.getWorkspaceId());
+    k8sEnv.getPersistentVolumeClaims().clear();
     for (PodData pod : k8sEnv.getPodsData().values()) {
       PodSpec podSpec = pod.getSpec();
 
       // To ensure same volumes get mounted correctly in different containers, we need to track
       // which volumes have been "created"
-      Map<String, String> volumeKeyToNameCache = new HashMap<>();
+      Map<String, String> cheVolumeNameToPodVolumeName = new HashMap<>();
+
+      podSpec
+          .getVolumes()
+          .stream()
+          .filter(v -> v.getPersistentVolumeClaim() != null)
+          .forEach(
+              v -> {
+                String claimName = v.getPersistentVolumeClaim().getClaimName();
+                cheVolumeNameToPodVolumeName.put(claimName, v.getName());
+                v.setPersistentVolumeClaim(null);
+                v.setEmptyDir(new EmptyDirVolumeSource());
+              });
 
       List<Container> containers = new ArrayList<>();
       containers.addAll(podSpec.getContainers());
       containers.addAll(podSpec.getInitContainers());
       for (Container container : containers) {
         String machineName = Names.machineName(pod, container);
-        Map<String, Volume> volumes = k8sEnv.getMachines().get(machineName).getVolumes();
+        InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
+        if (machineConfig == null) {
+          return;
+        }
+        Map<String, Volume> volumes = machineConfig.getVolumes();
         if (volumes.isEmpty()) {
           continue;
         }
 
         for (Entry<String, Volume> volumeEntry : volumes.entrySet()) {
           final String volumePath = volumeEntry.getValue().getPath();
-          final String volumeKey =
+          final String cheVolumeName =
               LOGS_VOLUME_NAME.equals(volumeEntry.getKey())
                   ? volumeEntry.getKey() + '-' + pod.getMetadata().getName()
                   : volumeEntry.getKey();
 
           final String uniqueVolumeName;
-          if (volumeKeyToNameCache.containsKey(volumeKey)) {
-            uniqueVolumeName = volumeKeyToNameCache.get(volumeKey);
+          if (cheVolumeNameToPodVolumeName.containsKey(cheVolumeName)) {
+            uniqueVolumeName = cheVolumeNameToPodVolumeName.get(cheVolumeName);
           } else {
             uniqueVolumeName = Names.generateName(EPHEMERAL_VOLUME_NAME_PREFIX);
-            volumeKeyToNameCache.put(volumeKey, uniqueVolumeName);
+            cheVolumeNameToPodVolumeName.put(cheVolumeName, uniqueVolumeName);
           }
           // binds volume to pod and container
           container
@@ -89,7 +111,7 @@ public class EphemeralWorkspaceAdapter {
                   newVolumeMount(
                       uniqueVolumeName,
                       volumePath,
-                      getSubPath(identity.getWorkspaceId(), volumeKey, machineName)));
+                      getSubPath(identity.getWorkspaceId(), cheVolumeName, machineName)));
           addEmptyDirVolumeIfAbsent(pod.getSpec(), uniqueVolumeName);
         }
       }

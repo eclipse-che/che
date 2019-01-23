@@ -106,7 +106,7 @@ public class PhpProjectDebuggingTest {
     debugConfig.removeConfig(PROJECT);
   }
 
-  @Test(priority = 0)
+  @Test
   public void shouldDebugCliPhpScriptFromFirstLine() {
     // when
     menu.runCommand(
@@ -154,7 +154,7 @@ public class PhpProjectDebuggingTest {
   }
 
   @Test(priority = 1)
-  public void shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine() throws IOException {
+  public void shouldDebugWebPhpScriptFromNonDefaultPortAndNotFromFirstLine() {
     // when
     menu.runCommand(
         TestMenuCommandsConstants.Run.RUN_MENU,

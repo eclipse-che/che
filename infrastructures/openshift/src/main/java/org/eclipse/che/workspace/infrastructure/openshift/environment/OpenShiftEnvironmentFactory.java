@@ -105,10 +105,14 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     Map<String, Deployment> deployments = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
     Map<String, ConfigMap> configMaps = new HashMap<>();
+    Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     boolean isAnyRoutePresent = false;
-    boolean isAnyPVCPresent = false;
     boolean isAnySecretPresent = false;
     for (HasMetadata object : list.getItems()) {
+      checkNotNull(object.getKind(), "Environment contains object without specified kind field");
+      checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
+      checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
+
       if (object instanceof DeploymentConfig) {
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
       } else if (object instanceof Pod) {
@@ -125,7 +129,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       } else if (object instanceof Route) {
         isAnyRoutePresent = true;
       } else if (object instanceof PersistentVolumeClaim) {
-        isAnyPVCPresent = true;
+        PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
+        pvcs.put(pvc.getMetadata().getName(), pvc);
       } else if (object instanceof Secret) {
         isAnySecretPresent = true;
       } else if (object instanceof ConfigMap) {
@@ -141,11 +146,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       warnings.add(
           new WarningImpl(
               Warnings.ROUTE_IGNORED_WARNING_CODE, Warnings.ROUTES_IGNORED_WARNING_MESSAGE));
-    }
-
-    if (isAnyPVCPresent) {
-      warnings.add(
-          new WarningImpl(Warnings.PVC_IGNORED_WARNING_CODE, Warnings.PVC_IGNORED_WARNING_MESSAGE));
     }
 
     if (isAnySecretPresent) {
@@ -164,7 +164,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setPods(pods)
             .setDeployments(deployments)
             .setServices(services)
-            .setPersistentVolumeClaims(new HashMap<>())
+            .setPersistentVolumeClaims(pvcs)
             .setSecrets(new HashMap<>())
             .setConfigMaps(configMaps)
             .setRoutes(new HashMap<>())
@@ -194,6 +194,13 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {
     if (object == null) {
       throw new ValidationException(errorMessage);
+    }
+  }
+
+  private void checkNotNull(Object object, String messageFmt, Object... messageArguments)
+      throws ValidationException {
+    if (object == null) {
+      throw new ValidationException(format(messageFmt, messageArguments));
     }
   }
 }

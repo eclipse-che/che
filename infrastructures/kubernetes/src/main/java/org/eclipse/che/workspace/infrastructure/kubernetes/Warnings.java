@@ -23,10 +23,6 @@ public final class Warnings {
       "Ingresses specified in Kubernetes recipe are ignored. "
           + "To expose ports please define servers in machine configuration.";
 
-  public static final int PVC_IGNORED_WARNING_CODE = 4101;
-  public static final String PVC_IGNORED_WARNING_MESSAGE =
-      "Persistent volume claims specified in Kubernetes recipe are ignored.";
-
   public static final int SECRET_IGNORED_WARNING_CODE = 4102;
   public static final String SECRET_IGNORED_WARNING_MESSAGE =
       "Secrets specified in Kubernetes recipe are ignored.";

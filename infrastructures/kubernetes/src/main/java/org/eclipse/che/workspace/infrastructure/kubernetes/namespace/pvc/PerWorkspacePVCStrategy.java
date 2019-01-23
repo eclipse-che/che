@@ -12,8 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -43,6 +45,8 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
 
   private final KubernetesNamespaceFactory factory;
   private final String pvcNamePrefix;
+  private final String pvcAccessMode;
+  private final String pvcQuantity;
 
   @Inject
   public PerWorkspacePVCStrategy(
@@ -63,11 +67,18 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
         ephemeralWorkspaceAdapter);
     this.pvcNamePrefix = pvcName;
     this.factory = factory;
+    this.pvcAccessMode = pvcAccessMode;
+    this.pvcQuantity = pvcQuantity;
   }
 
   @Override
-  protected String getCommonPVCName(RuntimeIdentity identity) {
-    return pvcNamePrefix + '-' + identity.getWorkspaceId();
+  protected PersistentVolumeClaim createCommonPVC(RuntimeIdentity runtimeId) {
+    String workspaceId = runtimeId.getWorkspaceId();
+    String pvcName = pvcNamePrefix + '-' + workspaceId;
+
+    PersistentVolumeClaim perWorkspacePVC = newPVC(pvcName, pvcAccessMode, pvcQuantity);
+    perWorkspacePVC.getMetadata().getLabels().put(CHE_WORKSPACE_ID_LABEL, workspaceId);
+    return perWorkspacePVC;
   }
 
   @Override

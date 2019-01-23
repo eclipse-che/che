@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.miscellaneous;
 
 import static java.lang.String.valueOf;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.PanelSelector.PanelTypes.LEFT_BOTTOM_ID;
@@ -20,8 +21,6 @@ import static org.testng.Assert.fail;
 import com.google.inject.Inject;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.concurrent.ExecutionException;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
 import org.eclipse.che.selenium.core.constant.TestBuildConstants;
 import org.eclipse.che.selenium.core.constant.TestTimeoutsConstants;
@@ -45,7 +44,7 @@ import org.testng.annotations.Test;
  * @author Alexander Andrienko
  */
 public class WorkingWithTerminalTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
+  private static final String PROJECT_NAME = generate("project", 4);
 
   private static final String[] CHECK_MC_OPENING = {
     "Left", "File", "Command", "Options", "Right", "Name", "bin", "dev", "etc", "home",
@@ -65,14 +64,14 @@ public class WorkingWithTerminalTest {
   private static final String MC_USER_MENU_DIALOG = "User menu";
   private static final String[] VIEW_BIN_FOLDER = {"bash", "chmod", "date"};
 
-  @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
-  @Inject private ProjectExplorer projectExplorer;
   @Inject private Loader loader;
-  @Inject private CheTerminal terminal;
   @Inject private Consoles consoles;
-  @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private CheTerminal terminal;
+  @Inject private TestWorkspace workspace;
   @Inject private PanelSelector panelSelector;
+  @Inject private ProjectExplorer projectExplorer;
+  @Inject private TestProjectServiceClient testProjectServiceClient;
 
   @BeforeClass
   public void setUp() throws Exception {
@@ -87,7 +86,7 @@ public class WorkingWithTerminalTest {
   }
 
   @BeforeMethod
-  private void prepareNewTerminal() {
+  protected void prepareNewTerminal() {
     panelSelector.selectPanelTypeFromPanelSelector(LEFT_BOTTOM_ID);
 
     projectExplorer.waitItem(PROJECT_NAME);
@@ -244,9 +243,7 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal("touch a.txt" + Keys.ENTER);
 
     terminal.typeIntoActiveTerminal("ls" + Keys.ENTER);
-    terminal.waitTextInFirstTerminal("che");
-    terminal.waitTextInFirstTerminal("a.txt");
-    terminal.waitTextInFirstTerminal("tomcat8");
+    terminal.waitTextInFirstTerminal(getExpectedContent());
   }
 
   @Test(groups = UNDER_REPAIR)
@@ -272,7 +269,7 @@ public class WorkingWithTerminalTest {
   }
 
   @Test
-  public void shouldBeClear() throws ExecutionException, InterruptedException {
+  public void shouldBeClear() {
     terminal.typeIntoActiveTerminal("cd / && ls -l" + Keys.ENTER);
 
     // clear terminal
@@ -282,7 +279,7 @@ public class WorkingWithTerminalTest {
   }
 
   @Test
-  public void shouldBeReset() throws ExecutionException, InterruptedException {
+  public void shouldBeReset() {
     terminal.typeIntoActiveTerminal("cd / && ls -l" + Keys.ENTER);
 
     // clear terminal
@@ -383,5 +380,9 @@ public class WorkingWithTerminalTest {
     terminal.typeIntoActiveTerminal("mc");
     terminal.typeIntoActiveTerminal(Keys.ENTER.toString());
     terminal.waitTextInFirstTerminal("Modify time");
+  }
+
+  protected String[] getExpectedContent() {
+    return new String[] {"che", "a.txt", "tomcat8"};
   }
 }
