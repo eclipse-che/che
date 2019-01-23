@@ -126,7 +126,7 @@ public class DevfileService extends Service {
     try {
       Devfile devfile = devfileManager.parse(data, verbose);
       workspace = devfileManager.createWorkspace(devfile, null);
-    } catch (DevfileFormatException e) {
+    } catch (DevfileFormatException | DevfileRecipeFormatException e) {
       throw new BadRequestException(e.getMessage());
     } catch (JsonProcessingException e) {
       throw new ServerException(e.getMessage());

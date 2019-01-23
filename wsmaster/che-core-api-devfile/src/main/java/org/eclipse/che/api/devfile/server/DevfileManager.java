@@ -20,7 +20,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -93,7 +92,7 @@ public class DevfileManager {
   public WorkspaceImpl createWorkspace(
       Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
       throws ServerException, DevfileFormatException, ConflictException, NotFoundException,
-          ValidationException, BadRequestException {
+          ValidationException, DevfileRecipeFormatException {
     WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, recipeFileContentProvider);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
@@ -109,7 +108,7 @@ public class DevfileManager {
    */
   public WorkspaceConfigImpl createWorkspaceConfig(
       Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
-      throws DevfileFormatException, BadRequestException {
+      throws DevfileFormatException, DevfileRecipeFormatException {
     integrityValidator.validateDevfile(devfile);
     return devfileConverter.devFileToWorkspaceConfig(devfile, recipeFileContentProvider);
   }

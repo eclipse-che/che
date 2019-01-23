@@ -17,7 +17,6 @@ import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.DevfileEnvironmentFactory.DEFAULT_RECIPE_CONTENT_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
@@ -28,8 +27,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
@@ -50,7 +47,7 @@ public class DevfileEnvironmentFactoryTest {
   @InjectMocks private DevfileEnvironmentFactory factory;
 
   @Test(
-      expectedExceptions = BadRequestException.class,
+      expectedExceptions = IllegalArgumentException.class,
       expectedExceptionsMessageRegExp =
           "There is no content provider registered for '" + KUBERNETES_TOOL_TYPE + "' type tools.")
   public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoURLComposerGiven() throws Exception {
@@ -60,7 +57,7 @@ public class DevfileEnvironmentFactoryTest {
   }
 
   @Test(
-      expectedExceptions = BadRequestException.class,
+      expectedExceptions = IllegalArgumentException.class,
       expectedExceptionsMessageRegExp = "Environment cannot be created from such type of tool.")
   public void shouldReturnEmptyOptionalWhenNoRecipeToolIsPresent() throws Exception {
     Tool tool = new Tool().withType(EDITOR_TOOL_TYPE).withId("foo").withName(TOOL_NAME);
@@ -69,7 +66,7 @@ public class DevfileEnvironmentFactoryTest {
   }
 
   @Test(
-      expectedExceptions = BadRequestException.class,
+      expectedExceptions = DevfileRecipeFormatException.class,
       expectedExceptionsMessageRegExp =
           "The local file '"
               + LOCAL_FILENAME
@@ -83,7 +80,7 @@ public class DevfileEnvironmentFactoryTest {
   }
 
   @Test(
-      expectedExceptions = BadRequestException.class,
+      expectedExceptions = DevfileRecipeFormatException.class,
       expectedExceptionsMessageRegExp =
           "Unable to serialize or deserialize specified local file content for tool '"
               + TOOL_NAME
@@ -101,10 +98,9 @@ public class DevfileEnvironmentFactoryTest {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
 
-    Optional<EnvironmentImpl> result = factory.createEnvironment(tool, s -> yamlRecipeContent);
+    EnvironmentImpl result = factory.createEnvironment(tool, s -> yamlRecipeContent);
 
-    assertTrue(result.isPresent());
-    RecipeImpl recipe = result.get().getRecipe();
+    RecipeImpl recipe = result.getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), KUBERNETES_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
@@ -118,10 +114,9 @@ public class DevfileEnvironmentFactoryTest {
     Tool tool =
         new Tool().withType(OPENSHIFT_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
 
-    Optional<EnvironmentImpl> result = factory.createEnvironment(tool, s -> yamlRecipeContent);
+    EnvironmentImpl result = factory.createEnvironment(tool, s -> yamlRecipeContent);
 
-    assertTrue(result.isPresent());
-    RecipeImpl recipe = result.get().getRecipe();
+    RecipeImpl recipe = result.getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
@@ -142,10 +137,9 @@ public class DevfileEnvironmentFactoryTest {
             .withName(TOOL_NAME)
             .withSelector(selector);
 
-    Optional<EnvironmentImpl> result = factory.createEnvironment(tool, s -> yamlRecipeContent);
+    EnvironmentImpl result = factory.createEnvironment(tool, s -> yamlRecipeContent);
 
-    assertTrue(result.isPresent());
-    RecipeImpl recipe = result.get().getRecipe();
+    RecipeImpl recipe = result.getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);

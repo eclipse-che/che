@@ -34,7 +34,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
@@ -112,7 +111,7 @@ public class DevfileConverter {
 
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
       Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
-      throws DevfileFormatException, BadRequestException {
+      throws DevfileFormatException, DevfileRecipeFormatException {
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
@@ -137,12 +136,14 @@ public class DevfileConverter {
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
-          Optional<EnvironmentImpl> environment =
-              devfileEnvironmentFactory.createEnvironment(tool, recipeFileContentProvider);
-          if (environment.isPresent()) {
+          try {
+            EnvironmentImpl environment =
+                devfileEnvironmentFactory.createEnvironment(tool, recipeFileContentProvider);
             final String environmentName = tool.getName();
             config.setDefaultEnv(environmentName);
-            config.setEnvironments(singletonMap(environmentName, environment.get()));
+            config.setEnvironments(singletonMap(environmentName, environment));
+          } catch (IllegalArgumentException e) {
+            throw new DevfileFormatException(e.getMessage());
           }
           continue;
         default:

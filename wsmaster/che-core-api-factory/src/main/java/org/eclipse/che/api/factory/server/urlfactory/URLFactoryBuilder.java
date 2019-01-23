@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
+import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -110,7 +111,7 @@ public class URLFactoryBuilder {
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
               .withWorkspace(DtoConverter.asDto(wsConfig)));
-    } catch (DevfileFormatException e) {
+    } catch (DevfileFormatException | DevfileRecipeFormatException e) {
       throw new BadRequestException(e.getMessage());
     } catch (IOException x) {
       throw new ServerException(x.getLocalizedMessage(), x);

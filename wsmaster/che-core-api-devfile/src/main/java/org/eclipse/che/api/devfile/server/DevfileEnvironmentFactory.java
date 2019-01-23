@@ -23,9 +23,8 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
@@ -48,24 +47,26 @@ public class DevfileEnvironmentFactory {
    * @param recipeTool the recipe-type tool
    * @param recipeFileContentProvider service-specific provider of recipe file content
    * @return optional of constructed environment from recipe type tool
-   * @throws BadRequestException when there is no content provider for recipe-type tool
-   * @throws BadRequestException when recipe-type tool content is unreachable or empty
+   * @throws IllegalArgumentException when wring type tool is passed
+   * @throws IllegalArgumentException when there is no content provider for recipe-type tool
+   * @throws DevfileRecipeFormatException when recipe-type tool content is unreachable empty or has
+   *     wrong format
    */
-  public Optional<EnvironmentImpl> createEnvironment(
+  public EnvironmentImpl createEnvironment(
       Tool recipeTool, RecipeFileContentProvider recipeFileContentProvider)
-      throws BadRequestException {
+      throws DevfileRecipeFormatException {
     final String type = recipeTool.getType();
     if (!KUBERNETES_TOOL_TYPE.equals(type) && !OPENSHIFT_TOOL_TYPE.equals(type)) {
-      throw new BadRequestException("Environment cannot be created from such type of tool.");
+      throw new IllegalArgumentException("Environment cannot be created from such type of tool.");
     }
     if (recipeFileContentProvider == null) {
-      throw new BadRequestException(
+      throw new IllegalArgumentException(
           format("There is no content provider registered for '%s' type tools.", type));
     }
 
     String recipeFileContent = recipeFileContentProvider.fetchContent(recipeTool.getLocal());
     if (isNullOrEmpty(recipeFileContent)) {
-      throw new BadRequestException(
+      throw new DevfileRecipeFormatException(
           format(
               "The local file '%s' defined in tool  '%s' is unreachable or empty.",
               recipeTool.getLocal(), recipeTool.getName()));
@@ -74,19 +75,22 @@ public class DevfileEnvironmentFactory {
       final KubernetesList list = unmarshal(recipeFileContent, KubernetesList.class);
 
       if (recipeTool.getSelector() != null && !recipeTool.getSelector().isEmpty()) {
-        List<HasMetadata> itemsList = list.getItems();
-        itemsList.removeIf(
-            e ->
-                !e.getMetadata()
-                    .getLabels()
-                    .entrySet()
-                    .containsAll(recipeTool.getSelector().entrySet()));
+        List<HasMetadata> itemsList =
+            list.getItems()
+                .stream()
+                .filter(
+                    e ->
+                        !e.getMetadata()
+                            .getLabels()
+                            .entrySet()
+                            .containsAll(recipeTool.getSelector().entrySet()))
+                .collect(Collectors.toList());
         list.setItems(itemsList);
       }
       RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, asYaml(list), null);
-      return Optional.of(new EnvironmentImpl(recipe, emptyMap()));
+      return new EnvironmentImpl(recipe, emptyMap());
     } catch (KubernetesClientException ex) {
-      throw new BadRequestException(
+      throw new DevfileRecipeFormatException(
           format(
               "Unable to serialize or deserialize specified local file content for tool '%s'",
               recipeTool.getName()));
