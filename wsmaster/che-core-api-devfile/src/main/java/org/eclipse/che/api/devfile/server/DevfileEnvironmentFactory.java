@@ -80,7 +80,7 @@ public class DevfileEnvironmentFactory {
                 .stream()
                 .filter(
                     e ->
-                        !e.getMetadata()
+                        e.getMetadata()
                             .getLabels()
                             .entrySet()
                             .containsAll(recipeTool.getSelector().entrySet()))
