@@ -33,7 +33,6 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
-import org.eclipse.che.commons.lang.Pair;
 import org.mockito.InjectMocks;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -102,12 +101,10 @@ public class DevfileEnvironmentFactoryTest {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
 
-    Optional<Pair<String, EnvironmentImpl>> result =
-        factory.createEnvironment(tool, s -> yamlRecipeContent);
+    Optional<EnvironmentImpl> result = factory.createEnvironment(tool, s -> yamlRecipeContent);
 
     assertTrue(result.isPresent());
-    assertEquals(result.get().first, TOOL_NAME);
-    RecipeImpl recipe = result.get().second.getRecipe();
+    RecipeImpl recipe = result.get().getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), KUBERNETES_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
@@ -121,12 +118,10 @@ public class DevfileEnvironmentFactoryTest {
     Tool tool =
         new Tool().withType(OPENSHIFT_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
 
-    Optional<Pair<String, EnvironmentImpl>> result =
-        factory.createEnvironment(tool, s -> yamlRecipeContent);
+    Optional<EnvironmentImpl> result = factory.createEnvironment(tool, s -> yamlRecipeContent);
 
     assertTrue(result.isPresent());
-    assertEquals(result.get().first, TOOL_NAME);
-    RecipeImpl recipe = result.get().second.getRecipe();
+    RecipeImpl recipe = result.get().getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
@@ -147,12 +142,10 @@ public class DevfileEnvironmentFactoryTest {
             .withName(TOOL_NAME)
             .withSelector(selector);
 
-    Optional<Pair<String, EnvironmentImpl>> result =
-        factory.createEnvironment(tool, s -> yamlRecipeContent);
+    Optional<EnvironmentImpl> result = factory.createEnvironment(tool, s -> yamlRecipeContent);
 
     assertTrue(result.isPresent());
-    assertEquals(result.get().first, TOOL_NAME);
-    RecipeImpl recipe = result.get().second.getRecipe();
+    RecipeImpl recipe = result.get().getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);

@@ -46,7 +46,6 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.commons.lang.Pair;
 
 /** Helps to convert devfile into workspace config and back. */
 public class DevfileConverter {
@@ -138,12 +137,12 @@ public class DevfileConverter {
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
-          Optional<Pair<String, EnvironmentImpl>> environmentPair =
+          Optional<EnvironmentImpl> environment =
               devfileEnvironmentFactory.createEnvironment(tool, recipeFileContentProvider);
-          if (environmentPair.isPresent()) {
-            final String environmentName = environmentPair.get().first;
+          if (environment.isPresent()) {
+            final String environmentName = tool.getName();
             config.setDefaultEnv(environmentName);
-            config.setEnvironments(singletonMap(environmentName, environmentPair.get().second));
+            config.setEnvironments(singletonMap(environmentName, environment.get()));
           }
           continue;
         default:

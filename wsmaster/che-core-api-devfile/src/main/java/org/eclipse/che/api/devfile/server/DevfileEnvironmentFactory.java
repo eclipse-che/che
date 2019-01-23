@@ -29,10 +29,9 @@ import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
-import org.eclipse.che.commons.lang.Pair;
 
 /**
- * Creates workspace environment from specific tool in devfile if any.
+ * Creates {@link EnvironmentImpl} from specific tool in devfile if any.
  *
  * @author Max Shaposhnyk
  */
@@ -48,11 +47,11 @@ public class DevfileEnvironmentFactory {
    *
    * @param recipeTool the recipe-type tool
    * @param recipeFileContentProvider service-specific provider of recipe file content
-   * @return optional pair of the recipe-type tool name and newly constructed environment from it
+   * @return optional of constructed environment from recipe type tool
    * @throws BadRequestException when there is no content provider for recipe-type tool
    * @throws BadRequestException when recipe-type tool content is unreachable or empty
    */
-  public Optional<Pair<String, EnvironmentImpl>> createEnvironment(
+  public Optional<EnvironmentImpl> createEnvironment(
       Tool recipeTool, RecipeFileContentProvider recipeFileContentProvider)
       throws BadRequestException {
     final String type = recipeTool.getType();
@@ -85,7 +84,7 @@ public class DevfileEnvironmentFactory {
         list.setItems(itemsList);
       }
       RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, asYaml(list), null);
-      return Optional.of(new Pair<>(recipeTool.getName(), new EnvironmentImpl(recipe, emptyMap())));
+      return Optional.of(new EnvironmentImpl(recipe, emptyMap()));
     } catch (KubernetesClientException ex) {
       throw new BadRequestException(
           format(
