@@ -17,4 +17,8 @@ public class DevfileFormatException extends Exception {
   public DevfileFormatException(String formatError) {
     super(formatError);
   }
+
+  public DevfileFormatException(String formatError, Throwable cause) {
+    super(formatError, cause);
+  }
 }

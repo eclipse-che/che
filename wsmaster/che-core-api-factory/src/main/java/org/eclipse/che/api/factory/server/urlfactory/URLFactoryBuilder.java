@@ -105,8 +105,8 @@ public class URLFactoryBuilder {
       WorkspaceConfigImpl wsConfig =
           devfileManager.createWorkspaceConfig(
               devfile,
-              local ->
-                  fileUrlProvider != null ? urlFetcher.fetch(fileUrlProvider.apply(local)) : null);
+              filename ->
+                  fileUrlProvider != null ? urlFetcher.fetch(fileUrlProvider.apply(filename)) : null);
       return Optional.of(
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)

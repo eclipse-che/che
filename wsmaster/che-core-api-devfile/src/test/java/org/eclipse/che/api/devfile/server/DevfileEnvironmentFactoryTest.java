@@ -70,13 +70,13 @@ public class DevfileEnvironmentFactoryTest {
       expectedExceptionsMessageRegExp =
           "The local file '"
               + LOCAL_FILENAME
-              + "' defined in tool  '"
+              + "' defined in tool '"
               + TOOL_NAME
               + "' is unreachable or empty.")
   public void shouldThrowExceptionWhenRecipeContentIsNull() throws Exception {
     Tool tool =
         new Tool().withType(OPENSHIFT_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
-    factory.createEnvironment(tool, s -> "");
+    factory.createEnvironment(tool, s -> null);
   }
 
   @Test(

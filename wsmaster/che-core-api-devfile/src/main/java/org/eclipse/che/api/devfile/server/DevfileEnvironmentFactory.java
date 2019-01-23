@@ -46,7 +46,7 @@ public class DevfileEnvironmentFactory {
    *
    * @param recipeTool the recipe-type tool
    * @param recipeFileContentProvider service-specific provider of recipe file content
-   * @return optional of constructed environment from recipe type tool
+   * @return constructed environment from recipe type tool
    * @throws IllegalArgumentException when wrong type tool is passed
    * @throws IllegalArgumentException when there is no content provider for recipe-type tool
    * @throws DevfileRecipeFormatException when recipe-type tool content is unreachable, empty or has
@@ -68,7 +68,7 @@ public class DevfileEnvironmentFactory {
     if (isNullOrEmpty(recipeFileContent)) {
       throw new DevfileRecipeFormatException(
           format(
-              "The local file '%s' defined in tool  '%s' is unreachable or empty.",
+              "The local file '%s' defined in tool '%s' is unreachable or empty.",
               recipeTool.getLocal(), recipeTool.getName()));
     }
     try {

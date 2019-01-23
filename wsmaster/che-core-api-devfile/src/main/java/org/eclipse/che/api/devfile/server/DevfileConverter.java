@@ -143,7 +143,7 @@ public class DevfileConverter {
             config.setDefaultEnv(environmentName);
             config.setEnvironments(singletonMap(environmentName, environment));
           } catch (IllegalArgumentException e) {
-            throw new DevfileFormatException(e.getMessage());
+            throw new DevfileFormatException(e.getMessage(), e);
           }
           continue;
         default:
