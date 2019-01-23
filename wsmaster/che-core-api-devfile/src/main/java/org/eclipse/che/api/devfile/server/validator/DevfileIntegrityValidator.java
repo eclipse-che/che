@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
@@ -20,7 +19,6 @@ import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
@@ -78,13 +76,13 @@ public class DevfileIntegrityValidator {
                     "Multiple editor tools found: '%s', '%s'",
                     editorTool.getName(), tool.getName()));
           }
-          checkStringFieldNotSet(tool, "local", tool.getLocal());
-          checkMapFieldNotSet(tool, "selector", tool.getSelector());
+          checkFieldNotSet(tool, "local", tool.getLocal());
+          checkFieldNotSet(tool, "selector", tool.getSelector());
           editorTool = tool;
           break;
         case PLUGIN_TOOL_TYPE:
-          checkStringFieldNotSet(tool, "local", tool.getLocal());
-          checkMapFieldNotSet(tool, "selector", tool.getSelector());
+          checkFieldNotSet(tool, "local", tool.getLocal());
+          checkFieldNotSet(tool, "selector", tool.getSelector());
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
@@ -94,7 +92,7 @@ public class DevfileIntegrityValidator {
                     "Multiple non plugin or editor type tools found: '%s', '%s'",
                     recipeTool.getName(), tool.getName()));
           }
-          checkStringFieldNotSet(tool, "id", tool.getId());
+          checkFieldNotSet(tool, "id", tool.getId());
           recipeTool = tool;
           break;
         default:
@@ -105,19 +103,9 @@ public class DevfileIntegrityValidator {
     return existingNames;
   }
 
-  private void checkStringFieldNotSet(Tool tool, String fieldName, String fieldValue)
+  private void checkFieldNotSet(Tool tool, String fieldName, Object fieldValue)
       throws DevfileFormatException {
-    if (!isNullOrEmpty(fieldValue)) {
-      throw new DevfileFormatException(
-          format(
-              "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
-              tool.getType(), fieldName, tool.getName()));
-    }
-  }
-
-  private void checkMapFieldNotSet(Tool tool, String fieldName, Map<String, String> fieldValue)
-      throws DevfileFormatException {
-    if (fieldValue == null || fieldValue.isEmpty()) {
+    if (fieldValue == null) {
       return;
     }
     throw new DevfileFormatException(
