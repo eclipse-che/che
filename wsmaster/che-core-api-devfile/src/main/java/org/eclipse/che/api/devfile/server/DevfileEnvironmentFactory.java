@@ -30,7 +30,7 @@ import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 
 /**
- * Creates {@link EnvironmentImpl} from specific tool in devfile if any.
+ * Creates {@link EnvironmentImpl} from specific type of devfile tool.
  *
  * @author Max Shaposhnyk
  */
@@ -40,7 +40,7 @@ public class DevfileEnvironmentFactory {
   static final String DEFAULT_RECIPE_CONTENT_TYPE = "application/x-yaml";
 
   /**
-   * Consumes an recipe-type tool (openshift or kubernetes) from devfile and tries to create {@link
+   * Consumes an recipe-type tool (openshift or kubernetes) and tries to create {@link
    * EnvironmentImpl} from it (including filtering of list items using selectors, if necessary). An
    * {@link RecipeFileContentProvider} MUST be provided in order to fetch recipe content.
    *
@@ -49,7 +49,7 @@ public class DevfileEnvironmentFactory {
    * @return optional of constructed environment from recipe type tool
    * @throws IllegalArgumentException when wrong type tool is passed
    * @throws IllegalArgumentException when there is no content provider for recipe-type tool
-   * @throws DevfileRecipeFormatException when recipe-type tool content is unreachable empty or has
+   * @throws DevfileRecipeFormatException when recipe-type tool content is unreachable, empty or has
    *     wrong format
    */
   public EnvironmentImpl createEnvironment(
