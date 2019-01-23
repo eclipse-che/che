@@ -65,7 +65,6 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -89,7 +88,7 @@ public class OpenShiftEnvironmentFactoryTest {
   private OpenShiftEnvironmentFactory osEnvFactory;
 
   @Mock private OpenShiftClientFactory clientFactory;
-  @Mock private KubernetesEnvironmentValidator k8sEnvValidator;
+  @Mock private OpenShiftEnvironmentValidator openShiftEnvValidator;
   @Mock private OpenShiftClient client;
   @Mock private InternalRecipe internalRecipe;
   @Mock private KubernetesListMixedOperation listMixedOperation;
@@ -108,7 +107,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void setup() throws Exception {
     osEnvFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, null, clientFactory, k8sEnvValidator, memoryProvisioner);
+            null, null, null, clientFactory, openShiftEnvValidator, memoryProvisioner);
     when(clientFactory.create()).thenReturn(client);
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
@@ -154,6 +153,7 @@ public class OpenShiftEnvironmentFactoryTest {
     assertEquals(osEnv.getPersistentVolumeClaims().get("pvc2"), pvc2);
   }
 
+  @Test
   public void addRoutesWhenRecipeContainsThem() throws Exception {
     Route route = new RouteBuilder().withNewMetadata().withName("test-route").endMetadata().build();
     final List<HasMetadata> recipeObjects = singletonList(route);
