@@ -340,7 +340,6 @@ public class WorkspaceRuntimes {
           createInternalEnvironment(
               environment, workspaceConfig.getAttributes(), workspaceConfig.getCommands());
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
-
       InternalRuntime runtime = runtimeContext.getRuntime();
 
       try (Unlocker ignored = lockService.writeLock(workspaceId)) {

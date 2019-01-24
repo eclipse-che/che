@@ -11,8 +11,8 @@
  */
 package org.eclipse.che.api.workspace.server.spi.environment;
 
-import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_TYPE_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.shared.Constants.USER_CONTAINER;
+import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.RECIPE;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
@@ -111,7 +111,7 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
                 machineConfig.getAttributes(),
                 machineConfig.getVolumes());
 
-        internalMachineConfig.getAttributes().put(CONTAINER_TYPE_ATTRIBUTE, USER_CONTAINER);
+        internalMachineConfig.getAttributes().put(CONTAINER_SOURCE_ATTRIBUTE, RECIPE);
 
         machines.put(machineEntry.getKey(), internalMachineConfig);
       }

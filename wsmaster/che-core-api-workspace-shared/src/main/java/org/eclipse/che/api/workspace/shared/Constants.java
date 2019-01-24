@@ -162,14 +162,14 @@ public final class Constants {
 
   public static final String NO_ENVIRONMENT_RECIPE_TYPE = "no-environment";
 
-  /** Attribute to mark goal of the container. */
-  public static final String CONTAINER_TYPE_ATTRIBUTE = "type";
+  /** Attribute to mark source of the container. */
+  public static final String CONTAINER_SOURCE_ATTRIBUTE = "source";
 
-  /** Constant to mark containers applied to workspace by user definition. */
-  public static final String USER_CONTAINER = "user-container";
+  /** Mark containers applied to workspace with help recipe definition. */
+  public static final String RECIPE = "recipe";
 
   /** Mark containers created workspace api like tooling for user development. */
-  public static final String TOOL_CONTAINER = "tool-container";
+  public static final String TOOL = "tool";
 
   private Constants() {}
 }
