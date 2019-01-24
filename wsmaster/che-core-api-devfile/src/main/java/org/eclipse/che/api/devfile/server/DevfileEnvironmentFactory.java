@@ -12,8 +12,6 @@
 package org.eclipse.che.api.devfile.server;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static io.fabric8.kubernetes.client.utils.Serialization.asYaml;
-import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
@@ -22,6 +20,7 @@ import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
@@ -57,11 +56,16 @@ public class DevfileEnvironmentFactory {
       throws DevfileRecipeFormatException {
     final String type = recipeTool.getType();
     if (!KUBERNETES_TOOL_TYPE.equals(type) && !OPENSHIFT_TOOL_TYPE.equals(type)) {
-      throw new IllegalArgumentException("Environment cannot be created from such type of tool.");
+      throw new IllegalArgumentException(
+          format(
+              "Unable to create environment from tool '%s' - it has ineligible type '%s'.",
+              recipeTool.getName(), type));
     }
     if (recipeFileContentProvider == null) {
       throw new IllegalArgumentException(
-          format("There is no content provider registered for '%s' type tools.", type));
+          format(
+              "Unable to process tool '%s' of type '%s' since there is no content provider supplied.",
+              recipeTool.getName(), type));
     }
 
     String recipeFileContent = recipeFileContentProvider.fetchContent(recipeTool.getLocal());
@@ -71,29 +75,45 @@ public class DevfileEnvironmentFactory {
               "The local file '%s' defined in tool '%s' is unreachable or empty.",
               recipeTool.getLocal(), recipeTool.getName()));
     }
-    try {
-      final KubernetesList list = unmarshal(recipeFileContent, KubernetesList.class);
+    final KubernetesList list = unmarshal(recipeTool, recipeFileContent);
 
-      if (recipeTool.getSelector() != null && !recipeTool.getSelector().isEmpty()) {
-        List<HasMetadata> itemsList =
-            list.getItems()
-                .stream()
-                .filter(
-                    e ->
-                        e.getMetadata()
-                            .getLabels()
-                            .entrySet()
-                            .containsAll(recipeTool.getSelector().entrySet()))
-                .collect(Collectors.toList());
-        list.setItems(itemsList);
-      }
-      RecipeImpl recipe = new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, asYaml(list), null);
-      return new EnvironmentImpl(recipe, emptyMap());
-    } catch (KubernetesClientException ex) {
+    if (recipeTool.getSelector() != null && !recipeTool.getSelector().isEmpty()) {
+      List<HasMetadata> itemsList =
+          list.getItems()
+              .stream()
+              .filter(
+                  e ->
+                      e.getMetadata()
+                          .getLabels()
+                          .entrySet()
+                          .containsAll(recipeTool.getSelector().entrySet()))
+              .collect(Collectors.toList());
+      list.setItems(itemsList);
+    }
+    RecipeImpl recipe =
+        new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, asYaml(recipeTool, list), null);
+    return new EnvironmentImpl(recipe, emptyMap());
+  }
+
+  private KubernetesList unmarshal(Tool tool, String recipeContent)
+      throws DevfileRecipeFormatException {
+    try {
+      return Serialization.unmarshal(recipeContent, KubernetesList.class);
+    } catch (KubernetesClientException e) {
       throw new DevfileRecipeFormatException(
           format(
-              "Unable to serialize or deserialize specified local file content for tool '%s'",
-              recipeTool.getName()));
+              "Error occurred during parsing list from file %s for tool '%s'",
+              tool.getLocal(), tool.getName()));
+    }
+  }
+
+  private String asYaml(Tool tool, KubernetesList list) throws DevfileRecipeFormatException {
+    try {
+      return Serialization.asYaml(list);
+    } catch (KubernetesClientException e) {
+      throw new DevfileRecipeFormatException(
+          format(
+              "Unable to deserialize specified local file content for tool '%s'", tool.getName()));
     }
   }
 }

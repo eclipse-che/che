@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
@@ -20,10 +21,6 @@ import static org.testng.Assert.assertNotNull;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +39,16 @@ public class DevfileEnvironmentFactoryTest {
   public static final String LOCAL_FILENAME = "local.yaml";
   public static final String TOOL_NAME = "foo";
 
-  private final KubernetesClient client = new DefaultKubernetesClient();
-
   @InjectMocks private DevfileEnvironmentFactory factory;
 
   @Test(
       expectedExceptions = IllegalArgumentException.class,
       expectedExceptionsMessageRegExp =
-          "There is no content provider registered for '" + KUBERNETES_TOOL_TYPE + "' type tools.")
+          "Unable to process tool '"
+              + TOOL_NAME
+              + "' of type '"
+              + KUBERNETES_TOOL_TYPE
+              + "' since there is no content provider supplied.")
   public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoURLComposerGiven() throws Exception {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
@@ -58,7 +57,12 @@ public class DevfileEnvironmentFactoryTest {
 
   @Test(
       expectedExceptions = IllegalArgumentException.class,
-      expectedExceptionsMessageRegExp = "Environment cannot be created from such type of tool.")
+      expectedExceptionsMessageRegExp =
+          "Unable to create environment from tool '"
+              + TOOL_NAME
+              + "' - it has ineligible type '"
+              + EDITOR_TOOL_TYPE
+              + "'.")
   public void shouldReturnEmptyOptionalWhenNoRecipeToolIsPresent() throws Exception {
     Tool tool = new Tool().withType(EDITOR_TOOL_TYPE).withId("foo").withName(TOOL_NAME);
 
@@ -82,7 +86,9 @@ public class DevfileEnvironmentFactoryTest {
   @Test(
       expectedExceptions = DevfileRecipeFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to serialize or deserialize specified local file content for tool '"
+          "Error occurred during parsing list from file "
+              + LOCAL_FILENAME
+              + " for tool '"
               + TOOL_NAME
               + "'")
   public void shouldThrowExceptionWhenRecipeContentIsUnparseable() throws Exception {
@@ -144,18 +150,14 @@ public class DevfileEnvironmentFactoryTest {
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
 
-    KubernetesList expectedK8SList = toK8SList(yamlRecipeContent);
-    List<HasMetadata> itemsList = toK8SList(yamlRecipeContent).getItems();
-    itemsList.removeIf(
-        e -> !e.getMetadata().getLabels().entrySet().containsAll(selector.entrySet()));
-    expectedK8SList.setItems(itemsList);
-    assertEquals(toK8SList(recipe.getContent()), expectedK8SList);
+    List<HasMetadata> resultItemsList = toK8SList(recipe.getContent()).getItems();
+    assertEquals(resultItemsList.size(), 3);
+    assertEquals(1, resultItemsList.stream().filter(it -> "Pod".equals(it.getKind())).count());
+    assertEquals(1, resultItemsList.stream().filter(it -> "Service".equals(it.getKind())).count());
+    assertEquals(1, resultItemsList.stream().filter(it -> "Route".equals(it.getKind())).count());
   }
 
   private KubernetesList toK8SList(String content) {
-    return client
-        .lists()
-        .load(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)))
-        .get();
+    return unmarshal(content, KubernetesList.class);
   }
 }

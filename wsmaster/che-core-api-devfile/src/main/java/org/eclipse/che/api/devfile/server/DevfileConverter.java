@@ -56,6 +56,13 @@ public class DevfileConverter {
     this.devfileEnvironmentFactory = devfileEnvironmentFactory;
   }
 
+  /**
+   * Exports workspace config into {@link Devfile}
+   *
+   * @param wsConfig initial workspace config
+   * @return devfile resulted devfile
+   * @throws WorkspaceExportException if export of given workspace config is impossible
+   */
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) throws WorkspaceExportException {
 
     if (!isNullOrEmpty(wsConfig.getDefaultEnv()) || !wsConfig.getEnvironments().isEmpty()) {
@@ -109,6 +116,16 @@ public class DevfileConverter {
     return devfile;
   }
 
+  /**
+   * Converts given {@link Devfile} into workspace config.
+   *
+   * @param devfile inital devfile
+   * @param recipeFileContentProvider content provider for recipe-type tool
+   * @return constructed workspace config
+   * @throws DevfileFormatException when devfile format is invalid
+   * @throws DevfileRecipeFormatException when content of the file specified in recipe type tool is
+   *     empty or it's format is invalid
+   */
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
       Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
       throws DevfileFormatException, DevfileRecipeFormatException {
