@@ -3,11 +3,17 @@
     "attributes" : {
       "id": "propertyList",
       "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
       "javaType": "java.util.Map<String, String>"
     },
     "selector" : {
       "id": "selector",
       "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
       "javaType": "java.util.Map<String, String>"
     }
   },
