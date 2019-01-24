@@ -106,7 +106,9 @@ public class URLFactoryBuilder {
           devfileManager.createWorkspaceConfig(
               devfile,
               filename ->
-                  fileUrlProvider != null ? urlFetcher.fetch(fileUrlProvider.apply(filename)) : null);
+                  fileUrlProvider != null
+                      ? urlFetcher.fetch(fileUrlProvider.apply(filename))
+                      : null);
       return Optional.of(
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
