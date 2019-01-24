@@ -24,7 +24,9 @@ public interface RecipeFileContentProvider {
    * Fetches content of the file specified under 'local' field fo recipe-type tools in {@link
    * org.eclipse.che.api.devfile.model.Devfile}.
    *
-   * @param localFileName file name to fetch content
+   * @param localFileName file name to fetch content. Only devfile-relative files are currently
+   *     supported, so it means file should be localed at the same directory level as devfile (no
+   *     matter in repository or PR or branch etc )
    * @return content of the specified file or {@code null} if it is impossible to fetch it.
    */
   String fetchContent(String localFileName);
