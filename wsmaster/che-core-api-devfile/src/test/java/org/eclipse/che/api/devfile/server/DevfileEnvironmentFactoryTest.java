@@ -49,7 +49,8 @@ public class DevfileEnvironmentFactoryTest {
               + "' of type '"
               + KUBERNETES_TOOL_TYPE
               + "' since there is no content provider supplied.")
-  public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoURLComposerGiven() throws Exception {
+  public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoContentProviderSupplied()
+      throws Exception {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
     factory.createEnvironment(tool, null);
