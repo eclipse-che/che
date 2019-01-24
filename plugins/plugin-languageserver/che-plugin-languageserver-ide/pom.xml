@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-languageserver-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.17.0-SNAPSHOT</version>
+        <version>6.18.0-SNAPSHOT</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>che-plugin-languageserver-ide</artifactId>
@@ -81,10 +81,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-project-shared</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-workspace-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -237,7 +233,9 @@
                         <exclude>org.eclipse.lsp4j.WatchKind</exclude>
                         <exclude>org.eclipse.lsp4j.MarkupKind</exclude>
                         <exclude>org.eclipse.lsp4j.CodeActionKind</exclude>
+                        <exclude>org.eclipse.lsp4j.FailureHandlingKind</exclude>
                         <exclude>org.eclipse.lsp4j.FoldingRangeKind</exclude>
+                        <exclude>org.eclipse.lsp4j.ResourceOperationKind</exclude>
                     </excludes>
                     <dtoPackages>
                         <package>org.eclipse.lsp4j</package>

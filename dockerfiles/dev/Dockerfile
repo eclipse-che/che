@@ -13,11 +13,12 @@ FROM registry.centos.org/che-stacks/centos-stack-base
 
 EXPOSE 4403 8080 8000 9876 22
 
-RUN sudo yum -y update && \
+RUN sudo yum -y install epel-release && \
+    sudo yum -y update && \
     sudo yum -y install  \
            rh-maven35 \
            plexus-classworlds \
-           rh-nodejs6 \
+           rh-nodejs8 \
            gcc-c++ \
            gcc \
            glibc-devel \
@@ -26,8 +27,8 @@ RUN sudo yum -y update && \
            golang \
     sudo yum clean all && \
     cat /opt/rh/rh-maven35/enable >> /home/user/.bashrc  && \
-    cat /opt/rh/rh-nodejs6/enable >> /home/user/.bashrc && \
-    sudo ln -s /opt/rh/rh-nodejs6/root/usr/bin/node /usr/local/bin/nodejs
+    cat /opt/rh/rh-nodejs8/enable >> /home/user/.bashrc && \
+    sudo ln -s /opt/rh/rh-nodejs8/root/usr/bin/node /usr/local/bin/nodejs
 
 ENV TOMCAT_VERSION=8.5.23
 
@@ -42,9 +43,9 @@ RUN mkdir $HOME/.m2 && \
 
 USER user
 
-ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs6/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \
- PYTHONPATH=/opt/rh/rh-nodejs6/root/usr/lib/python2.7/site-packages${PYTHONPATH:+:${PYTHONPATH}} \
- MANPATH=/opt/rh/rh-nodejs6/root/usr/share/man:$MANPATH \
+ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs8/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}} \
+ PYTHONPATH=/opt/rh/rh-nodejs8/root/usr/lib/python2.7/site-packages${PYTHONPATH:+:${PYTHONPATH}} \
+ MANPATH=/opt/rh/rh-nodejs8/root/usr/share/man:$MANPATH \
  TOMCAT_HOME=/home/user/tomcat8 \
  TERM=xterm  \
  M2_HOME=/opt/rh/rh-maven35/root/usr/share/maven \
@@ -53,7 +54,7 @@ ENV LD_LIBRARY_PATH=/opt/rh/rh-nodejs6/root/usr/lib64${LD_LIBRARY_PATH:+:${LD_LI
  NPM_RUN=start \
  NPM_CONFIG_PREFIX=$HOME/.npm-global
 
-ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bin:/opt/rh/rh-nodejs6/root/usr/bin:/usr/local/go/bin:$PATH
+ENV PATH=$HOME/node_modules/.bin/:$HOME/.npm-global/bin/:$GOPATH/bin:$M2_HOME/bin:/opt/rh/rh-nodejs8/root/usr/bin:/usr/local/go/bin:$PATH
 
 RUN mkdir /home/user/traefik ;\
     wget -O /home/user/traefik/traefik "https://github.com/containous/traefik/releases/download/v1.4.3/traefik_linux-amd64"; \

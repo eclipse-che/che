@@ -62,22 +62,6 @@ public class MachineConfigsValidatorTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Environment should contain at least 1 machine")
-  public void shouldFailIfMachinesIsNull() throws Exception {
-    // when
-    machinesValidator.validate(null);
-  }
-
-  @Test(
-      expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Environment should contain at least 1 machine")
-  public void shouldFailIfMachinesIsEmpty() throws Exception {
-    // when
-    machinesValidator.validate(emptyMap());
-  }
-
-  @Test(
-      expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp = "Name of machine '.*' in environment is invalid",
       dataProvider = "invalidMachineNames")
   public void shouldFailIfMachinesNameAreInvalid(String machineName) throws Exception {

@@ -290,7 +290,21 @@ export class WorkspaceDetailsController {
     }
 
     this.workspaceDetails.config = config;
-    this.checkEditMode();
+    
+
+    if (!this.originWorkspaceDetails || !this.workspaceDetails) {
+      return;
+    }
+
+    // check for failed tabs
+    const failedTabs = this.checkForFailedTabs();
+    // publish changes
+    this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
+    
+    if (!failedTabs || failedTabs.length === 0) {
+      let runningWorkspace = this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING];
+      this.saveConfigChanges(runningWorkspace);
+    }
   }
 
   /**
@@ -441,7 +455,7 @@ export class WorkspaceDetailsController {
   /**
    * Updates workspace with new config.
    */
-  saveConfigChanges(): void {
+  saveConfigChanges(notifyRestart?: boolean): void {
     this.editOverlayConfig.disabled = true;
 
     this.loading = true;
@@ -456,7 +470,10 @@ export class WorkspaceDetailsController {
         }
         this.unsavedChangesToApply = false;
 
-        this.cheNotification.showInfo('Workspace updated.');
+        let message = 'Workspace updated.';
+        message += notifyRestart ? '<br/>To apply changes in running workspace - need to restart it.' : '';
+        this.cheNotification.showInfo(message);
+
         this.$scope.$broadcast('edit-workspace-details', {status: 'saved'});
 
         return this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {

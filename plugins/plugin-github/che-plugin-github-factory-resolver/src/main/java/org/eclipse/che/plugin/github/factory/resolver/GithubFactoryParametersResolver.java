@@ -89,7 +89,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     // create factory from the following location if location exists, else create default factory
     FactoryDto factory =
         urlFactoryBuilder
-            .createFactoryFromDevfile(githubUrl.devfileFileLocation())
+            .createFactoryFromDevfile(githubUrl.devfileFileLocation(), githubUrl::rawFileLocation)
             .orElseGet(
                 () ->
                     urlFactoryBuilder

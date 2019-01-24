@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-java-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.17.0-SNAPSHOT</version>
+        <version>6.18.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-server</artifactId>
     <name>Che Plugin :: Java :: Language Server</name>
@@ -99,10 +99,6 @@
             <artifactId>che-plugin-java-ext-lang-shared</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-maven-shared</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
         </dependency>
@@ -154,6 +150,7 @@
                         <classe>org.eclipse.lsp4j.Position</classe>
                         <classe>org.eclipse.lsp4j.WorkspaceEdit</classe>
                         <classe>org.eclipse.lsp4j.ResourceChange</classe>
+                        <classe>org.eclipse.lsp4j.ResourceOperation</classe>
                         <classe>org.eclipse.lsp4j.RenameParams</classe>
                         <classe>org.eclipse.lsp4j.TextDocumentIdentifier</classe>
                         <classe>org.eclipse.lsp4j.TextEdit</classe>

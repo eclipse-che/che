@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-nodejs-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.17.0-SNAPSHOT</version>
+        <version>6.18.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-nodejs-lang-server</artifactId>
     <name>Che Plugin :: NodeJs :: Extension Server</name>

@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.activity;
 
 import java.util.List;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -116,4 +117,13 @@ public interface WorkspaceActivityDao {
    * @throws ServerException on error
    */
   WorkspaceActivity findActivity(String workspaceId) throws ServerException;
+
+  /**
+   * Creates a new activity record. Fails if activity record already exists.
+   *
+   * @param activity the activity to persist
+   * @throws ConflictException when activity record exists
+   * @throws ServerException on other error
+   */
+  void createActivity(WorkspaceActivity activity) throws ConflictException, ServerException;
 }

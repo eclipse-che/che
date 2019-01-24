@@ -68,7 +68,7 @@ public class GithubFactoryParametersResolverTest {
 
   /**
    * Capturing the parameter when calling {@link URLFactoryBuilder#createFactoryFromJson(String)} or
-   * {@link URLFactoryBuilder#createFactoryFromDevfile(String)}
+   * {@link URLFactoryBuilder#createFactoryFromDevfile(String, java.util.function.Function)}
    */
   @Captor private ArgumentCaptor<String> fileLocationArgumentCaptor;
 
@@ -146,13 +146,13 @@ public class GithubFactoryParametersResolverTest {
     String githubUrl = "https://github.com/eclipse/che";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromDevfile(anyString()))
+    when(urlFactoryBuilder.createFactoryFromDevfile(anyString(), any()))
         .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
     // check we called the builder with the following devfile
-    verify(urlFactoryBuilder).createFactoryFromDevfile(fileLocationArgumentCaptor.capture());
+    verify(urlFactoryBuilder).createFactoryFromDevfile(fileLocationArgumentCaptor.capture(), any());
     assertEquals(
         fileLocationArgumentCaptor.getValue(),
         "https://raw.githubusercontent.com/eclipse/che/master/.devfile");

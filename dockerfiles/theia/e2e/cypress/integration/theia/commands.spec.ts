@@ -38,13 +38,12 @@ context('Check Extensions are installed', () => {
        '@theia/java',
        '@theia/typescript',
        'che-theia-ssh-extension',
-       'theia-machines-extension',
        '@eclipse-che/che-theia-hosted-plugin-manager-extension',
        '@eclipse-che/theia-remote-extension',
        'github-extension',
        '@eclipse-che/theia-activity-tracker',
        '@eclipse-che/theia-task-extension',
-       'che-theia-terminal',
+       '@eclipse-che/theia-terminal',
        '@eclipse-che/theia-dashboard-extension']);
     });
 

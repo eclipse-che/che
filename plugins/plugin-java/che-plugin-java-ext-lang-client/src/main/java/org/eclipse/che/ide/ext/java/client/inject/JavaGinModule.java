@@ -59,6 +59,7 @@ import org.eclipse.che.ide.ext.java.client.resource.JavaSourceRenameValidator;
 import org.eclipse.che.ide.ext.java.client.resource.SourceFolderInterceptor;
 import org.eclipse.che.ide.ext.java.client.search.FindUsagesView;
 import org.eclipse.che.ide.ext.java.client.search.FindUsagesViewImpl;
+import org.eclipse.che.ide.ext.java.client.service.CustomNotificationReceiver;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.ErrorsWarningsPreferenceManager;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPreferenceManager;
 import org.eclipse.che.ide.ext.java.client.settings.compiler.JavaCompilerPreferencePresenter;
@@ -167,6 +168,8 @@ public class JavaGinModule extends AbstractGinModule {
     GinMultibinder.newSetBinder(binder(), RenamingSupport.class)
         .addBinding()
         .to(JavaSourceRenameValidator.class);
+
+    bind(CustomNotificationReceiver.class).asEagerSingleton();
   }
 
   @Provides

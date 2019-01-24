@@ -56,8 +56,11 @@ RUN if [ -d "${HOME}/patches/${THEIA_VERSION}" ]; then \
     fi
 
 # Generate che-theia
+ARG CDN_PREFIX=""
+ARG MONACO_CDN_PREFIX=""
 WORKDIR ${HOME}/theia-source-code
 RUN che:theia init
+RUN che:theia cdn --theia="${CDN_PREFIX}" --monaco="${MONACO_CDN_PREFIX}"
 
 # Compile Theia
 RUN yarn
@@ -99,7 +102,8 @@ RUN adduser --disabled-password -S -u 1001 -G root -h ${HOME} -s /bin/sh theia \
     && mkdir /default-theia-plugins \
     # Download yeoman generator plug-in
     && curl -L -o /default-theia-plugins/theia_yeoman_plugin.theia https://github.com/eclipse/theia-yeoman-plugin/releases/download/untagged-04f28ee329e479cc465b/theia_yeoman_plugin.theia \
-    && curl -L -o /default-theia-plugins/eclipse_che_theia_factory_plugin.theia https://github.com/eclipse/che-theia-factory-extension/releases/download/untagged-20251ef0ab72d8db49ca/eclipse_che_theia_factory_plugin.theia \
+    && curl -L -o /default-theia-plugins/eclipse_che_theia_factory_plugin.theia https://github.com/eclipse/che-theia/releases/download/0.0.1/eclipse_che_theia_factory_plugin.theia \
+    && curl -L -o /default-theia-plugins/eclipse_che_theia_containers_plugin.theia https://github.com/eclipse/che-theia/releases/download/0.0.1/eclipse_che_theia_containers_plugin.theia \
     && for f in "${HOME}" "/etc/passwd" "/etc/group /node_modules /default-theia-plugins /projects"; do\
            sudo chgrp -R 0 ${f} && \
            sudo chmod -R g+rwX ${f}; \

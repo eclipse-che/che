@@ -17,9 +17,8 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.17.0-SNAPSHOT</version>
+        <version>6.18.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.eclipse.che.core</groupId>
     <artifactId>che-core-dynamodule-maven-plugin</artifactId>
     <packaging>maven-plugin</packaging>
     <name>Che Core :: API :: DynaModule maven plugin</name>

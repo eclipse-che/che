@@ -354,7 +354,7 @@ export abstract class EnvironmentManager {
   setMemoryLimit(machine: IEnvironmentManagerMachine, limit: number): void {
     machine.attributes = machine.attributes ? machine.attributes : {};
     if (limit) {
-      machine.attributes.memoryLimitBytes = limit;
+      machine.attributes.memoryLimitBytes = limit.toString();
     }
   }
 }

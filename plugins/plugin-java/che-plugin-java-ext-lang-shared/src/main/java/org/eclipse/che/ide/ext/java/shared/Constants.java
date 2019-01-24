@@ -78,6 +78,9 @@ public final class Constants {
   public static final String NOTIFY_UNSUBSCRIBE = "workspace/notify/unsubscribe";
   public static final String NOTIFY_SUBSCRIBE = "workspace/notify/subscribe";
 
+  // Notifications
+  public static final String POM_CHANGED = "java/pomChanged";
+
   private Constants() {
     throw new UnsupportedOperationException("Unused constructor.");
   }

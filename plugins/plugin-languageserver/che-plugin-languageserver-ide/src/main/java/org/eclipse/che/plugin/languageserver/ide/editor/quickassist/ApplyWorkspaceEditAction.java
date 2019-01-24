@@ -19,11 +19,11 @@ import com.google.web.bindery.event.shared.EventBus;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import org.eclipse.che.api.languageserver.shared.dto.DtoClientImpls.FileEditParamsDto;
 import org.eclipse.che.api.languageserver.shared.model.FileEditParams;
@@ -68,10 +68,12 @@ import org.eclipse.che.plugin.languageserver.ide.util.PromiseHelper;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ResourceOperation;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 @Singleton
 public class ApplyWorkspaceEditAction extends BaseAction {
@@ -148,13 +150,11 @@ public class ApplyWorkspaceEditAction extends BaseAction {
     if (edit.getChanges() != null) {
       changes = edit.getChanges();
     } else if (edit.getDocumentChanges() != null) {
-      changes =
-          edit.getDocumentChanges()
-              .stream()
-              .collect(
-                  Collectors.toMap(
-                      (TextDocumentEdit e) -> e.getTextDocument().getUri(),
-                      TextDocumentEdit::getEdits));
+      changes = new HashMap<>();
+      for (Either<TextDocumentEdit, ResourceOperation> e : edit.getDocumentChanges()) {
+        // we're not announcing resource change capabilities, so assume none present
+        changes.put(e.getLeft().getTextDocument().getUri(), e.getLeft().getEdits());
+      }
     }
 
     fileStatusNotifier.suspend();

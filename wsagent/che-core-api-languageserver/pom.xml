@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agent-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.17.0-SNAPSHOT</version>
+        <version>6.18.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-languageserver</artifactId>
     <packaging>jar</packaging>
@@ -153,7 +153,9 @@
                         <exclude>org.eclipse.lsp4j.WatchKind</exclude>
                         <exclude>org.eclipse.lsp4j.MarkupKind</exclude>
                         <exclude>org.eclipse.lsp4j.CodeActionKind</exclude>
+                        <exclude>org.eclipse.lsp4j.FailureHandlingKind</exclude>
                         <exclude>org.eclipse.lsp4j.FoldingRangeKind</exclude>
+                        <exclude>org.eclipse.lsp4j.ResourceOperationKind</exclude>
                     </excludes>
                     <dtoPackages>
                         <package>org.eclipse.lsp4j</package>

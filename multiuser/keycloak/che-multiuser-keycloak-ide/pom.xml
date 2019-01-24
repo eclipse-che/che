@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-keycloak</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.17.0-SNAPSHOT</version>
+        <version>6.18.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-multiuser-keycloak-ide</artifactId>

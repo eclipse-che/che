@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseProvider;
-import org.eclipse.che.ide.ext.java.client.project.classpath.ClasspathChangedEvent;
+import org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathChangedEvent;
 import org.eclipse.che.ide.ext.java.client.service.JavaLanguageExtensionServiceClient;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 
@@ -29,7 +29,8 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
  * @author Valeriy Svydenko
  */
 @Singleton
-public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChangedHandler {
+public class ClasspathContainer
+    implements ProjectClasspathChangedEvent.ProjectClasspathChangedHandler {
   public static String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
   private final JavaLanguageExtensionServiceClient extensionService;
@@ -45,7 +46,7 @@ public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChange
     this.promiseProvider = promiseProvider;
     classpath = new HashMap<>();
 
-    eventBus.addHandler(ClasspathChangedEvent.TYPE, this);
+    eventBus.addHandler(ProjectClasspathChangedEvent.TYPE, this);
   }
 
   /**
@@ -73,7 +74,7 @@ public class ClasspathContainer implements ClasspathChangedEvent.ClasspathChange
   }
 
   @Override
-  public void onClasspathChanged(ClasspathChangedEvent event) {
-    classpath.put(event.getPath(), promiseProvider.resolve(event.getEntries()));
+  public void onProjectClasspathChanged(ProjectClasspathChangedEvent event) {
+    classpath.remove(event.getProject());
   }
 }

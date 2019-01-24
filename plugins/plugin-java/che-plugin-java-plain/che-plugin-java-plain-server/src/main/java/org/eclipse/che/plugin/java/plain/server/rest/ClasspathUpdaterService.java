@@ -12,8 +12,6 @@
 package org.eclipse.che.plugin.java.plain.server.rest;
 
 import static org.eclipse.che.api.languageserver.LanguageServiceUtils.prefixURI;
-import static org.eclipse.che.plugin.java.plain.server.projecttype.PlainJavaProjectUpdateUtil.notifyClientOnProjectUpdate;
-import static org.eclipse.che.plugin.java.plain.server.projecttype.PlainJavaProjectUpdateUtil.updateProjectConfig;
 
 import com.google.inject.Inject;
 import java.io.IOException;
@@ -29,7 +27,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.project.server.ProjectManager;
 import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 import org.eclipse.che.plugin.java.languageserver.JavaLanguageServerExtensionService;
 import org.eclipse.che.plugin.java.languageserver.NotifyJsonRpcTransmitter;
@@ -45,18 +42,13 @@ import org.slf4j.LoggerFactory;
 public class ClasspathUpdaterService {
   private static final Logger LOG = LoggerFactory.getLogger(ClasspathUpdaterService.class);
 
-  private final ProjectManager projectManager;
   private final JavaLanguageServerExtensionService extensionService;
-  private final NotifyJsonRpcTransmitter notifyTransmitter;
 
   @Inject
   public ClasspathUpdaterService(
-      ProjectManager projectManager,
       JavaLanguageServerExtensionService extensionService,
       NotifyJsonRpcTransmitter notifyTransmitter) {
-    this.projectManager = projectManager;
     this.extensionService = extensionService;
-    this.notifyTransmitter = notifyTransmitter;
   }
 
   /**
@@ -77,11 +69,8 @@ public class ClasspathUpdaterService {
           BadRequestException {
     try {
       extensionService.updateClasspathWithResult(prefixURI(projectPath), entries).get();
-      updateProjectConfig(projectManager, projectPath).get();
     } catch (InterruptedException | ExecutionException e) {
       LOG.error(e.getMessage());
     }
-
-    notifyClientOnProjectUpdate(notifyTransmitter, projectPath);
   }
 }

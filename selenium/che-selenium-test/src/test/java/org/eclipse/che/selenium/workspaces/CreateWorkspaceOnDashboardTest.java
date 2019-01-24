@@ -42,10 +42,10 @@ import org.testng.annotations.Test;
 public class CreateWorkspaceOnDashboardTest {
 
   private static final String WS_NAME = generate("workspace", 4);
-  private static final String PROJECT_NAME = "web-java-spring";
+  private static final String PROJECT_NAME = "test-project";
   private static final String PATH_TO_EXPAND = "/src/main/java/org.eclipse.che.examples";
   private static final String PATH_JAVA_FILE =
-      PROJECT_NAME + "/src/main/java/org/eclipse/che/examples/GreetingController.java";
+      "/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private NotificationsPopupPanel notificationsPopupPanel;
@@ -96,7 +96,7 @@ public class CreateWorkspaceOnDashboardTest {
 
     // Import the "web-java-spring" project
     menu.runCommand(WORKSPACE, CREATE_PROJECT);
-    wizard.selectProjectAndCreate(WEB_JAVA_SPRING, PROJECT_NAME);
+    wizard.selectProjectAndCreate(getSampleProjectName(), PROJECT_NAME);
     notificationsPopupPanel.waitProgressPopupPanelClose();
 
     // wait that type of the added project folder has PROJECT FOLDER status
@@ -105,13 +105,29 @@ public class CreateWorkspaceOnDashboardTest {
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
 
     // open a file in the Editor
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + PATH_TO_EXPAND);
-    projectExplorer.openItemByPath(PATH_JAVA_FILE);
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + getPathToExpand());
+    projectExplorer.openItemByPath(PROJECT_NAME + getPathJavaFile());
     editor.waitActive();
-    editor.waitTabIsPresent("GreetingController");
+    editor.waitTabIsPresent(getTabName());
 
     // stop the workspace
     menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");
+  }
+
+  protected String getSampleProjectName() {
+    return WEB_JAVA_SPRING;
+  }
+
+  protected String getPathToExpand() {
+    return PATH_TO_EXPAND;
+  }
+
+  protected String getPathJavaFile() {
+    return PATH_JAVA_FILE;
+  }
+
+  protected String getTabName() {
+    return "GreetingController";
   }
 }
