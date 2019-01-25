@@ -17,6 +17,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.Kube
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.common.base.Strings;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
@@ -145,10 +146,11 @@ public class PVCSubPathHelper {
       final Pod finished = deployments.wait(podName, WAIT_POD_TIMEOUT_MIN, POD_PREDICATE::apply);
       PodStatus finishedStatus = finished.getStatus();
       if (POD_PHASE_FAILED.equals(finishedStatus.getPhase())) {
+        String logs = deployments.getPodLogs(podName);
         LOG.error(
-            "Job command '{}' execution is failed. Status '{}'.",
+            "Job command '{}' execution is failed. Logs: {}",
             Arrays.toString(command),
-            finishedStatus);
+            Strings.nullToEmpty(logs).replace("\n", " \\n")); // Force logs onto one line
       }
     } catch (InfrastructureException ex) {
       LOG.error(

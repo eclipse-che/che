@@ -718,7 +718,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     final KubernetesEnvironment environment = getContext().getEnvironment();
     final Map<String, InternalMachineConfig> machineConfigs = environment.getMachines();
     final String workspaceId = getContext().getIdentity().getWorkspaceId();
-    LOG.info("Begin pods creation for workspace '{}'", workspaceId);
+    LOG.debug("Begin pods creation for workspace '{}'", workspaceId);
     for (Pod toCreate : environment.getPodsCopy().values()) {
       startTracingContainersStartup(toCreate.getMetadata(), toCreate.getSpec());
       ObjectMeta toCreateMeta = toCreate.getMetadata();
@@ -737,7 +737,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final ObjectMeta templateMeta = toCreate.getSpec().getTemplate().getMetadata();
       storeStartingMachine(createdPod, templateMeta, machineConfigs, serverResolver);
     }
-    LOG.info("Pods creation finished in workspace '{}'", workspaceId);
+    LOG.debug("Pods creation finished in workspace '{}'", workspaceId);
   }
 
   /** Puts createdPod in the {@code machines} map and sends the starting event for this machine */
