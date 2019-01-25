@@ -43,7 +43,7 @@ public class URLFetcherTest {
   /** Check that when url is null, NPE is thrown */
   @Test(expectedExceptions = NullPointerException.class)
   public void checkNullURL() {
-    URLFetcher.fetch((String) null);
+    URLFetcher.fetchSafely((String) null);
   }
 
   /** Check that when url exists the content is retrieved */
@@ -54,14 +54,14 @@ public class URLFetcherTest {
     URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
-    String content = URLFetcher.fetch(urlJson.toString());
+    String content = URLFetcher.fetchSafely(urlJson.toString());
     assertEquals(content, "Hello");
   }
 
   /** Check when url is invalid */
   @Test
   public void checkUrlFileIsInvalid() {
-    String result = URLFetcher.fetch("hello world");
+    String result = URLFetcher.fetchSafely("hello world");
     assertNull(result);
   }
 
@@ -84,7 +84,7 @@ public class URLFetcherTest {
     Assert.assertNotNull(urlJson);
 
     // add extra path to make url not found
-    String content = URLFetcher.fetch(urlJson.toString() + "-invalid");
+    String content = URLFetcher.fetchSafely(urlJson.toString() + "-invalid");
     assertNull(content);
   }
 
@@ -94,7 +94,7 @@ public class URLFetcherTest {
     URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
-    String content = new OneByteURLFetcher().fetch(urlJson.toString());
+    String content = new OneByteURLFetcher().fetchSafely(urlJson.toString());
     assertEquals(content, "Hello".substring(0, 1));
   }
 

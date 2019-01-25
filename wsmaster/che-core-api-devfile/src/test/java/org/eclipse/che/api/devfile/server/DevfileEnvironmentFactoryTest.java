@@ -21,6 +21,7 @@ import static org.testng.Assert.assertNotNull;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,13 +43,15 @@ public class DevfileEnvironmentFactoryTest {
   @InjectMocks private DevfileEnvironmentFactory factory;
 
   @Test(
-      expectedExceptions = IllegalArgumentException.class,
+      expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
           "Unable to process tool '"
               + TOOL_NAME
               + "' of type '"
               + KUBERNETES_TOOL_TYPE
-              + "' since there is no content provider supplied.")
+              + "' since there is no recipe content provider supplied. "
+              + "That means you're trying to submit an devfile with recipe-type tools to the bare "
+              + "devfile API or factory URL used didn't support this feature.")
   public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoContentProviderSupplied()
       throws Exception {
     Tool tool =
@@ -96,6 +99,20 @@ public class DevfileEnvironmentFactoryTest {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
     factory.createEnvironment(tool, s -> "some_unparseable_content");
+  }
+
+  @Test(
+      expectedExceptions = DevfileException.class,
+      expectedExceptionsMessageRegExp =
+          "Error during recipe content retrieval for tool '" + TOOL_NAME + "': fetch failed")
+  public void shouldThrowExceptionWhenExceptionHappensOnContentProvider() throws Exception {
+    Tool tool =
+        new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
+    factory.createEnvironment(
+        tool,
+        e -> {
+          throw new IOException("fetch failed");
+        });
   }
 
   @Test

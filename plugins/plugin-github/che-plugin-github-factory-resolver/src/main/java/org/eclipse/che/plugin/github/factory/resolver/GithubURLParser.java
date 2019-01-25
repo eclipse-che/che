@@ -64,7 +64,7 @@ public class GithubURLParser {
     String pullRequestId = matcher.group("pullRequestId");
     if (pullRequestId != null) {
       // there is a Pull Request ID, analyze content to extract repository and branch to use
-      String prData = this.urlFetcher.fetch(url);
+      String prData = this.urlFetcher.fetchSafely(url);
       Matcher prMatcher = PR_DATA_PATTERN.matcher(prData);
       if (prMatcher.matches()) {
         String prState = prMatcher.group("prState");

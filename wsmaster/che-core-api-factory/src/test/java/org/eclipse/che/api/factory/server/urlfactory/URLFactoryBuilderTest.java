@@ -93,7 +93,7 @@ public class URLFactoryBuilderTest {
     String jsonFactory = DtoFactory.getInstance().toJson(templateFactory);
 
     String myLocation = "http://foo-location";
-    when(urlFetcher.fetch(myLocation)).thenReturn(jsonFactory);
+    when(urlFetcher.fetchSafely(myLocation)).thenReturn(jsonFactory);
 
     FactoryDto factory = urlFactoryBuilder.createFactoryFromJson(myLocation).get();
 
@@ -112,7 +112,7 @@ public class URLFactoryBuilderTest {
     workspaceConfigImpl.setEnvironments(singletonMap("name", expectedEnv));
     workspaceConfigImpl.setDefaultEnv("name");
 
-    when(urlFetcher.fetch(anyString())).thenReturn("random_content");
+    when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
     when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
     when(devfileManager.createWorkspaceConfig(any(Devfile.class), any()))
         .thenReturn(workspaceConfigImpl);

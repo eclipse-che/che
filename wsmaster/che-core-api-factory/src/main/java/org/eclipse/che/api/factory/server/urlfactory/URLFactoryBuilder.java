@@ -28,9 +28,8 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.DevfileFormatException;
+import org.eclipse.che.api.devfile.server.DevfileException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
-import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -74,7 +73,7 @@ public class URLFactoryBuilder {
   public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation) {
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
-      final String factoryJsonContent = urlFetcher.fetch(jsonFileLocation);
+      final String factoryJsonContent = urlFetcher.fetchSafely(jsonFileLocation);
       if (!isNullOrEmpty(factoryJsonContent)) {
         return Optional.of(
             DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class));
@@ -96,7 +95,7 @@ public class URLFactoryBuilder {
     if (devfileLocation == null) {
       return Optional.empty();
     }
-    final String devfileYamlContent = urlFetcher.fetch(devfileLocation);
+    final String devfileYamlContent = urlFetcher.fetchSafely(devfileLocation);
     if (isNullOrEmpty(devfileYamlContent)) {
       return Optional.empty();
     }
@@ -113,7 +112,7 @@ public class URLFactoryBuilder {
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
               .withWorkspace(DtoConverter.asDto(wsConfig)));
-    } catch (DevfileFormatException | DevfileRecipeFormatException e) {
+    } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());
     } catch (IOException x) {
       throw new ServerException(x.getLocalizedMessage(), x);

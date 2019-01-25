@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
@@ -48,12 +49,12 @@ public class DevfileEnvironmentFactory {
    * @return constructed environment from recipe type tool
    * @throws IllegalArgumentException when wrong type tool is passed
    * @throws IllegalArgumentException when there is no content provider for recipe-type tool
-   * @throws DevfileRecipeFormatException when recipe-type tool content is unreachable, empty or has
-   *     wrong format
+   * @throws DevfileException when general devfile error occurs
+   * @throws DevfileRecipeFormatException when recipe-type tool content is empty or has wrong format
    */
   public EnvironmentImpl createEnvironment(
       Tool recipeTool, RecipeFileContentProvider recipeFileContentProvider)
-      throws DevfileRecipeFormatException {
+      throws DevfileRecipeFormatException, DevfileException {
     final String type = recipeTool.getType();
     if (!KUBERNETES_TOOL_TYPE.equals(type) && !OPENSHIFT_TOOL_TYPE.equals(type)) {
       throw new IllegalArgumentException(
@@ -62,13 +63,22 @@ public class DevfileEnvironmentFactory {
               recipeTool.getName(), type));
     }
     if (recipeFileContentProvider == null) {
-      throw new IllegalArgumentException(
+      throw new DevfileException(
           format(
-              "Unable to process tool '%s' of type '%s' since there is no content provider supplied.",
+              "Unable to process tool '%s' of type '%s' since there is no recipe content provider supplied. "
+                  + "That means you're trying to submit an devfile with recipe-type tools to the bare devfile API or factory URL used didn't support this feature.",
               recipeTool.getName(), type));
     }
 
-    String recipeFileContent = recipeFileContentProvider.fetchContent(recipeTool.getLocal());
+    String recipeFileContent;
+    try {
+      recipeFileContent = recipeFileContentProvider.fetchContent(recipeTool.getLocal());
+    } catch (IOException e) {
+      throw new DevfileException(
+          format("Error during recipe content retrieval for tool '%s': ", recipeTool.getName())
+              + e.getMessage(),
+          e);
+    }
     if (isNullOrEmpty(recipeFileContent)) {
       throw new DevfileRecipeFormatException(
           format(

@@ -119,16 +119,17 @@ public class DevfileConverter {
   /**
    * Converts given {@link Devfile} into workspace config.
    *
-   * @param devfile inital devfile
+   * @param devfile initial devfile
    * @param recipeFileContentProvider content provider for recipe-type tool
    * @return constructed workspace config
+   * @throws DevfileException when general devfile error occurs
    * @throws DevfileFormatException when devfile format is invalid
    * @throws DevfileRecipeFormatException when content of the file specified in recipe type tool is
-   *     empty or it's format is invalid
+   *     empty or its format is invalid
    */
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
       Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
-      throws DevfileFormatException, DevfileRecipeFormatException {
+      throws DevfileFormatException, DevfileRecipeFormatException, DevfileException {
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
