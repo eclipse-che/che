@@ -166,10 +166,10 @@ public final class Constants {
   public static final String CONTAINER_SOURCE_ATTRIBUTE = "source";
 
   /** Mark containers applied to workspace with help recipe definition. */
-  public static final String RECIPE = "recipe";
+  public static final String RECIPE_CONTAINER_SOURCE = "recipe";
 
   /** Mark containers created workspace api like tooling for user development. */
-  public static final String TOOL = "tool";
+  public static final String TOOL_CONTAINER_SOURCE = "tool";
 
   private Constants() {}
 }

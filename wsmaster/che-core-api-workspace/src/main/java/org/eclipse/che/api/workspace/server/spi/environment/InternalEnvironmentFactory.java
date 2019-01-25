@@ -12,7 +12,7 @@
 package org.eclipse.che.api.workspace.server.spi.environment;
 
 import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.shared.Constants.RECIPE;
+import static org.eclipse.che.api.workspace.shared.Constants.RECIPE_CONTAINER_SOURCE;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
@@ -103,23 +103,27 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
           throw new InfrastructureException(e);
         }
 
-        InternalMachineConfig internalMachineConfig =
+        machines.put(
+            machineEntry.getKey(),
             new InternalMachineConfig(
                 installers,
                 normalizeServers(machineConfig.getServers()),
                 machineConfig.getEnv(),
                 machineConfig.getAttributes(),
-                machineConfig.getVolumes());
-
-        internalMachineConfig.getAttributes().put(CONTAINER_SOURCE_ATTRIBUTE, RECIPE);
-
-        machines.put(machineEntry.getKey(), internalMachineConfig);
+                machineConfig.getVolumes()));
       }
 
       machinesValidator.validate(machines);
     }
 
-    return doCreate(recipe, machines, warnings);
+    T internalEnv = doCreate(recipe, machines, warnings);
+
+    internalEnv
+        .getMachines()
+        .values()
+        .forEach(m -> m.getAttributes().put(CONTAINER_SOURCE_ATTRIBUTE, RECIPE_CONTAINER_SOURCE));
+
+    return internalEnv;
   }
 
   /**
