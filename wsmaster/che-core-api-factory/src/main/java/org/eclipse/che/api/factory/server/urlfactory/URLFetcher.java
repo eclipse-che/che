@@ -64,8 +64,7 @@ public class URLFetcher {
   }
 
   /**
-   * Fetch the url provided and return its content To prevent DOS attack, limit the amount of the
-   * collected data
+   * Fetch the url provided and return its content.
    *
    * @param url the URL to fetch
    * @return the content of the file
@@ -82,6 +81,7 @@ public class URLFetcher {
    *
    * @param urlConnection the URL connection to fetch
    * @return the content of the file
+   * @throws IOException if fetch error occurs
    */
   public String fetch(@NotNull URLConnection urlConnection) throws IOException {
     requireNonNull(urlConnection, "urlConnection parameter can't be null");
@@ -92,7 +92,7 @@ public class URLFetcher {
                 new InputStreamReader(ByteStreams.limit(inputStream, getLimit()), UTF_8))) {
       value = reader.lines().collect(Collectors.joining("\n"));
     } catch (IOException e) {
-      // we shouldn't fetchSafely if check is done before
+      // we shouldn't fetch if check is done before
       LOG.debug("Invalid URL", e);
       throw e;
     }
