@@ -11,18 +11,15 @@
  */
 package org.eclipse.che.api.workspace.activity;
 
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_BY;
-import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.time.Clock;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.ConflictException;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -34,7 +31,6 @@ import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
-import org.eclipse.che.commons.schedule.ScheduleDelay;
 import org.eclipse.che.core.db.cascade.CascadeEventSubscriber;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +53,6 @@ public class WorkspaceActivityManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceActivityManager.class);
 
-  private static final String ACTIVITY_CHECKER = "activity-checker";
-
   private final long defaultTimeout;
   private final WorkspaceActivityDao activityDao;
   private final EventService eventService;
@@ -68,16 +62,30 @@ public class WorkspaceActivityManager {
 
   protected final WorkspaceManager workspaceManager;
 
+  private final Clock clock;
+
   @Inject
   public WorkspaceActivityManager(
       WorkspaceManager workspaceManager,
       WorkspaceActivityDao activityDao,
       EventService eventService,
       @Named("che.limits.workspace.idle.timeout") long timeout) {
+
+    this(workspaceManager, activityDao, eventService, timeout, Clock.systemDefaultZone());
+  }
+
+  @VisibleForTesting
+  WorkspaceActivityManager(
+      WorkspaceManager workspaceManager,
+      WorkspaceActivityDao activityDao,
+      EventService eventService,
+      long timeout,
+      Clock clock) {
     this.workspaceManager = workspaceManager;
     this.eventService = eventService;
     this.activityDao = activityDao;
     this.defaultTimeout = timeout;
+    this.clock = clock;
     if (timeout > 0 && timeout < MINIMAL_TIMEOUT) {
       LOG.warn(
           "Value of property \"che.limits.workspace.idle.timeout\" is below recommended minimum ("
@@ -162,45 +170,11 @@ public class WorkspaceActivityManager {
     return defaultTimeout;
   }
 
-  @ScheduleDelay(
-      initialDelayParameterName = "che.workspace.activity_check_scheduler_delay_s",
-      delayParameterName = "che.workspace.activity_check_scheduler_period_s")
-  private void invalidate() {
-    try {
-      activityDao.findExpired(System.currentTimeMillis()).forEach(this::stopExpired);
-    } catch (ServerException e) {
-      LOG.error(e.getLocalizedMessage(), e);
-    }
-  }
-
-  private void stopExpired(String workspaceId) {
-    try {
-      Workspace workspace = workspaceManager.getWorkspace(workspaceId);
-      workspace.getAttributes().put(WORKSPACE_STOPPED_BY, ACTIVITY_CHECKER);
-      workspaceManager.updateWorkspace(workspaceId, workspace);
-      workspaceManager.stopWorkspace(
-          workspaceId, singletonMap(WORKSPACE_STOP_REASON, "Workspace idle timeout exceeded"));
-    } catch (NotFoundException ignored) {
-      // workspace no longer exists, no need to do anything
-    } catch (ConflictException e) {
-      LOG.warn(e.getLocalizedMessage());
-    } catch (Exception ex) {
-      LOG.error(ex.getLocalizedMessage());
-      LOG.debug(ex.getLocalizedMessage(), ex);
-    } finally {
-      try {
-        activityDao.removeExpiration(workspaceId);
-      } catch (ServerException e) {
-        LOG.error(e.getLocalizedMessage(), e);
-      }
-    }
-  }
-
   private class UpdateStatusChangedTimestampSubscriber
       implements EventSubscriber<WorkspaceStatusEvent> {
     @Override
     public void onEvent(WorkspaceStatusEvent event) {
-      long now = System.currentTimeMillis();
+      long now = clock.millis();
       String workspaceId = event.getWorkspaceId();
       WorkspaceStatus status = event.getStatus();
 

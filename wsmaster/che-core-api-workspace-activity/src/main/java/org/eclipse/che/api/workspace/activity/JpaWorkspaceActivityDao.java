@@ -20,7 +20,9 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -200,6 +202,21 @@ public class JpaWorkspaceActivityDao implements WorkspaceActivityDao {
       return em.find(WorkspaceActivity.class, workspaceId);
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
+    }
+  }
+
+  @Override
+  @Transactional(rollbackOn = {ConflictException.class, ServerException.class})
+  public void createActivity(WorkspaceActivity activity) throws ConflictException, ServerException {
+    try {
+      EntityManager em = managerProvider.get();
+      em.persist(activity);
+      em.flush();
+    } catch (EntityExistsException e) {
+      throw new ConflictException(
+          "Activity record for workspace ID " + activity.getWorkspaceId() + " already exists.", e);
+    } catch (RuntimeException e) {
+      throw new ServerException(e.getLocalizedMessage(), e);
     }
   }
 
