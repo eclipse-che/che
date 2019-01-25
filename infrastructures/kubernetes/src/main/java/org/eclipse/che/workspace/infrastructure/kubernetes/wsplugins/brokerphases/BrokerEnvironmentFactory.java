@@ -196,7 +196,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private Pod newPod() {
     return new PodBuilder()
         .withNewMetadata()
-        .withName(BROKERS_POD_NAME)
+        .withName(generateUniqueName(BROKERS_POD_NAME))
         .endMetadata()
         .withNewSpec()
         .withRestartPolicy("Never")
