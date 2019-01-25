@@ -52,7 +52,7 @@ public class URLFetcher {
    * collected data
    *
    * @param url the URL to fetch
-   * @return the content of the file
+   * @return the content of the file or {@code null} if error happened
    */
   public String fetchSafely(@NotNull final String url) {
     requireNonNull(url, "url parameter can't be null");
@@ -63,6 +63,14 @@ public class URLFetcher {
     }
   }
 
+  /**
+   * Fetch the url provided and return its content To prevent DOS attack, limit the amount of the
+   * collected data
+   *
+   * @param url the URL to fetch
+   * @return the content of the file
+   * @throws IOException if fetch error occurs
+   */
   public String fetch(@NotNull final String url) throws IOException {
     requireNonNull(url, "url parameter can't be null");
     return fetch(new URL(sanitized(url)).openConnection());
