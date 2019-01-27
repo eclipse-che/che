@@ -19,7 +19,6 @@ import java.io.IOException;
  *
  * @author Max Shaposhnyk
  */
-@FunctionalInterface
 public interface RecipeFileContentProvider {
 
   /**

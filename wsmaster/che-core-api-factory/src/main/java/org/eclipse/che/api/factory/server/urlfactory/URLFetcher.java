@@ -48,11 +48,11 @@ public class URLFetcher {
   final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");
 
   /**
-   * Fetch the url provided and return its content To prevent DOS attack, limit the amount of the
+   * Fetches the url provided and return its content. To prevent DOS attack, limit the amount of the
    * collected data
    *
    * @param url the URL to fetch
-   * @return the content of the file or {@code null} if error happened
+   * @return the content of the requested URL or {@code null} if error happened
    */
   public String fetchSafely(@NotNull final String url) {
     requireNonNull(url, "url parameter can't be null");
@@ -64,10 +64,10 @@ public class URLFetcher {
   }
 
   /**
-   * Fetch the url provided and return its content.
+   * Fetches the url provided and return its content.
    *
    * @param url the URL to fetch
-   * @return the content of the file
+   * @return content of the requested URL
    * @throws IOException if fetch error occurs
    */
   public String fetch(@NotNull final String url) throws IOException {
