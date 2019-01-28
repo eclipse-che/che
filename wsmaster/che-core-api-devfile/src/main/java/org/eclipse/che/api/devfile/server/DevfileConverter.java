@@ -68,7 +68,7 @@ public class DevfileConverter {
     if (!isNullOrEmpty(wsConfig.getDefaultEnv()) || !wsConfig.getEnvironments().isEmpty()) {
       throw new WorkspaceExportException(
           format(
-              "Workspace %s cannot be converted to devfile since it contains environments (which have no equivalent in devfile model)",
+              "Workspace %s cannot be converted to devfile since it contains environments which have no equivalent in devfile model",
               wsConfig.getName()));
     }
 

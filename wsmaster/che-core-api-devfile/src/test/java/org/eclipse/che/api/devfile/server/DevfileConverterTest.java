@@ -138,7 +138,7 @@ public class DevfileConverterTest {
   @Test(
       expectedExceptions = WorkspaceExportException.class,
       expectedExceptionsMessageRegExp =
-          "Workspace .* cannot be converted to devfile since it contains environments \\(which have no equivalent in devfile model\\)")
+          "Workspace .* cannot be converted to devfile since it contains environments which have no equivalent in devfile model")
   public void shouldThrowExceptionWhenWorkspaceHasEnvironments() throws Exception {
     String jsonContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));

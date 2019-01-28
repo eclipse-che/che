@@ -51,7 +51,7 @@ public class DevfileEnvironmentFactoryTest {
               + KUBERNETES_TOOL_TYPE
               + "' since there is no recipe content provider supplied. "
               + "That means you're trying to submit an devfile with recipe-type tools to the bare "
-              + "devfile API or factory URL used didn't support this feature.")
+              + "devfile API or used factory URL does not support this feature.")
   public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoContentProviderSupplied()
       throws Exception {
     Tool tool =

@@ -66,7 +66,7 @@ public class DevfileEnvironmentFactory {
       throw new DevfileException(
           format(
               "Unable to process tool '%s' of type '%s' since there is no recipe content provider supplied. "
-                  + "That means you're trying to submit an devfile with recipe-type tools to the bare devfile API or factory URL used didn't support this feature.",
+                  + "That means you're trying to submit an devfile with recipe-type tools to the bare devfile API or used factory URL does not support this feature.",
               recipeTool.getName(), type));
     }
 
