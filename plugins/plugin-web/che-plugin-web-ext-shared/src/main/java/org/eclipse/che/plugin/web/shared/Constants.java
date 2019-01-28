@@ -14,6 +14,7 @@ package org.eclipse.che.plugin.web.shared;
 /** Shared constants for Web plugin */
 public final class Constants {
 
+  /** Language attribute name */
   public static final String LANGUAGE = "language";
 
   /** TS Project Type ID */
@@ -27,6 +28,18 @@ public final class Constants {
 
   /** TypeScript file mime type */
   public static final String TS_MIME_TYPE = "application/typescript";
+
+  /** Vue Project Type ID */
+  public static String VUE_PROJECT_TYPE_ID = "vue";
+
+  /** Vue Language */
+  public static String VUE_LANG = "vue";
+
+  /** Default extension for Vue files */
+  public static String VUE_EXT = "vue";
+
+  /** TypeScript file mime type */
+  public static final String VUE_MIME_TYPE = "text/x-vue";
 
   private Constants() {}
 }

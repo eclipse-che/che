@@ -14,7 +14,10 @@ package org.eclipse.che.plugin.web.client;
 import com.google.gwt.resources.client.ClientBundle;
 import org.vectomatic.dom.svg.ui.SVGResource;
 
-/** @author Nikolay Zamosenchuk */
+/**
+ * @author Nikolay Zamosenchuk
+ * @author Sébastien Demanou
+ */
 public interface WebExtensionResource extends ClientBundle {
 
   @Source("css.svg")
@@ -25,6 +28,9 @@ public interface WebExtensionResource extends ClientBundle {
 
   @Source("html.svg")
   SVGResource htmlFile();
+
+  @Source("vue.svg")
+  SVGResource vueFile();
 
   @Source("js.svg")
   SVGResource jsFile();

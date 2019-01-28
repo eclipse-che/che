@@ -41,5 +41,6 @@
         <module>ls-yaml</module>
         <module>ls-camel</module>
         <module>ls-clang</module>
+        <module>ls-vue</module>
     </modules>
 </project>
