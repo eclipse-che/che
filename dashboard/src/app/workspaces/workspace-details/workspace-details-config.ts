@@ -75,9 +75,6 @@ import {WorkspaceConfigService} from '../workspace-config.service';
 import {CheRecipeService} from './che-recipe.service';
 import {CheProjectItem} from './workspace-projects/project-item/project-item.directive';
 import {ProjectItemCtrl} from './workspace-projects/project-item/project-item.controller';
-import {ProjectRepository} from './workspace-projects/project-details/repository/project-repository.directive';
-import {ProjectRepositoryController} from './workspace-projects/project-details/repository/project-repository.controller';
-import {ProjectDetailsController} from './workspace-projects/project-details/project-details.controller';
 import {NoGithubOauthDialogController} from '../create-workspace/project-source-selector/add-import-project/import-github-project/oauth-dialog/no-github-oauth-dialog.controller';
 import {EditMachineVolumeDialogController} from './workspace-machine-volumes/edit-volume-dialog/edit-volume-dialog.controller';
 import {MachineVolumes} from './workspace-machine-volumes/machine-volumes.directive';
@@ -109,9 +106,6 @@ export class WorkspaceDetailsConfig {
 
     register.directive('cheProjectItem', CheProjectItem);
     register.controller('ProjectItemCtrl', ProjectItemCtrl);
-    register.controller('ProjectDetailsController', ProjectDetailsController);
-    register.controller('ProjectRepositoryController', ProjectRepositoryController);
-    register.directive('projectRepository', ProjectRepository);
     register.controller('NoGithubOauthDialogController', NoGithubOauthDialogController);
 
     register.controller('AddProjectPopoverController', AddProjectPopoverController);
@@ -178,14 +172,6 @@ export class WorkspaceDetailsConfig {
     // config routes
     register.app.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) => {
       $routeProvider
-        .accessWhen('/project/:namespace*/:workspaceName/:projectName', {
-          title: (params: any) => {
-            return params.workspaceName + ' | ' + params.projectName;
-          },
-          templateUrl: 'app/workspaces/workspace-details/workspace-projects/project-details/project-details.html',
-          controller: 'ProjectDetailsController',
-          controllerAs: 'projectDetailsController'
-        })
         .accessWhen('/workspace/:namespace*/:workspaceName', {
           title: (params: any) => {
             return params.workspaceName;
