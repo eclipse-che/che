@@ -238,7 +238,7 @@ public class InternalEnvironmentFactoryTest {
   }
 
   @Test
-  public void testApplyContainerSourceAttributeToTheMachineThatBecomesFromRecipe()
+  public void testApplyContainerSourceAttributeToTheMachineThatComesFromRecipe()
       throws Exception {
     // given
     final Environment sourceEnv = mock(Environment.class);
