@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.SUBPATHS_PROPERTY_FMT;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -21,12 +23,12 @@ import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
@@ -49,9 +51,6 @@ public class PerWorkspacePVCStrategyTest {
 
   private static final String PVC_QUANTITY = "10Gi";
   private static final String PVC_ACCESS_MODE = "RWO";
-
-  private static final RuntimeIdentity IDENTITY =
-      new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
 
   @Mock private PVCSubPathHelper pvcSubPathHelper;
   @Mock private KubernetesNamespaceFactory factory;
@@ -78,9 +77,31 @@ public class PerWorkspacePVCStrategyTest {
   }
 
   @Test
+  public void shouldPreparePerWorkspacePVCWithSubPaths() throws Exception {
+    // given
+    final PersistentVolumeClaim pvc = newPVC(PVC_NAME_PREFIX + "-" + WORKSPACE_ID);
+    String perWorkspacePVCName = pvc.getMetadata().getName();
+
+    KubernetesEnvironment k8sEnv = KubernetesEnvironment.builder().build();
+    k8sEnv.getPersistentVolumeClaims().put(perWorkspacePVCName, pvc);
+
+    String[] subPaths = {"/projects", "/plugins"};
+    pvc.getAdditionalProperties().put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), subPaths);
+
+    // when
+    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+
+    // then
+    verify(pvcs).get();
+    verify(pvcs).create(pvc);
+    verify(pvcs).waitBound(perWorkspacePVCName, 100);
+    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, perWorkspacePVCName, subPaths);
+  }
+
+  @Test
   public void shouldReturnPVCPerWorkspace() throws Exception {
     // when
-    PersistentVolumeClaim commonPVC = strategy.createCommonPVC(IDENTITY);
+    PersistentVolumeClaim commonPVC = strategy.createCommonPVC(WORKSPACE_ID);
 
     // then
     assertEquals(commonPVC.getMetadata().getName(), PVC_NAME_PREFIX + "-" + WORKSPACE_ID);
@@ -147,5 +168,15 @@ public class PerWorkspacePVCStrategyTest {
 
     // then
     verify(pvcs, never()).delete(ImmutableMap.of(CHE_WORKSPACE_ID_LABEL, WORKSPACE_ID));
+  }
+
+  private static PersistentVolumeClaim newPVC(String name) {
+    return new PersistentVolumeClaimBuilder()
+        .withNewMetadata()
+        .withName(name)
+        .endMetadata()
+        .withNewSpec()
+        .endSpec()
+        .build();
   }
 }
