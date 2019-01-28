@@ -93,13 +93,21 @@ export class WebsocketClient implements ICommunicationClient {
         }
     }
 
+    private sleep(ms: number): Promise<any> {
+        return new Promise<any>(resolve => setTimeout(resolve, ms));
+    }
+
     /**
      * Sends pointed data.
      *
      * @param data to be sent
      */
-    send(data: any): void {
-        this.websocketStream.send(JSON.stringify(data));
+    async send(data: any): Promise<void> {
+        while (this.websocketStream.readyState !== this.websocketStream.OPEN) {
+            /* Wait for the reconnection establshed. */
+            await this.sleep(1000);
+        }
+        return this.websocketStream.send(JSON.stringify(data));
     }
 
     private callHandlers(event: CommunicationClientEvent, data?: any): void {

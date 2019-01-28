@@ -103,11 +103,11 @@ export class JsonRpcClient {
    * @returns {IPromise<any>}
    */
   request(method: string, params?: any): Promise<any> {
-    let deferred = new Deffered();
-    let id: string = (this.counter++).toString();
+    const deferred = new Deffered();
+    const id: string = (this.counter++).toString();
     this.pendingRequests.set(id, deferred);
 
-    let request: IRequest = {
+    const request: IRequest = {
       jsonrpc: JSON_RPC_VERSION,
       id: id,
       method: method,
@@ -125,7 +125,7 @@ export class JsonRpcClient {
    * @param params params (optional)
    */
   notify(method: string, params?: any): void {
-    let request: INotification = {
+    const request: INotification = {
       jsonrpc: JSON_RPC_VERSION,
       method: method,
       params: params
@@ -158,7 +158,7 @@ export class JsonRpcClient {
    * @param handler handler
    */
   public removeNotificationHandler(method: string, handler: Function): void {
-    let handlers = this.notificationHandlers.get(method);
+    const handlers = this.notificationHandlers.get(method);
 
     if (handlers) {
       handlers.splice(handlers.indexOf(handler), 1);
@@ -184,8 +184,8 @@ export class JsonRpcClient {
    * @param message message
    */
   private processNotification(message: any): void {
-    let method = message.method;
-    let handlers = this.notificationHandlers.get(method);
+    const method = message.method;
+    const handlers = this.notificationHandlers.get(method);
     if (handlers && handlers.length > 0) {
       handlers.forEach((handler: Function) => {
         handler(message.params);
@@ -199,7 +199,7 @@ export class JsonRpcClient {
    * @param message
    */
   private processResponseMessage(message: any): void {
-    let promise = this.pendingRequests.get(message.id);
+    const promise = this.pendingRequests.get(message.id);
     if (message.result) {
       promise.resolve(message.result);
       return;
