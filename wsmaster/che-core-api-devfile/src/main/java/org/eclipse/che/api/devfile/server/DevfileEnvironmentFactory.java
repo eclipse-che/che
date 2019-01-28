@@ -80,7 +80,7 @@ public class DevfileEnvironmentFactory {
           e);
     }
     if (isNullOrEmpty(recipeFileContent)) {
-      throw new DevfileRecipeFormatException(
+      throw new DevfileException(
           format(
               "The local file '%s' defined in tool '%s' is unreachable or empty.",
               recipeTool.getLocal(), recipeTool.getName()));
@@ -112,8 +112,8 @@ public class DevfileEnvironmentFactory {
     } catch (KubernetesClientException e) {
       throw new DevfileRecipeFormatException(
           format(
-              "Error occurred during parsing list from file %s for tool '%s'",
-              tool.getLocal(), tool.getName()));
+              "Error occurred during parsing list from file %s for tool '%s': %s",
+              tool.getLocal(), tool.getName(), e.getMessage()));
     }
   }
 
@@ -123,7 +123,8 @@ public class DevfileEnvironmentFactory {
     } catch (KubernetesClientException e) {
       throw new DevfileRecipeFormatException(
           format(
-              "Unable to deserialize specified local file content for tool '%s'", tool.getName()));
+              "Unable to deserialize specified local file content for tool '%s'. Error: %s",
+              tool.getName(), e.getMessage()));
     }
   }
 }

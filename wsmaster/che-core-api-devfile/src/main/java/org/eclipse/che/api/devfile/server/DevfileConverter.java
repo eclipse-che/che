@@ -129,7 +129,7 @@ public class DevfileConverter {
    */
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
       Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
-      throws DevfileFormatException, DevfileRecipeFormatException, DevfileException {
+      throws DevfileException {
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 

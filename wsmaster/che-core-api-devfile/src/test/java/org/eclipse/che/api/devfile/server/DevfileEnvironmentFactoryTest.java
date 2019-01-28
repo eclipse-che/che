@@ -74,7 +74,7 @@ public class DevfileEnvironmentFactoryTest {
   }
 
   @Test(
-      expectedExceptions = DevfileRecipeFormatException.class,
+      expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
           "The local file '"
               + LOCAL_FILENAME
@@ -88,13 +88,13 @@ public class DevfileEnvironmentFactoryTest {
   }
 
   @Test(
-      expectedExceptions = DevfileRecipeFormatException.class,
+      expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
           "Error occurred during parsing list from file "
               + LOCAL_FILENAME
               + " for tool '"
               + TOOL_NAME
-              + "'")
+              + "': .*")
   public void shouldThrowExceptionWhenRecipeContentIsUnparseable() throws Exception {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);

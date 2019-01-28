@@ -84,9 +84,9 @@ public class DevfileManager {
    * @param devfile source devfile
    * @param recipeFileContentProvider content provider for recipe-type tool
    * @return created {@link WorkspaceImpl} instance
-   * @throws DevfileException when general devfile error occurs
    * @throws DevfileFormatException when devfile integrity validation fail
    * @throws DevfileRecipeFormatException when devfile recipe format is invalid
+   * @throws DevfileException when any another devfile related error occurs
    * @throws ValidationException when incoming configuration or attributes are not valid
    * @throws ConflictException when any conflict occurs
    * @throws NotFoundException when user account is not found
@@ -94,8 +94,8 @@ public class DevfileManager {
    */
   public WorkspaceImpl createWorkspace(
       Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
-      throws ServerException, DevfileFormatException, ConflictException, NotFoundException,
-          ValidationException, DevfileRecipeFormatException, DevfileException {
+      throws ServerException, ConflictException, NotFoundException, ValidationException,
+          DevfileException {
     WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, recipeFileContentProvider);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
@@ -108,9 +108,9 @@ public class DevfileManager {
    * @param devfile source devfile
    * @param recipeFileContentProvider content provider for recipe-type tool
    * @return created {@link WorkspaceConfigImpl} instance
-   * @throws DevfileException when general devfile error occurs
    * @throws DevfileFormatException when devfile integrity validation fail
    * @throws DevfileRecipeFormatException when devfile recipe format is invalid
+   * @throws DevfileException when any another devfile related error occurs
    */
   public WorkspaceConfigImpl createWorkspaceConfig(
       Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)

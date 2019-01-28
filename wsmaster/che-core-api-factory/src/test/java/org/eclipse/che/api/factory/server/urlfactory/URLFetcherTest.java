@@ -65,6 +65,15 @@ public class URLFetcherTest {
     assertNull(result);
   }
 
+  /** Check when url is invalid */
+  @Test(
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp = "no protocol: hello_world")
+  public void checkUnsafeGetUrlFileIsInvalid() throws Exception {
+    String result = URLFetcher.fetch("hello_world");
+    assertNull(result);
+  }
+
   /** Check Sanitizing of Git URL works */
   @Test
   public void checkDotGitRemovedFromURL() {
@@ -85,6 +94,21 @@ public class URLFetcherTest {
 
     // add extra path to make url not found
     String content = URLFetcher.fetchSafely(urlJson.toString() + "-invalid");
+    assertNull(content);
+  }
+
+  /** Check that when url doesn't exist */
+  @Test(
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp = ".*.che.json-invalid \\(No such file or directory\\)")
+  public void checkMissingContentUnsafeGet() throws Exception {
+
+    // test to download this class object
+    URL urlJson = getClass().getClassLoader().getResource(".che.json");
+    Assert.assertNotNull(urlJson);
+
+    // add extra path to make url not found
+    String content = URLFetcher.fetch(urlJson.toString() + "-invalid");
     assertNull(content);
   }
 
