@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -137,6 +138,15 @@ public class InmemoryWorkspaceActivityDao implements WorkspaceActivityDao {
   @Override
   public void removeActivity(String workspaceId) throws ServerException {
     workspaceActivities.remove(workspaceId);
+  }
+
+  @Override
+  public void createActivity(WorkspaceActivity activity) throws ConflictException {
+    if (workspaceActivities.containsKey(activity.getWorkspaceId())) {
+      throw new ConflictException("Already exists.");
+    } else {
+      workspaceActivities.put(activity.getWorkspaceId(), activity);
+    }
   }
 
   private boolean isGreater(Long value, long threshold) {

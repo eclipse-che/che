@@ -1,5 +1,14 @@
 # Change Log
 
+## [6.17.1](https://github.com/eclipse/che/tree/6.17.1) (2019-01-22)
+[Full Changelog](https://github.com/eclipse/che/compare/6.17.0...6.17.1)
+
+**Merged pull requests:**
+
+- bump che-ls-jdt version [\#12484](https://github.com/eclipse/che/pull/12484) ([riuvshin](https://github.com/riuvshin))
+- Selenium: Refactor selenium tests from the 'miscellaneous' package [\#12402](https://github.com/eclipse/che/pull/12402) ([artaleks9](https://github.com/artaleks9))
+
+
 ## [6.17.0](https://github.com/eclipse/che/tree/6.17.0) (2019-01-18)
 [Full Changelog](https://github.com/eclipse/che/compare/6.16.0...6.17.0)
 
