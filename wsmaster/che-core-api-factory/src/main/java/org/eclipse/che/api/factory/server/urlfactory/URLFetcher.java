@@ -48,21 +48,31 @@ public class URLFetcher {
   final Pattern GIT_HTTP_URL_PATTERN = Pattern.compile("(?<sanitized>^http[s]?://.*)\\.git$");
 
   /**
-   * Fetch the url provided and return its content To prevent DOS attack, limit the amount of the
+   * Fetches the url provided and return its content. To prevent DOS attack, limit the amount of the
    * collected data
    *
    * @param url the URL to fetch
-   * @return the content of the file
+   * @return the content of the requested URL or {@code null} if error happened
    */
-  public String fetch(@NotNull final String url) {
+  public String fetchSafely(@NotNull final String url) {
     requireNonNull(url, "url parameter can't be null");
     try {
-      return fetch(new URL(sanitized(url)).openConnection());
+      return fetch(url);
     } catch (IOException e) {
-      // we shouldn't fetch if check is done before
-      LOG.debug("Invalid URL", e);
       return null;
     }
+  }
+
+  /**
+   * Fetches the url provided and return its content.
+   *
+   * @param url the URL to fetch
+   * @return content of the requested URL
+   * @throws IOException if fetch error occurs
+   */
+  public String fetch(@NotNull final String url) throws IOException {
+    requireNonNull(url, "url parameter can't be null");
+    return fetch(new URL(sanitized(url)).openConnection());
   }
 
   /**
@@ -71,8 +81,9 @@ public class URLFetcher {
    *
    * @param urlConnection the URL connection to fetch
    * @return the content of the file
+   * @throws IOException if fetch error occurs
    */
-  public String fetch(@NotNull URLConnection urlConnection) {
+  public String fetch(@NotNull URLConnection urlConnection) throws IOException {
     requireNonNull(urlConnection, "urlConnection parameter can't be null");
     final String value;
     try (InputStream inputStream = urlConnection.getInputStream();
@@ -83,7 +94,7 @@ public class URLFetcher {
     } catch (IOException e) {
       // we shouldn't fetch if check is done before
       LOG.debug("Invalid URL", e);
-      return null;
+      throw e;
     }
     return value;
   }

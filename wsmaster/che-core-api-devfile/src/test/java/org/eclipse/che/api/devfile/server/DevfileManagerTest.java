@@ -54,6 +54,7 @@ public class DevfileManagerTest {
   private DevfileIntegrityValidator integrityValidator;
   private DevfileConverter devfileConverter;
   @Mock private WorkspaceManager workspaceManager;
+  @Mock private DevfileEnvironmentFactory devfileEnvironmentFactory;
 
   private static final Subject TEST_SUBJECT = new SubjectImpl("name", "id", "token", false);
 
@@ -63,7 +64,7 @@ public class DevfileManagerTest {
   public void setUp() throws Exception {
     schemaValidator = spy(new DevfileSchemaValidator(new DevfileSchemaProvider()));
     integrityValidator = spy(new DevfileIntegrityValidator());
-    devfileConverter = spy(new DevfileConverter());
+    devfileConverter = spy(new DevfileConverter(devfileEnvironmentFactory));
     devfileManager =
         new DevfileManager(schemaValidator, integrityValidator, devfileConverter, workspaceManager);
   }
@@ -112,7 +113,7 @@ public class DevfileManagerTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
     Devfile devfile = devfileManager.parse(yamlContent, true);
     // when
-    devfileManager.createWorkspace(devfile);
+    devfileManager.createWorkspace(devfile, null);
     // then
     verify(workspaceManager).createWorkspace(captor.capture(), anyString(), anyMap());
     assertEquals("petclinic-dev-environment_2", captor.getValue().getName());

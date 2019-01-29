@@ -47,7 +47,7 @@ public class GithubURLParserTest {
 
   @BeforeMethod
   public void init() {
-    lenient().when(urlFetcher.fetch(any(String.class))).thenReturn("");
+    lenient().when(urlFetcher.fetchSafely(any(String.class))).thenReturn("");
   }
 
   /** Check URLs are valid with regexp */
@@ -108,7 +108,7 @@ public class GithubURLParserTest {
   public void checkPullRequestFromRepository() {
 
     String url = "https://github.com/eclipse/che/pull/11103";
-    when(urlFetcher.fetch(url))
+    when(urlFetcher.fetchSafely(url))
         .thenReturn(
             "<div class=\"TableObject gh-header-meta\">\n"
                 + "    <div class=\"TableObject-item\">\n"
@@ -148,7 +148,7 @@ public class GithubURLParserTest {
   public void checkPullRequestFromForkedRepository() {
 
     String url = "https://github.com/eclipse/che/pull/11103";
-    when(urlFetcher.fetch(url))
+    when(urlFetcher.fetchSafely(url))
         .thenReturn(
             "<div class=\"TableObject gh-header-meta\">\n"
                 + "    <div class=\"TableObject-item\">\n"
@@ -178,7 +178,7 @@ public class GithubURLParserTest {
   public void checkPullRequestMergedState() {
 
     String url = "https://github.com/eclipse/che/pull/11103";
-    when(urlFetcher.fetch(url))
+    when(urlFetcher.fetchSafely(url))
         .thenReturn(
             "\n"
                 + "  <div class=\"TableObject gh-header-meta\">\n"
@@ -216,7 +216,7 @@ public class GithubURLParserTest {
   public void checkPullRequestClosedState() {
 
     String url = "https://github.com/eclipse/che/pull/11103";
-    when(urlFetcher.fetch(url))
+    when(urlFetcher.fetchSafely(url))
         .thenReturn(
             "  <div class=\"TableObject gh-header-meta\">\n"
                 + "    <div class=\"TableObject-item\">\n"

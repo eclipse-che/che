@@ -3,6 +3,17 @@
     "attributes" : {
       "id": "propertyList",
       "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "javaType": "java.util.Map<String, String>"
+    },
+    "selector" : {
+      "id": "selector",
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
       "javaType": "java.util.Map<String, String>"
     }
   },
@@ -122,6 +133,17 @@
             "description": "Describes the tool FQN",
             "examples": [
               "eclipse/maven-jdk8:1.0.0"
+            ]
+          },
+          "selector": {
+            "$ref": "#/definitions/selector",
+            "description": "Describes the objects selector for the recipe type tools",
+            "examples": [
+              {
+                "app.kubernetes.io/name": "mysql",
+                "app.kubernetes.io/component": "database",
+                "app.kubernetes.io/part-of": "petclinic"
+              }
             ]
           }
         }
