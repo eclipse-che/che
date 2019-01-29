@@ -33,6 +33,7 @@ import org.eclipse.che.plugin.web.client.html.PreviewHTMLAction;
 import org.eclipse.che.plugin.web.client.html.editor.HtmlEditorProvider;
 import org.eclipse.che.plugin.web.client.js.NewJavaScriptFileAction;
 import org.eclipse.che.plugin.web.client.js.editor.JsEditorProvider;
+import org.eclipse.che.plugin.web.client.vue.NewVueFileAction;
 import org.vectomatic.dom.svg.ui.SVGImage;
 
 /**
@@ -40,13 +41,14 @@ import org.vectomatic.dom.svg.ui.SVGImage;
  * configured TextEditorView with syntax coloring and autocomplete.
  *
  * @author Nikolay Zamosenchuk
+ * @author Sébastien Demanou
  */
 @Singleton
-@Extension(title = "Web", version = "3.0.0", description = "syntax highlighting and autocomplete.")
+@Extension(title = "Web", version = "3.1.0", description = "syntax highlighting and autocomplete.")
 public class WebExtension {
   /**
    * Web Extension adds JavaScript, HTML and CSS Support to IDE Application. It provides syntax
-   * highlighting for CSS, JS, HTML files and code completion features for CSS files to IDE.
+   * highlighting for CSS, JS, HTML, Vue files and code completion features for CSS files to IDE.
    */
   @Inject
   public WebExtension(
@@ -57,6 +59,7 @@ public class WebExtension {
       IconRegistry iconRegistry,
       @Named("JSFileType") FileType jsFile,
       @Named("HTMLFileType") FileType htmlFile,
+      @Named("VueFileType") FileType vueFile,
       @Named("ES6FileType") FileType es6File,
       @Named("JSXFileType") FileType jsxFile) {
     // register new Icon for javascript project type
@@ -67,6 +70,7 @@ public class WebExtension {
     editorRegistry.registerDefaultEditor(es6File, jsEditorProvider);
     editorRegistry.registerDefaultEditor(jsxFile, jsEditorProvider);
     editorRegistry.registerDefaultEditor(htmlFile, htmlEditorProvider);
+    editorRegistry.registerDefaultEditor(vueFile, htmlEditorProvider);
   }
 
   @Inject
@@ -79,6 +83,7 @@ public class WebExtension {
       @Named("JSXFileType") FileType jsxFile,
       @Named("TypeScript") FileType typeScriptFile,
       @Named("HTMLFileType") FileType htmlFile,
+      @Named("VueFileType") FileType vueFile,
       @Named("PHPFileType") FileType phpFile) {
     fileTypeRegistry.registerFileType(cssFile);
     fileTypeRegistry.registerFileType(lessFile);
@@ -87,6 +92,7 @@ public class WebExtension {
     fileTypeRegistry.registerFileType(jsxFile);
     fileTypeRegistry.registerFileType(typeScriptFile);
     fileTypeRegistry.registerFileType(htmlFile);
+    fileTypeRegistry.registerFileType(vueFile);
     fileTypeRegistry.registerFileType(phpFile);
   }
 
@@ -97,12 +103,14 @@ public class WebExtension {
       NewCssFileAction newCssFileAction,
       NewLessFileAction newLessFileAction,
       NewHtmlFileAction newHtmlFileAction,
+      NewVueFileAction newVueFileAction,
       NewJavaScriptFileAction newJavaScriptFileAction,
       PreviewHTMLAction previewHTMLAction) {
     // register actions
     actionManager.registerAction("newCssFile", newCssFileAction);
     actionManager.registerAction("newLessFile", newLessFileAction);
     actionManager.registerAction("newHtmlFile", newHtmlFileAction);
+    actionManager.registerAction("newVueFile", newVueFileAction);
     actionManager.registerAction("newJavaScriptFile", newJavaScriptFileAction);
     actionManager.registerAction("previewHTML", previewHTMLAction);
 
@@ -116,6 +124,9 @@ public class WebExtension {
     newHtmlFileAction
         .getTemplatePresentation()
         .setImageElement(new SVGImage(resources.htmlFile()).getElement());
+    newVueFileAction
+        .getTemplatePresentation()
+        .setImageElement(new SVGImage(resources.vueFile()).getElement());
     newJavaScriptFileAction
         .getTemplatePresentation()
         .setImageElement(new SVGImage(resources.jsFile()).getElement());
@@ -125,6 +136,7 @@ public class WebExtension {
     newGroup.add(newCssFileAction);
     newGroup.add(newLessFileAction);
     newGroup.add(newHtmlFileAction);
+    newGroup.add(newVueFileAction);
     newGroup.add(newJavaScriptFileAction);
 
     // add actions in context menu

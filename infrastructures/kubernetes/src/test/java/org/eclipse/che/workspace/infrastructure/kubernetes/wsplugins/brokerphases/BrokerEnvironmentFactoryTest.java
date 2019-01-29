@@ -22,6 +22,7 @@ import static org.testng.Assert.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Collection;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -121,6 +122,7 @@ public class BrokerEnvironmentFactoryTest {
     List<Container> initContainers = brokersConfigs.pod.getSpec().getInitContainers();
     assertEquals(initContainers.size(), 1);
     Container initContainer = initContainers.get(0);
+    assertEquals(initContainer.getName(), "init-image");
     assertEquals(initContainer.getImage(), INIT_IMAGE);
     assertEquals(initContainer.getImagePullPolicy(), IMAGE_PULL_POLICY);
     assertEquals(
@@ -138,5 +140,28 @@ public class BrokerEnvironmentFactoryTest {
         });
     assertEquals(Containers.getRamLimit(initContainer), 262144000);
     assertEquals(Containers.getRamLimit(initContainer), 262144000);
+  }
+
+  @Test
+  public void shouldNameContainersAfterPluginBrokerImage() throws Exception {
+    // given
+    Collection<PluginMeta> metas = singletonList(new PluginMeta().type(SUPPORTED_TYPE));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.create(metas, runtimeId, new BrokersResult());
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+    PodSpec brokerPodSpec = brokersConfigs.pod.getSpec();
+
+    List<Container> initContainers = brokerPodSpec.getInitContainers();
+    assertEquals(initContainers.size(), 1);
+    assertEquals(initContainers.get(0).getName(), "init-image");
+
+    List<Container> containers = brokerPodSpec.getContainers();
+    assertEquals(containers.size(), 1);
+    assertEquals(containers.get(0).getName(), "testrepo-image-tag");
   }
 }

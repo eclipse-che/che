@@ -58,6 +58,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -650,6 +651,30 @@ public class KubernetesDeployments {
       }
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
+    }
+  }
+
+  /**
+   * Get logs from pod with specified name. The name can refer to either a deployment or pod
+   * directly. In case of a deployment being provided, logs are returned from pods in that
+   * deployment.
+   *
+   * @return the logs from the pod or null if pod cannot be found.
+   */
+  @Nullable
+  public String getPodLogs(String name) {
+    String podName;
+    try {
+      podName = getPodName(name);
+      return clientFactory
+          .create(workspaceId)
+          .pods()
+          .inNamespace(namespace)
+          .withName(podName)
+          .getLog();
+    } catch (InfrastructureException e) {
+      LOG.error("Could not get logs from pod {}. Pod not found", name);
+      return null;
     }
   }
 
