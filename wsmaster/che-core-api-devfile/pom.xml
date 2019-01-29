@@ -155,7 +155,7 @@
                 <version>1.4</version>
                 <executions>
                     <execution>
-                        <id>test</id>
+                        <id>compile</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
