@@ -24,13 +24,20 @@ import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.json.JsonHelper;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
 public class DevfileConverterTest {
 
   private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-  private DevfileConverter devfileConverter = new DevfileConverter();
+  private DevfileEnvironmentFactory devfileEnvironmentFactory = new DevfileEnvironmentFactory();
+  private DevfileConverter devfileConverter;
+
+  @BeforeClass
+  public void setUp() {
+    devfileConverter = new DevfileConverter(devfileEnvironmentFactory);
+  }
 
   @Test
   public void shouldBuildWorkspaceConfigFromYamlDevFile() throws Exception {
@@ -38,9 +45,13 @@ public class DevfileConverterTest {
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
 
+    String yamlRecipeContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+
     Devfile devFile = objectMapper.readValue(yamlContent, Devfile.class);
 
-    WorkspaceConfigImpl wsConfigImpl = devfileConverter.devFileToWorkspaceConfig(devFile);
+    WorkspaceConfigImpl wsConfigImpl =
+        devfileConverter.devFileToWorkspaceConfig(devFile, local -> yamlRecipeContent);
 
     String jsonContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
@@ -52,7 +63,10 @@ public class DevfileConverterTest {
   public void shouldBuildYamlDevFileFromWorkspaceConfig() throws Exception {
 
     String jsonContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
+        Files.readFile(
+            getClass()
+                .getClassLoader()
+                .getResourceAsStream("workspace_config_no_environment.json"));
     WorkspaceConfigImpl workspaceConfig =
         JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
     Devfile devFile = devfileConverter.workspaceToDevFile(workspaceConfig);
@@ -124,7 +138,7 @@ public class DevfileConverterTest {
   @Test(
       expectedExceptions = WorkspaceExportException.class,
       expectedExceptionsMessageRegExp =
-          "Workspace .* cannot be converted to devfile since it is contains environments \\(which have no equivalent in devfile model\\)")
+          "Workspace .* cannot be converted to devfile since it contains environments which have no equivalent in devfile model")
   public void shouldThrowExceptionWhenWorkspaceHasEnvironments() throws Exception {
     String jsonContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));

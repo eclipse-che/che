@@ -151,6 +151,7 @@ public class PVCSubPathHelperTest {
     verify(osDeployments).create(any());
     verify(osDeployments).wait(anyString(), anyInt(), any());
     verify(podStatus).getPhase();
+    verify(osDeployments).getPodLogs(any());
     verify(osDeployments).delete(anyString());
   }
 

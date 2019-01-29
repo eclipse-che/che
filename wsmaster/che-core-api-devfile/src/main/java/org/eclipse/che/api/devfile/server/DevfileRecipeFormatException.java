@@ -11,14 +11,10 @@
  */
 package org.eclipse.che.api.devfile.server;
 
-/** Thrown when devfile schema or integrity validation is failed. */
-public class DevfileFormatException extends DevfileException {
+/** Thrown when the provided content of recipe-type tool is empty or invalid. */
+public class DevfileRecipeFormatException extends DevfileException {
 
-  public DevfileFormatException(String formatError) {
-    super(formatError);
-  }
-
-  public DevfileFormatException(String formatError, Exception cause) {
-    super(formatError, cause);
+  public DevfileRecipeFormatException(String message) {
+    super(message);
   }
 }

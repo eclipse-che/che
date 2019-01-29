@@ -82,17 +82,21 @@ public class DevfileManager {
    * Creates {@link WorkspaceImpl} from given devfile with available name search
    *
    * @param devfile source devfile
+   * @param recipeFileContentProvider content provider for recipe-type tool
    * @return created {@link WorkspaceImpl} instance
    * @throws DevfileFormatException when devfile integrity validation fail
+   * @throws DevfileRecipeFormatException when devfile recipe format is invalid
+   * @throws DevfileException when any another devfile related error occurs
    * @throws ValidationException when incoming configuration or attributes are not valid
    * @throws ConflictException when any conflict occurs
    * @throws NotFoundException when user account is not found
    * @throws ServerException when other error occurs
    */
-  public WorkspaceImpl createWorkspace(Devfile devfile)
-      throws ServerException, DevfileFormatException, ConflictException, NotFoundException,
-          ValidationException {
-    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile);
+  public WorkspaceImpl createWorkspace(
+      Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
+      throws ServerException, ConflictException, NotFoundException, ValidationException,
+          DevfileException {
+    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, recipeFileContentProvider);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
         findAvailableName(workspaceConfig), namespace, emptyMap());
@@ -102,12 +106,17 @@ public class DevfileManager {
    * Creates {@link WorkspaceConfigImpl} from given devfile with integrity validation
    *
    * @param devfile source devfile
+   * @param recipeFileContentProvider content provider for recipe-type tool
    * @return created {@link WorkspaceConfigImpl} instance
    * @throws DevfileFormatException when devfile integrity validation fail
+   * @throws DevfileRecipeFormatException when devfile recipe format is invalid
+   * @throws DevfileException when any another devfile related error occurs
    */
-  public WorkspaceConfigImpl createWorkspaceConfig(Devfile devfile) throws DevfileFormatException {
+  public WorkspaceConfigImpl createWorkspaceConfig(
+      Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
+      throws DevfileFormatException, DevfileRecipeFormatException, DevfileException {
     integrityValidator.validateDevfile(devfile);
-    return devfileConverter.devFileToWorkspaceConfig(devfile);
+    return devfileConverter.devFileToWorkspaceConfig(devfile, recipeFileContentProvider);
   }
 
   /**

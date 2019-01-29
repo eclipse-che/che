@@ -14,6 +14,7 @@ package org.eclipse.che.api.devfile.server;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
@@ -39,6 +41,7 @@ import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -46,12 +49,26 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 /** Helps to convert devfile into workspace config and back. */
 public class DevfileConverter {
 
+  private DevfileEnvironmentFactory devfileEnvironmentFactory;
+
+  @Inject
+  public DevfileConverter(DevfileEnvironmentFactory devfileEnvironmentFactory) {
+    this.devfileEnvironmentFactory = devfileEnvironmentFactory;
+  }
+
+  /**
+   * Exports workspace config into {@link Devfile}
+   *
+   * @param wsConfig initial workspace config
+   * @return devfile resulted devfile
+   * @throws WorkspaceExportException if export of given workspace config is impossible
+   */
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) throws WorkspaceExportException {
 
     if (!isNullOrEmpty(wsConfig.getDefaultEnv()) || !wsConfig.getEnvironments().isEmpty()) {
       throw new WorkspaceExportException(
           format(
-              "Workspace %s cannot be converted to devfile since it is contains environments (which have no equivalent in devfile model)",
+              "Workspace %s cannot be converted to devfile since it contains environments which have no equivalent in devfile model",
               wsConfig.getName()));
     }
 
@@ -99,8 +116,20 @@ public class DevfileConverter {
     return devfile;
   }
 
-  public WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devfile)
-      throws DevfileFormatException {
+  /**
+   * Converts given {@link Devfile} into workspace config.
+   *
+   * @param devfile initial devfile
+   * @param recipeFileContentProvider content provider for recipe-type tool
+   * @return constructed workspace config
+   * @throws DevfileException when general devfile error occurs
+   * @throws DevfileFormatException when devfile format is invalid
+   * @throws DevfileRecipeFormatException when content of the file specified in recipe type tool is
+   *     empty or its format is invalid
+   */
+  public WorkspaceConfigImpl devFileToWorkspaceConfig(
+      Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
+      throws DevfileException {
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
@@ -125,8 +154,15 @@ public class DevfileConverter {
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
-          // this kind of tool ignored here since it contain only reference to tool configuration
-          // which should be resolved and provisioned into workspace config recipe separately.
+          try {
+            EnvironmentImpl environment =
+                devfileEnvironmentFactory.createEnvironment(tool, recipeFileContentProvider);
+            final String environmentName = tool.getName();
+            config.setDefaultEnv(environmentName);
+            config.setEnvironments(singletonMap(environmentName, environment));
+          } catch (IllegalArgumentException e) {
+            throw new DevfileFormatException(e.getMessage(), e);
+          }
           continue;
         default:
           throw new DevfileFormatException(

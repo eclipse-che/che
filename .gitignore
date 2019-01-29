@@ -60,6 +60,7 @@ Icon?
 Thumbs.db
 */overlays
 *~
+.directory
 
 # Che files #
 #############

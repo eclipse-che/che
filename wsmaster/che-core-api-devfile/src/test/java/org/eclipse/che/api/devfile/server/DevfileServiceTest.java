@@ -89,7 +89,7 @@ public class DevfileServiceTest {
     Devfile devfile = createDevfile(yamlContent);
     WorkspaceImpl ws = createWorkspace(WorkspaceStatus.STOPPED);
     when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
-    when(devfileManager.createWorkspace(any(Devfile.class))).thenReturn(ws);
+    when(devfileManager.createWorkspace(any(Devfile.class), any())).thenReturn(ws);
     final Response response =
         given()
             .auth()
@@ -100,7 +100,7 @@ public class DevfileServiceTest {
             .post(SECURE_PATH + "/devfile");
 
     assertEquals(response.getStatusCode(), 201);
-    verify(devfileManager).createWorkspace(captor.capture());
+    verify(devfileManager).createWorkspace(captor.capture(), any());
     assertEquals(devfile, captor.getValue());
   }
 

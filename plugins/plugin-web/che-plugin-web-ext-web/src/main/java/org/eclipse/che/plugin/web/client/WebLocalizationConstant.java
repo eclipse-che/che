@@ -38,6 +38,12 @@ public interface WebLocalizationConstant extends Messages {
   @Key("action.newHtmlFile.description")
   String newHtmlFileActionDescription();
 
+  @Key("action.newVueFile.title")
+  String newVueFileActionTitle();
+
+  @Key("action.newVueFile.description")
+  String newVueFileActionDescription();
+
   @Key("action.newJavaScriptFile.title")
   String newJavaScriptFileActionTitle();
 

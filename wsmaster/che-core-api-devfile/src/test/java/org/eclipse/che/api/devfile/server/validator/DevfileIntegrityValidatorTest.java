@@ -19,6 +19,7 @@ import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
@@ -69,12 +70,54 @@ public class DevfileIntegrityValidatorTest {
           "Tool of type '"
               + KUBERNETES_TOOL_TYPE
               + "' cannot contain 'id' field, please check 'k8s' tool")
-  public void shouldThrowExceptionOnUnsupportedKubernetesToolField() throws Exception {
+  public void shouldThrowExceptionOnUnsupportedKubernetesToolIdField() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getTools().clear();
     broken
         .getTools()
         .add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE).withId("anyId"));
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Tool of type '"
+              + EDITOR_TOOL_TYPE
+              + "' cannot contain 'selector' field, please check 'editor1' tool")
+  public void shouldThrowExceptionOnUnsupportedEditorToolSelectorField() throws Exception {
+    Devfile broken = copyOf(initialDevfile);
+    broken.getTools().clear();
+    broken
+        .getTools()
+        .add(
+            new Tool()
+                .withName("editor1")
+                .withType(EDITOR_TOOL_TYPE)
+                .withId("anyId")
+                .withSelector(Collections.singletonMap("key", "value")));
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Tool of type '"
+              + PLUGIN_TOOL_TYPE
+              + "' cannot contain 'selector' field, please check 'plugin1' tool")
+  public void shouldThrowExceptionOnUnsupportedPluginToolSelectorField() throws Exception {
+    Devfile broken = copyOf(initialDevfile);
+    broken.getTools().clear();
+    broken
+        .getTools()
+        .add(
+            new Tool()
+                .withName("plugin1")
+                .withType(PLUGIN_TOOL_TYPE)
+                .withId("anyId")
+                .withSelector(Collections.singletonMap("key", "value")));
     // when
     integrityValidator.validateDevfile(broken);
   }
@@ -102,7 +145,7 @@ public class DevfileIntegrityValidatorTest {
           "Tool of type '"
               + OPENSHIFT_TOOL_TYPE
               + "' cannot contain 'id' field, please check 'os' tool")
-  public void shouldThrowExceptionOnUnsupportedOpenshiftToolField() throws Exception {
+  public void shouldThrowExceptionOnUnsupportedOpenshiftToolIdField() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getTools().clear();
     broken.getTools().add(new Tool().withName("os").withType(OPENSHIFT_TOOL_TYPE).withId("anyId"));
@@ -116,7 +159,7 @@ public class DevfileIntegrityValidatorTest {
           "Tool of type '"
               + EDITOR_TOOL_TYPE
               + "' cannot contain 'local' field, please check 'foo' tool")
-  public void shouldThrowExceptionOnUnsupportedEditorToolField() throws Exception {
+  public void shouldThrowExceptionOnUnsupportedEditorToolLocalField() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getTools().clear();
     broken

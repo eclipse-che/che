@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
@@ -78,10 +77,12 @@ public class DevfileIntegrityValidator {
                     editorTool.getName(), tool.getName()));
           }
           checkFieldNotSet(tool, "local", tool.getLocal());
+          checkFieldNotSet(tool, "selector", tool.getSelector());
           editorTool = tool;
           break;
         case PLUGIN_TOOL_TYPE:
           checkFieldNotSet(tool, "local", tool.getLocal());
+          checkFieldNotSet(tool, "selector", tool.getSelector());
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
@@ -102,14 +103,15 @@ public class DevfileIntegrityValidator {
     return existingNames;
   }
 
-  private void checkFieldNotSet(Tool tool, String fieldName, String fieldValue)
+  private void checkFieldNotSet(Tool tool, String fieldName, Object fieldValue)
       throws DevfileFormatException {
-    if (!isNullOrEmpty(fieldValue)) {
-      throw new DevfileFormatException(
-          format(
-              "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
-              tool.getType(), fieldName, tool.getName()));
+    if (fieldValue == null) {
+      return;
     }
+    throw new DevfileFormatException(
+        format(
+            "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
+            tool.getType(), fieldName, tool.getName()));
   }
 
   private void validateCommands(Devfile devfile, Set<String> toolNames)

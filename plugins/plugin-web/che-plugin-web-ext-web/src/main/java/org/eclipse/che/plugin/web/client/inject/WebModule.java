@@ -24,8 +24,10 @@ import org.eclipse.che.ide.api.filetypes.FileTypeRegistry.FileTypeProvider;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.plugin.web.client.JsonLanguageDescriptionProvider;
 import org.eclipse.che.plugin.web.client.TypeScriptLanguageDescriptionProvider;
+import org.eclipse.che.plugin.web.client.VueLanguageDescriptionProvider;
 import org.eclipse.che.plugin.web.client.WebExtensionResource;
 import org.eclipse.che.plugin.web.client.typescript.TSProjectWizardRegistrar;
+import org.eclipse.che.plugin.web.client.vue.VueProjectWizardRegistrar;
 
 /**
  * Adds custom binding for Editors.
@@ -41,9 +43,17 @@ public class WebModule extends AbstractGinModule {
         .addBinding()
         .to(TSProjectWizardRegistrar.class);
 
+    newSetBinder(binder(), ProjectWizardRegistrar.class)
+        .addBinding()
+        .to(VueProjectWizardRegistrar.class);
+
     newSetBinder(binder(), LanguageDescription.class)
         .addBinding()
         .toProvider(TypeScriptLanguageDescriptionProvider.class);
+
+    newSetBinder(binder(), LanguageDescription.class)
+        .addBinding()
+        .toProvider(VueLanguageDescriptionProvider.class);
 
     newSetBinder(binder(), LanguageDescription.class)
         .addBinding()
@@ -98,6 +108,13 @@ public class WebModule extends AbstractGinModule {
   @Named("HTMLFileType")
   protected FileType provideHTMLFile(WebExtensionResource res, FileTypeProvider fileTypeProvider) {
     return fileTypeProvider.getByExtension(res.htmlFile(), "html");
+  }
+
+  @Provides
+  @Singleton
+  @Named("VueFileType")
+  protected FileType provideVueFile(WebExtensionResource res, FileTypeProvider fileTypeProvider) {
+    return fileTypeProvider.getByExtension(res.vueFile(), "vue");
   }
 
   @Provides
