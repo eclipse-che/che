@@ -15,7 +15,6 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_VOLUME_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategyTest.mockName;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.TestObjects.newContainer;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.TestObjects.newPod;
 import static org.mockito.ArgumentMatchers.any;
@@ -476,7 +475,7 @@ public class UniqueWorkspacePVCStrategyTest {
   @Test
   public void testCreatesProvisionedPVCsOnPrepare() throws Exception {
     final String uniqueName = PVC_NAME_PREFIX + "-3121";
-    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), uniqueName);
+    final PersistentVolumeClaim pvc = newPVC(uniqueName);
     k8sEnv.getPersistentVolumeClaims().clear();
     k8sEnv.getPersistentVolumeClaims().putAll(singletonMap(uniqueName, pvc));
     doReturn(pvc).when(pvcs).create(any());

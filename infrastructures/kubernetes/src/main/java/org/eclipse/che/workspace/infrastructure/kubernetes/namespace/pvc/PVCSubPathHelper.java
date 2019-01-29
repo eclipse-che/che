@@ -73,7 +73,6 @@ public class PVCSubPathHelper {
   static final String POD_PHASE_FAILED = "Failed";
   static final String JOB_MOUNT_PATH = "/tmp/job_mount";
 
-  private final String pvcName;
   private final String jobImage;
   private final String jobMemoryLimit;
   private final KubernetesNamespaceFactory factory;
@@ -83,12 +82,10 @@ public class PVCSubPathHelper {
 
   @Inject
   PVCSubPathHelper(
-      @Named("che.infra.kubernetes.pvc.name") String pvcName,
       @Named("che.infra.kubernetes.pvc.jobs.memorylimit") String jobMemoryLimit,
       @Named("che.infra.kubernetes.pvc.jobs.image") String jobImage,
       KubernetesNamespaceFactory factory,
       SecurityContextProvisioner securityContextProvisioner) {
-    this.pvcName = pvcName;
     this.jobMemoryLimit = jobMemoryLimit;
     this.jobImage = jobImage;
     this.factory = factory;
@@ -109,8 +106,13 @@ public class PVCSubPathHelper {
    * @param workspaceId workspace identifier
    * @param dirs workspace directories to create
    */
-  void createDirs(String workspaceId, String... dirs) {
-    execute(workspaceId, MKDIR_COMMAND_BASE, dirs);
+  void createDirs(String workspaceId, String pvcName, String... dirs) {
+    LOG.debug(
+        "Preparing PVC `{}` for workspace `{}`. Directories to create: {}",
+        pvcName,
+        workspaceId,
+        Arrays.toString(dirs));
+    execute(workspaceId, pvcName, MKDIR_COMMAND_BASE, dirs);
   }
 
   /**
@@ -119,9 +121,15 @@ public class PVCSubPathHelper {
    * @param workspaceId workspace identifier
    * @param dirs workspace directories to remove
    */
-  CompletableFuture<Void> removeDirsAsync(String workspaceId, String... dirs) {
+  CompletableFuture<Void> removeDirsAsync(String workspaceId, String pvcName, String... dirs) {
+    LOG.debug(
+        "Removing files in PVC `{}` of workspace `{}`. Directories to remove: {}",
+        pvcName,
+        workspaceId,
+        Arrays.toString(dirs));
     return CompletableFuture.runAsync(
-        ThreadLocalPropagateContext.wrap(() -> execute(workspaceId, RM_COMMAND_BASE, dirs)),
+        ThreadLocalPropagateContext.wrap(
+            () -> execute(workspaceId, pvcName, RM_COMMAND_BASE, dirs)),
         executor);
   }
 
@@ -132,11 +140,11 @@ public class PVCSubPathHelper {
    * @param arguments the list of arguments for the specified job
    */
   @VisibleForTesting
-  void execute(String workspaceId, String[] commandBase, String... arguments) {
+  void execute(String workspaceId, String pvcName, String[] commandBase, String... arguments) {
     final String jobName = commandBase[0];
     final String podName = jobName + '-' + workspaceId;
     final String[] command = buildCommand(commandBase, arguments);
-    final Pod pod = newPod(podName, command);
+    final Pod pod = newPod(podName, pvcName, command);
     securityContextProvisioner.provision(pod.getSpec());
 
     KubernetesDeployments deployments = null;
@@ -206,7 +214,7 @@ public class PVCSubPathHelper {
   }
 
   /** Returns new instance of {@link Pod} with given name and command. */
-  private Pod newPod(String podName, String[] command) {
+  private Pod newPod(String podName, String pvcName, String[] command) {
     final Container container =
         new ContainerBuilder()
             .withName(podName)
