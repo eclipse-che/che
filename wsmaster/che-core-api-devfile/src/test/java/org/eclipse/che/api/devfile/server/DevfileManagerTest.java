@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
@@ -79,8 +78,8 @@ public class DevfileManagerTest {
   }
 
   @Test(
-      expectedExceptions = JsonProcessingException.class,
-      expectedExceptionsMessageRegExp = "Unrecognized field \"foos\" [\\w\\W]+")
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp = "Devfile schema validation failed. Errors: [\\w\\W]+")
   public void shouldThrowExceptionWhenUnconvertableContentProvided() throws Exception {
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"))

@@ -1,7 +1,19 @@
 {
+  "meta:license" : [
+    " Copyright (c) 2012-2019 Red Hat, Inc.",
+    " This program and the accompanying materials are made",
+    " available under the terms of the Eclipse Public License 2.0",
+    " which is available at https://www.eclipse.org/legal/epl-2.0/",
+    " SPDX-License-Identifier: EPL-2.0",
+    " Contributors:",
+    " Red Hat, Inc. - initial API and implementation"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "The Root of DevFile object",
+  "description" : "This schema describes the structure of the devfile object",
   "definitions": {
     "attributes" : {
-      "id": "propertyList",
       "type": "object",
       "additionalProperties": {
         "type": "string"
@@ -9,7 +21,6 @@
       "javaType": "java.util.Map<String, String>"
     },
     "selector" : {
-      "id": "selector",
       "type": "object",
       "additionalProperties": {
         "type": "string"
@@ -17,10 +28,6 @@
       "javaType": "java.util.Map<String, String>"
     }
   },
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "title": "The Root of DevFile object",
-  "description" : "This schema describes the structure of the devfile object",
   "required": [
     "specVersion",
     "name",
@@ -93,7 +100,7 @@
     },
     "tools": {
       "type": "array",
-      "title": "The Tools List Schema",
+      "title": "The Tools List",
       "items": {
         "type": "object",
         "required": [
@@ -123,7 +130,8 @@
             "type": "string",
             "examples": [
               "chePlugin",
-              "cheEditor"
+              "cheEditor",
+              "kubernetes"
             ]
           },
           "local": {
@@ -144,11 +152,7 @@
             "$ref": "#/definitions/selector",
             "description": "Describes the objects selector for the recipe type tools",
             "examples": [
-              {
-                "app.kubernetes.io/name": "mysql",
-                "app.kubernetes.io/component": "database",
-                "app.kubernetes.io/part-of": "petclinic"
-              }
+              "{\n   \"app.kubernetes.io/name\" : \"mysql\", \n   \"app.kubernetes.io/component\" : \"database\", \n   \"app.kubernetes.io/part-of\" : \"petclinic\" \n}"
             ]
           }
         }
@@ -156,7 +160,7 @@
     },
     "commands": {
       "type": "array",
-      "title": "The Commands List Schema",
+      "title": "The Commands List",
       "items": {
         "type": "object",
         "required": [
@@ -172,12 +176,13 @@
             ]
           },
           "attributes": {
+            "description" : "Additional command attributes",
             "$ref": "#/definitions/attributes"
           },
           "actions": {
             "type": "array",
             "description" : "List of the actions of given command",
-            "title": "The Command Actions Schema",
+            "title": "The Command Actions List",
             "items": {
               "type": "object",
               "required": [
