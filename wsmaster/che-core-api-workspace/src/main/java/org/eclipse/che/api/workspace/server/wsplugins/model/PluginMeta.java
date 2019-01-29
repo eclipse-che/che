@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /** @author Oleksandr Garagatyi */
-@JsonIgnoreProperties(ignoreUnknown=true)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PluginMeta {
   private String name = null;
   private String id = null;
