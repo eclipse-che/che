@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.git;
 
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.DELETE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Edit.EDIT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Git.ADD_TO_INDEX;
@@ -24,7 +23,6 @@ import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.G
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.JAVA_CLASS;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -50,7 +48,6 @@ import org.eclipse.che.selenium.pageobject.WarningDialog;
 import org.eclipse.che.selenium.pageobject.Wizard;
 import org.eclipse.che.selenium.pageobject.git.Git;
 import org.eclipse.che.selenium.pageobject.git.GitCompare;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -208,7 +205,7 @@ public class GitCompareTest {
     git.closeGroupGitCompareForm();
   }
 
-  @Test(priority = 3, groups = UNDER_REPAIR)
+  @Test(priority = 3)
   public void checkCompareWithRevision() {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitAndSelectItem(PATH_TO_APP_CONTROLLER);
@@ -233,14 +230,7 @@ public class GitCompareTest {
     git.typeTextIntoGitCompareEditor("//change content from compare editor");
     git.waitExpTextIntoCompareLeftEditor("//change content from compare editor");
     git.clickOnGitCompareCloseButton();
-
-    try {
-      askDialog.confirmAndWaitClosed();
-    } catch (TimeoutException ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/11769");
-    }
-
+    askDialog.confirmAndWaitClosed();
     git.waitGitCompareFormIsClosed();
     git.waitGitCompareRevisionFormIsOpen();
     git.clickOnCloseRevisionButton();
