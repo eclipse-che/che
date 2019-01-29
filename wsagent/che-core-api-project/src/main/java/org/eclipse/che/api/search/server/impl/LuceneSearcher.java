@@ -252,18 +252,18 @@ public class LuceneSearcher implements Searcher {
               float res = queryScorer.getTokenScore();
               if (res > 0.0F && startOffset <= endOffset) {
                 String tokenText = txt.substring(startOffset, endOffset);
-                Scanner sc = new Scanner(txt);
                 int lineNum = 1;
                 long len = 0;
                 String foundLine = "";
-                while (sc.hasNextLine()) {
-                  foundLine = sc.nextLine();
-
-                  len += foundLine.length();
-                  if (len > startOffset) {
-                    break;
+                try (Scanner sc = new Scanner(txt)) {
+                  while (sc.hasNextLine()) {
+                    foundLine = sc.nextLine();
+                    len += foundLine.length();
+                    if (len > startOffset) {
+                      break;
+                    }
+                    lineNum++;
                   }
-                  lineNum++;
                 }
                 offsetData.add(
                     new OffsetData(tokenText, startOffset, endOffset, res, lineNum, foundLine));

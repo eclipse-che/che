@@ -37,8 +37,6 @@ import io.fabric8.kubernetes.api.model.ConfigMapVolumeSource;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
@@ -451,19 +449,31 @@ public class CommonPVCStrategyTest {
 
   @Test
   public void testCreatesPVCsWithSubpathsOnPrepare() throws Exception {
-    final PersistentVolumeClaim pvc = mockName(mock(PersistentVolumeClaim.class), PVC_NAME);
+    final PersistentVolumeClaim pvc = newPVC(PVC_NAME);
+    pvc.getAdditionalProperties()
+        .put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), WORKSPACE_SUBPATHS);
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, pvc);
-    final Map<String, Object> subPaths = new HashMap<>();
-    subPaths.put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), WORKSPACE_SUBPATHS);
-    when(pvc.getAdditionalProperties()).thenReturn(subPaths);
-    doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, WORKSPACE_SUBPATHS);
+    doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
 
     commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
 
     verify(pvcs).get();
     verify(pvcs).create(pvc);
     verify(pvcs).waitBound(PVC_NAME, 100);
-    verify(pvcSubPathHelper).createDirs(any(), any());
+    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "The only one PVC MUST be present in common strategy while it contains: pvc1, pvc2\\.")
+  public void shouldThrowExceptionIfK8sEnvHasMoreThanOnePVCOnPreparing() throws Exception {
+    final PersistentVolumeClaim pvc1 = newPVC("pvc1");
+    final PersistentVolumeClaim pvc2 = newPVC("pvc2");
+    k8sEnv.getPersistentVolumeClaims().put("pvc1", pvc1);
+    k8sEnv.getPersistentVolumeClaims().put("pvc2", pvc2);
+
+    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -476,7 +486,7 @@ public class CommonPVCStrategyTest {
 
   @Test(expectedExceptions = InfrastructureException.class)
   public void throwsInfrastructureExceptionWhenPVCCreationFailed() throws Exception {
-    final PersistentVolumeClaim claim = mockName(mock(PersistentVolumeClaim.class), PVC_NAME);
+    final PersistentVolumeClaim claim = newPVC(PVC_NAME);
     k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, claim);
     when(pvcs.get()).thenReturn(emptyList());
     doThrow(InfrastructureException.class).when(pvcs).create(any());
@@ -501,7 +511,7 @@ public class CommonPVCStrategyTest {
     commonPVCStrategy.cleanup(workspace);
 
     // then
-    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, WORKSPACE_ID);
+    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, PVC_NAME, WORKSPACE_ID);
   }
 
   @Test
@@ -523,7 +533,7 @@ public class CommonPVCStrategyTest {
     commonPVCStrategy.cleanup(workspace);
 
     // then
-    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, WORKSPACE_ID);
+    verify(pvcSubPathHelper).removeDirsAsync(WORKSPACE_ID, PVC_NAME, WORKSPACE_ID);
   }
 
   @Test
@@ -555,13 +565,6 @@ public class CommonPVCStrategyTest {
         .withNewSpec()
         .endSpec()
         .build();
-  }
-
-  static <T extends HasMetadata> T mockName(T obj, String name) {
-    final ObjectMeta objectMeta = mock(ObjectMeta.class);
-    lenient().when(obj.getMetadata()).thenReturn(objectMeta);
-    lenient().when(objectMeta.getName()).thenReturn(name);
-    return obj;
   }
 
   private static String expectedVolumeDir(String volumeName) {
