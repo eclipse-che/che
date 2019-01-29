@@ -15,6 +15,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.Cert
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner.CERT_MOUNT_PATH;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner.CHE_SELF_SIGNED_CERT_SECRET_SUFFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner.CHE_SELF_SIGNED_CERT_VOLUME;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -46,6 +47,10 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class CertificateProvisionerTest {
 
+  private static final String WORKSPACE_ID = "workspace123";
+  private static final String EXPECTED_CERT_NAME =
+      WORKSPACE_ID + CHE_SELF_SIGNED_CERT_SECRET_SUFFIX;
+
   public static final String CERT_CONTENT = "--BEGIN FJASBNDF END";
   @Mock private RuntimeIdentity runtimeId;
   private CertificateProvisioner provisioner;
@@ -53,6 +58,8 @@ public class CertificateProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
+    when(runtimeId.getWorkspaceId()).thenReturn(WORKSPACE_ID);
+
     provisioner = new CertificateProvisioner("--BEGIN FJASBNDF END");
     k8sEnv = KubernetesEnvironment.builder().build();
   }
@@ -91,24 +98,22 @@ public class CertificateProvisionerTest {
   }
 
   @Test
-  public void shouldAddSecretWithCertificateIntoEnvironment(RuntimeIdentity identity)
-      throws Exception {
+  public void shouldAddSecretWithCertificateIntoEnvironment() throws Exception {
     // when
     provisioner.provision(k8sEnv, runtimeId);
 
     // then
     Map<String, Secret> secrets = k8sEnv.getSecrets();
     assertEquals(secrets.size(), 1);
-    Secret certSecret =
-        secrets.get(identity.getWorkspaceId() + "-" + CHE_SELF_SIGNED_CERT_SECRET_SUFFIX);
+
+    Secret certSecret = secrets.get(EXPECTED_CERT_NAME);
     assertNotNull(certSecret);
-    assertEquals(certSecret.getMetadata().getName(), CHE_SELF_SIGNED_CERT_SECRET_SUFFIX);
+    assertEquals(certSecret.getMetadata().getName(), EXPECTED_CERT_NAME);
     assertEquals(certSecret.getStringData().get(CA_CERT_FILE), CERT_CONTENT);
   }
 
   @Test
-  public void shouldAddVolumeAndVolumeMountsToPodsAndContainersInEnvironment(
-      RuntimeIdentity identity) throws Exception {
+  public void shouldAddVolumeAndVolumeMountsToPodsAndContainersInEnvironment() throws Exception {
     // given
     k8sEnv.addPod(createPod("pod"));
     k8sEnv.addPod(createPod("pod2"));
@@ -118,7 +123,7 @@ public class CertificateProvisionerTest {
 
     // then
     for (Pod pod : k8sEnv.getPodsCopy().values()) {
-      verifyVolumeIsPresent(pod, identity);
+      verifyVolumeIsPresent(pod);
       for (Container container : pod.getSpec().getContainers()) {
         verifyVolumeMountIsPresent(container);
       }
@@ -146,15 +151,14 @@ public class CertificateProvisionerTest {
     }
   }
 
-  private void verifyVolumeIsPresent(Pod pod, RuntimeIdentity identity) {
+  private void verifyVolumeIsPresent(Pod pod) {
     List<Volume> podVolumes = pod.getSpec().getVolumes();
     assertEquals(podVolumes.size(), 1);
     Volume certVolume = podVolumes.get(0);
-    assertEquals(
-        certVolume.getName(), identity.getWorkspaceId() + "-" + CHE_SELF_SIGNED_CERT_VOLUME);
+    assertEquals(certVolume.getName(), CHE_SELF_SIGNED_CERT_VOLUME);
     SecretVolumeSource volumeSecret = certVolume.getSecret();
     assertNotNull(volumeSecret);
-    assertEquals(volumeSecret.getSecretName(), CHE_SELF_SIGNED_CERT_SECRET_SUFFIX);
+    assertEquals(volumeSecret.getSecretName(), EXPECTED_CERT_NAME);
   }
 
   private void verifyVolumeMountIsPresent(Container container) {
