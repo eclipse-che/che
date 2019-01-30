@@ -20,7 +20,7 @@ public class Command {
 
   private String name = null;
 
-  @JsonProperty("working-dir")
+  @JsonProperty("workingDir")
   private String workingDir = null;
 
   private List<String> command = new ArrayList<String>();
