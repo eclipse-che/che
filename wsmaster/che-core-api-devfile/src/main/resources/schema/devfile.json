@@ -10,7 +10,7 @@
   ],
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "title": "DevFile object",
+  "title": "Devfile object",
   "description" : "This schema describes the structure of the devfile object",
   "definitions": {
     "attributes" : {
