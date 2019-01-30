@@ -442,9 +442,10 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         bind(String.class).annotatedWith(Names.named(key)).toProvider(Providers.<String>of(null));
         if (aliasesForName != null) {
           for (String alias : aliasesForName) {
-            LOG.debug("Binding `{}` to `null`", alias);
+            String bindKey = prefix == null ? alias : prefix + alias;
+            LOG.debug("Binding `{}` to `null`", bindKey);
             bind(String.class)
-                .annotatedWith(Names.named(prefix == null ? alias : prefix + alias))
+                .annotatedWith(Names.named(bindKey))
                 .toProvider(Providers.<String>of(null));
           }
         }
@@ -453,10 +454,9 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         bindConstant().annotatedWith(Names.named(key)).to(value);
         if (aliasesForName != null) {
           for (String alias : aliasesForName) {
+            String bindKey = prefix == null ? alias : prefix + alias;
             LOG.debug("Binding `{}` to `{}`", key, value);
-            bindConstant()
-                .annotatedWith(Names.named(prefix == null ? alias : prefix + alias))
-                .to(value);
+            bindConstant().annotatedWith(Names.named(bindKey)).to(value);
           }
         }
       }
