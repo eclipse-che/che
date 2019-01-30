@@ -18,6 +18,8 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_REQUEST_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.UNSECURED_PATHS_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.TOOL_CONTAINER_SOURCE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
@@ -126,7 +128,9 @@ public class JwtProxyProvisioner {
             MEMORY_LIMIT_ATTRIBUTE,
             Long.toString(memoryLimitLong),
             MEMORY_REQUEST_ATTRIBUTE,
-            Long.toString(memoryLimitLong));
+            Long.toString(memoryLimitLong),
+            CONTAINER_SOURCE_ATTRIBUTE,
+            TOOL_CONTAINER_SOURCE);
   }
 
   /**
