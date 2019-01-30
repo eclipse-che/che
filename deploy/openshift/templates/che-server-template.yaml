@@ -96,6 +96,8 @@ objects:
             value: "${PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api"
           - name: CHE_WEBSOCKET_ENDPOINT
             value: "${WS_PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api/websocket"
+          - name: CHE_WEBSOCKET_ENDPOINT__MINOR
+            value: "${WS_PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api/websocket-minor"
           - name: CHE_DEBUG_SERVER
             value: "false"
           - name: CHE_INFRASTRUCTURE_ACTIVE
