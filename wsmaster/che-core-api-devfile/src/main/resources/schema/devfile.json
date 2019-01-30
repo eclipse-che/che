@@ -45,7 +45,7 @@
     "name": {
       "type": "string",
       "title": "Devfile Name.",
-      "description" : "The name of the devfile. Workspaces created from devfile, will inherit this name.",
+      "description" : "The name of the devfile. Workspaces created from devfile, will inherit this name",
       "examples": [
         "petclinic-dev-environment"
       ]
@@ -53,7 +53,7 @@
     "projects": {
       "type": "array",
       "title": "The Projects List",
-      "description" : "Description of the project sources location and type",
+      "description" : "Description of the projects, containing names and sources locations",
       "items": {
         "type": "object",
         "required": [
@@ -71,7 +71,7 @@
           "source": {
             "type": "object",
             "title": "The Project Source object",
-            "description": "Describes the project's source - type and location.",
+            "description": "Describes the project's source - type and location",
             "required": [
               "type",
               "location"
@@ -101,6 +101,7 @@
     "tools": {
       "type": "array",
       "title": "The Tools List",
+      "description" : "Description of the workspace tools, such as editor and plugins",
       "items": {
         "type": "object",
         "required": [
@@ -161,6 +162,7 @@
     "commands": {
       "type": "array",
       "title": "The Commands List",
+      "description" : "Description of the predefined commands to be available in workspace",
       "items": {
         "type": "object",
         "required": [
