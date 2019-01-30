@@ -455,7 +455,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
         if (aliasesForName != null) {
           for (String alias : aliasesForName) {
             String bindKey = prefix == null ? alias : prefix + alias;
-            LOG.debug("Binding `{}` to `{}`", key, value);
+            LOG.debug("Binding `{}` to `{}`", bindKey, value);
             bindConstant().annotatedWith(Names.named(bindKey)).to(value);
           }
         }
