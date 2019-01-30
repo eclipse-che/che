@@ -44,7 +44,7 @@
     },
     "name": {
       "type": "string",
-      "title": "Devfile Name.",
+      "title": "Devfile Name",
       "description" : "The name of the devfile. Workspaces created from devfile, will inherit this name",
       "examples": [
         "petclinic-dev-environment"
@@ -88,7 +88,7 @@
               },
               "location": {
                 "type": "string",
-                "description": "Project's source location address. Should be URL for git and github located projects, and file:// for zip.",
+                "description": "Project's source location address. Should be URL for git and github located projects, or file:// for zip.",
                 "examples": [
                   "git@github.com:spring-projects/spring-petclinic.git"
                 ]
