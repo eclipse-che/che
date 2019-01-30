@@ -69,6 +69,7 @@ public class WorkspaceLinksGenerator {
         uriBuilder
             .clone()
             .replacePath("")
+            .path("workspace-loader")
             .path(workspace.getNamespace())
             .path(workspace.getConfig().getName())
             .build()
