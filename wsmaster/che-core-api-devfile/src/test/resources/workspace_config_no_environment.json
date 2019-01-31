@@ -18,7 +18,7 @@
       "name": "build:mvn-stack",
       "type": "exec",
       "attributes": {
-        "pluginId": "eclipse/maven-jdk8:1.0.0",
+        "plugin": "eclipse/maven-jdk8:1.0.0",
         "workingDir": "/projects/spring-petclinic"
       }
     },
@@ -27,7 +27,7 @@
       "name": "run:mvn-stack",
       "type": "exec",
       "attributes": {
-        "pluginId": "eclipse/maven-jdk8:1.0.0",
+        "plugin": "eclipse/maven-jdk8:1.0.0",
         "runType": "sequential",
         "workingDir": "/projects/spring-petclinic"
       }
@@ -37,7 +37,7 @@
       "name": "other:jdt.ls",
       "type": "exec",
       "attributes": {
-        "pluginId": "eclipse/theia-jdtls:0.0.3"
+        "plugin": "eclipse/theia-jdtls:0.0.3"
       }
     }
   ],
