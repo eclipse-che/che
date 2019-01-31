@@ -12,13 +12,13 @@
 package org.eclipse.che.api.devfile.server.validator;
 
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.inject.Singleton;
@@ -103,17 +103,6 @@ public class DevfileIntegrityValidator {
     return existingNames;
   }
 
-  private void checkFieldNotSet(Tool tool, String fieldName, Object fieldValue)
-      throws DevfileFormatException {
-    if (fieldValue == null) {
-      return;
-    }
-    throw new DevfileFormatException(
-        format(
-            "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
-            tool.getType(), fieldName, tool.getName()));
-  }
-
   private void validateCommands(Devfile devfile, Set<String> toolNames)
       throws DevfileFormatException {
     Set<String> existingNames = new HashSet<>();
@@ -143,7 +132,6 @@ public class DevfileIntegrityValidator {
                 "Command '%s' has action that refers to non-existing tools '%s'",
                 command.getName(), action.getTool()));
       }
-
     }
   }
 
@@ -161,6 +149,31 @@ public class DevfileIntegrityValidator {
                     + "digits or these following special characters ._-",
                 project.getName()));
       }
+    }
+  }
+
+  private void checkFieldNotSet(Tool tool, String fieldName, Object fieldValue)
+      throws DevfileFormatException {
+    checkFieldNotSet(tool, fieldName, fieldValue == null);
+  }
+
+  private void checkFieldNotSet(Tool tool, String fieldName, Map fieldValue)
+      throws DevfileFormatException {
+    checkFieldNotSet(tool, fieldName, fieldValue == null || fieldValue.isEmpty());
+  }
+
+  private void checkFieldNotSet(Tool tool, String fieldName, boolean check)
+      throws DevfileFormatException {
+    checkField(
+        check,
+        format(
+            "Tool of type '%s' cannot contain '%s' field, please check '%s' tool",
+            tool.getType(), fieldName, tool.getName()));
+  }
+
+  private void checkField(Boolean check, String message) throws DevfileFormatException {
+    if (!check) {
+      throw new DevfileFormatException(message);
     }
   }
 }

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
+import java.util.HashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -74,8 +75,22 @@ public class DevfileManager {
       throws DevfileFormatException, JsonProcessingException {
     JsonNode parsed = schemaValidator.validateBySchema(devfileContent, verbose);
     Devfile devfile = objectMapper.treeToValue(parsed, Devfile.class);
+    initializeMaps(devfile);
     integrityValidator.validateDevfile(devfile);
     return devfile;
+  }
+
+  private void initializeMaps(Devfile devfile) {
+    devfile
+        .getCommands()
+        .stream()
+        .filter(command -> command.getAttributes() == null)
+        .forEach(command -> command.setAttributes(new HashMap<>()));
+    devfile
+        .getTools()
+        .stream()
+        .filter(tool -> tool.getSelector() == null)
+        .forEach(command -> command.setSelector(new HashMap<>()));
   }
 
   /**
