@@ -155,7 +155,7 @@
                 <version>1.4</version>
                 <executions>
                     <execution>
-                        <id>test</id>
+                        <id>generate-pojo</id>
                         <phase>generate-sources</phase>
                         <goals>
                             <goal>add-source</goal>
@@ -190,5 +190,134 @@
                 </configuration>
             </plugin>
         </plugins>
-    </build>
+     </build>
+    <profiles>
+    <profile>
+        <!-- Docker build used by default, to use native build, use -Pnative -->
+        <id>docker</id>
+        <activation>
+            <activeByDefault>false</activeByDefault>
+        </activation>
+        <build>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>build-image</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <!-- build docs inside -->
+                                    <exec dir="${basedir}" executable="docker" failonerror="true">
+                                        <arg value="build" />
+                                        <arg value="-t" />
+                                        <arg value="eclipse-che-devfile-docs" />
+                                        <arg value="." />
+                                    </exec>
+                                </target>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>unpack-docker-build</id>
+                            <phase>generate-resources</phase>
+                            <goals>
+                              <goal>run</goal>
+                            </goals>
+                            <configuration>
+                                <target>
+                                    <exec executable="bash">
+                                        <arg value="-c" />
+                                        <arg value="docker run --rm eclipse-che-devfile-docs | tar -C target/ -xf -" />
+                                    </exec>
+                                </target>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+    <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>install-jsonschema2md</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- install-->
+                                        <exec dir="${basedir}/target" executable="git" failonerror="true">
+                                            <arg value="clone" />
+                                            <arg value="git@github.com:adobe/jsonschema2md.git" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>build-jsonschema2md</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec dir="${basedir}/target/jsonschema2md" executable="npm" failonerror="true">
+                                            <arg value="install" />
+                                        </exec>
+                                        <exec dir="${basedir}/target/jsonschema2md" executable="npm" failonerror="true">
+                                            <arg value="link" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>build-docs</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec dir="${basedir}/target" executable="jsonschema2md" failonerror="true">
+                                            <arg value="-d" />
+                                            <arg value="classes/schema" />
+                                            <arg value="-n" />
+                                            <arg value="-e" />
+                                            <arg value="json"/>
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>rename-doc</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <exec dir="${basedir}/target/out" executable="mv" failonerror="true">
+                                            <arg value="devfile.md" />
+                                            <arg value="index.md" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+  </profiles>
 </project>
