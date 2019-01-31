@@ -13,6 +13,9 @@
 
 import {IParser} from './parser';
 
+/**
+ * Item types supported in Kubernetes recipes.
+ */
 export type ISupportedListItem = IPodItem | IDeploymentItem | IConfigMapItem | ISecretItem;
 
 export function isSupportedItem(item: any): item is ISupportedListItem {

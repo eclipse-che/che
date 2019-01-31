@@ -52,8 +52,8 @@ const NAME_ANNOTATION_PREFIX: string = 'org.eclipse.che.container';
  */
 
 export class KubernetesEnvironmentManager extends EnvironmentManager {
-  parser: KubernetesEnvironmentRecipeParser;
-  private machineParser: KubernetesMachineRecipeParser;
+  parser: any;
+  protected machineParser: any;
 
   constructor($log: ng.ILogService) {
     super($log);
@@ -121,7 +121,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
       return machines;
     }
 
-    recipe.items.forEach((item: ISupportedListItem) => {
+    this.parser.getRecipeItems(recipe).forEach((item: ISupportedListItem) => {
       const podItem = getPodItemOrNull(item);
       if (!podItem) {
         return;

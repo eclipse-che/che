@@ -62,6 +62,18 @@ export class KubernetesEnvironmentRecipeParser implements IParser {
   }
 
   /**
+   * Helper method for retreiving items with in a parsed recipe. Useful for overriding
+   * in subclasses mainly, as e.g. OpenShift recipes support templates as well as lists.
+   *
+   * Types are left as `any` to allow overriding
+   *
+   * @param recipe the parsed and validated recipe
+   */
+  getRecipeItems(recipe: any): Array<any> {
+    return recipe.items;
+  }
+
+  /**
    * Simple validation of recipe.
    * @param recipe {ISupportedItemList}
    */
@@ -88,10 +100,7 @@ export class KubernetesEnvironmentRecipeParser implements IParser {
           return;
         }
         if (!isSupportedItem(item)) {
-          // should throw a TypeError here but this code is currently used to validate OpenShift recipes
-          // (which support Routes) as well as Kubernetes recipes, so we need to ignore some elements
-          // rather than complain. Returning here prevents warning about typos in the `kind` section.
-          return;
+          throw new TypeError(`Item of kind '${item.kind}' is not supported in Kubernetes recipes`);
         }
         this.machineRecipeParser.validate(item);
       });
