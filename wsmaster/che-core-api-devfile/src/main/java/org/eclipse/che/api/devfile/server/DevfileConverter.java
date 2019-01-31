@@ -192,7 +192,7 @@ public class DevfileConverter {
     List<CommandImpl> commands = new ArrayList<>();
     for (Action devAction : devCommand.getActions()) {
       CommandImpl command = new CommandImpl();
-      command.setName(devCommand.getName() + ":" + devAction.getTool());
+      command.setName(devCommand.getName());
       command.setType(devAction.getType());
       command.setCommandLine(devAction.getCommand());
       if (devAction.getWorkdir() != null) {

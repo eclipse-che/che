@@ -15,7 +15,7 @@
   "commands": [
     {
       "commandLine": "mvn package",
-      "name": "build:mvn-stack",
+      "name": "build",
       "type": "exec",
       "attributes": {
         "plugin": "eclipse/maven-jdk8:1.0.0",
@@ -24,7 +24,7 @@
     },
     {
       "commandLine": "mvn spring-boot:run",
-      "name": "run:mvn-stack",
+      "name": "run",
       "type": "exec",
       "attributes": {
         "plugin": "eclipse/maven-jdk8:1.0.0",
@@ -34,7 +34,7 @@
     },
     {
       "commandLine": "run.sh",
-      "name": "other:jdt.ls",
+      "name": "other",
       "type": "exec",
       "attributes": {
         "plugin": "eclipse/theia-jdtls:0.0.3"
