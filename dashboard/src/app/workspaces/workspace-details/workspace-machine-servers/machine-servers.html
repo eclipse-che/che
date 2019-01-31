@@ -4,6 +4,7 @@
     <div flex layout="column" md-theme="maincontent-theme">
       <che-list-header che-add-button-title="Add Server"
                        che-on-add="machineServersController.showEditDialog()"
+                       che-hide-add="machineServersController.isToolContainer"
                        che-delete-button-title="Delete"
                        che-on-delete="machineServersController.deleteSelectedServers()"
                        che-hide-delete="machineServersController.serversSelectedNumber === 0"
@@ -39,6 +40,9 @@
           </div>
         </div>
       </che-list-header>
+      <div ng-if="!machineServersController.serversList.length" class="che-list-empty">
+        <span>There are no servers defined for this container.</span>
+      </div>
       <!-- Servers list-->
       <che-list class="machine-servers-list" flex
                 ng-if="machineServersController.serversList && machineServersController.serversList.length > 0">
