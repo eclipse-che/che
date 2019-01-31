@@ -171,6 +171,11 @@ declare namespace che {
       NOENVIRONMENT: string;
       getValues(): Array<string>;
     }
+
+    export interface ICheMachineSourceTypes {
+      TOOL,
+      RECIPE
+    }
   }
 
   export namespace service {
@@ -332,6 +337,7 @@ declare namespace che {
     installers?: string[];
     attributes?: {
       memoryLimitBytes?: string|number;
+      source?: string;
       [attrName: string]: string|number;
     };
     servers?: {

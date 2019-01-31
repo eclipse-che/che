@@ -4,6 +4,7 @@
     <div flex layout="column" md-theme="maincontent-theme">
       <che-list-header che-add-button-title="Add Volume"
                        che-on-add="machineVolumesController.showEditDialog()"
+                       che-hide-add="machineVolumesController.isToolContainer"
                        che-delete-button-title="Delete"
                        che-on-delete="machineVolumesController.deleteSelectedMachineVolumes()"
                        che-hide-delete="machineVolumesController.cheListHelper.isNoItemSelected"
@@ -36,6 +37,9 @@
           </div>
         </div>
       </che-list-header>
+      <div ng-if="machineVolumesController.cheListHelper.visibleItemsNumber === 0" class="che-list-empty">
+        <span>There are no volumes defined for this container.</span>
+      </div>
       <!-- Machine volume list -->
       <che-list class="machine-volume-list" flex
                 ng-show="machineVolumesController.cheListHelper.visibleItemsNumber > 0">

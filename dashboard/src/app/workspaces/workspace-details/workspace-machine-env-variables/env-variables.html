@@ -7,6 +7,7 @@
     <div flex layout="column" md-theme="maincontent-theme">
       <che-list-header che-add-button-title="Add Env Variable"
                        che-on-add="envVariablesController.showEditDialog()"
+                       che-hide-add="envVariablesController.isToolContainer"
                        che-delete-button-title="Delete"
                        che-on-delete="envVariablesController.deleteSelectedEnvVariables()"
                        che-hide-delete="envVariablesController.envVariablesSelectedNumber === 0"
@@ -39,6 +40,9 @@
           </div>
         </div>
       </che-list-header>
+      <div ng-if="!envVariablesController.envVariablesList.length" class="che-list-empty">
+        <span>There are no environment variables defined for this container.</span>
+      </div>
       <!-- Env variables list -->
       <che-list class="environment-variables-list" flex
                 ng-if="envVariablesController.envVariablesList && envVariablesController.envVariablesList.length > 0">

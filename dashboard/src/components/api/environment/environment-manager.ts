@@ -177,7 +177,7 @@ export abstract class EnvironmentManager {
 
     Object.keys(runtime.machines).forEach((machineName: string) => {
       let runtimeMachine = runtime.machines[machineName];
-      let machine: any = {name: machineName, servers: {}};
+      let machine: any = {name: machineName, servers: {}, attributes: runtimeMachine.attributes};
       if (runtimeMachine && runtimeMachine.servers) {
         machine.runtime = {
           servers: runtimeMachine.servers

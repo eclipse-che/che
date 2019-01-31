@@ -177,12 +177,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
     let newEnvironment: che.IWorkspaceEnvironment = angular.copy(environment);
 
     machines.forEach((machine: IEnvironmentManagerMachine) => {
-      const podItem = machine.recipe;
-      const podItemContainer = machine.recipe.spec.containers[0];
-      const annotations = podItem.metadata.annotations;
-      const podName = podItem.metadata.name ? podItem.metadata.name : podItem.metadata.generateName;
-      const nameAnnotation = `${NAME_ANNOTATION_PREFIX}.${podItemContainer.name}.${MACHINE_NAME}`;
-      const machineName = annotations && annotations[nameAnnotation] ? annotations[nameAnnotation] : `${podName}/${podItemContainer.name}`;
+      const machineName = machine.name;
 
       if (angular.isUndefined(newEnvironment.machines)) {
         newEnvironment.machines = {};
