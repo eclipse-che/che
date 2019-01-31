@@ -17,7 +17,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -96,10 +95,13 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
                 + "application/x-yaml, text/yaml, text/x-yaml");
     }
 
-    final KubernetesList list;
+    final List<HasMetadata> list;
     try {
-      list =
-          clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
+      // Behavior:
+      // - If `content` is a Kubernetes List, load().get() will get the objects in that list
+      // - If `content` is an OpenShift template, load().get() will get the objects in the template
+      //   with parameters substituted (e.g. with default values).
+      list = clientFactory.create().load(new ByteArrayInputStream(content.getBytes())).get();
     } catch (KubernetesClientException e) {
       // KubernetesClient wraps the error when a JsonMappingException occurs so we need the cause
       String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
@@ -118,7 +120,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     Map<String, Route> routes = new HashMap<>();
     Map<String, Secret> secrets = new HashMap<>();
-    for (HasMetadata object : list.getItems()) {
+    for (HasMetadata object : list) {
       checkNotNull(object.getKind(), "Environment contains object without specified kind field");
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
       checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
