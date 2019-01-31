@@ -183,7 +183,7 @@
           },
           "actions": {
             "type": "array",
-            "description" : "List of the actions of given command",
+            "description" : "List of the actions of given command. Now the only one command must be specified in list but there are plans to implement supporting multiple actions commands.",
             "title": "The Command Actions List",
             "items": {
               "type": "object",

@@ -122,19 +122,28 @@ public class DevfileIntegrityValidator {
         throw new DevfileFormatException(
             format("Duplicate command name found:'%s'", command.getName()));
       }
-      Set<String> nonExistingToolActions =
-          command
-              .getActions()
-              .stream()
-              .map(Action::getTool)
-              .filter(t -> !toolNames.contains(t))
-              .collect(toSet());
-      if (!nonExistingToolActions.isEmpty()) {
+
+      if (command.getActions().isEmpty()) {
+        throw new DevfileFormatException(
+            format("Command '%s' does not have actions.", command.getName()));
+      }
+
+      // It is temporary restriction while exec plugin is not able to handle multiple commands
+      // in different containers as one Task. Later supporting of multiple actions in one command
+      // may be implemented.
+      if (command.getActions().size() > 1) {
+        throw new DevfileFormatException(
+            format("Multiple actions in command '%s' are not supported yet.", command.getName()));
+      }
+      Action action = command.getActions().get(0);
+
+      if (!toolNames.contains(action.getTool())) {
         throw new DevfileFormatException(
             format(
-                "Found actions which refer to non-existing tools in command '%s':'%s'",
-                command.getName(), String.join(",", nonExistingToolActions)));
+                "Command '%s' has action that refers to non-existing tools '%s'",
+                command.getName(), action.getTool()));
       }
+
     }
   }
 
