@@ -171,5 +171,8 @@ public final class Constants {
   /** Mark containers created workspace api like tooling for user development. */
   public static final String TOOL_CONTAINER_SOURCE = "tool";
 
+  /** The projects volume has a standard name used in a couple of locations. */
+  public static final String PROJECTS_VOLUME_NAME = "projects";
+
   private Constants() {}
 }

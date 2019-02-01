@@ -76,7 +76,7 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
     List<ChePlugin> chePlugins =
         pluginBrokerManager.getTooling(id, startSynchronizer, pluginsMeta, isEphemeral);
 
-    pluginsApplier.apply(environment, chePlugins);
+    pluginsApplier.apply(id, environment, chePlugins);
     if (isEphemeral) {
       brokerApplier.apply(environment, id, pluginsMeta);
     }
