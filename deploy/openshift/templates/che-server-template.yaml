@@ -138,7 +138,7 @@ objects:
             value: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
               -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
               -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true
-              -Xms20m "
+              -Xms20m -Djava.security.egd=file:/dev/./urandom"
           - name: CHE_WORKSPACE_AUTO_START
             value: "false"
           - name: CHE_INFRA_KUBERNETES_PVC_QUANTITY

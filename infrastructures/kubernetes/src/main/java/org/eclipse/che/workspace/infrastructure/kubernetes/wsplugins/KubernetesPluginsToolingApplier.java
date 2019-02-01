@@ -14,6 +14,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.TOOL_CONTAINER_SOURCE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
 import com.google.common.annotations.Beta;
@@ -32,11 +34,13 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
@@ -64,20 +68,26 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   private final String defaultSidecarMemoryLimitBytes;
   private final String sidecarImagePullPolicy;
   private final boolean isAuthEnabled;
+  private final ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider;
 
   @Inject
   public KubernetesPluginsToolingApplier(
       @Named("che.workspace.sidecar.image_pull_policy") String sidecarImagePullPolicy,
       @Named("che.workspace.sidecar.default_memory_limit_mb") long defaultSidecarMemoryLimitMB,
-      @Named("che.agents.auth_enabled") boolean isAuthEnabled) {
+      @Named("che.agents.auth_enabled") boolean isAuthEnabled,
+      ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider) {
     this.defaultSidecarMemoryLimitBytes = String.valueOf(defaultSidecarMemoryLimitMB * 1024 * 1024);
     this.isAuthEnabled = isAuthEnabled;
     this.sidecarImagePullPolicy =
         validImagePullPolicies.contains(sidecarImagePullPolicy) ? sidecarImagePullPolicy : null;
+    this.projectsRootEnvVariableProvider = projectsRootEnvVariableProvider;
   }
 
   @Override
-  public void apply(InternalEnvironment internalEnvironment, Collection<ChePlugin> chePlugins)
+  public void apply(
+      RuntimeIdentity runtimeIdentity,
+      InternalEnvironment internalEnvironment,
+      Collection<ChePlugin> chePlugins)
       throws InfrastructureException {
     if (chePlugins.isEmpty()) {
       return;
@@ -104,7 +114,13 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
 
       for (CheContainer container : chePlugin.getContainers()) {
-        addSidecar(pod, container, chePlugin, kubernetesEnvironment, pluginRelatedCommands);
+        addSidecar(
+            pod,
+            container,
+            chePlugin,
+            kubernetesEnvironment,
+            pluginRelatedCommands,
+            runtimeIdentity);
       }
     }
 
@@ -167,7 +183,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       CheContainer container,
       ChePlugin chePlugin,
       KubernetesEnvironment kubernetesEnvironment,
-      Collection<CommandImpl> sidecarRelatedCommands)
+      Collection<CommandImpl> sidecarRelatedCommands,
+      RuntimeIdentity runtimeIdentity)
       throws InfrastructureException {
 
     K8sContainerResolver k8sContainerResolver =
@@ -191,9 +208,12 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setContainerEndpoints(containerEndpoints)
             .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemoryLimitBytes)
             .setAttributes(kubernetesEnvironment.getAttributes())
+            .setProjectsRootPathEnvVar(projectsRootEnvVariableProvider.get(runtimeIdentity))
+            .setPluginId(chePlugin.getId())
             .build();
 
     InternalMachineConfig machineConfig = machineResolver.resolve();
+    machineConfig.getAttributes().put(CONTAINER_SOURCE_ATTRIBUTE, TOOL_CONTAINER_SOURCE);
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
     sidecarRelatedCommands.forEach(c -> c.getAttributes().put("machineName", machineName));

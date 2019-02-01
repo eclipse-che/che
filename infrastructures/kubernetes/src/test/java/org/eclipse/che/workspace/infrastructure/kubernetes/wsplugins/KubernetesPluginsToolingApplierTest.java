@@ -22,6 +22,7 @@ import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMO
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -51,12 +52,14 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainerPort;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
@@ -64,6 +67,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
+import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
@@ -92,6 +96,8 @@ public class KubernetesPluginsToolingApplierTest {
   @Mock private ObjectMeta meta;
   @Mock private Container userContainer;
   @Mock private InternalMachineConfig userMachineConfig;
+  @Mock private RuntimeIdentity runtimeIdentity;
+  @Mock private ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider;
 
   private KubernetesEnvironment internalEnvironment;
   private List<Container> containers;
@@ -100,7 +106,9 @@ public class KubernetesPluginsToolingApplierTest {
   @BeforeMethod
   public void setUp() {
     internalEnvironment = spy(KubernetesEnvironment.builder().build());
-    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, false);
+    applier =
+        new KubernetesPluginsToolingApplier(
+            TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, false, projectsRootEnvVariableProvider);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
     containers = new ArrayList<>();
@@ -113,6 +121,9 @@ public class KubernetesPluginsToolingApplierTest {
     lenient().when(meta.getName()).thenReturn(POD_NAME);
     internalEnvironment.addPod(pod);
     internalEnvironment.getMachines().putAll(machines);
+
+    when(projectsRootEnvVariableProvider.get(any()))
+        .thenReturn(new Pair<>("projects_root", "/somewhere/over/the/rainbow"));
   }
 
   @Test
@@ -126,6 +137,7 @@ public class KubernetesPluginsToolingApplierTest {
 
     // when
     applier.apply(
+        runtimeIdentity,
         internalEnvironment,
         singletonList(createChePlugin("plugin", createContainer("container", pluginCommand))));
 
@@ -154,7 +166,7 @@ public class KubernetesPluginsToolingApplierTest {
     internalEnvironment.getCommands().add(pluginCommand);
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     List<CommandImpl> envCommands = internalEnvironment.getCommands();
@@ -179,7 +191,7 @@ public class KubernetesPluginsToolingApplierTest {
     internalEnvironment.getCommands().add(pluginCommand);
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     List<Warning> envWarnings = internalEnvironment.getWarnings();
@@ -201,7 +213,7 @@ public class KubernetesPluginsToolingApplierTest {
     ChePlugin chePlugin = createChePlugin("plugin");
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     assertTrue(internalEnvironment.getWarnings().isEmpty());
@@ -219,7 +231,7 @@ public class KubernetesPluginsToolingApplierTest {
     internalEnvironment.getCommands().add(pluginCommand);
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     List<Warning> envWarnings = internalEnvironment.getWarnings();
@@ -240,7 +252,7 @@ public class KubernetesPluginsToolingApplierTest {
     ChePlugin chePlugin = createChePlugin("plugin", createContainer(), createContainer());
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     assertTrue(internalEnvironment.getWarnings().isEmpty());
@@ -254,12 +266,12 @@ public class KubernetesPluginsToolingApplierTest {
     PodData podData = new PodData(podSpec, meta);
     when(internalEnvironment.getPodsData()).thenReturn(of("pod1", podData, "pod2", podData));
 
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
   }
 
   @Test
   public void addToolingContainerToAPod() throws Exception {
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     verifyPodAndContainersNumber(2);
     Container toolingContainer = getOneAndOnlyNonUserContainer(internalEnvironment);
@@ -273,7 +285,7 @@ public class KubernetesPluginsToolingApplierTest {
     machines.put(USER_MACHINE_NAME, userMachineConfig);
     internalEnvironment.getMachines().putAll(machines);
 
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     verifyPodAndContainersNumber(1);
     Container toolingContainer = getOneAndOnlyNonUserContainer(internalEnvironment);
@@ -283,7 +295,9 @@ public class KubernetesPluginsToolingApplierTest {
   @Test
   public void canAddMultipleToolingContainersToAPodFromOnePlugin() throws Exception {
     applier.apply(
-        internalEnvironment, singletonList(createChePlugin(createContainer(), createContainer())));
+        runtimeIdentity,
+        internalEnvironment,
+        singletonList(createChePlugin(createContainer(), createContainer())));
 
     verifyPodAndContainersNumber(3);
     List<Container> nonUserContainers = getNonUserContainers(internalEnvironment);
@@ -292,7 +306,10 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void canAddMultipleToolingContainersToAPodFromSeveralPlugins() throws Exception {
-    applier.apply(internalEnvironment, ImmutableList.of(createChePlugin(), createChePlugin()));
+    applier.apply(
+        runtimeIdentity,
+        internalEnvironment,
+        ImmutableList.of(createChePlugin(), createChePlugin()));
 
     verifyPodAndContainersNumber(3);
     List<Container> nonUserContainers = getNonUserContainers(internalEnvironment);
@@ -301,7 +318,7 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void addsMachineWithVolumeToAToolingContainer() throws Exception {
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
     verifyOneAndOnlyVolume(machineConfig, VOLUME_NAME, VOLUME_MOUNT_PATH);
@@ -320,7 +337,10 @@ public class KubernetesPluginsToolingApplierTest {
             singletonList(new Volume().name(anotherVolumeName).mountPath(anotherVolumeMountPath)));
 
     // when
-    applier.apply(internalEnvironment, asList(createChePlugin(), chePluginWithNonDefaultVolume));
+    applier.apply(
+        runtimeIdentity,
+        internalEnvironment,
+        asList(createChePlugin(), chePluginWithNonDefaultVolume));
 
     // then
     Collection<InternalMachineConfig> machineConfigs = getNonUserMachines(internalEnvironment);
@@ -337,7 +357,8 @@ public class KubernetesPluginsToolingApplierTest {
     chePluginWithNoVolume.getContainers().get(0).setVolumes(emptyList());
 
     // when
-    applier.apply(internalEnvironment, asList(createChePlugin(), chePluginWithNoVolume));
+    applier.apply(
+        runtimeIdentity, internalEnvironment, asList(createChePlugin(), chePluginWithNoVolume));
 
     // then
     Collection<InternalMachineConfig> machineConfigs = getNonUserMachines(internalEnvironment);
@@ -353,7 +374,7 @@ public class KubernetesPluginsToolingApplierTest {
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port", emptyMap(), true);
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
@@ -369,7 +390,7 @@ public class KubernetesPluginsToolingApplierTest {
     addPortToSingleContainerPlugin(chePlugin, 8090, "another-test-port", emptyMap(), false);
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
@@ -387,7 +408,7 @@ public class KubernetesPluginsToolingApplierTest {
     addPortToSingleContainerPlugin(chePlugin, 80, "test-port/ws", emptyMap(), true);
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
@@ -409,7 +430,7 @@ public class KubernetesPluginsToolingApplierTest {
         true);
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
@@ -421,7 +442,7 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void setsDefaultMemoryLimitForMachineAssociatedWithContainer() throws Exception {
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
     String memoryLimitAttribute = machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE);
@@ -442,7 +463,7 @@ public class KubernetesPluginsToolingApplierTest {
     chePlugin.getContainers().get(0).setPorts(asList(cheContainerPort1, cheContainerPort2));
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     Container container = getOneAndOnlyNonUserContainer(internalEnvironment);
@@ -461,7 +482,7 @@ public class KubernetesPluginsToolingApplierTest {
     chePlugin.getContainers().get(0).setPorts(asList(cheContainerPort1, cheContainerPort2));
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     Container container = getOneAndOnlyNonUserContainer(internalEnvironment);
@@ -482,7 +503,7 @@ public class KubernetesPluginsToolingApplierTest {
     chePlugin.getContainers().get(0).setPorts(asList(cheContainerPort1, cheContainerPort2));
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     verifyK8sServices(internalEnvironment, endpoint1, endpoint2);
@@ -499,6 +520,7 @@ public class KubernetesPluginsToolingApplierTest {
 
     // when
     applier.apply(
+        runtimeIdentity,
         internalEnvironment,
         ImmutableList.of(createChePlugin(), createChePlugin(createContainer(), createContainer())));
 
@@ -531,14 +553,16 @@ public class KubernetesPluginsToolingApplierTest {
     internalEnvironment.getServices().put(CHE_PLUGIN_ENDPOINT_NAME, new Service());
 
     // when
-    applier.apply(internalEnvironment, singletonList(chePlugin));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
   }
 
   @Test
   public void shouldSetJWTServerExposerAttributeIfAuthEnabled() throws Exception {
-    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
+    applier =
+        new KubernetesPluginsToolingApplier(
+            TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true, projectsRootEnvVariableProvider);
 
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     assertEquals(internalEnvironment.getAttributes().get(SECURE_EXPOSER_IMPL_PROPERTY), "jwtproxy");
   }
@@ -546,10 +570,12 @@ public class KubernetesPluginsToolingApplierTest {
   @Test
   public void shouldNotSetJWTServerExposerAttributeIfAuthEnabledButAttributeIsPresent()
       throws Exception {
-    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
+    applier =
+        new KubernetesPluginsToolingApplier(
+            TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true, projectsRootEnvVariableProvider);
     internalEnvironment.getAttributes().put(SECURE_EXPOSER_IMPL_PROPERTY, "somethingElse");
 
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     assertEquals(
         internalEnvironment.getAttributes().get(SECURE_EXPOSER_IMPL_PROPERTY), "somethingElse");
@@ -557,9 +583,11 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void shouldSetSpecifiedImagePullPolicy() throws Exception {
-    applier = new KubernetesPluginsToolingApplier(TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true);
+    applier =
+        new KubernetesPluginsToolingApplier(
+            TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, true, projectsRootEnvVariableProvider);
 
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     assertEquals(
         internalEnvironment
@@ -576,9 +604,11 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void shouldSetNullImagePullPolicyIfValueIsNotStandard() throws Exception {
-    applier = new KubernetesPluginsToolingApplier("None", MEMORY_LIMIT_MB, true);
+    applier =
+        new KubernetesPluginsToolingApplier(
+            "None", MEMORY_LIMIT_MB, true, projectsRootEnvVariableProvider);
 
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     assertNull(
         internalEnvironment
@@ -594,7 +624,7 @@ public class KubernetesPluginsToolingApplierTest {
 
   @Test
   public void shouldNotSetJWTServerExposerAttributeIfAuthDisabled() throws Exception {
-    applier.apply(internalEnvironment, singletonList(createChePlugin()));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(createChePlugin()));
 
     assertNull(internalEnvironment.getAttributes().get(SECURE_EXPOSER_IMPL_PROPERTY));
   }

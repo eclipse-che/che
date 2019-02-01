@@ -36,9 +36,4 @@ export class ProjectItemCtrl {
     this.$location = $location;
     this.cheWorkspace = cheWorkspace;
   }
-
-  redirectToProjectDetails(): void {
-    this.$location.path('/project/' + this.workspace.namespace + '/' + this.workspace.config.name + '/' + this.project.name).search({});
-  }
-
 }

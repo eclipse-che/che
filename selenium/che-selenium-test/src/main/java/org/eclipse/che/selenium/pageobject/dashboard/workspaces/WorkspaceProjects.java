@@ -52,7 +52,7 @@ public class WorkspaceProjects {
   }
 
   public interface Locators {
-    String PROJECT_BY_NAME = "//div[contains(@ng-click, 'projectItem')]/span[text()='%s']";
+    String PROJECT_BY_NAME = "//div[@aria-label='project-item']/span[text()='%s']";
     String DELETE_PROJECT = "//button/span[text()='Delete']";
     String DELETE_SELECTED_PROJECTS = "//che-button-primary[@che-button-title='Delete']/button";
     String DELETE_IT_PROJECT = "//md-dialog//che-button-primary[@che-button-title='Delete']/button";
