@@ -36,10 +36,10 @@ module.exports = merge(common, {
         historyApiFallback: true,
         proxy: {
             '/api/websocket': {
-                target: 'http://che-che.10.101.162.245.nip.io.',
+                target: 'http://localhost:8080',
                 ws: true,
             },
-            '/api': "http://che-che.10.101.162.245.nip.io.",
+            '/api': "http://localhost:8080",
         }
     },
     plugins: [
