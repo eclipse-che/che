@@ -114,7 +114,7 @@ public class WorkspaceLinksGeneratorTest {
             LINK_REL_SELF,
             "https://mydomain:7345/api/workspace/wside-123877234580",
             LINK_REL_IDE_URL,
-            "https://mydomain:7345/workspace-loader/my-namespace/my-name",
+            "https://mydomain:7345/my-namespace/my-name",
             LINK_REL_ENVIRONMENT_STATUS_CHANNEL,
             "wss://mydomain:7345",
             LINK_REL_ENVIRONMENT_OUTPUT_CHANNEL,
