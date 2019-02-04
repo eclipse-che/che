@@ -45,9 +45,12 @@ export class WorkspaceConfigImportController {
   errorsScopeSettings: string = 'workspace-details-settings';
   errorsScopeEnvironment: string = 'workspace-details-environment';
   importWorkspaceJson: string;
+  isActive: boolean;
   workspaceConfig: any;
   newWorkspaceConfig: any;
   workspaceConfigOnChange: Function;
+  private saveTimeoutPromise: ng.IPromise<any>;
+  private isSaving: boolean;
 
 
   /**
@@ -60,6 +63,8 @@ export class WorkspaceConfigImportController {
     this.$timeout = $timeout;
     this.errorMessagesService = cheErrorMessagesService;
     this.validationService = stackValidationService;
+
+    this.isSaving = false;
 
     this.importWorkspaceJson = angular.toJson(this.workspaceConfig, true);
 
@@ -117,14 +122,22 @@ export class WorkspaceConfigImportController {
 
       this.configValidationMessages = angular.copy(validationResult.errors);
       this.configErrorsNumber = this.configValidationMessages.length;
-
-      if (validateOnly) {
+      if (validateOnly || !this.isActive) {
         return;
       }
+      this.isSaving = (this.configValidationMessages.length === 0) && !angular.equals(config, this.workspaceConfig);
 
-      // immediately apply config on IU
-      this.newWorkspaceConfig = angular.copy(config);
-      this.applyChanges();
+      if (this.saveTimeoutPromise) {
+        this.$timeout.cancel(this.saveTimeoutPromise);
+      }
+
+      this.saveTimeoutPromise = this.$timeout(() => {
+        // immediately apply config on IU
+        this.newWorkspaceConfig = angular.copy(config);
+        this.isSaving = false;
+        this.applyChanges();
+      }, 2000);
+
 
     } catch (e) {
       if (this.configValidationMessages.length === 0) {
