@@ -36,7 +36,7 @@ public class OnProjectsLoadedImpl implements OnProjectsLoaded {
   @Override
   public List<ActionImpl> getActions() {
     if (actions == null) {
-      return new ArrayList<>();
+      actions = new ArrayList<>();
     }
     return actions;
   }

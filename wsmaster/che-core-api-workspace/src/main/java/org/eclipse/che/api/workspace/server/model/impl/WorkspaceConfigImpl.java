@@ -184,7 +184,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
   @Override
   public Map<String, EnvironmentImpl> getEnvironments() {
     if (environments == null) {
-      return new HashMap<>();
+      environments = new HashMap<>();
     }
     return environments;
   }

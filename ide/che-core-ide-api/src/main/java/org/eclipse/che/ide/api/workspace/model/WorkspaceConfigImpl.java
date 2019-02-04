@@ -112,7 +112,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
   @Override
   public Map<String, EnvironmentImpl> getEnvironments() {
     if (environments == null) {
-      return new HashMap<>();
+      environments = new HashMap<>();
     }
     return environments;
   }
@@ -120,7 +120,7 @@ public class WorkspaceConfigImpl implements WorkspaceConfig {
   @Override
   public Map<String, String> getAttributes() {
     if (attributes == null) {
-      return new HashMap<>();
+      attributes = new HashMap<>();
     }
     return attributes;
   }

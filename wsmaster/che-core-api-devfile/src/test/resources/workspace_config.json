@@ -15,29 +15,29 @@
   "commands": [
     {
       "commandLine": "mvn package",
-      "name": "build:mvn-stack",
+      "name": "build",
       "type": "exec",
       "attributes": {
-        "pluginId": "eclipse/maven-jdk8:1.0.0",
+        "plugin": "eclipse/maven-jdk8:1.0.0",
         "workingDir": "/projects/spring-petclinic"
       }
     },
     {
       "commandLine": "mvn spring-boot:run",
-      "name": "run:mvn-stack",
+      "name": "run",
       "type": "exec",
       "attributes": {
-        "pluginId": "eclipse/maven-jdk8:1.0.0",
+        "plugin": "eclipse/maven-jdk8:1.0.0",
         "runType": "sequential",
         "workingDir": "/projects/spring-petclinic"
       }
     },
     {
       "commandLine": "run.sh",
-      "name": "other:jdt.ls",
+      "name": "other",
       "type": "exec",
       "attributes": {
-        "pluginId": "eclipse/theia-jdtls:0.0.3"
+        "plugin": "eclipse/theia-jdtls:0.0.3"
       }
     }
   ],

@@ -206,11 +206,37 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp = "Command 'build' does not have actions.")
+  public void shouldThrowExceptionWhenCommandDoesNotHaveActions() throws Exception {
+    Devfile broken = copyOf(initialDevfile);
+    broken.getCommands().get(0).getActions().clear();
+
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Found actions which refer to non-existing tools in command 'build':'no_such_tool'")
+          "Multiple actions in command 'build' are not supported yet.")
+  public void shouldThrowExceptionWhenCommandHasMultipleActions() throws Exception {
+    Devfile broken = copyOf(initialDevfile);
+    broken.getCommands().get(0).getActions().add(new Action());
+    ;
+
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Command 'build' has action that refers to non-existing tools 'no_such_tool'")
   public void shouldThrowExceptionOnUnexistingCommandActionTool() throws Exception {
     Devfile broken = copyOf(initialDevfile);
+    broken.getCommands().get(0).getActions().clear();
     broken.getCommands().get(0).getActions().add(new Action().withTool("no_such_tool"));
+
     // when
     integrityValidator.validateDevfile(broken);
   }

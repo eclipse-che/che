@@ -216,7 +216,12 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     machineConfig.getAttributes().put(CONTAINER_SOURCE_ATTRIBUTE, TOOL_CONTAINER_SOURCE);
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
-    sidecarRelatedCommands.forEach(c -> c.getAttributes().put("machineName", machineName));
+    sidecarRelatedCommands.forEach(
+        c ->
+            c.getAttributes()
+                .put(
+                    org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE,
+                    machineName));
 
     container
         .getCommands()
@@ -241,6 +246,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   }
 
   private static class CommandsResolver {
+
     private final KubernetesEnvironment k8sEnvironment;
     private final ArrayListMultimap<String, CommandImpl> pluginRefToCommand;
 
@@ -252,7 +258,11 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
           .getCommands()
           .forEach(
               (c) -> {
-                String pluginRef = c.getAttributes().get("plugin");
+                String pluginRef =
+                    c.getAttributes()
+                        .get(
+                            org.eclipse.che.api.core.model.workspace.config.Command
+                                .PLUGIN_ATTRIBUTE);
                 if (pluginRef != null) {
                   pluginRefToCommand.put(pluginRef, c);
                 }
