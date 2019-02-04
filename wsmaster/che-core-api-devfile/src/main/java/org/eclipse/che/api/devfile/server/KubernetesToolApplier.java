@@ -16,22 +16,26 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Singleton;
+import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 
 /**
  * Applies Kubernetes tool configuration on provided {@link Devfile} and {@link
@@ -53,6 +57,8 @@ public class KubernetesToolApplier {
    *
    * <ul>
    *   <li>provisioning environment based on content of the file specified in {@link Tool#local};
+   *   <li>provisioning machine name attribute to commands that are configured to be run in the
+   *       specified tool. Note that name will be set only if tool contains the only one container;
    * </ul>
    *
    * <p>NOTE: An {@link RecipeFileContentProvider} MUST be provided in order to fetch recipe
@@ -91,6 +97,8 @@ public class KubernetesToolApplier {
     if (!recipeTool.getSelector().isEmpty()) {
       list.setItems(filter(list, recipeTool.getSelector()));
     }
+
+    estimateCommandsMachineName(devfile, recipeTool, list);
 
     RecipeImpl recipe = new RecipeImpl(type, YAML_CONTENT_TYPE, asYaml(recipeTool, list), null);
 
@@ -133,6 +141,41 @@ public class KubernetesToolApplier {
         .stream()
         .filter(e -> e.getMetadata().getLabels().entrySet().containsAll(selector.entrySet()))
         .collect(toList());
+  }
+
+  /**
+   * Set {@link MACHINE_NAME_ATTRIBUTE} to commands which are configured in the specified tool.
+   *
+   * <p>Machine name will be set only if the specified recipe objects has the only one container.
+   */
+  private void estimateCommandsMachineName(
+      Devfile devfile, Tool tool, KubernetesList recipeObjects) {
+    List<Command> toolsCommands =
+        devfile
+            .getCommands()
+            .stream()
+            .filter(c -> c.getActions().get(0).getTool().equals(tool.getName()))
+            .collect(toList());
+    if (toolsCommands.isEmpty()) {
+      return;
+    }
+    List<Pod> pods =
+        recipeObjects
+            .getItems()
+            .stream()
+            .filter(hasMetadata -> hasMetadata instanceof Pod)
+            .map(hasMetadata -> (Pod) hasMetadata)
+            .collect(toList());
+
+    Pod pod;
+    if (pods.size() != 1 || (pod = pods.get(0)).getSpec().getContainers().isEmpty()) {
+      // recipe contains several containers
+      // can not estimate commands machine name
+      return;
+    }
+
+    String machineName = Names.machineName(pod, pod.getSpec().getContainers().get(0));
+    toolsCommands.forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
   }
 
   private KubernetesList unmarshal(Tool tool, String recipeContent)

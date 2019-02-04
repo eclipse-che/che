@@ -12,12 +12,14 @@
 package org.eclipse.che.api.devfile.server;
 
 import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
+import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.KubernetesToolApplier.YAML_CONTENT_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
@@ -26,6 +28,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.devfile.model.Action;
+import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -195,6 +199,59 @@ public class KubernetesToolApplierTest {
     assertEquals(1, resultItemsList.stream().filter(it -> "Pod".equals(it.getKind())).count());
     assertEquals(1, resultItemsList.stream().filter(it -> "Service".equals(it.getKind())).count());
     assertEquals(1, resultItemsList.stream().filter(it -> "Route".equals(it.getKind())).count());
+  }
+
+  @Test(dependsOnMethods = "shouldFilterRecipeWithGivenSelectors")
+  public void shouldSetMachineNameAttributeToCommandConfiguredInOpenShiftToolWithOneContainer()
+      throws Exception {
+    String yamlRecipeContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+
+    final Map<String, String> selector =
+        Collections.singletonMap("app.kubernetes.io/component", "webapp");
+    Tool tool =
+        new Tool()
+            .withType(OPENSHIFT_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withName(TOOL_NAME)
+            .withSelector(selector);
+    devfile
+        .getCommands()
+        .add(
+            new Command()
+                .withAttributes(new HashMap<>())
+                .withActions(Collections.singletonList(new Action().withTool(TOOL_NAME))));
+
+    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+
+    Command command = devfile.getCommands().get(0);
+    assertEquals(command.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "petclinic/server");
+  }
+
+  @Test
+  public void
+      shouldNotSetMachineNameAttributeToCommandConfiguredInOpenShiftToolWithMultipleContainers()
+          throws Exception {
+    String yamlRecipeContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+
+    Tool tool =
+        new Tool()
+            .withType(OPENSHIFT_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withName(TOOL_NAME)
+            .withSelector(new HashMap<>());
+    devfile
+        .getCommands()
+        .add(
+            new Command()
+                .withAttributes(new HashMap<>())
+                .withActions(Collections.singletonList(new Action().withTool(TOOL_NAME))));
+
+    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+
+    Command command = devfile.getCommands().get(0);
+    assertNull(command.getAttributes().get(MACHINE_NAME_ATTRIBUTE));
   }
 
   private KubernetesList toK8SList(String content) {
