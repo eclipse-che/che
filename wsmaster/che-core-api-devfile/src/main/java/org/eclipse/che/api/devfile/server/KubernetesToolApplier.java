@@ -11,9 +11,11 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
@@ -23,45 +25,83 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 import javax.inject.Singleton;
+import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
 /**
- * Creates {@link EnvironmentImpl} from specific type of devfile tool.
+ * Applies Kubernetes tool configuration on provided {@link Devfile} and {@link
+ * WorkspaceConfigImpl}.
  *
  * @author Max Shaposhnyk
+ * @author Sergii Leshchenko
  */
 @Singleton
-public class DevfileEnvironmentFactory {
+public class KubernetesToolApplier {
 
-  static final String DEFAULT_RECIPE_CONTENT_TYPE = "application/x-yaml";
+  static final String YAML_CONTENT_TYPE = "application/x-yaml";
 
   /**
-   * Consumes an recipe-type tool (openshift or kubernetes) and tries to create {@link
-   * EnvironmentImpl} from it (including filtering of list items using selectors, if necessary). An
-   * {@link RecipeFileContentProvider} MUST be provided in order to fetch recipe content.
+   * Applies Kubernetes tool configuration on provided {@link Devfile} and {@link
+   * WorkspaceConfigImpl}.
+   *
+   * <p>It includes:
+   *
+   * <ul>
+   *   <li>provisioning environment based on content of the file specified in {@link Tool#local};
+   * </ul>
+   *
+   * <p>NOTE: An {@link RecipeFileContentProvider} MUST be provided in order to fetch recipe
+   * content.
    *
    * @param recipeTool the recipe-type tool
-   * @param recipeFileContentProvider service-specific provider of recipe file content
-   * @return constructed environment from recipe type tool
+   * @param devfile devfile that should be changed according to the provided tool
+   * @param workspaceConfig workspace config that should be changed according to the provided tool
+   * @param contentProvider service-specific provider of recipe file content
    * @throws IllegalArgumentException when wrong type tool is passed
    * @throws IllegalArgumentException when there is no content provider for recipe-type tool
-   * @throws DevfileException when general devfile error occurs
    * @throws DevfileRecipeFormatException when recipe-type tool content is empty or has wrong format
+   * @throws DevfileException when general devfile error occurs
    */
-  public EnvironmentImpl createEnvironment(
-      Tool recipeTool, RecipeFileContentProvider recipeFileContentProvider)
+  public void apply(
+      Tool recipeTool,
+      Devfile devfile,
+      WorkspaceConfigImpl workspaceConfig,
+      RecipeFileContentProvider contentProvider)
       throws DevfileRecipeFormatException, DevfileException {
+    checkArgument(recipeTool != null, "Tool must not be null");
+    checkArgument(devfile != null, "Devfile must not be null");
+    checkArgument(workspaceConfig != null, "Workspace config must not be null");
+
     final String type = recipeTool.getType();
-    if (!KUBERNETES_TOOL_TYPE.equals(type) && !OPENSHIFT_TOOL_TYPE.equals(type)) {
-      throw new IllegalArgumentException(
-          format(
-              "Unable to create environment from tool '%s' - it has ineligible type '%s'.",
-              recipeTool.getName(), type));
+    checkArgument(
+        KUBERNETES_TOOL_TYPE.equals(type) || OPENSHIFT_TOOL_TYPE.equals(type),
+        format(
+            "Unable to create environment from tool '%s' - it has ineligible type '%s'.",
+            recipeTool.getName(), type));
+
+    String recipeFileContent = retrieveContent(recipeTool, contentProvider, type);
+
+    final KubernetesList list = unmarshal(recipeTool, recipeFileContent);
+
+    if (!recipeTool.getSelector().isEmpty()) {
+      list.setItems(filter(list, recipeTool.getSelector()));
     }
+
+    RecipeImpl recipe = new RecipeImpl(type, YAML_CONTENT_TYPE, asYaml(recipeTool, list), null);
+
+    String envName = recipeTool.getName();
+    workspaceConfig.getEnvironments().put(envName, new EnvironmentImpl(recipe, emptyMap()));
+    workspaceConfig.setDefaultEnv(envName);
+  }
+
+  private String retrieveContent(
+      Tool recipeTool, RecipeFileContentProvider recipeFileContentProvider, String type)
+      throws DevfileException {
     if (recipeFileContentProvider == null) {
       throw new DevfileException(
           format(
@@ -82,27 +122,17 @@ public class DevfileEnvironmentFactory {
     if (isNullOrEmpty(recipeFileContent)) {
       throw new DevfileException(
           format(
-              "The local file '%s' defined in tool '%s' is unreachable or empty.",
+              "The local file '%s' defined in tool '%s' is empty.",
               recipeTool.getLocal(), recipeTool.getName()));
     }
-    final KubernetesList list = unmarshal(recipeTool, recipeFileContent);
+    return recipeFileContent;
+  }
 
-    if (recipeTool.getSelector() != null && !recipeTool.getSelector().isEmpty()) {
-      List<HasMetadata> itemsList =
-          list.getItems()
-              .stream()
-              .filter(
-                  e ->
-                      e.getMetadata()
-                          .getLabels()
-                          .entrySet()
-                          .containsAll(recipeTool.getSelector().entrySet()))
-              .collect(Collectors.toList());
-      list.setItems(itemsList);
-    }
-    RecipeImpl recipe =
-        new RecipeImpl(type, DEFAULT_RECIPE_CONTENT_TYPE, asYaml(recipeTool, list), null);
-    return new EnvironmentImpl(recipe, emptyMap());
+  private List<HasMetadata> filter(KubernetesList list, Map<String, String> selector) {
+    return list.getItems()
+        .stream()
+        .filter(e -> e.getMetadata().getLabels().entrySet().containsAll(selector.entrySet()))
+        .collect(toList());
   }
 
   private KubernetesList unmarshal(Tool tool, String recipeContent)
