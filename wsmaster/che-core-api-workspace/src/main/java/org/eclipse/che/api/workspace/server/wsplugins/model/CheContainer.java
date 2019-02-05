@@ -23,13 +23,13 @@ public class CheContainer {
   private String name = null;
   private List<EnvVar> env = new ArrayList<>();
 
-  @JsonProperty("editor-commands")
+  @JsonProperty("editorCommands")
   private List<Command> commands = new ArrayList<>();
 
   private List<Volume> volumes = new ArrayList<>();
   private List<CheContainerPort> ports = new ArrayList<>();
 
-  @JsonProperty("memory-limit")
+  @JsonProperty("memoryLimit")
   private String memoryLimit = null;
 
   @JsonProperty("mountSources")
