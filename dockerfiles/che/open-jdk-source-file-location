@@ -1,14 +1,14 @@
 This package distributes OpenJDK binaries that are licensed under the GPL.
 The source code and build scripts used to create this binary are available for download at:
 
-* eclipse che image parent: `FROM openjdk:8u181-jre-alpine`
-   * official openjdk image parent: `FROM alpine:3.6`
-    * summary of alpine `openjdk8-jre v8.181.13-r0` package  reference - https://pkgs.alpinelinux.org/package/v3.6/community/x86_64/openjdk8-jre
-        * alpine build scripts for `openjdk8-jre v8.181.13-r0` reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8?h=3.6-stable
+* eclipse che image parent: `FROM openjdk:8u191-jdk-alpine`
+   * official openjdk image parent: `FROM alpine:3.8`
+    * summary of alpine `openjdk8 8.191.12-r0` package  reference - https://pkgs.alpinelinux.org/package/v3.8/community/x86_64/openjdk8
+        * alpine build scripts for `openjdk8-jre v8.181.13-r0` reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8?h=3.8-stable
             * build performed by running `APKBUILD` script which will:
-                 * define jdk version reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8/APKBUILD?h=3.6-stable#n8
+                 * define jdk version reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8/APKBUILD?h=3.8-stable#n8
                  * grab official jdk sources by version from "http://icedtea.classpath.org/" reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8/APKBUILD?id=027d8ceca1422c0ffc3fe3a22523f22abedd694c#n43
-                 * add alpine specific patches reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8?h=3.6-stable
+                 * add alpine specific patches reference - https://git.alpinelinux.org/cgit/aports/tree/community/openjdk8?h=3.8-stable
                  * perform build
 
 The following license applies to OpenJDK

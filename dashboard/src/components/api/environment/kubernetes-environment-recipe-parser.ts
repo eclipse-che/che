@@ -10,7 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {ISupportedListItem, KubernetesMachineRecipeParser} from './kubernetes-machine-recipe-parser';
+import {ISupportedListItem, KubernetesMachineRecipeParser, isSupportedItem} from './kubernetes-machine-recipe-parser';
 import {IParser} from './parser';
 
 export interface ISupportedItemList {
@@ -62,6 +62,18 @@ export class KubernetesEnvironmentRecipeParser implements IParser {
   }
 
   /**
+   * Helper method for retreiving items with in a parsed recipe. Useful for overriding
+   * in subclasses mainly, as e.g. OpenShift recipes support templates as well as lists.
+   *
+   * Types are left as `any` to allow overriding
+   *
+   * @param recipe the parsed and validated recipe
+   */
+  getRecipeItems(recipe: any): Array<any> {
+    return recipe.items;
+  }
+
+  /**
    * Simple validation of recipe.
    * @param recipe {ISupportedItemList}
    */
@@ -79,13 +91,16 @@ export class KubernetesEnvironmentRecipeParser implements IParser {
     if (!angular.isArray(items) || items.length === 0) {
       throw new TypeError(`Recipe kubernetes list should contain at least one 'item'.`);
     } else {
-      items.forEach((item: ISupportedListItem) => {
+      items.forEach((item: any) => {
         if (!item) {
           return;
         }
         // skip services
         if (item.kind && item.kind.toLowerCase() === 'service') {
           return;
+        }
+        if (!isSupportedItem(item)) {
+          throw new TypeError(`Item of kind '${item.kind}' is not supported in Kubernetes recipes`);
         }
         this.machineRecipeParser.validate(item);
       });

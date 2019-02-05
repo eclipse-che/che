@@ -23,14 +23,17 @@ public class CheContainer {
   private String name = null;
   private List<EnvVar> env = new ArrayList<>();
 
-  @JsonProperty("editor-commands")
+  @JsonProperty("editorCommands")
   private List<Command> commands = new ArrayList<>();
 
   private List<Volume> volumes = new ArrayList<>();
   private List<CheContainerPort> ports = new ArrayList<>();
 
-  @JsonProperty("memory-limit")
+  @JsonProperty("memoryLimit")
   private String memoryLimit = null;
+
+  @JsonProperty("mountSources")
+  private boolean mountSources = false;
 
   public CheContainer image(String image) {
     this.image = image;
@@ -138,6 +141,19 @@ public class CheContainer {
     this.memoryLimit = memoryLimit;
   }
 
+  public CheContainer mountSources(boolean mountSources) {
+    this.mountSources = mountSources;
+    return this;
+  }
+
+  public boolean isMountSources() {
+    return mountSources;
+  }
+
+  public void setMountSources(boolean mountSources) {
+    this.mountSources = mountSources;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -153,13 +169,21 @@ public class CheContainer {
         && Objects.equals(getVolumes(), that.getVolumes())
         && Objects.equals(getPorts(), that.getPorts())
         && Objects.equals(getMemoryLimit(), that.getMemoryLimit())
-        && Objects.equals(getName(), that.getName());
+        && Objects.equals(getName(), that.getName())
+        && isMountSources() == that.isMountSources();
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-        getImage(), getEnv(), getCommands(), getVolumes(), getPorts(), getMemoryLimit(), getName());
+        getImage(),
+        getEnv(),
+        getCommands(),
+        getVolumes(),
+        getPorts(),
+        getMemoryLimit(),
+        getName(),
+        isMountSources());
   }
 
   @Override
@@ -180,6 +204,8 @@ public class CheContainer {
         + memoryLimit
         + ", name="
         + name
+        + ", mountSources="
+        + mountSources
         + '}';
   }
 }

@@ -138,7 +138,7 @@ objects:
             value: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10
               -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
               -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true
-              -Xms20m "
+              -Xms20m -Djava.security.egd=file:/dev/./urandom"
           - name: CHE_WORKSPACE_AUTO_START
             value: "false"
           - name: CHE_INFRA_KUBERNETES_PVC_QUANTITY
@@ -300,7 +300,7 @@ parameters:
 - name: CHE_INFRA_KUBERNETES_PVC_PRECREATE__SUBPATHS
   displayName: Pre-create subpaths in PV
   description: Applied only if a common strategy is used. Required for Kubernetes versions before 1.6
-  value: 'false'
+  value: 'true'
 - name: CHE_OAUTH_GITHUB_CLIENTID
   displayName: GitHub Client ID
   description: GitHub oAuth app client ID. Applicable to Che single user only!

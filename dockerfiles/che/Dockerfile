@@ -17,7 +17,7 @@
 #             -v /home/user/che/storage:/home/user/che/storage \
 #             codenvy/che-server
 #           
-FROM openjdk:8u181-jre-alpine
+FROM openjdk:8u191-jdk-alpine
 
 ENV LANG=C.UTF-8 \
     DOCKER_VERSION=1.6.0 \

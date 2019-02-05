@@ -33,6 +33,7 @@ Variables:
     CHE_REGISTRY_HOST                   Hostname of Docker registry to launch, otherwise 'localhost'
     CHE_LOG_LEVEL                       [INFO | DEBUG] Sets the output level of Tomcat messages
     CHE_DEBUG_SERVER                    If true, activates Tomcat's JPDA debugging mode
+    CHE_DEBUG_SUSPEND                   If true, Tomcat will start suspended waiting for debugger
     CHE_HOME                            Where the Che assembly resides - self-determining if not set
 "
 
@@ -65,6 +66,8 @@ Variables:
   DEFAULT_CHE_DEBUG_SERVER=false
   CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER:-${DEFAULT_CHE_DEBUG_SERVER}}
 
+  DEFAULT_CHE_DEBUG_SUSPEND="false"
+  CHE_DEBUG_SUSPEND=${CHE_DEBUG_SUSPEND:-${DEFAULT_CHE_DEBUG_SUSPEND}}
 }
 
 error () {
@@ -106,6 +109,12 @@ set_environment_variables () {
   # Convert windows path name to POSIX
   if [[ "${CATALINA_HOME}" == *":"* ]]; then
     CATALINA_HOME=$(echo /"${CATALINA_HOME}" | sed  's|\\|/|g' | sed 's|:||g')
+  fi
+
+  if [[ "${CHE_DEBUG_SUSPEND}" == "true" ]]; then
+    export JPDA_SUSPEND="y"
+  else
+    export JPDA_SUSPEND="n"
   fi
 
   # Internal properties - should generally not be overridden

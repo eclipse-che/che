@@ -12,7 +12,6 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
@@ -29,15 +28,13 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.DevfileFormatException;
+import org.eclipse.che.api.devfile.server.DevfileException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -52,7 +49,6 @@ public class URLFactoryBuilder {
   private final String defaultCheEditor;
   private final String defaultChePlugins;
 
-  private final DevfileEnvironmentFactory devfileEnvironmentFactory;
   private final URLFetcher urlFetcher;
   private final DevfileManager devfileManager;
 
@@ -60,12 +56,10 @@ public class URLFactoryBuilder {
   public URLFactoryBuilder(
       @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
-      DevfileEnvironmentFactory devfileEnvironmentFactory,
       URLFetcher urlFetcher,
       DevfileManager devfileManager) {
     this.defaultCheEditor = defaultCheEditor;
     this.defaultChePlugins = defaultChePlugins;
-    this.devfileEnvironmentFactory = devfileEnvironmentFactory;
     this.urlFetcher = urlFetcher;
     this.devfileManager = devfileManager;
   }
@@ -79,7 +73,7 @@ public class URLFactoryBuilder {
   public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation) {
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
-      final String factoryJsonContent = urlFetcher.fetch(jsonFileLocation);
+      final String factoryJsonContent = urlFetcher.fetchSafely(jsonFileLocation);
       if (!isNullOrEmpty(factoryJsonContent)) {
         return Optional.of(
             DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class));
@@ -101,25 +95,24 @@ public class URLFactoryBuilder {
     if (devfileLocation == null) {
       return Optional.empty();
     }
-    final String devfileYamlContent = urlFetcher.fetch(devfileLocation);
+    final String devfileYamlContent = urlFetcher.fetchSafely(devfileLocation);
     if (isNullOrEmpty(devfileYamlContent)) {
       return Optional.empty();
     }
     try {
       Devfile devfile = devfileManager.parse(devfileYamlContent, false);
-      Optional<Pair<String, EnvironmentImpl>> environmentPair =
-          devfileEnvironmentFactory.create(devfile, fileUrlProvider);
-      WorkspaceConfigImpl wsConfig = devfileManager.createWorkspaceConfig(devfile);
-      if (environmentPair.isPresent()) {
-        final String environmentName = environmentPair.get().first;
-        wsConfig.setDefaultEnv(environmentName);
-        wsConfig.setEnvironments(singletonMap(environmentName, environmentPair.get().second));
-      }
+      WorkspaceConfigImpl wsConfig =
+          devfileManager.createWorkspaceConfig(
+              devfile,
+              filename ->
+                  fileUrlProvider != null
+                      ? urlFetcher.fetch(fileUrlProvider.apply(filename))
+                      : null);
       return Optional.of(
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
               .withWorkspace(DtoConverter.asDto(wsConfig)));
-    } catch (DevfileFormatException e) {
+    } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());
     } catch (IOException x) {
       throw new ServerException(x.getLocalizedMessage(), x);

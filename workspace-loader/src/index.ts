@@ -140,7 +140,7 @@ export class WorkspaceLoader {
     }
 
     load(): Promise<void> {
-        let workspaceKey = this.getWorkspaceKey();
+        const workspaceKey = this.getWorkspaceKey();
 
         if (!workspaceKey || workspaceKey === "") {
             console.error("Workspace is not defined");
@@ -165,7 +165,7 @@ export class WorkspaceLoader {
      * Returns workspace key from current address or empty string when it is undefined.
      */
     getWorkspaceKey(): string {
-        let result: string = window.location.pathname.substr(1);
+        const result: string = window.location.pathname.substr(1);
         return result.substr(result.indexOf('/') + 1, result.length);
     }
 
@@ -173,7 +173,7 @@ export class WorkspaceLoader {
      * Returns base websocket URL.
      */
     websocketBaseURL(): string {
-        let wsProtocol = 'http:' === document.location.protocol ? 'ws' : 'wss';
+        const wsProtocol = 'http:' === document.location.protocol ? 'ws' : 'wss';
         return wsProtocol + '://' + document.location.host;
     }
 
@@ -298,8 +298,8 @@ export class WorkspaceLoader {
 
     connectMasterApi(): Promise<CheJsonRpcMasterApi> {
         return new Promise((resolve, reject) => {
-            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT + this.getAuthenticationToken();
-            const master = new CheJsonRpcMasterApi(new WebsocketClient(), entryPoint);
+            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT;
+            const master = new CheJsonRpcMasterApi(new WebsocketClient(), entryPoint, this);
             master.connect(entryPoint)
                 .then(() => resolve(master))
                 .catch((error: any) => reject(error));
@@ -347,11 +347,11 @@ export class WorkspaceLoader {
      */
     openIDE() : void {
         this.getWorkspace(this.workspace.id).then((workspace) => {
-            let machines = workspace.runtime.machines;
-            for (let machineName in machines) {
-                let servers = machines[machineName].servers;
-                for (let serverId in servers) {
-                    let attributes = servers[serverId].attributes;
+            const machines = workspace.runtime.machines;
+            for (const machineName in machines) {
+                const servers = machines[machineName].servers;
+                for (const serverId in servers) {
+                    const attributes = servers[serverId].attributes;
                     if (attributes['type'] === 'ide') {
                         this.openURL(servers[serverId].url + this.getQueryString());
                         return;

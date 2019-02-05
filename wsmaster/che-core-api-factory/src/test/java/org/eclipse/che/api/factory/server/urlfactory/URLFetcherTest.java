@@ -43,7 +43,7 @@ public class URLFetcherTest {
   /** Check that when url is null, NPE is thrown */
   @Test(expectedExceptions = NullPointerException.class)
   public void checkNullURL() {
-    URLFetcher.fetch((String) null);
+    URLFetcher.fetchSafely((String) null);
   }
 
   /** Check that when url exists the content is retrieved */
@@ -54,14 +54,23 @@ public class URLFetcherTest {
     URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
-    String content = URLFetcher.fetch(urlJson.toString());
+    String content = URLFetcher.fetchSafely(urlJson.toString());
     assertEquals(content, "Hello");
   }
 
   /** Check when url is invalid */
   @Test
   public void checkUrlFileIsInvalid() {
-    String result = URLFetcher.fetch("hello world");
+    String result = URLFetcher.fetchSafely("hello world");
+    assertNull(result);
+  }
+
+  /** Check when url is invalid */
+  @Test(
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp = "no protocol: hello_world")
+  public void checkUnsafeGetUrlFileIsInvalid() throws Exception {
+    String result = URLFetcher.fetch("hello_world");
     assertNull(result);
   }
 
@@ -84,6 +93,21 @@ public class URLFetcherTest {
     Assert.assertNotNull(urlJson);
 
     // add extra path to make url not found
+    String content = URLFetcher.fetchSafely(urlJson.toString() + "-invalid");
+    assertNull(content);
+  }
+
+  /** Check that when url doesn't exist */
+  @Test(
+      expectedExceptions = IOException.class,
+      expectedExceptionsMessageRegExp = ".*.che.json-invalid \\(No such file or directory\\)")
+  public void checkMissingContentUnsafeGet() throws Exception {
+
+    // test to download this class object
+    URL urlJson = getClass().getClassLoader().getResource(".che.json");
+    Assert.assertNotNull(urlJson);
+
+    // add extra path to make url not found
     String content = URLFetcher.fetch(urlJson.toString() + "-invalid");
     assertNull(content);
   }
@@ -94,7 +118,7 @@ public class URLFetcherTest {
     URL urlJson = getClass().getClassLoader().getResource(".che.json");
     Assert.assertNotNull(urlJson);
 
-    String content = new OneByteURLFetcher().fetch(urlJson.toString());
+    String content = new OneByteURLFetcher().fetchSafely(urlJson.toString());
     assertEquals(content, "Hello".substring(0, 1));
   }
 

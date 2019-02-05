@@ -64,7 +64,7 @@ public class OnAppClosedImpl implements OnAppClosed {
   @Override
   public List<ActionImpl> getActions() {
     if (actions == null) {
-      return new ArrayList<>();
+      actions = new ArrayList<>();
     }
     return actions;
   }

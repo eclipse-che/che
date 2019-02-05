@@ -44,6 +44,13 @@
         class="fa fa-arrow-circle-right"></div>
     </div>
   </che-label-container>
+  <!-- Ephemeral mode -->
+  <che-label-container che-label-name="Ephemeral mode" che-label-description="In ephemeral mode workspace has no PVC attached.">
+      <md-switch ng-model="workspaceDetailsOverviewController.isEphemeralMode"
+        ng-change="workspaceDetailsOverviewController.onEphemeralModeChange()"
+        aria-label="ephemeral-mode">
+      </md-switch>
+  </che-label-container>
   <!-- Export workspace -->
   <che-label-container che-label-name="Export">
     <export-workspace workspace-id="{{workspaceDetailsOverviewController.workspaceDetails.id}}"

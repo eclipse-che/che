@@ -86,7 +86,9 @@ public class DockerCertificates {
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     final PEMKeyPair clientKeyPair;
     try (Reader reader = Files.newBufferedReader(clientKeyPath, Charset.defaultCharset())) {
-      clientKeyPair = (PEMKeyPair) new PEMParser(reader).readObject();
+      try (PEMParser parser = new PEMParser(reader)) {
+        clientKeyPair = (PEMKeyPair) parser.readObject();
+      }
     }
     final PKCS8EncodedKeySpec spec =
         new PKCS8EncodedKeySpec(clientKeyPair.getPrivateKeyInfo().getEncoded());

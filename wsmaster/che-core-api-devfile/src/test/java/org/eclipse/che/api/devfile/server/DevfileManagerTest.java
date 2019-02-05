@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
@@ -54,6 +53,7 @@ public class DevfileManagerTest {
   private DevfileIntegrityValidator integrityValidator;
   private DevfileConverter devfileConverter;
   @Mock private WorkspaceManager workspaceManager;
+  @Mock private DevfileEnvironmentFactory devfileEnvironmentFactory;
 
   private static final Subject TEST_SUBJECT = new SubjectImpl("name", "id", "token", false);
 
@@ -63,7 +63,7 @@ public class DevfileManagerTest {
   public void setUp() throws Exception {
     schemaValidator = spy(new DevfileSchemaValidator(new DevfileSchemaProvider()));
     integrityValidator = spy(new DevfileIntegrityValidator());
-    devfileConverter = spy(new DevfileConverter());
+    devfileConverter = spy(new DevfileConverter(devfileEnvironmentFactory));
     devfileManager =
         new DevfileManager(schemaValidator, integrityValidator, devfileConverter, workspaceManager);
   }
@@ -78,8 +78,8 @@ public class DevfileManagerTest {
   }
 
   @Test(
-      expectedExceptions = JsonProcessingException.class,
-      expectedExceptionsMessageRegExp = "Unrecognized field \"foos\" [\\w\\W]+")
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp = "Devfile schema validation failed. Errors: [\\w\\W]+")
   public void shouldThrowExceptionWhenUnconvertableContentProvided() throws Exception {
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"))
@@ -112,7 +112,7 @@ public class DevfileManagerTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
     Devfile devfile = devfileManager.parse(yamlContent, true);
     // when
-    devfileManager.createWorkspace(devfile);
+    devfileManager.createWorkspace(devfile, null);
     // then
     verify(workspaceManager).createWorkspace(captor.capture(), anyString(), anyMap());
     assertEquals("petclinic-dev-environment_2", captor.getValue().getName());

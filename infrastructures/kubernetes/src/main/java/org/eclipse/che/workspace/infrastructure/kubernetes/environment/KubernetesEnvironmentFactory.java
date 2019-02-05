@@ -24,6 +24,7 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -97,21 +98,35 @@ public class KubernetesEnvironmentFactory
                 + "application/x-yaml, text/yaml, text/x-yaml");
     }
 
-    final KubernetesList list =
-        clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
+    final KubernetesList list;
+    try {
+      list =
+          clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
+    } catch (KubernetesClientException e) {
+      // KubernetesClient wraps the error when a JsonMappingException occurs so we need the cause
+      String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
+      if (message.contains("\n")) {
+        // Clean up message if it comes from JsonMappingException. Format is e.g.
+        // `No resource type found for:v1#Route1\n at [...]`
+        message = message.split("\\n", 2)[0];
+      }
+      throw new ValidationException(format("Could not parse Kubernetes recipe: %s", message));
+    }
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Deployment> deployments = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
     Map<String, ConfigMap> configMaps = new HashMap<>();
+    Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
+    Map<String, Secret> secrets = new HashMap<>();
     boolean isAnyIngressPresent = false;
-    boolean isAnyPVCPresent = false;
-    boolean isAnySecretPresent = false;
     for (HasMetadata object : list.getItems()) {
+      checkNotNull(object.getKind(), "Environment contains object without specified kind field");
+      checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
+      checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
+
       if (object instanceof Pod) {
         Pod pod = (Pod) object;
-        checkNotNull(pod.getMetadata(), "Pod metadata must not be null");
-        checkNotNull(pod.getMetadata().getName(), "Pod metadata name must not be null");
         pods.put(pod.getMetadata().getName(), pod);
       } else if (object instanceof Deployment) {
         Deployment deployment = (Deployment) object;
@@ -122,15 +137,19 @@ public class KubernetesEnvironmentFactory
       } else if (object instanceof Ingress) {
         isAnyIngressPresent = true;
       } else if (object instanceof PersistentVolumeClaim) {
-        isAnyPVCPresent = true;
+        PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
+        pvcs.put(pvc.getMetadata().getName(), pvc);
       } else if (object instanceof Secret) {
-        isAnySecretPresent = true;
+        Secret secret = (Secret) object;
+        secrets.put(secret.getMetadata().getName(), secret);
       } else if (object instanceof ConfigMap) {
         ConfigMap configMap = (ConfigMap) object;
         configMaps.put(configMap.getMetadata().getName(), configMap);
       } else {
         throw new ValidationException(
-            format("Found unknown object type '%s'", object.getMetadata()));
+            format(
+                "Found unknown object type in recipe -- name: '%s', kind: '%s'",
+                object.getMetadata().getName(), object.getKind()));
       }
     }
 
@@ -138,17 +157,6 @@ public class KubernetesEnvironmentFactory
       warnings.add(
           new WarningImpl(
               Warnings.INGRESSES_IGNORED_WARNING_CODE, Warnings.INGRESSES_IGNORED_WARNING_MESSAGE));
-    }
-
-    if (isAnyPVCPresent) {
-      warnings.add(
-          new WarningImpl(Warnings.PVC_IGNORED_WARNING_CODE, Warnings.PVC_IGNORED_WARNING_MESSAGE));
-    }
-
-    if (isAnySecretPresent) {
-      warnings.add(
-          new WarningImpl(
-              Warnings.SECRET_IGNORED_WARNING_CODE, Warnings.SECRET_IGNORED_WARNING_MESSAGE));
     }
 
     addRamAttributes(machines, pods.values());
@@ -161,9 +169,10 @@ public class KubernetesEnvironmentFactory
             .setPods(pods)
             .setDeployments(deployments)
             .setServices(services)
+            .setPersistentVolumeClaims(pvcs)
             .setIngresses(new HashMap<>())
             .setPersistentVolumeClaims(new HashMap<>())
-            .setSecrets(new HashMap<>())
+            .setSecrets(secrets)
             .setConfigMaps(configMaps)
             .build();
 
@@ -191,6 +200,13 @@ public class KubernetesEnvironmentFactory
   private void checkNotNull(Object object, String errorMessage) throws ValidationException {
     if (object == null) {
       throw new ValidationException(errorMessage);
+    }
+  }
+
+  private void checkNotNull(Object object, String messageFmt, Object... messageArguments)
+      throws ValidationException {
+    if (object == null) {
+      throw new ValidationException(format(messageFmt, messageArguments));
     }
   }
 }

@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.activity.inject;
 
 import com.google.inject.AbstractModule;
 import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
+import org.eclipse.che.api.workspace.activity.WorkspaceActivityChecker;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityManager;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityService;
@@ -23,6 +24,7 @@ public class WorkspaceActivityModule extends AbstractModule {
   protected void configure() {
     bind(WorkspaceActivityService.class);
     bind(WorkspaceActivityManager.class);
+    bind(WorkspaceActivityChecker.class);
     bind(WorkspaceActivityDao.class).to(JpaWorkspaceActivityDao.class);
   }
 }

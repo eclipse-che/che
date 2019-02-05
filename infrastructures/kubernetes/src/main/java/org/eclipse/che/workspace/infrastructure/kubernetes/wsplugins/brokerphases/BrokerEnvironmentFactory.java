@@ -170,7 +170,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       @Nullable String brokerVolumeName) {
     final ContainerBuilder cb =
         new ContainerBuilder()
-            .withName(generateUniqueName(CONTAINER_NAME_SUFFIX))
+            .withName(image.toLowerCase().replaceAll("[^\\d\\w-]", "-"))
             .withImage(image)
             .withArgs(
                 "-push-endpoint",

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
+import java.util.HashMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -74,25 +75,43 @@ public class DevfileManager {
       throws DevfileFormatException, JsonProcessingException {
     JsonNode parsed = schemaValidator.validateBySchema(devfileContent, verbose);
     Devfile devfile = objectMapper.treeToValue(parsed, Devfile.class);
+    initializeMaps(devfile);
     integrityValidator.validateDevfile(devfile);
     return devfile;
+  }
+
+  private void initializeMaps(Devfile devfile) {
+    devfile
+        .getCommands()
+        .stream()
+        .filter(command -> command.getAttributes() == null)
+        .forEach(command -> command.setAttributes(new HashMap<>()));
+    devfile
+        .getTools()
+        .stream()
+        .filter(tool -> tool.getSelector() == null)
+        .forEach(command -> command.setSelector(new HashMap<>()));
   }
 
   /**
    * Creates {@link WorkspaceImpl} from given devfile with available name search
    *
    * @param devfile source devfile
+   * @param recipeFileContentProvider content provider for recipe-type tool
    * @return created {@link WorkspaceImpl} instance
    * @throws DevfileFormatException when devfile integrity validation fail
+   * @throws DevfileRecipeFormatException when devfile recipe format is invalid
+   * @throws DevfileException when any another devfile related error occurs
    * @throws ValidationException when incoming configuration or attributes are not valid
    * @throws ConflictException when any conflict occurs
    * @throws NotFoundException when user account is not found
    * @throws ServerException when other error occurs
    */
-  public WorkspaceImpl createWorkspace(Devfile devfile)
-      throws ServerException, DevfileFormatException, ConflictException, NotFoundException,
-          ValidationException {
-    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile);
+  public WorkspaceImpl createWorkspace(
+      Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
+      throws ServerException, ConflictException, NotFoundException, ValidationException,
+          DevfileException {
+    WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, recipeFileContentProvider);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
         findAvailableName(workspaceConfig), namespace, emptyMap());
@@ -102,12 +121,17 @@ public class DevfileManager {
    * Creates {@link WorkspaceConfigImpl} from given devfile with integrity validation
    *
    * @param devfile source devfile
+   * @param recipeFileContentProvider content provider for recipe-type tool
    * @return created {@link WorkspaceConfigImpl} instance
    * @throws DevfileFormatException when devfile integrity validation fail
+   * @throws DevfileRecipeFormatException when devfile recipe format is invalid
+   * @throws DevfileException when any another devfile related error occurs
    */
-  public WorkspaceConfigImpl createWorkspaceConfig(Devfile devfile) throws DevfileFormatException {
+  public WorkspaceConfigImpl createWorkspaceConfig(
+      Devfile devfile, RecipeFileContentProvider recipeFileContentProvider)
+      throws DevfileFormatException, DevfileRecipeFormatException, DevfileException {
     integrityValidator.validateDevfile(devfile);
-    return devfileConverter.devFileToWorkspaceConfig(devfile);
+    return devfileConverter.devFileToWorkspaceConfig(devfile, recipeFileContentProvider);
   }
 
   /**
