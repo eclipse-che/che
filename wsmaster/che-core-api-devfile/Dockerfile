@@ -26,6 +26,6 @@ RUN cd ..
 COPY ./src/main/resources/schema /schema
 RUN cd /schema && jsonschema2md -d . -e json -n
 RUN cd /schema/out && mv devfile.md index.md
-RUN cd /schema && tar zcf /tmp/out.tar.gz out/
+RUN cd /schema && tar zcf /tmp/out.tar.gz -C out .
 
 CMD zcat /tmp/out.tar.gz

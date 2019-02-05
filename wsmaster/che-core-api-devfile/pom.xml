@@ -193,11 +193,7 @@
      </build>
     <profiles>
     <profile>
-        <!-- Docker build used by default, to use native build, use -Pnative -->
-        <id>docker</id>
-        <activation>
-            <activeByDefault>false</activeByDefault>
-        </activation>
+        <id>devfile-docs-docker</id>
         <build>
             <plugins>
                 <plugin>
@@ -231,7 +227,7 @@
                                 <target>
                                     <exec executable="bash">
                                         <arg value="-c" />
-                                        <arg value="docker run --rm eclipse-che-devfile-docs | tar -C target/ -xf -" />
+                                        <arg value="mkdir -p target/docs/ | docker run --rm eclipse-che-devfile-docs | tar -C target/docs/ -xf -" />
                                     </exec>
                                 </target>
                             </configuration>
@@ -242,7 +238,7 @@
         </build>
     </profile>
     <profile>
-            <id>native</id>
+            <id>devfile-docs-native</id>
             <build>
                 <plugins>
                     <plugin>
@@ -292,6 +288,8 @@
                                         <exec dir="${basedir}/target" executable="jsonschema2md" failonerror="true">
                                             <arg value="-d" />
                                             <arg value="classes/schema" />
+                                            <arg value="-o" />
+                                            <arg value="docs" />
                                             <arg value="-n" />
                                             <arg value="-e" />
                                             <arg value="json"/>
@@ -307,7 +305,7 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <exec dir="${basedir}/target/out" executable="mv" failonerror="true">
+                                        <exec dir="${basedir}/target/docs" executable="mv" failonerror="true">
                                             <arg value="devfile.md" />
                                             <arg value="index.md" />
                                         </exec>
