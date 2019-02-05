@@ -15,6 +15,7 @@ import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
@@ -191,7 +192,7 @@ public class DevfileConverter {
     List<CommandImpl> commands = new ArrayList<>();
     for (Action devAction : devCommand.getActions()) {
       CommandImpl command = new CommandImpl();
-      command.setName(devCommand.getName() + ":" + devAction.getTool());
+      command.setName(devCommand.getName());
       command.setType(devAction.getType());
       command.setCommandLine(devAction.getCommand());
       if (devAction.getWorkdir() != null) {
@@ -204,7 +205,7 @@ public class DevfileConverter {
               .filter(tool -> tool.getName().equals(devAction.getTool()))
               .findFirst();
       if (toolOfCommand.isPresent() && !isNullOrEmpty(toolOfCommand.get().getId())) {
-        command.getAttributes().put("pluginId", toolOfCommand.get().getId());
+        command.getAttributes().put(PLUGIN_ATTRIBUTE, toolOfCommand.get().getId());
       }
       if (devCommand.getAttributes() != null) {
         command.getAttributes().putAll(devCommand.getAttributes());
@@ -221,12 +222,12 @@ public class DevfileConverter {
     if (!isNullOrEmpty(workingDir)) {
       action.setWorkdir(workingDir);
     }
-    action.setTool(toolsIdToName.getOrDefault(command.getAttributes().get("pluginId"), ""));
+    action.setTool(toolsIdToName.getOrDefault(command.getAttributes().get(PLUGIN_ATTRIBUTE), ""));
     devCommand.getActions().add(action);
     devCommand.setAttributes(command.getAttributes());
     // Remove internal attributes
     devCommand.getAttributes().remove(WORKING_DIRECTORY_ATTRIBUTE);
-    devCommand.getAttributes().remove("pluginId");
+    devCommand.getAttributes().remove(PLUGIN_ATTRIBUTE);
     return devCommand;
   }
 

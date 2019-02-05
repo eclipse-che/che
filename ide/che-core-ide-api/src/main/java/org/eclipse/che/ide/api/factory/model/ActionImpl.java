@@ -41,7 +41,7 @@ public class ActionImpl implements Action {
   @Override
   public Map<String, String> getProperties() {
     if (properties == null) {
-      return new HashMap<>();
+      properties = new HashMap<>();
     }
     return properties;
   }

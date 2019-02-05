@@ -438,21 +438,25 @@ public class CheBootstrap extends EverrestGuiceContextListener {
       String key = prefix == null ? name : (prefix + name);
       Set<String> aliasesForName = bindMap.get(name);
       if (value == null) {
+        LOG.debug("Binding `{}` to `null`", key);
         bind(String.class).annotatedWith(Names.named(key)).toProvider(Providers.<String>of(null));
         if (aliasesForName != null) {
           for (String alias : aliasesForName) {
+            String bindKey = prefix == null ? alias : prefix + alias;
+            LOG.debug("Binding `{}` to `null`", bindKey);
             bind(String.class)
-                .annotatedWith(Names.named(prefix == null ? alias : prefix + alias))
+                .annotatedWith(Names.named(bindKey))
                 .toProvider(Providers.<String>of(null));
           }
         }
       } else {
+        LOG.debug("Binding `{}` to `{}`", key, value);
         bindConstant().annotatedWith(Names.named(key)).to(value);
         if (aliasesForName != null) {
           for (String alias : aliasesForName) {
-            bindConstant()
-                .annotatedWith(Names.named(prefix == null ? alias : prefix + alias))
-                .to(value);
+            String bindKey = prefix == null ? alias : prefix + alias;
+            LOG.debug("Binding `{}` to `{}`", bindKey, value);
+            bindConstant().annotatedWith(Names.named(bindKey)).to(value);
           }
         }
       }
@@ -467,6 +471,7 @@ public class CheBootstrap extends EverrestGuiceContextListener {
       if (resolved == null) {
         resolved = System.getenv(placeholderName);
       }
+      LOG.debug("Resolving `{}` to `{}`", placeholderName, resolved);
       return resolved;
     }
   }

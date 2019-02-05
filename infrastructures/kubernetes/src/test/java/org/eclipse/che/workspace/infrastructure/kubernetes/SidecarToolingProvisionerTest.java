@@ -94,7 +94,7 @@ public class SidecarToolingProvisionerTest {
   public void shouldNotAddInitContainerWhenWorkspaceIsNotEphemeral() throws Exception {
     provisioner.provision(runtimeId, startSynchronizer, nonEphemeralEnvironment);
 
-    verify(chePluginsApplier, times(1)).apply(any(), any());
+    verify(chePluginsApplier, times(1)).apply(any(), any(), any());
     verify(brokerApplier, times(0)).apply(any(), any(), any());
   }
 
@@ -102,7 +102,7 @@ public class SidecarToolingProvisionerTest {
   public void shouldIncludeInitContainerWhenWorkspaceIsEphemeral() throws Exception {
     provisioner.provision(runtimeId, startSynchronizer, ephemeralEnvironment);
 
-    verify(chePluginsApplier, times(1)).apply(any(), any());
+    verify(chePluginsApplier, times(1)).apply(any(), any(), any());
     verify(brokerApplier, times(1)).apply(any(), any(), any());
   }
 }

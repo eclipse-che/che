@@ -17,17 +17,12 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
-import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.ROUTES_IGNORED_WARNING_MESSAGE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.ROUTE_IGNORED_WARNING_CODE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.SECRET_IGNORED_WARNING_CODE;
-import static org.eclipse.che.workspace.infrastructure.openshift.Warnings.SECRET_IGNORED_WARNING_MESSAGE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -49,6 +44,7 @@ import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.PodTemplateSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
@@ -56,6 +52,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
 import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
+import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import java.io.InputStream;
@@ -64,12 +61,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -93,7 +88,7 @@ public class OpenShiftEnvironmentFactoryTest {
   private OpenShiftEnvironmentFactory osEnvFactory;
 
   @Mock private OpenShiftClientFactory clientFactory;
-  @Mock private KubernetesEnvironmentValidator k8sEnvValidator;
+  @Mock private OpenShiftEnvironmentValidator openShiftEnvValidator;
   @Mock private OpenShiftClient client;
   @Mock private InternalRecipe internalRecipe;
   @Mock private KubernetesListMixedOperation listMixedOperation;
@@ -112,7 +107,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void setup() throws Exception {
     osEnvFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, null, clientFactory, k8sEnvValidator, memoryProvisioner);
+            null, null, null, clientFactory, openShiftEnvValidator, memoryProvisioner);
     when(clientFactory.create()).thenReturn(client);
     when(client.lists()).thenReturn(listMixedOperation);
     when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
@@ -159,38 +154,34 @@ public class OpenShiftEnvironmentFactoryTest {
   }
 
   @Test
-  public void ignoreRoutesWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> objects =
-        asList(
-            new RouteBuilder().withNewMetadata().withName("route1").endMetadata().build(),
-            new RouteBuilder().withNewMetadata().withName("route2").endMetadata().build());
-    when(parsedList.getItems()).thenReturn(objects);
-
-    final OpenShiftEnvironment parsed =
-        osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
-
-    assertTrue(parsed.getRoutes().isEmpty());
-    assertEquals(parsed.getWarnings().size(), 1);
-    assertEquals(
-        parsed.getWarnings().get(0),
-        new WarningImpl(ROUTE_IGNORED_WARNING_CODE, ROUTES_IGNORED_WARNING_MESSAGE));
-  }
-
-  @Test
-  public void ignoreSecretsWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> recipeObjects =
-        singletonList(
-            new SecretBuilder().withNewMetadata().withName("secret").endMetadata().build());
+  public void addRoutesWhenRecipeContainsThem() throws Exception {
+    Route route = new RouteBuilder().withNewMetadata().withName("test-route").endMetadata().build();
+    final List<HasMetadata> recipeObjects = singletonList(route);
     when(parsedList.getItems()).thenReturn(recipeObjects);
 
     final OpenShiftEnvironment parsed =
         osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertTrue(parsed.getSecrets().isEmpty());
-    assertEquals(parsed.getWarnings().size(), 1);
+    assertEquals(parsed.getRoutes().size(), 1);
     assertEquals(
-        parsed.getWarnings().get(0),
-        new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
+        parsed.getRoutes().get("test-route").getMetadata().getName(),
+        route.getMetadata().getName());
+  }
+
+  @Test
+  public void addSecretsWhenRecipeContainsThem() throws Exception {
+    Secret secret =
+        new SecretBuilder().withNewMetadata().withName("test-secret").endMetadata().build();
+    final List<HasMetadata> recipeObjects = singletonList(secret);
+    when(parsedList.getItems()).thenReturn(recipeObjects);
+
+    final OpenShiftEnvironment parsed =
+        osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    assertEquals(parsed.getSecrets().size(), 1);
+    assertEquals(
+        parsed.getSecrets().get("test-secret").getMetadata().getName(),
+        secret.getMetadata().getName());
   }
 
   @Test

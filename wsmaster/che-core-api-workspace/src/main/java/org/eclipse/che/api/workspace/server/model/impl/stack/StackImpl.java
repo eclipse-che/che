@@ -197,7 +197,7 @@ public class StackImpl implements Stack {
   @Override
   public List<String> getTags() {
     if (tags == null) {
-      return new ArrayList<>();
+      tags = new ArrayList<>();
     }
     return tags;
   }
@@ -218,7 +218,7 @@ public class StackImpl implements Stack {
   @Override
   public List<StackComponentImpl> getComponents() {
     if (components == null) {
-      return new ArrayList<>();
+      components = new ArrayList<>();
     }
     return components;
   }

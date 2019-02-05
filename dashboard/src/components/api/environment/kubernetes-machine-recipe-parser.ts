@@ -13,7 +13,11 @@
 
 import {IParser} from './parser';
 
-export type ISupportedListItem = IPodItem | IDeploymentItem | IConfigMapItem;
+export type ISupportedListItem = IPodItem | IDeploymentItem | IConfigMapItem | ISecretItem;
+
+export function isSupportedItem(item: any): item is ISupportedListItem {
+  return isDeploymentItem(item) || isPodItem(item) || isConfigMapItem(item) || isSecretItem(item);
+}
 
 export function isDeploymentItem(item: ISupportedListItem): item is IDeploymentItem {
   return (item.kind && item.kind.toLowerCase() === 'deployment');
@@ -25,6 +29,10 @@ export function isPodItem(item: ISupportedListItem): item is IPodItem {
 
 export function isConfigMapItem(item: ISupportedListItem): item is IConfigMapItem {
   return (item.kind && item.kind.toLowerCase() === 'configmap');
+}
+
+export function isSecretItem(item: ISupportedListItem): item is ISecretItem {
+  return (item.kind && item.kind.toLowerCase() === 'secret');
 }
 
 export function getPodItemOrNull(item: ISupportedListItem): IPodItem {
@@ -84,6 +92,14 @@ export interface IConfigMapItem {
   data: { [propName: string]: string | Object };
 }
 
+export interface ISecretItem {
+  apiVersion: string;
+  kind: string;
+  metadata: IObjectMetadata;
+  data?: { [propName: string]: string | Object };
+  stringData?: { [propName: string]: string | Object};
+}
+
 /**
  * Wrapper for jsyaml and simple validator for kubernetes machine recipe.
  *
@@ -141,6 +157,8 @@ export class KubernetesMachineRecipeParser implements IParser {
       this.validatePod(<IPodItem>recipe);
     } else if (isConfigMapItem(recipe)) {
       this.validateConfigMap(<IConfigMapItem>recipe);
+    } else if (isSecretItem(recipe)) {
+      this.validateSecret(<ISecretItem> recipe);
     }
   }
 
@@ -222,6 +240,15 @@ export class KubernetesMachineRecipeParser implements IParser {
     if (!configMap.data) {
       throw new TypeError(`Recipe config map item should contain data section.`);
     }
+  }
+
+  validateSecret(secret: ISecretItem) {
+    this.validateMetadata(secret.metadata);
+    if (!secret.data && !secret.stringData) {
+      throw new TypeError(`Recipe secret item should contain either data or stringData section.`);
+    }
+    // secret.data values must also be base64 encoded but nodejs doesn't allow an easy way to check
+    // if the encoding is valid (ignores errors silently).
   }
 
   validateMetadata(metadata: IObjectMetadata) {
