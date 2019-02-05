@@ -358,8 +358,7 @@ export class WorkspaceLoader {
                     }
                 }
             }
-            //fall back to GWT IDE behavior
-            this.openURL(workspace.links.ide.replace('/workspace-loader','') + this.getQueryString());
+            this.openURL(workspace.links.ide + this.getQueryString());
         });
     }
 
