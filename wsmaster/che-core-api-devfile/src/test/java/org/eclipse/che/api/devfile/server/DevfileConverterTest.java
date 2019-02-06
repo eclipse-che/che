@@ -16,6 +16,7 @@ import static org.testng.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import java.io.IOException;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
@@ -31,51 +32,45 @@ import org.testng.reporters.Files;
 public class DevfileConverterTest {
 
   private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-  private DevfileEnvironmentFactory devfileEnvironmentFactory = new DevfileEnvironmentFactory();
+  private KubernetesToolApplier kubernetesToolApplier = new KubernetesToolApplier();
   private DevfileConverter devfileConverter;
 
   @BeforeClass
   public void setUp() {
-    devfileConverter = new DevfileConverter(devfileEnvironmentFactory);
+    devfileConverter = new DevfileConverter(kubernetesToolApplier);
   }
 
   @Test
   public void shouldBuildWorkspaceConfigFromYamlDevFile() throws Exception {
+    // given
+    String devfileYaml = getTestResource("devfile.yaml");
+    String openshiftToolYaml = getTestResource("petclinic.yaml");
+    Devfile devFile = objectMapper.readValue(devfileYaml, Devfile.class);
 
-    String yamlContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-
-    String yamlRecipeContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
-
-    Devfile devFile = objectMapper.readValue(yamlContent, Devfile.class);
-
+    // when
     WorkspaceConfigImpl wsConfigImpl =
-        devfileConverter.devFileToWorkspaceConfig(devFile, local -> yamlRecipeContent);
+        devfileConverter.devFileToWorkspaceConfig(devFile, local -> openshiftToolYaml);
 
-    String jsonContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
-
-    assertEquals(wsConfigImpl, JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null));
+    // then
+    WorkspaceConfigImpl expectedWokrspaceConfig =
+        JsonHelper.fromJson(
+            getTestResource("workspace_config.json"), WorkspaceConfigImpl.class, null);
+    assertEquals(wsConfigImpl, expectedWokrspaceConfig);
   }
 
   @Test
   public void shouldBuildYamlDevFileFromWorkspaceConfig() throws Exception {
-
-    String jsonContent =
-        Files.readFile(
-            getClass()
-                .getClassLoader()
-                .getResourceAsStream("workspace_config_no_environment.json"));
+    // given
+    String workspaceConfigJson = getTestResource("workspace_config_no_environment.json");
     WorkspaceConfigImpl workspaceConfig =
-        JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
+        JsonHelper.fromJson(workspaceConfigJson, WorkspaceConfigImpl.class, null);
+
+    // when
     Devfile devFile = devfileConverter.workspaceToDevFile(workspaceConfig);
 
-    String yamlContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-
+    // then
+    String yamlContent = getTestResource("devfile.yaml");
     Devfile expectedDevFile = objectMapper.readValue(yamlContent, Devfile.class);
-
     // Recursively compare
     assertEquals(devFile.getSpecVersion(), expectedDevFile.getSpecVersion());
     assertEquals(devFile.getName(), expectedDevFile.getName());
@@ -98,8 +93,8 @@ public class DevfileConverterTest {
           expectedDevFile
               .getCommands()
               .stream()
-              .filter(command1 -> command1.getName().equals(command.getName().split(":")[0]))
-              .findFirst()
+              .filter(command1 -> command1.getName().equals(command.getName()))
+              .findAny()
               .get();
       for (Action action : command.getActions()) {
         Action expectedAction =
@@ -107,7 +102,7 @@ public class DevfileConverterTest {
                 .getActions()
                 .stream()
                 .filter(action1 -> action1.getTool().equals(action.getTool()))
-                .findFirst()
+                .findAny()
                 .get();
         assertEquals(action.getCommand(), expectedAction.getCommand());
         assertEquals(action.getType(), expectedAction.getType());
@@ -140,12 +135,15 @@ public class DevfileConverterTest {
       expectedExceptionsMessageRegExp =
           "Workspace .* cannot be converted to devfile since it contains environments which have no equivalent in devfile model")
   public void shouldThrowExceptionWhenWorkspaceHasEnvironments() throws Exception {
-    String jsonContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("workspace_config.json"));
-    WorkspaceConfigImpl workspaceConfig =
-        JsonHelper.fromJson(jsonContent, WorkspaceConfigImpl.class, null);
+    // given
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     workspaceConfig.getEnvironments().put("env1", new EnvironmentImpl());
 
+    // when
     devfileConverter.workspaceToDevFile(workspaceConfig);
+  }
+
+  private String getTestResource(String resource) throws IOException {
+    return Files.readFile(getClass().getClassLoader().getResourceAsStream(resource));
   }
 }
