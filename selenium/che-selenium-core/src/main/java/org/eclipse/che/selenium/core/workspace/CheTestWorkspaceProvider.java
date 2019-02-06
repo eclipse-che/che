@@ -52,7 +52,7 @@ public class CheTestWorkspaceProvider implements TestWorkspaceProvider {
   private ArrayBlockingQueue<TestWorkspace> testWorkspaceQueue;
 
   @Inject
-  CheTestWorkspaceProvider(
+  public CheTestWorkspaceProvider(
       @Named("che.workspace_pool_size") String poolSize,
       @Named("che.threads") int threads,
       @Named("workspace.default_memory_gb") int defaultMemoryGb,

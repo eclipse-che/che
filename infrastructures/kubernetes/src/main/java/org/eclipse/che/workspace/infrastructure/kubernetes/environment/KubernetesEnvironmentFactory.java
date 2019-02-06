@@ -17,7 +17,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
@@ -98,10 +97,10 @@ public class KubernetesEnvironmentFactory
                 + "application/x-yaml, text/yaml, text/x-yaml");
     }
 
-    final KubernetesList list;
+    final List<HasMetadata> list;
     try {
-      list =
-          clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
+      // Load list of Kubernetes objects into java List.
+      list = clientFactory.create().load(new ByteArrayInputStream(content.getBytes())).get();
     } catch (KubernetesClientException e) {
       // KubernetesClient wraps the error when a JsonMappingException occurs so we need the cause
       String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
@@ -120,7 +119,7 @@ public class KubernetesEnvironmentFactory
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     Map<String, Secret> secrets = new HashMap<>();
     boolean isAnyIngressPresent = false;
-    for (HasMetadata object : list.getItems()) {
+    for (HasMetadata object : list) {
       checkNotNull(object.getKind(), "Environment contains object without specified kind field");
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
       checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
