@@ -22,7 +22,6 @@ RUN git clone https://github.com/adobe/jsonschema2md.git
 RUN cd jsonschema2md && npm install && npm link
 RUN cd ..
 
-
 COPY ./src/main/resources/schema /schema
 RUN cd /schema && jsonschema2md -d . -e json -n
 RUN cd /schema/out && mv devfile.md index.md
