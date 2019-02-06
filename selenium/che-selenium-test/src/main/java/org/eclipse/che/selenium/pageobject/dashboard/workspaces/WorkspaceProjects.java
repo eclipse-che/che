@@ -54,8 +54,6 @@ public class WorkspaceProjects {
   public interface Locators {
     String PROJECT_BY_NAME = "//div[@aria-label='project-item']/span[text()='%s']";
     String DELETE_PROJECT = "//button/span[text()='Delete']";
-    String DELETE_SELECTED_PROJECTS = "//che-button-primary[@che-button-title='Delete']/button";
-    String DELETE_IT_PROJECT = "//md-dialog//che-button-primary[@che-button-title='Delete']/button";
     String ADD_NEW_PROJECT_BUTTON = "//che-button-primary[@che-button-title='Add Project']/button";
     String PROJECT_CHECKBOX = "//md-checkbox[contains(@aria-label, 'Project %s')]";
     String SEARCH_FIELD_XPATH = "//workspace-details-projects//input[@placeholder='Search']";
@@ -176,38 +174,6 @@ public class WorkspaceProjects {
         .until(
             invisibilityOfElementLocated(
                 By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName))));
-  }
-
-  /**
-   * open settings for project by name in the 'All projects' tab
-   *
-   * @param projectName name of project
-   */
-  public void openSettingsForProjectByName(String projectName) {
-    seleniumWebDriverHelper.waitAndClick(
-        By.xpath(String.format(Locators.PROJECT_BY_NAME, projectName)));
-
-    seleniumWebDriverHelper.waitVisibility(By.xpath(Locators.DELETE_PROJECT));
-  }
-
-  /** click on 'DELETE' button in settings of project */
-  public void clickOnDeleteProject() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.DELETE_PROJECT)))
-        .click();
-  }
-
-  /** click on 'DELETE IT!' button in the confirming window */
-  public void clickOnDeleteItInDialogWindow() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.DELETE_IT_PROJECT)))
-        .click();
-  }
-
-  public void clickOnDeleteProjectButton() {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
-        .until(visibilityOfElementLocated(By.xpath(Locators.DELETE_SELECTED_PROJECTS)))
-        .click();
   }
 
   /** click on the Add Project button */
