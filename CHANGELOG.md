@@ -62,13 +62,6 @@
 - Added support of PVC in Kuberentes/OpenShift recipe [\#12335](https://github.com/eclipse/che/pull/12335) ([sleshchenko](https://github.com/sleshchenko))
 - Detect Simple Java Projects on Import [\#12041](https://github.com/eclipse/che/pull/12041) ([tsmaeder](https://github.com/tsmaeder))
 
-## [6.17.1](https://github.com/eclipse/che/tree/6.17.1) (2019-01-22)
-[Full Changelog](https://github.com/eclipse/che/compare/6.17.0...6.17.1)
-
-**Merged pull requests:**
-
-- Fix outdated theia image readme file [\#12468](https://github.com/eclipse/che/pull/12468) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
-
 
 ## [6.17.1](https://github.com/eclipse/che/tree/6.17.1) (2019-01-22)
 [Full Changelog](https://github.com/eclipse/che/compare/6.17.0...6.17.1)
