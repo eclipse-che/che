@@ -190,7 +190,7 @@
                 </configuration>
             </plugin>
         </plugins>
-     </build>
+    </build>
     <profiles>
     <profile>
         <id>devfile-docs-docker</id>
