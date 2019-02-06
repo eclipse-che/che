@@ -49,8 +49,8 @@
     </scm>
     <properties>
         <che.dashboard.version>6.18.1-SNAPSHOT</che.dashboard.version>
-        <che.docs.version>6.18.0</che.docs.version>
-        <che.lib.version>6.18.0</che.lib.version>
+        <che.docs.version>6.18.1-SNAPSHOT</che.docs.version>
+        <che.lib.version>6.18.1-SNAPSHOT</che.lib.version>
         <che.ls.jdt.version>0.0.3</che.ls.jdt.version>
         <che.version>6.18.1-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
