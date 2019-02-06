@@ -8,10 +8,10 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-# This is a Dockerfile allowing to build dashboard by using a docker container.
-# Build step: $ docker build -t eclipse-che-dashboard
+# This is a Dockerfile allowing to build devfile documentaion by using a docker container.
+# Build step: $ docker build -t eclipse-che-devfile-docs
 # It builds an archive file that can be used by doing later
-#  $ docker run --rm eclipse-che-dashboard | tar -C target/ -zxf -
+#  $  docker run --rm eclipse-che-devfile-docs | tar -C target/docs/ -xf -
 FROM node:8.10.0
 
 RUN apt-get update && \
