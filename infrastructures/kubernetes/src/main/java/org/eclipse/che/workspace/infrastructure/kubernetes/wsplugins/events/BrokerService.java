@@ -98,18 +98,29 @@ public class BrokerService {
       LOG.error("Broker event skipped due to illegal content: {}", event);
       return;
     }
-    eventService.publish(new BrokerEvent(event, parseTooling(encodedTooling)));
+    BrokerEvent brokerEvent;
+    List<ChePlugin> tooling = null;
+    if (!isNullOrEmpty(encodedTooling)) {
+      try {
+        tooling = parseTooling(encodedTooling);
+      } catch (IOException e) {
+        if (isNullOrEmpty(event.getError())) {
+          event.withError(e.getMessage());
+        }
+      }
+    }
+    brokerEvent = new BrokerEvent(event, tooling);
+    eventService.publish(brokerEvent);
   }
 
   @Nullable
-  private List<ChePlugin> parseTooling(String toolingString) {
-    if (!isNullOrEmpty(toolingString)) {
-      try {
-        return objectMapper.readValue(toolingString, new TypeReference<List<ChePlugin>>() {});
-      } catch (IOException e) {
-        LOG.error("Parsing Che plugin broker event failed. Error: " + e.getMessage(), e);
-      }
+  private List<ChePlugin> parseTooling(String toolingString) throws IOException {
+    try {
+      return objectMapper.readValue(toolingString, new TypeReference<List<ChePlugin>>() {});
+    } catch (IOException e) {
+      String errMessage = "Parsing Che plugin broker event failed. Error: " + e.getMessage();
+      LOG.error(errMessage, e);
+      throw new IOException(errMessage, e);
     }
-    return null;
   }
 }
