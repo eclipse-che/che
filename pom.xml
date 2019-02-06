@@ -40,7 +40,6 @@
         <module>workspace-loader</module>
         <module>assembly</module>
         <module>selenium</module>
-        <module>typescript-dto</module>
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
