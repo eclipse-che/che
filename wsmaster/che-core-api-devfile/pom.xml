@@ -192,53 +192,53 @@
         </plugins>
     </build>
     <profiles>
-    <profile>
-        <id>devfile-docs-docker</id>
-        <build>
-            <plugins>
-                <plugin>
-                    <artifactId>maven-antrun-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>build-image</id>
-                            <phase>generate-resources</phase>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <target>
-                                    <!-- build docs inside container -->
-                                    <exec dir="${basedir}" executable="docker" failonerror="true">
-                                        <arg value="build" />
-                                        <arg value="-t" />
-                                        <arg value="eclipse-che-devfile-docs" />
-                                        <arg value="." />
-                                    </exec>
-                                </target>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>unpack-docker-build</id>
-                            <phase>generate-resources</phase>
-                            <goals>
-                              <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <target>
-                                    <!-- push result to host machine -->
-                                    <exec executable="bash">
-                                        <arg value="-c" />
-                                        <arg value="mkdir -p target/docs/ | docker run --rm eclipse-che-devfile-docs | tar -C target/docs/ -xf -" />
-                                    </exec>
-                                </target>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-            </plugins>
-        </build>
-    </profile>
-    <profile>
+        <profile>
+            <id>devfile-docs-docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>build-image</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- build docs inside container -->
+                                        <exec dir="${basedir}" executable="docker" failonerror="true">
+                                            <arg value="build" />
+                                            <arg value="-t" />
+                                            <arg value="eclipse-che-devfile-docs" />
+                                            <arg value="." />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-docker-build</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <!-- push result to host machine -->
+                                        <exec executable="bash">
+                                            <arg value="-c" />
+                                            <arg value="mkdir -p target/docs/ | docker run --rm eclipse-che-devfile-docs | tar -C target/docs/ -xf -" />
+                                        </exec>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
             <id>devfile-docs-native</id>
             <build>
                 <plugins>
@@ -277,7 +277,7 @@
                                         </exec>
                                     </target>
                                 </configuration>
-                            </execution>
+                             </execution>
                             <execution>
                                 <id>build-docs</id>
                                 <phase>compile</phase>
@@ -319,5 +319,5 @@
                 </plugins>
             </build>
         </profile>
-  </profiles>
+    </profiles>
 </project>
