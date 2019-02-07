@@ -17,6 +17,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
+import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
@@ -152,7 +153,8 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommand.getType(), "custom");
     assertEquals(
         envCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), pluginCommand.getWorkingDir());
-    assertEquals(envCommand.getAttributes().get("machineName"), POD_NAME + "/plugin-container");
+    assertEquals(
+        envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), POD_NAME + "/plugin-container");
   }
 
   @Test
@@ -176,7 +178,8 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommand.getType(), pluginCommand.getType());
     assertEquals(envCommand.getCommandLine(), pluginCommand.getCommandLine());
     assertEquals(envCommand.getAttributes().get("plugin"), pluginRef);
-    assertEquals(envCommand.getAttributes().get("machineName"), POD_NAME + "/plugin-container");
+    assertEquals(
+        envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), POD_NAME + "/plugin-container");
   }
 
   @Test

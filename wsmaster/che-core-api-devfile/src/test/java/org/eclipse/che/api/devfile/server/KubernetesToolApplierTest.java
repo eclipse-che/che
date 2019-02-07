@@ -12,35 +12,56 @@
 package org.eclipse.che.api.devfile.server;
 
 import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
+import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.DevfileEnvironmentFactory.DEFAULT_RECIPE_CONTENT_TYPE;
+import static org.eclipse.che.api.devfile.server.KubernetesToolApplier.YAML_CONTENT_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.devfile.model.Action;
+import org.eclipse.che.api.devfile.model.Command;
+import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
-import org.mockito.InjectMocks;
-import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.Listeners;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
-@Listeners(MockitoTestNGListener.class)
-public class DevfileEnvironmentFactoryTest {
+/**
+ * Tests {@link KubernetesToolApplier}.
+ *
+ * @author Max Shaposhnyk
+ * @author Sergii Leshchenko
+ */
+public class KubernetesToolApplierTest {
 
   public static final String LOCAL_FILENAME = "local.yaml";
   public static final String TOOL_NAME = "foo";
 
-  @InjectMocks private DevfileEnvironmentFactory factory;
+  private WorkspaceConfigImpl workspaceConfig;
+  private Devfile devfile;
+
+  private KubernetesToolApplier applier;
+
+  @BeforeMethod
+  public void setUp() {
+    devfile = new Devfile();
+    applier = new KubernetesToolApplier();
+
+    workspaceConfig = new WorkspaceConfigImpl();
+  }
 
   @Test(
       expectedExceptions = DevfileException.class,
@@ -56,7 +77,7 @@ public class DevfileEnvironmentFactoryTest {
       throws Exception {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
-    factory.createEnvironment(tool, null);
+    applier.apply(tool, devfile, workspaceConfig, null);
   }
 
   @Test(
@@ -70,21 +91,7 @@ public class DevfileEnvironmentFactoryTest {
   public void shouldReturnEmptyOptionalWhenNoRecipeToolIsPresent() throws Exception {
     Tool tool = new Tool().withType(EDITOR_TOOL_TYPE).withId("foo").withName(TOOL_NAME);
 
-    factory.createEnvironment(tool, null);
-  }
-
-  @Test(
-      expectedExceptions = DevfileException.class,
-      expectedExceptionsMessageRegExp =
-          "The local file '"
-              + LOCAL_FILENAME
-              + "' defined in tool '"
-              + TOOL_NAME
-              + "' is unreachable or empty.")
-  public void shouldThrowExceptionWhenRecipeContentIsNull() throws Exception {
-    Tool tool =
-        new Tool().withType(OPENSHIFT_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
-    factory.createEnvironment(tool, s -> null);
+    applier.apply(tool, devfile, workspaceConfig, null);
   }
 
   @Test(
@@ -98,7 +105,7 @@ public class DevfileEnvironmentFactoryTest {
   public void shouldThrowExceptionWhenRecipeContentIsUnparseable() throws Exception {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
-    factory.createEnvironment(tool, s -> "some_unparseable_content");
+    applier.apply(tool, devfile, workspaceConfig, s -> "some_unparseable_content");
   }
 
   @Test(
@@ -108,8 +115,10 @@ public class DevfileEnvironmentFactoryTest {
   public void shouldThrowExceptionWhenExceptionHappensOnContentProvider() throws Exception {
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
-    factory.createEnvironment(
+    applier.apply(
         tool,
+        devfile,
+        workspaceConfig,
         e -> {
           throw new IOException("fetch failed");
         });
@@ -120,14 +129,22 @@ public class DevfileEnvironmentFactoryTest {
     String yamlRecipeContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
     Tool tool =
-        new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
+        new Tool()
+            .withType(KUBERNETES_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withName(TOOL_NAME)
+            .withSelector(new HashMap<>());
 
-    EnvironmentImpl result = factory.createEnvironment(tool, s -> yamlRecipeContent);
+    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
 
-    RecipeImpl recipe = result.getRecipe();
+    String defaultEnv = workspaceConfig.getDefaultEnv();
+    assertNotNull(defaultEnv);
+    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
+    assertNotNull(environment);
+    RecipeImpl recipe = environment.getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), KUBERNETES_TOOL_TYPE);
-    assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
+    assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
     assertEquals(toK8SList(recipe.getContent()), toK8SList(yamlRecipeContent));
   }
 
@@ -136,14 +153,22 @@ public class DevfileEnvironmentFactoryTest {
     String yamlRecipeContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
     Tool tool =
-        new Tool().withType(OPENSHIFT_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
+        new Tool()
+            .withType(OPENSHIFT_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withName(TOOL_NAME)
+            .withSelector(new HashMap<>());
 
-    EnvironmentImpl result = factory.createEnvironment(tool, s -> yamlRecipeContent);
+    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
 
-    RecipeImpl recipe = result.getRecipe();
+    String defaultEnv = workspaceConfig.getDefaultEnv();
+    assertNotNull(defaultEnv);
+    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
+    assertNotNull(environment);
+    RecipeImpl recipe = environment.getRecipe();
     assertNotNull(recipe);
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
-    assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
+    assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
     assertEquals(toK8SList(recipe.getContent()), toK8SList(yamlRecipeContent));
   }
 
@@ -161,18 +186,72 @@ public class DevfileEnvironmentFactoryTest {
             .withName(TOOL_NAME)
             .withSelector(selector);
 
-    EnvironmentImpl result = factory.createEnvironment(tool, s -> yamlRecipeContent);
+    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
 
-    RecipeImpl recipe = result.getRecipe();
-    assertNotNull(recipe);
-    assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
-    assertEquals(recipe.getContentType(), DEFAULT_RECIPE_CONTENT_TYPE);
+    String defaultEnv = workspaceConfig.getDefaultEnv();
+    assertNotNull(defaultEnv);
+    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
+    assertNotNull(environment);
+    RecipeImpl recipe = environment.getRecipe();
 
     List<HasMetadata> resultItemsList = toK8SList(recipe.getContent()).getItems();
     assertEquals(resultItemsList.size(), 3);
     assertEquals(1, resultItemsList.stream().filter(it -> "Pod".equals(it.getKind())).count());
     assertEquals(1, resultItemsList.stream().filter(it -> "Service".equals(it.getKind())).count());
     assertEquals(1, resultItemsList.stream().filter(it -> "Route".equals(it.getKind())).count());
+  }
+
+  @Test(dependsOnMethods = "shouldFilterRecipeWithGivenSelectors")
+  public void shouldSetMachineNameAttributeToCommandConfiguredInOpenShiftToolWithOneContainer()
+      throws Exception {
+    String yamlRecipeContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+
+    final Map<String, String> selector =
+        Collections.singletonMap("app.kubernetes.io/component", "webapp");
+    Tool tool =
+        new Tool()
+            .withType(OPENSHIFT_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withName(TOOL_NAME)
+            .withSelector(selector);
+    devfile
+        .getCommands()
+        .add(
+            new Command()
+                .withAttributes(new HashMap<>())
+                .withActions(Collections.singletonList(new Action().withTool(TOOL_NAME))));
+
+    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+
+    Command command = devfile.getCommands().get(0);
+    assertEquals(command.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "petclinic/server");
+  }
+
+  @Test
+  public void
+      shouldNotSetMachineNameAttributeToCommandConfiguredInOpenShiftToolWithMultipleContainers()
+          throws Exception {
+    String yamlRecipeContent =
+        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+
+    Tool tool =
+        new Tool()
+            .withType(OPENSHIFT_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withName(TOOL_NAME)
+            .withSelector(new HashMap<>());
+    devfile
+        .getCommands()
+        .add(
+            new Command()
+                .withAttributes(new HashMap<>())
+                .withActions(Collections.singletonList(new Action().withTool(TOOL_NAME))));
+
+    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+
+    Command command = devfile.getCommands().get(0);
+    assertNull(command.getAttributes().get(MACHINE_NAME_ATTRIBUTE));
   }
 
   private KubernetesList toK8SList(String content) {
