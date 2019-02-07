@@ -159,7 +159,7 @@ public class ConfigureClasspath {
    * @param expText expected value
    */
   public void waitExpectedTextJarsAndFolderArea(String expText) {
-    new WebDriverWait(seleniumWebDriver, REDRAW_UI_ELEMENTS_TIMEOUT_SEC)
+    new WebDriverWait(seleniumWebDriver, ELEMENT_TIMEOUT_SEC)
         .until((WebDriver driver) -> getTextFromJarsAndFolderArea().contains(expText));
   }
 

@@ -81,6 +81,7 @@ public class ConfigureClasspathBaseTest {
 
     // check the 'JARs and folders' area for 'my-lib' module
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/my-lib");
+    projectExplorer.waitItemIsSelected(PROJECT_NAME + "/my-lib");
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.selectSourceCategory();
@@ -96,6 +97,7 @@ public class ConfigureClasspathBaseTest {
 
     // check the 'JARs and folders' area for 'my-webapp' module
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/my-webapp");
+    projectExplorer.waitItemIsSelected(PROJECT_NAME + "/my-webapp");
     menu.runCommand(PROJECT, CONFIGURE_CLASSPATH);
     configureClasspath.waitConfigureClasspathFormIsOpen();
     configureClasspath.selectSourceCategory();
