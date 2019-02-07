@@ -160,29 +160,6 @@ public class AutocompleteFeaturesInEditorTest {
     "getClass() : Class<?> Object"
   };
 
-  private static final String contentAfterEditing =
-      "public class AppController implements Controller {\n"
-          + "    private static final String secretNum = Integer.toString(new Random().nextInt(10));\n"
-          + "\n"
-          + "    @Override\n"
-          + "    public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception {\n"
-          + "        String numGuessByUser = request.getParameter(\"numGuess\");\n"
-          + "        String result = \"\";\n"
-          + "        \n"
-          + "        if (numGuessByUser != null && numGuessByUser.equals(secretNum)) {\n"
-          + "            result = \"Congrats! The number is \" + secretNum;\n"
-          + "        } \n"
-          + "        \n"
-          + "        else if (numGuessByUser != null) {\n"
-          + "            result = \"Sorry, you failed. Try again later!\";\n"
-          + "        }\n"
-          + "\n"
-          + "        ModelAndView view = new ModelAndView(\"guess_num\");\n"
-          + "        result.getBytes().toString();\n"
-          + "        view.addObject(\"num\", result);\n"
-          + "        return view;\n"
-          + "    }\n"
-          + "}\n";
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
   @Inject private ProjectExplorer projectExplorer;
@@ -245,10 +222,8 @@ public class AutocompleteFeaturesInEditorTest {
     editor.typeTextIntoEditor(".");
     editor.launchAutocompleteAndWaitContainer();
     editor.enterAutocompleteProposal("toString() : String ");
-    editor.waitTextIntoEditor("result.getBytes().toString()");
     editor.typeTextIntoEditor(";");
-    consoles.closeProcessesArea();
-    editor.waitTextIntoEditor(contentAfterEditing);
+    editor.waitTextIntoEditor("result.getBytes().toString();");
     editor.waitTabFileWithSavedStatus("AppController");
   }
 
