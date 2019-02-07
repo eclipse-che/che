@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
@@ -73,7 +74,7 @@ public class CheckOpenFileFeatureTest {
     factoryServiceClient.deleteFactory(FACTORY_NAME);
   }
 
-  @Test
+  @Test(groups = FLAKY)
   public void checkOpenFileFeatureTest() throws Exception {
     createProject(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
