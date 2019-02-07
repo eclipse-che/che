@@ -130,7 +130,6 @@
           <class name="org.eclipse.che.selenium.intelligencecommand.CheckIntelligenceCommandFromToolbarTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.CommandsEditorTest"/>
           <class name="org.eclipse.che.selenium.intelligencecommand.CommandsPaletteTest"/>
-          <class name="org.eclipse.che.selenium.intelligencecommand.PreviewUrlIntoCommandsEditorTest"/>
           <class name="org.eclipse.che.selenium.mavenplugin.CheckGeneratingMavenArchetypeTest"/>
           <class name="org.eclipse.che.selenium.mavenplugin.CheckMavenPluginTest"/>
           <class name="org.eclipse.che.selenium.mavenplugin.GenerateEffectivePomTest"/>
