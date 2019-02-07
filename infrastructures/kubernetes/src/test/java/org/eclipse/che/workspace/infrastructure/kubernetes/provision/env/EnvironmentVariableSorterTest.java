@@ -19,9 +19,11 @@ import static org.testng.Assert.assertEquals;
 
 import io.fabric8.kubernetes.api.model.EnvVar;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -33,12 +35,13 @@ public class EnvironmentVariableSorterTest {
   public void shouldDetectReferences() {
     // creating a separate test case for each of these is just too much for me :)
     // breaking given-when-then flow of our tests on purpose here, because the below would result
-    // in 15 test cases I refuse to write out manually
+    // in 24 test cases I refuse to write out manually
 
     testSingleValue("value", emptySet(), "no refs");
     testSingleValue("$(NO_REF", emptySet(), "unclosed ref");
     testSingleValue("$$(NO_REF)", emptySet(), "escaped ref");
     testSingleValue("$NO_REF)", emptySet(), "invalid start ref");
+    testSingleValue("$(NO REF)", emptySet(), "invalid name ref");
     testSingleValue("$(REF)", singleton("REF"), "valid ref");
   }
 
@@ -97,6 +100,18 @@ public class EnvironmentVariableSorterTest {
     EnvironmentVariablesSorter.sort(vars);
 
     // then the exception is expected
+  }
+
+  @Test
+  public void shouldDetectMultipleReferences() throws Exception {
+    // given
+    EnvVar envVar = var("a", "$(b) $(c) $$(d)");
+
+    // when
+    SortedSet<String> refs = EnvironmentVariablesSorter.findReferences(envVar);
+
+    // then
+    assertEquals(refs, new HashSet<>(Arrays.asList("b", "c")));
   }
 
   private static EnvVar var(String name, String value) {
