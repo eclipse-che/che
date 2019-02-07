@@ -12,42 +12,24 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
-import static com.google.common.base.Strings.nullToEmpty;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolume;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolumeMount;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner.LOGS_VOLUME_NAME;
 
 import com.google.inject.Inject;
-import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.PodSpec;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesPersistentVolumeClaims;
@@ -109,6 +91,9 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   private final PVCSubPathHelper pvcSubPathHelper;
   private final KubernetesNamespaceFactory factory;
   private final EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
+  private final PVCProvisioner pvcProvisioner;
+  private final PodsVolumes podsVolumes;
+  private final SubPathPrefixes subpathPrefixes;
 
   @Inject
   public CommonPVCStrategy(
@@ -118,7 +103,10 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
       PVCSubPathHelper pvcSubPathHelper,
       KubernetesNamespaceFactory factory,
-      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter) {
+      EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
+      PVCProvisioner pvcProvisioner,
+      PodsVolumes podsVolumes,
+      SubPathPrefixes subpathPrefixes) {
     this.configuredPVCName = configuredPVCName;
     this.pvcQuantity = pvcQuantity;
     this.pvcAccessMode = pvcAccessMode;
@@ -126,18 +114,21 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     this.pvcSubPathHelper = pvcSubPathHelper;
     this.factory = factory;
     this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
+    this.pvcProvisioner = pvcProvisioner;
+    this.podsVolumes = podsVolumes;
+    this.subpathPrefixes = subpathPrefixes;
   }
 
   /**
-   * Creates PVC objects that should be used for the specified runtime identity.
+   * Creates new instance of PVC object that should be used for the specified workspace.
    *
    * <p>May be overridden by child class for changing common scope. Like common per user or common
    * per workspace.
    *
-   * @param runtimeId runtime identity that needs PVC
+   * @param workspaceId workspace that needs PVC
    * @return pvc that should be used for the specified runtime identity
    */
-  protected PersistentVolumeClaim createCommonPVC(RuntimeIdentity runtimeId) {
+  protected PersistentVolumeClaim createCommonPVC(String workspaceId) {
     return newPVC(configuredPVCName, pvcAccessMode, pvcQuantity);
   }
 
@@ -151,15 +142,16 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     }
     log.debug("Provisioning PVC strategy for workspace '{}'", workspaceId);
 
+    pvcProvisioner.convertCheVolumes(k8sEnv, workspaceId);
+
     // Note that PVC name is used during prefixing
     // It MUST be done before changing all PVCs references to common PVC
-    prefixVolumeMountsSubpaths(k8sEnv, identity.getWorkspaceId());
+    subpathPrefixes.prefixVolumeMountsSubpaths(k8sEnv, identity.getWorkspaceId());
 
     PersistentVolumeClaim commonPVC = replacePVCsWithCommon(k8sEnv, identity);
 
-    replacePodsVolumesWithCommon(k8sEnv.getPodsData(), commonPVC.getMetadata().getName());
-
-    provisionCheVolumes(k8sEnv, workspaceId, commonPVC.getMetadata().getName());
+    podsVolumes.replacePVCVolumesWithCommon(
+        k8sEnv.getPodsData(), commonPVC.getMetadata().getName());
 
     if (preCreateDirs) {
       Set<String> subPaths = combineVolumeMountsSubpaths(k8sEnv);
@@ -181,31 +173,40 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     if (EphemeralWorkspaceUtility.isEphemeral(k8sEnv.getAttributes())) {
       return;
     }
-    final Collection<PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims().values();
 
+    log.debug("Preparing PVC started for workspace '{}'", workspaceId);
+
+    Map<String, PersistentVolumeClaim> claims = k8sEnv.getPersistentVolumeClaims();
     if (claims.isEmpty()) {
       return;
     }
+    if (claims.size() > 1) {
+      throw new InfrastructureException(
+          format(
+              "The only one PVC MUST be present in common strategy while it contains: %s.",
+              claims.keySet().stream().collect(joining(", "))));
+    }
 
-    log.debug("Preparing PVC started for workspace '{}'", workspaceId);
+    PersistentVolumeClaim commonPVC = claims.values().iterator().next();
+
     final KubernetesNamespace namespace = factory.create(workspaceId);
     final KubernetesPersistentVolumeClaims pvcs = namespace.persistentVolumeClaims();
     final Set<String> existing =
         pvcs.get().stream().map(p -> p.getMetadata().getName()).collect(toSet());
-    for (PersistentVolumeClaim pvc : claims) {
-      final String[] subpaths =
-          (String[])
-              pvc.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
-      if (!existing.contains(pvc.getMetadata().getName())) {
-        log.debug("Creating PVC for workspace '{}'", workspaceId);
-        pvcs.create(pvc);
-        log.debug("Waiting PVC for workspace '{}' to be bound", workspaceId);
-        pvcs.waitBound(pvc.getMetadata().getName(), timeoutMillis);
-      }
-      if (preCreateDirs && subpaths != null) {
-        pvcSubPathHelper.createDirs(workspaceId, subpaths);
-      }
+    if (!existing.contains(commonPVC.getMetadata().getName())) {
+      log.debug("Creating PVC for workspace '{}'", workspaceId);
+      pvcs.create(commonPVC);
+      log.debug("Waiting PVC for workspace '{}' to be bound", workspaceId);
+      pvcs.waitBound(commonPVC.getMetadata().getName(), timeoutMillis);
     }
+
+    final String[] subpaths =
+        (String[])
+            commonPVC.getAdditionalProperties().remove(format(SUBPATHS_PROPERTY_FMT, workspaceId));
+    if (preCreateDirs && subpaths != null) {
+      pvcSubPathHelper.createDirs(workspaceId, commonPVC.getMetadata().getName(), subpaths);
+    }
+
     log.debug("Preparing PVC done for workspace '{}'", workspaceId);
   }
 
@@ -215,125 +216,17 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       return;
     }
     String workspaceId = workspace.getId();
-    pvcSubPathHelper.removeDirsAsync(workspaceId, getWorkspaceSubPath(workspaceId));
-  }
-
-  private void prefixVolumeMountsSubpaths(KubernetesEnvironment k8sEnv, String workspaceId) {
-    for (PodData pod : k8sEnv.getPodsData().values()) {
-      Map<String, String> volumeToClaimName = new HashMap<>();
-      for (io.fabric8.kubernetes.api.model.Volume volume : pod.getSpec().getVolumes()) {
-        if (volume.getPersistentVolumeClaim() == null) {
-          continue;
-        }
-        volumeToClaimName.put(volume.getName(), volume.getPersistentVolumeClaim().getClaimName());
-      }
-
-      if (volumeToClaimName.isEmpty()) {
-        // Pod does not have any volume that references PVC
-        continue;
-      }
-
-      Stream.concat(
-              pod.getSpec().getContainers().stream(), pod.getSpec().getInitContainers().stream())
-          .forEach(
-              c -> {
-                for (VolumeMount volumeMount : c.getVolumeMounts()) {
-                  String pvcName = volumeToClaimName.get(volumeMount.getName());
-                  if (pvcName == null) {
-                    // should not happens since Volume<>PVC links are checked during recipe
-                    // validation
-                    continue;
-                  }
-
-                  String volumeSubPath =
-                      getVolumeMountSubpath(
-                          volumeMount, pvcName, workspaceId, Names.machineName(pod, c));
-                  volumeMount.setSubPath(volumeSubPath);
-                }
-              });
-    }
+    PersistentVolumeClaim pvc = createCommonPVC(workspaceId);
+    pvcSubPathHelper.removeDirsAsync(
+        workspaceId, pvc.getMetadata().getName(), subpathPrefixes.getWorkspaceSubPath(workspaceId));
   }
 
   private PersistentVolumeClaim replacePVCsWithCommon(
       KubernetesEnvironment k8sEnv, RuntimeIdentity identity) {
-    final PersistentVolumeClaim commonPVC = createCommonPVC(identity);
+    final PersistentVolumeClaim commonPVC = createCommonPVC(identity.getWorkspaceId());
     k8sEnv.getPersistentVolumeClaims().clear();
     k8sEnv.getPersistentVolumeClaims().put(commonPVC.getMetadata().getName(), commonPVC);
     return commonPVC;
-  }
-
-  private void replacePodsVolumesWithCommon(Map<String, PodData> pods, String commonPVCName) {
-    for (PodData pod : pods.values()) {
-      Set<String> pvcSourcedVolumes = reducePVCSourcedVolumes(pod.getSpec().getVolumes());
-
-      // add common PVC sourced volume instead of removed
-      pod.getSpec()
-          .getVolumes()
-          .add(
-              new VolumeBuilder()
-                  .withName(commonPVCName)
-                  .withNewPersistentVolumeClaim()
-                  .withClaimName(commonPVCName)
-                  .endPersistentVolumeClaim()
-                  .build());
-
-      Stream.concat(
-              pod.getSpec().getContainers().stream(), pod.getSpec().getInitContainers().stream())
-          .flatMap(c -> c.getVolumeMounts().stream())
-          .filter(vm -> pvcSourcedVolumes.contains(vm.getName()))
-          .forEach(vm -> vm.setName(commonPVCName));
-    }
-  }
-
-  private Set<String> reducePVCSourcedVolumes(
-      List<io.fabric8.kubernetes.api.model.Volume> volumes) {
-    Set<String> pvcSourcedVolumes = new HashSet<>();
-    Iterator<io.fabric8.kubernetes.api.model.Volume> volumeIterator = volumes.iterator();
-    while (volumeIterator.hasNext()) {
-      io.fabric8.kubernetes.api.model.Volume volume = volumeIterator.next();
-      if (volume.getPersistentVolumeClaim() != null) {
-        pvcSourcedVolumes.add(volume.getName());
-        volumeIterator.remove();
-      }
-    }
-    return pvcSourcedVolumes;
-  }
-
-  private void provisionCheVolumes(
-      KubernetesEnvironment k8sEnv, String workspaceId, String commonPVCName) {
-    for (PodData pod : k8sEnv.getPodsData().values()) {
-      PodSpec podSpec = pod.getSpec();
-      List<Container> containers = new ArrayList<>();
-      containers.addAll(podSpec.getContainers());
-      containers.addAll(podSpec.getInitContainers());
-      for (Container container : containers) {
-        String machineName = Names.machineName(pod, container);
-        InternalMachineConfig machineConfig = k8sEnv.getMachines().get(machineName);
-        if (machineConfig == null) {
-          continue;
-        }
-        addMachineVolumes(commonPVCName, workspaceId, pod, container, machineConfig.getVolumes());
-      }
-    }
-  }
-
-  private void addMachineVolumes(
-      String pvcName,
-      String workspaceId,
-      PodData pod,
-      Container container,
-      Map<String, Volume> volumes) {
-    if (volumes.isEmpty()) {
-      return;
-    }
-    for (Entry<String, Volume> volumeEntry : volumes.entrySet()) {
-      String volumePath = volumeEntry.getValue().getPath();
-      String subPath =
-          getVolumeSubPath(workspaceId, volumeEntry.getKey(), Names.machineName(pod, container));
-
-      container.getVolumeMounts().add(newVolumeMount(pvcName, volumePath, subPath));
-      addVolumeIfNeeded(pvcName, pod.getSpec());
-    }
   }
 
   private Set<String> combineVolumeMountsSubpaths(KubernetesEnvironment k8sEnv) {
@@ -346,39 +239,5 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
         .map(VolumeMount::getSubPath)
         .filter(subpath -> !isNullOrEmpty(subpath))
         .collect(Collectors.toSet());
-  }
-
-  private void addVolumeIfNeeded(String pvcName, PodSpec podSpec) {
-    if (podSpec.getVolumes().stream().noneMatch(volume -> volume.getName().equals(pvcName))) {
-      podSpec.getVolumes().add(newVolume(pvcName, pvcName));
-    }
-  }
-
-  /** Get sub-path for particular Volume Mount in a particular workspace */
-  private String getVolumeMountSubpath(
-      VolumeMount volumeMount, String volumeName, String workspaceId, String machineName) {
-    String volumeMountSubPath = nullToEmpty(volumeMount.getSubPath());
-    if (!volumeMountSubPath.startsWith("/")) {
-      volumeMountSubPath = '/' + volumeMountSubPath;
-    }
-
-    return getVolumeSubPath(workspaceId, volumeName, machineName) + volumeMountSubPath;
-  }
-
-  /** Get sub-path for particular volume in a particular workspace */
-  private String getVolumeSubPath(String workspaceId, String volumeName, String machineName) {
-    // logs must be located inside the folder related to the machine because few machines can
-    // contain the identical agents and in this case, a conflict is possible.
-    if (LOGS_VOLUME_NAME.equals(volumeName)) {
-      return getWorkspaceSubPath(workspaceId) + '/' + volumeName + '/' + machineName;
-    }
-    // this path should correlate with path returned by method getWorkspaceSubPath
-    // because this logic is used to correctly cleanup sub-paths related to a workspace
-    return getWorkspaceSubPath(workspaceId) + '/' + volumeName;
-  }
-
-  /** Get sub-path that holds all the volumes of a particular workspace */
-  private String getWorkspaceSubPath(String workspaceId) {
-    return workspaceId;
   }
 }

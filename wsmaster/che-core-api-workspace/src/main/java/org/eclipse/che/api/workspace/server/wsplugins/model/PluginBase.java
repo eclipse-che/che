@@ -24,7 +24,7 @@ public class PluginBase {
   private List<CheContainer> containers = new ArrayList<>();
   private List<ChePluginEndpoint> endpoints = new ArrayList<>();
 
-  @JsonProperty("workspace-env")
+  @JsonProperty("workspaceEnv")
   private List<EnvVar> workspaceEnv = new ArrayList<>();
 
   /** Object name. Name must be unique. */

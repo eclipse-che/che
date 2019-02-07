@@ -15,9 +15,10 @@ const common = require('./webpack.common.js');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = merge(common, {
+    mode: 'development',
     devtool: 'inline-source-map',
-    module:{
-        rules:[
+    module: {
+        rules: [
             {
                 test: /\.css$/,
                 use: [{
@@ -41,12 +42,12 @@ module.exports = merge(common, {
             '/api': "http://localhost:8080",
         }
     },
-    plugins:[
+    plugins: [
         new HtmlWebpackPlugin({
             inject: false,
             title: "Che Workspace Loader",
-            template:"src/index.html",
-            urlPrefix:"/"
+            template: "src/index.html",
+            urlPrefix: "/"
         })
     ]
 });

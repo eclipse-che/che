@@ -17,12 +17,12 @@ import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Route;
 import java.io.ByteArrayInputStream;
@@ -35,15 +35,12 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
-import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
-import org.eclipse.che.workspace.infrastructure.openshift.Warnings;
 
 /**
  * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
@@ -53,7 +50,7 @@ import org.eclipse.che.workspace.infrastructure.openshift.Warnings;
 public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<OpenShiftEnvironment> {
 
   private final OpenShiftClientFactory clientFactory;
-  private final KubernetesEnvironmentValidator envValidator;
+  private final OpenShiftEnvironmentValidator envValidator;
   private final MemoryAttributeProvisioner memoryProvisioner;
 
   @Inject
@@ -62,7 +59,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       OpenShiftClientFactory clientFactory,
-      KubernetesEnvironmentValidator envValidator,
+      OpenShiftEnvironmentValidator envValidator,
       MemoryAttributeProvisioner memoryProvisioner) {
     super(installerRegistry, recipeRetriever, machinesValidator);
     this.clientFactory = clientFactory;
@@ -98,17 +95,32 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
                 + "application/x-yaml, text/yaml, text/x-yaml");
     }
 
-    final KubernetesList list =
-        clientFactory.create().lists().load(new ByteArrayInputStream(content.getBytes())).get();
+    final List<HasMetadata> list;
+    try {
+      // Behavior:
+      // - If `content` is a Kubernetes List, load().get() will get the objects in that list
+      // - If `content` is an OpenShift template, load().get() will get the objects in the template
+      //   with parameters substituted (e.g. with default values).
+      list = clientFactory.create().load(new ByteArrayInputStream(content.getBytes())).get();
+    } catch (KubernetesClientException e) {
+      // KubernetesClient wraps the error when a JsonMappingException occurs so we need the cause
+      String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
+      if (message.contains("\n")) {
+        // Clean up message if it comes from JsonMappingException. Format is e.g.
+        // `No resource type found for:v1#Route1\n at [...]`
+        message = message.split("\\n", 2)[0];
+      }
+      throw new ValidationException(format("Could not parse OpenShift recipe: %s", message));
+    }
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Deployment> deployments = new HashMap<>();
     Map<String, Service> services = new HashMap<>();
     Map<String, ConfigMap> configMaps = new HashMap<>();
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
-    boolean isAnyRoutePresent = false;
-    boolean isAnySecretPresent = false;
-    for (HasMetadata object : list.getItems()) {
+    Map<String, Route> routes = new HashMap<>();
+    Map<String, Secret> secrets = new HashMap<>();
+    for (HasMetadata object : list) {
       checkNotNull(object.getKind(), "Environment contains object without specified kind field");
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
       checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
@@ -117,8 +129,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
       } else if (object instanceof Pod) {
         Pod pod = (Pod) object;
-        checkNotNull(pod.getMetadata(), "Pod metadata must not be null");
-        checkNotNull(pod.getMetadata().getName(), "Pod metadata name must not be null");
         pods.put(pod.getMetadata().getName(), pod);
       } else if (object instanceof Deployment) {
         Deployment deployment = (Deployment) object;
@@ -127,31 +137,23 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
         Service service = (Service) object;
         services.put(service.getMetadata().getName(), service);
       } else if (object instanceof Route) {
-        isAnyRoutePresent = true;
+        Route route = (Route) object;
+        routes.put(route.getMetadata().getName(), route);
       } else if (object instanceof PersistentVolumeClaim) {
         PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
         pvcs.put(pvc.getMetadata().getName(), pvc);
       } else if (object instanceof Secret) {
-        isAnySecretPresent = true;
+        Secret secret = (Secret) object;
+        secrets.put(secret.getMetadata().getName(), secret);
       } else if (object instanceof ConfigMap) {
         ConfigMap configMap = (ConfigMap) object;
         configMaps.put(configMap.getMetadata().getName(), configMap);
       } else {
         throw new ValidationException(
-            format("Found unknown object type '%s'", object.getMetadata()));
+            format(
+                "Found unknown object type in recipe -- name: '%s', kind: '%s'",
+                object.getMetadata().getName(), object.getKind()));
       }
-    }
-
-    if (isAnyRoutePresent) {
-      warnings.add(
-          new WarningImpl(
-              Warnings.ROUTE_IGNORED_WARNING_CODE, Warnings.ROUTES_IGNORED_WARNING_MESSAGE));
-    }
-
-    if (isAnySecretPresent) {
-      warnings.add(
-          new WarningImpl(
-              Warnings.SECRET_IGNORED_WARNING_CODE, Warnings.SECRET_IGNORED_WARNING_MESSAGE));
     }
 
     addRamAttributes(machines, pods.values());
@@ -165,9 +167,9 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setDeployments(deployments)
             .setServices(services)
             .setPersistentVolumeClaims(pvcs)
-            .setSecrets(new HashMap<>())
+            .setSecrets(secrets)
             .setConfigMaps(configMaps)
-            .setRoutes(new HashMap<>())
+            .setRoutes(routes)
             .build();
 
     envValidator.validate(osEnv);

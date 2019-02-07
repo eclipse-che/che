@@ -14,6 +14,9 @@ package org.eclipse.che.api.devfile.server;
 import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
@@ -26,12 +29,11 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
@@ -43,15 +45,34 @@ import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
-/** Helps to convert devfile into workspace config and back. */
+/**
+ * Helps to convert Devfile into workspace config and back.
+ *
+ * @author Max Shaposhnyk
+ * @author Sergii Leshchenko
+ */
 public class DevfileConverter {
 
+  private KubernetesToolApplier kubernetesToolApplier;
+
+  @Inject
+  public DevfileConverter(KubernetesToolApplier kubernetesToolApplier) {
+    this.kubernetesToolApplier = kubernetesToolApplier;
+  }
+
+  /**
+   * Exports workspace config into {@link Devfile}
+   *
+   * @param wsConfig initial workspace config
+   * @return devfile resulted devfile
+   * @throws WorkspaceExportException if export of given workspace config is impossible
+   */
   public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) throws WorkspaceExportException {
 
     if (!isNullOrEmpty(wsConfig.getDefaultEnv()) || !wsConfig.getEnvironments().isEmpty()) {
       throw new WorkspaceExportException(
           format(
-              "Workspace %s cannot be converted to devfile since it is contains environments (which have no equivalent in devfile model)",
+              "Workspace %s cannot be converted to devfile since it contains environments which have no equivalent in devfile model",
               wsConfig.getName()));
     }
 
@@ -99,83 +120,127 @@ public class DevfileConverter {
     return devfile;
   }
 
-  public WorkspaceConfigImpl devFileToWorkspaceConfig(Devfile devfile)
-      throws DevfileFormatException {
+  /**
+   * Converts given {@link Devfile} into {@link WorkspaceConfigImpl workspace config}.
+   *
+   * @param devfile initial devfile
+   * @param contentProvider content provider for recipe-type tool
+   * @return constructed workspace config
+   * @throws DevfileException when general devfile error occurs
+   * @throws DevfileFormatException when devfile format is invalid
+   * @throws DevfileRecipeFormatException when content of the file specified in recipe type tool is
+   *     empty or its format is invalid
+   */
+  public WorkspaceConfigImpl devFileToWorkspaceConfig(
+      Devfile devfile, RecipeFileContentProvider contentProvider) throws DevfileException {
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
     config.setName(devfile.getName());
 
-    // Manage projects
+    // fill in WorkspaceConfig with configured projects
     List<ProjectConfigImpl> projects = new ArrayList<>();
     devfile.getProjects().forEach(project -> projects.add(devProjectToProjectConfig(project)));
     config.setProjects(projects);
 
+    // fill in Workspace Config with configured tools
+    fillInTools(config, devfile, contentProvider);
+
+    // fill in Workspace Config with configured commands
+    fillInCommands(config, devfile);
+
+    return config;
+  }
+
+  private void fillInTools(
+      WorkspaceConfigImpl config, Devfile devfile, RecipeFileContentProvider contentProvider)
+      throws DevfileException {
     // Manage tools
-    Map<String, String> attributes = new HashMap<>();
     StringJoiner pluginsStringJoiner = new StringJoiner(",");
-    StringJoiner toolIdToNameMappingStringJoiner = new StringJoiner(",");
     for (Tool tool : devfile.getTools()) {
       switch (tool.getType()) {
         case EDITOR_TOOL_TYPE:
-          attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, tool.getId());
+          config.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, tool.getId());
           break;
         case PLUGIN_TOOL_TYPE:
           pluginsStringJoiner.add(tool.getId());
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
-          // this kind of tool ignored here since it contain only reference to tool configuration
-          // which should be resolved and provisioned into workspace config recipe separately.
-          continue;
+          kubernetesToolApplier.apply(tool, devfile, config, contentProvider);
+          break;
         default:
           throw new DevfileFormatException(
               format("Unsupported tool %s type provided: %s", tool.getName(), tool.getType()));
       }
-      toolIdToNameMappingStringJoiner.add(tool.getId() + "=" + tool.getName());
     }
-    if (pluginsStringJoiner.length() > 0) {
-      attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, pluginsStringJoiner.toString());
-    }
-    if (toolIdToNameMappingStringJoiner.length() > 0) {
-      attributes.put(ALIASES_WORKSPACE_ATTRIBUTE_NAME, toolIdToNameMappingStringJoiner.toString());
-    }
-    config.setAttributes(attributes);
 
-    // Manage commands
-    List<CommandImpl> commands = new ArrayList<>();
-    devfile
-        .getCommands()
-        .forEach(command -> commands.addAll(devCommandToCommandImpls(devfile, command)));
-    config.setCommands(commands);
-    return config;
+    if (pluginsStringJoiner.length() > 0) {
+      config
+          .getAttributes()
+          .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, pluginsStringJoiner.toString());
+    }
+
+    config
+        .getAttributes()
+        .put(
+            ALIASES_WORKSPACE_ATTRIBUTE_NAME,
+            devfile
+                .getTools()
+                .stream()
+                .filter(tool -> tool.getId() != null)
+                .map(tool -> tool.getId() + "=" + tool.getName())
+                .collect(Collectors.joining(",")));
   }
 
-  private List<CommandImpl> devCommandToCommandImpls(Devfile devFile, Command devCommand) {
+  private void fillInCommands(WorkspaceConfigImpl config, Devfile devfile)
+      throws DevfileFormatException {
+    Map<String, Tool> tools = devfile.getTools().stream().collect(toMap(Tool::getName, identity()));
     List<CommandImpl> commands = new ArrayList<>();
-    for (Action devAction : devCommand.getActions()) {
-      CommandImpl command = new CommandImpl();
-      command.setName(devCommand.getName() + ":" + devAction.getTool());
-      command.setType(devAction.getType());
-      command.setCommandLine(devAction.getCommand());
-      if (devAction.getWorkdir() != null) {
-        command.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, devAction.getWorkdir());
+
+    for (Command devCommand : devfile.getCommands()) {
+      if (devCommand.getActions().size() != 1) {
+        throw new DevfileFormatException(
+            format("Command `%s` MUST has one and only one action", devCommand.getName()));
       }
-      Optional<Tool> toolOfCommand =
-          devFile
-              .getTools()
-              .stream()
-              .filter(tool -> tool.getName().equals(devAction.getTool()))
-              .findFirst();
-      if (toolOfCommand.isPresent() && !isNullOrEmpty(toolOfCommand.get().getId())) {
-        command.getAttributes().put("pluginId", toolOfCommand.get().getId());
+      Action commandAction = devCommand.getActions().get(0);
+
+      Tool toolOfCommand = tools.get(commandAction.getTool());
+
+      if (toolOfCommand == null) {
+        throw new DevfileFormatException(
+            String.format(
+                "Action of the command '%s' references missing tool '%s'",
+                devCommand.getName(), commandAction.getTool()));
       }
-      if (devCommand.getAttributes() != null) {
-        command.getAttributes().putAll(devCommand.getAttributes());
-      }
-      commands.add(command);
+
+      commands.add(devCommandToCommandImpl(devCommand, commandAction, toolOfCommand));
     }
-    return commands;
+
+    config.setCommands(commands);
+  }
+
+  private CommandImpl devCommandToCommandImpl(
+      Command devCommand, Action commandAction, Tool toolOfCommand) {
+    CommandImpl command = new CommandImpl();
+    command.setName(devCommand.getName());
+    command.setType(commandAction.getType());
+    command.setCommandLine(commandAction.getCommand());
+
+    if (commandAction.getWorkdir() != null) {
+      command.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, commandAction.getWorkdir());
+    }
+
+    if (PLUGIN_TOOL_TYPE.equals(toolOfCommand.getType())
+        || EDITOR_TOOL_TYPE.equals(toolOfCommand.getType())) {
+      command.getAttributes().put(PLUGIN_ATTRIBUTE, toolOfCommand.getId());
+    }
+
+    if (devCommand.getAttributes() != null) {
+      command.getAttributes().putAll(devCommand.getAttributes());
+    }
+
+    return command;
   }
 
   private Command commandImplToDevCommand(CommandImpl command, Map<String, String> toolsIdToName) {
@@ -185,12 +250,12 @@ public class DevfileConverter {
     if (!isNullOrEmpty(workingDir)) {
       action.setWorkdir(workingDir);
     }
-    action.setTool(toolsIdToName.getOrDefault(command.getAttributes().get("pluginId"), ""));
+    action.setTool(toolsIdToName.getOrDefault(command.getAttributes().get(PLUGIN_ATTRIBUTE), ""));
     devCommand.getActions().add(action);
     devCommand.setAttributes(command.getAttributes());
     // Remove internal attributes
     devCommand.getAttributes().remove(WORKING_DIRECTORY_ATTRIBUTE);
-    devCommand.getAttributes().remove("pluginId");
+    devCommand.getAttributes().remove(PLUGIN_ATTRIBUTE);
     return devCommand;
   }
 
@@ -218,7 +283,7 @@ public class DevfileConverter {
         firstNonNull(wsConfig.getAttributes().get(ALIASES_WORKSPACE_ATTRIBUTE_NAME), "");
     return Arrays.stream(aliasesString.split(","))
         .map(s -> s.split("=", 2))
-        .collect(Collectors.toMap(arr -> arr[0], arr -> arr[1]));
+        .collect(toMap(arr -> arr[0], arr -> arr[1]));
   }
 
   private static void validateCurrentVersion(Devfile devFile) throws DevfileFormatException {

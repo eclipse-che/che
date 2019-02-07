@@ -22,7 +22,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
@@ -50,12 +49,13 @@ import org.testng.reporters.Files;
 @Listeners(MockitoTestNGListener.class)
 public class DevfileManagerTest {
 
+  private static final Subject TEST_SUBJECT = new SubjectImpl("name", "id", "token", false);
+
   private DevfileSchemaValidator schemaValidator;
   private DevfileIntegrityValidator integrityValidator;
   private DevfileConverter devfileConverter;
   @Mock private WorkspaceManager workspaceManager;
-
-  private static final Subject TEST_SUBJECT = new SubjectImpl("name", "id", "token", false);
+  @Mock private KubernetesToolApplier kubernetesToolApplier;
 
   private DevfileManager devfileManager;
 
@@ -63,28 +63,29 @@ public class DevfileManagerTest {
   public void setUp() throws Exception {
     schemaValidator = spy(new DevfileSchemaValidator(new DevfileSchemaProvider()));
     integrityValidator = spy(new DevfileIntegrityValidator());
-    devfileConverter = spy(new DevfileConverter());
+    devfileConverter = spy(new DevfileConverter(kubernetesToolApplier));
     devfileManager =
         new DevfileManager(schemaValidator, integrityValidator, devfileConverter, workspaceManager);
   }
 
   @Test
   public void testValidateAndConvert() throws Exception {
-    String yamlContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
+    String yamlContent = getTestResource("devfile.yaml");
+
     devfileManager.parse(yamlContent, true);
+
     verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
     verify(integrityValidator).validateDevfile(any(Devfile.class));
   }
 
   @Test(
-      expectedExceptions = JsonProcessingException.class,
-      expectedExceptionsMessageRegExp = "Unrecognized field \"foos\" [\\w\\W]+")
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp = "Devfile schema validation failed. Errors: [\\w\\W]+")
   public void shouldThrowExceptionWhenUnconvertableContentProvided() throws Exception {
-    String yamlContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"))
-            .concat("foos:");
+    String yamlContent = getTestResource("devfile.yaml").concat("foos:");
+
     devfileManager.parse(yamlContent, true);
+
     verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
     verifyNoMoreInteractions(integrityValidator);
   }
@@ -112,10 +113,14 @@ public class DevfileManagerTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
     Devfile devfile = devfileManager.parse(yamlContent, true);
     // when
-    devfileManager.createWorkspace(devfile);
+    devfileManager.createWorkspace(devfile, null);
     // then
     verify(workspaceManager).createWorkspace(captor.capture(), anyString(), anyMap());
     assertEquals("petclinic-dev-environment_2", captor.getValue().getName());
+  }
+
+  private String getTestResource(String resource) throws IOException {
+    return Files.readFile(getClass().getClassLoader().getResourceAsStream(resource));
   }
 
   private WorkspaceImpl createWorkspace(WorkspaceStatus status)

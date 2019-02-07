@@ -156,7 +156,7 @@ export class WorkspaceDetailsController {
       },
       saveButton: {
         action: () => {
-          this.saveConfigChanges();
+          this.saveConfigChanges(true);
         },
         title: 'Save',
         disabled: false
@@ -303,7 +303,7 @@ export class WorkspaceDetailsController {
     
     if (!failedTabs || failedTabs.length === 0) {
       let runningWorkspace = this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING];
-      this.saveConfigChanges(runningWorkspace);
+      this.saveConfigChanges(false, runningWorkspace);
     }
   }
 
@@ -454,8 +454,9 @@ export class WorkspaceDetailsController {
 
   /**
    * Updates workspace with new config.
+   * 
    */
-  saveConfigChanges(notifyRestart?: boolean): void {
+  saveConfigChanges(refreshPage: boolean, notifyRestart?: boolean): void {
     this.editOverlayConfig.disabled = true;
 
     this.loading = true;
@@ -476,9 +477,11 @@ export class WorkspaceDetailsController {
 
         this.$scope.$broadcast('edit-workspace-details', {status: 'saved'});
 
-        return this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {
-          this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDetails.config.name).search({tab: this.tab[this.selectedTabIndex]});
-        });
+        if (refreshPage) {
+          return this.cheWorkspace.fetchWorkspaceDetails(this.originWorkspaceDetails.id).then(() => {
+            this.$location.path('/workspace/' + this.namespaceId + '/' + this.workspaceDetails.config.name).search({tab: this.tab[this.selectedTabIndex]});
+          });
+        }
       })
       .catch((error: any) => {
         this.$scope.$broadcast('edit-workspace-details', {status: 'failed'});

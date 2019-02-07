@@ -19,8 +19,6 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_MESSAGE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.SECRET_IGNORED_WARNING_CODE;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.SECRET_IGNORED_WARNING_MESSAGE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -36,9 +34,7 @@ import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.DoneableKubernetesList;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -50,6 +46,7 @@ import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.PodTemplateSpecBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.ResourceRequirements;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.SecretBuilder;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
@@ -57,11 +54,10 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.dsl.KubernetesListMixedOperation;
-import io.fabric8.kubernetes.client.dsl.RecreateFromServerGettable;
+import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.dsl.ParameterNamespaceListVisitFromServerGetDeleteRecreateWaitApplicable;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.core.ValidationException;
@@ -96,8 +92,6 @@ public class KubernetesEnvironmentFactoryTest {
   @Mock private KubernetesClient client;
   @Mock private InternalEnvironment internalEnvironment;
   @Mock private InternalRecipe internalRecipe;
-  @Mock private KubernetesListMixedOperation listMixedOperation;
-  @Mock private KubernetesList parsedList;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
@@ -105,8 +99,8 @@ public class KubernetesEnvironmentFactoryTest {
   private Map<String, InternalMachineConfig> machines;
 
   @Mock
-  private RecreateFromServerGettable<KubernetesList, KubernetesList, DoneableKubernetesList>
-      serverGettable;
+  private ParameterNamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>
+      loadedRecipe;
 
   @BeforeMethod
   public void setup() throws Exception {
@@ -114,9 +108,7 @@ public class KubernetesEnvironmentFactoryTest {
         new KubernetesEnvironmentFactory(
             null, null, null, clientFactory, k8sEnvValidator, memoryProvisioner);
     when(clientFactory.create()).thenReturn(client);
-    when(client.lists()).thenReturn(listMixedOperation);
-    when(listMixedOperation.load(any(InputStream.class))).thenReturn(serverGettable);
-    when(serverGettable.get()).thenReturn(parsedList);
+    when(client.load(any(InputStream.class))).thenReturn(loadedRecipe);
     lenient().when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
     when(internalRecipe.getContentType()).thenReturn(YAML_RECIPE);
     when(internalRecipe.getContent()).thenReturn("recipe content");
@@ -130,7 +122,7 @@ public class KubernetesEnvironmentFactoryTest {
         new ServiceBuilder().withNewMetadata().withName("service1").endMetadata().build();
     Service service2 =
         new ServiceBuilder().withNewMetadata().withName("service2").endMetadata().build();
-    when(parsedList.getItems()).thenReturn(asList(service1, service2));
+    when(loadedRecipe.get()).thenReturn(asList(service1, service2));
 
     // when
     KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -148,7 +140,7 @@ public class KubernetesEnvironmentFactoryTest {
         new PersistentVolumeClaimBuilder().withNewMetadata().withName("pvc1").endMetadata().build();
     PersistentVolumeClaim pvc2 =
         new PersistentVolumeClaimBuilder().withNewMetadata().withName("pvc2").endMetadata().build();
-    when(parsedList.getItems()).thenReturn(asList(pvc1, pvc2));
+    when(loadedRecipe.get()).thenReturn(asList(pvc1, pvc2));
 
     // when
     KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -161,11 +153,11 @@ public class KubernetesEnvironmentFactoryTest {
 
   @Test
   public void ignoreIgressesWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> objects =
-        asList(
-            new IngressBuilder().withNewMetadata().withName("ingress1").endMetadata().build(),
-            new IngressBuilder().withNewMetadata().withName("ingress2").endMetadata().build());
-    when(parsedList.getItems()).thenReturn(objects);
+    when(loadedRecipe.get())
+        .thenReturn(
+            asList(
+                new IngressBuilder().withNewMetadata().withName("ingress1").endMetadata().build(),
+                new IngressBuilder().withNewMetadata().withName("ingress2").endMetadata().build()));
 
     final KubernetesEnvironment parsed =
         k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -178,28 +170,25 @@ public class KubernetesEnvironmentFactoryTest {
   }
 
   @Test
-  public void ignoreSecretsWhenRecipeContainsThem() throws Exception {
-    final List<HasMetadata> recipeObjects =
-        singletonList(
-            new SecretBuilder().withNewMetadata().withName("secret").endMetadata().build());
-    when(parsedList.getItems()).thenReturn(recipeObjects);
+  public void addSecretsWhenRecipeContainsThem() throws Exception {
+    Secret secret =
+        new SecretBuilder().withNewMetadata().withName("test-secret").endMetadata().build();
+    when(loadedRecipe.get()).thenReturn(singletonList(secret));
 
     final KubernetesEnvironment parsed =
         k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
-    assertTrue(parsed.getSecrets().isEmpty());
-    assertEquals(parsed.getWarnings().size(), 1);
+    assertEquals(parsed.getSecrets().size(), 1);
     assertEquals(
-        parsed.getWarnings().get(0),
-        new WarningImpl(SECRET_IGNORED_WARNING_CODE, SECRET_IGNORED_WARNING_MESSAGE));
+        parsed.getSecrets().get("test-secret").getMetadata().getName(),
+        secret.getMetadata().getName());
   }
 
   @Test
   public void addConfigMapsWhenRecipeContainsThem() throws Exception {
     ConfigMap configMap =
         new ConfigMapBuilder().withNewMetadata().withName("test-configmap").endMetadata().build();
-    final List<HasMetadata> recipeObjects = singletonList(configMap);
-    when(parsedList.getItems()).thenReturn(recipeObjects);
+    when(loadedRecipe.get()).thenReturn(singletonList(configMap));
 
     final KubernetesEnvironment parsed =
         k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -218,7 +207,7 @@ public class KubernetesEnvironmentFactoryTest {
             .endMetadata()
             .withSpec(new PodSpec())
             .build();
-    when(parsedList.getItems()).thenReturn(singletonList(pod));
+    when(loadedRecipe.get()).thenReturn(singletonList(pod));
 
     // when
     KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -253,8 +242,7 @@ public class KubernetesEnvironmentFactoryTest {
             .endSpec()
             .build();
 
-    final List<HasMetadata> recipeObjects = singletonList(deployment);
-    when(parsedList.getItems()).thenReturn(recipeObjects);
+    when(loadedRecipe.get()).thenReturn(singletonList(deployment));
 
     // when
     final KubernetesEnvironment k8sEnv =
@@ -298,7 +286,7 @@ public class KubernetesEnvironmentFactoryTest {
             .withNewSpec()
             .endSpec()
             .build();
-    when(parsedList.getItems()).thenReturn(asList(deployment, pod));
+    when(loadedRecipe.get()).thenReturn(asList(deployment, pod));
 
     // when
     final KubernetesEnvironment k8sEnv =
@@ -315,13 +303,20 @@ public class KubernetesEnvironmentFactoryTest {
     assertEquals(k8sEnv.getPodsData().get("bare-pod").getSpec(), pod.getSpec());
   }
 
+  @Test(expectedExceptions = ValidationException.class)
+  public void exceptionOnRecipeLoadError() throws Exception {
+    when(loadedRecipe.get()).thenThrow(new KubernetesClientException("Could not parse recipe"));
+
+    k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+  }
+
   @Test(
       expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp = "Environment contains object without specified kind field")
   public void exceptionOnObjectWithNoKindSpecified() throws Exception {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn(null);
-    when(parsedList.getItems()).thenReturn(singletonList(object));
+    when(loadedRecipe.get()).thenReturn(singletonList(object));
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -333,7 +328,7 @@ public class KubernetesEnvironmentFactoryTest {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn("MyObject");
     when(object.getMetadata()).thenReturn(null);
-    when(parsedList.getItems()).thenReturn(singletonList(object));
+    when(loadedRecipe.get()).thenReturn(singletonList(object));
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -345,7 +340,7 @@ public class KubernetesEnvironmentFactoryTest {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn("MyObject");
     when(object.getMetadata()).thenReturn(new ObjectMetaBuilder().withName(null).build());
-    when(parsedList.getItems()).thenReturn(singletonList(object));
+    when(loadedRecipe.get()).thenReturn(singletonList(object));
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }

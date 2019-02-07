@@ -1,23 +1,43 @@
 {
+  "meta:license" : [
+    " Copyright (c) 2012-2019 Red Hat, Inc.",
+    " This program and the accompanying materials are made",
+    " available under the terms of the Eclipse Public License 2.0",
+    " which is available at https://www.eclipse.org/legal/epl-2.0/",
+    " SPDX-License-Identifier: EPL-2.0",
+    " Contributors:",
+    " Red Hat, Inc. - initial API and implementation"
+  ],
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Devfile object",
+  "description" : "This schema describes the structure of the devfile object",
   "definitions": {
     "attributes" : {
-      "id": "propertyList",
       "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "javaType": "java.util.Map<String, String>"
+    },
+    "selector" : {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
       "javaType": "java.util.Map<String, String>"
     }
   },
-  "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "title": "The Root Schema of DevFile object",
   "required": [
     "specVersion",
     "name",
     "tools"
   ],
+  "additionalProperties": false,
   "properties": {
     "specVersion": {
       "type": "string",
-      "title": "Devfile Schema Specification Version",
+      "title": "Devfile Specification Version",
       "examples": [
         "0.0.1"
       ]
@@ -25,14 +45,15 @@
     "name": {
       "type": "string",
       "title": "Devfile Name",
+      "description" : "The name of the devfile. Workspaces created from devfile, will inherit this name",
       "examples": [
         "petclinic-dev-environment"
       ]
     },
     "projects": {
       "type": "array",
-      "title": "The Projects Schema",
-      "description" : "Description of the project sources location and type",
+      "title": "The Projects List",
+      "description" : "Description of the projects, containing names and sources locations",
       "items": {
         "type": "object",
         "required": [
@@ -42,13 +63,15 @@
         "properties": {
           "name": {
             "type": "string",
+            "title": "The Project Name",
             "examples": [
               "petclinic"
             ]
           },
           "source": {
             "type": "object",
-            "title": "The Project Source Schema",
+            "title": "The Project Source object",
+            "description": "Describes the project's source - type and location",
             "required": [
               "type",
               "location"
@@ -56,7 +79,7 @@
             "properties": {
               "type": {
                 "type": "string",
-                "description": "Project-s source type.",
+                "description": "Project's source type.",
                 "examples": [
                   "git",
                   "github",
@@ -65,7 +88,7 @@
               },
               "location": {
                 "type": "string",
-                "description": "Project-s source location address. Should be URL for git and github located projects, and file:// for zip.",
+                "description": "Project's source location address. Should be URL for git and github located projects, or file:// for zip.",
                 "examples": [
                   "git@github.com:spring-projects/spring-petclinic.git"
                 ]
@@ -77,7 +100,8 @@
     },
     "tools": {
       "type": "array",
-      "title": "The Tools Schema",
+      "title": "The Tools List",
+      "description" : "Description of the workspace tools, such as editor and plugins",
       "items": {
         "type": "object",
         "required": [
@@ -107,11 +131,12 @@
             "type": "string",
             "examples": [
               "chePlugin",
-              "cheEditor"
+              "cheEditor",
+              "kubernetes"
             ]
           },
           "local": {
-            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type tools.",
+            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type tools",
             "type": "string",
             "examples": [
               "petclinic-app.yaml"
@@ -123,13 +148,21 @@
             "examples": [
               "eclipse/maven-jdk8:1.0.0"
             ]
+          },
+          "selector": {
+            "$ref": "#/definitions/selector",
+            "description": "Describes the objects selector for the recipe type tools. Allows to pick-up only selected items from k8s/openshift list",
+            "examples": [
+              "{\n   \"app.kubernetes.io/name\" : \"mysql\", \n   \"app.kubernetes.io/component\" : \"database\", \n   \"app.kubernetes.io/part-of\" : \"petclinic\" \n}"
+            ]
           }
         }
       }
     },
     "commands": {
       "type": "array",
-      "title": "The Commands Schema",
+      "title": "The Commands List",
+      "description" : "Description of the predefined commands to be available in workspace",
       "items": {
         "type": "object",
         "required": [
@@ -145,11 +178,13 @@
             ]
           },
           "attributes": {
+            "description" : "Additional command attributes",
             "$ref": "#/definitions/attributes"
           },
           "actions": {
             "type": "array",
-            "title": "The Command Actions Schema",
+            "description" : "List of the actions of given command. Now the only one command must be specified in list but there are plans to implement supporting multiple actions commands.",
+            "title": "The Command Actions List",
             "items": {
               "type": "object",
               "required": [
@@ -181,7 +216,7 @@
                 },
                 "workdir": {
                   "type": "string",
-                  "description": "Working directory where the schema should be executed",
+                  "description": "Working directory where the command should be executed",
                   "examples": [
                     "/projects/spring-petclinic"
                   ]
