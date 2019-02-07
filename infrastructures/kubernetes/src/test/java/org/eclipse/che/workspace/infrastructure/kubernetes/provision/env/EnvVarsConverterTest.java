@@ -51,11 +51,7 @@ public class EnvVarsConverterTest {
 
   @BeforeMethod
   public void setup() {
-    List<EnvVar> preExistingEnvironment = new ArrayList<>();
-    preExistingEnvironment.add(new EnvVar(PRE_EXISTING_VAR, PRE_EXISTING_VAR_VALUE, null));
-
     testContainer = new Container();
-    testContainer.setEnv(preExistingEnvironment);
 
     PodSpec podSpec = new PodSpec();
     podSpec.setContainers(singletonList(testContainer));
@@ -78,10 +74,6 @@ public class EnvVarsConverterTest {
             .build();
 
     machine = new InternalMachineConfig();
-    machine.getEnv().put(PRE_EXISTING_VAR, PRE_EXISTING_VAR_NEW_VALUE);
-    machine.getEnv().put(A_VAR, A_VAL);
-    machine.getEnv().put(B_VAR, B_VAL);
-    machine.getEnv().put(C_VAR, C_VAL);
 
     environment.setMachines(
         Collections.singletonMap(Names.machineName(podMeta, testContainer), machine));
