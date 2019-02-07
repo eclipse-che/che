@@ -157,6 +157,8 @@ final class EnvironmentVariablesSorter implements Comparator<EnvVar> {
 
     while (matcher.find()) {
       int start = matcher.start();
+
+      // the variable reference can be escaped using a double $, e.g. $$(VAR) is not a reference
       if (start > 0 && val.charAt(start - 1) == '$') {
         continue;
       }
@@ -164,10 +166,7 @@ final class EnvironmentVariablesSorter implements Comparator<EnvVar> {
       // extract the variable name out of the reference $(NAME) -> NAME
       String refName = matcher.group().substring(2, matcher.group().length() - 1);
       if (refName.equals(var.getName())) {
-        throw new CycleException(
-            format(
-                "Environment variable %s defined using itself. That's not supposed to work.",
-                refName));
+        throw new CycleException(refName);
       }
       ret.add(refName);
     }
