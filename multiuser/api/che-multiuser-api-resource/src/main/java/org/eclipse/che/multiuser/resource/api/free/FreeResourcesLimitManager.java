@@ -15,6 +15,7 @@ import static java.util.Objects.requireNonNull;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
@@ -44,10 +45,11 @@ public class FreeResourcesLimitManager {
    * @return stored resources limit
    * @throws NullPointerException when {@code freeResourcesLimit} is null
    * @throws NotFoundException when resources limit contains resource with non supported type
+   * @throws ConflictException when the specified account doesn't exist
    * @throws ServerException when any other error occurs
    */
   public FreeResourcesLimit store(FreeResourcesLimit freeResourcesLimit)
-      throws NotFoundException, ServerException {
+      throws NotFoundException, ConflictException, ServerException {
     requireNonNull(freeResourcesLimit, "Required non-null free resources limit");
     final FreeResourcesLimitImpl toStore = new FreeResourcesLimitImpl(freeResourcesLimit);
     freeResourcesLimitDao.store(toStore);
