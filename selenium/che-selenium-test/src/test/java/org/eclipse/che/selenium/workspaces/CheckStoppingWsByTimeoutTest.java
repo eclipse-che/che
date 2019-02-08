@@ -28,7 +28,6 @@ import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
-import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -68,7 +67,7 @@ public class CheckStoppingWsByTimeoutTest {
 
     try {
       assertEquals(workspace.getStatus(), STOPPED);
-    } catch (TimeoutException ex) {
+    } catch (AssertionError ex) {
       // remove try-catch block after issue has been resolved
       fail("Known permanent failure https://github.com/eclipse/che/issues/12636");
     }
