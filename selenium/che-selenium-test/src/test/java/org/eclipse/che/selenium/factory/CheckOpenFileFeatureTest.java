@@ -42,6 +42,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
+@Test(groups = FLAKY)
 public class CheckOpenFileFeatureTest {
   private static final String PROJECT_NAME = generate("project", 4);
   private static final String OPEN_FILE_URL = "/" + PROJECT_NAME + "/pom.xml";
@@ -74,7 +75,7 @@ public class CheckOpenFileFeatureTest {
     factoryServiceClient.deleteFactory(FACTORY_NAME);
   }
 
-  @Test(groups = FLAKY)
+  @Test
   public void checkOpenFileFeatureTest() throws Exception {
     createProject(PROJECT_NAME);
     projectExplorer.waitItem(PROJECT_NAME);
