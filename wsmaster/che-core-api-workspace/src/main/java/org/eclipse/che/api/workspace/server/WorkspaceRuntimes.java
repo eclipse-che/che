@@ -30,6 +30,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_B
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -87,6 +88,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
@@ -312,6 +314,9 @@ public class WorkspaceRuntimes {
   public CompletableFuture<Void> startAsync(
       Workspace workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
+    TracingTags.WORKSPACE_ID.set(workspace::getId);
+    TracingTags.USER_ID.set(
+        (Supplier<String>) () -> EnvironmentContext.getCurrent().getSubject().getUserId());
 
     final String workspaceId = workspace.getId();
     // Sidecar-based workspaces allowed not to have environments

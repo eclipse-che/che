@@ -26,6 +26,9 @@ public final class TracingTags {
   public static final AnnotationAwareStringTag MACHINE_NAME =
       new AnnotationAwareStringTag("machine.name");
 
+  /** The id of the user the span is related to. */
+  public static final AnnotationAwareStringTag USER_ID = new AnnotationAwareStringTag("user.id");
+
   /**
    * This is the standard {@link Tags#ERROR} "reexported" as an annotation aware tag so that it can
    * be easily set in the {@link org.eclipse.che.commons.annotation.Traced @Traced} methods.
