@@ -12,15 +12,18 @@
 package org.eclipse.che.selenium.mavenplugin;
 
 import static java.nio.file.Paths.get;
+import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.JAVA_CLASS;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
+import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
+import static org.eclipse.che.selenium.pageobject.AskForValueDialog.JavaFiles.CLASS;
 import static org.eclipse.che.selenium.pageobject.CodenvyEditor.MarkerLocator.ERROR;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 
 import com.google.inject.Inject;
 import java.net.URL;
-import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.core.client.TestProjectServiceClient;
-import org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskForValueDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
@@ -35,7 +38,7 @@ import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
 public class CheckMavenPluginTest {
-  private static final String PROJECT_NAME = NameGenerator.generate("project", 6);
+  private static final String PROJECT_NAME = generate("project", 6);
   private static final String PATH_TO_EXTERNAL_LIBRARIES_IN_MODULE_1 =
       PROJECT_NAME + "/my-lib/External Libraries";
   private static final String PATH_TO_EXTERNAL_LIBRARIES_IN_MODULE_2 =
@@ -56,8 +59,10 @@ public class CheckMavenPluginTest {
     URL resource = getClass().getResource("/projects/check-maven-plugin-test");
     testProjectServiceClient.importProject(
         workspace.getId(), get(resource.toURI()), PROJECT_NAME, MAVEN_SPRING);
+
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
+
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
@@ -65,12 +70,12 @@ public class CheckMavenPluginTest {
 
   @Test
   public void shouldAccessClassCreatedInAnotherModule() {
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitAndSelectItem(PROJECT_NAME + "/my-lib/src/main/java/hello");
-    createNewFileFromMenuFile("TestClass", AskForValueDialog.JavaFiles.CLASS, ".java");
-    projectExplorer.openItemByPath(
-        PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
+    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + "/my-lib/src/main/java/hello");
+    createNewFileFromMenuFile("TestClass", CLASS, ".java");
+    projectExplorer.expandPathInProjectExplorerAndOpenFile(
+        PROJECT_NAME + "/my-webapp/src/main/java/che.eclipse.sample", "Aclass.java");
     editor.waitActive();
+
     editor.setCursorToLine(15);
     enterClassNameViaAutocomplete();
     editor.waitTextIntoEditor("import hello.TestClass;");
@@ -94,10 +99,11 @@ public class CheckMavenPluginTest {
   @Test(priority = 2)
   public void shouldAccessClassCreatedInAnotherModuleAfterIncludingModule() {
     includeModulesInTheParentPom();
-    projectExplorer.quickExpandWithJavaScript();
+
     projectExplorer.openItemByPath(
         PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java");
     editor.waitActive();
+
     editor.goToCursorPositionVisible(18, 1);
     enterClassNameViaAutocomplete();
     editor.typeTextIntoEditor(" testClass2 = new TestClass();");
@@ -132,10 +138,7 @@ public class CheckMavenPluginTest {
    */
   private void createNewFileFromMenuFile(
       String name, AskForValueDialog.JavaFiles item, String fileExt) {
-    menu.runCommand(
-        TestMenuCommandsConstants.Project.PROJECT,
-        TestMenuCommandsConstants.Project.New.NEW,
-        TestMenuCommandsConstants.Project.New.JAVA_CLASS);
+    menu.runCommand(PROJECT, NEW, JAVA_CLASS);
     loader.waitOnClosed();
     askDialog.createJavaFileByNameAndType(name, item);
     loader.waitOnClosed();
