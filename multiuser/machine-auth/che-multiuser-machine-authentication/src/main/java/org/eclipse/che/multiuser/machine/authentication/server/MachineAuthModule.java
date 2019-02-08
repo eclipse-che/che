@@ -67,7 +67,9 @@ public class MachineAuthModule extends AbstractModule {
                 "resolveFactory"));
     machineAuthenticatedResources
         .addBinding()
-        .toInstance(new MachineAuthenticatedResource("/preferences", "find"));
+        .toInstance(
+            new MachineAuthenticatedResource(
+                "/preferences", "find", "save", "update", "removePreferences"));
     machineAuthenticatedResources
         .addBinding()
         .toInstance(new MachineAuthenticatedResource("/activity", "active"));
