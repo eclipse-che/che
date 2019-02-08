@@ -97,8 +97,7 @@ public class WorkspaceDetailsMachinesRamTest {
 
     workspaceDetailsMachines.typeRamAmount(MACHINE_NAME, "3");
     workspaceDetailsMachines.waitValidRamHighlighting(MACHINE_NAME);
-    workspaceDetails.waitAllEnabled(SAVE_BUTTON);
-    workspaceDetails.waitAndClickOn(SAVE_BUTTON);
+    workspaceDetails.waitAllDisabled(SAVE_BUTTON);
 
     workspaceDetailsMachines.clickOnIncrementRamButton(MACHINE_NAME);
     workspaceDetails.waitAllEnabled(SAVE_BUTTON);

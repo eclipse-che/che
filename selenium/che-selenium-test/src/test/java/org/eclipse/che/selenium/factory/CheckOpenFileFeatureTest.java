@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
+import static org.eclipse.che.selenium.core.TestGroup.FLAKY;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
@@ -41,6 +42,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
+@Test(groups = FLAKY)
 public class CheckOpenFileFeatureTest {
   private static final String PROJECT_NAME = generate("project", 4);
   private static final String OPEN_FILE_URL = "/" + PROJECT_NAME + "/pom.xml";
