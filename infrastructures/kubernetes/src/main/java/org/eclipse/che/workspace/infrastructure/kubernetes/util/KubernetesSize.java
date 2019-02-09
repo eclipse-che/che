@@ -42,24 +42,26 @@ public class KubernetesSize {
 
   /**
    * Converts memory in Kubernetes format to bytes.
-   * <p>Format: "< number >< modifier >"
-   * <br>Where modifier is one of the following (case-insensitive):
-   * b, bi, k, ki, kib, m, mi, mib, g, gi, gib, t, ti, tib, p, pi, pib, e, ei, eib
    *
-   * <ul>Conversion rules:
-   * <li>b, bi conversion not needed</li>
-   * <li>k multiplied by 1000</li>
-   * <li>ki, kib multiplied by 1024</li>
-   * <li>m multiplied by 1048576</li>
-   * <li>mi, mib multiplied by 1000000</li>
-   * <li>g multiplied by 1073741824</li>
-   * <li>gi, gib multiplied by 1000000000</li>
-   * <li>t multiplied by 1,09951162778e+12</li>
-   * <li>ti,tib multiplied by 1e+12</li>
-   * <li>p multiplied by 1,12589990684e+15</li>
-   * <li>pi, pib multiplied by 1e+15</li>
-   * <li>e multiplied by 1,1529215046e+18</li>
-   * <li>ei, eib multiplied by 1e+18</li>
+   * <p>Format: "< number >< modifier >" <br>
+   * Where modifier is one of the following (case-insensitive): b, bi, k, ki, kib, m, mi, mib, g,
+   * gi, gib, t, ti, tib, p, pi, pib, e, ei, eib
+   *
+   * <ul>
+   *   Conversion rules:
+   *   <li>b, bi conversion not needed
+   *   <li>k multiplied by 1000
+   *   <li>ki, kib multiplied by 1024
+   *   <li>m multiplied by 1048576
+   *   <li>mi, mib multiplied by 1000000
+   *   <li>g multiplied by 1073741824
+   *   <li>gi, gib multiplied by 1000000000
+   *   <li>t multiplied by 1,09951162778e+12
+   *   <li>ti,tib multiplied by 1e+12
+   *   <li>p multiplied by 1,12589990684e+15
+   *   <li>pi, pib multiplied by 1e+15
+   *   <li>e multiplied by 1,1529215046e+18
+   *   <li>ei, eib multiplied by 1e+18
    * </ul>
    *
    * @throws IllegalArgumentException if specified string can not be parsed
