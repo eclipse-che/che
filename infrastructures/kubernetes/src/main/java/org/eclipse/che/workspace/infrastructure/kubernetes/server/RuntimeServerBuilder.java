@@ -18,8 +18,9 @@ import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 
 /**
- * Helper class to build {@link ServerImpl} from parts like port, host, path, etc.
- * It also adds port that let to server creation as attribute {@link org.eclipse.che.api.workspace.shared.Constants#SERVER_TARGET_PORT_ATTRIBUTE}
+ * Helper class to build {@link ServerImpl} from parts like port, host, path, etc. It also adds port
+ * that let to server creation as attribute {@link
+ * org.eclipse.che.api.workspace.shared.Constants#SERVER_TARGET_PORT_ATTRIBUTE}
  *
  * @author Oleksandr Garagatyi
  */
@@ -87,9 +88,7 @@ public class RuntimeServerBuilder {
         .withAttributes(completeAttributes);
   }
 
-  /**
-   * Removes suffix of {@link ServerConfig} such as "/tcp" when port value "8080/tcp".
-   */
+  /** Removes suffix of {@link ServerConfig} such as "/tcp" when port value "8080/tcp". */
   private String removeSuffix(String port) {
     return port.split("/")[0];
   }

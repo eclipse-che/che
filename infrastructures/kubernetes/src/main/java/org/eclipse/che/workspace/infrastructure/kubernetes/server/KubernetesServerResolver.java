@@ -111,7 +111,8 @@ public class KubernetesServerResolver {
               String path =
                   buildPath(ingressRule.getHttp().getPaths().get(0).getPath(), config.getPath());
               servers.put(
-                  name, new RuntimeServerBuilder()
+                  name,
+                  new RuntimeServerBuilder()
                       .protocol(config.getProtocol())
                       .host(host)
                       .path(path)
