@@ -91,7 +91,7 @@ parse_args() {
                IS_DOCKER=true
                shift
            ;;
-           --no-push)
+           --no-deploy)
                IS_UPLOAD=false
                shift
            ;;
