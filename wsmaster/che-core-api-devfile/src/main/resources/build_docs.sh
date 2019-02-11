@@ -19,7 +19,7 @@ if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
   echo "GitHub token not found, exiting now..."
   exit 1
 else
-  GH_TOKEN="${DEVFILE_DOSC_GITHUB_TOKEN}"
+  GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
 fi
 
 build_with_docker() {
