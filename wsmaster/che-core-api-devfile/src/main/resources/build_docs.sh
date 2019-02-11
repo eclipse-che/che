@@ -60,7 +60,6 @@ upload() {
    else
        echo "No changes in docs."
    fi
-   cd ../..
 }
 
 check_packages() {
