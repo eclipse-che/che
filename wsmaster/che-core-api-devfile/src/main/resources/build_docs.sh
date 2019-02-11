@@ -25,7 +25,7 @@ fi
 
 DEFAULT_COMMIT_MESSAGE="Update devfile docs"
 DEFAULT_BUILD_DOCKER=false
-DEFAULT_UPLOAD=true
+DEFAULT_DEPLOY=true
 
 build_with_docker() {
     echo "Building docs using docker."
@@ -54,7 +54,7 @@ build_native() {
    echo "Building docs done."
 }
 
-upload() {
+deploy() {
    rm -rf devfile && git clone https://${GH_TOKEN}@github.com/redhat-developer/devfile.git
    cp -f docs/* ./devfile/docs
    cd devfile
@@ -92,7 +92,7 @@ parse_args() {
                shift
            ;;
            --no-deploy)
-               IS_UPLOAD=false
+               IS_DEPLOY=false
                shift
            ;;
            --message)
@@ -108,7 +108,7 @@ parse_args "$@"
 
 COMMIT_MESSAGE=${MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
 IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
-IS_UPLOAD=${IS_UPLOAD:-${DEFAULT_UPLOAD}}
+IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
 
 if [[ "$IS_DOCKER" == "true" ]];
 then
@@ -116,8 +116,8 @@ then
 else
     build_native
 fi
-if [[ "$IS_UPLOAD" == "true" ]]; then
-    upload
+if [[ "$IS_DEPLOY" == "true" ]]; then
+    deploy
 fi
 cleanup
 exit 0
