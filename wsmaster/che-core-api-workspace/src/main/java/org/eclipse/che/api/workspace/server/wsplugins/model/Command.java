@@ -71,22 +71,22 @@ public class Command {
   }
 
   @Override
-  public boolean equals(java.lang.Object o) {
+  public boolean equals(Object o) {
     if (this == o) {
       return true;
     }
-    if (o == null || getClass() != o.getClass()) {
+    if (!(o instanceof Command)) {
       return false;
     }
-    Command command = (Command) o;
-    return Objects.equals(name, command.name)
-        && Objects.equals(workingDir, command.workingDir)
-        && Objects.equals(command, command.command);
+    Command command1 = (Command) o;
+    return Objects.equals(getName(), command1.getName())
+        && Objects.equals(getWorkingDir(), command1.getWorkingDir())
+        && Objects.equals(getCommand(), command1.getCommand());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, workingDir, command);
+    return Objects.hash(getName(), getWorkingDir(), getCommand());
   }
 
   @Override

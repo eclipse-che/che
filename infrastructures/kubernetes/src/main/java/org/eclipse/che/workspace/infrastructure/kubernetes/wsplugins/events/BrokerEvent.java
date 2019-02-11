@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events;
 
 import com.google.common.annotations.Beta;
 import java.util.List;
+import java.util.Objects;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.shared.dto.BrokerStatus;
@@ -79,5 +80,40 @@ public class BrokerEvent {
   BrokerEvent withTooling(List<ChePlugin> tooling) {
     this.tooling = tooling;
     return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof BrokerEvent)) {
+      return false;
+    }
+    BrokerEvent that = (BrokerEvent) o;
+    return getStatus() == that.getStatus()
+        && Objects.equals(getRuntimeId(), that.getRuntimeId())
+        && Objects.equals(getError(), that.getError())
+        && Objects.equals(getTooling(), that.getTooling());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getStatus(), getRuntimeId(), getError(), getTooling());
+  }
+
+  @Override
+  public String toString() {
+    return "BrokerEvent{"
+        + "status="
+        + status
+        + ", runtimeId="
+        + runtimeId
+        + ", error='"
+        + error
+        + '\''
+        + ", tooling="
+        + tooling
+        + '}';
   }
 }
