@@ -13,17 +13,12 @@
 ---
 specVersion: 0.0.1
 name: petclinic-dev-environment
-projects:
-  - name: petclinic
-    source:
-      type: git
-      location: 'git@github.com:spring-projects/spring-petclinic.git'
 tools:
-  - type: chePlugin
-    id: eclipse/maven-jdk8:1.0.0
+ - name: theia
+   type: cheEditor
+   id: eclipse/theia:0.0.3
 commands:
-  - name: build
-    actions:
+  - actions:
       - type: exec
         tool: mvn-stack
         command: mvn package
