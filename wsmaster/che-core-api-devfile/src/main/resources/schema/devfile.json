@@ -11,7 +11,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "title": "Devfile object",
-  "description" : "This schema describes the structure of the devfile object",
+  "description" : "This schema described the structure of the devfile object",
   "definitions": {
     "attributes" : {
       "type": "object",

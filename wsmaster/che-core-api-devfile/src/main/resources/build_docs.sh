@@ -13,12 +13,21 @@
 
 set -e
 
+TMP_DIR="tmp"
+
+if [[ -z "${DEPLOY_DOC_GITHUB_TOKEN}" ]]; then
+  echo "GitHub token not found, exiting now..."
+  exit 1
+else
+  GH_TOKEN="${DEPLOY_DOC_GITHUB_TOKEN}"
+fi
+
 build_with_docker() {
     echo "Building docs using docker."
     check_packages docker tar git
     DOCKER_IMAGE_NAME="eclipse-che-devfile-docs"
     docker build -t ${DOCKER_IMAGE_NAME} .
-    cd ../../../target
+    mkdir -p ${TMP_DIR} && cd ${TMP_DIR}
     mkdir -p docs
     docker run --rm ${DOCKER_IMAGE_NAME} | tar -C docs/ -xf -
     echo "Building docs done."
@@ -28,19 +37,20 @@ build_with_docker() {
 build_native() {
    echo "Building docs using native way."
    check_packages git npm
-   cd ../../../target
+   mkdir -p ${TMP_DIR} && cd ${TMP_DIR}
    rm -rf jsonschema2md && git clone git@github.com:adobe/jsonschema2md.git
    cd jsonschema2md
    npm install
    npm link
    cd ..
-   jsonschema2md -d ../src/main/resources/schema -o docs -n -e json
+   jsonschema2md -d ../schema -o docs -n -e json
    rm -rf jsonschema2md
+   mv ./docs/devfile.md ./docs/index.md
    echo "Building docs done."
 }
 
 upload() {
-   rm -rf devfile && git clone git@github.com:redhat-developer/devfile.git
+   rm -rf devfile && git clone https://${GH_TOKEN}@github.com/redhat-developer/devfile.git
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ `git status --porcelain` ]]; then
@@ -49,6 +59,7 @@ upload() {
    else
        echo "No changes in docs."
    fi
+   cd ../..
 }
 
 check_packages() {
@@ -64,11 +75,17 @@ check_packages() {
    done
 }
 
-if [[ "$1" == "--docker" ]]; 
+cleanup() {
+   rm -rf ${TMP_DIR}
+}
+
+cleanup
+if [[ "$1" == "--docker" ]];
 then
     build_with_docker
 else
     build_native
 fi
 upload
+cleanup
 exit 0
