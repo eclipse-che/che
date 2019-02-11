@@ -176,7 +176,7 @@ public final class Constants {
   public static final String PROJECTS_VOLUME_NAME = "projects";
 
   /** Attribute of {@link Server} that specifies exposure of which port created the server */
-  public static final String SERVER_TARGET_PORT_ATTRIBUTE = "targetPort";
+  public static final String SERVER_TARGET_PORT_ATTRIBUTE = "port";
 
   private Constants() {}
 }

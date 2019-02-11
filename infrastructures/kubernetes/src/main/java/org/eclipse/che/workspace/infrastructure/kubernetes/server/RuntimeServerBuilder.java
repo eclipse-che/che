@@ -16,6 +16,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
  * Helper class to build {@link ServerImpl} from parts like port, host, path, etc. It also adds port
@@ -81,7 +82,7 @@ public class RuntimeServerBuilder {
       ub.append(path);
     }
     Map<String, String> completeAttributes = new HashMap<>(attributes);
-    completeAttributes.put("targetPort", targetPort);
+    completeAttributes.put(Constants.SERVER_TARGET_PORT_ATTRIBUTE, targetPort);
     return new ServerImpl()
         .withUrl(ub.toString())
         .withStatus(ServerStatus.UNKNOWN)
