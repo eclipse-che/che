@@ -22,6 +22,8 @@ public class WorkspaceActivityModule extends AbstractModule {
 
   @Override
   protected void configure() {
+    // make sure any changes here are reflected in the MultiUserWorkspaceActivityModule
+    // appropriately
     bind(WorkspaceActivityService.class);
     bind(WorkspaceActivityManager.class);
     bind(WorkspaceActivityChecker.class);
