@@ -108,15 +108,34 @@
           "name",
           "type"
         ],
+        "additionalProperties": false,
         "oneOf" : [
           {
+            "properties": {
+              "type": {
+                "enum": [
+                  "cheEditor",
+                  "chePlugin"
+                ]
+              }
+            },
             "required": [
               "id"
-            ]},
+            ]
+          },
           {
+            "properties": {
+              "type": {
+                "enum": [
+                  "kubernetes",
+                  "openshift"
+                ]
+              }
+            },
             "required": [
               "local"
-            ]}
+            ]
+          }
         ],
         "properties": {
           "name": {
@@ -135,18 +154,18 @@
               "kubernetes"
             ]
           },
-          "local": {
-            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type tools",
-            "type": "string",
-            "examples": [
-              "petclinic-app.yaml"
-            ]
-          },
           "id": {
             "type": "string",
             "description": "Describes the tool FQN",
             "examples": [
               "eclipse/maven-jdk8:1.0.0"
+            ]
+          },
+          "local": {
+            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type tools",
+            "type": "string",
+            "examples": [
+              "petclinic-app.yaml"
             ]
           },
           "selector": {
@@ -185,6 +204,8 @@
             "type": "array",
             "description" : "List of the actions of given command. Now the only one command must be specified in list but there are plans to implement supporting multiple actions commands.",
             "title": "The Command Actions List",
+            "minItems": 1,
+            "maxItems": 1,
             "items": {
               "type": "object",
               "required": [
