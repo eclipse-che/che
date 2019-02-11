@@ -44,7 +44,7 @@ build_native() {
    mkdir -p ${TMP_DIR}/schema
    cp -f schema/* ${TMP_DIR}/schema
    cd ${TMP_DIR}
-   git clone git@github.com:adobe/jsonschema2md.git
+   git clone -b '1.1.0' --single-branch git@github.com:adobe/jsonschema2md.git
    cd jsonschema2md
    npm install
    npm link
@@ -59,7 +59,7 @@ upload() {
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ `git status --porcelain` ]]; then
-       git commit -am ${COMMIT_MESSAGE}
+       git commit -am "${COMMIT_MESSAGE}"
        git push
    else
        echo "No changes in docs."
@@ -105,16 +105,18 @@ parse_args() {
 
 cleanup
 parse_args "$@"
+
 COMMIT_MESSAGE=${MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
-BUILD_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
-UPLOAD=${IS_UPLOAD:-${DEFAULT_UPLOAD}}
-if [[ "$BUILD_DOCKER" == "true" ]];
+IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
+IS_UPLOAD=${IS_UPLOAD:-${DEFAULT_UPLOAD}}
+
+if [[ "$IS_DOCKER" == "true" ]];
 then
     build_with_docker
 else
     build_native
 fi
-if [[ "$UPLOAD" == "true" ]]; then
+if [[ "$IS_UPLOAD" == "true" ]]; then
     upload
 fi
 cleanup
