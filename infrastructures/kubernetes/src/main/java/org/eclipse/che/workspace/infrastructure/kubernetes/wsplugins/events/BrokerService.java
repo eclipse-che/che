@@ -28,7 +28,6 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.shared.dto.event.BrokerLogEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.BrokerStatusChangedEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 
@@ -98,9 +97,8 @@ public class BrokerService {
       LOG.error("Broker event skipped due to illegal content: {}", event);
       return;
     }
-    BrokerEvent brokerEvent;
     List<ChePlugin> tooling = null;
-    if (!isNullOrEmpty(encodedTooling)) {
+    if (isNullOrEmpty(event.getError()) && !isNullOrEmpty(encodedTooling)) {
       try {
         tooling = parseTooling(encodedTooling);
       } catch (IOException e) {
@@ -109,11 +107,9 @@ public class BrokerService {
         }
       }
     }
-    brokerEvent = new BrokerEvent(event, tooling);
-    eventService.publish(brokerEvent);
+    eventService.publish(new BrokerEvent(event, tooling));
   }
 
-  @Nullable
   private List<ChePlugin> parseTooling(String toolingString) throws IOException {
     try {
       return objectMapper.readValue(toolingString, new TypeReference<List<ChePlugin>>() {});
