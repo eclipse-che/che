@@ -13,7 +13,7 @@
 
 set -e
 
-TMP_DIR="tmp"
+TMP_DIR="/tmp/devfile"
 
 if [[ -z "${DEPLOY_DOC_GITHUB_TOKEN}" ]]; then
   echo "GitHub token not found, exiting now..."
@@ -37,13 +37,15 @@ build_with_docker() {
 build_native() {
    echo "Building docs using native way."
    check_packages git npm
-   mkdir -p ${TMP_DIR} && cd ${TMP_DIR}
+   mkdir -p ${TMP_DIR}/schema
+   cp -f schema/* ${TMP_DIR}/schema
+   cd ${TMP_DIR}
    rm -rf jsonschema2md && git clone git@github.com:adobe/jsonschema2md.git
    cd jsonschema2md
    npm install
    npm link
    cd ..
-   jsonschema2md -d ../schema -o docs -n -e json
+   jsonschema2md -d schema -o docs -n -e json
    rm -rf jsonschema2md
    mv ./docs/devfile.md ./docs/index.md
    echo "Building docs done."
