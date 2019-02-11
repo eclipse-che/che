@@ -20,6 +20,7 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATT
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.ALIASES_WORKSPACE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
@@ -53,11 +54,14 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
  */
 public class DevfileConverter {
 
-  private KubernetesToolApplier kubernetesToolApplier;
+  private final KubernetesToolApplier kubernetesToolApplier;
+  private final DockerimageToolApplier dockerimageToolApplier;
 
   @Inject
-  public DevfileConverter(KubernetesToolApplier kubernetesToolApplier) {
+  public DevfileConverter(
+      KubernetesToolApplier kubernetesToolApplier, DockerimageToolApplier dockerimageToolApplier) {
     this.kubernetesToolApplier = kubernetesToolApplier;
+    this.dockerimageToolApplier = dockerimageToolApplier;
   }
 
   /**
@@ -168,6 +172,9 @@ public class DevfileConverter {
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
           kubernetesToolApplier.apply(tool, devfile, config, contentProvider);
+          break;
+        case DOCKERIMAGE_TOOL_TYPE:
+          dockerimageToolApplier.apply(tool, devfile, config);
           break;
         default:
           throw new DevfileFormatException(

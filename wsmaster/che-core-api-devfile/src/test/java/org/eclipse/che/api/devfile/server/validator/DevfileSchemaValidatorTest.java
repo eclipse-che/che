@@ -41,7 +41,8 @@ public class DevfileSchemaValidatorTest {
   public Object[][] validDevfiles() {
     return new Object[][] {
       {"editor_plugin_tool/devfile_editor_plugins.yaml"},
-      {"kubernetes_openshift_tool/devfile_openshift_tool.yaml"}
+      {"kubernetes_openshift_tool/devfile_openshift_tool.yaml"},
+      {"dockerimage_tool/devfile_dockerimage_tool.yaml"}
     };
   }
 
@@ -104,12 +105,21 @@ public class DevfileSchemaValidatorTest {
       // cheEditor/chePlugin tool model testing
       {
         "editor_plugin_tool/devfile_editor_tool_with_missing_id.yaml",
-        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 2\\)\\]"
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
       },
       // kubernetes/openshift tool model testing
       {
         "kubernetes_openshift_tool/devfile_openshift_tool_with_missing_local.yaml",
-        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 2\\)\\]"
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+      },
+      // Dockerimage tool model testing
+      {
+        "dockerimage_tool/devfile_dockerimage_tool_with_missing_image.yaml",
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+      },
+      {
+        "dockerimage_tool/devfile_dockerimage_tool_with_missing_memory_limit.yaml",
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
       },
     };
   }

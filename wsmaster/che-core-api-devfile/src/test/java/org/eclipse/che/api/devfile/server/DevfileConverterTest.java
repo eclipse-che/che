@@ -33,11 +33,12 @@ public class DevfileConverterTest {
 
   private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
   private KubernetesToolApplier kubernetesToolApplier = new KubernetesToolApplier();
+  private DockerimageToolApplier dockerimageToolApplier = new DockerimageToolApplier("/projects");
   private DevfileConverter devfileConverter;
 
   @BeforeClass
   public void setUp() {
-    devfileConverter = new DevfileConverter(kubernetesToolApplier);
+    devfileConverter = new DevfileConverter(kubernetesToolApplier, dockerimageToolApplier);
   }
 
   @Test
