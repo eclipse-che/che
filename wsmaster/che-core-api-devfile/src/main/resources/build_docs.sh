@@ -83,6 +83,14 @@ cleanup() {
    rm -rf ${TMP_DIR}
 }
 
+print_help() {
+ echo "This script builds and deploys documentation from devfile json schema."
+ echo "Command line options:"
+ echo "--docker     Build docs in docker container"
+ echo "--no-deploy  Skip deploy result to remote"
+ echo "--message    Override default commit message"
+}
+
 parse_args() {
     for i in "${@}"
     do
@@ -98,6 +106,10 @@ parse_args() {
            --message)
                MESSAGE="${i#*=}"
                shift
+           ;;
+            -help|--help)
+               print_help
+               exit 0
            ;;
          esac
      done
