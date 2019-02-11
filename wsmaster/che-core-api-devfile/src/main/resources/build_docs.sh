@@ -22,13 +22,17 @@ else
   GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
 fi
 
+
+DEFAULT_COMMIT_MESSAGE="Update devfile docs"
+DEFAULT_BUILD_DOCKER=false
+DEFAULT_UPLOAD=true
+
 build_with_docker() {
     echo "Building docs using docker."
     check_packages docker tar git
     DOCKER_IMAGE_NAME="eclipse-che-devfile-docs"
     docker build -t ${DOCKER_IMAGE_NAME} .
-    mkdir -p ${TMP_DIR} && cd ${TMP_DIR}
-    mkdir -p docs
+    mkdir -p ${TMP_DIR}/docs && cd ${TMP_DIR}
     docker run --rm ${DOCKER_IMAGE_NAME} | tar -C docs/ -xf -
     echo "Building docs done."
 }
@@ -55,7 +59,7 @@ upload() {
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ `git status --porcelain` ]]; then
-       git commit -am "Update devfile docs"
+       git commit -am ${COMMIT_MESSAGE}
        git push
    else
        echo "No changes in docs."
@@ -79,13 +83,39 @@ cleanup() {
    rm -rf ${TMP_DIR}
 }
 
+parse_args() {
+    for i in "${@}"
+    do
+        case $i in
+           --docker)
+               IS_DOCKER=true
+               shift
+           ;;
+           --no-push)
+               IS_UPLOAD=false
+               shift
+           ;;
+           --message)
+               MESSAGE="${i#*=}"
+               shift
+           ;;
+         esac
+     done
+}
+
 cleanup
-if [[ "$1" == "--docker" ]];
+parse_args "$@"
+COMMIT_MESSAGE=${MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
+BUILD_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
+UPLOAD=${IS_UPLOAD:-${DEFAULT_UPLOAD}}
+if [[ "$BUILD_DOCKER" == "true" ]];
 then
     build_with_docker
 else
     build_native
 fi
-upload
+if [[ "$UPLOAD" == "true" ]]; then
+    upload
+fi
 cleanup
 exit 0

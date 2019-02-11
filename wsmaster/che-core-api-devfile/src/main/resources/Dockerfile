@@ -24,8 +24,9 @@ RUN git clone https://github.com/adobe/jsonschema2md.git
 RUN cd jsonschema2md && npm install && npm link
 
 COPY ./schema /schema
-RUN cd /schema && jsonschema2md -d . -e json -n
-RUN cd /schema/out && mv devfile.md index.md
-RUN cd /schema && tar zcf /tmp/out.tar.gz -C out .
+RUN cd /schema && \
+    jsonschema2md -d . -e json -n && \
+    mv ./out/devfile.md ./out/index.md && \
+    tar zcf /tmp/out.tar.gz -C out .
 
 CMD zcat /tmp/out.tar.gz
