@@ -84,11 +84,11 @@ cleanup() {
 }
 
 print_help() {
- echo "This script builds and deploys documentation from devfile json schema."
- echo "Command line options:"
- echo "--docker     Build docs in docker container"
- echo "--no-deploy  Skip deploy result to remote"
- echo "--message    Override default commit message"
+   echo "This script builds and deploys documentation in markdown format from devfile json schema."
+   echo "Command line options:"
+   echo "--docker     Build docs in docker container"
+   echo "--no-deploy  Skip deploy result to remote"
+   echo "--message    Override default commit message"
 }
 
 parse_args() {
