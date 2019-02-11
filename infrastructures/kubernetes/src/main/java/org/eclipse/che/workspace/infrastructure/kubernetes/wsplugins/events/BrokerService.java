@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.events;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -97,17 +98,24 @@ public class BrokerService {
       LOG.error("Broker event skipped due to illegal content: {}", event);
       return;
     }
-    List<ChePlugin> tooling = null;
-    if (isNullOrEmpty(event.getError()) && !isNullOrEmpty(encodedTooling)) {
-      try {
-        tooling = parseTooling(encodedTooling);
-      } catch (IOException e) {
-        if (isNullOrEmpty(event.getError())) {
-          event.withError(e.getMessage());
+    BrokerEvent brokerEvent = new BrokerEvent(event, null);
+    if (isNullOrEmpty(event.getError())) {
+      if (isNullOrEmpty(encodedTooling)) {
+        brokerEvent.withError(
+            format(
+                "Received event from plugin broker for workspace %s:%s with empty error and brokering result",
+                runtimeId.getOwnerId(), runtimeId.getWorkspaceId()));
+      } else {
+        try {
+          brokerEvent.withTooling(parseTooling(encodedTooling));
+        } catch (IOException e) {
+          if (isNullOrEmpty(event.getError())) {
+            brokerEvent.withError(e.getMessage());
+          }
         }
       }
     }
-    eventService.publish(new BrokerEvent(event, tooling));
+    eventService.publish(brokerEvent);
   }
 
   private List<ChePlugin> parseTooling(String toolingString) throws IOException {
