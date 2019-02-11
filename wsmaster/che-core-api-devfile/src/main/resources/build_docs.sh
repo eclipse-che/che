@@ -40,13 +40,12 @@ build_native() {
    mkdir -p ${TMP_DIR}/schema
    cp -f schema/* ${TMP_DIR}/schema
    cd ${TMP_DIR}
-   rm -rf jsonschema2md && git clone git@github.com:adobe/jsonschema2md.git
+   git clone git@github.com:adobe/jsonschema2md.git
    cd jsonschema2md
    npm install
    npm link
    cd ..
    jsonschema2md -d schema -o docs -n -e json
-   rm -rf jsonschema2md
    mv ./docs/devfile.md ./docs/index.md
    echo "Building docs done."
 }
