@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-languageserver-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.18.1-SNAPSHOT</version>
+        <version>6.18.1</version>
         <relativePath>..</relativePath>
     </parent>
     <artifactId>che-plugin-languageserver-ide</artifactId>
