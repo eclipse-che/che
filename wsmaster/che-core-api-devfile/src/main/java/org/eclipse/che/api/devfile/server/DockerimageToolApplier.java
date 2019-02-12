@@ -20,11 +20,15 @@ import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAM
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Endpoint;
+import org.eclipse.che.api.devfile.model.Env;
 import org.eclipse.che.api.devfile.model.Tool;
+import org.eclipse.che.api.devfile.model.Volume;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
@@ -124,5 +128,96 @@ public class DockerimageToolApplier {
         .stream()
         .filter(command -> command.getActions().get(0).getTool().equals(tool.getName()))
         .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+  }
+
+  /**
+   * Creates dockerimage tool from the specified environment.
+   *
+   * @param environmentName the name of environment. Will be used for tool name
+   * @param environment environment that contains configuration which will be used for tool
+   * @return created dockerimage tool
+   * @throws IllegalArgumentException if the specified environment or name are null
+   * @throws IllegalArgumentException if the specified environment does not have recipe
+   * @throws IllegalArgumentException if the specified environment has non dockerimage recipe
+   * @throws WorkspaceExportException when the specified environment can not be converted to
+   *     dockerimage tool
+   */
+  public Tool from(String environmentName, EnvironmentImpl environment)
+      throws WorkspaceExportException {
+    checkArgument(environment != null, "The environment must not be null");
+    checkArgument(environmentName != null, "The environment name must not be null");
+    checkArgument(environment.getRecipe() != null, "The environment recipe must not be null");
+    checkArgument(
+        environment.getRecipe().getType().equals(DOCKERIMAGE_RECIPE_TYPE),
+        "The environment recipe must have recipe with 'dockerimage' tool");
+
+    RecipeImpl recipe = environment.getRecipe();
+    Tool dockerimageTool = new Tool();
+    dockerimageTool.setName(environmentName);
+
+    dockerimageTool.setImage(recipe.getContent());
+    dockerimageTool.setType(DOCKERIMAGE_TOOL_TYPE);
+
+    if (environment.getMachines().isEmpty()) {
+      // environment does not have additional configuration
+      return dockerimageTool;
+    }
+
+    if (environment.getMachines().size() > 1) {
+      throw new WorkspaceExportException(
+          "Environment with 'dockerimage' recipe must contain only one machine configuration");
+    }
+
+    MachineConfigImpl machineConfig = environment.getMachines().values().iterator().next();
+
+    for (Entry<String, ServerConfigImpl> serverEntry : machineConfig.getServers().entrySet()) {
+      dockerimageTool.getEndpoints().add(toEndpoint(serverEntry.getKey(), serverEntry.getValue()));
+    }
+
+    for (Entry<String, VolumeImpl> volumeEntry : machineConfig.getVolumes().entrySet()) {
+      if (volumeEntry.getKey().equals(PROJECTS_VOLUME_NAME)) {
+        dockerimageTool.setMountSources(true);
+        continue;
+      }
+
+      dockerimageTool
+          .getVolumes()
+          .add(toDevfileVolume(volumeEntry.getKey(), volumeEntry.getValue()));
+    }
+
+    dockerimageTool.setMemoryLimit(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE));
+
+    machineConfig
+        .getEnv()
+        .entrySet()
+        .stream()
+        .map(e -> new Env().withName(e.getKey()).withValue(e.getValue()))
+        .forEach(e -> dockerimageTool.getEnv().add(e));
+
+    return dockerimageTool;
+  }
+
+  private Volume toDevfileVolume(String name, VolumeImpl volume) {
+    return new Volume().withName(name).withContainerPath(volume.getPath());
+  }
+
+  private Endpoint toEndpoint(String name, ServerConfigImpl config) {
+    String stringPort =
+        config.getPort().split("/")[0]; // cut protocol from string port like 8080/TCP
+
+    Map<String, String> attributes = new HashMap<>(config.getAttributes());
+    putIfNotNull(attributes, "protocol", config.getProtocol());
+    putIfNotNull(attributes, "path", config.getPath());
+
+    return new Endpoint()
+        .withName(name)
+        .withPort(Integer.parseInt(stringPort))
+        .withAttributes(attributes);
+  }
+
+  private void putIfNotNull(Map<String, String> attributes, String key, String value) {
+    if (value != null) {
+      attributes.put(key, value);
+    }
   }
 }
