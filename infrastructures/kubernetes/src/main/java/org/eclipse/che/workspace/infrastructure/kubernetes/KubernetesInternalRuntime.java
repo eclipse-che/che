@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_FAILED;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
@@ -27,7 +26,6 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.client.Watcher.Action;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.util.ArrayList;
@@ -84,7 +82,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachi
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
@@ -650,8 +647,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
   protected void listenEvents(KubernetesDeployments kubernetesDeployments)
       throws InfrastructureException {
-    // TODO https://github.com/eclipse/che/issues/7653
-    // namespace.pods().watch(new AbnormalStopHandler());
 
     kubernetesDeployments.watchEvents(new MachineLogsPublisher(eventPublisher, machines,
         getContext().getIdentity()));
@@ -1017,30 +1012,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             machineName,
             serverName,
             e.getMessage());
-      }
-    }
-  }
-
-  /** Stops runtime if one of the pods was abnormally stopped. */
-  class AbnormalStopHandler implements PodActionHandler {
-
-    @Override
-    public void handle(Action action, Pod pod) {
-      eventPublisher.sendAbnormalStoppingEvent(
-          getContext().getIdentity(),
-          format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
-      // Cancels workspace servers probes if any
-      probeScheduler.cancel(getContext().getIdentity().getWorkspaceId());
-      if (pod.getStatus() != null && POD_STATUS_PHASE_FAILED.equals(pod.getStatus().getPhase())) {
-        try {
-          internalStop(emptyMap());
-        } catch (InfrastructureException ex) {
-          LOG.error("Kubernetes environment stop failed cause '{}'", ex.getMessage());
-        } finally {
-          eventPublisher.sendAbnormalStoppedEvent(
-              getContext().getIdentity(),
-              format("Pod '%s' was abnormally stopped", pod.getMetadata().getName()));
-        }
       }
     }
   }
