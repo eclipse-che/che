@@ -318,7 +318,7 @@ public class WorkspaceRuntimes {
 
     final String workspaceId = workspace.getId();
     // Sidecar-based workspaces allowed not to have environments
-    EnvironmentImpl environment = null;workspace.id="workspaceyoi5anpdkht01g5s"
+    EnvironmentImpl environment = null;
     if (envName != null) {
       environment = copyEnv(workspace, envName);
       requireNonNull(environment, "Environment should not be null " + workspaceId);
