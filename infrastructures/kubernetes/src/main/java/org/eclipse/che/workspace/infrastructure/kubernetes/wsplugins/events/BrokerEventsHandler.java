@@ -36,7 +36,7 @@ import org.slf4j.Logger;
  */
 public class BrokerEventsHandler {
 
-  static final String NO_ERROR_NO_TOOLING_ERROR_TEMPLATE =
+  public static final String NO_ERROR_NO_TOOLING_ERROR_TEMPLATE =
       "Received event from plugin broker for workspace %s:%s with empty error and brokering result";
 
   private static final Logger LOG = getLogger(BrokerEventsHandler.class);
