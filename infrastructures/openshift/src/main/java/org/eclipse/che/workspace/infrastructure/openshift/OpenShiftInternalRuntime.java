@@ -108,6 +108,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
   }
 
   @Override
+  @Traced
   protected void startMachines() throws InfrastructureException {
     OpenShiftEnvironment osEnv = getContext().getEnvironment();
     String workspaceId = getContext().getIdentity().getWorkspaceId();

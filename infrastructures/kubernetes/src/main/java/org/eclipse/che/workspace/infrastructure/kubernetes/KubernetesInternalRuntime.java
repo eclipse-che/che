@@ -629,6 +629,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    *
    * @throws InfrastructureException when any error occurs while creating Kubernetes objects
    */
+  @Traced
   protected void startMachines() throws InfrastructureException {
     KubernetesEnvironment k8sEnv = getContext().getEnvironment();
     String workspaceId = getContext().getIdentity().getWorkspaceId();
