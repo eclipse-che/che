@@ -35,7 +35,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -87,7 +86,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesD
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
@@ -1019,41 +1017,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             machineName,
             serverName,
             e.getMessage());
-      }
-    }
-  }
-
-  /** Listens pod events and publish them as machine logs. */
-  public static class MachineLogsPublisher implements PodEventHandler {
-
-    private final RuntimeEventsPublisher eventPublisher;
-    private final KubernetesMachineCache machines;
-    private final RuntimeIdentity runtimeIdentity;
-
-    public MachineLogsPublisher(
-        RuntimeEventsPublisher eventPublisher,
-        KubernetesMachineCache machines,
-        RuntimeIdentity runtimeIdentity) {
-      this.eventPublisher = eventPublisher;
-      this.machines = machines;
-      this.runtimeIdentity = runtimeIdentity;
-    }
-
-    @Override
-    public void handle(PodEvent event) {
-      final String podName = event.getPodName();
-      try {
-        for (Entry<String, KubernetesMachineImpl> entry :
-            machines.getMachines(runtimeIdentity).entrySet()) {
-          final KubernetesMachineImpl machine = entry.getValue();
-          if (machine.getPodName().equals(podName)) {
-            eventPublisher.sendMachineLogEvent(
-                entry.getKey(), event.getMessage(), event.getCreationTimeStamp(), runtimeIdentity);
-            return;
-          }
-        }
-      } catch (InfrastructureException e) {
-        LOG.error("Error while machine fetching for logs publishing. Cause: {}", e.getMessage());
       }
     }
   }
