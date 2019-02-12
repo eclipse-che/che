@@ -124,6 +124,9 @@ public class KubernetesEnvironmentFactory
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
       checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
 
+      // needed because Che master namespace is set by K8s API during list loading
+      object.getMetadata().setNamespace(null);
+
       if (object instanceof Pod) {
         Pod pod = (Pod) object;
         pods.put(pod.getMetadata().getName(), pod);
