@@ -38,8 +38,11 @@ import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.multiuser.resource.api.exception.NoEnoughResourcesException;
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.api.type.RuntimeResourceType;
@@ -90,9 +93,12 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   }
 
   @Override
+  @Traced
   public WorkspaceImpl createWorkspace(
       WorkspaceConfig config, String namespace, @Nullable Map<String, String> attributes)
       throws ServerException, ConflictException, NotFoundException, ValidationException {
+    TracingTags.USER_ID.set(() -> EnvironmentContext.getCurrent().getSubject().getUserId());
+
     checkMaxEnvironmentRam(config);
     String accountId = accountManager.getByName(namespace).getId();
     try (@SuppressWarnings("unused")

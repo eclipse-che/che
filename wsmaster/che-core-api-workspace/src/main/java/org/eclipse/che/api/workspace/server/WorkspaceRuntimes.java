@@ -30,7 +30,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOPPED_B
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_STOP_REASON;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -314,13 +313,12 @@ public class WorkspaceRuntimes {
   public CompletableFuture<Void> startAsync(
       Workspace workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
-    TracingTags.WORKSPACE_ID.set(workspace::getId);
-    TracingTags.USER_ID.set(
-        (Supplier<String>) () -> EnvironmentContext.getCurrent().getSubject().getUserId());
+    TracingTags.WORKSPACE_ID.set(workspace.getId());
+    TracingTags.USER_ID.set(() -> EnvironmentContext.getCurrent().getSubject().getUserId());
 
     final String workspaceId = workspace.getId();
     // Sidecar-based workspaces allowed not to have environments
-    EnvironmentImpl environment = null;
+    EnvironmentImpl environment = null;workspace.id="workspaceyoi5anpdkht01g5s"
     if (envName != null) {
       environment = copyEnv(workspace, envName);
       requireNonNull(environment, "Environment should not be null " + workspaceId);
@@ -454,6 +452,9 @@ public class WorkspaceRuntimes {
   @Traced
   public CompletableFuture<Void> stopAsync(Workspace workspace, Map<String, String> options)
       throws NotFoundException, ConflictException {
+    TracingTags.WORKSPACE_ID.set(workspace.getId());
+    TracingTags.USER_ID.set(() -> EnvironmentContext.getCurrent().getSubject().getUserId());
+
     String workspaceId = workspace.getId();
     WorkspaceStatus status = statuses.get(workspaceId);
     if (status == null) {
