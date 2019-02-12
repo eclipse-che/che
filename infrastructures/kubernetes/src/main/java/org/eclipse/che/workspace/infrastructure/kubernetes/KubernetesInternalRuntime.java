@@ -83,6 +83,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
@@ -346,8 +347,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
           "Waiting to start machines of workspace '{}'",
           getContext().getIdentity().getWorkspaceId());
       final CompletableFuture<Void> allDone =
-          CompletableFuture.allOf(
-              machinesFutures.values().toArray(new CompletableFuture[machinesFutures.size()]));
+          CompletableFuture.allOf(machinesFutures.values().toArray(new CompletableFuture[0]));
 
       CompletableFuture.anyOf(allDone, failure)
           .get(startSynchronizer.getStartTimeoutMillis(), TimeUnit.MILLISECONDS);
@@ -642,28 +642,25 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     // /workspace{wsid}/server-{port} => service({wsid}):server-port => pod({wsid}):{port}
     List<Ingress> readyIngresses = createIngresses(k8sEnv, workspaceId);
 
-    // TODO https://github.com/eclipse/che/issues/7653
-    // namespace.pods().watch(new AbnormalStopHandler());
-    namespace.deployments().watchEvents(new MachineLogsPublisher());
-    if (unrecoverableEventListenerFactory.isConfigured()) {
-      KubernetesEnvironment environment = getContext().getEnvironment();
-      Set<String> toWatch =
-          environment
-              .getPodsData()
-              .values()
-              .stream()
-              .map(podData -> podData.getMetadata().getName())
-              .collect(Collectors.toSet());
-      namespace
-          .deployments()
-          .watchEvents(
-              unrecoverableEventListenerFactory.create(toWatch, this::handleUnrecoverableEvent));
-    }
+    listenEvents(namespace.deployments());
 
     final KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(createdServices, readyIngresses);
 
     doStartMachine(serverResolver);
+  }
+
+  protected void listenEvents(KubernetesDeployments kubernetesDeployments)
+      throws InfrastructureException {
+    // TODO https://github.com/eclipse/che/issues/7653
+    // namespace.pods().watch(new AbnormalStopHandler());
+
+    kubernetesDeployments.watchEvents(new MachineLogsPublisher(eventPublisher, machines,
+        getContext().getIdentity()));
+    if (unrecoverableEventListenerFactory.isConfigured()) {
+      kubernetesDeployments.watchEvents(unrecoverableEventListenerFactory.create(
+              getContext().getEnvironment(), this::handleUnrecoverableEvent));
+    }
   }
 
   @Traced
@@ -792,7 +789,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   public WorkspaceStatus getStatus() throws InfrastructureException {
     Optional<WorkspaceStatus> runtimeStatusOpt =
         runtimeStates.getStatus(getContext().getIdentity());
-    return runtimeStatusOpt.isPresent() ? runtimeStatusOpt.get() : WorkspaceStatus.STOPPED;
+    return runtimeStatusOpt.orElse(WorkspaceStatus.STOPPED);
   }
 
   @Override
@@ -895,7 +892,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     if (status != WorkspaceStatus.RUNNING && status != WorkspaceStatus.STARTING) {
       return;
     }
-
     ServerLivenessHandler consumer = new ServerLivenessHandler();
     WorkspaceProbes probes =
         probesFactory.getProbes(getContext().getIdentity(), getInternalMachines());
@@ -1028,21 +1024,31 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   }
 
   /** Listens pod events and publish them as machine logs. */
-  public class MachineLogsPublisher implements PodEventHandler {
+  public static class MachineLogsPublisher implements PodEventHandler {
+
+    private final RuntimeEventsPublisher eventPublisher;
+    private final KubernetesMachineCache machines;
+    private final RuntimeIdentity runtimeIdentity;
+
+    public MachineLogsPublisher(
+        RuntimeEventsPublisher eventPublisher,
+        KubernetesMachineCache machines,
+        RuntimeIdentity runtimeIdentity) {
+      this.eventPublisher = eventPublisher;
+      this.machines = machines;
+      this.runtimeIdentity = runtimeIdentity;
+    }
 
     @Override
     public void handle(PodEvent event) {
       final String podName = event.getPodName();
       try {
         for (Entry<String, KubernetesMachineImpl> entry :
-            machines.getMachines(getContext().getIdentity()).entrySet()) {
+            machines.getMachines(runtimeIdentity).entrySet()) {
           final KubernetesMachineImpl machine = entry.getValue();
           if (machine.getPodName().equals(podName)) {
             eventPublisher.sendMachineLogEvent(
-                entry.getKey(),
-                event.getMessage(),
-                event.getCreationTimeStamp(),
-                getContext().getIdentity());
+                entry.getKey(), event.getMessage(), event.getCreationTimeStamp(), runtimeIdentity);
             return;
           }
         }
