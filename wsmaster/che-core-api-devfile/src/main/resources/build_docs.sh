@@ -69,7 +69,7 @@ deploy() {
 check_packages() {
    for var in "$@"
    do
-      if rpm -q $var >> /dev/null
+      if command -v $var >> /dev/null
       then
         echo "Package $var is installed, continue..."
       else
