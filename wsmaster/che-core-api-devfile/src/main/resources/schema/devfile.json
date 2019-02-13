@@ -108,15 +108,47 @@
           "name",
           "type"
         ],
+        "additionalProperties": false,
         "oneOf" : [
           {
+            "properties": {
+              "type": {
+                "enum": [
+                  "cheEditor",
+                  "chePlugin"
+                ]
+              }
+            },
             "required": [
               "id"
-            ]},
+            ]
+          },
           {
+            "properties": {
+              "type": {
+                "enum": [
+                  "kubernetes",
+                  "openshift"
+                ]
+              }
+            },
             "required": [
               "local"
-            ]}
+            ]
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "dockerimage"
+                ]
+              }
+            },
+            "required": [
+              "image",
+              "memoryLimit"
+            ]
+          }
         ],
         "properties": {
           "name": {
@@ -132,14 +164,9 @@
             "examples": [
               "chePlugin",
               "cheEditor",
-              "kubernetes"
-            ]
-          },
-          "local": {
-            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type tools",
-            "type": "string",
-            "examples": [
-              "petclinic-app.yaml"
+              "kubernetes",
+              "openshift",
+              "dockerimage"
             ]
           },
           "id": {
@@ -149,12 +176,141 @@
               "eclipse/maven-jdk8:1.0.0"
             ]
           },
+          "local": {
+            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type tools",
+            "type": "string",
+            "examples": [
+              "petclinic-app.yaml"
+            ]
+          },
           "selector": {
             "$ref": "#/definitions/selector",
             "description": "Describes the objects selector for the recipe type tools. Allows to pick-up only selected items from k8s/openshift list",
             "examples": [
               "{\n   \"app.kubernetes.io/name\" : \"mysql\", \n   \"app.kubernetes.io/component\" : \"database\", \n   \"app.kubernetes.io/part-of\" : \"petclinic\" \n}"
             ]
+          },
+          "image": {
+            "type": "string",
+            "description": "Specifies the docker image that should be used for tool",
+            "examples": [
+              "eclipse/maven-jdk8:1.0.0"
+            ]
+          },
+          "memoryLimit": {
+            "type": "string",
+            "description": "Describes memory limit for the tool. You can express memory as a plain integer or as a fixed-point integer using one of these suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi, Ki",
+            "examples": [
+              "128974848", "129e6", "129M", "123Mi"
+            ]
+          },
+          "mountSources": {
+            "type": "boolean",
+            "description": "Describes whether projects sources should be mount to the tool. `CHE_PROJECTS_ROOT` environment variable should contains a path where projects sources are mount",
+            "default": "false"
+          },
+          "volumes": {
+            "type": "array",
+            "description": "Describes volumes which should be mount to tool",
+            "items": {
+              "type": "object",
+              "description": "Describe volume that should be mount to tool",
+              "required": [
+                "name",
+                "containerPath"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "The Volume Name",
+                  "description": "The volume name. If several tools mount the same volume then they will reuse the volume and will be able to access to the same files",
+                  "examples": [
+                    "my-data"
+                  ]
+                },
+                "containerPath": {
+                  "type": "string",
+                  "title": "The path where volume should be mount to container",
+                  "examples": [
+                    "/home/user/data"
+                  ]
+                }
+              }
+            }
+          },
+          "env": {
+            "type": "array",
+            "description": "The environment variables list that should be set to docker container",
+            "items": {
+              "type": "object",
+              "description": "Describes environment variable",
+              "required": [
+                "name",
+                "value"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "The Environment Variable Name",
+                  "description": "The environment variable name"
+                },
+                "value": {
+                  "type": "string",
+                  "title": "The Environment Variable Value",
+                  "description": "The environment variable value"
+                }
+              }
+            }
+          },
+          "endpoints": {
+            "type": "array",
+            "description": "Describes dockerimage tool endpoints",
+            "items": {
+              "name": "object",
+              "description": "Describes dockerimage tool endpoint",
+              "required": [
+                "name",
+                "port"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "The Environment Variable Name",
+                  "description": "The environment variable name"
+                },
+                "port": {
+                  "type": "integer",
+                  "title": "The Environment Variable Name",
+                  "description": "The environment variable name"
+                },
+                "attributes" : {
+                  "type": "object",
+                  "public": {
+                    "type": "boolean",
+                    "description": "Identifies endpoint as workspace internally or externally accessible.",
+                    "default": "true"
+                  },
+                  "secure": {
+                    "type": "boolean",
+                    "description": "Identifies server as secure or non-secure. Requests to secure servers will be authenticated and must contain machine token",
+                    "default": "false"
+                  },
+                  "discoverable": {
+                    "type": "boolean",
+                    "description": "Identifies endpoint as accessible by its name.",
+                    "default": "false"
+                  },
+                  "protocol": {
+                    "type": "boolean",
+                    "description": "Defines protocol that should be used for communication with endpoint. Is used for endpoint URL evaluation"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "javaType": "java.util.Map<String, String>"
+                }
+              }
+            }
           }
         }
       }
@@ -185,6 +341,8 @@
             "type": "array",
             "description" : "List of the actions of given command. Now the only one command must be specified in list but there are plans to implement supporting multiple actions commands.",
             "title": "The Command Actions List",
+            "minItems": 1,
+            "maxItems": 1,
             "items": {
               "type": "object",
               "required": [

@@ -12,6 +12,7 @@
 package org.eclipse.che.api.devfile.server.validator;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
@@ -86,13 +87,15 @@ public class DevfileIntegrityValidator {
           break;
         case KUBERNETES_TOOL_TYPE:
         case OPENSHIFT_TOOL_TYPE:
+          checkFieldNotSet(tool, "id", tool.getId());
+          // fall through
+        case DOCKERIMAGE_TOOL_TYPE:
           if (recipeTool != null) {
             throw new DevfileFormatException(
                 format(
                     "Multiple non plugin or editor type tools found: '%s', '%s'",
                     recipeTool.getName(), tool.getName()));
           }
-          checkFieldNotSet(tool, "id", tool.getId());
           recipeTool = tool;
           break;
         default:

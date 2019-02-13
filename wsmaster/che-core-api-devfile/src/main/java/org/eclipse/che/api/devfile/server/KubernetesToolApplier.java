@@ -144,7 +144,8 @@ public class KubernetesToolApplier {
   }
 
   /**
-   * Set {@link MACHINE_NAME_ATTRIBUTE} to commands which are configured in the specified tool.
+   * Set {@link org.eclipse.che.api.core.model.workspace.config.Command#MACHINE_NAME_ATTRIBUTE} to
+   * commands which are configured in the specified tool.
    *
    * <p>Machine name will be set only if the specified recipe objects has the only one container.
    */
