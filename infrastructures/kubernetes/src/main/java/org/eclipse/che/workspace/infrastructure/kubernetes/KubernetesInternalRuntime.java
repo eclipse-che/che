@@ -32,7 +32,6 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -646,10 +645,14 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     // namespace.pods().watch(new AbnormalStopHandler());
     namespace.deployments().watchEvents(new MachineLogsPublisher());
     if (unrecoverableEventListenerFactory.isConfigured()) {
-      Set<String> toWatch = new HashSet<>();
       KubernetesEnvironment environment = getContext().getEnvironment();
-      toWatch.addAll(environment.getPodsCopy().keySet());
-      toWatch.addAll(environment.getDeploymentsCopy().keySet());
+      Set<String> toWatch =
+          environment
+              .getPodsData()
+              .values()
+              .stream()
+              .map(podData -> podData.getMetadata().getName())
+              .collect(Collectors.toSet());
       namespace
           .deployments()
           .watchEvents(
