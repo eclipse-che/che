@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.Server;
 
 /**
  * Constants for Workspace API
@@ -178,6 +179,9 @@ public final class Constants {
 
   /** The projects volume has a standard name used in a couple of locations. */
   public static final String PROJECTS_VOLUME_NAME = "projects";
+
+  /** Attribute of {@link Server} that specifies exposure of which port created the server */
+  public static final String SERVER_PORT_ATTRIBUTE = "port";
 
   private Constants() {}
 }

@@ -27,11 +27,13 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
@@ -91,7 +93,7 @@ public class KubernetesServerResolverTest {
         new ServerImpl()
             .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -113,7 +115,7 @@ public class KubernetesServerResolverTest {
         new ServerImpl()
             .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX)
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -135,7 +137,7 @@ public class KubernetesServerResolverTest {
         new ServerImpl()
             .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX)
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -157,7 +159,7 @@ public class KubernetesServerResolverTest {
         new ServerImpl()
             .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -181,7 +183,7 @@ public class KubernetesServerResolverTest {
         new ServerImpl()
             .withUrl("http://service11:3054/api")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -205,7 +207,7 @@ public class KubernetesServerResolverTest {
         new ServerImpl()
             .withUrl("xxx://service11:3054/api")
             .withStatus(ServerStatus.UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   private Service createService(
@@ -262,5 +264,11 @@ public class KubernetesServerResolverTest {
         .endLoadBalancer()
         .endStatus()
         .build();
+  }
+
+  private Map<String, String> defaultAttributeAnd(String key, String value) {
+    HashMap<String, String> attributes = new HashMap<>(ATTRIBUTES_MAP);
+    attributes.put(key, value);
+    return attributes;
   }
 }

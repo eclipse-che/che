@@ -24,9 +24,11 @@ import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
+import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolver;
@@ -86,7 +88,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost/api")
             .withStatus(UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -109,7 +111,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost")
             .withStatus(UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -131,7 +133,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost")
             .withStatus(UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -154,7 +156,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost/api")
             .withStatus(UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -179,7 +181,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://service11:3054/api")
             .withStatus(UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -204,7 +206,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("xxx://service11:3054/api")
             .withStatus(UNKNOWN)
-            .withAttributes(ATTRIBUTES_MAP));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   private Service createService(
@@ -251,5 +253,11 @@ public class OpenShiftServerResolverTest {
         .endTo()
         .endSpec()
         .build();
+  }
+
+  private Map<String, String> defaultAttributeAnd(String key, String value) {
+    HashMap<String, String> map = new HashMap<>(ATTRIBUTES_MAP);
+    map.put(key, value);
+    return map;
   }
 }
