@@ -40,7 +40,32 @@ public class KubernetesSize {
   private static final Pattern HUMAN_SIZE_PATTERN =
       Pattern.compile("^([-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)\\s*(\\S+)?$");
 
-  /** Converts memory in Kubernetes format to bytes. */
+  /**
+   * Converts memory in Kubernetes format to bytes.
+   *
+   * <p>Format: "< number >< modifier >" <br>
+   * Where modifier is one of the following (case-insensitive): b, bi, k, ki, kib, m, mi, mib, g,
+   * gi, gib, t, ti, tib, p, pi, pib, e, ei, eib
+   *
+   * <ul>
+   *   Conversion rules:
+   *   <li>b, bi conversion not needed
+   *   <li>k multiplied by 1000
+   *   <li>ki, kib multiplied by 1024
+   *   <li>m multiplied by 1048576
+   *   <li>mi, mib multiplied by 1000000
+   *   <li>g multiplied by 1073741824
+   *   <li>gi, gib multiplied by 1000000000
+   *   <li>t multiplied by 1,09951162778e+12
+   *   <li>ti,tib multiplied by 1e+12
+   *   <li>p multiplied by 1,12589990684e+15
+   *   <li>pi, pib multiplied by 1e+15
+   *   <li>e multiplied by 1,1529215046e+18
+   *   <li>ei, eib multiplied by 1e+18
+   * </ul>
+   *
+   * @throws IllegalArgumentException if specified string can not be parsed
+   */
   public static long toBytes(String sizeString) {
     final Matcher matcher;
     if ((matcher = HUMAN_SIZE_PATTERN.matcher(sizeString)).matches()) {

@@ -79,7 +79,7 @@ public class MachineResolver {
       machineConfig.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemoryLimitBytes);
     }
     String overriddenSidecarMemLimit =
-        wsAttributes.get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, cheContainer.getName()));
+        wsAttributes.get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginId));
     if (!isNullOrEmpty(overriddenSidecarMemLimit)) {
       machineConfig
           .getAttributes()
