@@ -21,7 +21,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 /**
  * Helper class to build {@link ServerImpl} from parts like port, host, path, etc. It also adds port
  * that let to server creation as attribute {@link
- * org.eclipse.che.api.workspace.shared.Constants#SERVER_TARGET_PORT_ATTRIBUTE}
+ * org.eclipse.che.api.workspace.shared.Constants#SERVER_PORT_ATTRIBUTE}
  *
  * @author Oleksandr Garagatyi
  */
@@ -82,7 +82,7 @@ public class RuntimeServerBuilder {
       ub.append(path);
     }
     Map<String, String> completeAttributes = new HashMap<>(attributes);
-    completeAttributes.put(Constants.SERVER_TARGET_PORT_ATTRIBUTE, targetPort);
+    completeAttributes.put(Constants.SERVER_PORT_ATTRIBUTE, targetPort);
     return new ServerImpl()
         .withUrl(ub.toString())
         .withStatus(ServerStatus.UNKNOWN)

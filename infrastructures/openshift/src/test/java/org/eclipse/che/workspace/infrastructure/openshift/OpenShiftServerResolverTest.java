@@ -88,7 +88,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost/api")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_TARGET_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -111,7 +111,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_TARGET_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -133,7 +133,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_TARGET_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -156,7 +156,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://localhost/api")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_TARGET_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -181,7 +181,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("http://service11:3054/api")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_TARGET_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
@@ -206,7 +206,7 @@ public class OpenShiftServerResolverTest {
         new ServerImpl()
             .withUrl("xxx://service11:3054/api")
             .withStatus(UNKNOWN)
-            .withAttributes(defaultAttributeAnd(Constants.SERVER_TARGET_PORT_ATTRIBUTE, "3054")));
+            .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   private Service createService(
