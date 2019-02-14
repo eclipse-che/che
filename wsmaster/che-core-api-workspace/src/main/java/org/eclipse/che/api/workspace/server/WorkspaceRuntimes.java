@@ -453,7 +453,11 @@ public class WorkspaceRuntimes {
   public CompletableFuture<Void> stopAsync(Workspace workspace, Map<String, String> options)
       throws NotFoundException, ConflictException {
     TracingTags.WORKSPACE_ID.set(workspace.getId());
-    TracingTags.USER_ID.set(() -> EnvironmentContext.getCurrent().getSubject().getUserId());
+    TracingTags.STOPPED_BY.set(
+        () ->
+            firstNonNull(
+                sessionUserIdOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY)), "undefined"));
+    TracingTags.STACK_ID.set(() -> workspace.getAttributes().getOrDefault("stackId", "no stack"));
 
     String workspaceId = workspace.getId();
     WorkspaceStatus status = statuses.get(workspaceId);
@@ -871,6 +875,14 @@ public class WorkspaceRuntimes {
     final Subject subject = EnvironmentContext.getCurrent().getSubject();
     if (!subject.isAnonymous()) {
       return subject.getUserName();
+    }
+    return nameIfNoUser;
+  }
+
+  private String sessionUserIdOr(String nameIfNoUser) {
+    final Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (!subject.isAnonymous()) {
+      return subject.getUserId();
     }
     return nameIfNoUser;
   }

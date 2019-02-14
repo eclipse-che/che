@@ -105,6 +105,7 @@ public class WorkspaceManager {
       WorkspaceConfig config, String namespace, @Nullable Map<String, String> attributes)
       throws ServerException, NotFoundException, ConflictException, ValidationException {
     TracingTags.USER_ID.set(() -> EnvironmentContext.getCurrent().getSubject().getUserId());
+    TracingTags.STACK_ID.set(() -> attributes.getOrDefault("stackId", "no stack"));
 
     requireNonNull(config, "Required non-null config");
     requireNonNull(namespace, "Required non-null namespace");
@@ -272,6 +273,12 @@ public class WorkspaceManager {
   public void removeWorkspace(String workspaceId) throws ConflictException, ServerException {
     TracingTags.WORKSPACE_ID.set(workspaceId);
     TracingTags.USER_ID.set(() -> EnvironmentContext.getCurrent().getSubject().getUserId());
+    try {
+      TracingTags.STACK_ID.set(
+          workspaceDao.get(workspaceId).getAttributes().getOrDefault("stackId", "no stack"));
+    } catch (NotFoundException e) {
+      LOG.warn("Unable to provide stack id for tracing");
+    }
 
     requireNonNull(workspaceId, "Required non-null workspace id");
     if (runtimes.hasRuntime(workspaceId)) {
