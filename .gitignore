@@ -86,8 +86,8 @@ requirements.lock
 */cypress/videos
 */node_modules
 */pids
-*.pid
-*.seed
+*/.pid
+*/.seed
 */lib-cov
 */coverage
 */.grunt
