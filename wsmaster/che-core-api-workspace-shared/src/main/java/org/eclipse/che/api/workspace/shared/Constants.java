@@ -34,15 +34,12 @@ public final class Constants {
   public static final String LINK_REL_CREATE_STACK = "create stack";
   public static final String LINK_REL_UPDATE_STACK = "update stack";
   public static final String LINK_REL_REMOVE_STACK = "remove stack";
-  public static final String LINK_REL_GET_STACK_BY_ID = "get stack by id";
-  public static final String LINK_REL_GET_STACKS_BY_CREATOR = "get stacks by creator";
+  public static final String LINK_REL_GET_STACK_BY_ID = "get stack by id";;
   public static final String LINK_REL_SEARCH_STACKS = "search stacks";
 
   public static final String LINK_REL_GET_ICON = "get icon link";
   public static final String LINK_REL_UPLOAD_ICON = "upload icon link";
   public static final String LINK_REL_DELETE_ICON = "delete icon link";
-
-  public static final String WS_AGENT_PROCESS_NAME = "CheWsAgent";
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
@@ -162,8 +159,6 @@ public final class Constants {
   public static final String SERVER_EXEC_AGENT_WEBSOCKET_REFERENCE = "exec-agent/ws";
 
   public static final String WS_AGENT_PORT = "4401/tcp";
-
-  public static final String WS_MACHINE_NAME = "default";
 
   public static final String SUPPORTED_RECIPE_TYPES = "supportedRecipeTypes";
 

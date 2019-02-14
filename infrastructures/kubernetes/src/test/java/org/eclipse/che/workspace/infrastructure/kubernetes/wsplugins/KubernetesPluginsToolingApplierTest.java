@@ -447,7 +447,7 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   @Test
-  public void setsSourceAndPluginAttributeForMachineAssociatedWithContainer() throws Exception {
+  public void setsSourceAndPluginAttributeForMachineAssociatedWithSidecar() throws Exception {
     ChePlugin chePlugin = createChePlugin();
 
     applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
