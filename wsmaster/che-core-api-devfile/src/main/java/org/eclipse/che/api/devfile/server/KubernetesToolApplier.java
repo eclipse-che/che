@@ -62,8 +62,7 @@ public class KubernetesToolApplier {
    *       specified tool. Note that name will be set only if tool contains the only one container;
    * </ul>
    *
-   * <p>NOTE: An {@link RecipeFileContentProvider} MUST be provided in order to fetch recipe
-   * content.
+   * <p>NOTE: An {@link FileContentProvider} MUST be provided in order to fetch recipe content.
    *
    * @param recipeTool the recipe-type tool
    * @param devfile devfile that should be changed according to the provided tool
@@ -78,7 +77,7 @@ public class KubernetesToolApplier {
       Tool recipeTool,
       Devfile devfile,
       WorkspaceConfigImpl workspaceConfig,
-      RecipeFileContentProvider contentProvider)
+      FileContentProvider contentProvider)
       throws DevfileRecipeFormatException, DevfileException {
     checkArgument(recipeTool != null, "Tool must not be null");
     checkArgument(devfile != null, "Devfile must not be null");
@@ -109,9 +108,9 @@ public class KubernetesToolApplier {
   }
 
   private String retrieveContent(
-      Tool recipeTool, RecipeFileContentProvider recipeFileContentProvider, String type)
+      Tool recipeTool, FileContentProvider fileContentProvider, String type)
       throws DevfileException {
-    if (recipeFileContentProvider == null) {
+    if (fileContentProvider == null) {
       throw new DevfileException(
           format(
               "Unable to process tool '%s' of type '%s' since there is no recipe content provider supplied. "
@@ -121,7 +120,7 @@ public class KubernetesToolApplier {
 
     String recipeFileContent;
     try {
-      recipeFileContent = recipeFileContentProvider.fetchContent(recipeTool.getLocal());
+      recipeFileContent = fileContentProvider.fetchContent(recipeTool.getLocal());
     } catch (IOException e) {
       throw new DevfileException(
           format("Error during recipe content retrieval for tool '%s': ", recipeTool.getName())

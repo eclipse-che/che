@@ -152,7 +152,7 @@ public class DevfileConverter {
    *     empty or its format is invalid
    */
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
-      Devfile devfile, RecipeFileContentProvider contentProvider) throws DevfileException {
+      Devfile devfile, FileContentProvider contentProvider) throws DevfileException {
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
@@ -173,7 +173,7 @@ public class DevfileConverter {
   }
 
   private void fillInTools(
-      WorkspaceConfigImpl config, Devfile devfile, RecipeFileContentProvider contentProvider)
+      WorkspaceConfigImpl config, Devfile devfile, FileContentProvider contentProvider)
       throws DevfileException {
     // Manage tools
     StringJoiner pluginsStringJoiner = new StringJoiner(",");

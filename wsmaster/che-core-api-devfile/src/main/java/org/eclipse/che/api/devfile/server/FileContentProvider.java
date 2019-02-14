@@ -14,22 +14,22 @@ package org.eclipse.che.api.devfile.server;
 import java.io.IOException;
 
 /**
- * Fetches content of file described in local field of recipe-type {@link
- * org.eclipse.che.api.devfile.model.Tool}
+ * Some types of {@link org.eclipse.che.api.devfile.model.Tool} may have configuration located in a
+ * separate file. It fetches content of file by its name.
  *
  * @author Max Shaposhnyk
+ * @author Sergii Leshchenko
  */
-public interface RecipeFileContentProvider {
+public interface FileContentProvider {
 
   /**
-   * Fetches content of the file specified under 'local' field fo recipe-type tools in {@link
-   * org.eclipse.che.api.devfile.model.Devfile}.
+   * Fetches content of the specified file.
    *
-   * @param localFileName file name to fetch content. Only devfile-relative files are currently
+   * @param fileName file name to fetch content. Only devfile-relative files are currently
    *     supported, so it means file should be localed at the same directory level as devfile (no
    *     matter in repository or PR or branch etc )
    * @return content of the specified file
    * @throws IOException when there is an error during content retrieval
    */
-  String fetchContent(String localFileName) throws IOException;
+  String fetchContent(String fileName) throws IOException;
 }
