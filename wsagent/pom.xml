@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.18.2-SNAPSHOT</version>
+        <version>6.18.2</version>
         <relativePath>../core/pom.xml</relativePath>
     </parent>
     <artifactId>che-agent-parent</artifactId>

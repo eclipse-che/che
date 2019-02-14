@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-core-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>6.18.2-SNAPSHOT</version>
+        <version>6.18.2</version>
     </parent>
     <artifactId>che-core-db-vendor-h2</artifactId>
     <name>Che Core :: DB :: Vendor H2</name>
