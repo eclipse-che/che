@@ -22,6 +22,7 @@ import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
@@ -137,10 +138,28 @@ public class KubernetesToolApplier {
   }
 
   private List<HasMetadata> filter(KubernetesList list, Map<String, String> selector) {
-    return list.getItems()
-        .stream()
-        .filter(e -> e.getMetadata().getLabels().entrySet().containsAll(selector.entrySet()))
-        .collect(toList());
+    return list.getItems().stream().filter(item -> matchLabels(item, selector)).collect(toList());
+  }
+
+  /**
+   * Returns true is specified {@link HasMetadata} instance is matched by specified selector, false
+   * otherwise
+   *
+   * @param hasMetadata object to check matching
+   * @param selector selector that should be matched with object's labels
+   */
+  private boolean matchLabels(HasMetadata hasMetadata, Map<String, String> selector) {
+    ObjectMeta metadata = hasMetadata.getMetadata();
+    if (metadata == null) {
+      return false;
+    }
+
+    Map<String, String> labels = metadata.getLabels();
+    if (labels == null) {
+      return false;
+    }
+
+    return labels.entrySet().containsAll(selector.entrySet());
   }
 
   /**
