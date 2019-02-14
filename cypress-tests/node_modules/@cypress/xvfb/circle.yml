@@ -1,0 +1,10 @@
+machine:
+  node:
+    version: 8
+
+deployment:
+  prod:
+    branch: master
+    commands:
+      # not every commit is going to be published
+      - npm run semantic-release || true

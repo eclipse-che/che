@@ -1,0 +1,52 @@
+language: node_js
+node_js:
+- 6.5.0
+
+cache:
+  directories:
+    - node_modules
+
+# common build steps
+defaults: &defaults
+  script:
+    - npm run demo
+
+jobs:
+  include:
+  # run many jobs to make sure XVFB starts reliably
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults
+    - stage: test
+      <<: *defaults

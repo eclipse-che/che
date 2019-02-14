@@ -1,0 +1,16 @@
+{
+  "test": [
+    "src/**/*.test.js"
+  ],
+  "critics": {
+    "lint": {
+      "engine": "standard"
+    }
+  },
+  "dependencies": {
+    "unused-ignores": [
+      "babel-runtime",
+      "regenerator-runtime"
+    ]
+  }
+}
