@@ -16,6 +16,7 @@ import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_MACHINE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.TOOL_CONTAINER_SOURCE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 
@@ -215,6 +216,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
     InternalMachineConfig machineConfig = machineResolver.resolve();
     machineConfig.getAttributes().put(CONTAINER_SOURCE_ATTRIBUTE, TOOL_CONTAINER_SOURCE);
+    machineConfig.getAttributes().put(PLUGIN_MACHINE_ATTRIBUTE, chePlugin.getId());
     kubernetesEnvironment.getMachines().put(machineName, machineConfig);
 
     sidecarRelatedCommands.forEach(

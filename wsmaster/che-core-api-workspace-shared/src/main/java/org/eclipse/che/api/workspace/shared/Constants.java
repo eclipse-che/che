@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 
 /**
@@ -168,8 +169,15 @@ public final class Constants {
 
   public static final String NO_ENVIRONMENT_RECIPE_TYPE = "no-environment";
 
-  /** Attribute to mark source of the container. */
+  /** Attribute of {@link Machine} to mark source of the container. */
   public static final String CONTAINER_SOURCE_ATTRIBUTE = "source";
+
+  /**
+   * Attribute of {@link Machine} that indicates by which plugin this machines is provisioned
+   *
+   * <p>It contains plugin id, like "plugin": "org.eclipse.che.editor.theia"
+   */
+  public static final String PLUGIN_MACHINE_ATTRIBUTE = "plugin";
 
   /** Mark containers applied to workspace with help recipe definition. */
   public static final String RECIPE_CONTAINER_SOURCE = "recipe";
