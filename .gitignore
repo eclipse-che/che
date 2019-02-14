@@ -82,14 +82,14 @@ requirements.lock
 
 # Cypress modules #
 ##################
-cypress/screenshots
-cypress/videos
-node_modules
-pids
+*/cypress/screenshots
+*/cypress/videos
+*/node_modules
+*/pids
 *.pid
 *.seed
-lib-cov
-coverage
-.grunt
-.lock-wscript
+*/lib-cov
+*/coverage
+*/.grunt
+*/.lock-wscript
 
