@@ -30,9 +30,13 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.DoneableEvent;
 import io.fabric8.kubernetes.api.model.DoneablePod;
+import io.fabric8.kubernetes.api.model.Event;
+import io.fabric8.kubernetes.api.model.EventList;
 import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectReference;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodList;
 import io.fabric8.kubernetes.api.model.PodStatus;
@@ -47,7 +51,9 @@ import io.fabric8.kubernetes.client.dsl.FilterWatchListDeletable;
 import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.PodResource;
+import io.fabric8.kubernetes.client.dsl.Resource;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
+import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -55,6 +61,8 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -66,6 +74,9 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesDeploymentsTest {
   private static final String POD_NAME = "podName";
+  private static final String POD_OBJECT_KIND = "Pod";
+  private static final String REPLICASET_OBJECT_KIND = "ReplicaSet";
+  private static final String DEPLOYMENT_OBJECT_KIND = "Deployment";
 
   @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesClient kubernetesClient;
@@ -88,6 +99,21 @@ public class KubernetesDeploymentsTest {
   @Mock private NonNamespaceOperation podsNamespaceOperation;
 
   @Captor private ArgumentCaptor<Watcher<Pod>> watcherCaptor;
+
+  // Event Mocks
+  @Mock private Event event;
+  @Mock private ObjectReference objectReference;
+  @Mock private PodEventHandler podEventHandler;
+
+  @Mock
+  private MixedOperation<Event, EventList, DoneableEvent, Resource<Event, DoneableEvent>>
+      eventMixedOperation;
+
+  @Mock
+  private NonNamespaceOperation<Event, EventList, DoneableEvent, Resource<Event, DoneableEvent>>
+      eventNamespaceMixedOperation;
+
+  @Captor private ArgumentCaptor<Watcher<Event>> eventWatcherCaptor;
 
   private KubernetesDeployments kubernetesDeployments;
 
@@ -120,6 +146,17 @@ public class KubernetesDeploymentsTest {
     lenient().doReturn(deployment).when(deploymentResource).get();
     lenient().doReturn(deploymentMetadata).when(deployment).getMetadata();
     lenient().doReturn(deploymentSpec).when(deployment).getSpec();
+
+    // Model DSL: client.events().inNamespace(...).watch(...)
+    //            event.getInvolvedObject().getKind()
+    when(kubernetesClient.events()).thenReturn(eventMixedOperation);
+    when(eventMixedOperation.inNamespace(any())).thenReturn(eventNamespaceMixedOperation);
+    when(event.getInvolvedObject()).thenReturn(objectReference);
+    when(event.getMetadata()).thenReturn(new ObjectMeta());
+    // Workaround to ensure mocked event happens 'after' watcher initialisation.
+    Date futureDate = new Date();
+    futureDate.setYear(3000);
+    when(event.getLastTimestamp()).thenReturn(PodEvents.convertDateToEventTimestamp(futureDate));
 
     kubernetesDeployments = new KubernetesDeployments("namespace", "workspace123", clientFactory);
   }
@@ -308,6 +345,51 @@ public class KubernetesDeploymentsTest {
           e.getCause().getMessage(),
           "Pod 'podName' failed to start. Error occurred while fetching pod logs: Unable to create client");
     }
+  }
+
+  @Test
+  public void shouldCallHandlerForEventsOnPods() throws Exception {
+    // Given
+    when(objectReference.getKind()).thenReturn(POD_OBJECT_KIND);
+    kubernetesDeployments.watchEvents(podEventHandler);
+    verify(eventNamespaceMixedOperation).watch(eventWatcherCaptor.capture());
+    Watcher<Event> watcher = eventWatcherCaptor.getValue();
+
+    // When
+    watcher.eventReceived(Watcher.Action.ADDED, event);
+
+    // Then
+    verify(podEventHandler).handle(any());
+  }
+
+  @Test
+  public void shouldCallHandlerForEventsOnReplicaSets() throws Exception {
+    // Given
+    when(objectReference.getKind()).thenReturn(REPLICASET_OBJECT_KIND);
+    kubernetesDeployments.watchEvents(podEventHandler);
+    verify(eventNamespaceMixedOperation).watch(eventWatcherCaptor.capture());
+    Watcher<Event> watcher = eventWatcherCaptor.getValue();
+
+    // When
+    watcher.eventReceived(Watcher.Action.ADDED, event);
+
+    // Then
+    verify(podEventHandler).handle(any());
+  }
+
+  @Test
+  public void shouldCallHandlerForEventsOnDeployments() throws Exception {
+    // Given
+    when(objectReference.getKind()).thenReturn(DEPLOYMENT_OBJECT_KIND);
+    kubernetesDeployments.watchEvents(podEventHandler);
+    verify(eventNamespaceMixedOperation).watch(eventWatcherCaptor.capture());
+    Watcher<Event> watcher = eventWatcherCaptor.getValue();
+
+    // When
+    watcher.eventReceived(Watcher.Action.ADDED, event);
+
+    // Then
+    verify(podEventHandler).handle(any());
   }
 
   @Test

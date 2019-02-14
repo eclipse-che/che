@@ -21,6 +21,7 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
 
 /**
  * Helps to resolve {@link ServerImpl servers} by machine name according to specified {@link Route
@@ -61,11 +62,12 @@ public class OpenShiftServerResolver extends KubernetesServerResolver {
             (name, config) ->
                 servers.put(
                     name,
-                    newServer(
-                        config.getProtocol(),
-                        route.getSpec().getHost(),
-                        null,
-                        config.getPath(),
-                        config.getAttributes())));
+                    new RuntimeServerBuilder()
+                        .protocol(config.getProtocol())
+                        .host(route.getSpec().getHost())
+                        .path(config.getPath())
+                        .attributes(config.getAttributes())
+                        .targetPort(config.getPort())
+                        .build()));
   }
 }

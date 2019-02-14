@@ -21,8 +21,6 @@ import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
@@ -87,12 +85,14 @@ public class KubernetesServerResolver {
             (name, config) ->
                 servers.put(
                     name,
-                    newServer(
-                        config.getProtocol(),
-                        service.getMetadata().getName(),
-                        config.getPort(),
-                        config.getPath(),
-                        config.getAttributes())));
+                    new RuntimeServerBuilder()
+                        .protocol(config.getProtocol())
+                        .host(service.getMetadata().getName())
+                        .port(config.getPort())
+                        .path(config.getPath())
+                        .attributes(config.getAttributes())
+                        .targetPort(config.getPort())
+                        .build()));
   }
 
   private void fillIngressServers(Ingress ingress, Map<String, ServerImpl> servers) {
@@ -111,7 +111,14 @@ public class KubernetesServerResolver {
               String path =
                   buildPath(ingressRule.getHttp().getPaths().get(0).getPath(), config.getPath());
               servers.put(
-                  name, newServer(config.getProtocol(), host, null, path, config.getAttributes()));
+                  name,
+                  new RuntimeServerBuilder()
+                      .protocol(config.getProtocol())
+                      .host(host)
+                      .path(path)
+                      .attributes(config.getAttributes())
+                      .targetPort(config.getPort())
+                      .build());
             });
   }
 
@@ -131,35 +138,5 @@ public class KubernetesServerResolver {
     }
 
     return sb.toString();
-  }
-
-  /** Constructs {@link ServerImpl} instance from provided parameters. */
-  protected ServerImpl newServer(
-      String protocol, String host, String port, String path, Map<String, String> attributes) {
-    StringBuilder ub = new StringBuilder();
-    if (protocol != null) {
-      ub.append(protocol).append("://");
-    } else {
-      ub.append("tcp://");
-    }
-    ub.append(host);
-    if (port != null) {
-      ub.append(':').append(removeSuffix(port));
-    }
-    if (path != null) {
-      if (!path.isEmpty() && !path.startsWith("/")) {
-        ub.append("/");
-      }
-      ub.append(path);
-    }
-    return new ServerImpl()
-        .withUrl(ub.toString())
-        .withStatus(ServerStatus.UNKNOWN)
-        .withAttributes(attributes);
-  }
-
-  /** Removes suffix of {@link ServerConfig} such as "/tcp" when port value "8080/tcp". */
-  private String removeSuffix(String port) {
-    return port.split("/")[0];
   }
 }

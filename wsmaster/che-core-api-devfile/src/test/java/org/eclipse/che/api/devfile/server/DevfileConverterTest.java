@@ -11,6 +11,10 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -22,10 +26,12 @@ import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Tool;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.json.JsonHelper;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
@@ -33,11 +39,13 @@ public class DevfileConverterTest {
 
   private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
   private KubernetesToolApplier kubernetesToolApplier = new KubernetesToolApplier();
+  private DockerimageToolApplier dockerimageToolApplier;
   private DevfileConverter devfileConverter;
 
-  @BeforeClass
+  @BeforeMethod
   public void setUp() {
-    devfileConverter = new DevfileConverter(kubernetesToolApplier);
+    dockerimageToolApplier = mock(DockerimageToolApplier.class);
+    devfileConverter = new DevfileConverter(kubernetesToolApplier, dockerimageToolApplier);
   }
 
   @Test
@@ -133,14 +141,79 @@ public class DevfileConverterTest {
   @Test(
       expectedExceptions = WorkspaceExportException.class,
       expectedExceptionsMessageRegExp =
-          "Workspace .* cannot be converted to devfile since it contains environments which have no equivalent in devfile model")
-  public void shouldThrowExceptionWhenWorkspaceHasEnvironments() throws Exception {
+          "Workspace `ws123` cannot be converted to devfile since it has several environments which have no equivalent in devfile model")
+  public void shouldThrowExceptionWhenWorkspaceHasMultipleEnvironments() throws Exception {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    workspaceConfig.setName("ws123");
     workspaceConfig.getEnvironments().put("env1", new EnvironmentImpl());
+    workspaceConfig.getEnvironments().put("env2", new EnvironmentImpl());
 
     // when
     devfileConverter.workspaceToDevFile(workspaceConfig);
+  }
+
+  @Test(
+      expectedExceptions = WorkspaceExportException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace `ws123` cannot be converted to devfile since it has environment with 'any' recipe type. Currently only workspaces with `dockerimage` recipe can be exported.")
+  public void shouldThrowExceptionWhenWorkspaceHasEnvironmentWithNonDockerimageRecipe()
+      throws Exception {
+    // given
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    workspaceConfig.setName("ws123");
+    EnvironmentImpl environment = new EnvironmentImpl();
+    environment.setRecipe(new RecipeImpl("any", null, null, null));
+    workspaceConfig.getEnvironments().put("env1", environment);
+
+    // when
+    devfileConverter.workspaceToDevFile(workspaceConfig);
+  }
+
+  @Test
+  public void shouldAddDockerimageToolIfEnvironmentHasDockerimageRecipe() throws Exception {
+    // given
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    workspaceConfig.setName("ws123");
+    EnvironmentImpl environment = new EnvironmentImpl();
+    environment.setRecipe(new RecipeImpl("dockerimage", null, null, null));
+    workspaceConfig.getEnvironments().put("env1", environment);
+
+    Tool dockerimageTool = new Tool();
+    when(dockerimageToolApplier.from(any(), any())).thenReturn(dockerimageTool);
+
+    // when
+    Devfile devfile = devfileConverter.workspaceToDevFile(workspaceConfig);
+
+    // then
+    verify(dockerimageToolApplier).from("env1", environment);
+    assertEquals(devfile.getTools().size(), 1);
+    assertEquals(devfile.getTools().get(0), dockerimageTool);
+  }
+
+  @Test
+  public void shouldSetDockerimageToolForCommandsWhichAreNotConfiguredToBeRunInPlugins()
+      throws Exception {
+    // given
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    workspaceConfig.setName("ws123");
+    EnvironmentImpl environment = new EnvironmentImpl();
+    environment.setRecipe(new RecipeImpl("dockerimage", null, null, null));
+    workspaceConfig.getEnvironments().put("env1", environment);
+
+    workspaceConfig.getCommands().add(new CommandImpl("cmd1", "echo Hello", "custom"));
+
+    Tool dockerimageTool = new Tool().withName("dockerimageTool");
+    when(dockerimageToolApplier.from(any(), any())).thenReturn(dockerimageTool);
+
+    // when
+    Devfile devfile = devfileConverter.workspaceToDevFile(workspaceConfig);
+
+    // then
+    assertEquals(devfile.getCommands().size(), 1);
+    Command command = devfile.getCommands().get(0);
+    assertEquals(command.getActions().size(), 1);
+    assertEquals(command.getActions().get(0).getTool(), "dockerimageTool");
   }
 
   private String getTestResource(String resource) throws IOException {

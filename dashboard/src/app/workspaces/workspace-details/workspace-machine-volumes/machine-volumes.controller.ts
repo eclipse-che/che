@@ -14,6 +14,7 @@ import {ConfirmDialogService} from '../../../../components/service/confirm-dialo
 import {IEnvironmentManagerMachine} from '../../../../components/api/environment/environment-manager-machine';
 import {EnvironmentManager} from '../../../../components/api/environment/environment-manager';
 import {CheListHelperFactory} from '../../../../components/widget/list/che-list-helper.factory';
+import {CheMachineSourceTypes} from '../../../../components/api/workspace/che-machine-source-types';
 
 /**
  * @ngdoc controller
@@ -35,6 +36,7 @@ export class MachineVolumesController {
   private machineVolumes: { [volumeName: string]: { path: string } } = {};
   private machineVolumesSelectedNumber: number = 0;
   private onChange: Function;
+  private isToolContainer: boolean;
 
   /**
    * Default constructor that is using resource
@@ -67,6 +69,8 @@ export class MachineVolumesController {
     if (!selectedMachine || !this.environmentManager) {
       return;
     }
+
+    this.isToolContainer = this.selectedMachine.attributes && this.selectedMachine.attributes.source ? this.selectedMachine.attributes.source === CheMachineSourceTypes.TOOL : false;
     this.machineVolumes = this.environmentManager.getMachineVolumes(selectedMachine);
     if (angular.isObject(this.machineVolumes)) {
       this.cheListHelper.setList(Object.keys(this.machineVolumes).map((key: string) => {

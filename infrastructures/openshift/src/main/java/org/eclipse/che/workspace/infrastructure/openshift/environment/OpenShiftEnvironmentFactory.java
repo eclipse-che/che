@@ -125,6 +125,9 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
       checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
 
+      // needed because Che master namespace is set by K8s API during list loading
+      object.getMetadata().setNamespace(null);
+
       if (object instanceof DeploymentConfig) {
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
       } else if (object instanceof Pod) {

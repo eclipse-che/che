@@ -25,6 +25,8 @@ public class Constants {
 
   public static final String OPENSHIFT_TOOL_TYPE = "openshift";
 
+  public static final String DOCKERIMAGE_TOOL_TYPE = "dockerimage";
+
   /**
    * Workspace attribute which contains comma-separated list of mappings of tool id to its name
    * Example value:

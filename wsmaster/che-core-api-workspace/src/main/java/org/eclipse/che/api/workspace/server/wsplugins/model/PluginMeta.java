@@ -12,7 +12,9 @@
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /** @author Oleksandr Garagatyi */
@@ -24,9 +26,18 @@ public class PluginMeta {
   private String version = null;
   private String title = null;
   private String description = null;
+  private String category = null;
+  private String publisher = null;
+  private String repository = null;
+  private List<String> tags = null;
+  private String mediaImage = null;
+  private String mediaVideo = null;
+  private String firstPublicationDate = null;
+  private String latestUpdateDate = null;
+  private String preview = null;
   private String icon = null;
   private String url = null;
-  private Map<String, String> attributes = new HashMap<>();
+  private Map<String, String> attributes = null;
 
   public PluginMeta name(String name) {
     this.name = name;
@@ -110,5 +121,89 @@ public class PluginMeta {
   public PluginMeta attributes(Map<String, String> attributes) {
     this.attributes = attributes;
     return this;
+  }
+
+  public PluginMeta category(String category) {
+    this.category = category;
+    return this;
+  }
+
+  public String getCategory() {
+    return category;
+  }
+
+  public PluginMeta publisher(String publisher) {
+    this.publisher = publisher;
+    return this;
+  }
+
+  public String getPublisher() {
+    return publisher;
+  }
+
+  public PluginMeta repository(String repository) {
+    this.repository = repository;
+    return this;
+  }
+
+  public String getRepository() {
+    return repository;
+  }
+
+  public PluginMeta tags(List<String> tags) {
+    this.tags = tags;
+    return this;
+  }
+
+  public List<String> getTags() {
+    if (tags == null) {
+      tags = new ArrayList<>();
+    }
+    return tags;
+  }
+
+  public PluginMeta mediaImage(String mediaImage) {
+    this.mediaImage = mediaImage;
+    return this;
+  }
+
+  public String getMediaImage() {
+    return mediaImage;
+  }
+
+  public PluginMeta mediaVideo(String mediaVideo) {
+    this.mediaVideo = mediaVideo;
+    return this;
+  }
+
+  public String getMediaVideo() {
+    return mediaVideo;
+  }
+
+  public PluginMeta preview(String preview) {
+    this.preview = preview;
+    return this;
+  }
+
+  public String getPreview() {
+    return preview;
+  }
+
+  public PluginMeta firstPublicationDate(String firstPublicationDate) {
+    this.firstPublicationDate = firstPublicationDate;
+    return this;
+  }
+
+  public String getFirstPublicationDate() {
+    return firstPublicationDate;
+  }
+
+  public PluginMeta latestUpdateDate(String latestUpdateDate) {
+    this.latestUpdateDate = latestUpdateDate;
+    return this;
+  }
+
+  public String getLatestUpdateDate() {
+    return latestUpdateDate;
   }
 }

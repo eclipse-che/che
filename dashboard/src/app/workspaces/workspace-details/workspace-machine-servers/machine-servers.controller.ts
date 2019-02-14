@@ -16,6 +16,7 @@ import {
   IEnvironmentManagerMachine,
   IEnvironmentManagerMachineServer
 } from '../../../../components/api/environment/environment-manager-machine';
+import {CheMachineSourceTypes} from '../../../../components/api/workspace/che-machine-source-types';
 
 interface IServerListItem extends IEnvironmentManagerMachineServer {
   reference: string;
@@ -44,6 +45,7 @@ export class MachineServersController {
   private serversSelectedNumber: number = 0;
   private onChange: Function;
   private hasUserScope: boolean;
+  private isToolContainer: boolean;
 
   /**
    * Default constructor that is using resource.
@@ -72,6 +74,8 @@ export class MachineServersController {
     if (!selectedMachine || !this.environmentManager) {
       return;
     }
+    this.isToolContainer = this.selectedMachine.attributes && this.selectedMachine.attributes.source ? this.selectedMachine.attributes.source === CheMachineSourceTypes.TOOL : false;
+
     this.servers = this.environmentManager.getServers(selectedMachine);
     if (!angular.isObject(this.servers)) {
       return;

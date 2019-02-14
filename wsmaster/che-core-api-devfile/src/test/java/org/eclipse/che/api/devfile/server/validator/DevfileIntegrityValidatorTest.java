@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
+import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
@@ -135,6 +136,22 @@ public class DevfileIntegrityValidatorTest {
     broken
         .getTools()
         .add(new Tool().withName("os").withType(OPENSHIFT_TOOL_TYPE).withLocal("bar.yaml"));
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Multiple non plugin or editor type tools found: 'k8s', 'dockerimage'")
+  public void shouldThrowExceptionOnKubernetesAndDockerimagesTools() throws Exception {
+    Devfile broken = copyOf(initialDevfile);
+    broken.getCommands().clear();
+    broken.getTools().clear();
+    broken
+        .getTools()
+        .add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE).withLocal("foo.yaml"));
+    broken.getTools().add(new Tool().withName("dockerimage").withType(DOCKERIMAGE_TOOL_TYPE));
     // when
     integrityValidator.validateDevfile(broken);
   }

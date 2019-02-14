@@ -56,6 +56,7 @@ public class DevfileManagerTest {
   private DevfileConverter devfileConverter;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private KubernetesToolApplier kubernetesToolApplier;
+  @Mock private DockerimageToolApplier dockerimageToolApplier;
 
   private DevfileManager devfileManager;
 
@@ -63,7 +64,7 @@ public class DevfileManagerTest {
   public void setUp() throws Exception {
     schemaValidator = spy(new DevfileSchemaValidator(new DevfileSchemaProvider()));
     integrityValidator = spy(new DevfileIntegrityValidator());
-    devfileConverter = spy(new DevfileConverter(kubernetesToolApplier));
+    devfileConverter = spy(new DevfileConverter(kubernetesToolApplier, dockerimageToolApplier));
     devfileManager =
         new DevfileManager(schemaValidator, integrityValidator, devfileConverter, workspaceManager);
   }

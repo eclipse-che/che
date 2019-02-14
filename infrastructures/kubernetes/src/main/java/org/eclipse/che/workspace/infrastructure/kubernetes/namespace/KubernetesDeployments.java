@@ -93,6 +93,8 @@ public class KubernetesDeployments {
   public static final int POD_CREATION_TIMEOUT_MIN = 1;
 
   private static final String POD_OBJECT_KIND = "Pod";
+  private static final String REPLICASET_OBJECT_KIND = "ReplicaSet";
+  private static final String DEPLOYMENT_OBJECT_KIND = "Deployment";
   // error stream data initial capacity
   public static final int ERROR_BUFF_INITIAL_CAP = 2048;
   public static final String STDOUT = "stdout";
@@ -472,7 +474,9 @@ public class KubernetesDeployments {
             public void eventReceived(Action action, Event event) {
               ObjectReference involvedObject = event.getInvolvedObject();
 
-              if (POD_OBJECT_KIND.equals(involvedObject.getKind())) {
+              if (POD_OBJECT_KIND.equals(involvedObject.getKind())
+                  || REPLICASET_OBJECT_KIND.equals(involvedObject.getKind())
+                  || DEPLOYMENT_OBJECT_KIND.equals(involvedObject.getKind())) {
 
                 String podName = involvedObject.getName();
 
