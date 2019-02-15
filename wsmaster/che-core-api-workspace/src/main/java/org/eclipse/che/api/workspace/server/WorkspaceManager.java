@@ -26,6 +26,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_N
 import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
@@ -273,12 +274,6 @@ public class WorkspaceManager {
   public void removeWorkspace(String workspaceId) throws ConflictException, ServerException {
     TracingTags.WORKSPACE_ID.set(workspaceId);
     TracingTags.USER_ID.set(() -> EnvironmentContext.getCurrent().getSubject().getUserId());
-    try {
-      TracingTags.STACK_ID.set(
-          workspaceDao.get(workspaceId).getAttributes().getOrDefault("stackId", "no stack"));
-    } catch (NotFoundException e) {
-      LOG.warn("Unable to provide stack id for tracing");
-    }
 
     requireNonNull(workspaceId, "Required non-null workspace id");
     if (runtimes.hasRuntime(workspaceId)) {
@@ -286,7 +281,12 @@ public class WorkspaceManager {
           format("The workspace '%s' is currently running and cannot be removed.", workspaceId));
     }
 
-    workspaceDao.remove(workspaceId);
+    Optional<WorkspaceImpl> workspaceOpt = workspaceDao.remove(workspaceId);
+    workspaceOpt.ifPresent(
+        workspace ->
+            TracingTags.STACK_ID.set(
+                workspace.getAttributes().getOrDefault("stackId", "no stack")));
+
     LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOrUndefined());
   }
 
