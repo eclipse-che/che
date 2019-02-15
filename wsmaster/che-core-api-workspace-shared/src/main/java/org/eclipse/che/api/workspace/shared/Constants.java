@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.shared;
 
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 
 /**
@@ -33,15 +34,12 @@ public final class Constants {
   public static final String LINK_REL_CREATE_STACK = "create stack";
   public static final String LINK_REL_UPDATE_STACK = "update stack";
   public static final String LINK_REL_REMOVE_STACK = "remove stack";
-  public static final String LINK_REL_GET_STACK_BY_ID = "get stack by id";
-  public static final String LINK_REL_GET_STACKS_BY_CREATOR = "get stacks by creator";
+  public static final String LINK_REL_GET_STACK_BY_ID = "get stack by id";;
   public static final String LINK_REL_SEARCH_STACKS = "search stacks";
 
   public static final String LINK_REL_GET_ICON = "get icon link";
   public static final String LINK_REL_UPLOAD_ICON = "upload icon link";
   public static final String LINK_REL_DELETE_ICON = "delete icon link";
-
-  public static final String WS_AGENT_PROCESS_NAME = "CheWsAgent";
 
   public static final String CHE_WORKSPACE_AUTO_START = "che.workspace.auto_start";
 
@@ -162,14 +160,19 @@ public final class Constants {
 
   public static final String WS_AGENT_PORT = "4401/tcp";
 
-  public static final String WS_MACHINE_NAME = "default";
-
   public static final String SUPPORTED_RECIPE_TYPES = "supportedRecipeTypes";
 
   public static final String NO_ENVIRONMENT_RECIPE_TYPE = "no-environment";
 
-  /** Attribute to mark source of the container. */
+  /** Attribute of {@link Machine} to mark source of the container. */
   public static final String CONTAINER_SOURCE_ATTRIBUTE = "source";
+
+  /**
+   * Attribute of {@link Machine} that indicates by which plugin this machines is provisioned
+   *
+   * <p>It contains plugin id, like "plugin": "org.eclipse.che.editor.theia"
+   */
+  public static final String PLUGIN_MACHINE_ATTRIBUTE = "plugin";
 
   /** Mark containers applied to workspace with help recipe definition. */
   public static final String RECIPE_CONTAINER_SOURCE = "recipe";

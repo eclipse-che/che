@@ -20,6 +20,9 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_MACHINE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.shared.Constants.TOOL_CONTAINER_SOURCE;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
@@ -441,6 +444,18 @@ public class KubernetesPluginsToolingApplierTest {
         machineConfig.getServers(),
         expectedSingleServer(
             443, "test-port", singletonMap("attr1", "value1"), true, "https", "/path/1"));
+  }
+
+  @Test
+  public void setsSourceAndPluginAttributeForMachineAssociatedWithSidecar() throws Exception {
+    ChePlugin chePlugin = createChePlugin();
+
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
+
+    InternalMachineConfig machineConfig = getOneAndOnlyNonUserMachine(internalEnvironment);
+    Map<String, String> attributes = machineConfig.getAttributes();
+    assertEquals(attributes.get(CONTAINER_SOURCE_ATTRIBUTE), TOOL_CONTAINER_SOURCE);
+    assertEquals(attributes.get(PLUGIN_MACHINE_ATTRIBUTE), chePlugin.getId());
   }
 
   @Test
