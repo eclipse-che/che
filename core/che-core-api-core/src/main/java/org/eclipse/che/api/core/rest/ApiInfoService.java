@@ -11,15 +11,11 @@
  */
 package org.eclipse.che.api.core.rest;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import java.io.File;
-import java.net.URL;
+import java.io.InputStream;
 import java.util.jar.Attributes;
-import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -35,7 +31,8 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.everrest.core.ObjectFactory;
 import org.everrest.core.ResourceBinder;
 import org.everrest.core.resource.ResourceDescriptor;
-import org.everrest.services.RestServicesList;
+import org.everrest.services.RestServicesList.RootResource;
+import org.everrest.services.RestServicesList.RootResourcesList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,19 +45,18 @@ public class ApiInfoService {
   private volatile ApiInfo apiInfo;
 
   @OPTIONS
-  public ApiInfo info() throws ServerException {
+  public ApiInfo info(@Context ServletContext context) throws ServerException {
     ApiInfo myApiInfo = apiInfo;
     if (myApiInfo == null) {
-      apiInfo = myApiInfo = readApiInfo();
+      apiInfo = myApiInfo = readApiInfo(context);
     }
     return myApiInfo;
   }
 
-  private ApiInfo readApiInfo() throws ServerException {
+  private ApiInfo readApiInfo(ServletContext context) throws ServerException {
     try {
-      URL url = ApiInfoService.class.getProtectionDomain().getCodeSource().getLocation();
-      try (JarFile jar = new JarFile(new File(url.toURI()))) {
-        final Manifest manifest = requireNonNull(jar.getManifest(), "Manifest must not be null");
+      try (InputStream inputStream = context.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+        final Manifest manifest = new Manifest(inputStream);
         final Attributes mainAttributes = manifest.getMainAttributes();
         final DtoFactory dtoFactory = DtoFactory.getInstance();
         return dtoFactory
@@ -80,23 +76,24 @@ public class ApiInfoService {
 
   @GET
   @Produces({MediaType.APPLICATION_JSON})
-  public RestServicesList.RootResourcesList listJSON(@Context ServletContext context) {
+  public RootResourcesList listJSON(@Context ServletContext context) {
     ResourceBinder binder = (ResourceBinder) context.getAttribute(ResourceBinder.class.getName());
-    return new RestServicesList.RootResourcesList(
-        FluentIterable.from(binder.getResources())
-            .transform(
-                new Function<ObjectFactory<ResourceDescriptor>, RestServicesList.RootResource>() {
+    return new RootResourcesList(
+        binder
+            .getResources()
+            .stream()
+            .map(
+                new Function<ObjectFactory<ResourceDescriptor>, RootResource>() {
                   @Nullable
                   @Override
-                  public RestServicesList.RootResource apply(
-                      ObjectFactory<ResourceDescriptor> input) {
+                  public RootResource apply(ObjectFactory<ResourceDescriptor> input) {
                     ResourceDescriptor descriptor = input.getObjectModel();
-                    return new RestServicesList.RootResource(
+                    return new RootResource(
                         descriptor.getObjectClass().getName(), //
                         descriptor.getPathValue().getPath(), //
                         descriptor.getUriPattern().getRegex());
                   }
                 })
-            .toList());
+            .collect(Collectors.toList()));
   }
 }
