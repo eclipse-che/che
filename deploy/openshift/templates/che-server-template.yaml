@@ -333,6 +333,14 @@ parameters:
   displayName: Eclipse Che tracing
   description: Enable or disable tracing in Eclipse Che
   value: 'false'
+- name: CHE_METRICS_ENABLED
+  displayName: Eclipse Che metrics collection
+  description: Enable or disable metrics collection in Eclipse Che
+  value: 'false'
+- name: CHE_DEBUG_SERVER
+  displayName: Deploy Che in a debug mode
+  description: Enable or disable java debug mode on Eclipse Che server
+  value: 'false'
 - name: CHE_CORS_ENABLED
   displayName: CORS filter for WS Master
   description: Enable or disable CORS filter for Eclipse Che WS Master

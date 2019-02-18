@@ -458,6 +458,15 @@ deployJaeger(){
     fi
 }
 
+deployMetrics(){
+    if [ "${CHE_METRICS_ENABLED}" == "true" ]; then
+      echo "Deploying Grafana and Prometheus..."
+      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-monitoring.yaml
+      echo "Grafana deployment complete. $($OC_BINARY get route/grafana --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})"
+      echo "Prometheus deployment complete. $($OC_BINARY get route/prometheus --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})"
+    fi
+}
+
 
 deployChe() {
     if [ "${CHE_TRACING_ENABLED}" == "true" ]; then
@@ -473,11 +482,13 @@ Multi-User: ${CHE_MULTIUSER}
 HTTPS support: ${ENABLE_SSL}
 Namespace: ${CHE_OPENSHIFT_PROJECT}
 Che version: ${CHE_IMAGE_TAG}
+Che server debug: ${CHE_DEBUG_SERVER}
 Image: ${CHE_IMAGE_REPO}
 Pull policy: ${IMAGE_PULL_POLICY}
 Update strategy: ${UPDATE_STRATEGY}
 Setup OpenShift oAuth: ${SETUP_OCP_OAUTH}
 Enable Jaeger based tracing: ${CHE_TRACING_ENABLED}
+Enable metrics collection: ${CHE_METRICS_ENABLED}
 Environment variables:
 ${CHE_VAR_ARRAY}"
     CHE_INFRA_OPENSHIFT_PROJECT=${CHE_OPENSHIFT_PROJECT}
@@ -577,6 +588,7 @@ ${CHE_VAR_ARRAY}"
                          -p TLS=${TLS} \
                          -p CHE_WORKSPACE_PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL} \
                          -p CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME=${WORKSPACE_SERVICE_ACCOUNT_NAME} \
+                         -p CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER} \
                          -p CHE_TRACING_ENABLED=${CHE_TRACING_ENABLED} \
                          -p CHE_METRICS_ENABLED=${CHE_METRICS_ENABLED} \
                          ${ENV}
@@ -606,4 +618,5 @@ createNewProject
 getRoutingSuffix
 deployChePluginRegistry
 deployJaeger
+deployMetrics
 deployChe
