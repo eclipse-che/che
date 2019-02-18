@@ -11,11 +11,12 @@
  */
 package org.eclipse.che.api.core.rest;
 
-import com.google.common.base.Function;
+import static java.util.stream.Collectors.toList;
+
 import java.io.InputStream;
+import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 import javax.inject.Singleton;
 import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
@@ -94,6 +95,6 @@ public class ApiInfoService {
                         descriptor.getUriPattern().getRegex());
                   }
                 })
-            .collect(Collectors.toList()));
+            .collect(toList()));
   }
 }
