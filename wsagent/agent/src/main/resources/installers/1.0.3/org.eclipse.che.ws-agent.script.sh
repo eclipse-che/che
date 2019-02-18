@@ -272,7 +272,7 @@ else
         CA_ARG="--cacert /tmp/che/secret/ca.crt"
       fi
 
-      curl -s ${CA_ARG} ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
+      curl -sSf ${CA_ARG} ${AGENT_BINARIES_URI} | tar  xzf - -C ${CHE_DIR}/ws-agent
     else
       # replace https by http as wget may not be able to handle ssl
       AGENT_BINARIES_URI=$(echo ${AGENT_BINARIES_URI} | sed 's/https/http/g')
