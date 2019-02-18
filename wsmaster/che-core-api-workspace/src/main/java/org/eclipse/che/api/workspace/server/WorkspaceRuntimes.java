@@ -453,10 +453,7 @@ public class WorkspaceRuntimes {
   public CompletableFuture<Void> stopAsync(Workspace workspace, Map<String, String> options)
       throws NotFoundException, ConflictException {
     TracingTags.WORKSPACE_ID.set(workspace.getId());
-    TracingTags.STOPPED_BY.set(
-        () ->
-            firstNonNull(
-                sessionUserIdOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY)), "undefined"));
+    TracingTags.STOPPED_BY.set(getStoppedBy(workspace));
     TracingTags.STACK_ID.set(() -> workspace.getAttributes().getOrDefault("stackId", "no stack"));
 
     String workspaceId = workspace.getId();
@@ -490,6 +487,11 @@ public class WorkspaceRuntimes {
     return CompletableFuture.runAsync(
         ThreadLocalPropagateContext.wrap(new StopRuntimeTask(workspace, options, stoppedBy)),
         sharedPool.getExecutor());
+  }
+
+  private String getStoppedBy(Workspace workspace) {
+    return firstNonNull(
+        sessionUserIdOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY)), "undefined");
   }
 
   private class StopRuntimeTask implements Runnable {
