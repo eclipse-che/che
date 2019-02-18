@@ -97,7 +97,7 @@ objects:
           - name: CHE_WEBSOCKET_ENDPOINT
             value: "${WS_PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api/websocket"
           - name: CHE_DEBUG_SERVER
-            value: "false"
+            value: "${CHE_DEBUG_SERVER}"
           - name: CHE_INFRASTRUCTURE_ACTIVE
             value: "openshift"
           - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
@@ -164,7 +164,7 @@ objects:
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
           - name: CHE_METRICS_ENABLED
-            value: "false"
+            value: "${CHE_METRICS_ENABLED}"
           - name: CHE_CORS_ENABLED
             value: "${CHE_CORS_ENABLED}"
           - name: CHE_CORS_ALLOW__CREDENTIALS

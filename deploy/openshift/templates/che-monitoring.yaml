@@ -1,0 +1,1291 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: che-monitoring
+objects:
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: prometheus
+    name: prometheus
+  spec:
+    port:
+      targetPort: 9090-tcp
+    to:
+      kind: Service
+      name: prometheus
+- apiVersion: v1
+  kind: Route
+  metadata:
+    labels:
+      app: grafana
+    name: grafana
+  spec:
+    port:
+      targetPort: 3000-tcp
+    to:
+      kind: Service
+      name: grafana
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: grafana
+    name: grafana
+  spec:
+    ports:
+    - name: 3000-tcp
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+    selector:
+      deploymentconfig: grafana
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: prometheus
+    name: prometheus
+  spec:
+    ports:
+    - name: 9090-tcp
+      port: 9090
+      protocol: TCP
+      targetPort: 9090
+    selector:
+      deploymentconfig: prometheus
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    generation: 1
+    labels:
+      app: grafana
+    name: grafana
+  spec:
+    selector:
+      app: grafana
+      deploymentconfig: grafana
+    template:
+      metadata:
+        labels:
+          app: grafana
+          deploymentconfig: grafana
+      spec:
+        containers:
+        - image: grafana/grafana
+          imagePullPolicy: Always
+          name: grafana
+          ports:
+          - containerPort: 3000
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /etc/grafana/provisioning/datasources
+            name: volume-datasources
+          - mountPath: /etc/grafana/provisioning/dashboards
+            name: volume-dashboards
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 60
+            timeoutSeconds: 30
+            failureThreshold: 10
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - configMap:
+            defaultMode: 420
+            name: grafana-datasources
+          name: volume-datasources
+        - configMap:
+            defaultMode: 420
+            name: grafana-dashboards
+          name: volume-dashboards
+    test: false
+    triggers:
+      - type: ConfigChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    generation: 1
+    labels:
+      app: prometheus
+    name: prometheus
+  spec:
+    replicas: 1
+    selector:
+      app: prometheus
+      deploymentconfig: prometheus
+    template:
+      metadata:
+        labels:
+          app: prometheus
+          deploymentconfig: prometheus
+      spec:
+        containers:
+        - image: prom/prometheus
+          imagePullPolicy: Always
+          name: prometheus
+          ports:
+          - containerPort: 9090
+            protocol: TCP
+          volumeMounts:
+          - mountPath: /prometheus
+            name: volume-data
+          - mountPath: /etc/prometheus/prometheus.yml
+            name: volume-config
+            subPath: prometheus.yml
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 30
+            timeoutSeconds: 30
+        restartPolicy: Always
+        volumes:
+        - emptyDir: {}
+          name: volume-data
+        - configMap:
+            defaultMode: 420
+            name: prometheus-config
+          name: volume-config
+    triggers:
+    - type: ConfigChange
+- apiVersion: v1
+  data:
+    che-workspaces.json: |-
+      {
+        "annotations": {
+          "list": [
+            {
+              "builtIn": 1,
+              "datasource": "-- Grafana --",
+              "enable": true,
+              "hide": true,
+              "iconColor": "rgba(0, 211, 255, 1)",
+              "name": "Annotations & Alerts",
+              "type": "dashboard"
+            }
+          ]
+        },
+        "editable": true,
+        "gnetId": null,
+        "graphTooltip": 1,
+        "links": [],
+        "panels": [
+          {
+            "collapsed": true,
+            "gridPos": {
+              "h": 1,
+              "w": 24,
+              "x": 0,
+              "y": 0
+            },
+            "id": 20,
+            "panels": [
+              {
+                "cacheTimeout": null,
+                "colorBackground": false,
+                "colorValue": false,
+                "colors": [
+                  "#299c46",
+                  "rgba(237, 129, 40, 0.89)",
+                  "#d44a3a"
+                ],
+                "datasource": "Che",
+                "format": "none",
+                "gauge": {
+                  "maxValue": 100,
+                  "minValue": 0,
+                  "show": false,
+                  "thresholdLabels": false,
+                  "thresholdMarkers": true
+                },
+                "gridPos": {
+                  "h": 5,
+                  "w": 5,
+                  "x": 0,
+                  "y": 1
+                },
+                "id": 14,
+                "interval": null,
+                "links": [],
+                "mappingType": 1,
+                "mappingTypes": [
+                  {
+                    "name": "value to text",
+                    "value": 1
+                  },
+                  {
+                    "name": "range to text",
+                    "value": 2
+                  }
+                ],
+                "maxDataPoints": 100,
+                "nullPointMode": "connected",
+                "nullText": null,
+                "postfix": "",
+                "postfixFontSize": "50%",
+                "prefix": "",
+                "prefixFontSize": "50%",
+                "rangeMaps": [
+                  {
+                    "from": "null",
+                    "text": "N/A",
+                    "to": "null"
+                  }
+                ],
+                "sparkline": {
+                  "fillColor": "rgba(31, 118, 189, 0.18)",
+                  "full": false,
+                  "lineColor": "rgb(31, 120, 193)",
+                  "show": false
+                },
+                "tableColumn": "",
+                "targets": [
+                  {
+                    "expr": "sum(che_workspace_status)",
+                    "format": "time_series",
+                    "intervalFactor": 1,
+                    "refId": "A"
+                  }
+                ],
+                "thresholds": "",
+                "timeFrom": null,
+                "title": "Number of Workspaces",
+                "type": "singlestat",
+                "valueFontSize": "80%",
+                "valueMaps": [
+                  {
+                    "op": "=",
+                    "text": "N/A",
+                    "value": "null"
+                  }
+                ],
+                "valueName": "current"
+              },
+              {
+                "aliasColors": {},
+                "bars": false,
+                "dashLength": 10,
+                "dashes": false,
+                "datasource": "Che",
+                "fill": 1,
+                "gridPos": {
+                  "h": 5,
+                  "w": 6,
+                  "x": 5,
+                  "y": 1
+                },
+                "id": 8,
+                "legend": {
+                  "avg": false,
+                  "current": false,
+                  "max": false,
+                  "min": false,
+                  "show": true,
+                  "total": false,
+                  "values": false
+                },
+                "lines": true,
+                "linewidth": 1,
+                "links": [],
+                "nullPointMode": "null",
+                "percentage": false,
+                "pointradius": 5,
+                "points": false,
+                "renderer": "flot",
+                "seriesOverrides": [],
+                "spaceLength": 10,
+                "stack": false,
+                "steppedLine": false,
+                "targets": [
+                  {
+                    "expr": "sum(che_workspace_failure_total)",
+                    "format": "time_series",
+                    "intervalFactor": 1,
+                    "legendFormat": "",
+                    "refId": "A"
+                  }
+                ],
+                "thresholds": [],
+                "timeFrom": null,
+                "timeRegions": [],
+                "timeShift": null,
+                "title": "Workspace Failures",
+                "tooltip": {
+                  "shared": true,
+                  "sort": 0,
+                  "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": []
+                },
+                "yaxes": [
+                  {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                  },
+                  {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                  }
+                ],
+                "yaxis": {
+                  "align": false,
+                  "alignLevel": null
+                }
+              },
+              {
+                "aliasColors": {},
+                "bars": false,
+                "dashLength": 10,
+                "dashes": false,
+                "datasource": "Che",
+                "fill": 1,
+                "gridPos": {
+                  "h": 5,
+                  "w": 6,
+                  "x": 11,
+                  "y": 1
+                },
+                "id": 6,
+                "legend": {
+                  "avg": false,
+                  "current": false,
+                  "max": false,
+                  "min": false,
+                  "show": true,
+                  "total": false,
+                  "values": false
+                },
+                "lines": true,
+                "linewidth": 1,
+                "links": [],
+                "nullPointMode": "null",
+                "percentage": false,
+                "pointradius": 5,
+                "points": false,
+                "renderer": "flot",
+                "seriesOverrides": [],
+                "spaceLength": 10,
+                "stack": false,
+                "steppedLine": false,
+                "targets": [
+                  {
+                    "expr": "che_workspace_status{status=\"STARTING\"}",
+                    "format": "time_series",
+                    "intervalFactor": 1,
+                    "legendFormat": "",
+                    "refId": "A"
+                  }
+                ],
+                "thresholds": [],
+                "timeFrom": null,
+                "timeRegions": [],
+                "timeShift": null,
+                "title": "Starting Workspaces",
+                "tooltip": {
+                  "shared": true,
+                  "sort": 0,
+                  "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": []
+                },
+                "yaxes": [
+                  {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                  },
+                  {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                  }
+                ],
+                "yaxis": {
+                  "align": false,
+                  "alignLevel": null
+                }
+              },
+              {
+                "aliasColors": {},
+                "bars": false,
+                "dashLength": 10,
+                "dashes": false,
+                "datasource": "Che",
+                "fill": 1,
+                "gridPos": {
+                  "h": 5,
+                  "w": 7,
+                  "x": 17,
+                  "y": 1
+                },
+                "id": 10,
+                "legend": {
+                  "avg": false,
+                  "current": false,
+                  "max": false,
+                  "min": false,
+                  "show": true,
+                  "total": false,
+                  "values": false
+                },
+                "lines": true,
+                "linewidth": 1,
+                "links": [],
+                "nullPointMode": "null",
+                "percentage": false,
+                "pointradius": 5,
+                "points": false,
+                "renderer": "flot",
+                "seriesOverrides": [],
+                "spaceLength": 10,
+                "stack": false,
+                "steppedLine": false,
+                "targets": [
+                  {
+                    "expr": "che_workspace_status{status=\"RUNNING\"}",
+                    "format": "time_series",
+                    "instant": false,
+                    "intervalFactor": 1,
+                    "legendFormat": "",
+                    "refId": "A"
+                  }
+                ],
+                "thresholds": [],
+                "timeFrom": null,
+                "timeRegions": [],
+                "timeShift": null,
+                "title": "Running Workspaces",
+                "tooltip": {
+                  "shared": true,
+                  "sort": 0,
+                  "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": []
+                },
+                "yaxes": [
+                  {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                  },
+                  {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                  }
+                ],
+                "yaxis": {
+                  "align": false,
+                  "alignLevel": null
+                }
+              }
+            ],
+            "title": "Workspaces",
+            "type": "row"
+          },
+          {
+            "collapsed": true,
+            "gridPos": {
+              "h": 1,
+              "w": 24,
+              "x": 0,
+              "y": 1
+            },
+            "id": 24,
+            "panels": [
+              {
+                "aliasColors": {},
+                "bars": false,
+                "dashLength": 10,
+                "dashes": false,
+                "datasource": "Che",
+                "fill": 1,
+                "gridPos": {
+                  "h": 7,
+                  "w": 11,
+                  "x": 0,
+                  "y": 2
+                },
+                "id": 16,
+                "legend": {
+                  "avg": false,
+                  "current": false,
+                  "max": false,
+                  "min": false,
+                  "show": true,
+                  "total": false,
+                  "values": false
+                },
+                "lines": true,
+                "linewidth": 1,
+                "links": [],
+                "nullPointMode": "null",
+                "percentage": false,
+                "pointradius": 5,
+                "points": false,
+                "renderer": "flot",
+                "seriesOverrides": [],
+                "spaceLength": 10,
+                "stack": false,
+                "steppedLine": false,
+                "targets": [
+                  {
+                    "expr": "sum(deriv(che_server_api_response_total[1m]))",
+                    "format": "time_series",
+                    "hide": false,
+                    "intervalFactor": 1,
+                    "legendFormat": "",
+                    "refId": "A"
+                  }
+                ],
+                "thresholds": [],
+                "timeFrom": null,
+                "timeRegions": [],
+                "timeShift": null,
+                "title": "req/s",
+                "tooltip": {
+                  "shared": true,
+                  "sort": 0,
+                  "value_type": "individual"
+                },
+                "type": "graph",
+                "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": []
+                },
+                "yaxes": [
+                  {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                  },
+                  {
+                    "format": "short",
+                    "label": null,
+                    "logBase": 1,
+                    "max": null,
+                    "min": null,
+                    "show": true
+                  }
+                ],
+                "yaxis": {
+                  "align": false,
+                  "alignLevel": null
+                }
+              }
+            ],
+            "title": "Request",
+            "type": "row"
+          },
+          {
+            "collapsed": false,
+            "gridPos": {
+              "h": 1,
+              "w": 24,
+              "x": 0,
+              "y": 2
+            },
+            "id": 22,
+            "panels": [],
+            "title": "JsonRPC",
+            "type": "row"
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "fill": 1,
+            "gridPos": {
+              "h": 7,
+              "w": 9,
+              "x": 0,
+              "y": 3
+            },
+            "id": 18,
+            "legend": {
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null as zero",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "executor_pool_size_threads{name=\"che.core.jsonrpc.major_executor\",}",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "refId": "A"
+              },
+              {
+                "expr": "executor_active_threads{name=\"che.core.jsonrpc.major_executor\",}",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "refId": "B"
+              },
+              {
+                "expr": "executor_pool_size_threads{name=\"che.core.jsonrpc.minor_executor\",}",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "refId": "C"
+              },
+              {
+                "expr": "executor_active_threads{name=\"che.core.jsonrpc.minor_executor\",}",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "refId": "D"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "che.core.jsonrpc.executor_pool",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "fill": 1,
+            "gridPos": {
+              "h": 7,
+              "w": 7,
+              "x": 9,
+              "y": 3
+            },
+            "id": 26,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null as zero",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "executor_queued_threads{name=\"che.core.jsonrpc.major_executor\",}",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "A"
+              },
+              {
+                "expr": "executor_queued_threads{name=\"che.core.jsonrpc.minor_executor\",}",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "JsonRpcQueue",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "fill": 1,
+            "gridPos": {
+              "h": 7,
+              "w": 7,
+              "x": 16,
+              "y": 3
+            },
+            "id": 32,
+            "legend": {
+              "alignAsTable": false,
+              "avg": false,
+              "current": false,
+              "hideEmpty": false,
+              "hideZero": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(deriv(executor_rejected_tasks_total{name=\"che.core.jsonrpc.major_executor\",}[1m]))",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "A"
+              },
+              {
+                "expr": "sum(deriv(executor_rejected_tasks_total{name=\"che.core.jsonrpc.minor_executor\",}[1m]))",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Rejected message/minute",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+              },
+              {
+                "decimals": null,
+                "format": "short",
+                "label": "",
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "fill": 1,
+            "gridPos": {
+              "h": 8,
+              "w": 9,
+              "x": 0,
+              "y": 10
+            },
+            "id": 30,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null as zero",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "executor_seconds_max{name=\"che.core.jsonrpc.major_executor\",}",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "A"
+              },
+              {
+                "expr": "executor_seconds_max{name=\"che.core.jsonrpc.minor_executor\",}",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Seconds Max",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "fill": 1,
+            "gridPos": {
+              "h": 8,
+              "w": 7,
+              "x": 9,
+              "y": 10
+            },
+            "id": 34,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null as zero",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(deriv(executor_seconds_sum{name=\"che.core.jsonrpc.major_executor\",}[1m]))",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "A"
+              },
+              {
+                "expr": "sum(deriv(executor_seconds_sum{name=\"che.core.jsonrpc.minor_executor\",}[1m]))",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Seconds Sum",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "description": "",
+            "fill": 1,
+            "gridPos": {
+              "h": 8,
+              "w": 7,
+              "x": 16,
+              "y": 10
+            },
+            "id": 28,
+            "legend": {
+              "avg": false,
+              "current": false,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": false
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null as zero",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(deriv(executor_completed_tasks_total{name=\"che.core.jsonrpc.major_executor\",}[1m]))",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "A"
+              },
+              {
+                "expr": "sum(deriv(executor_completed_tasks_total{name=\"che.core.jsonrpc.minor_executor\",}[1m]))",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "B"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Completed Task/minute",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": "0",
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          }
+        ],
+        "refresh": "5s",
+        "schemaVersion": 16,
+        "style": "dark",
+        "tags": [],
+        "templating": {
+          "list": []
+        },
+        "time": {
+          "from": "now-5m",
+          "to": "now"
+        },
+        "timepicker": {
+          "refresh_intervals": [
+            "5s",
+            "10s",
+            "30s",
+            "1m",
+            "5m",
+            "15m",
+            "30m",
+            "1h",
+            "2h",
+            "1d"
+          ],
+          "time_options": [
+            "5m",
+            "15m",
+            "1h",
+            "6h",
+            "12h",
+            "24h",
+            "2d",
+            "7d",
+            "30d"
+          ]
+        },
+        "timezone": "",
+        "title": "Che Server",
+        "uid": "sL0Klq_mz",
+        "version": 1
+      }
+    dashboards.yaml: |-
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10000
+        options:
+          path: /etc/grafana/provisioning/dashboards
+  kind: ConfigMap
+  metadata:
+    name: grafana-dashboards
+- apiVersion: v1
+  data:
+    che-datasource.yaml: |-
+      apiVersion: 1
+      datasources:
+      - name: Che
+        type: prometheus
+        access: proxy
+        url: http://prometheus:9090
+  kind: ConfigMap
+  metadata:
+    name: grafana-datasources
+- apiVersion: v1
+  data:
+    prometheus.yml: |-
+      global:
+        scrape_interval:     5s
+        evaluation_interval: 5s
+      scrape_configs:
+        - job_name: 'che'
+          static_configs:
+            - targets: ['che-host:8087']
+  kind: ConfigMap
+  metadata:
+    name: prometheus-config
