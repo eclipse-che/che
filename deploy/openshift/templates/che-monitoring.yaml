@@ -3952,12 +3952,12 @@ objects:
             "id": 8,
             "legend": {
               "avg": false,
-              "current": false,
+              "current": true,
               "max": false,
               "min": false,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -3976,7 +3976,7 @@ objects:
                 "expr": "sum(che_workspace_failure_total)",
                 "format": "time_series",
                 "intervalFactor": 1,
-                "legendFormat": "",
+                "legendFormat": "failure",
                 "refId": "A"
               }
             ],
@@ -4036,13 +4036,13 @@ objects:
             },
             "id": 6,
             "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
+              "avg": true,
+              "current": true,
+              "max": true,
+              "min": true,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -4061,7 +4061,7 @@ objects:
                 "expr": "che_workspace_status{status=\"STARTING\"}",
                 "format": "time_series",
                 "intervalFactor": 1,
-                "legendFormat": "",
+                "legendFormat": "starting",
                 "refId": "A"
               }
             ],
@@ -4121,13 +4121,13 @@ objects:
             },
             "id": 10,
             "legend": {
-              "avg": false,
-              "current": false,
-              "max": false,
-              "min": false,
+              "avg": true,
+              "current": true,
+              "max": true,
+              "min": true,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -4147,7 +4147,7 @@ objects:
                 "format": "time_series",
                 "instant": false,
                 "intervalFactor": 1,
-                "legendFormat": "",
+                "legendFormat": "running",
                 "refId": "A"
               }
             ],
@@ -4221,12 +4221,12 @@ objects:
             "id": 16,
             "legend": {
               "avg": false,
-              "current": false,
-              "max": false,
+              "current": true,
+              "max": true,
               "min": false,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -4246,7 +4246,7 @@ objects:
                 "format": "time_series",
                 "hide": false,
                 "intervalFactor": 1,
-                "legendFormat": "",
+                "legendFormat": "rate",
                 "refId": "A"
               }
             ],
@@ -4319,9 +4319,10 @@ objects:
             },
             "id": 18,
             "legend": {
+              "alignAsTable": false,
               "avg": false,
               "current": true,
-              "max": false,
+              "max": true,
               "min": false,
               "show": true,
               "total": false,
@@ -4345,6 +4346,7 @@ objects:
                 "format": "time_series",
                 "hide": false,
                 "intervalFactor": 1,
+                "legendFormat": "major size",
                 "refId": "A"
               },
               {
@@ -4352,6 +4354,7 @@ objects:
                 "format": "time_series",
                 "hide": false,
                 "intervalFactor": 1,
+                "legendFormat": "major active",
                 "refId": "B"
               },
               {
@@ -4359,6 +4362,7 @@ objects:
                 "format": "time_series",
                 "hide": false,
                 "intervalFactor": 1,
+                "legendFormat": "minor size",
                 "refId": "C"
               },
               {
@@ -4366,6 +4370,7 @@ objects:
                 "format": "time_series",
                 "hide": false,
                 "intervalFactor": 1,
+                "legendFormat": "minor active",
                 "refId": "D"
               }
             ],
@@ -4425,13 +4430,14 @@ objects:
             },
             "id": 26,
             "legend": {
+              "alignAsTable": false,
               "avg": false,
-              "current": false,
-              "max": false,
+              "current": true,
+              "max": true,
               "min": false,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -4449,13 +4455,17 @@ objects:
               {
                 "expr": "executor_queued_threads{name=\"che.core.jsonrpc.major_executor\",}",
                 "format": "time_series",
+                "instant": false,
                 "intervalFactor": 1,
+                "legendFormat": "major",
                 "refId": "A"
               },
               {
                 "expr": "executor_queued_threads{name=\"che.core.jsonrpc.minor_executor\",}",
                 "format": "time_series",
+                "instant": false,
                 "intervalFactor": 1,
+                "legendFormat": "minor",
                 "refId": "B"
               }
             ],
@@ -4483,7 +4493,7 @@ objects:
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": "0",
                 "show": true
               },
               {
@@ -4491,7 +4501,7 @@ objects:
                 "label": null,
                 "logBase": 1,
                 "max": null,
-                "min": null,
+                "min": "0",
                 "show": true
               }
             ],
@@ -4506,6 +4516,7 @@ objects:
             "dashLength": 10,
             "dashes": false,
             "datasource": "Che",
+            "decimals": null,
             "fill": 1,
             "gridPos": {
               "h": 7,
@@ -4517,14 +4528,14 @@ objects:
             "legend": {
               "alignAsTable": false,
               "avg": false,
-              "current": false,
+              "current": true,
               "hideEmpty": false,
               "hideZero": false,
-              "max": false,
+              "max": true,
               "min": false,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -4542,13 +4553,17 @@ objects:
               {
                 "expr": "sum(deriv(executor_rejected_tasks_total{name=\"che.core.jsonrpc.major_executor\",}[1m]))",
                 "format": "time_series",
+                "interval": "",
                 "intervalFactor": 1,
+                "legendFormat": "major",
                 "refId": "A"
               },
               {
                 "expr": "sum(deriv(executor_rejected_tasks_total{name=\"che.core.jsonrpc.minor_executor\",}[1m]))",
                 "format": "time_series",
+                "interval": "",
                 "intervalFactor": 1,
+                "legendFormat": "minor",
                 "refId": "B"
               }
             ],
@@ -4610,12 +4625,12 @@ objects:
             "id": 30,
             "legend": {
               "avg": false,
-              "current": false,
-              "max": false,
+              "current": true,
+              "max": true,
               "min": false,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -4634,12 +4649,14 @@ objects:
                 "expr": "executor_seconds_max{name=\"che.core.jsonrpc.major_executor\",}",
                 "format": "time_series",
                 "intervalFactor": 1,
+                "legendFormat": "major",
                 "refId": "A"
               },
               {
                 "expr": "executor_seconds_max{name=\"che.core.jsonrpc.minor_executor\",}",
                 "format": "time_series",
                 "intervalFactor": 1,
+                "legendFormat": "minor",
                 "refId": "B"
               }
             ],
@@ -4700,12 +4717,12 @@ objects:
             "id": 34,
             "legend": {
               "avg": false,
-              "current": false,
-              "max": false,
+              "current": true,
+              "max": true,
               "min": false,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -4723,13 +4740,16 @@ objects:
               {
                 "expr": "sum(deriv(executor_seconds_sum{name=\"che.core.jsonrpc.major_executor\",}[1m]))",
                 "format": "time_series",
+                "interval": "",
                 "intervalFactor": 1,
+                "legendFormat": "major",
                 "refId": "A"
               },
               {
                 "expr": "sum(deriv(executor_seconds_sum{name=\"che.core.jsonrpc.minor_executor\",}[1m]))",
                 "format": "time_series",
                 "intervalFactor": 1,
+                "legendFormat": "minor",
                 "refId": "B"
               }
             ],
@@ -4791,12 +4811,12 @@ objects:
             "id": 28,
             "legend": {
               "avg": false,
-              "current": false,
-              "max": false,
+              "current": true,
+              "max": true,
               "min": false,
               "show": true,
               "total": false,
-              "values": false
+              "values": true
             },
             "lines": true,
             "linewidth": 1,
@@ -4814,13 +4834,17 @@ objects:
               {
                 "expr": "sum(deriv(executor_completed_tasks_total{name=\"che.core.jsonrpc.major_executor\",}[1m]))",
                 "format": "time_series",
+                "interval": "",
                 "intervalFactor": 1,
+                "legendFormat": "major",
                 "refId": "A"
               },
               {
                 "expr": "sum(deriv(executor_completed_tasks_total{name=\"che.core.jsonrpc.minor_executor\",}[1m]))",
                 "format": "time_series",
+                "interval": "",
                 "intervalFactor": 1,
+                "legendFormat": "minor",
                 "refId": "B"
               }
             ],
