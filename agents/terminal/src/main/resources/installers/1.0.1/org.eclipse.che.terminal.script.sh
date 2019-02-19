@@ -193,7 +193,7 @@ else
     elif curl ${CA_ARG} -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g'); then
       curl ${CA_ARG} -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
     fi
-    curl -s $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
+    curl -sSf $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
   else
     CA_ARG=""
     if [ -f /tmp/che/secret/ca.crt ]; then
