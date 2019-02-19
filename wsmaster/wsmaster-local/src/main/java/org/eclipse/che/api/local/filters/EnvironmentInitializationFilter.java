@@ -26,6 +26,7 @@ import javax.servlet.http.HttpSession;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.commons.tracing.TracingTags;
 
 /**
  * Fills environment context with information about current subject.
@@ -51,6 +52,7 @@ public class EnvironmentInitializationFilter implements Filter {
 
     try {
       environmentContext.setSubject(subject);
+      TracingTags.USER_ID.set(subject.getUserId());
       filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
     } finally {
       EnvironmentContext.reset();
