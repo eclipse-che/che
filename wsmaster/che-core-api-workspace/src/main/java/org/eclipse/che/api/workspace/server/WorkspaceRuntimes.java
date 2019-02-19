@@ -314,7 +314,6 @@ public class WorkspaceRuntimes {
       Workspace workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
     TracingTags.WORKSPACE_ID.set(workspace.getId());
-    TracingTags.USER_ID.set(() -> EnvironmentContext.getCurrent().getSubject().getUserId());
 
     final String workspaceId = workspace.getId();
     // Sidecar-based workspaces allowed not to have environments
