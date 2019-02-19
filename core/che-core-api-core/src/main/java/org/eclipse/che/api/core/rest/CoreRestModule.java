@@ -19,6 +19,7 @@ import com.google.inject.name.Names;
 public class CoreRestModule extends AbstractModule {
   @Override
   protected void configure() {
+    bind(ApiInfoProvider.class);
     bind(CheJsonProvider.class);
     bind(ApiExceptionMapper.class);
     bind(RuntimeExceptionMapper.class);
