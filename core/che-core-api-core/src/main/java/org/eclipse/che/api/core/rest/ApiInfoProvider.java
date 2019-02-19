@@ -24,6 +24,11 @@ import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Provides api info by reading it from war manifest.
+ *
+ * @author Max Shaposhnyk
+ */
 @Singleton
 public class ApiInfoProvider implements Provider<ApiInfo> {
 
