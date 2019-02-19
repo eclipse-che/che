@@ -14,15 +14,16 @@ package org.eclipse.che.api.core.rest;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+import org.eclipse.che.api.core.rest.shared.dto.ApiInfo;
 
 /** @author andrew00x */
 public class CoreRestModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(ApiInfoProvider.class);
     bind(CheJsonProvider.class);
     bind(ApiExceptionMapper.class);
     bind(RuntimeExceptionMapper.class);
+    bind(ApiInfo.class).toProvider(ApiInfoProvider.class);
     Multibinder.newSetBinder(binder(), Class.class, Names.named("che.json.ignored_classes"));
   }
 }

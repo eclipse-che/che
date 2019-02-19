@@ -34,11 +34,11 @@ import org.everrest.services.RestServicesList.RootResourcesList;
 @Path("/")
 public class ApiInfoService {
 
-  @Inject private ApiInfoProvider apiInfoProvider;
+  @Inject private ApiInfo apiInfo;
 
   @OPTIONS
   public ApiInfo info() {
-    return apiInfoProvider.get();
+    return apiInfo;
   }
 
   @GET
