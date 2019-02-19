@@ -56,7 +56,7 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
             .createDto(ApiInfo.class)
             .withSpecificationVendor(mainAttributes.getValue("Specification-Vendor"))
             .withImplementationVendor(mainAttributes.getValue("Implementation-Vendor"))
-            .withSpecificationTitle("Codenvy REST API")
+            .withSpecificationTitle("Che REST API")
             .withSpecificationVersion(mainAttributes.getValue("Specification-Version"))
             .withImplementationVersion(mainAttributes.getValue("Implementation-Version"))
             .withScmRevision(mainAttributes.getValue("SCM-Revision"));
