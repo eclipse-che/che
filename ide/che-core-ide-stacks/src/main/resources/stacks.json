@@ -509,7 +509,7 @@
                 "memoryLimitBytes": "536870912"
               },
               "servers": {
-                "dev": {
+                "ws/dev": {
                   "attributes": {},
                   "port": "3130",
                   "protocol": "tcp"
