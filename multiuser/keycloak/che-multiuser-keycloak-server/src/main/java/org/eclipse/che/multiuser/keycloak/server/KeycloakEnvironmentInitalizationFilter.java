@@ -35,6 +35,7 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
@@ -138,6 +139,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
 
     try {
       EnvironmentContext.getCurrent().setSubject(subject);
+      TracingTags.USER_ID.set(subject.getUserId());
       filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
     } finally {
       EnvironmentContext.reset();

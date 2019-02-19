@@ -87,5 +87,9 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
+      <dependency>
+        <groupId>org.eclipse.che.core</groupId>
+        <artifactId>che-core-commons-tracing</artifactId>
+      </dependency>
     </dependencies>
 </project>

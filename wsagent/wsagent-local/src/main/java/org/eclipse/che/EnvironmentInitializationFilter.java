@@ -22,6 +22,7 @@ import javax.servlet.ServletResponse;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.commons.tracing.TracingTags;
 
 /**
  * Sets dummy subject into {@link EnvironmentContext}
@@ -42,6 +43,7 @@ public class EnvironmentInitializationFilter implements Filter {
     final EnvironmentContext environmentContext = EnvironmentContext.getCurrent();
     try {
       environmentContext.setSubject(subject);
+      TracingTags.USER_ID.set(subject.getUserId());
       filterChain.doFilter(request, response);
     } finally {
       EnvironmentContext.reset();
