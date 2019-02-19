@@ -14,6 +14,7 @@ package org.eclipse.che.api.core.rest;
 import static java.util.stream.Collectors.toList;
 
 import java.io.InputStream;
+import java.lang.ref.SoftReference;
 import java.util.function.Function;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
@@ -43,13 +44,14 @@ import org.slf4j.LoggerFactory;
 public class ApiInfoService {
   private static final Logger LOG = LoggerFactory.getLogger(ApiInfoService.class);
 
-  private volatile ApiInfo apiInfo;
+  private SoftReference<ApiInfo> apiInfo = new SoftReference<>(null);
 
   @OPTIONS
   public ApiInfo info(@Context ServletContext context) throws ServerException {
-    ApiInfo myApiInfo = apiInfo;
+    ApiInfo myApiInfo = apiInfo.get();
     if (myApiInfo == null) {
-      apiInfo = myApiInfo = readApiInfo(context);
+      myApiInfo = readApiInfo(context);
+      apiInfo = new SoftReference<>(myApiInfo);
     }
     return myApiInfo;
   }
