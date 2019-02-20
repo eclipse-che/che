@@ -15,5 +15,8 @@
     "ts-loader": "^5.3.3",
     "typescript": "^3.3.3",
     "webpack": "^4.29.3"
+  },
+  "dependencies": {
+    "@eclipse-che/api": "^6.17.1"
   }
 }
