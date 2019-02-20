@@ -59,6 +59,10 @@ items:
       resources:
         limits:
           memory: 512Mi
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    name: withoutLabels
 - kind: Service
   apiVersion: v1
   metadata:

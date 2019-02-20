@@ -22,8 +22,8 @@ export class Deffered<T> implements IDeffered<T> {
     private rejectF;
     constructor() {
         this.promise = new Promise((resolve, reject) => {
-            this.resolve = resolve;
-            this.reject = reject;
+            this.resolveF = resolve;
+            this.rejectF = reject;
         });
     }
     resolve(value?: T): void {

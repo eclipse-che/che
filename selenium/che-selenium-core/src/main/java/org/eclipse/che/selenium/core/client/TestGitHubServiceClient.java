@@ -22,9 +22,9 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import javax.xml.bind.DatatypeConverter;
 import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
@@ -223,7 +223,7 @@ public class TestGitHubServiceClient {
   private String createBasicAuthHeader(String username, String password)
       throws UnsupportedEncodingException {
     byte[] nameAndPass = (username + ":" + password).getBytes("UTF-8");
-    String base64 = DatatypeConverter.printBase64Binary(nameAndPass);
+    String base64 = Base64.getEncoder().encodeToString(nameAndPass);
     return "Basic " + base64;
   }
 }

@@ -97,7 +97,7 @@ objects:
           - name: CHE_WEBSOCKET_ENDPOINT
             value: "${WS_PROTOCOL}://che-${NAMESPACE}.${ROUTING_SUFFIX}/api/websocket"
           - name: CHE_DEBUG_SERVER
-            value: "false"
+            value: "${CHE_DEBUG_SERVER}"
           - name: CHE_INFRASTRUCTURE_ACTIVE
             value: "openshift"
           - name: CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL
@@ -164,7 +164,7 @@ objects:
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
           - name: CHE_METRICS_ENABLED
-            value: "false"
+            value: "${CHE_METRICS_ENABLED}"
           - name: CHE_CORS_ENABLED
             value: "${CHE_CORS_ENABLED}"
           - name: CHE_CORS_ALLOW__CREDENTIALS
@@ -332,6 +332,14 @@ parameters:
 - name: CHE_TRACING_ENABLED
   displayName: Eclipse Che tracing
   description: Enable or disable tracing in Eclipse Che
+  value: 'false'
+- name: CHE_METRICS_ENABLED
+  displayName: Eclipse Che metrics collection
+  description: Enable or disable metrics collection in Eclipse Che
+  value: 'false'
+- name: CHE_DEBUG_SERVER
+  displayName: Deploy Che in a debug mode
+  description: Enable or disable java debug mode on Eclipse Che server
   value: 'false'
 - name: CHE_CORS_ENABLED
   displayName: CORS filter for WS Master
