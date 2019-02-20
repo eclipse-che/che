@@ -76,6 +76,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
       @Assisted KubernetesMachineImpl kubernetesMachine,
       @Assisted KubernetesNamespace namespace,
       @Assisted StartSynchronizer startSynchronizer,
+      @Named("che.websocket.endpoint_minor") String cheWebsocketMinorEndpoint,
       @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
       @Named("che.infra.kubernetes.bootstrapper.binary_url") String bootstrapperBinaryUrl,
       @Named("che.infra.kubernetes.bootstrapper.installer_timeout_sec") int installerTimeoutSeconds,
@@ -87,7 +88,7 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
     super(
         kubernetesMachine.getName(),
         runtimeIdentity,
-        cheWebsocketEndpoint,
+        cheWebsocketMinorEndpoint,
         cheWebsocketEndpoint,
         eventService);
     this.bootstrapperBinaryUrl = bootstrapperBinaryUrl;
@@ -221,6 +222,11 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   }
 
   private void exec(String... command) throws InfrastructureException {
+    LOG.debug(
+        "Executing Pod={} ContainerName={} command={}",
+        kubernetesMachine.getPodName(),
+        kubernetesMachine.getContainerName(),
+        command);
     namespace
         .deployments()
         .exec(

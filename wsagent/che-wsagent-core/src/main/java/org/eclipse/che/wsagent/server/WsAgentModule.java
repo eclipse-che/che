@@ -12,6 +12,10 @@
 package org.eclipse.che.wsagent.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
+import java.util.concurrent.ExecutorService;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.LivenessProbeService;
 import org.eclipse.che.inject.DynaModule;
@@ -28,6 +32,14 @@ public class WsAgentModule extends AbstractModule {
   protected void configure() {
     bind(ApiInfoService.class);
     bind(LivenessProbeService.class);
+    bind(ExecutorService.class)
+        .annotatedWith(Names.named("che.core.jsonrpc.major_executor"))
+        .toProvider(CheWebSocketEndpoint.CheWebSocketEndpointExecutorServiceProvider.class);
+    Multibinder<RequestProcessorConfigurator.Configuration> configurationMultibinder =
+        Multibinder.newSetBinder(binder(), RequestProcessorConfigurator.Configuration.class);
+    configurationMultibinder
+        .addBinding()
+        .to(CheWebSocketEndpoint.CheWebSocketEndpointConfiguration.class);
     install(new org.eclipse.che.security.oauth.OAuthAgentModule());
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
