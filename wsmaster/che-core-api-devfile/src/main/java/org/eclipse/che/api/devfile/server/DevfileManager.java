@@ -66,14 +66,13 @@ public class DevfileManager {
    * input data.
    *
    * @param devfileContent raw content of devfile
-   * @param verbose when true, method returns more explained validation error messages if any
    * @return Devfile object created from the source content
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws JsonProcessingException when parsing error occurs
    */
-  public Devfile parse(String devfileContent, boolean verbose)
+  public Devfile parse(String devfileContent)
       throws DevfileFormatException, JsonProcessingException {
-    JsonNode parsed = schemaValidator.validateBySchema(devfileContent, verbose);
+    JsonNode parsed = schemaValidator.validateBySchema(devfileContent);
     Devfile devfile = objectMapper.treeToValue(parsed, Devfile.class);
     initializeMaps(devfile);
     integrityValidator.validateDevfile(devfile);

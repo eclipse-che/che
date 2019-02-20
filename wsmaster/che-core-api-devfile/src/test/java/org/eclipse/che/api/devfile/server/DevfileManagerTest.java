@@ -73,9 +73,9 @@ public class DevfileManagerTest {
   public void testValidateAndConvert() throws Exception {
     String yamlContent = getTestResource("devfile.yaml");
 
-    devfileManager.parse(yamlContent, true);
+    devfileManager.parse(yamlContent);
 
-    verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
+    verify(schemaValidator).validateBySchema(eq(yamlContent));
     verify(integrityValidator).validateDevfile(any(Devfile.class));
   }
 
@@ -85,9 +85,9 @@ public class DevfileManagerTest {
   public void shouldThrowExceptionWhenUnconvertableContentProvided() throws Exception {
     String yamlContent = getTestResource("devfile.yaml").concat("foos:");
 
-    devfileManager.parse(yamlContent, true);
+    devfileManager.parse(yamlContent);
 
-    verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
+    verify(schemaValidator).validateBySchema(eq(yamlContent));
     verifyNoMoreInteractions(integrityValidator);
   }
 
@@ -112,7 +112,7 @@ public class DevfileManagerTest {
             });
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-    Devfile devfile = devfileManager.parse(yamlContent, true);
+    Devfile devfile = devfileManager.parse(yamlContent);
     // when
     devfileManager.createWorkspace(devfile, null);
     // then

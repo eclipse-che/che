@@ -34,7 +34,7 @@ public class DevfileSchemaValidatorTest {
   @Test(dataProvider = "validDevfiles")
   public void shouldDoNotThrowExceptionOnValidationValidDevfile(String resourceFilePath)
       throws Exception {
-    schemaValidator.validateBySchema(getResource(resourceFilePath), false);
+    schemaValidator.validateBySchema(getResource(resourceFilePath));
   }
 
   @DataProvider
@@ -50,7 +50,7 @@ public class DevfileSchemaValidatorTest {
   public void shouldThrowExceptionOnValidationNonValidDevfile(
       String resourceFilePath, String expectedMessageRegexp) throws Exception {
     try {
-      schemaValidator.validateBySchema(getResource(resourceFilePath), false);
+      schemaValidator.validateBySchema(getResource(resourceFilePath));
     } catch (DevfileFormatException e) {
       if (!Pattern.matches(expectedMessageRegexp, e.getMessage())) {
         fail("DevfileFormatException with unexpected message is thrown: " + e.getMessage());

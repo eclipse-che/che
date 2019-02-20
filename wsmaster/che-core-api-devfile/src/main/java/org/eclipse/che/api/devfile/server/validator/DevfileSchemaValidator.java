@@ -11,58 +11,64 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import static java.lang.String.format;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
-import com.github.fge.jsonschema.core.report.LogLevel;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import com.github.fge.jsonschema.main.JsonValidator;
 import java.io.IOException;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.json.JsonReader;
 import org.eclipse.che.api.devfile.server.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
+import org.leadpony.justify.api.JsonSchema;
+import org.leadpony.justify.api.JsonValidationService;
+import org.leadpony.justify.api.Problem;
+import org.leadpony.justify.api.ProblemHandler;
 
 /** Validates YAML devfile content against given JSON schema. */
 @Singleton
 public class DevfileSchemaValidator {
 
-  private JsonValidator validator;
+  private static final JsonValidationService service = JsonValidationService.newInstance();
   private ObjectMapper yamlReader;
+  private ObjectMapper jsonWriter;
   private DevfileSchemaProvider schemaProvider;
 
   @Inject
   public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
     this.schemaProvider = schemaProvider;
-    this.validator = JsonSchemaFactory.byDefault().getValidator();
     this.yamlReader = new ObjectMapper(new YAMLFactory());
+    this.jsonWriter = new ObjectMapper();
+
   }
 
-  public JsonNode validateBySchema(String yamlContent, boolean verbose)
-      throws DevfileFormatException {
-    ProcessingReport report;
-    JsonNode data;
+  public JsonNode validateBySchema(String yamlContent) throws DevfileFormatException {
+    JsonSchema schema;
+    JsonNode contentNode;
     try {
-      data = yamlReader.readTree(yamlContent);
-      report = validator.validate(schemaProvider.getJsoneNode(), data);
-    } catch (IOException | ProcessingException e) {
+      schema = service.readSchema(schemaProvider.getAsReader());
+      contentNode = yamlReader.readTree(yamlContent);
+
+      // Problem handler
+      List<Problem> validationErrors = new ArrayList<>();
+      ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);
+      try (JsonReader reader = service
+          .createReader(new StringReader(jsonWriter.writeValueAsString(contentNode)), schema,
+              handler)) {
+        reader.read();
+      }
+      if (!validationErrors.isEmpty()) {
+        System.out.println(validationErrors);
+//        String error = validationErrors.stream().collect(Collectors.joining(", ", "[", "]"));
+//        throw new DevfileFormatException(
+//            format("Devfile schema validation failed. Errors: %s", error));
+      }
+    }catch (IOException e) {
       throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }
-    if (!report.isSuccess()) {
-      String error =
-          StreamSupport.stream(report.spliterator(), false)
-              .filter(m -> m.getLogLevel() == LogLevel.ERROR || m.getLogLevel() == LogLevel.FATAL)
-              .map(message -> verbose ? message.asJson().toString() : message.getMessage())
-              .collect(Collectors.joining(", ", "[", "]"));
-      throw new DevfileFormatException(
-          format("Devfile schema validation failed. Errors: %s", error));
-    }
-    return data;
+    return contentNode;
   }
 }

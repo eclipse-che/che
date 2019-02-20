@@ -92,7 +92,7 @@ public class DevfileService extends Service {
    * Creates workspace from provided devfile
    *
    * @param data devfile content
-   * @param verbose return more explained validation error messages if any
+   * @param verbose rYeturn more explained validation error messages if any
    * @return created workspace configuration
    */
   @POST
@@ -113,18 +113,13 @@ public class DevfileService extends Service {
     @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
-  public Response createFromYaml(
-      String data,
-      @ApiParam(value = "Provide extended validation messages")
-          @DefaultValue("false")
-          @QueryParam("verbose")
-          boolean verbose)
+  public Response createFromYaml(String data)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
     WorkspaceImpl workspace;
     try {
-      Devfile devfile = devfileManager.parse(data, verbose);
+      Devfile devfile = devfileManager.parse(data);
       workspace = devfileManager.createWorkspace(devfile, null);
     } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());
