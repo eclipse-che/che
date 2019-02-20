@@ -37,7 +37,7 @@ public final class TracingTags {
    * stopped it (e.g. activity checker) .
    */
   public static final AnnotationAwareStringTag STOPPED_BY =
-      new AnnotationAwareStringTag("stopped.by");
+      new AnnotationAwareStringTag("stopped_by");
 
   /**
    * This is the standard {@link Tags#ERROR} "reexported" as an annotation aware tag so that it can
