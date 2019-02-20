@@ -138,6 +138,30 @@ public class KubernetesToolToWorkspaceApplierTest {
   }
 
   @Test
+  public void shouldUseLocalContentAsRecipeIfPresent() throws Exception {
+    String yamlRecipeContent = getResource("petclinic.yaml");
+    Tool tool =
+        new Tool()
+            .withType(KUBERNETES_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withLocalContent(yamlRecipeContent)
+            .withName(TOOL_NAME)
+            .withSelector(new HashMap<>());
+
+    applier.apply(workspaceConfig, tool, null);
+
+    String defaultEnv = workspaceConfig.getDefaultEnv();
+    assertNotNull(defaultEnv);
+    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
+    assertNotNull(environment);
+    RecipeImpl recipe = environment.getRecipe();
+    assertNotNull(recipe);
+    assertEquals(recipe.getType(), KUBERNETES_TOOL_TYPE);
+    assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
+    assertEquals(toK8SList(recipe.getContent()), toK8SList(yamlRecipeContent));
+  }
+
+  @Test
   public void shouldProvisionEnvironmentWithCorrectRecipeTypeAndContentFromOSList()
       throws Exception {
     // given
