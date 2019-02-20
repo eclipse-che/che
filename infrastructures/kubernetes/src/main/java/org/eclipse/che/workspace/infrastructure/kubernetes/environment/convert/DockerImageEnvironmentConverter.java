@@ -19,13 +19,14 @@ import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPoint;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
 
 /**
  * Converts {@link DockerImageEnvironment} to {@link KubernetesEnvironment}.
@@ -39,15 +40,27 @@ public class DockerImageEnvironmentConverter {
   static final String POD_NAME = "dockerimage";
   static final String CONTAINER_NAME = "container";
 
+  private EntryPointParser entryPointParser = new EntryPointParser();
+
   public KubernetesEnvironment convert(DockerImageEnvironment environment)
       throws InfrastructureException {
-    final Iterator<String> iterator = environment.getMachines().keySet().iterator();
-    if (!iterator.hasNext()) {
-      throw new InternalInfrastructureException(
-          "DockerImage environment must contain at least one machine configuration");
-    }
-    final String machineName = iterator.next();
+
     final String dockerImage = environment.getRecipe().getContent();
+
+    Map.Entry<String, InternalMachineConfig> e =
+        environment.getMachines().entrySet().iterator().next();
+
+    InternalMachineConfig machine = e.getValue();
+    String machineName = e.getKey();
+
+    ContainerBuilder container =
+        new ContainerBuilder()
+            .withImage(dockerImage)
+            .withName(CONTAINER_NAME)
+            .withImagePullPolicy("Always");
+
+    applyEntryPoint(machine, container);
+
     final Map<String, String> annotations = new HashMap<>();
     annotations.put(format(MACHINE_NAME_ANNOTATION_FMT, CONTAINER_NAME), machineName);
 
@@ -58,18 +71,22 @@ public class DockerImageEnvironmentConverter {
             .withAnnotations(annotations)
             .endMetadata()
             .withNewSpec()
-            .withContainers(
-                new ContainerBuilder()
-                    .withImage(dockerImage)
-                    .withName(CONTAINER_NAME)
-                    .withImagePullPolicy("Always")
-                    .build())
+            .withContainers(container.build())
             .endSpec()
             .build();
+
     return KubernetesEnvironment.builder(environment)
         .setMachines(environment.getMachines())
         .setInternalRecipe(environment.getRecipe())
-        .setPods(ImmutableMap.of(POD_NAME, pod))
+        .setPods(ImmutableMap.of(machineName, pod))
         .build();
+  }
+
+  private void applyEntryPoint(InternalMachineConfig machineConfig, ContainerBuilder bld)
+      throws InfrastructureException {
+    EntryPoint ep = entryPointParser.parse(machineConfig.getAttributes());
+
+    bld.withCommand(ep.getCommand());
+    bld.withArgs(ep.getArguments());
   }
 }
