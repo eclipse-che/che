@@ -18,24 +18,20 @@ import com.google.inject.Module;
 import com.google.inject.name.Names;
 import io.micrometer.core.instrument.internal.TimedExecutorService;
 import java.util.concurrent.ExecutorService;
-import org.eclipse.che.api.deploy.MetricsOverrideBinding;
 import org.eclipse.che.api.deploy.jsonrpc.CheJsonRpcWebSocketConfigurationModule;
 import org.eclipse.che.api.deploy.jsonrpc.CheMajorWebSocketEndpointConfiguration;
 import org.eclipse.che.core.metrics.MetricsModule;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class WsMasterModuleTest {
+public class MetricsOverrideBindingTest {
 
-  private Injector injector;
-
-  @BeforeClass
-  public void setup() {
-    injector =
+  @Test
+  public void shouldInjectMettered() {
+    Injector injector =
         Guice.createInjector(
             new CheJsonRpcWebSocketConfigurationModule(),
-            new MetricsOverrideBinding(),
+            new org.eclipse.che.api.deploy.MetricsOverrideBinding(),
             new MetricsModule(),
             new Module() {
               @Override
@@ -68,10 +64,6 @@ public class WsMasterModuleTest {
                 binder.bindConstant().annotatedWith(Names.named("che.metrics.port")).to(100);
               }
             });
-  }
-
-  @Test
-  public void shouldInjectMettered() {
     CheMajorWebSocketEndpointConfiguration configuration =
         injector.getInstance(CheMajorWebSocketEndpointConfiguration.class);
     ExecutorService exc = configuration.getExecutorService();
