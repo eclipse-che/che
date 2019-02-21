@@ -80,7 +80,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
-import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -637,7 +636,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     // /workspace{wsid}/server-{port} => service({wsid}):server-port => pod({wsid}):{port}
     List<Ingress> readyIngresses = createIngresses(k8sEnv, workspaceId);
 
-    listenEvents(namespace.deployments());
+    listenEvents();
 
     final KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(createdServices, readyIngresses);
@@ -645,14 +644,18 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     doStartMachine(serverResolver);
   }
 
-  protected void listenEvents(KubernetesDeployments kubernetesDeployments)
-      throws InfrastructureException {
+  protected void listenEvents() throws InfrastructureException {
 
-    kubernetesDeployments.watchEvents(new MachineLogsPublisher(eventPublisher, machines,
-        getContext().getIdentity()));
+    namespace
+        .deployments()
+        .watchEvents(
+            new MachineLogsPublisher(eventPublisher, machines, getContext().getIdentity()));
     if (unrecoverableEventListenerFactory.isConfigured()) {
-      kubernetesDeployments.watchEvents(unrecoverableEventListenerFactory.create(
-              getContext().getEnvironment(), this::handleUnrecoverableEvent));
+      namespace
+          .deployments()
+          .watchEvents(
+              unrecoverableEventListenerFactory.create(
+                  getContext().getEnvironment(), this::handleUnrecoverableEvent));
     }
   }
 

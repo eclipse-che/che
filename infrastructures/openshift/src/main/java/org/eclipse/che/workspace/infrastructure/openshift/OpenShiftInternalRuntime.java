@@ -114,7 +114,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     List<Service> createdServices = createServices(osEnv, workspaceId);
     List<Route> createdRoutes = createRoutes(osEnv, workspaceId);
 
-    listenEvents(project.deployments());
+    listenEvents();
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
   }
