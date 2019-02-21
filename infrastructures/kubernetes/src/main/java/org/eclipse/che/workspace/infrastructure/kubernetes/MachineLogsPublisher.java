@@ -13,7 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-import java.util.Map.Entry;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -45,12 +44,10 @@ public class MachineLogsPublisher implements PodEventHandler {
   public void handle(PodEvent event) {
     final String podName = event.getPodName();
     try {
-      for (Entry<String, KubernetesMachineImpl> entry :
-          machines.getMachines(runtimeIdentity).entrySet()) {
-        final KubernetesMachineImpl machine = entry.getValue();
+      for (KubernetesMachineImpl machine : machines.getMachines(runtimeIdentity).values()) {
         if (machine.getPodName().equals(podName)) {
           eventPublisher.sendMachineLogEvent(
-              entry.getKey(), event.getMessage(), event.getCreationTimeStamp(), runtimeIdentity);
+              machine.getName(), event.getMessage(), event.getCreationTimeStamp(), runtimeIdentity);
           return;
         }
       }
