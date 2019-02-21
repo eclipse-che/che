@@ -18,10 +18,7 @@ import com.google.inject.name.Names;
 import java.util.concurrent.ExecutorService;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
 
-/**
- * This module configure providers of @{@link java.util.concurrent.ExecutorService} instances for
- * specific JSON-RPC endpoints
- */
+/** Configures JSON RPC WebSocket Endpoints. */
 public class CheJsonRpcWebSocketConfigurationModule implements Module {
   @Override
   public void configure(Binder binder) {
