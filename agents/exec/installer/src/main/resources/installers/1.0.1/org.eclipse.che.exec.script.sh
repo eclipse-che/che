@@ -194,9 +194,16 @@ else
     fi
 
     if curl ${CA_ARG} -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g'); then
-      curl ${CA_ARG} -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')
+      curl -sSf ${CA_ARG} -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')
     elif curl ${CA_ARG} -o /dev/null --silent --head --fail $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g'); then
-      curl ${CA_ARG} -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') -s $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
+      curl -sSf ${CA_ARG} -o $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g' | sed 's/file:\/\///g') $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
+    else
+      # both of test curl commands failed.
+      # perform them without --silent option to propagate errors
+      echo "Trying: curl -sSf ${CA_ARG} -o /dev/null --head $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')"
+      curl -sSf ${CA_ARG} -o /dev/null --head $(echo ${AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g')
+      echo "Trying: curl -sSf ${CA_ARG} -o /dev/null --head $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')"
+      curl -sSf ${CA_ARG} -o /dev/null --head $(echo ${AGENT_BINARIES_URI} | sed 's/-\${PREFIX}//g')
     fi
     curl -sSf $(echo ${TARGET_AGENT_BINARIES_URI} | sed 's/\${PREFIX}/'${PREFIX}'/g') | tar  xzf - -C ${CHE_DIR}
   else
