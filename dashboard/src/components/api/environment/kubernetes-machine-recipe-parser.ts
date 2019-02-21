@@ -39,7 +39,9 @@ export function isSecretItem(item: ISupportedListItem): item is ISecretItem {
 }
 
 export function getPodItemOrNull(item: ISupportedListItem): IPodItem {
-  if (isDeploymentItem(item)) {
+  if (!item) {
+    return null;
+  } else if (isDeploymentItem(item)) {
     return item.spec.template;
   } else if (isPodItem(item)) {
     return item;

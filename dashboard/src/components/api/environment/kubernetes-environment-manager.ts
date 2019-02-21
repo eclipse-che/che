@@ -16,6 +16,7 @@ import {IEnvironmentManagerMachine} from './environment-manager-machine';
 import {CheRecipeTypes} from '../recipe/che-recipe-types';
 import {ISupportedItemList, KubernetesEnvironmentRecipeParser} from './kubernetes-environment-recipe-parser';
 import {ISupportedListItem, IPodItem, IPodItemContainer, KubernetesMachineRecipeParser, getPodItemOrNull} from './kubernetes-machine-recipe-parser';
+import {CheMachineSourceTypes} from '../workspace/che-machine-source-types';
 
 enum MemoryUnit { 'B', 'Ki', 'Mi', 'Gi' }
 
@@ -175,9 +176,13 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
    */
   getEnvironment(environment: che.IWorkspaceEnvironment, machines: IEnvironmentManagerMachine[]): che.IWorkspaceEnvironment {
     let newEnvironment: che.IWorkspaceEnvironment = angular.copy(environment);
-
     machines.forEach((machine: IEnvironmentManagerMachine) => {
       const machineName = machine.name;
+
+      let isToolContainer = machine.attributes && machine.attributes.source ? machine.attributes.source === CheMachineSourceTypes.TOOL : false;
+      if (isToolContainer) {
+        return;
+      }
 
       if (angular.isUndefined(newEnvironment.machines)) {
         newEnvironment.machines = {};
