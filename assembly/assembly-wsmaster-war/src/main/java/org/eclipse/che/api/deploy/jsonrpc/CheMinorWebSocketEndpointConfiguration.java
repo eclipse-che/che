@@ -17,8 +17,8 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
 
 /**
- * {@link RequestProcessorConfigurator.Configuration} implementation used to configure @{@link
- * org.eclipse.che.api.deploy.jsonrpc.CheMinorWebSocketEndpoint}
+ * {@link RequestProcessorConfigurator.Configuration} implementation used to configure {@link
+ * CheMinorWebSocketEndpoint}
  */
 public class CheMinorWebSocketEndpointConfiguration
     implements RequestProcessorConfigurator.Configuration {

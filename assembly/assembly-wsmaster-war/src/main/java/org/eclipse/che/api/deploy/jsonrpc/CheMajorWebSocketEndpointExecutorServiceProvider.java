@@ -28,13 +28,16 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 
 /**
- * {@link java.util.concurrent.ExecutorService} provider used in {@link
- * org.eclipse.che.api.deploy.jsonrpc.CheMajorWebSocketEndpoint}
- * `che.core.jsonrpc.processor_core_pool_size` - corePoolSize of ThreadPoolExecutor
- * `che.core.jsonrpc.processor_max_pool_size` - maximumPoolSize of ThreadPoolExecutor
- * `che.core.jsonrpc.processor_queue_capacity` - >0 capacity of @{@link
- * java.util.concurrent.LinkedBlockingQueue}, <=0 {@link java.util.concurrent.SynchronousQueue} are
- * used.
+ * {@link ExecutorService} provider used in {@link CheMajorWebSocketEndpoint}.
+ *
+ * <p>Configuration parameters:
+ *
+ * <ul>
+ *   <li>{@code che.core.jsonrpc.processor_core_pool_size} : corePoolSize of ThreadPoolExecutor
+ *   <li>{@code che.core.jsonrpc.processor_max_pool_size}: maximumPoolSize of ThreadPoolExecutor
+ *   <li>{@code che.core.jsonrpc.processor_queue_capacity}: if >0 then configures capacity
+ *       of @{@link LinkedBlockingQueue}, if <=0 then {@link SynchronousQueue} are used.
+ * </ul>
  */
 @Singleton
 public class CheMajorWebSocketEndpointExecutorServiceProvider implements Provider<ExecutorService> {
