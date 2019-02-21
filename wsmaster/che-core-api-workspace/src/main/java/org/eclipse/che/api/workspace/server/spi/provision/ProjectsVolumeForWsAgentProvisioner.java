@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision;
 
+import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
+
 import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -32,7 +34,6 @@ public class ProjectsVolumeForWsAgentProvisioner implements InternalEnvironmentP
 
   private static final Logger LOG =
       LoggerFactory.getLogger(ProjectsVolumeForWsAgentProvisioner.class);
-  public static final String PROJECTS_VOLUME_NAME = "projects";
 
   private final String projectFolderPath;
 

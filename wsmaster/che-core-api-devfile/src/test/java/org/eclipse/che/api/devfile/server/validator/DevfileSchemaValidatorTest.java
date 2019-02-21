@@ -115,11 +115,11 @@ public class DevfileSchemaValidatorTest {
       // Dockerimage tool model testing
       {
         "dockerimage_tool/devfile_dockerimage_tool_with_missing_image.yaml",
-          "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\"\\]\\)\\]"
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\"\\]\\)\\]"
       },
       {
         "dockerimage_tool/devfile_dockerimage_tool_with_missing_memory_limit.yaml",
-          "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"memoryLimit\"\\]\\)\\]"
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"memoryLimit\"\\]\\)\\]"
       },
     };
   }

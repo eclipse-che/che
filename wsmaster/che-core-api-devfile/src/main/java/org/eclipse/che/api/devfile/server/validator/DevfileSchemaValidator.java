@@ -45,8 +45,7 @@ public class DevfileSchemaValidator {
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
 
-  public JsonNode validateBySchema(String yamlContent)
-      throws DevfileFormatException {
+  public JsonNode validateBySchema(String yamlContent) throws DevfileFormatException {
     ProcessingReport report;
     JsonNode data;
     try {
@@ -83,8 +82,8 @@ public class DevfileSchemaValidator {
       }
     } else {
       if (node.get("reports") == null) {
-        String pointer = "/devfile" +  node.get("instance").get("pointer").asText();
-        messages.add(pointer  + " " + node.get("message").asText());
+        String pointer = "/devfile" + node.get("instance").get("pointer").asText();
+        messages.add(pointer + " " + node.get("message").asText());
       } else {
         messages.add(node.get("message").asText());
         for (JsonNode subNode : node.get("reports")) {
