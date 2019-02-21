@@ -9,14 +9,15 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.devfile.server.convert.tool.kubernetes;
 
 import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
+import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.KubernetesToolApplier.YAML_CONTENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.TOOL_NAME_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.convert.tool.kubernetes.KubernetesToolToWorkspaceApplier.YAML_CONTENT_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -24,14 +25,12 @@ import static org.testng.Assert.assertNull;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.eclipse.che.api.devfile.model.Action;
-import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Tool;
+import org.eclipse.che.api.devfile.server.DevfileException;
+import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -39,26 +38,19 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
-/**
- * Tests {@link KubernetesToolApplier}.
- *
- * @author Max Shaposhnyk
- * @author Sergii Leshchenko
- */
-public class KubernetesToolApplierTest {
+/** @author Sergii Leshchenko */
+public class KubernetesToolToWorkspaceApplierTest {
 
   public static final String LOCAL_FILENAME = "local.yaml";
   public static final String TOOL_NAME = "foo";
 
   private WorkspaceConfigImpl workspaceConfig;
-  private Devfile devfile;
 
-  private KubernetesToolApplier applier;
+  private KubernetesToolToWorkspaceApplier applier;
 
   @BeforeMethod
   public void setUp() {
-    devfile = new Devfile();
-    applier = new KubernetesToolApplier();
+    applier = new KubernetesToolToWorkspaceApplier();
 
     workspaceConfig = new WorkspaceConfigImpl();
   }
@@ -75,23 +67,12 @@ public class KubernetesToolApplierTest {
               + "devfile API or used factory URL does not support this feature.")
   public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoContentProviderSupplied()
       throws Exception {
+    // given
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
-    applier.apply(tool, devfile, workspaceConfig, null);
-  }
 
-  @Test(
-      expectedExceptions = IllegalArgumentException.class,
-      expectedExceptionsMessageRegExp =
-          "Unable to create environment from tool '"
-              + TOOL_NAME
-              + "' - it has ineligible type '"
-              + EDITOR_TOOL_TYPE
-              + "'.")
-  public void shouldReturnEmptyOptionalWhenNoRecipeToolIsPresent() throws Exception {
-    Tool tool = new Tool().withType(EDITOR_TOOL_TYPE).withId("foo").withName(TOOL_NAME);
-
-    applier.apply(tool, devfile, workspaceConfig, null);
+    // when
+    applier.apply(workspaceConfig, tool, null);
   }
 
   @Test(
@@ -102,10 +83,13 @@ public class KubernetesToolApplierTest {
               + " for tool '"
               + TOOL_NAME
               + "': .*")
-  public void shouldThrowExceptionWhenRecipeContentIsUnparseable() throws Exception {
+  public void shouldThrowExceptionWhenRecipeContentIsNotAValidYaml() throws Exception {
+    // given
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
-    applier.apply(tool, devfile, workspaceConfig, s -> "some_unparseable_content");
+
+    // when
+    applier.apply(workspaceConfig, tool, s -> "some_non_yaml_content");
   }
 
   @Test(
@@ -113,21 +97,24 @@ public class KubernetesToolApplierTest {
       expectedExceptionsMessageRegExp =
           "Error during recipe content retrieval for tool '" + TOOL_NAME + "': fetch failed")
   public void shouldThrowExceptionWhenExceptionHappensOnContentProvider() throws Exception {
+    // given
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
+
+    // when
     applier.apply(
-        tool,
-        devfile,
         workspaceConfig,
+        tool,
         e -> {
           throw new IOException("fetch failed");
         });
   }
 
   @Test
-  public void shouldReturnEnvironmentWithCorrectRecipeTypeAndContentFromK8SList() throws Exception {
-    String yamlRecipeContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+  public void shouldProvisionEnvironmentWithCorrectRecipeTypeAndContentFromK8SList()
+      throws Exception {
+    // given
+    String yamlRecipeContent = getResource("petclinic.yaml");
     Tool tool =
         new Tool()
             .withType(KUBERNETES_TOOL_TYPE)
@@ -135,8 +122,10 @@ public class KubernetesToolApplierTest {
             .withName(TOOL_NAME)
             .withSelector(new HashMap<>());
 
-    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+    // when
+    applier.apply(workspaceConfig, tool, s -> yamlRecipeContent);
 
+    // then
     String defaultEnv = workspaceConfig.getDefaultEnv();
     assertNotNull(defaultEnv);
     EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
@@ -149,9 +138,10 @@ public class KubernetesToolApplierTest {
   }
 
   @Test
-  public void shouldReturnEnvironmentWithCorrectRecipeTypeAndContentFromOSList() throws Exception {
-    String yamlRecipeContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+  public void shouldProvisionEnvironmentWithCorrectRecipeTypeAndContentFromOSList()
+      throws Exception {
+    // given
+    String yamlRecipeContent = getResource("petclinic.yaml");
     Tool tool =
         new Tool()
             .withType(OPENSHIFT_TOOL_TYPE)
@@ -159,8 +149,10 @@ public class KubernetesToolApplierTest {
             .withName(TOOL_NAME)
             .withSelector(new HashMap<>());
 
-    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+    // when
+    applier.apply(workspaceConfig, tool, s -> yamlRecipeContent);
 
+    // then
     String defaultEnv = workspaceConfig.getDefaultEnv();
     assertNotNull(defaultEnv);
     EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
@@ -174,11 +166,10 @@ public class KubernetesToolApplierTest {
 
   @Test
   public void shouldFilterRecipeWithGivenSelectors() throws Exception {
-    String yamlRecipeContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+    // given
+    String yamlRecipeContent = getResource("petclinic.yaml");
 
-    final Map<String, String> selector =
-        Collections.singletonMap("app.kubernetes.io/component", "webapp");
+    final Map<String, String> selector = singletonMap("app.kubernetes.io/component", "webapp");
     Tool tool =
         new Tool()
             .withType(OPENSHIFT_TOOL_TYPE)
@@ -186,8 +177,10 @@ public class KubernetesToolApplierTest {
             .withName(TOOL_NAME)
             .withSelector(selector);
 
-    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+    // when
+    applier.apply(workspaceConfig, tool, s -> yamlRecipeContent);
 
+    // then
     String defaultEnv = workspaceConfig.getDefaultEnv();
     assertNotNull(defaultEnv);
     EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
@@ -204,36 +197,34 @@ public class KubernetesToolApplierTest {
   @Test(dependsOnMethods = "shouldFilterRecipeWithGivenSelectors")
   public void shouldSetMachineNameAttributeToCommandConfiguredInOpenShiftToolWithOneContainer()
       throws Exception {
-    String yamlRecipeContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+    // given
+    String yamlRecipeContent = getResource("petclinic.yaml");
 
-    final Map<String, String> selector =
-        Collections.singletonMap("app.kubernetes.io/component", "webapp");
+    final Map<String, String> selector = singletonMap("app.kubernetes.io/component", "webapp");
     Tool tool =
         new Tool()
             .withType(OPENSHIFT_TOOL_TYPE)
             .withLocal(LOCAL_FILENAME)
             .withName(TOOL_NAME)
             .withSelector(selector);
-    devfile
-        .getCommands()
-        .add(
-            new Command()
-                .withAttributes(new HashMap<>())
-                .withActions(Collections.singletonList(new Action().withTool(TOOL_NAME))));
+    CommandImpl command = new CommandImpl();
+    command.getAttributes().put(TOOL_NAME_COMMAND_ATTRIBUTE, TOOL_NAME);
+    workspaceConfig.getCommands().add(command);
 
-    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+    // when
+    applier.apply(workspaceConfig, tool, s -> yamlRecipeContent);
 
-    Command command = devfile.getCommands().get(0);
-    assertEquals(command.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "petclinic/server");
+    // then
+    CommandImpl actualCommand = workspaceConfig.getCommands().get(0);
+    assertEquals(actualCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "petclinic/server");
   }
 
   @Test
   public void
       shouldNotSetMachineNameAttributeToCommandConfiguredInOpenShiftToolWithMultipleContainers()
           throws Exception {
-    String yamlRecipeContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("petclinic.yaml"));
+    // given
+    String yamlRecipeContent = getResource("petclinic.yaml");
 
     Tool tool =
         new Tool()
@@ -241,20 +232,24 @@ public class KubernetesToolApplierTest {
             .withLocal(LOCAL_FILENAME)
             .withName(TOOL_NAME)
             .withSelector(new HashMap<>());
-    devfile
-        .getCommands()
-        .add(
-            new Command()
-                .withAttributes(new HashMap<>())
-                .withActions(Collections.singletonList(new Action().withTool(TOOL_NAME))));
 
-    applier.apply(tool, devfile, workspaceConfig, s -> yamlRecipeContent);
+    CommandImpl command = new CommandImpl();
+    command.getAttributes().put(TOOL_NAME_COMMAND_ATTRIBUTE, TOOL_NAME);
+    workspaceConfig.getCommands().add(command);
 
-    Command command = devfile.getCommands().get(0);
-    assertNull(command.getAttributes().get(MACHINE_NAME_ATTRIBUTE));
+    // when
+    applier.apply(workspaceConfig, tool, s -> yamlRecipeContent);
+
+    // then
+    CommandImpl actualCommand = workspaceConfig.getCommands().get(0);
+    assertNull(actualCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE));
   }
 
   private KubernetesList toK8SList(String content) {
     return unmarshal(content, KubernetesList.class);
+  }
+
+  private String getResource(String resourceName) throws IOException {
+    return Files.readFile(getClass().getClassLoader().getResourceAsStream(resourceName));
   }
 }

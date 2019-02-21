@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.devfile.server.convert.tool.kubernetes;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -20,6 +20,7 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NA
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
@@ -29,86 +30,76 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Singleton;
-import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.devfile.model.Tool;
+import org.eclipse.che.api.devfile.server.Constants;
+import org.eclipse.che.api.devfile.server.DevfileException;
+import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
+import org.eclipse.che.api.devfile.server.FileContentProvider;
+import org.eclipse.che.api.devfile.server.convert.tool.ToolToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 
 /**
- * Applies Kubernetes tool configuration on provided {@link Devfile} and {@link
- * WorkspaceConfigImpl}.
+ * Applies changes on workspace config according to the specified kubernetes/openshift tool.
  *
- * @author Max Shaposhnyk
  * @author Sergii Leshchenko
  */
-@Singleton
-public class KubernetesToolApplier {
+public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier {
 
-  static final String YAML_CONTENT_TYPE = "application/x-yaml";
+  @VisibleForTesting static final String YAML_CONTENT_TYPE = "application/x-yaml";
 
   /**
-   * Applies Kubernetes tool configuration on provided {@link Devfile} and {@link
-   * WorkspaceConfigImpl}.
+   * Applies changes on workspace config according to the specified kubernetes/openshift tool.
    *
-   * <p>It includes:
-   *
-   * <ul>
-   *   <li>provisioning environment based on content of the file specified in {@link Tool#local};
-   *   <li>provisioning machine name attribute to commands that are configured to be run in the
-   *       specified tool. Note that name will be set only if tool contains the only one container;
-   * </ul>
-   *
-   * <p>NOTE: An {@link FileContentProvider} MUST be provided in order to fetch recipe content.
-   *
-   * @param recipeTool the recipe-type tool
-   * @param devfile devfile that should be changed according to the provided tool
-   * @param workspaceConfig workspace config that should be changed according to the provided tool
-   * @param contentProvider service-specific provider of recipe file content
-   * @throws IllegalArgumentException when wrong type tool is passed
-   * @throws IllegalArgumentException when there is no content provider for recipe-type tool
-   * @throws DevfileRecipeFormatException when recipe-type tool content is empty or has wrong format
-   * @throws DevfileException when general devfile error occurs
+   * @param workspaceConfig workspace config on which changes should be applied
+   * @param k8sTool kubernetes/openshift tool that should be applied
+   * @param contentProvider optional content provider that may be used for external tool resource
+   *     fetching
+   * @throws IllegalArgumentException if specified workspace config or plugin tool is null
+   * @throws IllegalArgumentException if specified tool has type different from chePlugin
+   * @throws DevfileException if specified content provider is null while kubernetes/openshift tool
+   *     required external file content
+   * @throws DevfileException if external file content is empty or any error occurred during content
+   *     retrieving
    */
+  @Override
   public void apply(
-      Tool recipeTool,
-      Devfile devfile,
       WorkspaceConfigImpl workspaceConfig,
-      FileContentProvider contentProvider)
-      throws DevfileRecipeFormatException, DevfileException {
-    checkArgument(recipeTool != null, "Tool must not be null");
-    checkArgument(devfile != null, "Devfile must not be null");
+      Tool k8sTool,
+      @Nullable FileContentProvider contentProvider)
+      throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
-
-    final String type = recipeTool.getType();
+    checkArgument(k8sTool != null, "Tool must not be null");
     checkArgument(
-        KUBERNETES_TOOL_TYPE.equals(type) || OPENSHIFT_TOOL_TYPE.equals(type),
-        format(
-            "Unable to create environment from tool '%s' - it has ineligible type '%s'.",
-            recipeTool.getName(), type));
+        KUBERNETES_TOOL_TYPE.equals(k8sTool.getType())
+            || OPENSHIFT_TOOL_TYPE.equals(k8sTool.getType()),
+        format("Plugin must have `%s` or `%s` type", KUBERNETES_TOOL_TYPE, OPENSHIFT_TOOL_TYPE));
 
-    String recipeFileContent = retrieveContent(recipeTool, contentProvider, type);
+    String recipeFileContent = retrieveContent(k8sTool, contentProvider, k8sTool.getType());
 
-    final KubernetesList list = unmarshal(recipeTool, recipeFileContent);
+    final KubernetesList list = unmarshal(k8sTool, recipeFileContent);
 
-    if (!recipeTool.getSelector().isEmpty()) {
-      list.setItems(filter(list, recipeTool.getSelector()));
+    if (!k8sTool.getSelector().isEmpty()) {
+      list.setItems(filter(list, k8sTool.getSelector()));
     }
 
-    estimateCommandsMachineName(devfile, recipeTool, list);
+    estimateCommandsMachineName(workspaceConfig, k8sTool, list);
 
-    RecipeImpl recipe = new RecipeImpl(type, YAML_CONTENT_TYPE, asYaml(recipeTool, list), null);
+    RecipeImpl recipe =
+        new RecipeImpl(k8sTool.getType(), YAML_CONTENT_TYPE, asYaml(k8sTool, list), null);
 
-    String envName = recipeTool.getName();
+    String envName = k8sTool.getName();
     workspaceConfig.getEnvironments().put(envName, new EnvironmentImpl(recipe, emptyMap()));
     workspaceConfig.setDefaultEnv(envName);
   }
 
   private String retrieveContent(
-      Tool recipeTool, FileContentProvider fileContentProvider, String type)
+      Tool recipeTool, @Nullable FileContentProvider fileContentProvider, String type)
       throws DevfileException {
     if (fileContentProvider == null) {
       throw new DevfileException(
@@ -162,20 +153,23 @@ public class KubernetesToolApplier {
   }
 
   /**
-   * Set {@link org.eclipse.che.api.core.model.workspace.config.Command#MACHINE_NAME_ATTRIBUTE} to
-   * commands which are configured in the specified tool.
+   * Set {@link Command#MACHINE_NAME_ATTRIBUTE} to commands which are configured in the specified
+   * tool.
    *
    * <p>Machine name will be set only if the specified recipe objects has the only one container.
    */
   private void estimateCommandsMachineName(
-      Devfile devfile, Tool tool, KubernetesList recipeObjects) {
-    List<Command> toolsCommands =
-        devfile
+      WorkspaceConfig workspaceConfig, Tool tool, KubernetesList recipeObjects) {
+    List<? extends Command> toolCommands =
+        workspaceConfig
             .getCommands()
             .stream()
-            .filter(c -> c.getActions().get(0).getTool().equals(tool.getName()))
+            .filter(
+                c ->
+                    tool.getName()
+                        .equals(c.getAttributes().get(Constants.TOOL_NAME_COMMAND_ATTRIBUTE)))
             .collect(toList());
-    if (toolsCommands.isEmpty()) {
+    if (toolCommands.isEmpty()) {
       return;
     }
     List<Pod> pods =
@@ -194,7 +188,7 @@ public class KubernetesToolApplier {
     }
 
     String machineName = Names.machineName(pod, pod.getSpec().getContainers().get(0));
-    toolsCommands.forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+    toolCommands.forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
   }
 
   private KubernetesList unmarshal(Tool tool, String recipeContent)

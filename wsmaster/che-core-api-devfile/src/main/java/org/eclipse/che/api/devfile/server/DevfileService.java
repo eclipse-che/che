@@ -128,8 +128,6 @@ public class DevfileService extends Service {
       workspace = devfileManager.createWorkspace(devfile, null);
     } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());
-    } catch (JsonProcessingException e) {
-      throw new ServerException(e.getMessage(), e);
     }
     return Response.status(201)
         .entity(asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext())))

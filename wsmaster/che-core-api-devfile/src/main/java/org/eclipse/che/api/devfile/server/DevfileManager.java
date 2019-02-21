@@ -12,13 +12,14 @@
 package org.eclipse.che.api.devfile.server;
 
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.devfile.server.DevfileFactory.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
-import java.util.HashMap;
+import com.google.common.annotations.VisibleForTesting;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -26,6 +27,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
 import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
@@ -54,11 +56,26 @@ public class DevfileManager {
       DevfileIntegrityValidator integrityValidator,
       DevfileConverter devfileConverter,
       WorkspaceManager workspaceManager) {
+    this(
+        schemaValidator,
+        integrityValidator,
+        devfileConverter,
+        workspaceManager,
+        new ObjectMapper(new YAMLFactory()));
+  }
+
+  @VisibleForTesting
+  DevfileManager(
+      DevfileSchemaValidator schemaValidator,
+      DevfileIntegrityValidator integrityValidator,
+      DevfileConverter devfileConverter,
+      WorkspaceManager workspaceManager,
+      ObjectMapper objectMapper) {
     this.schemaValidator = schemaValidator;
     this.integrityValidator = integrityValidator;
     this.devfileConverter = devfileConverter;
     this.workspaceManager = workspaceManager;
-    this.objectMapper = new ObjectMapper(new YAMLFactory());
+    this.objectMapper = objectMapper;
   }
 
   /**
@@ -69,28 +86,21 @@ public class DevfileManager {
    * @param verbose when true, method returns more explained validation error messages if any
    * @return Devfile object created from the source content
    * @throws DevfileFormatException when any of schema or integrity validations fail
-   * @throws JsonProcessingException when parsing error occurs
+   * @throws DevfileFormatException when any yaml parsing error occurs
    */
-  public Devfile parse(String devfileContent, boolean verbose)
-      throws DevfileFormatException, JsonProcessingException {
+  public Devfile parse(String devfileContent, boolean verbose) throws DevfileFormatException {
     JsonNode parsed = schemaValidator.validateBySchema(devfileContent, verbose);
-    Devfile devfile = objectMapper.treeToValue(parsed, Devfile.class);
+
+    Devfile devfile;
+    try {
+      devfile = objectMapper.treeToValue(parsed, Devfile.class);
+    } catch (JsonProcessingException e) {
+      throw new DevfileFormatException(e.getMessage());
+    }
     initializeMaps(devfile);
+
     integrityValidator.validateDevfile(devfile);
     return devfile;
-  }
-
-  private void initializeMaps(Devfile devfile) {
-    devfile
-        .getCommands()
-        .stream()
-        .filter(command -> command.getAttributes() == null)
-        .forEach(command -> command.setAttributes(new HashMap<>()));
-    devfile
-        .getTools()
-        .stream()
-        .filter(tool -> tool.getSelector() == null)
-        .forEach(command -> command.setSelector(new HashMap<>()));
   }
 
   /**
