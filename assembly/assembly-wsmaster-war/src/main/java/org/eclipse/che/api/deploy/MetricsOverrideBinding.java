@@ -26,11 +26,12 @@ import org.eclipse.che.api.deploy.jsonrpc.CheMinorWebSocketEndpointExecutorServi
 import org.eclipse.che.core.metrics.ExecutorServiceMetrics;
 
 /**
- * {@link com.google.inject.Module} that provide alternative implementation of {@link
- * org.eclipse.che.api.deploy.jsonrpc.CheMajorWebSocketEndpointExecutorServiceProvider} and {@link
- * org.eclipse.che.api.deploy.jsonrpc.CheMinorWebSocketEndpointExecutorServiceProvider}. {@link
- * java.util.concurrent.ExecutorService} that is returned by this providers will publish metrics to
- * {@link io.micrometer.prometheus.PrometheusMeterRegistry}
+ * {@link Module} that provide alternative implementation of {@link
+ * CheMajorWebSocketEndpointExecutorServiceProvider} and {@link
+ * CheMinorWebSocketEndpointExecutorServiceProvider}.
+ *
+ * <p>{@link ExecutorService} that is returned by these providers will publish metrics to {@link
+ * PrometheusMeterRegistry}
  */
 public class MetricsOverrideBinding implements Module {
   @Override
@@ -65,12 +66,16 @@ public class MetricsOverrideBinding implements Module {
     @Override
     public ExecutorService get() {
       if (executorService == null) {
-        executorService =
-            ExecutorServiceMetrics.monitor(
-                meterRegistry,
-                super.get(),
-                CheMajorWebSocketEndpointConfiguration.EXECUTOR_NAME,
-                Tags.empty());
+        synchronized (MeteredCheMajorWebSocketEndpointExecutorServiceProvider.class) {
+          if (executorService == null) {
+            executorService =
+                ExecutorServiceMetrics.monitor(
+                    meterRegistry,
+                    super.get(),
+                    CheMajorWebSocketEndpointConfiguration.EXECUTOR_NAME,
+                    Tags.empty());
+          }
+        }
       }
       return executorService;
     }
@@ -96,15 +101,16 @@ public class MetricsOverrideBinding implements Module {
     @Override
     public ExecutorService get() {
       if (executorService == null) {
-
-        super.get();
-
-        executorService =
-            ExecutorServiceMetrics.monitor(
-                meterRegistry,
-                super.get(),
-                CheMinorWebSocketEndpointConfiguration.EXECUTOR_NAME,
-                Tags.empty());
+        synchronized (MeteredCheMinorWebSocketEndpointExecutorServiceProvider.class) {
+          if (executorService == null) {
+            executorService =
+                ExecutorServiceMetrics.monitor(
+                    meterRegistry,
+                    super.get(),
+                    CheMinorWebSocketEndpointConfiguration.EXECUTOR_NAME,
+                    Tags.empty());
+          }
+        }
       }
       return executorService;
     }
