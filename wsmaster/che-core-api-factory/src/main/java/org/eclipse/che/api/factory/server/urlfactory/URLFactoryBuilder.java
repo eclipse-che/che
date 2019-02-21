@@ -17,7 +17,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -114,8 +113,6 @@ public class URLFactoryBuilder {
               .withWorkspace(DtoConverter.asDto(wsConfig)));
     } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());
-    } catch (IOException x) {
-      throw new ServerException(x.getLocalizedMessage(), x);
     }
   }
 

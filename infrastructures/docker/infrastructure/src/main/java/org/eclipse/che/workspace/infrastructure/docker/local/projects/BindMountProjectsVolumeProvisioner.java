@@ -12,6 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.docker.local.projects;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import com.google.common.base.Strings;
@@ -25,7 +26,6 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.util.SystemInfo;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.provision.ProjectsVolumeForWsAgentProvisioner;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.os.WindowsPathEscaper;
 import org.eclipse.che.workspace.infrastructure.docker.model.DockerContainerConfig;
@@ -79,9 +79,7 @@ public class BindMountProjectsVolumeProvisioner implements ConfigurationProvisio
       for (String volume : value.getVolumes()) {
         String[] volumeSourceTarget = volume.split(":");
         if (VolumeNames.matches(
-            volumeSourceTarget[0],
-            ProjectsVolumeForWsAgentProvisioner.PROJECTS_VOLUME_NAME,
-            identity.getWorkspaceId())) {
+            volumeSourceTarget[0], PROJECTS_VOLUME_NAME, identity.getWorkspaceId())) {
           newVolumes.add(getProjectsVolumeSpec(identity.getWorkspaceId(), volumeSourceTarget[1]));
         } else {
           newVolumes.add(volume);
