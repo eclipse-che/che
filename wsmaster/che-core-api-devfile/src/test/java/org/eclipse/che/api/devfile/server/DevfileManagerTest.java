@@ -75,7 +75,7 @@ public class DevfileManagerTest {
 
     devfileManager.parse(yamlContent, true);
 
-    verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
+    verify(schemaValidator).validateBySchema(eq(yamlContent));
     verify(integrityValidator).validateDevfile(any(Devfile.class));
   }
 
@@ -87,7 +87,7 @@ public class DevfileManagerTest {
 
     devfileManager.parse(yamlContent, true);
 
-    verify(schemaValidator).validateBySchema(eq(yamlContent), eq(true));
+    verify(schemaValidator).validateBySchema(eq(yamlContent));
     verifyNoMoreInteractions(integrityValidator);
   }
 
