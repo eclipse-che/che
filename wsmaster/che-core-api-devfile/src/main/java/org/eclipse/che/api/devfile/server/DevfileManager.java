@@ -70,7 +70,7 @@ public class DevfileManager {
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws JsonProcessingException when parsing error occurs
    */
-  public Devfile parse(String devfileContent, boolean verbose)
+  public Devfile parse(String devfileContent)
       throws DevfileFormatException, JsonProcessingException {
     JsonNode parsed = schemaValidator.validateBySchema(devfileContent);
     Devfile devfile = objectMapper.treeToValue(parsed, Devfile.class);
