@@ -855,7 +855,7 @@ generateFailSafeReport () {
         for file in $(ls target/site/screenshots/* | sort -r)
         do
             local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
-            local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
+            local testDetailTag="<div id=\"${test}-failure\" style=\"display:none;\">"
             local screenshotTag="<p><img src=\"screenshots\/"$(basename ${file})"\"><p>"
             sed -i "s/${testDetailTag}/${testDetailTag}${screenshotTag}/" ${FAILSAFE_REPORT}
         done
@@ -889,7 +889,7 @@ attachLinkToTestReport() {
     for file in $(ls ${dirWithResources}/* | sort -r)
     do
         local test=$(basename ${file} | sed 's/\(.*\)_.*/\1/')
-        local testDetailTag="<div id=\"${test}error\" style=\"display:none;\">"
+        local testDetailTag="<div id=\"${test}-failure\" style=\"display:none;\">"
         local filename=$(basename ${file})
         local linkTag="<p><li><a href=\"$relativePathToResource\/$filename\" target=\"_blank\"><b>$titleOfLink<\/b>: $filename<\/a><\/li><\/p>"
         sed -i "s/${testDetailTag}/${testDetailTag}${linkTag}/" ${FAILSAFE_REPORT}
