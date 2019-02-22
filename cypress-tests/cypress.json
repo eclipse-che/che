@@ -1,7 +1,9 @@
 {
-    "env": {
-        "api_endpoint": "http://che-eclipse-che.192.168.0.104.nip.io/api/"
+    "defaultCommandTimeout": 10000,
 
+    "env": {
+        "api_endpoint": "http://che-eclipse-che.172.19.20.205.nip.io/api/",
+        "root_url": "http://che-eclipse-che.172.19.20.205.nip.io"    
       }
 
 }
