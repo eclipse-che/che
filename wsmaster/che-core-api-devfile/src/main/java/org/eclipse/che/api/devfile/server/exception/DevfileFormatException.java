@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.devfile.server.exception;
 
 /** Thrown when devfile schema or integrity validation is failed. */
 public class DevfileFormatException extends DevfileException {
