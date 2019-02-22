@@ -22,10 +22,13 @@ check_github_token_is_set() {
   fi
 }
 
-
-DEFAULT_COMMIT_MESSAGE="Update devfile docs"
-DEFAULT_BUILD_DOCKER=false
-DEFAULT_DEPLOY=true
+build() {
+  if [[ "$IS_DOCKER" == "true" ]]; then
+    build_with_docker
+  else
+    build_native
+  fi
+}
 
 build_with_docker() {
     echo "Building docs using docker."
@@ -36,7 +39,6 @@ build_with_docker() {
     docker run --rm ${DOCKER_IMAGE_NAME} | tar -C docs/ -xf -
     echo "Building docs done."
 }
-
 
 build_native() {
    echo "Building docs using native way."
@@ -79,7 +81,7 @@ check_packages() {
    done
 }
 
-cleanup() {
+cleanupTmpDir() {
    rm -rf ${TMP_DIR}
 }
 
@@ -89,6 +91,7 @@ print_help() {
    echo "--docker     Build docs in docker container"
    echo "--no-deploy  Skip deploy result to remote"
    echo "--message    Override default commit message"
+   echo "--folder     Optional. If specified then script will save docs file in the specified folder"
 }
 
 parse_args() {
@@ -110,30 +113,47 @@ parse_args() {
             -help|--help)
                print_help
                exit 0
-           ;;
-         esac
+               ;;
+            *)
+                echo "You've passed wrong arg '$key'."
+                echo -e "$HELP"
+                exit 1
+                ;;
+        esac
      done
 }
 
 cleanup
 parse_args "$@"
 
+TMP_DIR="/tmp/devfile"
+
+DEFAULT_COMMIT_MESSAGE="Update devfile docs"
 COMMIT_MESSAGE=${MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
+
+DEFAULT_BUILD_DOCKER=false
 IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
+
+DEFAULT_DEPLOY=true
 IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
+
+parse_args "$@"
 
 if [[ "$IS_DEPLOY" == "true" ]]; then
   check_github_token_is_set
 fi
 
-if [[ "$IS_DOCKER" == "true" ]];
-then
-    build_with_docker
-else
-    build_native
-fi
+cleanupTmpDir
+
+build
+
 if [[ "$IS_DEPLOY" == "true" ]]; then
     deploy
 fi
-cleanup
+
+if [[ "$FOLDER" ]]; then
+    copyDocs
+fi
+
+
 exit 0
