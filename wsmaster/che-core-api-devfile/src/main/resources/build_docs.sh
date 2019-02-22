@@ -15,7 +15,9 @@ set -e
 
 check_github_token_is_set() {
   if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
-    echo "GitHub token not found, exiting now..."
+    echo "GitHub token not found."
+    echo "Specify env var DEVFILE_DOCS_GITHUB_TOKEN or use --no-deploy argument if you do not want to push Docs automatically"
+    echo "Exiting now..."
     exit 1
   else
     GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
