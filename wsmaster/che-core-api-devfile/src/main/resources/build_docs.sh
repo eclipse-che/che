@@ -92,7 +92,7 @@ print_help() {
    echo "Command line options:"
    echo "--docker      Build docs in docker container"
    echo "--no-deploy   Skip deploy result to remote"
-   echo "--message     Override default commit message"
+   echo "--message     Override default commit message. Example: --message=\"Update Devfile Docs\""
    echo "--folder|-f   If specified then script will save docs files in the specified folder. Examples: -f=.|-f=/home/user"
 }
 
@@ -108,7 +108,7 @@ parse_args() {
                IS_DEPLOY=false
                shift
            ;;
-           --message)
+           --message=*)
                MESSAGE="${i#*=}"
                shift
            ;;
