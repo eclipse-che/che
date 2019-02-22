@@ -15,6 +15,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 
 import com.google.common.annotations.VisibleForTesting;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -54,8 +55,10 @@ public class InconsistentRuntimesDetector {
       initialDelayParameterName = "che.infra.kubernetes.runtimes_consistency_check_period_min",
       unit = TimeUnit.MINUTES)
   public void check() {
-    LOG.debug("Runtimes consistency check is running");
-    for (String runningWorkspaceId : workspaceRuntimes.getRunning()) {
+    Set<String> runningWorkspaces = workspaceRuntimes.getRunning();
+    LOG.info(
+        "Runtimes consistency check is running. Checking {} workspaces", runningWorkspaces.size());
+    for (String runningWorkspaceId : runningWorkspaces) {
       try {
         checkOne(runningWorkspaceId);
       } catch (InfrastructureException e) {
