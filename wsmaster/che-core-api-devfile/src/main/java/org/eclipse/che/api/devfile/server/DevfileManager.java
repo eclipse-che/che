@@ -11,8 +11,9 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyMap;
-import static org.eclipse.che.api.devfile.server.DevfileFactory.*;
+import static org.eclipse.che.api.devfile.server.DevfileFactory.initializeMaps;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -122,6 +123,9 @@ public class DevfileManager {
   public WorkspaceImpl createWorkspace(Devfile devfile, FileContentProvider fileContentProvider)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           DevfileException {
+    checkArgument(devfile != null, "Devfile must not be null");
+    checkArgument(fileContentProvider != null, "File content provider must not be null");
+
     WorkspaceConfigImpl workspaceConfig = createWorkspaceConfig(devfile, fileContentProvider);
     final String namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
     return workspaceManager.createWorkspace(
@@ -141,6 +145,9 @@ public class DevfileManager {
   public WorkspaceConfigImpl createWorkspaceConfig(
       Devfile devfile, FileContentProvider fileContentProvider)
       throws DevfileFormatException, DevfileRecipeFormatException, DevfileException {
+    checkArgument(devfile != null, "Devfile must not be null");
+    checkArgument(fileContentProvider != null, "File content provider must not be null");
+
     integrityValidator.validateDevfile(devfile);
     return devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
   }
@@ -149,11 +156,11 @@ public class DevfileManager {
    * Exports provided workspace into devfile
    *
    * @param key string composite workspace key
-   * @see WorkspaceManager#getByKey(String)
    * @return devfile representation of given workspace
    * @throws NotFoundException when no workspace can be found by given key
    * @throws ConflictException when workspace cannot be exported into devfile
    * @throws ServerException when other error occurs
+   * @see WorkspaceManager#getByKey(String)
    */
   public Devfile exportWorkspace(String key)
       throws NotFoundException, ServerException, ConflictException {

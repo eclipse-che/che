@@ -54,6 +54,7 @@ public class DockerimageToolProvisioner implements ToolProvisioner {
    * @throws IllegalArgumentException if the specified workspace config or devfile is null
    * @throws WorkspaceExportException if workspace config has more than one dockerimage environments
    */
+  @Override
   public void provision(Devfile devfile, WorkspaceConfigImpl workspaceConfig)
       throws WorkspaceExportException {
     checkArgument(devfile != null, "The environment must not be null");
