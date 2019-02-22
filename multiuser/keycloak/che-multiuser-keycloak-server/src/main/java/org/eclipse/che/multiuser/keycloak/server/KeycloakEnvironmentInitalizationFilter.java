@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
+import io.opentracing.Tracer;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
@@ -53,6 +55,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
   private final PermissionChecker permissionChecker;
   private final KeycloakSettings keycloakSettings;
   private final KeycloakProfileRetriever keycloakProfileRetriever;
+  private final Tracer tracer;
 
   @Inject
   public KeycloakEnvironmentInitalizationFilter(
@@ -60,12 +63,14 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
       KeycloakProfileRetriever keycloakProfileRetriever,
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
-      KeycloakSettings settings) {
+      KeycloakSettings settings,
+      OptionalTracer tracer) {
     this.userManager = userManager;
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
     this.keycloakProfileRetriever = keycloakProfileRetriever;
+    this.tracer = OptionalTracer.fromNullable(tracer);
   }
 
   @Override
@@ -139,7 +144,9 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
 
     try {
       EnvironmentContext.getCurrent().setSubject(subject);
-      TracingTags.USER_ID.set(subject.getUserId());
+      if (tracer != null) {
+        TracingTags.USER_ID.set(tracer.activeSpan(), subject.getUserId());
+      }
       filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
     } finally {
       EnvironmentContext.reset();
