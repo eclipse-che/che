@@ -222,11 +222,6 @@ public class KubernetesBootstrapper extends AbstractBootstrapper {
   }
 
   private void exec(String... command) throws InfrastructureException {
-    LOG.debug(
-        "Executing Pod={} ContainerName={} command={}",
-        kubernetesMachine.getPodName(),
-        kubernetesMachine.getContainerName(),
-        command);
     namespace
         .deployments()
         .exec(
