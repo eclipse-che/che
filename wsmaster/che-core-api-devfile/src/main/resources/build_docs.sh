@@ -88,10 +88,10 @@ cleanupTmpDir() {
 print_help() {
    echo "This script builds and deploys documentation in markdown format from devfile json schema."
    echo "Command line options:"
-   echo "--docker     Build docs in docker container"
-   echo "--no-deploy  Skip deploy result to remote"
-   echo "--message    Override default commit message"
-   echo "--folder     Optional. If specified then script will save docs file in the specified folder"
+   echo "--docker      Build docs in docker container"
+   echo "--no-deploy   Skip deploy result to remote"
+   echo "--message     Override default commit message"
+   echo "--folder|-f   If specified then script will save docs files in the specified folder. Examples: -f=.|-f=/home/user"
 }
 
 parse_args() {
@@ -110,6 +110,11 @@ parse_args() {
                MESSAGE="${i#*=}"
                shift
            ;;
+           -f=*| --folder=*)
+               FOLDER="${i#*=}"
+               echo $FOLDER
+               shift
+           ;;
             -help|--help)
                print_help
                exit 0
@@ -123,9 +128,13 @@ parse_args() {
      done
 }
 
-cleanup
-parse_args "$@"
+copyDocs() {
+  cd $RUN_DIR
+  cp -r ${TMP_DIR}/docs/. -t ${FOLDER}
+  echo "Docs is saved as ${FOLDER}/index.md"
+}
 
+RUN_DIR=$(pwd)
 TMP_DIR="/tmp/devfile"
 
 DEFAULT_COMMIT_MESSAGE="Update devfile docs"
@@ -154,6 +163,5 @@ fi
 if [[ "$FOLDER" ]]; then
     copyDocs
 fi
-
 
 exit 0
