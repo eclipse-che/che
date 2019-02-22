@@ -743,7 +743,7 @@ public class WorkspaceRuntimes {
       for (RuntimeIdentity identity : identities) {
         try {
           recoverOne(infrastructure, identity);
-        } catch (ServerException | ConflictException e) {
+        } catch (Exception e) {
           LOG.error(
               "An error occurred while attempting to recover runtime '{}' using infrastructure '{}'. Reason: '{}'",
               identity.getWorkspaceId(),
