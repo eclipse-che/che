@@ -20,7 +20,7 @@ RUN apt-get update && \
     apt-get install -y git \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/*
-RUN git clone -b '1.1.0' --single-branch https://github.com/adobe/jsonschema2md.git
+RUN git clone -b '1.1.0' --single-branch git@github.com:adobe/jsonschema2md.git
 RUN cd jsonschema2md && npm install && npm link
 
 COPY ./schema /schema
