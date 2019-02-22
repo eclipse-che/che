@@ -1,5 +1,3 @@
-/// <reference types="Cypress" />
-
 
 import { LoginPage } from "../pageobjects/LoginPage";
 import { TestWorkspace } from "../pageobjects/workspace/TestWorkspace";
@@ -25,8 +23,11 @@ describe("Create workspace and open it in IDE", ()=>{
     workspaces.clickAddWorkspaceButton();
     newWorkspace.clickOnChe7Stack();
     newWorkspace.waitChe7StackSelected();
+    newWorkspace.clickOnAddOrImportProjectButton();
+    newWorkspace.enableWebJavaSpringCheckbox();
+    newWorkspace.clickOnAddButton();
     newWorkspace.clickOnCreateAndOpenButton();
-
+ 
 })
 
 
