@@ -13,14 +13,14 @@
 
 set -e
 
-TMP_DIR="/tmp/devfile"
-
-if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
-  echo "GitHub token not found, exiting now..."
-  exit 1
-else
-  GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
-fi
+check_github_token_is_set() {
+  if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
+    echo "GitHub token not found, exiting now..."
+    exit 1
+  else
+    GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
+  fi
+}
 
 
 DEFAULT_COMMIT_MESSAGE="Update devfile docs"
@@ -121,6 +121,10 @@ parse_args "$@"
 COMMIT_MESSAGE=${MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
 IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
 IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
+
+if [[ "$IS_DEPLOY" == "true" ]]; then
+  check_github_token_is_set
+fi
 
 if [[ "$IS_DOCKER" == "true" ]];
 then
