@@ -16,7 +16,7 @@ import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import java.util.concurrent.ExecutorService;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider;
 
 /** Configures JSON RPC WebSocket Endpoints. */
 public class CheJsonRpcWebSocketConfigurationModule implements Module {
@@ -32,8 +32,8 @@ public class CheJsonRpcWebSocketConfigurationModule implements Module {
         .annotatedWith(Names.named(CheMinorWebSocketEndpointConfiguration.EXECUTOR_NAME))
         .toProvider(CheMinorWebSocketEndpointExecutorServiceProvider.class);
 
-    Multibinder<RequestProcessorConfigurator.Configuration> configurationMultibinder =
-        Multibinder.newSetBinder(binder, RequestProcessorConfigurator.Configuration.class);
+    Multibinder<RequestProcessorConfigurationProvider.Configuration> configurationMultibinder =
+        Multibinder.newSetBinder(binder, RequestProcessorConfigurationProvider.Configuration.class);
     configurationMultibinder.addBinding().to(CheMajorWebSocketEndpointConfiguration.class);
     configurationMultibinder.addBinding().to(CheMinorWebSocketEndpointConfiguration.class);
   }

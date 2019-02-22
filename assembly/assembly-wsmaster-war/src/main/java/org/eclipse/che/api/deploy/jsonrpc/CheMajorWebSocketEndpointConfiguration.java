@@ -14,14 +14,14 @@ package org.eclipse.che.api.deploy.jsonrpc;
 import java.util.concurrent.ExecutorService;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider;
 
 /**
- * {@link RequestProcessorConfigurator.Configuration} implementation used to configure {@link
+ * {@link RequestProcessorConfigurationProvider.Configuration} implementation used to configure {@link
  * CheMajorWebSocketEndpoint}
  */
 public class CheMajorWebSocketEndpointConfiguration
-    implements RequestProcessorConfigurator.Configuration {
+    implements RequestProcessorConfigurationProvider.Configuration {
 
   private final ExecutorService executor;
 

@@ -14,7 +14,7 @@ package org.eclipse.che.api.core.jsonrpc.commons;
 import java.util.concurrent.ExecutorService;
 
 /** Request processor configurator */
-public interface RequestProcessorConfigurator {
+public interface RequestProcessorConfigurationProvider {
 
   /**
    * Get request processor configuration for specified endpoint.

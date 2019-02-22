@@ -15,16 +15,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.concurrent.ExecutorService;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator.Configuration;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider.Configuration;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 
 @Singleton
 public class ServerSideRequestProcessor implements RequestProcessor {
-  private final RequestProcessorConfigurator requestProcessorConfigurator;
+  private final RequestProcessorConfigurationProvider requestProcessorConfigurator;
 
   @Inject
-  public ServerSideRequestProcessor(RequestProcessorConfigurator requestProcessorConfigurator) {
+  public ServerSideRequestProcessor(RequestProcessorConfigurationProvider requestProcessorConfigurator) {
     this.requestProcessorConfigurator = requestProcessorConfigurator;
   }
 

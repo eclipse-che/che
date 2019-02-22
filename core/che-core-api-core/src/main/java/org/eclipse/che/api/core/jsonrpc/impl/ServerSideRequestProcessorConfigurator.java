@@ -17,16 +17,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider;
 
 @Singleton
-public class ServerSideRequestProcessorConfigurator implements RequestProcessorConfigurator {
+public class ServerSideRequestProcessorConfigurator implements RequestProcessorConfigurationProvider {
 
   private final Map<String, Configuration> configurations;
 
   @Inject
   public ServerSideRequestProcessorConfigurator(
-      Set<RequestProcessorConfigurator.Configuration> configurations) {
+      Set<RequestProcessorConfigurationProvider.Configuration> configurations) {
     this.configurations =
         configurations
             .stream()

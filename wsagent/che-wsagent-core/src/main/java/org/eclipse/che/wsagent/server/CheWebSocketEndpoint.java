@@ -25,7 +25,7 @@ import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.websocket.server.ServerEndpoint;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurator;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
@@ -62,7 +62,7 @@ public class CheWebSocketEndpoint extends BasicWebSocketEndpoint {
   }
 
   public static class CheWebSocketEndpointConfiguration
-      implements RequestProcessorConfigurator.Configuration {
+      implements RequestProcessorConfigurationProvider.Configuration {
 
     private final ExecutorService executor;
 
