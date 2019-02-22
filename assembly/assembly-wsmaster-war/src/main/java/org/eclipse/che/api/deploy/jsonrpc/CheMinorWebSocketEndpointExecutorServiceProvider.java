@@ -69,7 +69,7 @@ public class CheMinorWebSocketEndpointExecutorServiceProvider implements Provide
             queueCapacity > 0 ? new LinkedBlockingQueue<>(queueCapacity) : new SynchronousQueue<>(),
             factory);
     executor.setRejectedExecutionHandler(
-        (r, __) -> LOG.error("Message {} rejected for execution", r));
+        (r, __) -> LOG.error("Executor rejected to handle the message {}", r));
     executor.prestartCoreThread();
   }
 

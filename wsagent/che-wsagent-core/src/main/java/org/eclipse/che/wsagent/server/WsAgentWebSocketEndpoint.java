@@ -112,7 +112,7 @@ public class WsAgentWebSocketEndpoint extends BasicWebSocketEndpoint {
                   : new SynchronousQueue<>(),
               factory);
       executor.setRejectedExecutionHandler(
-          (r, __) -> LOG.error("Message {} rejected for execution", r));
+          (r, __) -> LOG.error("Executor rejected to handle the message {}", r));
       executor.prestartCoreThread();
     }
 
