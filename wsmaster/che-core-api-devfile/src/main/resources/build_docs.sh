@@ -44,7 +44,7 @@ build_native() {
    mkdir -p ${TMP_DIR}/schema
    cp -f schema/* ${TMP_DIR}/schema
    cd ${TMP_DIR}
-   git clone -b '1.1.0' --single-branch git@github.com:adobe/jsonschema2md.git
+   git clone -b '1.1.0' --single-branch https://github.com/adobe/jsonschema2md.git
    cd jsonschema2md
    npm install
    npm link
