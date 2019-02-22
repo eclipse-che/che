@@ -112,7 +112,6 @@ parse_args() {
            ;;
            -f=*| --folder=*)
                FOLDER="${i#*=}"
-               echo $FOLDER
                shift
            ;;
             -help|--help)
@@ -146,6 +145,9 @@ IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
 DEFAULT_DEPLOY=true
 IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
 
+DEFAULT_DO_CLEANUP=true
+DO_CLEANUP=${DO_CLEANUP:-${DEFAULT_DO_CLEANUP}}
+
 parse_args "$@"
 
 if [[ "$IS_DEPLOY" == "true" ]]; then
@@ -163,5 +165,7 @@ fi
 if [[ "$FOLDER" ]]; then
     copyDocs
 fi
+
+echo "Working Dir where script results can be found is ${TMP_DIR}"
 
 exit 0
