@@ -41,14 +41,14 @@ import org.slf4j.Logger;
  * @author Vitalii Parfonov
  */
 @ServerEndpoint(value = "/wsagent", configurator = GuiceInjectorEndpointConfigurator.class)
-public class CheWebSocketEndpoint extends BasicWebSocketEndpoint {
+public class WsAgentWebSocketEndpoint extends BasicWebSocketEndpoint {
 
-  private static final Logger LOG = getLogger(CheWebSocketEndpoint.class);
+  private static final Logger LOG = getLogger(WsAgentWebSocketEndpoint.class);
 
   public static final String ENDPOINT_ID = "ws-agent-websocket-endpoint";
 
   @Inject
-  public CheWebSocketEndpoint(
+  public WsAgentWebSocketEndpoint(
       WebSocketSessionRegistry registry,
       MessagesReSender reSender,
       WebSocketMessageReceiver receiver,
@@ -97,7 +97,7 @@ public class CheWebSocketEndpoint extends BasicWebSocketEndpoint {
       ThreadFactory factory =
           new ThreadFactoryBuilder()
               .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-              .setNameFormat(CheWebSocketEndpoint.class.getSimpleName() + "-%d")
+              .setNameFormat(WsAgentWebSocketEndpoint.class.getSimpleName() + "-%d")
               .setDaemon(true)
               .build();
 

@@ -34,12 +34,12 @@ public class WsAgentModule extends AbstractModule {
     bind(LivenessProbeService.class);
     bind(ExecutorService.class)
         .annotatedWith(Names.named("che.core.jsonrpc.major_executor"))
-        .toProvider(CheWebSocketEndpoint.CheWebSocketEndpointExecutorServiceProvider.class);
+        .toProvider(WsAgentWebSocketEndpoint.CheWebSocketEndpointExecutorServiceProvider.class);
     Multibinder<RequestProcessorConfigurationProvider.Configuration> configurationMultibinder =
         Multibinder.newSetBinder(binder(), RequestProcessorConfigurationProvider.Configuration.class);
     configurationMultibinder
         .addBinding()
-        .to(CheWebSocketEndpoint.CheWebSocketEndpointConfiguration.class);
+        .to(WsAgentWebSocketEndpoint.CheWebSocketEndpointConfiguration.class);
     install(new org.eclipse.che.security.oauth.OAuthAgentModule());
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());
