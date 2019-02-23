@@ -19,6 +19,8 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationPro
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.LivenessProbeService;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.wsagent.server.jsonrpc.WsAgentWebSocketEndpointConfiguration;
+import org.eclipse.che.wsagent.server.jsonrpc.WsAgentWebSocketEndpointExecutorServiceProvider;
 
 /**
  * Mandatory modules of workspace agent
@@ -33,13 +35,12 @@ public class WsAgentModule extends AbstractModule {
     bind(ApiInfoService.class);
     bind(LivenessProbeService.class);
     bind(ExecutorService.class)
-        .annotatedWith(Names.named("che.core.jsonrpc.major_executor"))
-        .toProvider(WsAgentWebSocketEndpoint.CheWebSocketEndpointExecutorServiceProvider.class);
+        .annotatedWith(Names.named(WsAgentWebSocketEndpointConfiguration.EXECUTOR_NAME))
+        .toProvider(WsAgentWebSocketEndpointExecutorServiceProvider.class);
     Multibinder<RequestProcessorConfigurationProvider.Configuration> configurationMultibinder =
-        Multibinder.newSetBinder(binder(), RequestProcessorConfigurationProvider.Configuration.class);
-    configurationMultibinder
-        .addBinding()
-        .to(WsAgentWebSocketEndpoint.CheWebSocketEndpointConfiguration.class);
+        Multibinder.newSetBinder(
+            binder(), RequestProcessorConfigurationProvider.Configuration.class);
+    configurationMultibinder.addBinding().to(WsAgentWebSocketEndpointConfiguration.class);
     install(new org.eclipse.che.security.oauth.OAuthAgentModule());
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());

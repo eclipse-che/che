@@ -9,30 +9,20 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.wsagent.server;
+package org.eclipse.che.wsagent.server.jsonrpc;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.slf4j.LoggerFactory.getLogger;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.ThreadPoolExecutor;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.websocket.server.ServerEndpoint;
-import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider;
 import org.eclipse.che.api.core.websocket.commons.WebSocketMessageReceiver;
 import org.eclipse.che.api.core.websocket.impl.BasicWebSocketEndpoint;
 import org.eclipse.che.api.core.websocket.impl.GuiceInjectorEndpointConfigurator;
 import org.eclipse.che.api.core.websocket.impl.MessagesReSender;
 import org.eclipse.che.api.core.websocket.impl.WebSocketSessionRegistry;
 import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
-import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.eclipse.che.commons.lang.execution.ExecutorServiceProvider;
 import org.slf4j.Logger;
 
@@ -60,28 +50,6 @@ public class WsAgentWebSocketEndpoint extends BasicWebSocketEndpoint {
   @Override
   protected String getEndpointId() {
     return ENDPOINT_ID;
-  }
-
-  public static class CheWebSocketEndpointConfiguration
-      implements RequestProcessorConfigurationProvider.Configuration {
-
-    private final ExecutorService executor;
-
-    @Inject
-    public CheWebSocketEndpointConfiguration(
-        @Named("che.core.jsonrpc.major_executor") ExecutorService executor) {
-      this.executor = executor;
-    }
-
-    @Override
-    public String getEndpointId() {
-      return ENDPOINT_ID;
-    }
-
-    @Override
-    public ExecutorService getExecutorService() {
-      return executor;
-    }
   }
 
   @Singleton
