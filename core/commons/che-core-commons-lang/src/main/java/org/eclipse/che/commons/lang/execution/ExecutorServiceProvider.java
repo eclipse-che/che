@@ -26,7 +26,15 @@ import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
 import org.slf4j.Logger;
 
 /**
- * Configurable {@link Provider} of {@link ExecutorService}
+ * Configurable {@link Provider} of {@link ExecutorService}.
+ *
+ * <p>Allow to configure corePoolSize, maximumPoolSize, queueCapacity. It uses two different
+ * implementation of Queue. if queueCapacity > 0 then this is capacity of {@link
+ * LinkedBlockingQueue} if <=0 then {@link SynchronousQueue} is used.
+ *
+ * <p>Implementation add {@link java.util.concurrent.RejectedExecutionHandler} that is printing
+ * rejected message to the LOG.error. This can happen in case if there is no available Thread in
+ * ThreadPool and there is no capacity in the queue.
  *
  * @author Sergii Kabashniuk
  */
