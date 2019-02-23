@@ -60,18 +60,14 @@ public class MetricsOverrideBinding implements Module {
     }
 
     @Override
-    public ExecutorService get() {
+    public synchronized ExecutorService get() {
       if (executorService == null) {
-        synchronized (MeteredCheMajorWebSocketEndpointExecutorServiceProvider.class) {
-          if (executorService == null) {
-            executorService =
-                ExecutorServiceMetrics.monitor(
-                    meterRegistry,
-                    super.get(),
-                    CheMajorWebSocketEndpointConfiguration.EXECUTOR_NAME,
-                    Tags.empty());
-          }
-        }
+        executorService =
+            ExecutorServiceMetrics.monitor(
+                meterRegistry,
+                super.get(),
+                CheMajorWebSocketEndpointConfiguration.EXECUTOR_NAME,
+                Tags.empty());
       }
       return executorService;
     }
@@ -95,18 +91,15 @@ public class MetricsOverrideBinding implements Module {
     }
 
     @Override
-    public ExecutorService get() {
+    public synchronized ExecutorService get() {
       if (executorService == null) {
-        synchronized (MeteredCheMinorWebSocketEndpointExecutorServiceProvider.class) {
-          if (executorService == null) {
-            executorService =
-                ExecutorServiceMetrics.monitor(
-                    meterRegistry,
-                    super.get(),
-                    CheMinorWebSocketEndpointConfiguration.EXECUTOR_NAME,
-                    Tags.empty());
-          }
-        }
+
+        executorService =
+            ExecutorServiceMetrics.monitor(
+                meterRegistry,
+                super.get(),
+                CheMinorWebSocketEndpointConfiguration.EXECUTOR_NAME,
+                Tags.empty());
       }
       return executorService;
     }
