@@ -24,7 +24,8 @@ public class ServerSideRequestProcessor implements RequestProcessor {
   private final RequestProcessorConfigurationProvider requestProcessorConfigurator;
 
   @Inject
-  public ServerSideRequestProcessor(RequestProcessorConfigurationProvider requestProcessorConfigurator) {
+  public ServerSideRequestProcessor(
+      RequestProcessorConfigurationProvider requestProcessorConfigurator) {
     this.requestProcessorConfigurator = requestProcessorConfigurator;
   }
 

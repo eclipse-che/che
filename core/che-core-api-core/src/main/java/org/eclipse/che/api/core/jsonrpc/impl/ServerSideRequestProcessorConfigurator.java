@@ -20,7 +20,8 @@ import java.util.stream.Collectors;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider;
 
 @Singleton
-public class ServerSideRequestProcessorConfigurator implements RequestProcessorConfigurationProvider {
+public class ServerSideRequestProcessorConfigurator
+    implements RequestProcessorConfigurationProvider {
 
   private final Map<String, Configuration> configurations;
 

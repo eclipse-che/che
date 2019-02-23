@@ -20,7 +20,6 @@ public interface RequestProcessorConfigurationProvider {
    * Get request processor configuration for specified endpoint.
    *
    * @param endpointId endpoint id
-   *
    */
   Configuration get(String endpointId);
 
