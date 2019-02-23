@@ -11,12 +11,11 @@
  */
 package org.eclipse.che.api.deploy.jsonrpc;
 
-import org.eclipse.che.commons.lang.execution.ExecutorServiceProvider;
-
+import java.util.concurrent.ExecutorService;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.util.concurrent.ExecutorService;
+import org.eclipse.che.commons.lang.execution.ExecutorServiceProvider;
 
 /** * {@link ExecutorService} provider used in {@link CheMinorWebSocketEndpoint}. */
 @Singleton
