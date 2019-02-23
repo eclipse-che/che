@@ -461,7 +461,9 @@ public class KubernetesDeployments {
   }
 
   /**
-   * Registers a specified handler for handling events about changes in pods containers.
+   * Registers a specified handler for handling events about changes in pods containers. Registering
+   * several handlers doesn't create multiple websocket connections, so it is efficient to call this
+   * method several times instead of using composite handler to combine other handlers.
    *
    * @param handler pod container events handler
    * @throws InfrastructureException if any error occurs while watcher starting
