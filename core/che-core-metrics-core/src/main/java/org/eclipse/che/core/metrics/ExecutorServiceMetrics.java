@@ -83,7 +83,7 @@ public class ExecutorServiceMetrics implements MeterBinder {
       implements java.util.concurrent.RejectedExecutionHandler {
 
     private final RejectedExecutionHandler handler;
-    private long counter;
+    private volatile long counter;
 
     private RejectedExecutionHandlerWrapper(RejectedExecutionHandler handler) {
       this.handler = handler;
