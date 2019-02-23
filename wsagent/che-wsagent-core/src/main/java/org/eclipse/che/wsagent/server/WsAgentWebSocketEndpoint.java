@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.websocket.impl.MessagesReSender;
 import org.eclipse.che.api.core.websocket.impl.WebSocketSessionRegistry;
 import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
 import org.eclipse.che.commons.lang.concurrent.LoggingUncaughtExceptionHandler;
+import org.eclipse.che.commons.lang.execution.ExecutorServiceProvider;
 import org.slf4j.Logger;
 
 /**
@@ -84,41 +85,14 @@ public class WsAgentWebSocketEndpoint extends BasicWebSocketEndpoint {
   }
 
   @Singleton
-  public static class CheWebSocketEndpointExecutorServiceProvider
-      implements Provider<ExecutorService> {
-
-    private final ThreadPoolExecutor executor;
+  public static class CheWebSocketEndpointExecutorServiceProvider extends ExecutorServiceProvider {
 
     @Inject
     public CheWebSocketEndpointExecutorServiceProvider(
         @Named("che.core.jsonrpc.processor_core_pool_size") int corePoolSize,
         @Named("che.core.jsonrpc.processor_max_pool_size") int maxPoolSize,
         @Named("che.core.jsonrpc.processor_queue_capacity") int queueCapacity) {
-      ThreadFactory factory =
-          new ThreadFactoryBuilder()
-              .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
-              .setNameFormat(WsAgentWebSocketEndpoint.class.getSimpleName() + "-%d")
-              .setDaemon(true)
-              .build();
-
-      executor =
-          new ThreadPoolExecutor(
-              corePoolSize,
-              maxPoolSize,
-              60L,
-              SECONDS,
-              queueCapacity > 0
-                  ? new LinkedBlockingQueue<>(queueCapacity)
-                  : new SynchronousQueue<>(),
-              factory);
-      executor.setRejectedExecutionHandler(
-          (r, __) -> LOG.error("Executor rejected to handle the message {}", r));
-      executor.prestartCoreThread();
-    }
-
-    @Override
-    public ExecutorService get() {
-      return executor;
+      super(corePoolSize, maxPoolSize, queueCapacity);
     }
   }
 }
