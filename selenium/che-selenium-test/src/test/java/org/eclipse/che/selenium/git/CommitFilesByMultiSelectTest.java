@@ -26,6 +26,7 @@ import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.AskDialog;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
 import org.eclipse.che.selenium.pageobject.Events;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Loader;
@@ -40,9 +41,9 @@ import org.testng.annotations.Test;
 public class CommitFilesByMultiSelectTest {
   private static final String PROJECT_NAME = NameGenerator.generate("CommitByMultiSelect_", 4);
   private static final String PATH_FOR_EXPAND_FIRST_MODULE =
-      PROJECT_NAME + "/my-lib/src/test/java/hello";
+      PROJECT_NAME + "/my-lib/src/test/java/hello/SayHelloTest.java";
   private static final String PATH_FOR_EXPAND_SECOND_MODULE =
-      PROJECT_NAME + "/my-webapp/src/main/java/helloworld";
+      PROJECT_NAME + "/my-webapp/src/main/java/helloworld/AppController.java";
   private static final String CHANGE_CONTENT = "***change content***";
   private static final String COMMIT_MESSAGE_1 = "first commit";
   private static final String COMMIT_MESSAGE_2 = "second commit";
@@ -102,6 +103,7 @@ public class CommitFilesByMultiSelectTest {
   @Inject private CodenvyEditor editor;
   @Inject private TestUserPreferencesServiceClient testUserPreferencesServiceClient;
   @Inject private TestProjectServiceClient testProjectServiceClient;
+  @Inject private Consoles consoles;
 
   @BeforeClass
   public void prepare() throws Exception {
@@ -114,11 +116,12 @@ public class CommitFilesByMultiSelectTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_JAVA_MULTIMODULE);
     ide.open(ws);
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
   }
 
   @Test
   public void commitFilesByMultiSelect() {
-    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     menu.runCommand(
@@ -141,18 +144,18 @@ public class CommitFilesByMultiSelectTest {
     loader.waitOnClosed();
 
     // Edit SayHelloTest.java
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PATH_FOR_EXPAND_FIRST_MODULE, "SayHelloTest.java");
-    loader.waitOnClosed();
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_FOR_EXPAND_FIRST_MODULE);
+    projectExplorer.openItemByPath(PATH_FOR_EXPAND_FIRST_MODULE);
+    editor.waitActive();
     editor.setCursorToLine(16);
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + CHANGE_CONTENT);
 
     // Edit GreetingController.java
     git.closeGitInfoPanel();
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PATH_FOR_EXPAND_SECOND_MODULE, "AppController.java");
-    loader.waitOnClosed();
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_FOR_EXPAND_SECOND_MODULE);
+    projectExplorer.openItemByPath(PATH_FOR_EXPAND_SECOND_MODULE);
+    editor.waitActive();
     editor.setCursorToLine(16);
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + CHANGE_CONTENT);
@@ -176,11 +179,10 @@ public class CommitFilesByMultiSelectTest {
     git.waitGitStatusBarWithMess(STATUS_MESSAGE_BEFORE_COMMIT);
 
     // Perform the commit selected files
-    projectExplorer.waitAndSelectItem(
-        PROJECT_NAME + "/my-lib/src/test/java/hello/SayHelloTest.java");
+    projectExplorer.waitAndSelectItem(PATH_FOR_EXPAND_FIRST_MODULE);
+    projectExplorer.waitItemIsSelected(PATH_FOR_EXPAND_FIRST_MODULE);
     git.closeGitInfoPanel();
-    projectExplorer.selectMultiFilesByCtrlKeys(
-        PROJECT_NAME + "/my-webapp/src/main/java/helloworld/AppController.java");
+    selectItemByCtrlKeys(PATH_FOR_EXPAND_SECOND_MODULE);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
@@ -245,11 +247,10 @@ public class CommitFilesByMultiSelectTest {
 
     // Perform the commit and add selected files
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/my-webapp/src/file.xml");
-    projectExplorer.selectMultiFilesByCtrlKeys(PROJECT_NAME + "/my-webapp/src/file.js");
-    projectExplorer.selectMultiFilesByCtrlKeys(
-        PROJECT_NAME + "/my-lib/src/test/java/hello/file.css");
-    projectExplorer.selectMultiFilesByCtrlKeys(
-        PROJECT_NAME + "/my-lib/src/test/java/hello/file.html");
+    projectExplorer.waitItemIsSelected(PROJECT_NAME + "/my-webapp/src/file.xml");
+    selectItemByCtrlKeys(PROJECT_NAME + "/my-webapp/src/file.js");
+    selectItemByCtrlKeys(PROJECT_NAME + "/my-lib/src/test/java/hello/file.css");
+    selectItemByCtrlKeys(PROJECT_NAME + "/my-lib/src/test/java/hello/file.html");
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);
     git.waitAndRunCommit(COMMIT_MESSAGE_2);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
@@ -284,5 +285,10 @@ public class CommitFilesByMultiSelectTest {
     git.waitGitCompareFormIsOpen();
     git.waitExpTextIntoCompareLeftEditor(expText);
     git.waitTextNotPresentIntoCompareRightEditor(expText);
+  }
+
+  private void selectItemByCtrlKeys(String pathToItem) {
+    projectExplorer.selectMultiFilesByCtrlKeys(pathToItem);
+    projectExplorer.waitItemIsSelected(pathToItem);
   }
 }

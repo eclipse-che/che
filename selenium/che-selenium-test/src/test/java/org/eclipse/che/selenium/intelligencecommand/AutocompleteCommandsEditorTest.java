@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SU
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.MAVEN_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorLocator.COMMAND_LINE_EDITOR;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorLocator.PREVIEW_URL_EDITOR;
 
@@ -97,7 +98,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.waitAutocompleteContainerIsClosed();
     commandsEditor.waitTextIntoEditor("${explorer.current.project.name");
     commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
+    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, PREPARING_WS_TIMEOUT_SEC);
     consoles.waitExpectedTextIntoConsole("maven");
     consoles.waitExpectedTextIntoConsole(PROJ_NAME);
   }
