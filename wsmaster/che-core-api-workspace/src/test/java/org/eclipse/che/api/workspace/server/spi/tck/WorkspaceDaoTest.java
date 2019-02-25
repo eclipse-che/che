@@ -203,7 +203,8 @@ public class WorkspaceDaoTest {
     final WorkspaceImpl workspace = workspaces[0];
 
     workspaceDao.remove(workspace.getId());
-    workspaceDao.get(workspace.getId());
+    WorkspaceImpl removedWorkspace = workspaceDao.get(workspace.getId());
+    assertEquals(removedWorkspace, workspace);
   }
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
