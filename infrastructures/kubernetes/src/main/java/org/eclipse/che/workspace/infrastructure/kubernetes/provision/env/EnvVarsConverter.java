@@ -69,7 +69,7 @@ public class EnvVarsConverter implements ConfigurationProvisioner {
         // in the container, if any
         container.getEnv().forEach(v -> envVars.putIfAbsent(v.getName(), v));
 
-        // The environment variable interpolation only works if a variable that is referenced
+        // The environment variable expansion only works if a variable that is referenced
         // is already defined earlier in the list of environment variables.
         // We need to produce a list where variables that reference others always appear later
         // in the list.
