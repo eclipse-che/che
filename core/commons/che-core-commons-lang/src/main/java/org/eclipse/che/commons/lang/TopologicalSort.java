@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.commons.lang;
 
+import static com.google.common.collect.Maps.newLinkedHashMapWithExpectedSize;
 import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public final class TopologicalSort<N, ID> {
   public List<N> sort(Collection<N> nodes) {
     // the linked hashmap is important to retain the original order of elements unless required
     // by the dependencies between nodes
-    LinkedHashMap<ID, NodeInfo<ID, N>> nodeInfos = new LinkedHashMap<>(nodes.size());
+    LinkedHashMap<ID, NodeInfo<ID, N>> nodeInfos = newLinkedHashMapWithExpectedSize(nodes.size());
     List<NodeInfo<ID, N>> results = new ArrayList<>(nodes.size());
 
     int pos = 0;
@@ -93,7 +94,7 @@ public final class TopologicalSort<N, ID> {
       ID nodeID = identityExtractor.apply(node);
       // we need the set to be modifiable, so let's make our own
       Set<ID> preds = new HashSet<>(directPredecessorsExtractor.apply(node));
-      needsSorting |= !preds.isEmpty();
+      needsSorting = needsSorting || !preds.isEmpty();
 
       NodeInfo<ID, N> nodeInfo = nodeInfos.computeIfAbsent(nodeID, __ -> new NodeInfo<>());
       nodeInfo.id = nodeID;
@@ -174,6 +175,11 @@ public final class TopologicalSort<N, ID> {
   }
 
   private void removePredecessorMapping(Map<ID, NodeInfo<ID, N>> nodes, NodeInfo<ID, N> node) {
+    forgetNodeInSuccessors(node, nodes);
+    nodes.remove(node.id);
+  }
+
+  private void forgetNodeInSuccessors(NodeInfo<ID, N> node, Map<ID, NodeInfo<ID, N>> nodes) {
     if (node.successors != null) {
       for (ID succ : node.successors) {
         NodeInfo<ID, N> succNode = nodes.get(succ);
@@ -182,7 +188,6 @@ public final class TopologicalSort<N, ID> {
         }
       }
     }
-    nodes.remove(node.id);
   }
 
   private List<NodeInfo<ID, N>> findCycle(NodeInfo<ID, N> node, Map<ID, NodeInfo<ID, N>> nodes) {
@@ -229,7 +234,7 @@ public final class TopologicalSort<N, ID> {
       if (e.getValue().predecessors.isEmpty()) {
         it.remove();
         NodeInfo<ID, N> ret = e.getValue();
-        removePredecessorMapping(nodes, ret);
+        forgetNodeInSuccessors(ret, nodes);
         return ret;
       }
     }
