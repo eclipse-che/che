@@ -12,7 +12,6 @@
 package org.eclipse.che.api.devfile.server;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -78,20 +77,18 @@ public class DevfileManagerTest {
   public void setUp() throws Exception {
     devfile = new Devfile();
 
-    lenient()
-        .when(schemaValidator.validateBySchema(any(), anyBoolean()))
-        .thenReturn(devfileJsonNode);
+    lenient().when(schemaValidator.validateBySchema(any())).thenReturn(devfileJsonNode);
     lenient().when(objectMapper.treeToValue(any(), eq(Devfile.class))).thenReturn(devfile);
   }
 
   @Test
   public void testValidateAndParse() throws Exception {
     // when
-    Devfile parsed = devfileManager.parse(DEVFILE_YAML_CONTENT, false);
+    Devfile parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
 
     // then
     assertEquals(parsed, devfile);
-    verify(schemaValidator).validateBySchema(DEVFILE_YAML_CONTENT, false);
+    verify(schemaValidator).validateBySchema(DEVFILE_YAML_CONTENT);
     verify(objectMapper).treeToValue(devfileJsonNode, Devfile.class);
     verify(integrityValidator).validateDevfile(devfile);
   }
@@ -108,7 +105,7 @@ public class DevfileManagerTest {
     devfile.getTools().add(tool);
 
     // when
-    Devfile parsed = devfileManager.parse(DEVFILE_YAML_CONTENT, false);
+    Devfile parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
 
     // then
     assertNotNull(parsed.getCommands().get(0).getAttributes());
@@ -121,12 +118,10 @@ public class DevfileManagerTest {
       expectedExceptionsMessageRegExp = "non valid")
   public void shouldThrowExceptionWhenExceptionOccurredDuringSchemaValidation() throws Exception {
     // given
-    doThrow(new DevfileFormatException("non valid"))
-        .when(schemaValidator)
-        .validateBySchema(any(), anyBoolean());
+    doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validateBySchema(any());
 
     // when
-    devfileManager.parse(DEVFILE_YAML_CONTENT, true);
+    devfileManager.parse(DEVFILE_YAML_CONTENT);
   }
 
   @Test(
@@ -139,7 +134,7 @@ public class DevfileManagerTest {
     doThrow(jsonException).when(objectMapper).treeToValue(any(), any());
 
     // when
-    devfileManager.parse(DEVFILE_YAML_CONTENT, true);
+    devfileManager.parse(DEVFILE_YAML_CONTENT);
   }
 
   @Test
