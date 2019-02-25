@@ -107,7 +107,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentPro
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
 import org.eclipse.che.commons.tracing.OptionalTracer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime.MachineLogsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -204,6 +203,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private SidecarToolingProvisioner<KubernetesEnvironment> toolingProvisioner;
   private KubernetesRuntimeStateCache runtimeStatesCache;
   private KubernetesMachineCache machinesCache;
+  private RuntimeEventsPublisher eventPublisher;
 
   @Captor private ArgumentCaptor<MachineStatusEvent> machineStatusEventCaptor;
 
@@ -236,6 +236,7 @@ public class KubernetesInternalRuntimeTest {
 
     runtimeStatesCache = new MapBasedRuntimeStateCache();
     machinesCache = new MapBasedMachinesCache();
+    eventPublisher = new RuntimeEventsPublisher(eventService);
 
     startSynchronizer = spy(new StartSynchronizer(eventService, 5, IDENTITY));
     when(startSynchronizerFactory.create(any())).thenReturn(startSynchronizer);
@@ -251,7 +252,7 @@ public class KubernetesInternalRuntimeTest {
             volumesStrategy,
             probesScheduler,
             workspaceProbesFactory,
-            new RuntimeEventsPublisher(eventService),
+            eventPublisher,
             new KubernetesSharedPool(),
             runtimeStatesCache,
             machinesCache,
@@ -652,7 +653,8 @@ public class KubernetesInternalRuntimeTest {
 
   @Test
   public void testRepublishContainerOutputAsMachineLogEvents() throws Exception {
-    final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
+    final MachineLogsPublisher logsPublisher =
+        new MachineLogsPublisher(eventPublisher, machinesCache, IDENTITY);
     final PodEvent out1 =
         mockContainerEventWithoutRandomName(
             WORKSPACE_POD_NAME,
@@ -682,7 +684,8 @@ public class KubernetesInternalRuntimeTest {
 
   @Test
   public void testDoNotPublishForeignMachineOutput() throws ParseException {
-    final MachineLogsPublisher logsPublisher = internalRuntime.new MachineLogsPublisher();
+    final MachineLogsPublisher logsPublisher =
+        new MachineLogsPublisher(eventPublisher, machinesCache, IDENTITY);
     final PodEvent out1 =
         mockContainerEvent(
             WORKSPACE_POD_NAME,
@@ -1083,7 +1086,7 @@ public class KubernetesInternalRuntimeTest {
         .withMachineName(event.getPodName() + '/' + event.getContainerName());
   }
 
-  private String getCurrentTimestampWithOneHourShiftAhead() throws ParseException {
+  private String getCurrentTimestampWithOneHourShiftAhead() {
     Date currentTimestampWithOneHourShiftAhead = new Date(new Date().getTime() + 3600 * 1000);
     return PodEvents.convertDateToEventTimestamp(currentTimestampWithOneHourShiftAhead);
   }
@@ -1096,25 +1099,23 @@ public class KubernetesInternalRuntimeTest {
     private Map<RuntimeIdentity, KubernetesRuntimeState> runtimesStates = new HashMap<>();
 
     @Override
-    public Set<RuntimeIdentity> getIdentities() throws InfrastructureException {
+    public Set<RuntimeIdentity> getIdentities() {
       return new HashSet<>(runtimesStates.keySet());
     }
 
     @Override
-    public boolean putIfAbsent(KubernetesRuntimeState state) throws InfrastructureException {
+    public boolean putIfAbsent(KubernetesRuntimeState state) {
       return runtimesStates.putIfAbsent(state.getRuntimeId(), state) == null;
     }
 
     @Override
-    public void updateStatus(RuntimeIdentity runtimeId, WorkspaceStatus newStatus)
-        throws InfrastructureException {
+    public void updateStatus(RuntimeIdentity runtimeId, WorkspaceStatus newStatus) {
       runtimesStates.get(new RuntimeIdentityImpl(runtimeId)).setStatus(newStatus);
     }
 
     @Override
     public boolean updateStatus(
-        RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus)
-        throws InfrastructureException {
+        RuntimeIdentity identity, Predicate<WorkspaceStatus> predicate, WorkspaceStatus newStatus) {
       KubernetesRuntimeState state = runtimesStates.get(new RuntimeIdentityImpl(identity));
       if (predicate.test(state.getStatus())) {
         state.setStatus(newStatus);
@@ -1135,8 +1136,7 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public Optional<WorkspaceStatus> getStatus(RuntimeIdentity runtimeId)
-        throws InfrastructureException {
+    public Optional<WorkspaceStatus> getStatus(RuntimeIdentity runtimeId) {
       KubernetesRuntimeState runtimeState = runtimesStates.get(runtimeId);
       if (runtimeState == null) {
         return Optional.empty();
@@ -1145,8 +1145,7 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public List<? extends Command> getCommands(RuntimeIdentity runtimeId)
-        throws InfrastructureException {
+    public List<? extends Command> getCommands(RuntimeIdentity runtimeId) {
       KubernetesRuntimeState runtimeState = runtimesStates.get(runtimeId);
       if (runtimeState == null) {
         return emptyList();
@@ -1155,13 +1154,12 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId)
-        throws InfrastructureException {
+    public Optional<KubernetesRuntimeState> get(RuntimeIdentity runtimeId) {
       return Optional.ofNullable(runtimesStates.get(new RuntimeIdentityImpl(runtimeId)));
     }
 
     @Override
-    public void remove(RuntimeIdentity runtimeId) throws InfrastructureException {
+    public void remove(RuntimeIdentity runtimeId) {
       runtimesStates.remove(new RuntimeIdentityImpl(runtimeId));
     }
   }
@@ -1179,8 +1177,7 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public void put(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine)
-        throws InfrastructureException {
+    public void put(RuntimeIdentity runtimeIdentity, KubernetesMachineImpl machine) {
       machines.put(machineIdOf(runtimeIdentity, machine), machine);
     }
 
@@ -1189,8 +1186,7 @@ public class KubernetesInternalRuntimeTest {
         RuntimeIdentity runtimeIdentity,
         String machineName,
         String serverName,
-        ServerStatus newStatus)
-        throws InfrastructureException {
+        ServerStatus newStatus) {
       KubernetesServerImpl server =
           machines.get(machineIdOf(runtimeIdentity, machineName)).getServers().get(serverName);
 
@@ -1204,21 +1200,18 @@ public class KubernetesInternalRuntimeTest {
 
     @Override
     public KubernetesServerImpl getServer(
-        RuntimeIdentity runtimeIdentity, String machineName, String serverName)
-        throws InfrastructureException {
+        RuntimeIdentity runtimeIdentity, String machineName, String serverName) {
       return machines.get(machineIdOf(runtimeIdentity, machineName)).getServers().get(serverName);
     }
 
     @Override
     public void updateMachineStatus(
-        RuntimeIdentity runtimeIdentity, String machineName, MachineStatus newStatus)
-        throws InfrastructureException {
+        RuntimeIdentity runtimeIdentity, String machineName, MachineStatus newStatus) {
       machines.get(machineIdOf(runtimeIdentity, machineName)).setStatus(newStatus);
     }
 
     @Override
-    public Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity)
-        throws InfrastructureException {
+    public Map<String, KubernetesMachineImpl> getMachines(RuntimeIdentity runtimeIdentity) {
       return machines
           .entrySet()
           .stream()
@@ -1227,7 +1220,7 @@ public class KubernetesInternalRuntimeTest {
     }
 
     @Override
-    public void remove(RuntimeIdentity identity) throws InfrastructureException {
+    public void remove(RuntimeIdentity identity) {
       machines.keySet().removeIf(id -> id.getWorkspaceId().equals(identity.getWorkspaceId()));
     }
   }
