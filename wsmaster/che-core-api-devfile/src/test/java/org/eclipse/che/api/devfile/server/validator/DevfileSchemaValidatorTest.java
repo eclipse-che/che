@@ -124,11 +124,11 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "kubernetes_openshift_tool/devfile_openshift_tool_content_without_local.yaml",
-        "Devfile schema validation failed. Errors: \\[property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\), instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+        "Devfile schema validation failed. Errors: \\[/devfile/tools/0 property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\),instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\",\"memoryLimit\"\\]\\)\\]"
       },
       {
         "kubernetes_openshift_tool/devfile_kubernetes_tool_content_without_local.yaml",
-        "Devfile schema validation failed. Errors: \\[property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\), instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+        "Devfile schema validation failed. Errors: \\[/devfile/tools/0 property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\),instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\",\"memoryLimit\"\\]\\)\\]"
       },
       // Dockerimage tool model testing
       {
