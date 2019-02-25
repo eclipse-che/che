@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
@@ -27,12 +28,12 @@ public class DevfileSchemaValidatorTest {
   private DevfileSchemaValidator schemaValidator;
 
   @BeforeClass
-  public void setUp() throws Exception {
+  public void setUp() {
     schemaValidator = new DevfileSchemaValidator(new DevfileSchemaProvider());
   }
 
   @Test(dataProvider = "validDevfiles")
-  public void shouldDoNotThrowExceptionOnValidationValidDevfile(String resourceFilePath)
+  public void shouldNotThrowExceptionOnValidationValidDevfile(String resourceFilePath)
       throws Exception {
     schemaValidator.validateBySchema(getResource(resourceFilePath), false);
   }
@@ -41,7 +42,11 @@ public class DevfileSchemaValidatorTest {
   public Object[][] validDevfiles() {
     return new Object[][] {
       {"editor_plugin_tool/devfile_editor_plugins.yaml"},
+      {"kubernetes_openshift_tool/devfile_kubernetes_tool_local.yaml"},
+      {"kubernetes_openshift_tool/devfile_kubernetes_tool_local_and_content_as_block.yaml"},
       {"kubernetes_openshift_tool/devfile_openshift_tool.yaml"},
+      {"kubernetes_openshift_tool/devfile_openshift_tool_local_and_content.yaml"},
+      {"kubernetes_openshift_tool/devfile_openshift_tool_local_and_content_as_block.yaml"},
       {"dockerimage_tool/devfile_dockerimage_tool.yaml"}
     };
   }
@@ -53,7 +58,12 @@ public class DevfileSchemaValidatorTest {
       schemaValidator.validateBySchema(getResource(resourceFilePath), false);
     } catch (DevfileFormatException e) {
       if (!Pattern.matches(expectedMessageRegexp, e.getMessage())) {
-        fail("DevfileFormatException with unexpected message is thrown: " + e.getMessage());
+        // we don't need assertion here,
+        // but we use that to show the difference to simplify tests fixes
+        assertEquals(
+            e.getMessage(),
+            expectedMessageRegexp,
+            "DevfileFormatException thrown with message that doesn't match expected pattern:");
       }
       return;
     }
@@ -111,6 +121,14 @@ public class DevfileSchemaValidatorTest {
       {
         "kubernetes_openshift_tool/devfile_openshift_tool_with_missing_local.yaml",
         "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+      },
+      {
+        "kubernetes_openshift_tool/devfile_openshift_tool_content_without_local.yaml",
+        "Devfile schema validation failed. Errors: \\[property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\), instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+      },
+      {
+        "kubernetes_openshift_tool/devfile_kubernetes_tool_content_without_local.yaml",
+        "Devfile schema validation failed. Errors: \\[property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\), instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
       },
       // Dockerimage tool model testing
       {
