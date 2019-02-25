@@ -40,6 +40,7 @@ import org.testng.annotations.Test;
 @Test(groups = TestGroup.GITHUB)
 public class GitChangeMarkersTest {
   private static final String PROJECT_NAME = NameGenerator.generate("GitColors_", 4);
+  private static final String PATH_TO_JAVA_FILE = "/src/com/company/Main.java";
 
   @Inject private TestWorkspace ws;
   @Inject private Ide ide;
@@ -80,8 +81,7 @@ public class GitChangeMarkersTest {
   @Test
   public void testModificationMarker() {
     projectExplorer.waitProjectExplorer();
-    projectExplorer.openItemByPath(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + PATH_TO_JAVA_FILE);
     menu.runCommand(GIT, INITIALIZE_REPOSITORY);
     askDialog.waitFormToOpen();
     askDialog.clickOkBtn();
@@ -96,7 +96,7 @@ public class GitChangeMarkersTest {
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
 
-    projectExplorer.openItemByPath(PROJECT_NAME + "/src/com/company/Main.java");
+    projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_JAVA_FILE);
     editor.waitActive();
     editor.waitNoGitChangeMarkers();
     editor.typeTextIntoEditor("//", 12);

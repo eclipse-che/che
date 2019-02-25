@@ -24,6 +24,8 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.CodenvyEditor;
+import org.eclipse.che.selenium.pageobject.Consoles;
+import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
@@ -51,8 +53,6 @@ public class AddOrImportProjectFormTest {
   private static final String SPRING_SAMPLE_NAME = "web-java-spring";
   private static final String EXPECTED_SPRING_REPOSITORY_URL =
       "https://github.com/che-samples/web-java-spring.git";
-  private static final String CHE_SAMPLE_NAME = "che-in-che";
-  private static final String EXPECTED_CHE_REPOSITORY_URL = "https://github.com/eclipse/che";
   private static final String CONSOLE_SAMPLE_NAME = "console-java-simple";
   private static final String RENAMED_CONSOLE_SAMPLE_NAME = "java-console-test";
   private static final String EXPECTED_CONSOLE_REPOSITORY_URL =
@@ -95,6 +95,10 @@ public class AddOrImportProjectFormTest {
           + "   }\n"
           + "}\n";
 
+  private static final String PATH_TO_JAVA_FILE =
+      "/src/main/java/org/eclipse/che/examples/GreetingController.java";
+
+  @Inject private Ide ide;
   @Inject private Dashboard dashboard;
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private Workspaces workspaces;
@@ -109,6 +113,7 @@ public class AddOrImportProjectFormTest {
   @Inject private ProjectOptions projectOptions;
   @Inject private AddOrImportForm addOrImportForm;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
+  @Inject private Consoles consoles;
 
   // it is used to read workspace logs on test failure
   private TestWorkspace testWorkspace;
@@ -444,14 +449,15 @@ public class AddOrImportProjectFormTest {
     prepareJavaWorkspace(TEST_JAVA_WORKSPACE_NAME_EDIT);
     newWorkspace.clickOnTopCreateButton();
 
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     testWorkspaceServiceClient.waitStatus(
         TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName(), RUNNING);
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
-    projectExplorer.waitProjectExplorer();
+    ide.waitOpenedWorkspaceIsReadyToUse();
+    consoles.waitJDTLSProjectResolveFinishedMessage(SPRING_SAMPLE_NAME);
     projectExplorer.waitItem(SPRING_SAMPLE_NAME);
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        SPRING_SAMPLE_NAME + "/src/main/java/org.eclipse.che.examples", "GreetingController.java");
+    projectExplorer.quickRevealToItemWithJavaScript(SPRING_SAMPLE_NAME + PATH_TO_JAVA_FILE);
+    projectExplorer.openItemByPath(SPRING_SAMPLE_NAME + PATH_TO_JAVA_FILE);
     editor.waitActive();
     editor.waitTextIntoEditor(EXPECTED_TEXT_IN_EDITOR);
   }
