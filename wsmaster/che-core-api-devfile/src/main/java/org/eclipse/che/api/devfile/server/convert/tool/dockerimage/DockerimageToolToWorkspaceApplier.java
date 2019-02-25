@@ -15,12 +15,15 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CONTAINER_ARGS_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CONTAINER_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
+import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.devfile.model.Endpoint;
@@ -35,6 +38,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
 /**
@@ -45,11 +49,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier {
 
   private final String projectFolderPath;
+  private final EntryPointParser entryPointParser;
 
   @Inject
   public DockerimageToolToWorkspaceApplier(
-      @Named("che.workspace.projects.storage") String projectFolderPath) {
+      @Named("che.workspace.projects.storage") String projectFolderPath,
+      EntryPointParser entryPointParser) {
     this.projectFolderPath = projectFolderPath;
+    this.entryPointParser = entryPointParser;
   }
 
   /**
@@ -116,6 +123,10 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
             MEMORY_LIMIT_ATTRIBUTE,
             Long.toString(KubernetesSize.toBytes(dockerimageTool.getMemoryLimit())));
 
+    setEntryPointAttribute(
+        machineConfig, CONTAINER_COMMAND_ATTRIBUTE, dockerimageTool.getCommand());
+    setEntryPointAttribute(machineConfig, CONTAINER_ARGS_ATTRIBUTE, dockerimageTool.getArgs());
+
     RecipeImpl recipe =
         new RecipeImpl(DockerImageEnvironment.TYPE, null, dockerimageTool.getImage(), null);
     EnvironmentImpl environment =
@@ -132,5 +143,17 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
                     .getName()
                     .equals(c.getAttributes().get(Constants.TOOL_NAME_COMMAND_ATTRIBUTE)))
         .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+  }
+
+  private void setEntryPointAttribute(
+      MachineConfigImpl machineConfig, String attributeName, List<String> attributeValue) {
+
+    if (attributeValue == null) {
+      return;
+    }
+
+    String val = entryPointParser.serializeEntry(attributeValue);
+
+    machineConfig.getAttributes().put(attributeName, val);
   }
 }

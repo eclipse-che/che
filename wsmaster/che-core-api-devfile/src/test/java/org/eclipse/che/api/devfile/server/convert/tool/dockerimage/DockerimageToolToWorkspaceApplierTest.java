@@ -13,13 +13,19 @@ package org.eclipse.che.api.devfile.server.convert.tool.dockerimage;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CONTAINER_ARGS_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CONTAINER_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.model.Env;
@@ -31,11 +37,16 @@ import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
+@Listeners(MockitoTestNGListener.class)
 public class DockerimageToolToWorkspaceApplierTest {
 
   private static final String PROJECTS_MOUNT_PATH = "/projects";
@@ -44,9 +55,12 @@ public class DockerimageToolToWorkspaceApplierTest {
 
   private DockerimageToolToWorkspaceApplier dockerimageToolApplier;
 
+  @Mock private EntryPointParser entryPointParser;
+
   @BeforeMethod
-  public void setUp() {
-    dockerimageToolApplier = new DockerimageToolToWorkspaceApplier(PROJECTS_MOUNT_PATH);
+  public void setUp() throws Exception {
+    dockerimageToolApplier =
+        new DockerimageToolToWorkspaceApplier(PROJECTS_MOUNT_PATH, entryPointParser);
     workspaceConfig = new WorkspaceConfigImpl();
   }
 
@@ -242,6 +256,38 @@ public class DockerimageToolToWorkspaceApplierTest {
     // then
     MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
     Assert.assertFalse(machineConfig.getVolumes().containsKey(PROJECTS_VOLUME_NAME));
+  }
+
+  @Test
+  public void shouldProvisionCommandAndArgs() throws Exception {
+    // given
+    List<String> command = singletonList("/usr/bin/rf");
+    List<String> args = Arrays.asList("-r", "f");
+
+    String serializedCommand = command.toString();
+    String serializedArgs = args.toString();
+
+    doReturn(serializedCommand).when(entryPointParser).serializeEntry(eq(command));
+    doReturn(serializedArgs).when(entryPointParser).serializeEntry(eq(args));
+
+    Tool dockerimageTool =
+        new Tool()
+            .withName("jdk")
+            .withType(DOCKERIMAGE_TOOL_TYPE)
+            .withImage("eclipse/ubuntu_jdk8:latest")
+            .withMemoryLimit("1G")
+            .withCommand(command)
+            .withArgs(args);
+
+    // when
+    dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
+
+    // then
+    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
+    Assert.assertEquals(
+        machineConfig.getAttributes().get(CONTAINER_COMMAND_ATTRIBUTE), serializedCommand);
+    Assert.assertEquals(
+        machineConfig.getAttributes().get(CONTAINER_ARGS_ATTRIBUTE), serializedArgs);
   }
 
   private MachineConfigImpl getMachineConfig(

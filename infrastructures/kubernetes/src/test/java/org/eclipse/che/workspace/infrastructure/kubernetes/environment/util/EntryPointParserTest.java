@@ -16,6 +16,7 @@ import static java.util.Collections.emptyList;
 import static org.testng.AssertJUnit.assertEquals;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -82,5 +83,22 @@ public class EntryPointParserTest {
       new String[] {"string value"},
       new String[] {"[a, b, [c]]"}
     };
+  }
+
+  @Test
+  public void shouldSerializeValidData() {
+    // given
+    List<String> data = asList("/bin/sh", "-c");
+
+    EntryPointParser parser = new EntryPointParser();
+
+    // when
+    String serialized = parser.serializeEntry(data);
+
+    // then
+
+    // this is dependent on the configuration of the YAML generator used by the YAMLMapper used in
+    // the EntryPointParser so this may start failing on jackson-dataformat-yaml library upgrade
+    assertEquals(serialized, "---\n- \"/bin/sh\"\n- \"-c\"\n");
   }
 }

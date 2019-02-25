@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+import javax.inject.Inject;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.model.Env;
@@ -34,7 +36,10 @@ import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPoint;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
 
 /**
  * Provision dockerimage tool in {@link Devfile} according to the value of environment with
@@ -43,6 +48,13 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.D
  * @author Sergii Leshchenko
  */
 public class DockerimageToolProvisioner implements ToolProvisioner {
+
+  private final EntryPointParser entryPointParser;
+
+  @Inject
+  public DockerimageToolProvisioner(EntryPointParser entryPointParser) {
+    this.entryPointParser = entryPointParser;
+  }
 
   /**
    * Provision dockerimage tool in {@link Devfile} according to the value of environment with
@@ -118,6 +130,10 @@ public class DockerimageToolProvisioner implements ToolProvisioner {
 
     dockerimageTool.setMemoryLimit(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE));
 
+    EntryPoint ep = toEntryPoint(machineConfig);
+    dockerimageTool.setCommand(ep.getCommand());
+    dockerimageTool.setArgs(ep.getArguments());
+
     machineConfig
         .getEnv()
         .entrySet()
@@ -126,6 +142,14 @@ public class DockerimageToolProvisioner implements ToolProvisioner {
         .forEach(e -> dockerimageTool.getEnv().add(e));
 
     devfile.getTools().add(dockerimageTool);
+  }
+
+  private EntryPoint toEntryPoint(MachineConfig machineConfig) throws WorkspaceExportException {
+    try {
+      return entryPointParser.parse(machineConfig.getAttributes());
+    } catch (InfrastructureException e) {
+      throw new WorkspaceExportException(e.getMessage());
+    }
   }
 
   private Volume toDevfileVolume(String name, VolumeImpl volume) {

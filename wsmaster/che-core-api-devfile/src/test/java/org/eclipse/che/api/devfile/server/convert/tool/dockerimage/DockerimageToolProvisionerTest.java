@@ -11,10 +11,13 @@
  */
 package org.eclipse.che.api.devfile.server.convert.tool.dockerimage;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -36,17 +39,26 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPoint;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
+@Listeners(MockitoTestNGListener.class)
 public class DockerimageToolProvisionerTest {
 
   private DockerimageToolProvisioner dockerimageToolProvisioner;
 
+  @Mock private EntryPointParser entryPointParser;
+
   @BeforeMethod
-  public void setUp() {
-    dockerimageToolProvisioner = new DockerimageToolProvisioner();
+  public void setUp() throws Exception {
+    dockerimageToolProvisioner = new DockerimageToolProvisioner(entryPointParser);
+    when(entryPointParser.parse(any())).thenReturn(new EntryPoint(emptyList(), emptyList()));
   }
 
   @Test(
@@ -335,5 +347,34 @@ public class DockerimageToolProvisionerTest {
     assertEquals(devfile.getTools().size(), 1);
     Tool dockerimageTool = devfile.getTools().get(0);
     assertEquals(dockerimageTool.getMemoryLimit(), "1G");
+  }
+
+  @Test
+  public void shouldIncludeEntrypointPropertiesWhenSpecifiedInTheEnvironment() throws Exception {
+    // given
+    EnvironmentImpl dockerEnv = new EnvironmentImpl();
+    dockerEnv.setRecipe(new RecipeImpl("dockerimage", null, "eclipse/ubuntu_jdk8:latest", null));
+    dockerEnv
+        .getMachines()
+        .put(
+            "myMachine",
+            new MachineConfigImpl(emptyList(), emptyMap(), emptyMap(), emptyMap(), emptyMap()));
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    workspaceConfig.getEnvironments().put("dockerEnv", dockerEnv);
+
+    when(entryPointParser.parse(any()))
+        .thenReturn(new EntryPoint(asList("/bin/sh", "-c"), asList("echo", "hi")));
+
+    Devfile devfile = new Devfile();
+
+    // when
+
+    dockerimageToolProvisioner.provision(devfile, workspaceConfig);
+
+    // then
+    assertEquals(devfile.getTools().size(), 1);
+    Tool tool = devfile.getTools().get(0);
+    assertEquals(tool.getCommand(), asList("/bin/sh", "-c"));
+    assertEquals(tool.getArgs(), asList("echo", "hi"));
   }
 }
