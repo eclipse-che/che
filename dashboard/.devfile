@@ -1,0 +1,45 @@
+specVersion: 0.0.1
+name: dashboard-in-che
+projects:
+  - name: che
+    source:
+      type: git
+      location: 'https://github.com/eclipse/che.git'
+tools:
+  - name: theia-editor
+    type: cheEditor
+    id: org.eclipse.che.editor.theia:master
+  - name: exec-plugin
+    type: chePlugin
+    id: che-machine-exec-plugin:0.0.1
+  - name: dash-dev
+    type: dockerimage
+    image: 'eclipse/che-dashboard-dev:nightly'
+    endpoints:
+      - name: dashboard-dev-server
+        port: 3000
+        attributes:
+          path: /
+          protocol: http
+          public: "true"
+    mountSources: true
+    memoryLimit: 3Gi
+commands:
+  - name: dashboard_build
+    actions:
+      - type: exec
+        tool: dash-dev
+        command: cd /projects/che/dashboard && yarn
+        workdir: /projects/che/dashboard
+  - name: dashboard_test
+    actions:
+      - type: exec
+        tool: dash-dev
+        command: cd /projects/che/dashboard && yarn test
+        workdir: /projects/che/dashboard
+  - name: dashboard_dev_server
+    actions:
+      - type: exec
+        tool: dash-dev
+        command: cd /projects/che/dashboard && node_modules/.bin/gulp serve --server=${CHE_API_EXTERNAL%????}
+        workdir: /projects/che/dashboard
