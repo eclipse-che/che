@@ -359,7 +359,7 @@ checkDockerComposeRequirements() {
 checkIfProductIsRun() {
     local url=${PRODUCT_PROTOCOL}"://"${PRODUCT_HOST}:${PRODUCT_PORT}${API_SUFFIX};
 
-    curl -s -X OPTIONS ${url} > /dev/null
+    curl -s -k -X OPTIONS ${url} > /dev/null
     if [[ $? != 0 ]]; then
         echo "[TEST] "${url}" is down"
         exit 1
