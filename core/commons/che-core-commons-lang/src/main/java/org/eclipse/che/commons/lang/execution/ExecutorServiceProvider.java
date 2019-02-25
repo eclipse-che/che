@@ -69,7 +69,7 @@ public class ExecutorServiceProvider implements Provider<ExecutorService> {
             queueCapacity > 0 ? new LinkedBlockingQueue<>(queueCapacity) : new SynchronousQueue<>(),
             factory);
     executor.setRejectedExecutionHandler(
-        (r, __) -> LOG.error("Executor rejected to handle the message {}", r));
+        (r, __) -> LOG.error("Executor rejected to handle the payload {}", r));
     executor.prestartCoreThread();
   }
 
