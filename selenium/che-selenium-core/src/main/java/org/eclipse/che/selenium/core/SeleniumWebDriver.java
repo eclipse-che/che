@@ -249,6 +249,7 @@ public class SeleniumWebDriver
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--no-sandbox");
         options.addArguments("--dns-prefetch-disable");
+        options.addArguments("--ignore-certificate-errors");
 
         // set parameters required for automatic download capability
         Map<String, Object> chromePrefs = new HashMap<>();

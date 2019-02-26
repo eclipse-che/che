@@ -43,6 +43,9 @@ public class CheckMavenPluginTest {
       PROJECT_NAME + "/my-lib/External Libraries";
   private static final String PATH_TO_EXTERNAL_LIBRARIES_IN_MODULE_2 =
       PROJECT_NAME + "/my-webapp/External Libraries";
+  private static final String PATH_TO_HELLO_PACKAGE = PROJECT_NAME + "/my-lib/src/main/java/hello";
+  private static final String PATH_TO_JAVA_FILE =
+      PROJECT_NAME + "/my-webapp/src/main/java/che/eclipse/sample/Aclass.java";
 
   @Inject private TestWorkspace workspace;
   @Inject private Ide ide;
@@ -70,10 +73,10 @@ public class CheckMavenPluginTest {
 
   @Test
   public void shouldAccessClassCreatedInAnotherModule() {
-    projectExplorer.expandPathInProjectExplorer(PROJECT_NAME + "/my-lib/src/main/java/hello");
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_HELLO_PACKAGE);
     createNewFileFromMenuFile("TestClass", CLASS, ".java");
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(
-        PROJECT_NAME + "/my-webapp/src/main/java/che.eclipse.sample", "Aclass.java");
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JAVA_FILE);
+    projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     editor.waitActive();
 
     editor.setCursorToLine(15);
@@ -138,6 +141,7 @@ public class CheckMavenPluginTest {
    */
   private void createNewFileFromMenuFile(
       String name, AskForValueDialog.JavaFiles item, String fileExt) {
+    projectExplorer.waitAndSelectItem(PATH_TO_HELLO_PACKAGE);
     menu.runCommand(PROJECT, NEW, JAVA_CLASS);
     loader.waitOnClosed();
     askDialog.createJavaFileByNameAndType(name, item);

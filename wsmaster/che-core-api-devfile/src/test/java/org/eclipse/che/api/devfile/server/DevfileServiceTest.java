@@ -16,7 +16,6 @@ import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -88,7 +87,7 @@ public class DevfileServiceTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
     Devfile devfile = createDevfile(yamlContent);
     WorkspaceImpl ws = createWorkspace(WorkspaceStatus.STOPPED);
-    when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
+    when(devfileManager.parse(anyString())).thenReturn(devfile);
     when(devfileManager.createWorkspace(any(Devfile.class), any())).thenReturn(ws);
     final Response response =
         given()

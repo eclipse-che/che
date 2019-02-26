@@ -15,9 +15,9 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.CREATE_PROJECT;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Workspace.WORKSPACE;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.EXPECTED_MESS_IN_CONSOLE_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOADER_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.LOAD_PAGE_TIMEOUT_SEC;
-import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.Wizard.SamplesName.WEB_JAVA_SPRING;
 import static org.openqa.selenium.support.ui.ExpectedConditions.visibilityOfElementLocated;
 
@@ -205,11 +205,10 @@ public class CheckIntelligenceCommandFromToolbarTest {
 
   protected void clickAndLaunchCommandInCommandsToolbar() {
     commandsToolbar.clickWithHoldAndLaunchCommandFromList(PROJECT_NAME + ": build and run");
-    waitExpectedTextIntoConsole();
   }
 
   protected void waitExpectedTextIntoConsole() {
-    consoles.waitExpectedTextIntoConsole(" Server startup in", WIDGET_TIMEOUT_SEC);
+    consoles.waitExpectedTextIntoConsole(" Server startup in", EXPECTED_MESS_IN_CONSOLE_SEC);
   }
 
   protected void selectProcessByTabName() {

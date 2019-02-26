@@ -13,19 +13,24 @@
 
 set -e
 
-TMP_DIR="/tmp/devfile"
+check_github_token_is_set() {
+  if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
+    echo "GitHub token not found."
+    echo "Specify env var DEVFILE_DOCS_GITHUB_TOKEN or use --no-deploy argument if you do not want to push Docs automatically"
+    echo "Exiting now..."
+    exit 1
+  else
+    GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
+  fi
+}
 
-if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
-  echo "GitHub token not found, exiting now..."
-  exit 1
-else
-  GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
-fi
-
-
-DEFAULT_COMMIT_MESSAGE="Update devfile docs"
-DEFAULT_BUILD_DOCKER=false
-DEFAULT_DEPLOY=true
+build() {
+  if [[ "$IS_DOCKER" == "true" ]]; then
+    build_with_docker
+  else
+    build_native
+  fi
+}
 
 build_with_docker() {
     echo "Building docs using docker."
@@ -37,14 +42,13 @@ build_with_docker() {
     echo "Building docs done."
 }
 
-
 build_native() {
    echo "Building docs using native way."
    check_packages git npm
    mkdir -p ${TMP_DIR}/schema
    cp -f schema/* ${TMP_DIR}/schema
    cd ${TMP_DIR}
-   git clone -b '1.1.0' --single-branch git@github.com:adobe/jsonschema2md.git
+   git clone -b '1.1.0' --single-branch https://github.com/adobe/jsonschema2md.git
    cd jsonschema2md
    npm install
    npm link
@@ -79,16 +83,17 @@ check_packages() {
    done
 }
 
-cleanup() {
+cleanupTmpDir() {
    rm -rf ${TMP_DIR}
 }
 
 print_help() {
    echo "This script builds and deploys documentation in markdown format from devfile json schema."
    echo "Command line options:"
-   echo "--docker     Build docs in docker container"
-   echo "--no-deploy  Skip deploy result to remote"
-   echo "--message    Override default commit message"
+   echo "--docker      Build docs in docker container"
+   echo "--no-deploy   Skip deploy result to remote"
+   echo "--message     Override default commit message. Example: --message=\"Update Devfile Docs\""
+   echo "--folder|-f   If specified then script will save docs files in the specified folder. Examples: -f=.|-f=/home/user"
 }
 
 parse_args() {
@@ -103,33 +108,66 @@ parse_args() {
                IS_DEPLOY=false
                shift
            ;;
-           --message)
+           --message=*)
                MESSAGE="${i#*=}"
+               shift
+           ;;
+           -f=*| --folder=*)
+               FOLDER="${i#*=}"
                shift
            ;;
             -help|--help)
                print_help
                exit 0
-           ;;
-         esac
+               ;;
+            *)
+                echo "You've passed wrong arg '$key'."
+                echo -e "$HELP"
+                exit 1
+                ;;
+        esac
      done
 }
 
-cleanup
-parse_args "$@"
+copyDocs() {
+  cd $RUN_DIR
+  cp -r ${TMP_DIR}/docs/. -t ${FOLDER}
+  echo "Docs is saved as ${FOLDER}/index.md"
+}
 
+RUN_DIR=$(pwd)
+TMP_DIR="/tmp/devfile"
+
+DEFAULT_COMMIT_MESSAGE="Update devfile docs"
 COMMIT_MESSAGE=${MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
+
+DEFAULT_BUILD_DOCKER=false
 IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
+
+DEFAULT_DEPLOY=true
 IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
 
-if [[ "$IS_DOCKER" == "true" ]];
-then
-    build_with_docker
-else
-    build_native
+DEFAULT_DO_CLEANUP=true
+DO_CLEANUP=${DO_CLEANUP:-${DEFAULT_DO_CLEANUP}}
+
+parse_args "$@"
+
+if [[ "$IS_DEPLOY" == "true" ]]; then
+  check_github_token_is_set
 fi
+
+cleanupTmpDir
+
+build
+
 if [[ "$IS_DEPLOY" == "true" ]]; then
     deploy
 fi
-cleanup
+
+if [[ "$FOLDER" ]]; then
+    copyDocs
+fi
+
+echo "Working Dir where script results can be found is ${TMP_DIR}"
+
 exit 0

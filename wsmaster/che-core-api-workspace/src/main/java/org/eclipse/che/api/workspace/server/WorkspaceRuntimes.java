@@ -87,6 +87,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.core.db.DBInitializer;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
@@ -312,6 +313,8 @@ public class WorkspaceRuntimes {
   public CompletableFuture<Void> startAsync(
       Workspace workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
+    TracingTags.WORKSPACE_ID.set(workspace.getId());
+    TracingTags.STACK_ID.set(() -> workspace.getAttributes().getOrDefault("stackId", "no stack"));
 
     final String workspaceId = workspace.getId();
     // Sidecar-based workspaces allowed not to have environments
@@ -449,6 +452,10 @@ public class WorkspaceRuntimes {
   @Traced
   public CompletableFuture<Void> stopAsync(Workspace workspace, Map<String, String> options)
       throws NotFoundException, ConflictException {
+    TracingTags.WORKSPACE_ID.set(workspace.getId());
+    TracingTags.STOPPED_BY.set(getStoppedBy(workspace));
+    TracingTags.STACK_ID.set(() -> workspace.getAttributes().getOrDefault("stackId", "no stack"));
+
     String workspaceId = workspace.getId();
     WorkspaceStatus status = statuses.get(workspaceId);
     if (status == null) {
@@ -480,6 +487,11 @@ public class WorkspaceRuntimes {
     return CompletableFuture.runAsync(
         ThreadLocalPropagateContext.wrap(new StopRuntimeTask(workspace, options, stoppedBy)),
         sharedPool.getExecutor());
+  }
+
+  private String getStoppedBy(Workspace workspace) {
+    return firstNonNull(
+        sessionUserIdOr(workspace.getAttributes().get(WORKSPACE_STOPPED_BY)), "undefined");
   }
 
   private class StopRuntimeTask implements Runnable {
@@ -865,6 +877,14 @@ public class WorkspaceRuntimes {
     final Subject subject = EnvironmentContext.getCurrent().getSubject();
     if (!subject.isAnonymous()) {
       return subject.getUserName();
+    }
+    return nameIfNoUser;
+  }
+
+  private String sessionUserIdOr(String nameIfNoUser) {
+    final Subject subject = EnvironmentContext.getCurrent().getSubject();
+    if (!subject.isAnonymous()) {
+      return subject.getUserId();
     }
     return nameIfNoUser;
   }

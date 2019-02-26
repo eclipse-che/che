@@ -44,6 +44,7 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
+import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.keycloak.shared.KeycloakConstants;
@@ -71,6 +72,7 @@ public class KeycloakEnvironmentInitalizationFilterTest {
   @Mock private ServletOutputStream servletOutputStream;
   @Mock private HttpSession session;
   @Mock private JwtParser jwtParser;
+  @Mock private OptionalTracer optionalTracer;
 
   private KeycloakEnvironmentInitalizationFilter filter;
   private Map<String, String> keycloakAttributes = new HashMap<>();
@@ -90,7 +92,8 @@ public class KeycloakEnvironmentInitalizationFilterTest {
             keycloakProfileRetriever,
             tokenExtractor,
             permissionChecker,
-            keycloakSettings);
+            keycloakSettings,
+            optionalTracer);
     Field parser = filter.getClass().getSuperclass().getDeclaredField("jwtParser");
     parser.setAccessible(true);
     parser.set(filter, jwtParser);

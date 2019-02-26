@@ -26,6 +26,19 @@ public final class TracingTags {
   public static final AnnotationAwareStringTag MACHINE_NAME =
       new AnnotationAwareStringTag("machine.name");
 
+  /** The id of the user the span is related to. */
+  public static final AnnotationAwareStringTag USER_ID = new AnnotationAwareStringTag("user.id");
+
+  /** The id of the stack the span is related to. */
+  public static final AnnotationAwareStringTag STACK_ID = new AnnotationAwareStringTag("stack.id");
+
+  /**
+   * The entity that stopped workspace, which can be either user ID, or name of component that
+   * stopped it (e.g. activity checker) .
+   */
+  public static final AnnotationAwareStringTag STOPPED_BY =
+      new AnnotationAwareStringTag("stopped_by");
+
   /**
    * This is the standard {@link Tags#ERROR} "reexported" as an annotation aware tag so that it can
    * be easily set in the {@link org.eclipse.che.commons.annotation.Traced @Traced} methods.

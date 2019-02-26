@@ -35,7 +35,7 @@ public class DevfileSchemaValidatorTest {
   @Test(dataProvider = "validDevfiles")
   public void shouldNotThrowExceptionOnValidationValidDevfile(String resourceFilePath)
       throws Exception {
-    schemaValidator.validateBySchema(getResource(resourceFilePath), false);
+    schemaValidator.validateBySchema(getResource(resourceFilePath));
   }
 
   @DataProvider
@@ -55,7 +55,7 @@ public class DevfileSchemaValidatorTest {
   public void shouldThrowExceptionOnValidationNonValidDevfile(
       String resourceFilePath, String expectedMessageRegexp) throws Exception {
     try {
-      schemaValidator.validateBySchema(getResource(resourceFilePath), false);
+      schemaValidator.validateBySchema(getResource(resourceFilePath));
     } catch (DevfileFormatException e) {
       if (!Pattern.matches(expectedMessageRegexp, e.getMessage())) {
         // we don't need assertion here,
@@ -76,68 +76,68 @@ public class DevfileSchemaValidatorTest {
       // Devfile model testing
       {
         "devfile/devfile_missing_name.yaml",
-        "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[\"name\"\\]\\)\\]$"
+        "Devfile schema validation failed. Error: /devfile object has missing required properties \\(\\[\"name\"\\]\\)$"
       },
       {
         "devfile/devfile_missing_spec_version.yaml",
-        "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[\"specVersion\"\\]\\)\\]$"
+        "Devfile schema validation failed. Error: /devfile object has missing required properties \\(\\[\"specVersion\"\\]\\)$"
       },
       {
         "devfile/devfile_with_undeclared_field.yaml",
-        "Devfile schema validation failed. Errors: \\[object instance has properties which are not allowed by the schema: \\[\"unknown\"\\]\\]$"
+        "Devfile schema validation failed. Error: /devfile object instance has properties which are not allowed by the schema: \\[\"unknown\"\\]$"
       },
       // Tool model testing
       {
         "tool/devfile_missing_tool_name.yaml",
-        "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[\"name\"\\]\\)\\]$"
+        "Devfile schema validation failed. Error: /devfile/tools/0 object has missing required properties \\(\\[\"name\"\\]\\)$"
       },
       {
         "tool/devfile_missing_tool_type.yaml",
-        "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[\"type\"\\]\\)\\]$"
+        "Devfile schema validation failed. Error: /devfile/tools/0 object has missing required properties \\(\\[\"type\"\\]\\)$"
       },
       {
         "tool/devfile_tool_with_undeclared_field.yaml",
-        "Devfile schema validation failed. Errors: \\[object instance has properties which are not allowed by the schema: \\[\"unknown\"\\]\\]$"
+        "Devfile schema validation failed. Error: /devfile/tools/0 object instance has properties which are not allowed by the schema: \\[\"unknown\"\\]$"
       },
       // Command model testing
       {
         "command/devfile_missing_command_name.yaml",
-        "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[\"name\"\\]\\)\\]$"
+        "Devfile schema validation failed. Error: /devfile/commands/0 object has missing required properties \\(\\[\"name\"\\]\\)$"
       },
       {
         "command/devfile_missing_command_actions.yaml",
-        "Devfile schema validation failed. Errors: \\[object has missing required properties \\(\\[\"actions\"\\]\\)\\]$"
+        "Devfile schema validation failed. Error: /devfile/commands/0 object has missing required properties \\(\\[\"actions\"\\]\\)$"
       },
       {
         "command/devfile_multiple_commands_actions.yaml",
-        "Devfile schema validation failed. Errors: \\[array is too long: must have at most 1 elements but instance has 2 elements\\]$"
+        "Devfile schema validation failed. Error: /devfile/commands/0/actions array is too long: must have at most 1 elements but instance has 2 elements$"
       },
       // cheEditor/chePlugin tool model testing
       {
         "editor_plugin_tool/devfile_editor_tool_with_missing_id.yaml",
-        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\",\"memoryLimit\"\\]\\)\\]"
       },
       // kubernetes/openshift tool model testing
       {
         "kubernetes_openshift_tool/devfile_openshift_tool_with_missing_local.yaml",
-        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\",\"memoryLimit\"\\]\\)\\]"
       },
       {
         "kubernetes_openshift_tool/devfile_openshift_tool_content_without_local.yaml",
-        "Devfile schema validation failed. Errors: \\[property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\), instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+        "Devfile schema validation failed. Errors: \\[/devfile/tools/0 property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\),instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\",\"memoryLimit\"\\]\\)\\]"
       },
       {
         "kubernetes_openshift_tool/devfile_kubernetes_tool_content_without_local.yaml",
-        "Devfile schema validation failed. Errors: \\[property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\), instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+        "Devfile schema validation failed. Errors: \\[/devfile/tools/0 property \"localContent\" of object has missing property dependencies \\(schema requires \\[\"local\"\\]; missing: \\[\"local\"\\]\\),instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\",\"memoryLimit\"\\]\\)\\]"
       },
       // Dockerimage tool model testing
       {
         "dockerimage_tool/devfile_dockerimage_tool_with_missing_image.yaml",
-        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"image\"\\]\\)\\]"
       },
       {
         "dockerimage_tool/devfile_dockerimage_tool_with_missing_memory_limit.yaml",
-        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\)\\]"
+        "Devfile schema validation failed\\. Errors: \\[instance failed to match exactly one schema \\(matched 0 out of 3\\),/devfile/tools/0 object has missing required properties \\(\\[\"id\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"local\"\\]\\),/devfile/tools/0 object has missing required properties \\(\\[\"memoryLimit\"\\]\\)\\]"
       },
     };
   }
