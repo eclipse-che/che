@@ -21,15 +21,6 @@
     </parent>
     <artifactId>che-core-metrics-core</artifactId>
     <name>Che Core :: Metrics :: Core</name>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.github.mweirauch</groupId>
-                <artifactId>micrometer-jvm-extras</artifactId>
-                <version>0.1.3</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.google.guava</groupId>
