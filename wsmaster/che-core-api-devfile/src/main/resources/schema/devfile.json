@@ -122,11 +122,14 @@
                   "cheEditor",
                   "chePlugin"
                 ]
-              }
+              },
+              "name": {},
+              "id": {}
             },
             "required": [
               "id"
-            ]
+            ],
+            "additionalProperties": false
           },
           {
             "properties": {
@@ -135,11 +138,16 @@
                   "kubernetes",
                   "openshift"
                 ]
-              }
+              },
+              "name": {},
+              "local": {},
+              "localContent": {},
+              "selector": {}
             },
             "required": [
               "local"
-            ]
+            ],
+            "additionalProperties": false
           },
           {
             "properties": {
@@ -147,12 +155,20 @@
                 "enum": [
                   "dockerimage"
                 ]
-              }
+              },
+              "name": {},
+              "image": {},
+              "memoryLimit": {},
+              "mountSources": {},
+              "volumes": {},
+              "env": {},
+              "endpoints": {}
             },
             "required": [
               "image",
               "memoryLimit"
-            ]
+            ],
+            "additionalProperties": false
           }
         ],
         "properties": {
