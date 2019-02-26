@@ -26,7 +26,7 @@ import org.eclipse.che.api.deploy.jsonrpc.CheMinorWebSocketEndpointExecutorServi
 import org.eclipse.che.core.metrics.ExecutorServiceMetrics;
 
 /**
- * {@link Module} that provides mattered implementation for different classes. Metrics will be
+ * {@link Module} that provides metered implementation for different classes. Metrics will be
  * published to {@link PrometheusMeterRegistry}.
  */
 public class MetricsOverrideBinding implements Module {
