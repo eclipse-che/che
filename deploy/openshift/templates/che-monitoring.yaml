@@ -196,7 +196,7 @@ objects:
         "editable": true,
         "gnetId": 4701,
         "graphTooltip": 1,
-        "iteration": 1550504993993,
+        "iteration": 1550958562834,
         "links": [],
         "panels": [
           {
@@ -979,6 +979,112 @@ objects:
                 "logBase": 1,
                 "max": null,
                 "min": 0,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "editable": true,
+            "error": false,
+            "fill": 1,
+            "grid": {
+              "leftLogBase": 1,
+              "leftMax": null,
+              "leftMin": null,
+              "rightLogBase": 1,
+              "rightMax": null,
+              "rightMin": null
+            },
+            "gridPos": {
+              "h": 7,
+              "w": 6,
+              "x": 18,
+              "y": 5
+            },
+            "id": 86,
+            "legend": {
+              "avg": false,
+              "current": true,
+              "max": true,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "span": 3,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "(process_memory_pss_bytes{application=\"$application\", instance=\"$instance\"} + process_memory_swap_bytes{application=\"$application\", instance=\"$instance\"}  - on(application,instance) sum(jvm_memory_committed_bytes{application=\"$application\", instance=\"$instance\"})  by(application,instance)) >= 0",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 2,
+                "legendFormat": "native",
+                "metric": "",
+                "refId": "A",
+                "step": 2400
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "JVM Native Memory",
+            "tooltip": {
+              "msResolution": false,
+              "shared": true,
+              "sort": 0,
+              "value_type": "cumulative"
+            },
+            "type": "graph",
+            "x-axis": true,
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "y-axis": true,
+            "y_formats": [
+              "mbytes",
+              "short"
+            ],
+            "yaxes": [
+              {
+                "format": "bytes",
+                "label": "",
+                "logBase": 1,
+                "max": null,
+                "min": "0",
                 "show": true
               },
               {
@@ -1929,7 +2035,7 @@ objects:
             "points": false,
             "renderer": "flot",
             "repeat": null,
-            "repeatIteration": 1550504993993,
+            "repeatIteration": 1550958562834,
             "repeatPanelId": 3,
             "scopedVars": {
               "jvm_memory_pool_heap": {
@@ -2070,7 +2176,7 @@ objects:
             "points": false,
             "renderer": "flot",
             "repeat": null,
-            "repeatIteration": 1550504993993,
+            "repeatIteration": 1550958562834,
             "repeatPanelId": 3,
             "scopedVars": {
               "jvm_memory_pool_heap": {
@@ -2364,7 +2470,7 @@ objects:
             "points": false,
             "renderer": "flot",
             "repeat": null,
-            "repeatIteration": 1550504993993,
+            "repeatIteration": 1550958562834,
             "repeatPanelId": 78,
             "scopedVars": {
               "jvm_memory_pool_nonheap": {
@@ -2505,7 +2611,7 @@ objects:
             "points": false,
             "renderer": "flot",
             "repeat": null,
-            "repeatIteration": 1550504993993,
+            "repeatIteration": 1550958562834,
             "repeatPanelId": 78,
             "scopedVars": {
               "jvm_memory_pool_nonheap": {
@@ -3683,7 +3789,7 @@ objects:
           ]
         },
         "time": {
-          "from": "now-5m",
+          "from": "now-30m",
           "to": "now"
         },
         "timepicker": {
