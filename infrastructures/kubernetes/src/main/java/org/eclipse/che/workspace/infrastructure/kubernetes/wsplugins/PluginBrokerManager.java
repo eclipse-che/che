@@ -21,6 +21,7 @@ import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -86,6 +87,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
    * <p>This API is in <b>Beta</b> and is subject to changes or removal.
    */
   @Beta
+  @Traced
   public List<ChePlugin> getTooling(
       RuntimeIdentity runtimeID,
       StartSynchronizer startSynchronizer,

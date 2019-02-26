@@ -99,7 +99,7 @@ public class URLFactoryBuilder {
       return Optional.empty();
     }
     try {
-      Devfile devfile = devfileManager.parse(devfileYamlContent, false);
+      Devfile devfile = devfileManager.parse(devfileYamlContent);
       WorkspaceConfigImpl wsConfig =
           devfileManager.createWorkspaceConfig(
               devfile,

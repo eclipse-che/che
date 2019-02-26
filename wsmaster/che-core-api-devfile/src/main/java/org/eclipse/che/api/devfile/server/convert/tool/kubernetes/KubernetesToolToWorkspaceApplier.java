@@ -101,6 +101,10 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
   private String retrieveContent(
       Tool recipeTool, @Nullable FileContentProvider fileContentProvider, String type)
       throws DevfileException {
+    if (!isNullOrEmpty(recipeTool.getLocalContent())) {
+      return recipeTool.getLocalContent();
+    }
+
     if (fileContentProvider == null) {
       throw new DevfileException(
           format(

@@ -87,15 +87,17 @@ public class JpaWorkspaceDao implements WorkspaceDao {
   }
 
   @Override
-  public void remove(String id) throws ServerException {
+  public Optional<WorkspaceImpl> remove(String id) throws ServerException {
     requireNonNull(id, "Required non-null id");
+    Optional<WorkspaceImpl> workspaceOpt;
     try {
-      Optional<WorkspaceImpl> workspaceOpt = doRemove(id);
+      workspaceOpt = doRemove(id);
       workspaceOpt.ifPresent(
           workspace -> eventService.publish(new WorkspaceRemovedEvent(workspace)));
     } catch (RuntimeException x) {
       throw new ServerException(x.getLocalizedMessage(), x);
     }
+    return workspaceOpt;
   }
 
   @Override

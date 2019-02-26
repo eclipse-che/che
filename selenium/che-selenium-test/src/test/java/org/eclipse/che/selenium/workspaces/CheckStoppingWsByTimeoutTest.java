@@ -15,7 +15,6 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -65,12 +64,7 @@ public class CheckStoppingWsByTimeoutTest {
     Workspace workspace =
         workspaceServiceClient.getByName(testWorkspace.getName(), testUser.getName());
 
-    try {
-      assertEquals(workspace.getStatus(), STOPPED);
-    } catch (AssertionError ex) {
-      // remove try-catch block after issue has been resolved
-      fail("Known permanent failure https://github.com/eclipse/che/issues/12636");
-    }
+    assertEquals(workspace.getStatus(), STOPPED);
   }
 
   @Test(priority = 1)
