@@ -13,9 +13,7 @@ export class Dashboard {
 
 
     openDashboard(){
-        it(`Open dashboard ( ${Dashboard.ROOT_URL} )`, ()=>{
-            cy.visit(Dashboard.ROOT_URL);
-        })
+        cy.visit(Dashboard.ROOT_URL);
 
         this.waitButton("Dashboard", Dashboard.DASHBOARD_BUTTON);
         this.waitButton("Workspoaces", Dashboard.WORKSPACES_BUTTON);
@@ -40,15 +38,11 @@ export class Dashboard {
     }
 
     private waitButton(buttonName: string, locator: string){
-       it(`Wait visibility of the \"${buttonName}\" dashboard button`, ()=>{
-           cy.get(locator, { timeout: Dashboard.PAGE_LOAD_TIMEOUT }).should('be.visible', { timeout: Dashboard.PAGE_LOAD_TIMEOUT });
-       })
+        cy.get(locator, { timeout: Dashboard.PAGE_LOAD_TIMEOUT }).should('be.visible', { timeout: Dashboard.PAGE_LOAD_TIMEOUT });
     }
 
     private clickButton(buttonName: string, locator: string){
-        it(`Click on the ${buttonName} dashboard button`, ()=> {
-            cy.get(locator).click();
-        })
+        cy.get(locator).click();
     }
 
 

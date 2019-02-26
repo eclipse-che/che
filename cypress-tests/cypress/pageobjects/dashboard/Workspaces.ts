@@ -7,9 +7,7 @@ export class Workspaces{
 
 
     clickAddWorkspaceButton(){
-        it("Click on \"Add Workspace\" button on \"Workspaces\" page", ()=>{
-            cy.get(Workspaces.ADD_WORKSPACE_BUTTON).click();
-        })
+        cy.get(Workspaces.ADD_WORKSPACE_BUTTON).click();
     }
 
 }

@@ -13,52 +13,37 @@ export class NewWorkspace{
 
 
     typeWorkspaceName(workspaceName: string){
-        it("Type workspace name", ()=>{
-            cy.get(NewWorkspace.NAME_FIELD)
-            .clear()
-            .type(workspaceName);
-        })
+        cy.get(NewWorkspace.NAME_FIELD)
+        .clear()
+        .type(workspaceName);
     }
 
 
     clickOnChe7Stack(){
-        it("Click on \"Che 7\" stack on the \"New Workspace\" page", ()=>{
-            cy.get(NewWorkspace.CHE_7_STACK).click();
-        })
+        cy.get(NewWorkspace.CHE_7_STACK).click();
     }
  
     waitChe7StackSelected(){
-        it("Wait until \"Che 7\" stack on the \"New Workspace\" page is selected", ()=>{
-            cy.get(NewWorkspace.SELECTED_CHE_7_STACK);    
-        })
+        cy.get(NewWorkspace.SELECTED_CHE_7_STACK);    
     }
 
     clickOnCreateAndOpenButton(){
-        it("Click on \"CREATE & OPEN\" button on the \"New Workspace\" page", ()=>{
-            cy.get(NewWorkspace.CREATE_AND_OPEN_BUTTON).first().click();
-        })
+        cy.get(NewWorkspace.CREATE_AND_OPEN_BUTTON).first().click();
     }
 
     clickOnAddOrImportProjectButton(){
-        it("Click on \"Add or Import Project\" button on the \"New Workspace\" page", ()=>{
-            cy.get(NewWorkspace.ADD_OR_IMPORT_PROJECT_BUTTON).click();
-        })
+        cy.get(NewWorkspace.ADD_OR_IMPORT_PROJECT_BUTTON).click();
     }
 
     enableWebJavaSpringCheckbox(){
-        it("Click on \"web-java-spring\" checkbox on the \"New Workspace\" page", ()=>{
-            cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX).first().click( { force:true } ); 
-        })
+        cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX).first().click( { force:true } ); 
 
-        it("Wait enabling of \"web-java-spring\" checkbox on the \"New Workspace\" page", ()=>{
-            cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX_ENABLED);
-        })
+        //check that checkbox is succesfully enabled
+        cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX_ENABLED);
     }
 
     clickOnAddButton(){
-        it("Click on \"Add\" button from \"Add or Import Project\" form on the \"New Workspace\" page", ()=>{
-            cy.get(NewWorkspace.ADD_BUTTON).click(); 
-        })
+        cy.get(NewWorkspace.ADD_BUTTON).click(); 
     }
 
 

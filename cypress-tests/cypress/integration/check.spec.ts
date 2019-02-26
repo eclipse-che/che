@@ -19,22 +19,29 @@ const ide: Ide = new Ide();
 const projectTree: ProjectTree = new ProjectTree();
 const editor: Editor = new Editor();
 
-// describe("Prepare dashboard", ()=>{
-//     dashboard.openDashboard();
+describe("Prepare dashboard", ()=>{
+    it("Open dashboard", ()=>{
+        dashboard.openDashboard();
+    })
 
-// })
+})
 
-// describe("Create workspace and open it in IDE", ()=>{
+describe("Create workspace and open it in IDE", ()=>{
 
-//     dashboard.clickWorkspacesButton(); 
-//     workspaces.clickAddWorkspaceButton();
-//     newWorkspace.typeWorkspaceName(workspaceName);
-//     newWorkspace.clickOnChe7Stack();
-//     newWorkspace.waitChe7StackSelected();
-//     newWorkspace.clickOnAddOrImportProjectButton();
-//     newWorkspace.enableWebJavaSpringCheckbox();
-//     newWorkspace.clickOnAddButton();
-//     newWorkspace.clickOnCreateAndOpenButton();
+    it("Go to \"New Workspace\" page", ()=>{
+        dashboard.clickWorkspacesButton(); 
+        workspaces.clickAddWorkspaceButton();
+    })
+    
+    it(`Create a \"${workspaceName}\" workspace`, ()=>{
+        newWorkspace.typeWorkspaceName(workspaceName);
+        newWorkspace.clickOnChe7Stack();
+        newWorkspace.waitChe7StackSelected();
+        newWorkspace.clickOnAddOrImportProjectButton();
+        newWorkspace.enableWebJavaSpringCheckbox();
+        newWorkspace.clickOnAddButton();
+        newWorkspace.clickOnCreateAndOpenButton();    
+    })
 
 
 //     ide.openIdeWithoutFrames(workspaceName);
@@ -45,61 +52,60 @@ const editor: Editor = new Editor();
 
 // })
 
-describe("Work with IDE", ()=>{
+// describe("Work with IDE", ()=>{
     
-    it ("Open workspace", ()=>{
-        cy.visit("http://route24jd46nt-eclipse-che.172.19.20.205.nip.io/#/projects")
-    })
+//     it ("Open workspace", ()=>{
+//         cy.visit("http://route24jd46nt-eclipse-che.172.19.20.205.nip.io/#/projects")
+//     })
 
 
-    ide.waitIde();
-    ide.clickOnFilesButton();
-    projectTree.waitProjectTreeContainer();
+//     ide.waitIde();
+//     ide.clickOnFilesButton();
+//     projectTree.waitProjectTreeContainer();
 
 
-    // projectTree.clickOnItem("web-java-spring")
-    projectTree.waitItemExpanded("web-java-spring");
-    projectTree.waitItemColapsed("web-java-spring/src");
+//     // projectTree.clickOnItem("web-java-spring")
+//     projectTree.waitItemExpanded("web-java-spring");
+//     projectTree.waitItemColapsed("web-java-spring/src");
 
-    projectTree.clickOnItem("web-java-spring/src")
-    projectTree.waitItemExpanded("web-java-spring/src");
-    projectTree.waitItemExpanded("web-java-spring/src/main");
-    projectTree.waitItemColapsed("web-java-spring/src/main/java");
-
-
-    projectTree.clickOnItem("web-java-spring/src/main/java")
-    projectTree.waitItemExpanded("web-java-spring/src/main/java");
-    projectTree.waitItemExpanded("web-java-spring/src/main/java/org");
-    projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse");
-    projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse/che");
-    projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse/che/examples");
+//     projectTree.clickOnItem("web-java-spring/src")
+//     projectTree.waitItemExpanded("web-java-spring/src");
+//     projectTree.waitItemExpanded("web-java-spring/src/main");
+//     projectTree.waitItemColapsed("web-java-spring/src/main/java");
 
 
-    let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
+//     projectTree.clickOnItem("web-java-spring/src/main/java")
+//     projectTree.waitItemExpanded("web-java-spring/src/main/java");
+//     projectTree.waitItemExpanded("web-java-spring/src/main/java/org");
+//     projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse");
+//     projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse/che");
+//     projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse/che/examples");
+
+
+//     let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
 
 
-    projectTree.clickOnItem(filePath);
-    editor.waitTab(filePath, "GreetingController.java");
-    editor.waitTabDisappearance(filePath + "1111");
+//     projectTree.clickOnItem(filePath);
+//     editor.waitTab(filePath, "GreetingController.java");
+//     editor.waitTabDisappearance(filePath + "1111");
 
 
-    editor.clickOnTab(filePath);
-    editor.checkText("public class");
+//     editor.clickOnTab(filePath);
+//     editor.checkText("public class");
     // editor.waitTabFocused(filePath);
 
 
     // editor.closeTab(filePath);
     // editor.waitTabDisappearance(filePath);
 
-
-
-
-
-
-
-
 })
+
+
+
+
+
+
 
 
 
