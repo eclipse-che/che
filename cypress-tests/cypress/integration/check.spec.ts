@@ -6,6 +6,7 @@ import { Workspaces } from "../pageobjects/dashboard/Workspaces";
 import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";
 import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
+import { Editor } from "../pageobjects/ide/Editor";
 
 const workspaceName: string = "wksp-new-workspace";
 
@@ -16,6 +17,7 @@ const workspaces: Workspaces = new Workspaces();
 const newWorkspace: NewWorkspace = new NewWorkspace();
 const ide: Ide = new Ide();
 const projectTree: ProjectTree = new ProjectTree();
+const editor: Editor = new Editor();
 
 // describe("Prepare dashboard", ()=>{
 //     dashboard.openDashboard();
@@ -46,7 +48,7 @@ const projectTree: ProjectTree = new ProjectTree();
 describe("Work with IDE", ()=>{
     
     it ("Open workspace", ()=>{
-        cy.visit("http://routegrstamky-eclipse-che.172.19.20.205.nip.io/#/projects")
+        cy.visit("http://route24jd46nt-eclipse-che.172.19.20.205.nip.io/#/projects")
     })
 
 
@@ -73,7 +75,29 @@ describe("Work with IDE", ()=>{
     projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse/che/examples");
 
 
-    projectTree.clickOnItem("web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java")
+    let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
+
+
+
+    projectTree.clickOnItem(filePath);
+    editor.waitTab(filePath, "GreetingController.java");
+    editor.waitTabDisappearance(filePath + "1111");
+
+
+    editor.clickOnTab(filePath);
+    editor.checkText("public class");
+    // editor.waitTabFocused(filePath);
+
+
+    // editor.closeTab(filePath);
+    // editor.waitTabDisappearance(filePath);
+
+
+
+
+
+
+
 
 })
 
