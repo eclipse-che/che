@@ -75,6 +75,7 @@ import {CheToggle} from './toggle-button/che-toggle.directive';
 import {CheToolbar} from './toolbar/che-toolbar.directive';
 import {CheErrorNotification} from './notification/che-error-notification.directive';
 import {CheInfoNotification} from './notification/che-info-notification.directive';
+import {CheWarningNotification} from './notification/che-warning-notification.directive';
 import {ChePopup} from './popup/che-popup.directive';
 import {CheModalPopup} from './popup/che-modal-popup.directive';
 import {CheShowArea} from './show-area/che-show-area.directive';
@@ -186,6 +187,7 @@ export class WidgetConfig {
     // notifications
     register.directive('cheErrorNotification', CheErrorNotification);
     register.directive('cheInfoNotification', CheInfoNotification);
+    register.directive('cheWarningNotification', CheWarningNotification);
     // wrapper for popup
     register.directive('chePopup', ChePopup);
     register.directive('cheModalPopup', CheModalPopup);

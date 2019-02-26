@@ -174,4 +174,19 @@ export class CheNotification {
     }, ERROR_NOTIFICATION_DISPLAY_TIME);
     this.timeoutPromiseMap.set(notificationId, timeoutPromise);
   }
+
+  showWarning(text: string): void {
+    const notificationId = this._getNextNotificationId();
+    const jqInfoNotificationElement = angular.element('<che-warning-notification/>');
+
+    jqInfoNotificationElement.attr('che-warning-text', text);
+    jqInfoNotificationElement.attr('id', notificationId);
+
+    this._addNotification(jqInfoNotificationElement);
+
+    const timeoutPromise = this.$timeout(() => {
+      this._removeNotification(jqInfoNotificationElement);
+    }, INFO_NOTIFICATION_DISPLAY_TIME);
+    this.timeoutPromiseMap.set(notificationId, timeoutPromise);
+  }
 }
