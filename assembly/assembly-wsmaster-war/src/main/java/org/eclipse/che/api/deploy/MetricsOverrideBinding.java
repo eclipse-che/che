@@ -51,9 +51,9 @@ public class MetricsOverrideBinding implements Module {
 
     @Inject
     public MeteredCheMajorWebSocketEndpointExecutorServiceProvider(
-        @Named("che.core.jsonrpc.processor_core_pool_size") int corePoolSize,
-        @Named("che.core.jsonrpc.processor_max_pool_size") int maxPoolSize,
-        @Named("che.core.jsonrpc.processor_queue_capacity") int queueCapacity,
+        @Named(JSON_RPC_MAJOR_CORE_POOL_SIZE_PARAMETER_NAME) int corePoolSize,
+        @Named(JSON_RPC_MAJOR_MAX_POOL_SIZE_PARAMETER_NAME) int maxPoolSize,
+        @Named(JSON_RPC_MAJOR_QUEUE_CAPACITY_PARAMETER_NAME) int queueCapacity,
         PrometheusMeterRegistry meterRegistry) {
       super(corePoolSize, maxPoolSize, queueCapacity);
       this.meterRegistry = meterRegistry;
@@ -82,9 +82,9 @@ public class MetricsOverrideBinding implements Module {
 
     @Inject
     public MeteredCheMinorWebSocketEndpointExecutorServiceProvider(
-        @Named("che.core.jsonrpc.minor_processor_core_pool_size") int corePoolSize,
-        @Named("che.core.jsonrpc.minor_processor_max_pool_size") int maxPoolSize,
-        @Named("che.core.jsonrpc.minor_processor_queue_capacity") int queueCapacity,
+        @Named(JSON_RPC_MINOR_CORE_POOL_SIZE_PARAMETER_NAME) int corePoolSize,
+        @Named(JSON_RPC_MINOR_MAX_POOL_SIZE_PARAMETER_NAME) int maxPoolSize,
+        @Named(JSON_RPC_MINOR_QUEUE_CAPACITY_PARAMETER_NAME) int queueCapacity,
         PrometheusMeterRegistry meterRegistry) {
       super(corePoolSize, maxPoolSize, queueCapacity);
       this.meterRegistry = meterRegistry;

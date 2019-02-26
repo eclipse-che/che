@@ -21,11 +21,18 @@ import org.eclipse.che.commons.lang.execution.ExecutorServiceProvider;
 @Singleton
 public class CheMinorWebSocketEndpointExecutorServiceProvider extends ExecutorServiceProvider {
 
+  public static final String JSON_RPC_MINOR_CORE_POOL_SIZE_PARAMETER_NAME =
+      "che.core.jsonrpc.minor_processor_core_pool_size";
+  public static final String JSON_RPC_MINOR_MAX_POOL_SIZE_PARAMETER_NAME =
+      "che.core.jsonrpc.minor_processor_max_pool_size";
+  public static final String JSON_RPC_MINOR_QUEUE_CAPACITY_PARAMETER_NAME =
+      "che.core.jsonrpc.minor_processor_queue_capacity";
+
   @Inject
   public CheMinorWebSocketEndpointExecutorServiceProvider(
-      @Named("che.core.jsonrpc.minor_processor_core_pool_size") int corePoolSize,
-      @Named("che.core.jsonrpc.minor_processor_max_pool_size") int maxPoolSize,
-      @Named("che.core.jsonrpc.minor_processor_queue_capacity") int queueCapacity) {
+      @Named(JSON_RPC_MINOR_CORE_POOL_SIZE_PARAMETER_NAME) int corePoolSize,
+      @Named(JSON_RPC_MINOR_MAX_POOL_SIZE_PARAMETER_NAME) int maxPoolSize,
+      @Named(JSON_RPC_MINOR_QUEUE_CAPACITY_PARAMETER_NAME) int queueCapacity) {
 
     super(corePoolSize, maxPoolSize, queueCapacity);
   }
