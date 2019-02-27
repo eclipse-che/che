@@ -1,5 +1,5 @@
 
-import { LoginPage } from "../pageobjects/LoginPage";
+import { LoginPage } from "../pageobjects/dashboard/LoginPage";
 import { TestWorkspace } from "../pageobjects/workspace/TestWorkspace";
 import { Dashboard } from "../pageobjects/dashboard/Dashboard";
 import { Workspaces } from "../pageobjects/dashboard/Workspaces";
@@ -69,33 +69,13 @@ describe("Perform IDE checkings", ()=>{
 describe("Work with IDE", ()=>{
     let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
-
     it("Expand project and open file in editor", ()=>{
         projectTree.clickOnItem("web-java-spring")
-
-        ///
 
         projectTree.waitItemColapsed("web-java-spring");
         projectTree.clickOnItem("web-java-spring")
 
-        ///
-
-
         projectTree.waitItemExpanded("web-java-spring");
-        //projectTree.waitItemColapsed("web-java-spring/src");
-    
-        // projectTree.clickOnItem("web-java-spring/src")
-        // projectTree.waitItemExpanded("web-java-spring/src");
-        // projectTree.waitItemExpanded("web-java-spring/src/main");
-        // projectTree.waitItemColapsed("web-java-spring/src/main/java");
-    
-        // projectTree.clickOnItem("web-java-spring/src/main/java")
-        // projectTree.waitItemExpanded("web-java-spring/src/main/java");
-        // projectTree.waitItemExpanded("web-java-spring/src/main/java/org");
-        // projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse");
-        // projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse/che");
-        // projectTree.waitItemExpanded("web-java-spring/src/main/java/org/eclipse/che/examples");
-    
         projectTree.clickOnItem(filePath);
     })
 
@@ -105,22 +85,9 @@ describe("Work with IDE", ()=>{
     
     
         editor.clickOnTab(filePath);
-        // editor.waitTabFocused(filePath);
         
         editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
         editor.checkTextAbsence("return111");
-
-        // editor.getEditorLines().then(lines => {
-        //     console.log('>>> ', lines);
-        // });
-
-
-        // console.log(text);
-
-        
-    
-        // editor.closeTab(filePath);
-        // editor.waitTabDisappearance(filePath);
     })
 
 })
