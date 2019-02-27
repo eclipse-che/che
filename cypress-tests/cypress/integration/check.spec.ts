@@ -32,7 +32,7 @@ const editor: Editor = new Editor();
 //         dashboard.clickWorkspacesButton(); 
 //         workspaces.clickAddWorkspaceButton();
 //     })
-    
+
 //     it(`Create a \"${workspaceName}\" workspace`, ()=>{
 //         newWorkspace.typeWorkspaceName(workspaceName);
 //         newWorkspace.clickOnChe7Stack();
@@ -45,14 +45,14 @@ const editor: Editor = new Editor();
 
 // })
 
-describe("Perform IDE checkings", ()=>{
-    it("Open workspace", ()=>{
+describe("Perform IDE checkings", () => {
+    it("Open workspace", () => {
         ide.openIdeWithoutFrames(workspaceName);
         ide.waitIde();
         cy.wait(3000);
     })
-    
-    it("Open project tree container", ()=>{
+
+    it("Open project tree container", () => {
         ide.clickOnFilesButton();
         projectTree.waitProjectTreeContainerClosed();
 
@@ -66,10 +66,10 @@ describe("Perform IDE checkings", ()=>{
 
 
 
-describe("Work with IDE", ()=>{
+describe("Work with IDE", () => {
     let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
-    it("Expand project and open file in editor", ()=>{
+    it("Expand project and open file in editor", () => {
         projectTree.clickOnItem("web-java-spring")
 
         projectTree.waitItemColapsed("web-java-spring");
@@ -79,13 +79,13 @@ describe("Work with IDE", ()=>{
         projectTree.clickOnItem(filePath);
     })
 
-    it("Work with editor", ()=>{
+    it("Work with editor", () => {
         editor.waitTab(filePath, "GreetingController.java");
         editor.waitTabDisappearance(filePath + "1111");
-    
-    
+
+
         editor.clickOnTab(filePath);
-        
+
         editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
         editor.checkTextAbsence("return111");
     })
