@@ -151,7 +151,7 @@ public class CommitFilesByMultiSelectTest {
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);
     editor.waitTextIntoEditor("//" + CHANGE_CONTENT);
 
-    // Edit GreetingController.java
+    // Edit AppController.java
     git.closeGitInfoPanel();
     projectExplorer.quickRevealToItemWithJavaScript(PATH_FOR_EXPAND_SECOND_MODULE);
     projectExplorer.openItemByPath(PATH_FOR_EXPAND_SECOND_MODULE);
@@ -183,6 +183,7 @@ public class CommitFilesByMultiSelectTest {
     projectExplorer.waitItemIsSelected(PATH_FOR_EXPAND_FIRST_MODULE);
     git.closeGitInfoPanel();
     selectItemByCtrlKeys(PATH_FOR_EXPAND_SECOND_MODULE);
+    projectExplorer.waitItemIsSelected(PATH_FOR_EXPAND_SECOND_MODULE);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.ADD_TO_INDEX);
     git.waitGitStatusBarWithMess(TestGitConstants.GIT_ADD_TO_INDEX_SUCCESS);
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.COMMIT);

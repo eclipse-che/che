@@ -73,6 +73,7 @@ public class CheckMavenPluginTest {
 
   @Test
   public void shouldAccessClassCreatedInAnotherModule() {
+    projectExplorer.clickOnRefreshTreeButton();
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_HELLO_PACKAGE);
     createNewFileFromMenuFile("TestClass", CLASS, ".java");
     projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JAVA_FILE);
@@ -129,6 +130,7 @@ public class CheckMavenPluginTest {
   /** check ability just created class in autocomplete container */
   private void enterClassNameViaAutocomplete() {
     editor.typeTextIntoEditor("Test");
+    editor.waitTextIntoEditor("Test");
     editor.launchAutocomplete();
   }
 

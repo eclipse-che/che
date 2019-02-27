@@ -83,16 +83,17 @@ public class AmendCommitTest {
     testProjectServiceClient.importProject(
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
     ide.open(ws);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
   public void checkAmendPreviousCommit() {
-    String pathToFileItem = PROJECT_NAME + "/src/main/java/org.eclipse.qa.examples";
-    String javaFileName = "AppController.java";
+    String pathToFileItem =
+        PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java";
 
-    projectExplorer.waitProjectExplorer();
-    projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.quickRevealToItemWithJavaScript(pathToFileItem);
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
+    projectExplorer.waitItemIsSelected(PROJECT_NAME);
     menu.runCommand(GIT, INITIALIZE_REPOSITORY);
     askDialog.confirmAndWaitClosed();
     git.waitGitStatusBarWithMess(GIT_INITIALIZED_SUCCESS);
@@ -107,8 +108,7 @@ public class AmendCommitTest {
     loader.waitOnClosed();
 
     // edit java file and commit the change
-    projectExplorer.waitAndSelectItem(PROJECT_NAME);
-    projectExplorer.expandPathInProjectExplorerAndOpenFile(pathToFileItem, javaFileName);
+    projectExplorer.openItemByPath(pathToFileItem);
     editor.waitActive();
     editor.setCursorToLine(15);
     editor.typeTextIntoEditor("//" + CHANGE_CONTENT);
