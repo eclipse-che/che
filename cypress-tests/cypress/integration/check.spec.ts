@@ -107,7 +107,8 @@ describe("Work with IDE", ()=>{
         editor.clickOnTab(filePath);
         // editor.waitTabFocused(filePath);
         
-        editor.checkText("result1111");
+        editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
+        editor.checkTextAbsence("return111");
 
         // editor.getEditorLines().then(lines => {
         //     console.log('>>> ', lines);

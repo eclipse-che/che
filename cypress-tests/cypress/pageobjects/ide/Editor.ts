@@ -35,62 +35,76 @@ export class Editor {
 
     //#################################################################
 
-    getEditorLines(): Promise<Array<string>> {
+    private getEditorLines(checkFunction: (lines: Array<String>) => void) {
         let linesLocator: string = ".lines-content .view-line";
         let linesArray: Array<EditorLine> = new Array();
         let linesText: Array<string> = new Array();
 
-        return new Promise((resolve) => {
+        cy.log("Get text from editor");
 
-            cy.get(linesLocator)
-                .each((el, index, list) => {
-                    let lineCoordinate: number;
-                    let lineText: string;
+        cy.get(linesLocator)
+            .each((el, index, list) => {
+                let lineCoordinate: number;
+                let lineText: string;
 
-                    cy.wrap(el).invoke('attr', 'style').then(style => {
-                        let styleValue: string = "" + style;
+                cy.wrap(el).invoke('attr', 'style').then(style => {
+                    let styleValue: string = "" + style;
 
-                        let valueArray: string[] = styleValue.split(';');
-                        let pixelsCoordinate: string = valueArray[0];
-                        pixelsCoordinate = pixelsCoordinate.replace(/top:/gi, "");
-                        pixelsCoordinate = pixelsCoordinate.replace(/px/gi, "");
+                    let valueArray: string[] = styleValue.split(';');
+                    let pixelsCoordinate: string = valueArray[0];
+                    pixelsCoordinate = pixelsCoordinate.replace(/top:/gi, "");
+                    pixelsCoordinate = pixelsCoordinate.replace(/px/gi, "");
 
-                        lineCoordinate = + pixelsCoordinate;
-                    }).then(() => {
-                        cy.wrap(el).invoke('text').then(text => {
-                            lineText = "" + text;
-                        });
-                    }).then(() => {
-                        linesArray.push(new EditorLine(lineCoordinate, lineText));
-                    });
-
+                    lineCoordinate = + pixelsCoordinate;
                 }).then(() => {
-                    linesArray = linesArray.sort((editorLine1, editorLine2) => {
-                        return editorLine1.getLinePixelsCoordinate() - editorLine2.getLinePixelsCoordinate()
-                    })
-                }).then(() => {
-                    linesArray.forEach(editorLine => {
-                        linesText.push(editorLine.getLineText());
+                    cy.wrap(el).invoke('text').then(text => {
+                        lineText = "" + text;
                     });
-                    resolve(linesText);
+                }).then(() => {
+                    linesArray.push(new EditorLine(lineCoordinate, lineText));
+                });
+
+            }).then(() => {
+                linesArray = linesArray.sort((editorLine1, editorLine2) => {
+                    return editorLine1.getLinePixelsCoordinate() - editorLine2.getLinePixelsCoordinate()
                 })
-        });
+            }).then(() => {
+                linesArray.forEach(editorLine => {
+                    linesText.push(editorLine.getLineText());
+                });
+            }).should(() => {
+                checkFunction(linesText);
+            });
+
     }
 
 
-    checkText(expectedText: string) {
-        this.getEditorLines().then(lines => {
-            cy.log("Check that text is present in the editor");
+    checkTextPresence(regexp: string) {
+        let isTextPresent = (editorLines: Array<string>) => {
+            assert
+                .isTrue(
+                    editorLines.join('\n')
+                        .search(new RegExp(regexp)) > 0, "Have no string matches with provided regexp in the editor");
+        }
 
-            let editorText: string = lines.join('\n'); 
-            let isTextPresent: boolean = editorText.search(new RegExp(expectedText, "gi")) > 0;
+        this.getEditorLines(isTextPresent);
+    }
 
+    checkTextAbsence(regexp: string) {
+        let isTextAbsent = (editorLines: Array<string>) => {
+            assert
+                .isTrue(
+                    editorLines.join('\n').search(new RegExp(regexp)) < 1, "At least one match with provided regexp has been found in the editor"
+                )
+        }
 
-            console.log("========>>>>>>   ", isTextPresent);
-        });
+        this.getEditorLines(isTextAbsent);
     }
 
 
+
+
+}
 
 
     //#################################################################
@@ -100,4 +114,3 @@ export class Editor {
 
 
 
-}
