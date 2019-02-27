@@ -1,55 +1,47 @@
 /// <reference types="Cypress" />
 
 import { EditorLine } from "./EditorLine";
+import { Promise } from "bluebird";
 
-export class Editor{
-    
-    private getTabLocator(itemPath: string){
+export class Editor {
+
+    private getTabLocator(itemPath: string) {
         return `li[title='${itemPath}']`;
     }
 
-    waitTab(itemPath: string, editorTabTitle: string){
-        it(`Wait editor tab of the \"${itemPath}\" element with a \"${editorTabTitle}\" title`, ()=>{
-            cy.get(this.getTabLocator(itemPath))
-                .contains(editorTabTitle);
-        })
+    waitTab(itemPath: string, editorTabTitle: string) {
+        cy.get(this.getTabLocator(itemPath))
+            .contains(editorTabTitle);
     }
 
-    waitTabDisappearance(itemPath: string){
-        it(`Wait disappearance of the editor tab of the \"${itemPath}\" element`, ()=>{
-            cy.get(this.getTabLocator(itemPath))
-                .should('not.exist');
-        })
+    waitTabDisappearance(itemPath: string) {
+        cy.get(this.getTabLocator(itemPath))
+            .should('not.exist');
     }
 
-    clickOnTab(itemPath:string){
-        it(`Click on editor tab of the \"${itemPath}\" element`, ()=>{
-            cy.get(this.getTabLocator(itemPath)).should('be.visible').click();
-        })
+    clickOnTab(itemPath: string) {
+        cy.get(this.getTabLocator(itemPath)).should('be.visible').click();
     }
 
-    waitTabFocused(itemPath: string){
-        it(`Wait until editor tab of the \"${itemPath}\" element is focused`, ()=>{
-            cy.get(this.getTabLocator(itemPath)).should('have.class', 'theia-mod-active');
-        })
+    waitTabFocused(itemPath: string) {
+        cy.get(this.getTabLocator(itemPath)).should('have.class', 'theia-mod-active');
     }
 
-    closeTab(itemPath: string){
-        it(`Close editor tab of the \"${itemPath}\" by clicking on close icon`, ()=>{
-            cy.get(this.getTabLocator(itemPath)).should('be.visible')
-                .children('.p-TabBar-tabCloseIcon').should('be.visible')
-                    .click();
-        })
+    closeTab(itemPath: string) {
+        cy.get(this.getTabLocator(itemPath)).should('be.visible')
+            .children('.p-TabBar-tabCloseIcon').should('be.visible')
+            .click();
     }
-    
+
     //#################################################################
 
-    getEditorLines(): Array<string> {
+    getEditorLines(): Promise<Array<string>> {
         let linesLocator: string = ".lines-content .view-line";
         let linesArray: Array<EditorLine> = new Array();
-        let linesText: Array<string> = new Array(); 
+        let linesText: Array<string> = new Array();
 
-        it("Get editor text", ()=>{
+        return new Promise((resolve) => {
+
             cy.get(linesLocator)
                 .each((el, index, list) => {
                     let lineCoordinate: number;
@@ -64,42 +56,38 @@ export class Editor{
                         pixelsCoordinate = pixelsCoordinate.replace(/px/gi, "");
 
                         lineCoordinate = + pixelsCoordinate;
-                    }).then(()=>{
+                    }).then(() => {
                         cy.wrap(el).invoke('text').then(text => {
                             lineText = "" + text;
                         });
-                    }).then(()=>{
+                    }).then(() => {
                         linesArray.push(new EditorLine(lineCoordinate, lineText));
                     });
 
-            }).then(()=>{
-                linesArray = linesArray.sort((editorLine1, editorLine2) => {
-                    return editorLine1.getLinePixelsCoordinate() - editorLine2.getLinePixelsCoordinate()})
-            }).then(()=>{
-                linesArray.forEach( editorLine =>{
-                    linesText.push(editorLine.getLineText());
+                }).then(() => {
+                    linesArray = linesArray.sort((editorLine1, editorLine2) => {
+                        return editorLine1.getLinePixelsCoordinate() - editorLine2.getLinePixelsCoordinate()
+                    })
+                }).then(() => {
+                    linesArray.forEach(editorLine => {
+                        linesText.push(editorLine.getLineText());
+                    });
+                    resolve(linesText);
                 })
-            })
-
         });
-
-        return linesText;
     }
 
 
-    checkText(expectedText: string){
-        let editorLines: Array<string> = this.getEditorLines();
-        let editorText: string = editorLines.join('\n');
+    checkText(expectedText: string) {
+        this.getEditorLines().then(lines => {
+            cy.log("Check that text is present in the editor");
+
+            let editorText: string = lines.join('\n'); 
+            let isTextPresent: boolean = editorText.search(new RegExp(expectedText, "gi")) > 0;
 
 
-        it("Check that expected text is present in the editor", ()=>{
-            console.log(editorText);
-            
-            let re = new RegExp(expectedText, "gi");
-            
-            assert(editorText.search(re) > 0)
-        })
-
+            console.log("========>>>>>>   ", isTextPresent);
+        });
     }
 
 
