@@ -7,7 +7,6 @@
 
 - RELEASE: Update CHANGELOG [\#12779](https://github.com/eclipse/che/pull/12779) ([riuvshin](https://github.com/riuvshin))
 - RELEASE: Set next development version [\#12777](https://github.com/eclipse/che/pull/12777) ([riuvshin](https://github.com/riuvshin))
-- Introduced two web-socket endpoints for workspace master to split JSON-RPC messages [\#12673](https://github.com/eclipse/che/pull/12673) ([skabashnyuk](https://github.com/skabashnyuk))
 
 
 ## [6.19.0](https://github.com/eclipse/che/tree/6.19.0) (2019-02-27)
