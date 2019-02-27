@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.19.0</version>
+        <version>6.19.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>che-plugin-php-parent</artifactId>
