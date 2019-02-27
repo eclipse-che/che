@@ -30,6 +30,7 @@ import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
+import org.eclipse.che.api.deploy.jsonrpc.CheJsonRpcWebSocketConfigurationModule;
 import org.eclipse.che.api.devfile.server.DevfileModule;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
@@ -279,6 +280,7 @@ public class WsMasterModule extends AbstractModule {
       install(new LocalDockerModule());
       install(new DockerInfraModule());
     }
+    install(new CheJsonRpcWebSocketConfigurationModule());
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
     MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
@@ -289,6 +291,7 @@ public class WsMasterModule extends AbstractModule {
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       install(new org.eclipse.che.core.metrics.MetricsModule());
       install(new WsMasterMetricsModule());
+      install(new MetricsOverrideBinding());
     }
   }
 

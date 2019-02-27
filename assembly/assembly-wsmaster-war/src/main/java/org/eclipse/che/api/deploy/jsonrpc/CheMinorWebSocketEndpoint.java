@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.deploy;
+package org.eclipse.che.api.deploy.jsonrpc;
 
 import javax.inject.Inject;
 import javax.websocket.server.ServerEndpoint;
@@ -22,12 +22,15 @@ import org.eclipse.che.api.core.websocket.impl.WebsocketIdService;
 
 /**
  * Implementation of {@link BasicWebSocketEndpoint} for Che packaging. Add only mapping
- * "/websocket".
+ * "/websocket-minor".
  */
-@ServerEndpoint(value = "/websocket", configurator = GuiceInjectorEndpointConfigurator.class)
-public class CheWebSocketEndpoint extends BasicWebSocketEndpoint {
+@ServerEndpoint(value = "/websocket-minor", configurator = GuiceInjectorEndpointConfigurator.class)
+public class CheMinorWebSocketEndpoint extends BasicWebSocketEndpoint {
+
+  public static final String ENDPOINT_ID = "master-websocket-minor-endpoint";
+
   @Inject
-  public CheWebSocketEndpoint(
+  public CheMinorWebSocketEndpoint(
       WebSocketSessionRegistry registry,
       MessagesReSender reSender,
       WebSocketMessageReceiver receiver,
@@ -37,6 +40,6 @@ public class CheWebSocketEndpoint extends BasicWebSocketEndpoint {
 
   @Override
   protected String getEndpointId() {
-    return "master-websocket-endpoint";
+    return ENDPOINT_ID;
   }
 }
