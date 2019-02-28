@@ -49,9 +49,6 @@ public class KubernetesWorkspaceServiceAccount {
   /**
    * Make sure that workspace service account exists and has `view` and `exec` role bindings.
    *
-   * <p>Note that `view` role is used from cluster scope and `exec` role is created in the current
-   * namespace if does not exit.
-   *
    * @throws InfrastructureException when any exception occurred
    */
   void prepare() throws InfrastructureException {
@@ -66,6 +63,12 @@ public class KubernetesWorkspaceServiceAccount {
     if (k8sClient.rbac().kubernetesRoles().inNamespace(namespace).withName(execRoleName).get()
         == null) {
       createExecRole(k8sClient, execRoleName);
+    }
+
+    String viewRoleName = "exec";
+    if (k8sClient.rbac().kubernetesRoles().inNamespace(namespace).withName(viewRoleName).get()
+        == null) {
+      createViewRole(k8sClient, viewRoleName);
     }
 
     k8sClient
@@ -106,6 +109,22 @@ public class KubernetesWorkspaceServiceAccount {
                     .build())
             .build();
     k8sClient.rbac().kubernetesRoles().inNamespace(namespace).create(execRole);
+  }
+
+  private void createViewRole(KubernetesClient k8sClient, String name) {
+    KubernetesRole viewRole =
+        new KubernetesRoleBuilder()
+            .withNewMetadata()
+            .withName(name)
+            .endMetadata()
+            .withRules(
+                new KubernetesPolicyRuleBuilder()
+                    .withResources("pods")
+                    .withApiGroups("")
+                    .withVerbs("list")
+                    .build())
+            .build();
+    k8sClient.rbac().kubernetesRoles().inNamespace(namespace).create(viewRole);
   }
 
   private KubernetesRoleBinding createViewRoleBinding() {

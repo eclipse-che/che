@@ -49,8 +49,9 @@ class OpenShiftWorkspaceServiceAccount {
   }
 
   /**
-   * Make sure that workspace service account exists and has `view` and `exec` role bindings,
-   * as well as create view and exec roles in namespace scope
+   * Make sure that workspace service account exists and has `view` and `exec` role bindings, as
+   * well as create view and exec roles in namespace scope
+   *
    * @throws InfrastructureException when any exception occurred
    */
   void prepare() throws InfrastructureException {
@@ -67,7 +68,7 @@ class OpenShiftWorkspaceServiceAccount {
     }
 
     String viewRoleName = "view";
-    if (osClient.roles().inNamespace(projectName).withName(execRoleName).get() == null) {
+    if (osClient.roles().inNamespace(projectName).withName(viewRoleName).get() == null) {
       createViewRole(osClient, viewRoleName);
     }
 
