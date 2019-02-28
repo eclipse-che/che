@@ -5,6 +5,8 @@ import { Promise } from "bluebird";
 
 export class Editor {
 
+private static readonly EDITOR_LINES: string = ".lines-content .view-line"
+
     private getTabLocator(itemPath: string) {
         return `li[title='${itemPath}']`;
     }
@@ -33,16 +35,20 @@ export class Editor {
             .click();
     }
 
-    //#################################################################
+    waitEditorOpened(){
+        cy.get(Editor.EDITOR_LINES).first().should('be.visible');
+    }
+
+    waitEditorAvailable(itemPath: string, tabTitle: string){
+        this.waitTab(itemPath, tabTitle);
+        this.waitEditorOpened();
+    }
 
     private getEditorLines(checkFunction: (lines: Array<String>) => void) {
-        let linesLocator: string = ".lines-content .view-line";
         let linesArray: Array<EditorLine> = new Array();
         let linesText: Array<string> = new Array();
 
-        cy.log("Get text from editor");
-
-        cy.get(linesLocator)
+        cy.get(Editor.EDITOR_LINES)
             .each((el, index, list) => {
                 let lineCoordinate: number;
                 let lineText: string;
@@ -101,13 +107,57 @@ export class Editor {
         this.getEditorLines(isTextAbsent);
     }
 
+    checkLineTextContains(lineNumber: number, regexp: string) {
+        let isTextPresentInLine = (editorLines: Array<string>) => {
+            let lineText: string = editorLines[lineNumber];
+            let re = new RegExp(regexp);
+
+            // console.log("==>>  0 ", editorLines[0])
+            // console.log("==>>  1 ", editorLines[1])
+            // console.log("==>>  2 ", editorLines[2])
+            // console.log("==>>  3 ", editorLines[3])
+            // console.log("==>>  4 ", editorLines[4])
+            // console.log("==>>  5 ", editorLines[5])
+            // console.log("==>>  6 ", editorLines[6])
+            // console.log("==>>  7 ", editorLines[7])
+            // console.log("==>>  8 ", editorLines[8])
+            // console.log("==>>  9 ", editorLines[9])
+            // console.log("==>> 10 ", editorLines[10])
+            // console.log("==>> 11 ", editorLines[11])
+            // console.log("==>> 12 ", editorLines[12])
+            // console.log("==>> 13 ", editorLines[13])
+
+
+
+            assert
+                .isTrue(
+                    lineText.search(re) > 0, `Have no string matches with provided regexp in the \"${lineNumber}\ " \"${lineText}\" editor line`
+                );
+        }
+
+        this.getEditorLines(isTextPresentInLine);
+    }
+
+    checkLineTextAbsence(lineNumber: number, regexp: string) {
+        let isTextAbsentInLine = (editorLines: Array<string>) => {
+            let lineText: string = editorLines[lineNumber];
+            let re = new RegExp(regexp);
+
+            assert
+                .isTrue(
+                    lineText.search(re) < 1, `At least one match with provided regexp has been found in the \"${lineNumber}\ " \"${lineText}\" editor line`
+                );
+        }
+
+        this.getEditorLines(isTextAbsentInLine);
+    }
+
+
+
 
 
 
 }
-
-
-    //#################################################################
 
 
 

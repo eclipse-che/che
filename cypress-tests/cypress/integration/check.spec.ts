@@ -49,7 +49,6 @@ describe("Perform IDE checkings", () => {
     it("Open workspace", () => {
         ide.openIdeWithoutFrames(workspaceName);
         ide.waitIde();
-        cy.wait(3000);
     })
 
     it("Open project tree container", () => {
@@ -63,11 +62,9 @@ describe("Perform IDE checkings", () => {
 })
 
 
-
-
-
 describe("Work with IDE", () => {
     let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
+    let tabTitle: string = "GreetingController.java";
 
     it("Expand project and open file in editor", () => {
         projectTree.clickOnItem("web-java-spring")
@@ -79,16 +76,26 @@ describe("Work with IDE", () => {
         projectTree.clickOnItem(filePath);
     })
 
-    it("Work with editor", () => {
-        editor.waitTab(filePath, "GreetingController.java");
+    it("Open editor tab", () => {
+        editor.waitEditorAvailable(filePath, tabTitle);        
+
         editor.waitTabDisappearance(filePath + "1111");
-
-
         editor.clickOnTab(filePath);
 
+        editor.waitEditorAvailable(filePath, tabTitle);        
+    })
+
+    it("Perform editor checks", ()=>{
         editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
         editor.checkTextAbsence("return111");
+        editor.checkLineTextContains(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
+        editor.checkLineTextAbsence(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
     })
+
+    it("Perform editor actions", ()=>{
+        
+    })
+
 
 })
 
