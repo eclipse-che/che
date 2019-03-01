@@ -50,7 +50,7 @@ public class KubernetesWorkspaceServiceAccount {
    * Make sure that workspace service account exists and has `view` and `exec` role bindings.
    *
    * <p>Note that `view` role is used from cluster scope and `exec` role is created in the current
-   * namespace if does not exit.
+   * namespace if does not exist.
    *
    * @throws InfrastructureException when any exception occurred
    */
