@@ -31,6 +31,8 @@ import org.testng.annotations.Test;
 public class CheckSearchFeatureInEditorTest {
   private static final String PROJECT_NAME =
       NameGenerator.generate(CheckSearchFeatureInEditorTest.class.getSimpleName(), 4);
+  private static final String PATH_TO_JAVA_FILE =
+      PROJECT_NAME + "/src/main/java/org/eclipse/qa/examples/AppController.java";
   private static final String FIND_TEXT = "Num";
   private static final String FIND_TEXT_REGULAR_EXP = "Num.*";
   private static final String FIRST_CURSOR_POSITION = "23:42";
@@ -57,15 +59,15 @@ public class CheckSearchFeatureInEditorTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test(priority = 0)
   public void checkNextPrevious() {
-    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JAVA_FILE);
     loader.waitOnClosed();
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.openItemByVisibleNameInExplorer("AppController.java");
+    projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     editor.waitActive();
     searchReplacePanel.openSearchReplacePanel();
     searchReplacePanel.enterTextInFindInput(FIND_TEXT);

@@ -111,6 +111,7 @@ public class ConfigureSomeSourceFoldersTest {
     loader.waitOnClosed();
     codenvyEditor.waitTabIsPresent(name);
     codenvyEditor.closeFileByNameWithSaving(name);
+    projectExplorer.clickOnRefreshTreeButton();
   }
 
   private void launchMainClassFromCommandWidget() {

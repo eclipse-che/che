@@ -96,6 +96,7 @@ public class GitChangeMarkersTest {
     git.waitAndRunCommit("init");
     loader.waitOnClosed();
 
+    projectExplorer.clickOnRefreshTreeButton();
     projectExplorer.openItemByPath(PROJECT_NAME + PATH_TO_JAVA_FILE);
     editor.waitActive();
     editor.waitNoGitChangeMarkers();

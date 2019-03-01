@@ -58,15 +58,14 @@ public class AutocompleteCommandsEditorTest {
     testProjectServiceClient.importProject(
         testWorkspace.getId(), Paths.get(resource.toURI()), PROJ_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJ_NAME);
   }
 
   @Test(priority = 1)
   public void checkAutocompleteCommandLine() {
-    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJ_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItem(PATH_TO_JAVA_FILE);
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JAVA_FILE);
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     createMavenCommand();
     commandsEditor.setFocusIntoTypeCommandsEditor(COMMAND_LINE_EDITOR);
@@ -144,6 +143,8 @@ public class AutocompleteCommandsEditorTest {
   }
 
   private void createMavenCommand() {
+    projectExplorer.waitAndSelectItem(PROJ_NAME);
+    projectExplorer.waitItemIsSelected(PROJ_NAME);
     commandsExplorer.openCommandsExplorer();
     commandsExplorer.waitCommandExplorerIsOpened();
     commandsExplorer.clickAddCommandButton(BUILD_GOAL);
