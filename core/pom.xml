@@ -40,5 +40,6 @@
         <module>che-core-tracing-core</module>
         <module>che-core-tracing-web</module>
         <module>che-core-metrics-core</module>
+        <module>che-core-tracing-metrics</module>
     </modules>
 </project>

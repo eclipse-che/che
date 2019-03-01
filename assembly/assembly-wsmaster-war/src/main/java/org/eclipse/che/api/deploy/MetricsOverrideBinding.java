@@ -24,6 +24,7 @@ import org.eclipse.che.api.deploy.jsonrpc.CheMajorWebSocketEndpointExecutorServi
 import org.eclipse.che.api.deploy.jsonrpc.CheMinorWebSocketEndpointConfiguration;
 import org.eclipse.che.api.deploy.jsonrpc.CheMinorWebSocketEndpointExecutorServiceProvider;
 import org.eclipse.che.core.metrics.ExecutorServiceMetrics;
+import org.eclipse.che.core.tracing.metrics.TracingMetricsModule;
 
 /**
  * {@link Module} that provides metered implementation for different classes. Metrics will be
@@ -39,6 +40,7 @@ public class MetricsOverrideBinding implements Module {
     binder
         .bind(CheMinorWebSocketEndpointExecutorServiceProvider.class)
         .to(MeteredCheMinorWebSocketEndpointExecutorServiceProvider.class);
+    binder.install(new TracingMetricsModule());
   }
 
   @Singleton
