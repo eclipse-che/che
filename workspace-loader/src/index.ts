@@ -157,7 +157,7 @@ export class WorkspaceLoader {
                 console.error(err);
                 this.loader.error(err);
             } else {
-                this.loader.error('Unknown error are happened, try to reload page');
+                this.loader.error('Unknown error has happened, try to reload page');
             }
             this.loader.hideLoader();
             this.loader.showReload();
