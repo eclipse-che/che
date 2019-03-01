@@ -84,7 +84,7 @@ public class URLFactoryBuilder {
    * Build a factory using the provided devfile
    *
    * @param devfileLocation location of devfile
-   * @param fileContentProvider optional service-specific provider of URL's to the file raw content
+   * @param fileContentProvider service-specific devfile related file content provider
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
