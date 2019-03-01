@@ -38,8 +38,14 @@ module.exports = merge(common, {
             '/api/websocket': {
                 target: 'http://localhost:8080',
                 ws: true,
+                changeOrigin: true
             },
-            '/api': "http://localhost:8080",
+            '/api': {
+                target: 'http://localhost:8080',
+                changeOrigin: true
+            },
+
+
         }
     },
     plugins: [
