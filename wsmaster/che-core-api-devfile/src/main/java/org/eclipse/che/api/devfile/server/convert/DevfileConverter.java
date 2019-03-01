@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toCollection;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
@@ -23,17 +24,16 @@ import javax.inject.Inject;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Tool;
-import org.eclipse.che.api.devfile.server.DevfileException;
 import org.eclipse.che.api.devfile.server.DevfileFactory;
-import org.eclipse.che.api.devfile.server.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
-import org.eclipse.che.api.devfile.server.WorkspaceExportException;
 import org.eclipse.che.api.devfile.server.convert.tool.ToolProvisioner;
 import org.eclipse.che.api.devfile.server.convert.tool.ToolToWorkspaceApplier;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Helps to convert Devfile to workspace config and back.
@@ -106,12 +106,17 @@ public class DevfileConverter {
    * @param contentProvider content provider for recipe-type tool
    * @return constructed workspace config
    * @throws DevfileException when general devfile error occurs
+   * @throws DevfileException when devfile requires additional files content but the specified
+   *     content provider does not support it
    * @throws DevfileFormatException when devfile format is invalid
    * @throws DevfileRecipeFormatException when content of the file specified in recipe type tool is
    *     empty or its format is invalid
    */
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
-      Devfile devfile, @Nullable FileContentProvider contentProvider) throws DevfileException {
+      Devfile devfile, FileContentProvider contentProvider) throws DevfileException {
+    checkArgument(devfile != null, "Devfile must not be null");
+    checkArgument(contentProvider != null, "Content provider must not be null");
+
     validateCurrentVersion(devfile);
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 

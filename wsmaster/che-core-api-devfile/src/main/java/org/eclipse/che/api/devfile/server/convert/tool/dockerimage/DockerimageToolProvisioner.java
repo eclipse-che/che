@@ -26,8 +26,8 @@ import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.model.Env;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.model.Volume;
-import org.eclipse.che.api.devfile.server.WorkspaceExportException;
 import org.eclipse.che.api.devfile.server.convert.tool.ToolProvisioner;
+import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
@@ -54,6 +54,7 @@ public class DockerimageToolProvisioner implements ToolProvisioner {
    * @throws IllegalArgumentException if the specified workspace config or devfile is null
    * @throws WorkspaceExportException if workspace config has more than one dockerimage environments
    */
+  @Override
   public void provision(Devfile devfile, WorkspaceConfigImpl workspaceConfig)
       throws WorkspaceExportException {
     checkArgument(devfile != null, "The environment must not be null");

@@ -20,20 +20,19 @@ import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.DevfileException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
+import org.eclipse.che.api.devfile.server.FileContentProvider;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -85,11 +84,11 @@ public class URLFactoryBuilder {
    * Build a factory using the provided devfile
    *
    * @param devfileLocation location of devfile
-   * @param fileUrlProvider optional service-specific provider of URL's to the file raw content
+   * @param fileContentProvider optional service-specific provider of URL's to the file raw content
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
-      String devfileLocation, @Nullable Function<String, String> fileUrlProvider)
+      String devfileLocation, FileContentProvider fileContentProvider)
       throws BadRequestException, ServerException {
     if (devfileLocation == null) {
       return Optional.empty();
@@ -101,12 +100,7 @@ public class URLFactoryBuilder {
     try {
       Devfile devfile = devfileManager.parse(devfileYamlContent);
       WorkspaceConfigImpl wsConfig =
-          devfileManager.createWorkspaceConfig(
-              devfile,
-              filename ->
-                  fileUrlProvider != null
-                      ? urlFetcher.fetch(fileUrlProvider.apply(filename))
-                      : null);
+          devfileManager.createWorkspaceConfig(devfile, fileContentProvider);
       return Optional.of(
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)

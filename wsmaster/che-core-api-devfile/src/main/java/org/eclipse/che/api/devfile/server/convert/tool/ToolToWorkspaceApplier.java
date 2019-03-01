@@ -12,10 +12,9 @@
 package org.eclipse.che.api.devfile.server.convert.tool;
 
 import org.eclipse.che.api.devfile.model.Tool;
-import org.eclipse.che.api.devfile.server.DevfileException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * Applies changes on workspace config according to the specified tool. Different implementations
@@ -37,7 +36,6 @@ public interface ToolToWorkspaceApplier {
    *     file content
    * @throws DevfileException if any exception occurs during content retrieving
    */
-  void apply(
-      WorkspaceConfigImpl workspaceConfig, Tool tool, @Nullable FileContentProvider contentProvider)
+  void apply(WorkspaceConfigImpl workspaceConfig, Tool tool, FileContentProvider contentProvider)
       throws DevfileException;
 }
