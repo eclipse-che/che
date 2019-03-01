@@ -29,7 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.devfile.model.Tool;
-import org.eclipse.che.api.devfile.server.DevfileException;
+import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
@@ -58,21 +59,21 @@ public class KubernetesToolToWorkspaceApplierTest {
   @Test(
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to process tool '"
-              + TOOL_NAME
-              + "' of type '"
-              + KUBERNETES_TOOL_TYPE
-              + "' since there is no recipe content provider supplied. "
-              + "That means you're trying to submit an devfile with recipe-type tools to the bare "
-              + "devfile API or used factory URL does not support this feature.")
-  public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoContentProviderSupplied()
+          "Fetching content of file `local.yaml` specified in `local` field of tool `foo` is not "
+              + "supported. Please provide its content in `localContent` field. Cause: fetch is not supported")
+  public void shouldThrowExceptionWhenRecipeToolIsPresentAndContentProviderDoesNotSupportFetching()
       throws Exception {
     // given
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
 
     // when
-    applier.apply(workspaceConfig, tool, null);
+    applier.apply(
+        workspaceConfig,
+        tool,
+        e -> {
+          throw new DevfileException("fetch is not supported");
+        });
   }
 
   @Test(
@@ -95,7 +96,7 @@ public class KubernetesToolToWorkspaceApplierTest {
   @Test(
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
-          "Error during recipe content retrieval for tool '" + TOOL_NAME + "': fetch failed")
+          "Error during recipe content retrieval for tool 'foo' with type 'kubernetes': fetch failed")
   public void shouldThrowExceptionWhenExceptionHappensOnContentProvider() throws Exception {
     // given
     Tool tool =
@@ -148,7 +149,7 @@ public class KubernetesToolToWorkspaceApplierTest {
             .withName(TOOL_NAME)
             .withSelector(new HashMap<>());
 
-    applier.apply(workspaceConfig, tool, null);
+    applier.apply(workspaceConfig, tool, new FetchNotSupportedProvider());
 
     String defaultEnv = workspaceConfig.getDefaultEnv();
     assertNotNull(defaultEnv);

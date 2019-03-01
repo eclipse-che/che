@@ -37,6 +37,7 @@ import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
+import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;

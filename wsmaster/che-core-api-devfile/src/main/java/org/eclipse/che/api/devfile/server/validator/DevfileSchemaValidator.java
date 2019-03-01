@@ -21,7 +21,7 @@ import com.github.fge.jsonschema.main.JsonValidator;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import org.eclipse.che.api.devfile.server.DevfileFormatException;
+import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 
 /** Validates YAML devfile content against given JSON schema. */

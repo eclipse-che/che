@@ -34,10 +34,10 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.Constants;
-import org.eclipse.che.api.devfile.server.DevfileException;
 import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.tool.ToolToWorkspaceApplier;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -58,8 +58,7 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
    *
    * @param workspaceConfig workspace config on which changes should be applied
    * @param k8sTool kubernetes/openshift tool that should be applied
-   * @param contentProvider optional content provider that may be used for external tool resource
-   *     fetching
+   * @param contentProvider content provider that may be used for external tool resource fetching
    * @throws IllegalArgumentException if specified workspace config or plugin tool is null
    * @throws IllegalArgumentException if specified tool has type different from chePlugin
    * @throws DevfileException if specified content provider is null while kubernetes/openshift tool
@@ -69,9 +68,7 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
    */
   @Override
   public void apply(
-      WorkspaceConfigImpl workspaceConfig,
-      Tool k8sTool,
-      @Nullable FileContentProvider contentProvider)
+      WorkspaceConfigImpl workspaceConfig, Tool k8sTool, FileContentProvider contentProvider)
       throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
     checkArgument(k8sTool != null, "Tool must not be null");
@@ -80,7 +77,7 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
             || OPENSHIFT_TOOL_TYPE.equals(k8sTool.getType()),
         format("Plugin must have `%s` or `%s` type", KUBERNETES_TOOL_TYPE, OPENSHIFT_TOOL_TYPE));
 
-    String recipeFileContent = retrieveContent(k8sTool, contentProvider, k8sTool.getType());
+    String recipeFileContent = retrieveContent(k8sTool, contentProvider);
 
     final KubernetesList list = unmarshal(k8sTool, recipeFileContent);
 
@@ -98,28 +95,28 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
     workspaceConfig.setDefaultEnv(envName);
   }
 
-  private String retrieveContent(
-      Tool recipeTool, @Nullable FileContentProvider fileContentProvider, String type)
+  private String retrieveContent(Tool recipeTool, @Nullable FileContentProvider fileContentProvider)
       throws DevfileException {
+    checkArgument(fileContentProvider != null, "Content provider must not be null");
     if (!isNullOrEmpty(recipeTool.getLocalContent())) {
       return recipeTool.getLocalContent();
-    }
-
-    if (fileContentProvider == null) {
-      throw new DevfileException(
-          format(
-              "Unable to process tool '%s' of type '%s' since there is no recipe content provider supplied. "
-                  + "That means you're trying to submit an devfile with recipe-type tools to the bare devfile API or used factory URL does not support this feature.",
-              recipeTool.getName(), type));
     }
 
     String recipeFileContent;
     try {
       recipeFileContent = fileContentProvider.fetchContent(recipeTool.getLocal());
+    } catch (DevfileException e) {
+      throw new DevfileException(
+          format(
+              "Fetching content of file `%s` specified in `local` field of tool `%s` is not supported. "
+                  + "Please provide its content in `localContent` field. Cause: %s",
+              recipeTool.getLocal(), recipeTool.getName(), e.getMessage()),
+          e);
     } catch (IOException e) {
       throw new DevfileException(
-          format("Error during recipe content retrieval for tool '%s': ", recipeTool.getName())
-              + e.getMessage(),
+          format(
+              "Error during recipe content retrieval for tool '%s' with type '%s': %s",
+              recipeTool.getName(), recipeTool.getType(), e.getMessage()),
           e);
     }
     if (isNullOrEmpty(recipeFileContent)) {

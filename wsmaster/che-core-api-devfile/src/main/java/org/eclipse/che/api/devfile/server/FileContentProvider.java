@@ -12,6 +12,7 @@
 package org.eclipse.che.api.devfile.server;
 
 import java.io.IOException;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 
 /**
  * Some types of {@link org.eclipse.che.api.devfile.model.Tool} may have configuration located in a
@@ -21,7 +22,6 @@ import java.io.IOException;
  * @author Sergii Leshchenko
  */
 public interface FileContentProvider {
-
   /**
    * Fetches content of the specified file.
    *
@@ -30,6 +30,27 @@ public interface FileContentProvider {
    *     matter in repository or PR or branch etc )
    * @return content of the specified file
    * @throws IOException when there is an error during content retrieval
+   * @throws DevfileException when implementation does not support fetching of additional files
+   *     content
    */
-  String fetchContent(String fileName) throws IOException;
+  String fetchContent(String fileName) throws IOException, DevfileException;
+
+  /** Default implementation of {@link FileContentProvider} that does not support fetching. */
+  class FetchNotSupportedProvider implements FileContentProvider {
+
+    private String message;
+
+    public FetchNotSupportedProvider() {
+      this.message = "File content fetching is not supported";
+    }
+
+    public FetchNotSupportedProvider(String message) {
+      this.message = message;
+    }
+
+    @Override
+    public String fetchContent(String fileName) throws DevfileException {
+      throw new DevfileException(message);
+    }
+  }
 }
