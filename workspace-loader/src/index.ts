@@ -44,7 +44,7 @@ export class KeycloakLoader {
                     if (request.status == 200) {
                         resolve(this.injectKeycloakScript(JSON.parse(request.responseText)));
                     } else {
-                        reject('Cannot load keycloak script');
+                        reject(new Error('Cannot load keycloak script'));
                     }
                 };
 
