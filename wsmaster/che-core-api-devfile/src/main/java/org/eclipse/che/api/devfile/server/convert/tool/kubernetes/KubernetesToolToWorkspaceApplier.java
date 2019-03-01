@@ -15,6 +15,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
@@ -22,14 +23,16 @@ import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesList;
+import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.devfile.model.Tool;
@@ -43,6 +46,7 @@ import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 
 /**
  * Applies changes on workspace config according to the specified kubernetes/openshift tool.
@@ -52,6 +56,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier {
 
   @VisibleForTesting static final String YAML_CONTENT_TYPE = "application/x-yaml";
+
+  private final KubernetesRecipeParser objectsParser;
+
+  @Inject
+  public KubernetesToolToWorkspaceApplier(KubernetesRecipeParser objectsParser) {
+    this.objectsParser = objectsParser;
+  }
 
   /**
    * Applies changes on workspace config according to the specified kubernetes/openshift tool.
@@ -79,10 +90,10 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
 
     String recipeFileContent = retrieveContent(k8sTool, contentProvider);
 
-    final KubernetesList list = unmarshal(k8sTool, recipeFileContent);
+    List<HasMetadata> list = unmarshal(k8sTool, recipeFileContent);
 
     if (!k8sTool.getSelector().isEmpty()) {
-      list.setItems(filter(list, k8sTool.getSelector()));
+      list = filter(list, k8sTool.getSelector());
     }
 
     estimateCommandsMachineName(workspaceConfig, k8sTool, list);
@@ -128,8 +139,16 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
     return recipeFileContent;
   }
 
-  private List<HasMetadata> filter(KubernetesList list, Map<String, String> selector) {
-    return list.getItems().stream().filter(item -> matchLabels(item, selector)).collect(toList());
+  /**
+   * Returns a lists consisting of the elements of the specified list that match the given selector.
+   *
+   * @param list list to filter
+   * @param selector selector that should be matched with objects' labels
+   */
+  private List<HasMetadata> filter(List<HasMetadata> list, Map<String, String> selector) {
+    return list.stream()
+        .filter(item -> matchLabels(item, selector))
+        .collect(toCollection(ArrayList::new));
   }
 
   /**
@@ -160,7 +179,7 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
    * <p>Machine name will be set only if the specified recipe objects has the only one container.
    */
   private void estimateCommandsMachineName(
-      WorkspaceConfig workspaceConfig, Tool tool, KubernetesList recipeObjects) {
+      WorkspaceConfig workspaceConfig, Tool tool, List<HasMetadata> recipeObjects) {
     List<? extends Command> toolCommands =
         workspaceConfig
             .getCommands()
@@ -175,7 +194,6 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
     }
     List<Pod> pods =
         recipeObjects
-            .getItems()
             .stream()
             .filter(hasMetadata -> hasMetadata instanceof Pod)
             .map(hasMetadata -> (Pod) hasMetadata)
@@ -192,11 +210,11 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
     toolCommands.forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
   }
 
-  private KubernetesList unmarshal(Tool tool, String recipeContent)
+  private List<HasMetadata> unmarshal(Tool tool, String recipeContent)
       throws DevfileRecipeFormatException {
     try {
-      return Serialization.unmarshal(recipeContent, KubernetesList.class);
-    } catch (KubernetesClientException e) {
+      return objectsParser.parse(recipeContent);
+    } catch (Exception e) {
       throw new DevfileRecipeFormatException(
           format(
               "Error occurred during parsing list from file %s for tool '%s': %s",
@@ -204,14 +222,15 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
     }
   }
 
-  private String asYaml(Tool tool, KubernetesList list) throws DevfileRecipeFormatException {
+  private String asYaml(Tool tool, List<HasMetadata> list) throws DevfileRecipeFormatException {
     try {
-      return Serialization.asYaml(list);
+      return Serialization.asYaml(new KubernetesListBuilder().withItems(list).build());
     } catch (KubernetesClientException e) {
       throw new DevfileRecipeFormatException(
           format(
               "Unable to deserialize specified local file content for tool '%s'. Error: %s",
-              tool.getName(), e.getMessage()));
+              tool.getName(), e.getMessage()),
+          e);
     }
   }
 }

@@ -48,12 +48,8 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.ParameterNamespaceListVisitFromServerGetDeleteRecreateWaitApplicable;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.api.model.RouteBuilder;
-import io.fabric8.openshift.client.OpenShiftClient;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +58,8 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -77,36 +74,26 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftEnvironmentFactoryTest {
 
-  private static final String YAML_RECIPE = "application/x-yaml";
   private static final long BYTES_IN_MB = 1024 * 1024;
   private static final String MACHINE_NAME_1 = "machine1";
   private static final String MACHINE_NAME_2 = "machine2";
 
   private OpenShiftEnvironmentFactory osEnvFactory;
 
-  @Mock private OpenShiftClientFactory clientFactory;
   @Mock private OpenShiftEnvironmentValidator openShiftEnvValidator;
-  @Mock private OpenShiftClient client;
   @Mock private InternalRecipe internalRecipe;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
+  @Mock private KubernetesRecipeParser k8sRecipeParser;
 
   private Map<String, InternalMachineConfig> machines;
-
-  @Mock
-  private ParameterNamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>
-      loadedRecipe;
 
   @BeforeMethod
   public void setup() throws Exception {
     osEnvFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, null, clientFactory, openShiftEnvValidator, memoryProvisioner);
-    when(clientFactory.create()).thenReturn(client);
-    when(client.load(any(InputStream.class))).thenReturn(loadedRecipe);
-    when(internalRecipe.getContentType()).thenReturn(YAML_RECIPE);
-    when(internalRecipe.getContent()).thenReturn("recipe content");
+            null, null, null, openShiftEnvValidator, k8sRecipeParser, memoryProvisioner);
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
 
@@ -117,7 +104,7 @@ public class OpenShiftEnvironmentFactoryTest {
         new ServiceBuilder().withNewMetadata().withName("service1").endMetadata().build();
     Service service2 =
         new ServiceBuilder().withNewMetadata().withName("service2").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(asList(service1, service2));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(service1, service2));
 
     // when
     KubernetesEnvironment osEnv = osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -135,7 +122,7 @@ public class OpenShiftEnvironmentFactoryTest {
         new PersistentVolumeClaimBuilder().withNewMetadata().withName("pvc1").endMetadata().build();
     PersistentVolumeClaim pvc2 =
         new PersistentVolumeClaimBuilder().withNewMetadata().withName("pvc2").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(asList(pvc1, pvc2));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(pvc1, pvc2));
 
     // when
     OpenShiftEnvironment osEnv = osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -149,7 +136,7 @@ public class OpenShiftEnvironmentFactoryTest {
   @Test
   public void addRoutesWhenRecipeContainsThem() throws Exception {
     Route route = new RouteBuilder().withNewMetadata().withName("test-route").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(singletonList(route));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(route));
 
     final OpenShiftEnvironment parsed =
         osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -164,7 +151,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void addSecretsWhenRecipeContainsThem() throws Exception {
     Secret secret =
         new SecretBuilder().withNewMetadata().withName("test-secret").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(singletonList(secret));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(secret));
 
     final OpenShiftEnvironment parsed =
         osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -179,7 +166,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void addConfigMapsWhenRecipeContainsThem() throws Exception {
     ConfigMap configMap =
         new ConfigMapBuilder().withNewMetadata().withName("test-configmap").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(singletonList(configMap));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(configMap));
 
     final KubernetesEnvironment parsed =
         osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -200,7 +187,7 @@ public class OpenShiftEnvironmentFactoryTest {
             .endMetadata()
             .withSpec(new PodSpec())
             .build();
-    when(loadedRecipe.get()).thenReturn(singletonList(pod));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(pod));
 
     // when
     KubernetesEnvironment osEnv = osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -235,7 +222,7 @@ public class OpenShiftEnvironmentFactoryTest {
             .endSpec()
             .build();
 
-    when(loadedRecipe.get()).thenReturn(singletonList(deployment));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(deployment));
 
     // when
     final KubernetesEnvironment osEnv =
@@ -279,7 +266,7 @@ public class OpenShiftEnvironmentFactoryTest {
             .withNewSpec()
             .endSpec()
             .build();
-    when(loadedRecipe.get()).thenReturn(asList(deployment, pod));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(deployment, pod));
 
     // when
     final KubernetesEnvironment osEnv =
@@ -298,7 +285,8 @@ public class OpenShiftEnvironmentFactoryTest {
 
   @Test(expectedExceptions = ValidationException.class)
   public void exceptionOnRecipeLoadError() throws Exception {
-    when(loadedRecipe.get()).thenThrow(new KubernetesClientException("Could not parse recipe"));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class)))
+        .thenThrow(new ValidationException("Could not parse recipe"));
 
     osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -309,7 +297,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void exceptionOnObjectWithNoKindSpecified() throws Exception {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn(null);
-    when(loadedRecipe.get()).thenReturn(singletonList(object));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(object));
 
     osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -321,7 +309,7 @@ public class OpenShiftEnvironmentFactoryTest {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn("MyObject");
     when(object.getMetadata()).thenReturn(null);
-    when(loadedRecipe.get()).thenReturn(singletonList(object));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(object));
 
     osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -333,7 +321,7 @@ public class OpenShiftEnvironmentFactoryTest {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn("MyObject");
     when(object.getMetadata()).thenReturn(new ObjectMetaBuilder().withName(null).build());
-    when(loadedRecipe.get()).thenReturn(singletonList(object));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(object));
 
     osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -346,10 +334,10 @@ public class OpenShiftEnvironmentFactoryTest {
     final long secondMachineRamRequest = 512 * BYTES_IN_MB;
     when(machineConfig1.getAttributes()).thenReturn(new HashMap<>());
     when(machineConfig2.getAttributes()).thenReturn(new HashMap<>());
-    final Set<Pod> pods =
+    final Set<PodData> pods =
         ImmutableSet.of(
-            mockPod(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
-            mockPod(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
+            createPodData(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
+            createPodData(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
 
     osEnvFactory.addRamAttributes(machines, pods);
 
@@ -360,7 +348,7 @@ public class OpenShiftEnvironmentFactoryTest {
   }
 
   /** If provided {@code ramLimit} is {@code null} ram limit won't be set in POD */
-  private static Pod mockPod(String machineName, Long ramLimit, Long ramRequest) {
+  private static PodData createPodData(String machineName, Long ramLimit, Long ramRequest) {
     final String containerName = "container_" + machineName;
     final Container containerMock = mock(Container.class);
     final Pod podMock = mock(Pod.class);
@@ -385,6 +373,6 @@ public class OpenShiftEnvironmentFactoryTest {
         .thenReturn(
             ImmutableMap.of(format(MACHINE_NAME_ANNOTATION_FMT, containerName), machineName));
     when(specMock.getContainers()).thenReturn(ImmutableList.of(containerMock));
-    return podMock;
+    return new PodData(specMock, metadataMock);
   }
 }
