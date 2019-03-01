@@ -161,6 +161,7 @@ public class CommitFilesByMultiSelectTest {
     editor.waitTextIntoEditor("//" + CHANGE_CONTENT);
 
     // Edit several files in the first module
+    projectExplorer.clickOnRefreshTreeButton();
     projectExplorer.waitAndSelectItem(PROJECT_NAME + "/my-lib/src/test/java/hello/file.css");
     projectExplorer.openItemByPath(PROJECT_NAME + "/my-lib/src/test/java/hello/file.css");
     editor.waitActive();

@@ -193,6 +193,8 @@ public class RenameTypeTest {
     askDialog.clickOkBtn();
     askDialog.waitFormToClose();
     refactorPanel.waitRefactorPreviewFormIsClosed();
+    loader.waitOnClosed();
+    projectExplorer.waitAndSelectItem(pathToCurrentPackage + "/B.java");
     projectExplorer.clickOnRefreshTreeButton();
     projectExplorer.waitItem(pathToCurrentPackage + "/B.java", ELEMENT_TIMEOUT_SEC);
     projectExplorer.openItemByPath(pathToCurrentPackage + "/B.java");
