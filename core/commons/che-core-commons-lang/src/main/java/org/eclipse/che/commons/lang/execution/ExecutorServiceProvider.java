@@ -17,6 +17,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -39,7 +40,8 @@ import org.slf4j.Logger;
  * @author Sergii Kabashniuk
  */
 @Singleton
-public class ExecutorServiceProvider implements Provider<ExecutorService> {
+public class ExecutorServiceProvider
+    implements Provider<ExecutorService>, RejectedExecutionHandler {
 
   private static final Logger LOG = getLogger(ExecutorServiceProvider.class);
 
@@ -68,13 +70,17 @@ public class ExecutorServiceProvider implements Provider<ExecutorService> {
             SECONDS,
             queueCapacity > 0 ? new LinkedBlockingQueue<>(queueCapacity) : new SynchronousQueue<>(),
             factory);
-    executor.setRejectedExecutionHandler(
-        (r, __) -> LOG.warn("Executor rejected to handle the payload {}", r));
+    executor.setRejectedExecutionHandler(this);
     executor.prestartCoreThread();
   }
 
   @Override
   public ExecutorService get() {
     return executor;
+  }
+
+  @Override
+  public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+    LOG.warn("Executor rejected to handle the payload {}", r);
   }
 }

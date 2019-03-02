@@ -11,15 +11,21 @@
  */
 package org.eclipse.che.api.deploy.jsonrpc;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.commons.lang.execution.ExecutorServiceProvider;
+import org.slf4j.Logger;
 
 /** {@link ExecutorService} provider used in {@link CheMajorWebSocketEndpoint}. */
 @Singleton
 public class CheMajorWebSocketEndpointExecutorServiceProvider extends ExecutorServiceProvider {
+
+  private static final Logger LOG = getLogger(ExecutorServiceProvider.class);
 
   public static final String JSON_RPC_MAJOR_CORE_POOL_SIZE_PARAMETER_NAME =
       "che.core.jsonrpc.processor_core_pool_size";
@@ -27,6 +33,7 @@ public class CheMajorWebSocketEndpointExecutorServiceProvider extends ExecutorSe
       "che.core.jsonrpc.processor_max_pool_size";
   public static final String JSON_RPC_MAJOR_QUEUE_CAPACITY_PARAMETER_NAME =
       "che.core.jsonrpc.processor_queue_capacity";
+  private final int queueCapacity;
 
   @Inject
   public CheMajorWebSocketEndpointExecutorServiceProvider(
@@ -34,5 +41,15 @@ public class CheMajorWebSocketEndpointExecutorServiceProvider extends ExecutorSe
       @Named(JSON_RPC_MAJOR_MAX_POOL_SIZE_PARAMETER_NAME) int maxPoolSize,
       @Named(JSON_RPC_MAJOR_QUEUE_CAPACITY_PARAMETER_NAME) int queueCapacity) {
     super(corePoolSize, maxPoolSize, queueCapacity);
+    this.queueCapacity = queueCapacity;
+  }
+
+  @Override
+  public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
+    LOG.error(
+        "Executor on major websocket endpoint rejected to handle the payload {}. Some important messages may be lost. Consider increasing `{}`. Now it's configured to {}",
+        r,
+        JSON_RPC_MAJOR_QUEUE_CAPACITY_PARAMETER_NAME,
+        queueCapacity);
   }
 }
