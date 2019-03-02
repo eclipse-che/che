@@ -7,6 +7,7 @@ import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";
 import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
+import { ProposalWidget } from "../pageobjects/ide/ProposalWidget";
 
 const workspaceName: string = "wksp-new-workspace";
 
@@ -18,6 +19,9 @@ const newWorkspace: NewWorkspace = new NewWorkspace();
 const ide: Ide = new Ide();
 const projectTree: ProjectTree = new ProjectTree();
 const editor: Editor = new Editor();
+const proposalWidget = new ProposalWidget();
+
+
 
 // describe("Prepare dashboard", ()=>{
 //     it("Open dashboard", ()=>{
@@ -86,16 +90,27 @@ describe("Work with IDE", () => {
     })
 
     it("Perform editor checks", ()=>{
-        editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
-        editor.checkTextAbsence("return111");
-        editor.checkLineTextContains(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
-        editor.checkLineTextAbsence(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
+        // editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
+        // editor.checkTextAbsence("return111");
+        // editor.checkLineTextContains(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
+        // editor.checkLineTextAbsence(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
     })
 
-    it("Perform editor actions", ()=>{
-        
+    it("Tab focusing", ()=>{
+        editor.clickOnTab(filePath);
+        editor.waitTabFocused(filePath);
+
     })
 
+    it("Go to line", ()=>{
+        editor.setCursorToLine(4);
+    })
+
+    it("Suggestion", ()=>{
+    
+
+
+    })
 
 })
 

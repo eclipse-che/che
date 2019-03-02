@@ -1,14 +1,18 @@
 /// <reference types="Cypress" />
 
 import { EditorLine } from "./EditorLine";
-import { Promise } from "bluebird";
+import { ProposalWidget } from "../ide/ProposalWidget";
 
 export class Editor {
 
-private static readonly EDITOR_LINES: string = ".lines-content .view-line"
+    private static readonly EDITOR_LINES: string = ".lines-content .view-line";
+    private static readonly EDITOR_BODY: string = "#theia-main-content-panel .lines-content";
+
+    private readonly proposalWidget: ProposalWidget = new ProposalWidget();
+
 
     private getTabLocator(itemPath: string) {
-        return `li[title='${itemPath}']`;
+        return `li[title='${itemPath}'] .p-TabBar-tabLabel`;
     }
 
     waitTab(itemPath: string, editorTabTitle: string) {
@@ -26,7 +30,7 @@ private static readonly EDITOR_LINES: string = ".lines-content .view-line"
     }
 
     waitTabFocused(itemPath: string) {
-        cy.get(this.getTabLocator(itemPath)).should('have.class', 'theia-mod-active');
+        cy.get(`li[title='${itemPath}'].theia-mod-active`).should('be.visible').wait(2000);
     }
 
     closeTab(itemPath: string) {
@@ -35,11 +39,12 @@ private static readonly EDITOR_LINES: string = ".lines-content .view-line"
             .click();
     }
 
-    waitEditorOpened(){
+    waitEditorOpened() {
+        cy.get(Editor.EDITOR_BODY).should('be.visible');
         cy.get(Editor.EDITOR_LINES).first().should('be.visible');
     }
 
-    waitEditorAvailable(itemPath: string, tabTitle: string){
+    waitEditorAvailable(itemPath: string, tabTitle: string) {
         this.waitTab(itemPath, tabTitle);
         this.waitEditorOpened();
     }
@@ -84,7 +89,6 @@ private static readonly EDITOR_LINES: string = ".lines-content .view-line"
 
     }
 
-
     checkTextPresence(regexp: string) {
         let isTextPresent = (editorLines: Array<string>) => {
             assert
@@ -112,23 +116,6 @@ private static readonly EDITOR_LINES: string = ".lines-content .view-line"
             let lineText: string = editorLines[lineNumber];
             let re = new RegExp(regexp);
 
-            // console.log("==>>  0 ", editorLines[0])
-            // console.log("==>>  1 ", editorLines[1])
-            // console.log("==>>  2 ", editorLines[2])
-            // console.log("==>>  3 ", editorLines[3])
-            // console.log("==>>  4 ", editorLines[4])
-            // console.log("==>>  5 ", editorLines[5])
-            // console.log("==>>  6 ", editorLines[6])
-            // console.log("==>>  7 ", editorLines[7])
-            // console.log("==>>  8 ", editorLines[8])
-            // console.log("==>>  9 ", editorLines[9])
-            // console.log("==>> 10 ", editorLines[10])
-            // console.log("==>> 11 ", editorLines[11])
-            // console.log("==>> 12 ", editorLines[12])
-            // console.log("==>> 13 ", editorLines[13])
-
-
-
             assert
                 .isTrue(
                     lineText.search(re) > 0, `Have no string matches with provided regexp in the \"${lineNumber}\ " \"${lineText}\" editor line`
@@ -151,6 +138,53 @@ private static readonly EDITOR_LINES: string = ".lines-content .view-line"
 
         this.getEditorLines(isTextAbsentInLine);
     }
+
+    performCtrlKeyCombination(buttonCode: number) {
+        this.waitEditorOpened();
+        
+        cy.get('#theia-main-content-panel')
+        .trigger("keydown", { keyCode: buttonCode, which: buttonCode, ctrlKey: true })
+    }
+
+    setCursorToLine(lineNumber: number) {
+
+        this.performCtrlKeyCombination(71);
+
+        this.proposalWidget.waitWidget();
+        this.proposalWidget.typeToInputFieldAndPressEnter(lineNumber.toString())
+        this.proposalWidget.waitWidgetClosed();
+    }
+
+    performFindFileKeyShortcut() {
+        // this.performKeyCombination('{ctrl}P')
+    
+    }
+
+    waitSuggestionContainer(){
+        
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

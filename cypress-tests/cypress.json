@@ -5,7 +5,7 @@
 
     "env": {
         "api_endpoint": "http://che-eclipse-che.172.19.20.205.nip.io/api/",
-        "root_url": "http://che-eclipse-che.172.19.20.205.nip.io",
+        "root_url": "http://che-eclipse-che.192.168.0.104.nip.io",
         "load_page_timeout": 120000    
       }
 
