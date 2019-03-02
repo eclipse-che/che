@@ -86,31 +86,31 @@ describe("Work with IDE", () => {
         editor.waitTabDisappearance(filePath + "1111");
         editor.clickOnTab(filePath);
 
-        editor.waitEditorAvailable(filePath, tabTitle);        
+        editor.waitEditorAvailable(filePath, tabTitle);
     })
 
     it("Perform editor checks", ()=>{
-        // editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
-        // editor.checkTextAbsence("return111");
-        // editor.checkLineTextContains(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
-        // editor.checkLineTextAbsence(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
+        editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
+        editor.checkTextAbsence("return111");
+        editor.checkLineTextContains(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
+        editor.checkLineTextAbsence(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
     })
 
-    it("Tab focusing", ()=>{
-        editor.clickOnTab(filePath);
-        editor.waitTabFocused(filePath);
+    // it("Tab focusing", ()=>{
+    //     editor.clickOnTab(filePath);
+    //     editor.waitTabFocused(filePath);
 
-    })
+    // })
 
-    it("Go to line", ()=>{
-        editor.setCursorToLine(4);
-    })
+    // it("Go to line", ()=>{
+    //     editor.setCursorToLine(4);
+    // })
 
-    it("Suggestion", ()=>{
+    // it("Suggestion", ()=>{
     
 
 
-    })
+    // })
 
 })
 

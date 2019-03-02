@@ -2,6 +2,7 @@
 
 import { EditorLine } from "./EditorLine";
 import { ProposalWidget } from "../ide/ProposalWidget";
+import { Promise, reject } from "bluebird";
 
 export class Editor {
 
@@ -49,43 +50,61 @@ export class Editor {
         this.waitEditorOpened();
     }
 
-    private getEditorLines(checkFunction: (lines: Array<String>) => void) {
-        let linesArray: Array<EditorLine> = new Array();
+    private extractPixelCoordinate(element: JQuery<HTMLElement>): number {
+        let lineCoordinate: number;
+
+        cy.wrap(element).invoke('attr', 'style').then(style => {
+            let styleValue: string = "" + style;
+
+            let valueArray: string[] = styleValue.split(';');
+            let pixelsCoordinate: string = valueArray[0];
+            pixelsCoordinate = pixelsCoordinate.replace(/top:/gi, "");
+            pixelsCoordinate = pixelsCoordinate.replace(/px/gi, "");
+
+            lineCoordinate = + pixelsCoordinate;
+        })
+
+        return lineCoordinate;
+    }
+
+    public addAttributeToLines(): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            let elementsArray: Array<JQuery<HTMLElement>> = new Array();
+
+            cy.get(Editor.EDITOR_LINES)
+                .each((el, index, list) => {
+                    elementsArray.push(el)
+                }).then(() => {
+                    elementsArray = elementsArray.sort((element1, element2) => {
+                        return this.extractPixelCoordinate(element1) - this.extractPixelCoordinate(element2);
+                    })
+                }).then(() => {
+                    elementsArray.forEach((element, index) => {
+                        element[0].setAttribute("data-cy", `editor-line-${index + 1}`)
+                    })
+                }).then(() => {
+                    resolve(elementsArray.length);
+                })
+        })
+    }
+
+    public getEditorLines(checkFunction: (lines: Array<String>) => void) {
         let linesText: Array<string> = new Array();
 
-        cy.get(Editor.EDITOR_LINES)
-            .each((el, index, list) => {
-                let lineCoordinate: number;
-                let lineText: string;
+        cy.get('body').then(()=>{
+            this.addAttributeToLines().then( linesCapacity => {
+                let i: number;
 
-                cy.wrap(el).invoke('attr', 'style').then(style => {
-                    let styleValue: string = "" + style;
-
-                    let valueArray: string[] = styleValue.split(';');
-                    let pixelsCoordinate: string = valueArray[0];
-                    pixelsCoordinate = pixelsCoordinate.replace(/top:/gi, "");
-                    pixelsCoordinate = pixelsCoordinate.replace(/px/gi, "");
-
-                    lineCoordinate = + pixelsCoordinate;
-                }).then(() => {
-                    cy.wrap(el).invoke('text').then(text => {
-                        lineText = "" + text;
-                    });
-                }).then(() => {
-                    linesArray.push(new EditorLine(lineCoordinate, lineText));
-                });
-
-            }).then(() => {
-                linesArray = linesArray.sort((editorLine1, editorLine2) => {
-                    return editorLine1.getLinePixelsCoordinate() - editorLine2.getLinePixelsCoordinate()
-                })
-            }).then(() => {
-                linesArray.forEach(editorLine => {
-                    linesText.push(editorLine.getLineText());
-                });
-            }).should(() => {
-                checkFunction(linesText);
-            });
+                for(i=1; i <= linesCapacity; i ++){
+                    cy.get(`div[data-cy='editor-line-${i}']`).invoke('text').then(text => {
+                        // console.log("======>>>>>   "  +  text);
+                        linesText.push("" + text);
+                    })
+                }
+            })
+        }).should(()=>{
+            checkFunction(linesText);
+        })
 
     }
 
@@ -141,9 +160,9 @@ export class Editor {
 
     performCtrlKeyCombination(buttonCode: number) {
         this.waitEditorOpened();
-        
+
         cy.get('#theia-main-content-panel')
-        .trigger("keydown", { keyCode: buttonCode, which: buttonCode, ctrlKey: true })
+            .trigger("keydown", { keyCode: buttonCode, which: buttonCode, ctrlKey: true })
     }
 
     setCursorToLine(lineNumber: number) {
@@ -157,11 +176,11 @@ export class Editor {
 
     performFindFileKeyShortcut() {
         // this.performKeyCombination('{ctrl}P')
-    
+
     }
 
-    waitSuggestionContainer(){
-        
+    waitSuggestionContainer() {
+
     }
 
 
