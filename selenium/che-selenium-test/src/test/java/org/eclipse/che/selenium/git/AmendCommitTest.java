@@ -99,6 +99,7 @@ public class AmendCommitTest {
     git.waitGitStatusBarWithMess(GIT_INITIALIZED_SUCCESS);
     events.clickEventLogBtn();
     events.waitExpectedMessage(GIT_INITIALIZED_SUCCESS);
+    projectExplorer.quickRevealToItemWithJavaScript(pathToFileItem);
     loader.waitOnClosed();
 
     // perform init commit
