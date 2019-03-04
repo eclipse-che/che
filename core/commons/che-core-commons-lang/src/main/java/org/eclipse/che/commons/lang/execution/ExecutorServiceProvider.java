@@ -40,21 +40,23 @@ import org.slf4j.Logger;
  * @author Sergii Kabashniuk
  */
 @Singleton
-public class ExecutorServiceProvider
-    implements Provider<ExecutorService>, RejectedExecutionHandler {
+public class ExecutorServiceProvider implements Provider<ExecutorService> {
 
   private static final Logger LOG = getLogger(ExecutorServiceProvider.class);
 
   private final ThreadPoolExecutor executor;
-
   /**
    * @param corePoolSize - corePoolSize of ThreadPoolExecutor
    * @param maxPoolSize - maximumPoolSize of ThreadPoolExecutor
    * @param queueCapacity - queue capacity. if > 0 then this is capacity of {@link
    *     LinkedBlockingQueue} if <=0 then {@link SynchronousQueue} are used.
+   * @param rejectedExecutionHandler - {@link RejectedExecutionHandler} of ThreadPoolExecutor
    */
-  public ExecutorServiceProvider(int corePoolSize, int maxPoolSize, int queueCapacity) {
-
+  public ExecutorServiceProvider(
+      int corePoolSize,
+      int maxPoolSize,
+      int queueCapacity,
+      RejectedExecutionHandler rejectedExecutionHandler) {
     ThreadFactory factory =
         new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
@@ -70,17 +72,26 @@ public class ExecutorServiceProvider
             SECONDS,
             queueCapacity > 0 ? new LinkedBlockingQueue<>(queueCapacity) : new SynchronousQueue<>(),
             factory);
-    executor.setRejectedExecutionHandler(this);
+    executor.setRejectedExecutionHandler(rejectedExecutionHandler);
     executor.prestartCoreThread();
+  }
+
+  /**
+   * @param corePoolSize - corePoolSize of ThreadPoolExecutor
+   * @param maxPoolSize - maximumPoolSize of ThreadPoolExecutor
+   * @param queueCapacity - queue capacity. if > 0 then this is capacity of {@link
+   *     LinkedBlockingQueue} if <=0 then {@link SynchronousQueue} are used.
+   */
+  public ExecutorServiceProvider(int corePoolSize, int maxPoolSize, int queueCapacity) {
+    this(
+        corePoolSize,
+        maxPoolSize,
+        queueCapacity,
+        (r, executor1) -> LOG.warn("Executor rejected to handle the payload {}", r));
   }
 
   @Override
   public ExecutorService get() {
     return executor;
-  }
-
-  @Override
-  public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-    LOG.warn("Executor rejected to handle the payload {}", r);
   }
 }
