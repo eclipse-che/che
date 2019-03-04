@@ -87,7 +87,7 @@ public class ExecutorServiceProvider implements Provider<ExecutorService> {
         corePoolSize,
         maxPoolSize,
         queueCapacity,
-        (r, executor1) -> LOG.warn("Executor rejected to handle the payload {}", r));
+        (r, e) -> LOG.warn("Executor rejected to handle the payload {}", r));
   }
 
   @Override
