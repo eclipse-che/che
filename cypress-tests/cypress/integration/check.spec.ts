@@ -77,6 +77,7 @@ describe("Work with IDE", () => {
         projectTree.clickOnItem("web-java-spring")
 
         projectTree.waitItemExpanded("web-java-spring");
+
         projectTree.clickOnItem(filePath);
     })
 
@@ -92,29 +93,14 @@ describe("Work with IDE", () => {
     it("Perform editor checks", ()=>{
         // editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
         // editor.checkTextAbsence("return111");
-        // editor.checkLineTextContains(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
-        // editor.checkLineTextAbsence(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
+        // editor.checkLineTextContains(13, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
+        // editor.checkLineTextAbsence(13, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
 
-        editor.setCursorToLineAndChar(17, 33);
-        editor.performControlSpaceCombination();
+        editor.setCursorToLineAndChar(11, 1);
+        
 
     })
 
-    // it("Tab focusing", ()=>{
-    //     editor.clickOnTab(filePath);
-    //     editor.waitTabFocused(filePath);
-
-    // })
-
-    // it("Go to line", ()=>{
-    //     editor.setCursorToLine(4);
-    // })
-
-    // it("Suggestion", ()=>{
-    
-
-
-    // })
 
 })
 

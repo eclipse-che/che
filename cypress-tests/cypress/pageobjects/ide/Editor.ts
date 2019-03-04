@@ -14,6 +14,27 @@ export class Editor {
     private readonly proposalWidget: ProposalWidget = new ProposalWidget();
 
 
+    waitSuggestionContainer() {
+        cy.get(Editor.SUGGESTION_WIDGET_BODY).should('be.visible');
+    }
+
+    waitSuggestionContainerClosed() {
+        cy.get(Editor.SUGGESTION_WIDGET_BODY).should('be.not.visible');
+    }
+
+    clickOnSuggestion(suggestion: string) {
+        cy.get(Editor.SUGGESTION_WIDGET_ROW)
+            .contains(suggestion)
+            .first()
+            .click();
+    }
+
+    waitSuggestion(suggestion: string){
+        cy.get(Editor.SUGGESTION_WIDGET_ROW)
+            .contains(suggestion)
+    }
+
+
     private getTabLocator(itemPath: string) {
         return `li[title='${itemPath}'] .p-TabBar-tabLabel`;
     }
@@ -133,7 +154,7 @@ export class Editor {
 
     checkLineTextContains(lineNumber: number, regexp: string) {
         let isTextPresentInLine = (editorLines: Array<string>) => {
-            let lineText: string = editorLines[lineNumber];
+            let lineText: string = editorLines[lineNumber - 1];
             let re = new RegExp(regexp);
 
             assert
@@ -147,7 +168,7 @@ export class Editor {
 
     checkLineTextAbsence(lineNumber: number, regexp: string) {
         let isTextAbsentInLine = (editorLines: Array<string>) => {
-            let lineText: string = editorLines[lineNumber];
+            let lineText: string = editorLines[lineNumber - 1];
             let re = new RegExp(regexp);
 
             assert
