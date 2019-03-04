@@ -90,10 +90,14 @@ describe("Work with IDE", () => {
     })
 
     it("Perform editor checks", ()=>{
-        editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
-        editor.checkTextAbsence("return111");
-        editor.checkLineTextContains(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
-        editor.checkLineTextAbsence(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
+        // editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
+        // editor.checkTextAbsence("return111");
+        // editor.checkLineTextContains(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
+        // editor.checkLineTextAbsence(12, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
+
+        editor.setCursorToLineAndChar(17, 33);
+        editor.performControlSpaceCombination();
+
     })
 
     // it("Tab focusing", ()=>{

@@ -8,6 +8,8 @@ export class Editor {
 
     private static readonly EDITOR_LINES: string = ".lines-content .view-line";
     private static readonly EDITOR_BODY: string = "#theia-main-content-panel .lines-content";
+    private static readonly SUGGESTION_WIDGET_BODY: string = "div[widgetId='editor.widget.suggestWidget']"
+    private static readonly SUGGESTION_WIDGET_ROW: string = "div[widgetId='editor.widget.suggestWidget'] .monaco-list-row";
 
     private readonly proposalWidget: ProposalWidget = new ProposalWidget();
 
@@ -91,18 +93,17 @@ export class Editor {
     public getEditorLines(checkFunction: (lines: Array<String>) => void) {
         let linesText: Array<string> = new Array();
 
-        cy.get('body').then(()=>{
-            this.addAttributeToLines().then( linesCapacity => {
+        cy.get('body').then(() => {
+            this.addAttributeToLines().then(linesCapacity => {
                 let i: number;
 
-                for(i=1; i <= linesCapacity; i ++){
+                for (i = 1; i <= linesCapacity; i++) {
                     cy.get(`div[data-cy='editor-line-${i}']`).invoke('text').then(text => {
-                        // console.log("======>>>>>   "  +  text);
                         linesText.push("" + text);
                     })
                 }
             })
-        }).should(()=>{
+        }).should(() => {
             checkFunction(linesText);
         })
 
@@ -158,30 +159,69 @@ export class Editor {
         this.getEditorLines(isTextAbsentInLine);
     }
 
-    performCtrlKeyCombination(buttonCode: number) {
-        this.waitEditorOpened();
+    setCursorToLineAndChar(lineNumber: number, charNumber: number) {
+        this.waitEditorOpened()
+
+        //set cursor to the first line
+        cy.get('#theia-main-content-panel')
+            .should('be.visible')
+            .trigger("keydown", { keyCode: 40, which: 40 })
+            .trigger("keydown", { keyCode: 40, which: 40 })
+            .trigger("keydown", { keyCode: 36, which: 36, ctrlKey: true })
+            .then(() => {
+                //move cursor to specified line
+                let lineIndex;
+
+                for (lineIndex = 1; lineIndex < lineNumber; lineIndex++) {
+                    cy.get('#theia-main-content-panel').trigger("keydown", { keyCode: 40, which: 40 })
+                }
+            }).then(() => {
+                //move cursor to specified char
+                let charIndex;
+
+                for (charIndex = 1; charIndex < charNumber; charIndex++) {
+                    cy.get('#theia-main-content-panel').trigger("keydown", { keyCode: 39, which: 39 })
+                }
+            });
+
+    }
+
+    performControlSpaceCombination() {
+        this.waitEditorOpened()
 
         cy.get('#theia-main-content-panel')
-            .trigger("keydown", { keyCode: buttonCode, which: buttonCode, ctrlKey: true })
+            .should('be.visible')
+            .trigger("keydown", { keyCode: 32, which: 32, ctrlKey: true })
     }
 
-    setCursorToLine(lineNumber: number) {
 
-        this.performCtrlKeyCombination(71);
-
-        this.proposalWidget.waitWidget();
-        this.proposalWidget.typeToInputFieldAndPressEnter(lineNumber.toString())
-        this.proposalWidget.waitWidgetClosed();
+    private getLineLocator(lineNumber: number): string {
+        return `div[data-cy='editor-line-${lineNumber}']>span`;
     }
 
-    performFindFileKeyShortcut() {
-        // this.performKeyCombination('{ctrl}P')
-
+    typeToLine(lineNumber: number, text: string) {
+        //workaround for avoiding random cursor placement
+        this.addAttributeToLines()
+            .then(linesCapacity => {
+                cy.get(this.getLineLocator(1))
+                    .then(element => {
+                        element[0].setAttribute('contenteditable', '');
+                    })
+                    .type("{leftarrow}")
+            })
+            .then(() => {
+                this.addAttributeToLines().then(linesCapacity => {
+                    cy.get(this.getLineLocator(lineNumber))
+                        .then(element => {
+                            element[0].setAttribute('contenteditable', '');
+                        })
+                        .type(text, { force: true });
+                })
+            })
     }
 
-    waitSuggestionContainer() {
 
-    }
+
 
 
 
