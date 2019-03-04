@@ -316,7 +316,13 @@ declare namespace che {
     };
     projects?: Array <any>;
     commands?: Array <any>;
-    attributes?: {[attrName: string]: string};
+    attributes?: IWorkspaceConfigAttributes;
+  }
+
+  export interface IWorkspaceConfigAttributes {
+    persistVolumes?: string;
+    editor?: string;
+    plugins?: string;
   }
 
   export interface IWorkspaceEnvironment {
