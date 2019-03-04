@@ -12,10 +12,14 @@
 package org.eclipse.che.core.tracing.metrics;
 
 import io.opentracing.contrib.metrics.micrometer.MicrometerMetricsReporter;
-import io.opentracing.tag.Tags;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+/**
+ * Provider of {@link MicrometerMetricsReporter}, which is responsible for reporting metrics of
+ * traced spans to prometheus server. Here is also specified configuration as for metrics name and
+ * tags.
+ */
 @Singleton
 public class MicrometerMetricsReporterProvider implements Provider<MicrometerMetricsReporter> {
 
@@ -24,10 +28,10 @@ public class MicrometerMetricsReporterProvider implements Provider<MicrometerMet
   public MicrometerMetricsReporterProvider() {
     micrometerMetricsReporter =
         MicrometerMetricsReporter.newMetricsReporter()
-            .withName("MyName")
-            .withConstLabel("span.kind", Tags.SPAN_KIND_CLIENT)
+            .withName("che_server_api_tracing_span")
+            .withTagLabel("span.kind", null)
+            .withTagLabel("http.status_code", null)
             .build();
-    ;
   }
 
   @Override

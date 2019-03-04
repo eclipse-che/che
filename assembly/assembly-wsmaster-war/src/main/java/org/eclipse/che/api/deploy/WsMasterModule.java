@@ -78,6 +78,7 @@ import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.core.db.DBTermination;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.tracing.metrics.TracingMetricsModule;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
 import org.eclipse.che.mail.template.TemplateProcessor;
@@ -284,6 +285,10 @@ public class WsMasterModule extends AbstractModule {
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
     MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
+
+    if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
+      install(new TracingMetricsModule());
+    }
 
     if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
       install(new org.eclipse.che.core.tracing.TracingModule());
