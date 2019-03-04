@@ -173,8 +173,9 @@ declare namespace che {
     }
 
     export interface ICheMachineSourceTypes {
-      TOOL,
-      RECIPE
+      TOOL: string;
+      RECIPE: string;
+      getValues(): Array<string>;
     }
   }
 
