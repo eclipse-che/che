@@ -287,16 +287,16 @@ public class WsMasterModule extends AbstractModule {
     MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
 
     if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
-      install(new TracingMetricsModule());
-    }
-
-    if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
       install(new org.eclipse.che.core.tracing.TracingModule());
     }
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       install(new org.eclipse.che.core.metrics.MetricsModule());
       install(new WsMasterMetricsModule());
       install(new MetricsOverrideBinding());
+    }
+    if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))
+        && Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
+      install(new TracingMetricsModule());
     }
   }
 

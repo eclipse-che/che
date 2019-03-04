@@ -12,6 +12,7 @@
 package org.eclipse.che.core.tracing.metrics;
 
 import io.opentracing.contrib.metrics.micrometer.MicrometerMetricsReporter;
+import io.opentracing.tag.Tags;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
@@ -23,14 +24,16 @@ import javax.inject.Singleton;
 @Singleton
 public class MicrometerMetricsReporterProvider implements Provider<MicrometerMetricsReporter> {
 
+  private static final String TRACING_METRIC_NAME = "che_server_api_tracing_span";
+
   private final MicrometerMetricsReporter micrometerMetricsReporter;
 
   public MicrometerMetricsReporterProvider() {
     micrometerMetricsReporter =
         MicrometerMetricsReporter.newMetricsReporter()
-            .withName("che_server_api_tracing_span")
-            .withTagLabel("span.kind", null)
-            .withTagLabel("http.status_code", null)
+            .withName(TRACING_METRIC_NAME)
+            .withConstLabel(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
+            .withTagLabel(Tags.HTTP_STATUS.getKey(), null)
             .build();
   }
 
