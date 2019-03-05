@@ -8,8 +8,9 @@ import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
 import { ProposalWidget } from "../pageobjects/ide/ProposalWidget";
+import { NameGenerator } from "../pageobjects/workspace/NameGenerator";
 
-const workspaceName: string = "wksp-new-workspace";
+const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 
 const loginPage: LoginPage = new LoginPage();
 // const testWorkspace: TestWorkspace = new TestWorkspace("wksp-test-workspace");
@@ -27,10 +28,9 @@ describe("E2E test", () => {
     context("Prepare dashboard", () => {
         it("Open dashboard", () => {
             dashboard.openDashboard();
-            dashboard.waitLoaderPageAbcence()
-            loginPage.defaultLogin();
             dashboard.waitLoaderPage();
-            dashboard.waitLoaderPageAbcence();
+            dashboard.waitLoaderPageAbcence()
+            dashboard.waitDashboard();
         })
 
     })
@@ -71,10 +71,6 @@ describe("E2E test", () => {
     context("Work with IDE", () => {
         let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
         let tabTitle: string = "GreetingController.java";
-
-        // it("open workspace", ()=>{
-        //     cy.visit("http://route8l94wkmp-eclipse-che.172.19.20.205.nip.io/#/projects")
-        // })
 
         it("Expand project and open file in editor", () => {
             projectTree.clickOnItem("web-java-spring")

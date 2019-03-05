@@ -15,7 +15,9 @@ export class NewWorkspace {
     typeWorkspaceName(workspaceName: string) {
         cy.get(NewWorkspace.NAME_FIELD)
             .clear()
-            .type(workspaceName);
+            .should('have.value', "")
+            .type(workspaceName)
+            .should('have.value', workspaceName);
     }
 
 
