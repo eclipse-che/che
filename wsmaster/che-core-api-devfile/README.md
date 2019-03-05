@@ -1,6 +1,6 @@
 
 
-### Prerequisites
+### Introduction
 Previously, the  two kind of recipes was available to bootstrap a cloud developer workspace and make it portable: [Chefile](https://www.eclipse.org/che/docs/chefile.html) 
 and [Factories](https://www.eclipse.org/che/docs/factories-getting-started.html#try-a-factory).
 As a continuation of this, the brand new `devfile` format was introduced, which unites the forming simplicity and the high variety of different tools available to develop a container based application.
