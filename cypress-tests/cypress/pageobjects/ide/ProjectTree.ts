@@ -32,7 +32,8 @@ export class ProjectTree {
     waitProjectTreeContainer() {
         cy.get(ProjectTree.PROJECT_TREE_CONTAINER)
             .should('be.visible')
-            .should('not.have.class', 'animating');
+            .should('not.have.class', 'animating')
+            .wait(1000);
     }
 
     waitProjectTreeContainerClosed() {

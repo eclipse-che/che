@@ -5,6 +5,7 @@ export class Ide {
 
     private static readonly ROOT_URL: string = Cypress.env("root_url");
     private static readonly LOAD_PAGE_TIMEOUT: number = Cypress.env("load_page_timeout");
+    private static readonly LANGUAGE_SERVER_INITIALIZATION_TIMEOUT: number = Cypress.env("language_server_initialization_timeout");
 
     private static readonly TOP_MENU_PANEL: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
     private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
@@ -52,7 +53,27 @@ export class Ide {
         this.waitPreloaderAbsent();
     }
 
+    waitStatusBarContains(expectedText: string) {
+        cy.get("div[id='theia-statusBar']").invoke('text').should(text => {
+                let elementText: string = "" + text;
 
+                console.log("= yes ==>>>>  ", elementText)
+
+                expect(elementText).contain(expectedText);
+            })
+
+        // .should('contain', expectedText, {timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT})
+    }
+
+    waitStatusBarTextAbcence(expectedText: string) {
+        cy.get("div[id='theia-statusBar']").invoke('text', {timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT}).should(text => {
+            let elementText: string = "" + text;
+
+            console.log("= no ==>>>>  ", elementText)
+
+            expect(elementText).not.contain(expectedText);
+        })
+    }
 
 
 
