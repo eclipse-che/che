@@ -181,8 +181,7 @@ Devfile allows to specify commands set to be available for execution in workspac
 
 ### Live working examples
 
- - Hello World Theia Plugin
- - Sample Go Application
+    //TODO
 
 ### Planned features
 There is still a lot of plans to extend Devfile possibilities, such as support multiple kubernetes/openshift tools etc
