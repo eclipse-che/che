@@ -61,6 +61,7 @@ build_native() {
 }
 
 deploy() {
+   cd ${TMP_DIR}
    BRANCH_ARG=""
    if [[ ! -z "${DEPLOY_BRANCH}" ]]; then
        BRANCH_ARG="-b ${DEPLOY_BRANCH}"
