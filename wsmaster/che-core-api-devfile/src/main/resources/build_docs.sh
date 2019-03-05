@@ -30,6 +30,8 @@ build() {
   else
     build_native
   fi
+  cd $RUN_DIR
+  cp ../../../README.md ${TMP_DIR}/docs/index.md
 }
 
 build_with_docker() {
@@ -54,11 +56,11 @@ build_native() {
    npm link
    cd ..
    jsonschema2md -d schema -o docs -n -e json
-   mv ./docs/devfile.md ./docs/index.md
    echo "Building docs done."
 }
 
 deploy() {
+   cd ${TMP_DIR}
    rm -rf devfile && git clone https://${GH_TOKEN}@github.com/redhat-developer/devfile.git
    cp -f docs/* ./devfile/docs
    cd devfile
@@ -132,7 +134,7 @@ parse_args() {
 copyDocs() {
   cd $RUN_DIR
   cp -r ${TMP_DIR}/docs/. -t ${FOLDER}
-  echo "Docs is saved as ${FOLDER}/index.md"
+  echo "Docs is saved into ${FOLDER}"
 }
 
 RUN_DIR=$(pwd)
