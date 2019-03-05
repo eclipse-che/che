@@ -566,7 +566,7 @@ export class CheWorkspace {
    */
   notifyIfEphemeral(workspaceId: string): void {
     let workspace = this.workspacesById.get(workspaceId);
-    let isEphemeral = workspace && workspace.config && workspace.config.attributes && workspace.config.attributes.persistVolumes ? JSON.parse(workspace.config.attributes.persistVolumes) : false;
+    let isEphemeral = workspace && workspace.config && workspace.config.attributes && workspace.config.attributes.persistVolumes ? !JSON.parse(workspace.config.attributes.persistVolumes) : false;
     if (isEphemeral) {
       this.cheNotification.showWarning('Your are starting an ephemeral workspace. All changes to the source code will be lost when the workspace is stopped unless they are pushed to a source code repository.');
     }
