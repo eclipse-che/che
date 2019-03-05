@@ -267,10 +267,10 @@ export class WorkspaceDetailsOverviewController {
    */
   onEphemeralModeChange(): void {
     if (this.isEphemeralMode) {
-      this.workspaceDetails.config.attributes.persistVolumes = 'true';
+      this.workspaceDetails.config.attributes.persistVolumes = 'false';
     } else {
       if (this.attributesCopy.persistVolumes) {
-        this.workspaceDetails.config.attributes.persistVolumes = 'false';
+        this.workspaceDetails.config.attributes.persistVolumes = 'true';
       } else {
         delete this.workspaceDetails.config.attributes.persistVolumes;
       }
