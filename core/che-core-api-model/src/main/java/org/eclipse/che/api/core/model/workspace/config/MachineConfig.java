@@ -38,6 +38,25 @@ public interface MachineConfig {
   String MEMORY_REQUEST_ATTRIBUTE = "memoryRequestBytes";
 
   /**
+   * Name of the attribute from {@link #getAttributes()} which, if present, defines the entrypoint
+   * command to be executed in the machine/container.
+   *
+   * <p>The format is a YAML list of strings, e.g. {@code ['/bin/sh', '-c']}
+   */
+  String CONTAINER_COMMAND_ATTRIBUTE = "containerCommand";
+
+  /**
+   * Name of the attribute from {@link #getAttributes()} which, if present, defines the command line
+   * arguments of the entrypoint command specified using the {@link #CONTAINER_COMMAND_ATTRIBUTE}.
+   *
+   * <p>If {@link #CONTAINER_COMMAND_ATTRIBUTE} is not present, the default command defined in the
+   * image is used and the arguments are provided to it.
+   *
+   * <p>The format is a YAML list of strings, e.g. {@code ['-f', '--yes']}
+   */
+  String CONTAINER_ARGS_ATTRIBUTE = "containerArgs";
+
+  /**
    * Returns configured installers.
    *
    * <p>Values can be installer id with version separated with ':' symbol or just id then latest
