@@ -38,7 +38,7 @@ tools:
  
 For the detailed explanation of all devfile components assignment and possible values, please see the following resources:
  - [Specification repository](https://github.com/redhat-developer/devfile)  
- - [detailed json-schema documentation](https://mshaposhnik.github.io/devfile/devfile).
+ - [detailed json-schema documentation](https://redhat-developer.github.io/devfile/devfile).
 
 ### Getting Started
 The simplest way to use devfile is to have it deployed into GitHub source repository and then create factory from this repo.
