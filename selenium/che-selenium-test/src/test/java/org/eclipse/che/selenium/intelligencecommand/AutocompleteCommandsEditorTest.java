@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.constant.TestBuildConstants.BUILD_SU
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsDefaultNames.MAVEN_NAME;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsGoals.BUILD_GOAL;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandsTypes.MAVEN_TYPE;
+import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.PREPARING_WS_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorLocator.COMMAND_LINE_EDITOR;
 import static org.eclipse.che.selenium.pageobject.intelligent.CommandsEditor.CommandsEditorLocator.PREVIEW_URL_EDITOR;
 
@@ -57,15 +58,14 @@ public class AutocompleteCommandsEditorTest {
     testProjectServiceClient.importProject(
         testWorkspace.getId(), Paths.get(resource.toURI()), PROJ_NAME, ProjectTemplates.PLAIN_JAVA);
     ide.open(testWorkspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJ_NAME);
   }
 
   @Test(priority = 1)
   public void checkAutocompleteCommandLine() {
-    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJ_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-    projectExplorer.waitItem(PATH_TO_JAVA_FILE);
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JAVA_FILE);
     projectExplorer.openItemByPath(PATH_TO_JAVA_FILE);
     createMavenCommand();
     commandsEditor.setFocusIntoTypeCommandsEditor(COMMAND_LINE_EDITOR);
@@ -97,7 +97,7 @@ public class AutocompleteCommandsEditorTest {
     commandsEditor.waitAutocompleteContainerIsClosed();
     commandsEditor.waitTextIntoEditor("${explorer.current.project.name");
     commandsEditor.clickOnRunButton();
-    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS);
+    consoles.waitExpectedTextIntoConsole(BUILD_SUCCESS, PREPARING_WS_TIMEOUT_SEC);
     consoles.waitExpectedTextIntoConsole("maven");
     consoles.waitExpectedTextIntoConsole(PROJ_NAME);
   }
@@ -143,6 +143,8 @@ public class AutocompleteCommandsEditorTest {
   }
 
   private void createMavenCommand() {
+    projectExplorer.waitAndSelectItem(PROJ_NAME);
+    projectExplorer.waitItemIsSelected(PROJ_NAME);
     commandsExplorer.openCommandsExplorer();
     commandsExplorer.waitCommandExplorerIsOpened();
     commandsExplorer.clickAddCommandButton(BUILD_GOAL);

@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.URLRewriter.NoOpURLRewriter;
@@ -42,7 +41,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRunti
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
-import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -56,7 +54,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServer
 public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShiftEnvironment> {
 
   private final OpenShiftProject project;
-  private final UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
 
   @Inject
   public OpenShiftInternalRuntime(
@@ -104,10 +101,10 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         context,
         project);
     this.project = project;
-    this.unrecoverablePodEventListenerFactory = unrecoverablePodEventListenerFactory;
   }
 
   @Override
+  @Traced
   protected void startMachines() throws InfrastructureException {
     OpenShiftEnvironment osEnv = getContext().getEnvironment();
     String workspaceId = getContext().getIdentity().getWorkspaceId();
@@ -117,23 +114,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
     List<Service> createdServices = createServices(osEnv, workspaceId);
     List<Route> createdRoutes = createRoutes(osEnv, workspaceId);
 
-    // TODO https://github.com/eclipse/che/issues/7653
-    // project.pods().watch(new AbnormalStopHandler());
-
-    project.deployments().watchEvents(new MachineLogsPublisher());
-    if (unrecoverablePodEventListenerFactory.isConfigured()) {
-      OpenShiftEnvironment environment = getContext().getEnvironment();
-      Set<String> toWatch =
-          environment
-              .getPodsData()
-              .values()
-              .stream()
-              .map(podData -> podData.getMetadata().getName())
-              .collect(Collectors.toSet());
-      UnrecoverablePodEventListener handler =
-          unrecoverablePodEventListenerFactory.create(toWatch, this::handleUnrecoverableEvent);
-      project.deployments().watchEvents(handler);
-    }
+    listenEvents();
 
     doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
   }

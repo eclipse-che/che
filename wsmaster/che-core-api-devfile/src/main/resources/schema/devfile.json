@@ -108,6 +108,11 @@
           "name",
           "type"
         ],
+        "dependencies": {
+          "localContent": [
+            "local"
+          ]
+        },
         "additionalProperties": false,
         "oneOf" : [
           {
@@ -117,11 +122,14 @@
                   "cheEditor",
                   "chePlugin"
                 ]
-              }
+              },
+              "name": {},
+              "id": {}
             },
             "required": [
               "id"
-            ]
+            ],
+            "additionalProperties": false
           },
           {
             "properties": {
@@ -130,11 +138,16 @@
                   "kubernetes",
                   "openshift"
                 ]
-              }
+              },
+              "name": {},
+              "local": {},
+              "localContent": {},
+              "selector": {}
             },
             "required": [
               "local"
-            ]
+            ],
+            "additionalProperties": false
           },
           {
             "properties": {
@@ -142,12 +155,20 @@
                 "enum": [
                   "dockerimage"
                 ]
-              }
+              },
+              "name": {},
+              "image": {},
+              "memoryLimit": {},
+              "mountSources": {},
+              "volumes": {},
+              "env": {},
+              "endpoints": {}
             },
             "required": [
               "image",
               "memoryLimit"
-            ]
+            ],
+            "additionalProperties": false
           }
         ],
         "properties": {
@@ -181,6 +202,13 @@
             "type": "string",
             "examples": [
               "petclinic-app.yaml"
+            ]
+          },
+          "localContent": {
+            "description": "Inlined content of a file specified in field 'local'",
+            "type": "string",
+            "examples": [
+              "{\"kind\":\"List\",\"items\":[{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"name\":\"ws\"},\"spec\":{\"containers\":[{\"image\":\"eclipse/che-dev:nightly\"}]}}]}"
             ]
           },
           "selector": {

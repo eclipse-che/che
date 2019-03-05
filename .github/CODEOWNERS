@@ -21,7 +21,7 @@ assembly/** @riuvshin @skabashnyuk
 core/** @skabashnyuk
 
 # workspace runtime infrastructure implementations
-infrastructures/** @garagatyi @sleshchenko
+infrastructures/** @garagatyi @sleshchenko @amisevsk @metlos
 
 # multiuser che
 multiuser/api/**  @sleshchenko

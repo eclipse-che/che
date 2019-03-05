@@ -14,9 +14,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.util;
 import com.google.common.collect.ImmutableSet;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 
 /**
@@ -51,6 +53,24 @@ public class UnrecoverablePodEventListenerFactory {
     }
 
     return new UnrecoverablePodEventListener(unrecoverableEvents, pods, unrecoverableEventHandler);
+  }
+
+  public UnrecoverablePodEventListener create(
+      KubernetesEnvironment environment, Consumer<PodEvent> unrecoverableEventHandler) {
+    if (!isConfigured()) {
+      throw new IllegalStateException("Unrecoverable events are not configured");
+    }
+
+    Set<String> toWatch =
+        environment
+            .getPodsData()
+            .values()
+            .stream()
+            .map(podData -> podData.getMetadata().getName())
+            .collect(Collectors.toSet());
+
+    return new UnrecoverablePodEventListener(
+        unrecoverableEvents, toWatch, unrecoverableEventHandler);
   }
 
   /**

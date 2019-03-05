@@ -14,6 +14,8 @@ package org.eclipse.che.core.metrics;
 import com.google.common.annotations.Beta;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
+import io.github.mweirauch.micrometer.jvm.extras.ProcessMemoryMetrics;
+import io.github.mweirauch.micrometer.jvm.extras.ProcessThreadMetrics;
 import io.micrometer.core.instrument.binder.MeterBinder;
 import io.micrometer.core.instrument.binder.jvm.ClassLoaderMetrics;
 import io.micrometer.core.instrument.binder.jvm.JvmGcMetrics;
@@ -49,5 +51,7 @@ public class MetricsModule extends AbstractModule {
     meterMultibinder.addBinding().to(UptimeMetrics.class);
     meterMultibinder.addBinding().to(FileStoresMeterBinder.class);
     meterMultibinder.addBinding().to(ApiResponseCounter.class);
+    meterMultibinder.addBinding().to(ProcessMemoryMetrics.class);
+    meterMultibinder.addBinding().to(ProcessThreadMetrics.class);
   }
 }

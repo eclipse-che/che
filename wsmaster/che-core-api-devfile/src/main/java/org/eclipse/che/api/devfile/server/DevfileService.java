@@ -28,13 +28,11 @@ import io.swagger.annotations.ExampleProperty;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -43,6 +41,8 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
@@ -92,7 +92,6 @@ public class DevfileService extends Service {
    * Creates workspace from provided devfile
    *
    * @param data devfile content
-   * @param verbose return more explained validation error messages if any
    * @return created workspace configuration
    */
   @POST
@@ -113,23 +112,20 @@ public class DevfileService extends Service {
     @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
-  public Response createFromYaml(
-      String data,
-      @ApiParam(value = "Provide extended validation messages")
-          @DefaultValue("false")
-          @QueryParam("verbose")
-          boolean verbose)
+  public Response createFromYaml(String data)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
     WorkspaceImpl workspace;
     try {
-      Devfile devfile = devfileManager.parse(data, verbose);
-      workspace = devfileManager.createWorkspace(devfile, null);
+      Devfile devfile = devfileManager.parse(data);
+      workspace =
+          devfileManager.createWorkspace(
+              devfile,
+              new FetchNotSupportedProvider(
+                  "Devfile Service does not support fetching local file referenced in Devfile."));
     } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());
-    } catch (JsonProcessingException e) {
-      throw new ServerException(e.getMessage(), e);
     }
     return Response.status(201)
         .entity(asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext())))

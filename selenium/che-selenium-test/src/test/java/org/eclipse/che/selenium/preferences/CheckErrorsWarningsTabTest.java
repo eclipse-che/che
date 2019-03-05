@@ -94,7 +94,8 @@ public class CheckErrorsWarningsTabTest {
     final List<String> expectedErrorsWarningsList = readFile(errorsWarningFilePath);
 
     // open file
-    projectExplorer.openItemByVisibleNameInExplorer(expectedTabTitle + ".java");
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_CLASS_IN_SPRING_PACKAGE);
+    projectExplorer.openItemByPath(PATH_TO_CLASS_IN_SPRING_PACKAGE);
     editor.waitTabIsPresent(expectedTabTitle);
     editor.waitTabSelection(0, expectedTabTitle);
     editor.waitActive();

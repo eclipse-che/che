@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.List;
+import java.util.Set;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -111,7 +112,7 @@ public class DeployBrokerTest {
     // given
     when(unrecoverableEventListenerFactory.isConfigured()).thenReturn(true);
     UnrecoverablePodEventListener listener = mock(UnrecoverablePodEventListener.class);
-    when(unrecoverableEventListenerFactory.create(any(), any())).thenReturn(listener);
+    when(unrecoverableEventListenerFactory.create(any(Set.class), any())).thenReturn(listener);
 
     // when
     deployBrokerPhase.execute();

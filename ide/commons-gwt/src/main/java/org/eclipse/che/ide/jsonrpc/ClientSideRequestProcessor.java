@@ -18,7 +18,7 @@ import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessor;
 public class ClientSideRequestProcessor implements RequestProcessor {
 
   @Override
-  public void process(Runnable runnable) {
+  public void process(String endpointId, Runnable runnable) {
     runnable.run();
   }
 }

@@ -23,6 +23,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginMetaRetriever;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
@@ -56,6 +57,7 @@ public class SidecarToolingProvisioner<E extends KubernetesEnvironment> {
     this.pluginBrokerManager = pluginBrokerManager;
   }
 
+  @Traced
   @Beta
   public void provision(RuntimeIdentity id, StartSynchronizer startSynchronizer, E environment)
       throws InfrastructureException {

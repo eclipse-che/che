@@ -74,7 +74,6 @@ public class RenamePackageSpringTest {
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
     ide.waitOpenedWorkspaceIsReadyToUse();
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME_1);
     consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME_2);
   }
 

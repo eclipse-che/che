@@ -68,7 +68,8 @@ public class GithubFactoryParametersResolverTest {
 
   /**
    * Capturing the parameter when calling {@link URLFactoryBuilder#createFactoryFromJson(String)} or
-   * {@link URLFactoryBuilder#createFactoryFromDevfile(String, java.util.function.Function)}
+   * {@link URLFactoryBuilder#createFactoryFromDevfile(String,
+   * org.eclipse.che.api.devfile.server.FileContentProvider)}
    */
   @Captor private ArgumentCaptor<String> fileLocationArgumentCaptor;
 

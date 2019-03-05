@@ -13,19 +13,25 @@
 
 set -e
 
-TMP_DIR="/tmp/devfile"
+check_github_token_is_set() {
+  if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
+    echo "GitHub token not found."
+    echo "Configure env var DEVFILE_DOCS_GITHUB_TOKEN or use --ssh argument if you have ssh keys configured"
+    echo "Also you is able to use --no-deploy argument if you do not want to push Docs automatically"
+    echo "Exiting now..."
+    exit 1
+  else
+    GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
+  fi
+}
 
-if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
-  echo "GitHub token not found, exiting now..."
-  exit 1
-else
-  GH_TOKEN="${DEVFILE_DOCS_GITHUB_TOKEN}"
-fi
-
-
-DEFAULT_COMMIT_MESSAGE="Update devfile docs"
-DEFAULT_BUILD_DOCKER=false
-DEFAULT_DEPLOY=true
+build() {
+  if [[ "$IS_DOCKER" == "true" ]]; then
+    build_with_docker
+  else
+    build_native
+  fi
+}
 
 build_with_docker() {
     echo "Building docs using docker."
@@ -37,14 +43,13 @@ build_with_docker() {
     echo "Building docs done."
 }
 
-
 build_native() {
    echo "Building docs using native way."
    check_packages git npm
    mkdir -p ${TMP_DIR}/schema
    cp -f schema/* ${TMP_DIR}/schema
    cd ${TMP_DIR}
-   git clone -b '1.1.0' --single-branch git@github.com:adobe/jsonschema2md.git
+   git clone -b '1.1.0' --single-branch https://github.com/adobe/jsonschema2md.git
    cd jsonschema2md
    npm install
    npm link
@@ -55,7 +60,18 @@ build_native() {
 }
 
 deploy() {
-   rm -rf devfile && git clone https://${GH_TOKEN}@github.com/redhat-developer/devfile.git
+   BRANCH_ARG=""
+   if [[ ! -z "${DEPLOY_BRANCH}" ]]; then
+       BRANCH_ARG="-b ${DEPLOY_BRANCH}"
+   fi
+
+   if [[ "$USE_SSH" == "true" ]]; then
+     DOCS_REPOSITORY_URL="git@github.com:${DEPLOY_ORGANIZATION}/devfile.git"
+   else
+     DOCS_REPOSITORY_URL=https://${GH_TOKEN}@github.com/${DEPLOY_ORGANIZATION}/devfile.git
+   fi
+
+   rm -rf devfile && git clone --single-branch ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ `git status --porcelain` ]]; then
@@ -79,16 +95,22 @@ check_packages() {
    done
 }
 
-cleanup() {
+cleanupTmpDir() {
    rm -rf ${TMP_DIR}
 }
 
 print_help() {
    echo "This script builds and deploys documentation in markdown format from devfile json schema."
    echo "Command line options:"
-   echo "--docker     Build docs in docker container"
-   echo "--no-deploy  Skip deploy result to remote"
-   echo "--message    Override default commit message"
+   echo " Build related options"
+   echo "   --docker      Build docs in docker container"
+   echo "   --folder|-f   If specified then script will save docs files in the specified folder. Examples: -f=.|-f=/home/user"
+   echo " Deploy related options"
+   echo "   --message     Override default commit message. Example: --message=\"Update Devfile Docs\""
+   echo "   --no-deploy   Skip deploy result to remote"
+   echo "   --org         Specifies organization of devfile repository to which Docs should be pushed. Default value: redhat-developer"
+   echo "   --branch|-b   Specifies branch to which Docs should be pushed. Default behaviour: use default GitHub repo branch"
+   echo "   --ssh         Configures script to use ssh link to GitHub Docs repository. Default: false"
 }
 
 parse_args() {
@@ -103,33 +125,84 @@ parse_args() {
                IS_DEPLOY=false
                shift
            ;;
-           --message)
-               MESSAGE="${i#*=}"
+           --message=*)
+               COMMIT_MESSAGE="${i#*=}"
                shift
            ;;
-            -help|--help)
+           -f=*| --folder=*)
+               FOLDER="${i#*=}"
+               shift
+           ;;
+           --org=*)
+               DEPLOY_ORGANIZATION="${i#*=}"
+               shift
+           ;;
+           --branch=*)
+               DEPLOY_BRANCH="${i#*=}"
+               shift
+           ;;
+           --ssh)
+               USE_SSH="true"
+               shift
+           ;;
+           -help|--help)
                print_help
                exit 0
-           ;;
-         esac
+               ;;
+           *)
+               echo "You've passed wrong arg '$i'."
+               print_help
+               exit 1
+               ;;
+        esac
      done
 }
 
-cleanup
-parse_args "$@"
+copyDocs() {
+  cd $RUN_DIR
+  cp -r ${TMP_DIR}/docs/. -t ${FOLDER}
+  echo "Docs is saved as ${FOLDER}/index.md"
+}
 
-COMMIT_MESSAGE=${MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
+RUN_DIR=$(pwd)
+TMP_DIR="/tmp/devfile"
+
+DEFAULT_BUILD_DOCKER=false
 IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
+
+DEFAULT_DEPLOY=true
 IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
 
-if [[ "$IS_DOCKER" == "true" ]];
-then
-    build_with_docker
-else
-    build_native
+DEFAULT_COMMIT_MESSAGE="Update devfile docs"
+COMMIT_MESSAGE=${COMMIT_MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
+
+DEFAULT_DEPLOY_ORGANIZATION=redhat-developer
+DEPLOY_ORGANIZATION=${DEPLOY_ORGANIZATION:-${DEFAULT_COMMIT_MESSAGE}}
+
+DEFAULT_DEPLOY_BRANCH="" # means use default branch of GitHub repository
+DEPLOY_BRANCH=${DEFAULT_DEPLOY_BRANCH:-${DEPLOY_BRANCH}}
+
+DEFAULT_USE_SSH="false"
+USE_SSH=${DEFAULT_USE_SSH:-${USE_SSH}}
+
+parse_args "$@"
+
+if [[ "$IS_DEPLOY" == "true" && "$USE_SSH" == "false" ]]; then
+  check_github_token_is_set
 fi
+
+cleanupTmpDir
+
+build
+
 if [[ "$IS_DEPLOY" == "true" ]]; then
     deploy
 fi
-cleanup
+
+if [[ "$FOLDER" ]]; then
+    copyDocs
+fi
+
+echo "Working Dir where script results can be found is ${TMP_DIR}"
+
 exit 0

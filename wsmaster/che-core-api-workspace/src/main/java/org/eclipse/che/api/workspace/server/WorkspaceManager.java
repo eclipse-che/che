@@ -26,6 +26,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_N
 import com.google.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import javax.inject.Singleton;
 import org.eclipse.che.account.api.AccountManager;
@@ -48,6 +49,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,13 +105,18 @@ public class WorkspaceManager {
   public WorkspaceImpl createWorkspace(
       WorkspaceConfig config, String namespace, @Nullable Map<String, String> attributes)
       throws ServerException, NotFoundException, ConflictException, ValidationException {
+    TracingTags.STACK_ID.set(() -> attributes.getOrDefault("stackId", "no stack"));
+
     requireNonNull(config, "Required non-null config");
     requireNonNull(namespace, "Required non-null namespace");
     validator.validateConfig(config);
     if (attributes != null) {
       validator.validateAttributes(attributes);
     }
-    return doCreateWorkspace(config, accountManager.getByName(namespace), attributes, false);
+    WorkspaceImpl workspace =
+        doCreateWorkspace(config, accountManager.getByName(namespace), attributes, false);
+    TracingTags.WORKSPACE_ID.set(workspace.getId());
+    return workspace;
   }
 
   /**
@@ -264,13 +271,20 @@ public class WorkspaceManager {
    */
   @Traced
   public void removeWorkspace(String workspaceId) throws ConflictException, ServerException {
+    TracingTags.WORKSPACE_ID.set(workspaceId);
+
     requireNonNull(workspaceId, "Required non-null workspace id");
     if (runtimes.hasRuntime(workspaceId)) {
       throw new ConflictException(
           format("The workspace '%s' is currently running and cannot be removed.", workspaceId));
     }
 
-    workspaceDao.remove(workspaceId);
+    Optional<WorkspaceImpl> workspaceOpt = workspaceDao.remove(workspaceId);
+    workspaceOpt.ifPresent(
+        workspace ->
+            TracingTags.STACK_ID.set(
+                workspace.getAttributes().getOrDefault("stackId", "no stack")));
+
     LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOrUndefined());
   }
 

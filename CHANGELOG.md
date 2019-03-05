@@ -1,5 +1,68 @@
 # Change Log
 
+## [7.0.0-beta-1.0](https://github.com/eclipse/che/tree/7.0.0-beta-1.0) (2019-02-27)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.0...7.0.0-beta-1.0)
+
+**Merged pull requests:**
+
+- RELEASE: Update CHANGELOG [\#12779](https://github.com/eclipse/che/pull/12779) ([riuvshin](https://github.com/riuvshin))
+- RELEASE: Set next development version [\#12777](https://github.com/eclipse/che/pull/12777) ([riuvshin](https://github.com/riuvshin))
+
+
+## [6.19.0](https://github.com/eclipse/che/tree/6.19.0) (2019-02-27)
+[Full Changelog](https://github.com/eclipse/che/compare/6.18.2...6.19.0)
+
+**Merged pull requests:**
+
+- RELEASE: Set next development version [\#12768](https://github.com/eclipse/che/pull/12768) ([riuvshin](https://github.com/riuvshin))
+- Add Angel Misevski and Lukas Krejci to the codeowners of infras code [\#12760](https://github.com/eclipse/che/pull/12760) ([garagatyi](https://github.com/garagatyi))
+- Selenium: Correct the selenium tests to increase reliability [\#12756](https://github.com/eclipse/che/pull/12756) ([artaleks9](https://github.com/artaleks9))
+- Trust self-signed TLS certificate in selenium tests [\#12753](https://github.com/eclipse/che/pull/12753) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add ProcessMemoryMetrics ProcessThreadMetrics [\#12749](https://github.com/eclipse/che/pull/12749) ([skabashnyuk](https://github.com/skabashnyuk))
+- Continue recovering workspaces when unchecked exception is thrown [\#12748](https://github.com/eclipse/che/pull/12748) ([amisevsk](https://github.com/amisevsk))
+- Different improvements of script that helps to build Devfile Docs [\#12744](https://github.com/eclipse/che/pull/12744) ([sleshchenko](https://github.com/sleshchenko))
+- Add log message when starting InconsistentRuntimesDetector [\#12738](https://github.com/eclipse/che/pull/12738) ([amisevsk](https://github.com/amisevsk))
+- Add `\<b\>kubernetes\</b\>` to messages. [\#12737](https://github.com/eclipse/che/pull/12737) ([monaka](https://github.com/monaka))
+- Fix webdriver.sh to attach test resources to selenium e2e test report [\#12735](https://github.com/eclipse/che/pull/12735) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Improve json schema validation messages [\#12734](https://github.com/eclipse/che/pull/12734) ([mshaposhnik](https://github.com/mshaposhnik))
+- Fix editing running workspace config with tools containers and multiuser [\#12725](https://github.com/eclipse/che/pull/12725) ([ashumilova](https://github.com/ashumilova))
+- Fix the way the activity checker decides whether workspace idling is configured or not [\#12718](https://github.com/eclipse/che/pull/12718) ([metlos](https://github.com/metlos))
+- Add an ability to provide local file content in devfile [\#12713](https://github.com/eclipse/che/pull/12713) ([garagatyi](https://github.com/garagatyi))
+- Added propagating curl errors in exec/terminal installers [\#12704](https://github.com/eclipse/che/pull/12704) ([sleshchenko](https://github.com/sleshchenko))
+- Improved JSON Schema not to allow fields that are not typical for concrete tool type [\#12700](https://github.com/eclipse/che/pull/12700) ([sleshchenko](https://github.com/sleshchenko))
+- API info service to use meta-info from war-s manifest instead of jar [\#12691](https://github.com/eclipse/che/pull/12691) ([mshaposhnik](https://github.com/mshaposhnik))
+- Make variable expansion work for environment variables in k8s [\#12689](https://github.com/eclipse/che/pull/12689) ([metlos](https://github.com/metlos))
+- Added -f -S flags for curl commands in installers [\#12688](https://github.com/eclipse/che/pull/12688) ([sleshchenko](https://github.com/sleshchenko))
+- Use Java Base64 method instead of javax.xml.bind.DatatypeConverter [\#12687](https://github.com/eclipse/che/pull/12687) ([benoitf](https://github.com/benoitf))
+- Deployment of tracing/monitoring/debug on OpenShift [\#12683](https://github.com/eclipse/che/pull/12683) ([skabashnyuk](https://github.com/skabashnyuk))
+- Refactored Devfile converting process [\#12682](https://github.com/eclipse/che/pull/12682) ([sleshchenko](https://github.com/sleshchenko))
+- Provision plugin attribute for machines that contains related plugin id [\#12669](https://github.com/eclipse/che/pull/12669) ([sleshchenko](https://github.com/sleshchenko))
+- Fix NPE during selector matching when kubernetes tool objects does not have labels [\#12666](https://github.com/eclipse/che/pull/12666) ([sleshchenko](https://github.com/sleshchenko))
+- Enable getting workspace events from ReplicaSets and Deployments [\#12657](https://github.com/eclipse/che/pull/12657) ([amisevsk](https://github.com/amisevsk))
+- Add more traces and cleanup code [\#12655](https://github.com/eclipse/che/pull/12655) ([garagatyi](https://github.com/garagatyi))
+- Set kubernetes namespace to null on workspace recipe parsing [\#12654](https://github.com/eclipse/che/pull/12654) ([garagatyi](https://github.com/garagatyi))
+- Change package validation using 'command' instead of 'rpm' [\#12653](https://github.com/eclipse/che/pull/12653) ([mshaposhnik](https://github.com/mshaposhnik))
+- Adding tracing tags to workspace related operations [\#12652](https://github.com/eclipse/che/pull/12652) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Add support of dockerimage tool in Devfile [\#12649](https://github.com/eclipse/che/pull/12649) ([sleshchenko](https://github.com/sleshchenko))
+- Update versions of plugin brokers to v0.12.0 [\#12648](https://github.com/eclipse/che/pull/12648) ([garagatyi](https://github.com/garagatyi))
+- Add targetPort attribute to runtime server [\#12642](https://github.com/eclipse/che/pull/12642) ([garagatyi](https://github.com/garagatyi))
+- Bind the workspace activity checker also in the multiuser environment [\#12640](https://github.com/eclipse/che/pull/12640) ([metlos](https://github.com/metlos))
+- Upgrade Che brokers versions [\#12639](https://github.com/eclipse/che/pull/12639) ([tolusha](https://github.com/tolusha))
+- Allow to change preferences with machine token [\#12637](https://github.com/eclipse/che/pull/12637) ([mmorhun](https://github.com/mmorhun))
+- \[Selenium\] Update selenium tests from dashboard package according to workspace details changes, fix unstable tests [\#12630](https://github.com/eclipse/che/pull/12630) ([SkorikSergey](https://github.com/SkorikSergey))
+- Detect tools containers on dashboard and disable action items for them [\#12629](https://github.com/eclipse/che/pull/12629) ([ashumilova](https://github.com/ashumilova))
+- Fix link for deploying multi-user che to kubernetes [\#12623](https://github.com/eclipse/che/pull/12623) ([ywskycn](https://github.com/ywskycn))
+- RELEASE: Update CHANGELOG [\#12619](https://github.com/eclipse/che/pull/12619) ([riuvshin](https://github.com/riuvshin))
+- Use plugin ID instead of sidecar container name to override sidecar memory using workspace attributes [\#12615](https://github.com/eclipse/che/pull/12615) ([garagatyi](https://github.com/garagatyi))
+- RELEASE: Set next development version [\#12596](https://github.com/eclipse/che/pull/12596) ([riuvshin](https://github.com/riuvshin))
+- CHE-12376: Fix IDE link navigation [\#12561](https://github.com/eclipse/che/pull/12561) ([vparfonov](https://github.com/vparfonov))
+- Fixed handling creating of free resources limit that references non-existing account [\#12539](https://github.com/eclipse/che/pull/12539) ([sleshchenko](https://github.com/sleshchenko))
+- Selenium: Delete the 'try-catch' from selenium tests related to fix issues [\#12537](https://github.com/eclipse/che/pull/12537) ([artaleks9](https://github.com/artaleks9))
+- Handle more fields in plugin meta YAML [\#12489](https://github.com/eclipse/che/pull/12489) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Initial devfile to work che in che [\#12305](https://github.com/eclipse/che/pull/12305) ([skabashnyuk](https://github.com/skabashnyuk))
+- Fix a potentially bug. [\#12043](https://github.com/eclipse/che/pull/12043) ([monaka](https://github.com/monaka))
+
+
 ## [6.18.0](https://github.com/eclipse/che/tree/6.18.0) (2019-02-06)
 [Full Changelog](https://github.com/eclipse/che/compare/6.17.1...6.18.0)
 
