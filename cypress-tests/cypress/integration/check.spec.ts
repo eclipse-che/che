@@ -22,113 +22,109 @@ const editor: Editor = new Editor();
 const proposalWidget = new ProposalWidget();
 
 
-describe("E2E test", ()=>{
+describe("E2E test", () => {
 
-    // context("Prepare dashboard", ()=>{
-    //     it("Open dashboard", ()=>{
-    //         dashboard.openDashboard();
-    //     })
-    
-    // })
-    
-    // context("Create workspace and open it in IDE", ()=>{
-    
-    //     it("Go to \"New Workspace\" page", ()=>{
-    //         dashboard.clickWorkspacesButton(); 
-    //         workspaces.clickAddWorkspaceButton();
-    //     })
-    
-    //     it(`Create a \"${workspaceName}\" workspace`, ()=>{
-    //         newWorkspace.typeWorkspaceName(workspaceName);
-    //         newWorkspace.clickOnChe7Stack();
-    //         newWorkspace.waitChe7StackSelected();
-    //         newWorkspace.clickOnAddOrImportProjectButton();
-    //         newWorkspace.enableWebJavaSpringCheckbox();
-    //         newWorkspace.clickOnAddButton();
-    //         newWorkspace.clickOnCreateAndOpenButton();    
-    //     })
-    
-    // })
-    
-    // context("Perform IDE checkings", () => {
-    //     it("Open workspace", () => {
-    //         ide.openIdeWithoutFrames(workspaceName);
-    //         ide.waitIde();
-    //     })
-    
-    //     it("Open project tree container", () => {
-    //         ide.clickOnFilesButton();
-    //         projectTree.waitProjectTreeContainer();
-    //     })
-    
-    // })
-    
-    
+    context("Prepare dashboard", () => {
+        it("Open dashboard", () => {
+            dashboard.openDashboard();
+            dashboard.waitLoaderPageAbcence()
+            loginPage.defaultLogin();
+            dashboard.waitLoaderPage();
+            dashboard.waitLoaderPageAbcence();
+        })
+
+    })
+
+    context("Create workspace and open it in IDE", () => {
+
+        it("Go to \"New Workspace\" page", () => {
+            dashboard.clickWorkspacesButton();
+            workspaces.clickAddWorkspaceButton();
+        })
+
+        it(`Create a \"${workspaceName}\" workspace`, () => {
+            newWorkspace.typeWorkspaceName(workspaceName);
+            newWorkspace.clickOnChe7Stack();
+            newWorkspace.waitChe7StackSelected();
+            newWorkspace.clickOnAddOrImportProjectButton();
+            newWorkspace.enableWebJavaSpringCheckbox();
+            newWorkspace.clickOnAddButton();
+            newWorkspace.clickOnCreateAndOpenButton();
+        })
+
+    })
+
+    context("Perform IDE checkings", () => {
+        it("Open workspace", () => {
+            ide.openIdeWithoutFrames(workspaceName);
+            ide.waitIde();
+        })
+
+        it("Open project tree container", () => {
+            ide.clickOnFilesButton();
+            projectTree.waitProjectTreeContainer();
+        })
+
+    })
+
+
     context("Work with IDE", () => {
         let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
         let tabTitle: string = "GreetingController.java";
 
-        it("open workspace", ()=>{
-            cy.visit("http://routeecxzlq5c-eclipse-che.172.19.20.205.nip.io/#/projects")
+        // it("open workspace", ()=>{
+        //     cy.visit("http://route8l94wkmp-eclipse-che.172.19.20.205.nip.io/#/projects")
+        // })
+
+        it("Expand project and open file in editor", () => {
+            projectTree.clickOnItem("web-java-spring")
+            projectTree.waitItemExpanded("web-java-spring");
+
+            projectTree.clickOnItem("web-java-spring/src");
+            projectTree.waitItemExpanded("web-java-spring/src");
+
+            projectTree.clickOnItem("web-java-spring/src/main/java");
+            projectTree.waitItemExpanded("web-java-spring/src/main/java");
+
+            projectTree.clickOnItem(filePath);
         })
 
-
-        it("statusbar", ()=>{
+        it("statusbar", () => {
             ide.waitStatusBarContains("Starting Java Language Server")
+            ide.waitStatusBarContains("100% Starting Java Language Server")
             ide.waitStatusBarTextAbcence("Starting Java Language Server")
         })
 
+        it("Open editor tab", () => {
+            editor.waitEditorAvailable(filePath, tabTitle);
 
-    
-        // it("Expand project and open file in editor", () => {
-        //     projectTree.clickOnItem("web-java-spring")
-        //     projectTree.waitItemExpanded("web-java-spring");
-    
-        //     projectTree.clickOnItem("web-java-spring/src");
-        //     projectTree.waitItemExpanded("web-java-spring/src");
+            editor.waitTabDisappearance(filePath + "1111");
+            editor.clickOnTab(filePath);
 
-        //     projectTree.clickOnItem("web-java-spring/src/main/java");
-        //     projectTree.waitItemExpanded("web-java-spring/src/main/java");
+            editor.waitEditorAvailable(filePath, tabTitle);
+        })
 
-        //     projectTree.clickOnItem(filePath);
-        // })
-    
-        // it("Open editor tab", () => {
-        //     editor.waitEditorAvailable(filePath, tabTitle);        
-    
-        //     editor.waitTabDisappearance(filePath + "1111");
-        //     editor.clickOnTab(filePath);
-    
-        //     editor.waitEditorAvailable(filePath, tabTitle);
-        // })
-    
-        // it("Perform editor checks", ()=>{
-        //     // editor.checkTextPresence("if\\s\\(userName\\s!=\\snull\\)");
-        //     // editor.checkTextAbsence("return111");
-        //     // editor.checkLineTextContains(13, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest");
-        //     // editor.checkLineTextAbsence(13, "public\\sModelAndView\\shandleRequest\\(HttpServletRequest\\srequest1111");
-    
-        //     editor.setCursorToLineAndChar(15, 33);
-        //     editor.performControlSpaceCombination();
-        //     editor.waitSuggestionContainer();
-        //     editor.waitSuggestion("getContentType()");
-    
-        // })
-    
+        it("Perform editor checks", () => {
+            editor.setCursorToLineAndChar(15, 33);
+            editor.performControlSpaceCombination();
+            editor.waitSuggestionContainer();
+            editor.waitSuggestion("getContentType()");
+        })
+
     })
 
-    // context("Delete workspace", ()=>{
-    //     it("Delete workspace", ()=>{
-    //         dashboard.openDashboard()
-    //         dashboard.clickWorkspacesButton()
-    //         workspaces.waitPage()
-    //         workspaces.clickWorkspaceListItem(workspaceName);
-    //         workspaces.clickDeleteButtonOnWorkspaceDetails();
-    //         workspaces.clickConfirmDeletionButton();
-    //         workspaces.waitPage()
-    //         workspaces.waitWorkspaceListItemAbcence(workspaceName);
-    //     })
-    // })
+    context("Delete workspace", () => {
+        it("Delete workspace", () => {
+            dashboard.openDashboard()
+            dashboard.clickWorkspacesButton()
+            workspaces.waitPage()
+            workspaces.clickWorkspaceListItem(workspaceName);
+            workspaces.clickDeleteButtonOnWorkspaceDetails();
+            workspaces.clickConfirmDeletionButton();
+            workspaces.waitPage()
+            workspaces.waitWorkspaceListItemAbcence(workspaceName);
+        })
+    })
 
 
 })

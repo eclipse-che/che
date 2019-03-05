@@ -54,25 +54,22 @@ export class Ide {
     }
 
     waitStatusBarContains(expectedText: string) {
-        cy.get("div[id='theia-statusBar']").invoke('text').should(text => {
-                let elementText: string = "" + text;
-
-                console.log("= yes ==>>>>  ", elementText)
+        cy.get("div[id='theia-statusBar']", { timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT })
+            .should(elem => {
+                let elementText: string = elem[0].innerText.toString();
 
                 expect(elementText).contain(expectedText);
             })
 
-        // .should('contain', expectedText, {timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT})
     }
 
     waitStatusBarTextAbcence(expectedText: string) {
-        cy.get("div[id='theia-statusBar']").invoke('text', {timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT}).should(text => {
-            let elementText: string = "" + text;
+        cy.get("div[id='theia-statusBar']", { timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT })
+            .should(elem => {
+                let elementText: string = elem[0].innerText.toString();
 
-            console.log("= no ==>>>>  ", elementText)
-
-            expect(elementText).not.contain(expectedText);
-        })
+                expect(elementText).not.contain(expectedText);
+            })
     }
 
 
