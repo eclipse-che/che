@@ -1,19 +1,19 @@
 
 
 ### Introduction
-Previously, the  two kind of recipes was available to bootstrap a cloud developer workspace and make it portable: [Chefile](https://www.eclipse.org/che/docs/chefile.html) 
+Previously, two kind of recipes were available to bootstrap a cloud developer workspace and to make it portable: [Chefile](https://www.eclipse.org/che/docs/chefile.html) 
 and [Factories](https://www.eclipse.org/che/docs/factories-getting-started.html#try-a-factory).
-As a continuation of this, the brand new `devfile` format was introduced, which unites the forming simplicity and the high variety of different tools available to develop a container based application.
+As a continuation of this, the brand new `devfile` format was introduced, which combines simplicity and support for high variety of different tools available to develop a container based application.
 
 ### What the devfile consists of
 The minimal devfile sufficient to run a workspace from it, consists of the following parts:
  - Specification version
  - Name
- - Tools set 
+ - A list of tools: the development tools and user runtimes 
  
 To get more functional workspace, the following parts can be added:
- - Project(s)
- - Command(s)
+ - A list of projects: the source code repositories
+ - A list of commands: actions to manage the workspace components like running the dev tools, starting the runtime environments etc...
 
 Example of the minimal devfile with project and standard plugins set (Theia editor + exec plugin):
 
@@ -56,7 +56,7 @@ or sending a devfile to a dedicated REST API using curl/swagger, which will crea
 curl -X POST  -H "Authorization: <TOKEN>" -H "Content-Type: application/yaml" -d <devlile_content> https://<your-che-host>/api/devfile
 ``` 
 
-If you're an user of `chectl` tool, is is also possible to execute workspace from devfile, using `workspace:start` command 
+If you're a user of `chectl` tool, it is also possible to execute workspace from devfile, using `workspace:start` command 
 parameter as follows:
 ```
 chectl workspace:start --devfile=.devfile
@@ -66,7 +66,7 @@ Please note that currently this way only works for the local devfiles.
 
  
 ### Supported Tool types
-There is currently four types of tools supported. There is two simpler types, such as `cheEditor` and `chePlugin` and 
+There are currently four types of tools supported. There is two simpler types, such as `cheEditor` and `chePlugin` and 
 two more complex - `kubernetes` (or `openshift`) and `dockerimage`.
 Please note that all tools inside single devfile must have unique names.
 Detailed tool types explanation below:
