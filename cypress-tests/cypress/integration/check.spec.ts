@@ -13,7 +13,6 @@ import { NameGenerator } from "../pageobjects/workspace/NameGenerator";
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 
 const loginPage: LoginPage = new LoginPage();
-// const testWorkspace: TestWorkspace = new TestWorkspace("wksp-test-workspace");
 const dashboard: Dashboard = new Dashboard();
 const workspaces: Workspaces = new Workspaces();
 const newWorkspace: NewWorkspace = new NewWorkspace();
@@ -52,55 +51,38 @@ describe("E2E test", () => {
             newWorkspace.clickOnCreateAndOpenButton();
         })
 
-    })
-
-    context("Perform IDE checkings", () => {
-        it("Open workspace", () => {
+        it("Wait IDE availability", () => {
             ide.openIdeWithoutFrames(workspaceName);
             ide.waitIde();
         })
 
+    })
+
+    context("Work with IDE", () => {
+        let fileFolderPath: string = "web-java-spring/src/main/java/org/eclipse/che/examples";
+        let tabTitle: string = "GreetingController.java";
+        let filePath: string = `${fileFolderPath}/${tabTitle}`
+
         it("Open project tree container", () => {
-            ide.clickOnFilesButton();
+            projectTree.openProjectTreeContainer();
             projectTree.waitProjectTreeContainer();
         })
 
-    })
-
-
-    context("Work with IDE", () => {
-        let filePath: string = "web-java-spring/src/main/java/org/eclipse/che/examples/GreetingController.java";
-        let tabTitle: string = "GreetingController.java";
-
         it("Expand project and open file in editor", () => {
-            projectTree.clickOnItem("web-java-spring")
-            projectTree.waitItemExpanded("web-java-spring");
-
-            projectTree.clickOnItem("web-java-spring/src");
-            projectTree.waitItemExpanded("web-java-spring/src");
-
-            projectTree.clickOnItem("web-java-spring/src/main/java");
-            projectTree.waitItemExpanded("web-java-spring/src/main/java");
-
-            projectTree.clickOnItem(filePath);
+            projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
         })
 
-        it("statusbar", () => {
+        it("Check \"Java Language Server\" initialization by statusbar", () => {
             ide.waitStatusBarContains("Starting Java Language Server")
             ide.waitStatusBarContains("100% Starting Java Language Server")
             ide.waitStatusBarTextAbcence("Starting Java Language Server")
         })
 
-        it("Open editor tab", () => {
+        it("Check \"Java Language Server\" initialization by suggestion invoking", () => {
             editor.waitEditorAvailable(filePath, tabTitle);
-
-            editor.waitTabDisappearance(filePath + "1111");
             editor.clickOnTab(filePath);
-
             editor.waitEditorAvailable(filePath, tabTitle);
-        })
 
-        it("Perform editor checks", () => {
             editor.setCursorToLineAndChar(15, 33);
             editor.performControlSpaceCombination();
             editor.waitSuggestionContainer();

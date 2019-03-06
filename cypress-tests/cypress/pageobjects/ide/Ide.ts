@@ -9,7 +9,7 @@ export class Ide {
 
     private static readonly TOP_MENU_PANEL: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
     private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
-    private static readonly FILES_BUTTON: string = ".theia-app-left .p-TabBar-content li[title='Files']";
+    public static readonly FILES_BUTTON: string = ".theia-app-left .p-TabBar-content li[title='Files']";
     private static readonly PRELOADER: string = ".theia-preload";
 
     private static readonly IDE_IFRAME: string = "iframe[id='ide-application-iframe']";
