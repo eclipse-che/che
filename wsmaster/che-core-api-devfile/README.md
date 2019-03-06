@@ -61,7 +61,7 @@ parameter as follows:
 ```
 chectl workspace:start --devfile=.devfile
 ```` 
-Please note that currently this way only works for the local devfiles.
+Please note that currently this way only works for the local (same machine) devfiles - URL can't be used here atm.
 
 
  
@@ -114,8 +114,8 @@ Currently, devfile can only contain one tool with `kubernetes` or `openshift` ty
         app.kubernetes.io/component: database
         app.kubernetes.io/part-of: petclinic
 ```
-Contents of the `local` file is currently read _ONLY_ if the devfile and local file both placed in the same GitHub repository. 
-So, alternatively, if you need to post devfile with such tools to REST API, contents of K8S/Openshift list can be put directly into devfile using `localContent` field:
+Contents of the `local` file is currently read _ONLY_ if the devfile and local file both placed in the same public GitHub repository. 
+So, alternatively, if you need to post devfile with such tools to REST API, contents of K8S/Openshift list can be embedded into devfile using `localContent` field:
 
 ```
 ...
