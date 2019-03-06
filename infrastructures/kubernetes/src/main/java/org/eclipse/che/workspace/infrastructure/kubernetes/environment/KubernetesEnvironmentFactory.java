@@ -23,8 +23,6 @@ import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,11 +34,17 @@ import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
+import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
@@ -51,7 +55,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 public class KubernetesEnvironmentFactory
     extends InternalEnvironmentFactory<KubernetesEnvironment> {
 
-  private final KubernetesClientFactory clientFactory;
+  private final KubernetesRecipeParser recipeParser;
   private final KubernetesEnvironmentValidator envValidator;
   private final MemoryAttributeProvisioner memoryProvisioner;
 
@@ -60,11 +64,11 @@ public class KubernetesEnvironmentFactory
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
-      KubernetesClientFactory clientFactory,
+      KubernetesRecipeParser recipeParser,
       KubernetesEnvironmentValidator envValidator,
       MemoryAttributeProvisioner memoryProvisioner) {
     super(installerRegistry, recipeRetriever, machinesValidator);
-    this.clientFactory = clientFactory;
+    this.recipeParser = recipeParser;
     this.envValidator = envValidator;
     this.memoryProvisioner = memoryProvisioner;
   }
@@ -80,37 +84,8 @@ public class KubernetesEnvironmentFactory
     if (sourceWarnings != null) {
       warnings.addAll(sourceWarnings);
     }
-    String content = recipe.getContent();
-    String contentType = recipe.getContentType();
-    checkNotNull(contentType, "Kubernetes Recipe content type should not be null");
 
-    switch (contentType) {
-      case "application/x-yaml":
-      case "text/yaml":
-      case "text/x-yaml":
-        break;
-      default:
-        throw new ValidationException(
-            "Provided environment recipe content type '"
-                + contentType
-                + "' is unsupported. Supported values are: "
-                + "application/x-yaml, text/yaml, text/x-yaml");
-    }
-
-    final List<HasMetadata> list;
-    try {
-      // Load list of Kubernetes objects into java List.
-      list = clientFactory.create().load(new ByteArrayInputStream(content.getBytes())).get();
-    } catch (KubernetesClientException e) {
-      // KubernetesClient wraps the error when a JsonMappingException occurs so we need the cause
-      String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
-      if (message.contains("\n")) {
-        // Clean up message if it comes from JsonMappingException. Format is e.g.
-        // `No resource type found for:v1#Route1\n at [...]`
-        message = message.split("\\n", 2)[0];
-      }
-      throw new ValidationException(format("Could not parse Kubernetes recipe: %s", message));
-    }
+    final List<HasMetadata> recipeObjects = recipeParser.parse(recipe);
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Deployment> deployments = new HashMap<>();
@@ -119,13 +94,10 @@ public class KubernetesEnvironmentFactory
     Map<String, PersistentVolumeClaim> pvcs = new HashMap<>();
     Map<String, Secret> secrets = new HashMap<>();
     boolean isAnyIngressPresent = false;
-    for (HasMetadata object : list) {
+    for (HasMetadata object : recipeObjects) {
       checkNotNull(object.getKind(), "Environment contains object without specified kind field");
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
       checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
-
-      // needed because Che master namespace is set by K8s API during list loading
-      object.getMetadata().setNamespace(null);
 
       if (object instanceof Pod) {
         Pod pod = (Pod) object;
@@ -161,8 +133,6 @@ public class KubernetesEnvironmentFactory
               Warnings.INGRESSES_IGNORED_WARNING_CODE, Warnings.INGRESSES_IGNORED_WARNING_MESSAGE));
     }
 
-    addRamAttributes(machines, pods.values());
-
     KubernetesEnvironment k8sEnv =
         KubernetesEnvironment.builder()
             .setInternalRecipe(recipe)
@@ -178,14 +148,16 @@ public class KubernetesEnvironmentFactory
             .setConfigMaps(configMaps)
             .build();
 
+    addRamAttributes(k8sEnv.getMachines(), k8sEnv.getPodsData().values());
+
     envValidator.validate(k8sEnv);
 
     return k8sEnv;
   }
 
   @VisibleForTesting
-  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<Pod> pods) {
-    for (Pod pod : pods) {
+  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<PodData> pods) {
+    for (PodData pod : pods) {
       for (Container container : pod.getSpec().getContainers()) {
         final String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConfig;

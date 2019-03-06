@@ -19,4 +19,8 @@ public class DevfileRecipeFormatException extends DevfileException {
   public DevfileRecipeFormatException(String message) {
     super(message);
   }
+
+  public DevfileRecipeFormatException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
