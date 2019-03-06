@@ -73,8 +73,8 @@ deploy() {
      DOCS_REPOSITORY_URL=https://${GH_TOKEN}@github.com/${DEPLOY_ORGANIZATION}/devfile.git
    fi
 
-   rm -rf devfile && git clone ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
    echo git clone ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
+   rm -rf devfile && git clone ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ `git status --porcelain` ]]; then
