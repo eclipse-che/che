@@ -64,7 +64,7 @@ deploy() {
    cd ${TMP_DIR}
    BRANCH_ARG=""
    if [[ ! -z "${DEPLOY_BRANCH}" ]]; then
-       BRANCH_ARG="-b ${DEPLOY_BRANCH}"
+       BRANCH_ARG="-b ${DEPLOY_BRANCH} --single-branch"
    fi
 
    if [[ "$USE_SSH" == "true" ]]; then
@@ -73,7 +73,7 @@ deploy() {
      DOCS_REPOSITORY_URL=https://${GH_TOKEN}@github.com/${DEPLOY_ORGANIZATION}/devfile.git
    fi
 
-   rm -rf devfile && git clone --single-branch ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
+   rm -rf devfile && git clone ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ `git status --porcelain` ]]; then
