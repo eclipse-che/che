@@ -1,4 +1,22 @@
+/*********************************************************************
+ * Copyright (c) 2018 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
 
+/**
+ * In this testcase is implemented next scenario:
+ * 
+ * 1. Open dashboard 
+ * 2. Create new workspace using dashboard and open it
+ * 3. Wait IDE and open file
+ * 4. Check Language Server initialization
+ * 5. Delete workspace using dashboard
+ */
 import { LoginPage } from "../pageobjects/dashboard/LoginPage";
 import { TestWorkspace } from "../pageobjects/workspace/TestWorkspace";
 import { Dashboard } from "../pageobjects/dashboard/Dashboard";
@@ -7,7 +25,6 @@ import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";
 import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
-import { ProposalWidget } from "../pageobjects/ide/ProposalWidget";
 import { NameGenerator } from "../pageobjects/workspace/NameGenerator";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
@@ -19,7 +36,6 @@ const newWorkspace: NewWorkspace = new NewWorkspace();
 const ide: Ide = new Ide();
 const projectTree: ProjectTree = new ProjectTree();
 const editor: Editor = new Editor();
-const proposalWidget = new ProposalWidget();
 
 
 describe("E2E test", () => {

@@ -1,7 +1,15 @@
+/*********************************************************************
+ * Copyright (c) 2018 Red Hat, Inc.
+ *
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ **********************************************************************/
+
 /// <reference types="Cypress" />
 
-import { EditorLine } from "./EditorLine";
-import { ProposalWidget } from "../ide/ProposalWidget";
 import { Promise, reject } from "bluebird";
 
 export class Editor {
@@ -10,8 +18,6 @@ export class Editor {
     private static readonly EDITOR_BODY: string = "#theia-main-content-panel .lines-content";
     private static readonly SUGGESTION_WIDGET_BODY: string = "div[widgetId='editor.widget.suggestWidget']"
     private static readonly SUGGESTION_WIDGET_ROW: string = "div[widgetId='editor.widget.suggestWidget'] .monaco-list-row";
-
-    private readonly proposalWidget: ProposalWidget = new ProposalWidget();
 
 
     waitSuggestionContainer() {
