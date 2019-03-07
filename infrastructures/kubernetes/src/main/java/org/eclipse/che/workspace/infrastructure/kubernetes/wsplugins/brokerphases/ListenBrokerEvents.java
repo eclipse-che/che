@@ -12,7 +12,10 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
 import com.google.common.annotations.Beta;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import java.util.List;
+import javax.annotation.Nullable;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
@@ -40,25 +43,31 @@ public class ListenBrokerEvents extends BrokerPhase {
   private final BrokersResult brokersResult;
   private final EventService eventService;
   private final KubernetesPluginsToolingValidator pluginsValidator;
+  @Nullable private final Tracer tracer;
 
   public ListenBrokerEvents(
       String workspaceId,
       KubernetesPluginsToolingValidator pluginsValidator,
       BrokersResult brokersResult,
-      EventService eventService) {
+      EventService eventService,
+      @Nullable Tracer tracer) {
     this.workspaceId = workspaceId;
     this.pluginsValidator = pluginsValidator;
     this.brokersResult = brokersResult;
     this.eventService = eventService;
+    this.tracer = tracer;
   }
 
+  @Override
   public List<ChePlugin> execute() throws InfrastructureException {
+    Span tracingSpan = startTracingPhase(tracer, "ListenBrokerEvents", workspaceId);
     BrokerStatusListener brokerStatusListener =
         new BrokerStatusListener(workspaceId, pluginsValidator, brokersResult);
     try {
       LOG.debug("Subscribing broker events listener for workspace '{}'", workspaceId);
       eventService.subscribe(brokerStatusListener, BrokerEvent.class);
 
+      finishSpanIfExists(tracingSpan);
       return nextPhase.execute();
     } finally {
       eventService.unsubscribe(brokerStatusListener);

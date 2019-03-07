@@ -12,10 +12,13 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
 import com.google.common.annotations.Beta;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import javax.annotation.Nullable;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
@@ -37,18 +40,23 @@ public class WaitBrokerResult extends BrokerPhase {
 
   private final BrokersResult brokersResult;
   private final String workspaceId;
-
   private final int resultWaitingTimeout;
+  @Nullable private final Tracer tracer;
 
   public WaitBrokerResult(
-      String workspaceId, BrokersResult brokersResult, int resultWaitingTimeout) {
+      String workspaceId,
+      BrokersResult brokersResult,
+      int resultWaitingTimeout,
+      @Nullable Tracer tracer) {
     this.workspaceId = workspaceId;
     this.brokersResult = brokersResult;
     this.resultWaitingTimeout = resultWaitingTimeout;
+    this.tracer = tracer;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
+    Span tracingSpan = startTracingPhase(tracer, "WaitBrokerResult", workspaceId);
     try {
       LOG.debug("Trying to get brokers result for workspace '{}'", workspaceId);
       return brokersResult.get(resultWaitingTimeout, TimeUnit.MINUTES);
@@ -60,6 +68,8 @@ public class WaitBrokerResult extends BrokerPhase {
           "Plugins installation process failed. Error: " + e.getCause().getMessage(), e.getCause());
     } catch (TimeoutException e) {
       throw new InfrastructureException("Plugins installation process timed out");
+    } finally {
+      finishSpanIfExists(tracingSpan);
     }
   }
 }

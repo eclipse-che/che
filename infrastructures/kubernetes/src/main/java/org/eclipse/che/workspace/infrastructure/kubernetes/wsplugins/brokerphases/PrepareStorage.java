@@ -12,9 +12,12 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
 import com.google.common.annotations.Beta;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -33,23 +36,28 @@ public class PrepareStorage extends BrokerPhase {
   private final KubernetesEnvironment brokerEnvironment;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final StartSynchronizer startSynchronizer;
+  @Nullable private final Tracer tracer;
 
   public PrepareStorage(
       String workspaceId,
       KubernetesEnvironment brokerEnvironment,
       WorkspaceVolumesStrategy volumesStrategy,
-      StartSynchronizer startSynchronizer) {
+      StartSynchronizer startSynchronizer,
+      @Nullable Tracer tracer) {
     this.workspaceId = workspaceId;
     this.brokerEnvironment = brokerEnvironment;
     this.volumesStrategy = volumesStrategy;
     this.startSynchronizer = startSynchronizer;
+    this.tracer = tracer;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
+    Span tracingSpan = startTracingPhase(tracer, "PrepareStorage", workspaceId);
     volumesStrategy.prepare(
         brokerEnvironment, workspaceId, startSynchronizer.getStartTimeoutMillis());
 
+    finishSpanIfExists(tracingSpan);
     return nextPhase.execute();
   }
 }

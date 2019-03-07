@@ -18,11 +18,14 @@ import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -50,23 +53,27 @@ public class DeployBroker extends BrokerPhase {
   private final BrokersResult brokersResult;
   private final UnrecoverablePodEventListenerFactory factory;
   private final String workspaceId;
+  @Nullable private final Tracer tracer;
 
   public DeployBroker(
       String workspaceId,
       KubernetesNamespace namespace,
       KubernetesEnvironment brokerEnvironment,
       BrokersResult brokersResult,
-      UnrecoverablePodEventListenerFactory factory) {
+      UnrecoverablePodEventListenerFactory factory,
+      @Nullable Tracer tracer) {
     this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.brokerEnvironment = brokerEnvironment;
     this.brokersResult = brokersResult;
     this.factory = factory;
+    this.tracer = tracer;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     LOG.debug("Starting brokers pod for workspace '{}'", workspaceId);
+    Span tracingSpan = startTracingPhase(tracer, "DeployBroker", workspaceId);
     KubernetesDeployments deployments = namespace.deployments();
     try {
       // Creates config map that can inject Che tooling plugins meta files into a Che plugin
@@ -88,6 +95,7 @@ public class DeployBroker extends BrokerPhase {
       deployments.create(pluginBrokerPod);
 
       LOG.debug("Brokers pod is created for workspace '{}'", workspaceId);
+      finishSpanIfExists(tracingSpan);
       return nextPhase.execute();
     } finally {
       namespace.deployments().stopWatch();
