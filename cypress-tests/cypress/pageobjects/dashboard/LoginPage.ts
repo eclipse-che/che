@@ -70,25 +70,4 @@ export class LoginPage {
         this.login(LoginPage.TEST_USER_NANE, LoginPage.TEST_USER_PASSWORD);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

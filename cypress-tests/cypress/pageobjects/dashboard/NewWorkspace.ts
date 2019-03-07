@@ -30,41 +30,42 @@ export class NewWorkspace {
             .should('have.value', workspaceName);
     }
 
-
     clickOnChe7Stack() {
-        cy.get(NewWorkspace.CHE_7_STACK).click();
+        cy.get(NewWorkspace.CHE_7_STACK)
+            .click();
     }
 
     waitChe7StackSelected() {
-        cy.get(NewWorkspace.SELECTED_CHE_7_STACK);
+        cy.get(NewWorkspace.SELECTED_CHE_7_STACK)
+            .should('be.visible');
     }
 
     clickOnCreateAndOpenButton() {
-        cy.get(NewWorkspace.CREATE_AND_OPEN_BUTTON).first().click();
+        cy.get(NewWorkspace.CREATE_AND_OPEN_BUTTON)
+            .first()
+            .should('be.visible')
+            .click();
     }
 
     clickOnAddOrImportProjectButton() {
-        cy.get(NewWorkspace.ADD_OR_IMPORT_PROJECT_BUTTON).click();
+        cy.get(NewWorkspace.ADD_OR_IMPORT_PROJECT_BUTTON)
+            .should('be.visible')
+            .click();
     }
 
     enableWebJavaSpringCheckbox() {
-        cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX).first().click({ force: true });
+        cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX)
+            .first()
+            .click({ force: true });
 
         //check that checkbox is succesfully enabled
         cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX_ENABLED);
     }
 
     clickOnAddButton() {
-        cy.get(NewWorkspace.ADD_BUTTON).click();
+        cy.get(NewWorkspace.ADD_BUTTON)
+            .should('be.visible')
+            .click();
     }
-
-
-
-
-
-
-
-
-
 
 }
