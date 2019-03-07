@@ -35,11 +35,10 @@ export class Editor {
             .click();
     }
 
-    waitSuggestion(suggestion: string){
+    waitSuggestion(suggestion: string) {
         cy.get(Editor.SUGGESTION_WIDGET_ROW)
             .contains(suggestion)
     }
-
 
     private getTabLocator(itemPath: string) {
         return `li[title='${itemPath}'] .p-TabBar-tabLabel`;
@@ -221,7 +220,6 @@ export class Editor {
             .trigger("keydown", { keyCode: 32, which: 32, ctrlKey: true })
     }
 
-
     private getLineLocator(lineNumber: number): string {
         return `div[data-cy='editor-line-${lineNumber}']>span`;
     }
@@ -247,40 +245,4 @@ export class Editor {
             })
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-
-
-
-
-

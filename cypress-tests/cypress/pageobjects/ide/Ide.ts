@@ -74,7 +74,7 @@ export class Ide {
 
     }
 
-    waitStatusBarTextAbcence(expectedText: string) { 
+    waitStatusBarTextAbcence(expectedText: string) {
         cy.get("div[id='theia-statusBar']", { timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT })
             .should(elem => {
                 let elementText: string = elem[0].innerText.toString();
@@ -82,9 +82,5 @@ export class Ide {
                 expect(elementText).not.contain(expectedText);
             })
     }
-
-
-
-
 
 }
