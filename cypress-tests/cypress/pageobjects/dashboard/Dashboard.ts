@@ -27,12 +27,12 @@ export class Dashboard {
         cy.visit(Dashboard.ROOT_URL);
     }
 
-    waitDashboard(){
-        [ Dashboard.DASHBOARD_BUTTON, Dashboard.WORKSPACES_BUTTON, Dashboard.STACKS_BUTTON, Dashboard.FACTORIES_BUTTON ]
-        .forEach(buttonLocator => {
-            cy.get(buttonLocator, {timeout: Dashboard.PAGE_LOAD_TIMEOUT})
-            .should('be.visible');
-        })
+    waitDashboard() {
+        [Dashboard.DASHBOARD_BUTTON, Dashboard.WORKSPACES_BUTTON, Dashboard.STACKS_BUTTON, Dashboard.FACTORIES_BUTTON]
+            .forEach(buttonLocator => {
+                cy.get(buttonLocator, { timeout: Dashboard.PAGE_LOAD_TIMEOUT })
+                    .should('be.visible');
+            })
     }
 
     clickDashboardButton() {
@@ -51,11 +51,11 @@ export class Dashboard {
         cy.get(Dashboard.FACTORIES_BUTTON).should('be.visible').click()
     }
 
-    waitLoaderPage(){
+    waitLoaderPage() {
         cy.get(Dashboard.LOADER_PAGE, { timeout: Dashboard.PAGE_LOAD_TIMEOUT }).should('be.visible')
     }
 
-    waitLoaderPageAbcence(){
+    waitLoaderPageAbcence() {
         cy.get(Dashboard.LOADER_PAGE, { timeout: Dashboard.PAGE_LOAD_TIMEOUT }).should('not.be.visible')
     }
 
