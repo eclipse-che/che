@@ -142,7 +142,8 @@
               "name": {},
               "local": {},
               "localContent": {},
-              "selector": {}
+              "selector": {},
+              "entrypoints": {}
             },
             "required": [
               "local"
@@ -358,6 +359,54 @@
                     "type": "string"
                   },
                   "javaType": "java.util.Map<String, String>"
+                }
+              }
+            }
+          },
+          "entrypoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "deployment": {
+                  "type": "string",
+                  "description": "The name of the deployment (either the concrete name or the generateName from the metadata). If not specified, then all deployments are considered."
+                },
+                "pod": {
+                  "type": "string",
+                  "description": "The name of the pod (either the concrete name or the generateName from the metadata) containing the container to apply the entrypoint to. Optional if there is just one pod in the selected deployment (or as a top level entry in the list)."
+                },
+                "container": {
+                  "type": "string",
+                  "description": "The name of the container to apply the entrypoint to. Optional if there is just a single container in the selected pods."
+                },
+                "deploymentSelector": {
+                  "$ref": "#/definitions/selector",
+                  "description": "The selector of the deployments."
+                },
+                "podSelector": {
+                  "$ref": "#/definitions/selector",
+                  "description": "The selector of the pods."
+                },
+                "command": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The command to run in the tool instead of the default one provided in the image of the container.",
+                  "examples": [
+                    "['/bin/sh', '-c']"
+                  ]
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The arguments to supply to the command running the tool. The arguments are supplied either to the default command provided in the image of the container or to the overridden command.",
+                  "examples": [
+                    "['-R', '-f']"
+                  ]
                 }
               }
             }

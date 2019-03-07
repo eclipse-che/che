@@ -22,9 +22,9 @@ import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
@@ -35,6 +35,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
+import org.eclipse.che.api.devfile.model.Entrypoint;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.Constants;
 import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
@@ -98,6 +99,8 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
 
     estimateCommandsMachineName(workspaceConfig, k8sTool, list);
 
+    applyEntrypoints(k8sTool.getEntrypoints(), list);
+
     RecipeImpl recipe =
         new RecipeImpl(k8sTool.getType(), YAML_CONTENT_TYPE, asYaml(k8sTool, list), null);
 
@@ -147,29 +150,8 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
    */
   private List<HasMetadata> filter(List<HasMetadata> list, Map<String, String> selector) {
     return list.stream()
-        .filter(item -> matchLabels(item, selector))
+        .filter(i -> SelectorFilter.test(i.getMetadata(), selector))
         .collect(toCollection(ArrayList::new));
-  }
-
-  /**
-   * Returns true is specified {@link HasMetadata} instance is matched by specified selector, false
-   * otherwise
-   *
-   * @param hasMetadata object to check matching
-   * @param selector selector that should be matched with object's labels
-   */
-  private boolean matchLabels(HasMetadata hasMetadata, Map<String, String> selector) {
-    ObjectMeta metadata = hasMetadata.getMetadata();
-    if (metadata == null) {
-      return false;
-    }
-
-    Map<String, String> labels = metadata.getLabels();
-    if (labels == null) {
-      return false;
-    }
-
-    return labels.entrySet().containsAll(selector.entrySet());
   }
 
   /**
@@ -231,6 +213,30 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
               "Unable to deserialize specified local file content for tool '%s'. Error: %s",
               tool.getName(), e.getMessage()),
           e);
+    }
+  }
+
+  private void applyEntrypoints(List<Entrypoint> entrypoints, List<HasMetadata> list) {
+    entrypoints.forEach(ep -> applyEntrypoint(ep, list));
+  }
+
+  private void applyEntrypoint(Entrypoint entrypoint, List<HasMetadata> list) {
+    ContainerSearch search =
+        new ContainerSearch(
+            entrypoint.getDeployment(),
+            entrypoint.getPod(),
+            entrypoint.getContainer(),
+            entrypoint.getPodSelector(),
+            entrypoint.getDeploymentSelector());
+
+    List<Container> cs = search.search(list);
+
+    List<String> command = entrypoint.getCommand();
+    List<String> args = entrypoint.getArgs();
+
+    for (Container c : cs) {
+      c.setCommand(command);
+      c.setArgs(args);
     }
   }
 }
