@@ -28,26 +28,27 @@ export class Dashboard {
     }
 
     waitDashboard(){
-        this.waitButton("Dashboard", Dashboard.DASHBOARD_BUTTON);
-        this.waitButton("Workspoaces", Dashboard.WORKSPACES_BUTTON);
-        this.waitButton("Stacks", Dashboard.STACKS_BUTTON);
-        this.waitButton("Factories", Dashboard.FACTORIES_BUTTON);
+        [ Dashboard.DASHBOARD_BUTTON, Dashboard.WORKSPACES_BUTTON, Dashboard.STACKS_BUTTON, Dashboard.FACTORIES_BUTTON ]
+        .forEach(buttonLocator => {
+            cy.get(buttonLocator, {timeout: Dashboard.PAGE_LOAD_TIMEOUT})
+            .should('be.visible');
+        })
     }
 
     clickDashboardButton() {
-        this.clickButton("Dashboard", Dashboard.DASHBOARD_BUTTON);
+        cy.get(Dashboard.DASHBOARD_BUTTON).should('be.visible').click()
     }
 
     clickWorkspacesButton() {
-        this.clickButton("Workspaces", Dashboard.WORKSPACES_BUTTON);
+        cy.get(Dashboard.WORKSPACES_BUTTON).should('be.visible').click()
     }
 
     clickStacksButton() {
-        this.clickButton("Stacks", Dashboard.DASHBOARD_BUTTON);
+        cy.get(Dashboard.STACKS_BUTTON).should('be.visible').click()
     }
 
     clickFactoriesButton() {
-        this.clickButton("Factories", Dashboard.DASHBOARD_BUTTON);
+        cy.get(Dashboard.FACTORIES_BUTTON).should('be.visible').click()
     }
 
     waitLoaderPage(){
@@ -57,35 +58,5 @@ export class Dashboard {
     waitLoaderPageAbcence(){
         cy.get(Dashboard.LOADER_PAGE, { timeout: Dashboard.PAGE_LOAD_TIMEOUT }).should('not.be.visible')
     }
-
-    private waitButton(buttonName: string, locator: string) {
-        cy.get(locator, { timeout: Dashboard.PAGE_LOAD_TIMEOUT }).should('be.visible', { timeout: Dashboard.PAGE_LOAD_TIMEOUT });
-    }
-
-    private clickButton(buttonName: string, locator: string) {
-        cy.get(locator).click();
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
