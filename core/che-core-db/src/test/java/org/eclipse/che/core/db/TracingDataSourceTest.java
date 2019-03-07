@@ -39,7 +39,7 @@ public class TracingDataSourceTest {
   @AfterMethod
   public void cleanup() throws Exception {
     HashMap<String, String> newEnv = new HashMap<>(System.getenv());
-    newEnv.remove("CHE_TRACING_ENABLED");
+    newEnv.remove("CHE_DB_TRACING_ENABLED");
     setEnv(newEnv);
   }
 
@@ -63,7 +63,7 @@ public class TracingDataSourceTest {
 
   @Test
   public void shouldBeAbleTogetTracingDataSource() throws Exception {
-    setEnv(ImmutableMap.of("CHE_TRACING_ENABLED", "true"));
+    setEnv(ImmutableMap.of("CHE_DB_TRACING_ENABLED", "true"));
 
     DataSource actual = TracingDataSource.wrapWithTracingIfEnabled(dataSource);
 
@@ -72,7 +72,7 @@ public class TracingDataSourceTest {
 
   @Test
   public void shouldNotWrapDatasourceIfEnvSetToFalseØ() throws Exception {
-    setEnv(ImmutableMap.of("CHE_TRACING_ENABLED", "false"));
+    setEnv(ImmutableMap.of("CHE_DB_TRACING_ENABLED", "false"));
 
     DataSource actual = TracingDataSource.wrapWithTracingIfEnabled(dataSource);
 
