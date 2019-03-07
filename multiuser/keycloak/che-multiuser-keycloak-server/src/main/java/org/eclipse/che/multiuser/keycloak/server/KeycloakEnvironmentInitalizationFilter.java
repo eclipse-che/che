@@ -146,6 +146,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
       EnvironmentContext.getCurrent().setSubject(subject);
       if (tracer != null) {
         TracingTags.USER_ID.set(tracer.activeSpan(), subject.getUserId());
+        tracer.activeSpan().setBaggageItem(TracingTags.USER_ID.getKey(), subject.getUserId());
       }
       filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
     } finally {

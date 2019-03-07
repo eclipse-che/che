@@ -187,7 +187,7 @@ objects:
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 50
-            failureThreshold: 3
+            failureThreshold: 9999
             timeoutSeconds: 2
           readinessProbe:
             httpGet:
@@ -196,7 +196,7 @@ objects:
               scheme: HTTP
             initialDelaySeconds: 25
             timeoutSeconds: 5
-            failureThreshold: 5
+            failureThreshold: 9999
           name: che
           ports:
           - containerPort: 8080
