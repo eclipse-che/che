@@ -47,13 +47,12 @@ import org.slf4j.Logger;
 public class DeployBroker extends BrokerPhase {
 
   private static final Logger LOG = getLogger(DeployBroker.class);
+  private static final String SPAN_NAME = "DeployBroker";
 
   private final KubernetesNamespace namespace;
   private final KubernetesEnvironment brokerEnvironment;
   private final BrokersResult brokersResult;
   private final UnrecoverablePodEventListenerFactory factory;
-  private final String workspaceId;
-  @Nullable private final Tracer tracer;
 
   public DeployBroker(
       String workspaceId,
@@ -68,12 +67,13 @@ public class DeployBroker extends BrokerPhase {
     this.brokersResult = brokersResult;
     this.factory = factory;
     this.tracer = tracer;
+    this.spanName = SPAN_NAME;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     LOG.debug("Starting brokers pod for workspace '{}'", workspaceId);
-    Span tracingSpan = startTracingPhase(tracer, "DeployBroker", workspaceId);
+    Span tracingSpan = startTracingPhase();
     KubernetesDeployments deployments = namespace.deployments();
     try {
       // Creates config map that can inject Che tooling plugins meta files into a Che plugin

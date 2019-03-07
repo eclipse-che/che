@@ -37,11 +37,10 @@ import org.slf4j.LoggerFactory;
 public class WaitBrokerResult extends BrokerPhase {
 
   private static final Logger LOG = LoggerFactory.getLogger(WaitBrokerResult.class);
+  private static final String SPAN_NAME = "WaitBrokerResult";
 
   private final BrokersResult brokersResult;
-  private final String workspaceId;
   private final int resultWaitingTimeout;
-  @Nullable private final Tracer tracer;
 
   public WaitBrokerResult(
       String workspaceId,
@@ -56,7 +55,7 @@ public class WaitBrokerResult extends BrokerPhase {
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
-    Span tracingSpan = startTracingPhase(tracer, "WaitBrokerResult", workspaceId);
+    Span tracingSpan = startTracingPhase();
     try {
       LOG.debug("Trying to get brokers result for workspace '{}'", workspaceId);
       return brokersResult.get(resultWaitingTimeout, TimeUnit.MINUTES);

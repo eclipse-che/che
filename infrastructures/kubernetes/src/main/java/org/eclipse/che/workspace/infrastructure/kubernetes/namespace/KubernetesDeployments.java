@@ -39,7 +39,6 @@ import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
 import io.opentracing.Span;
-import io.opentracing.Tracer;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -64,7 +63,7 @@ import javax.annotation.Nullable;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
-import org.eclipse.che.commons.tracing.TracingTags;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
@@ -351,16 +350,8 @@ public class KubernetesDeployments {
    *     </ul>
    *     otherwise, it must be explicitly closed
    */
-  public CompletableFuture<Void> waitRunningAsync(String name, @Nullable Tracer tracer) {
-    final Span tracingSpan =
-        tracer == null
-            ? null
-            : tracer
-                .buildSpan("WaitRunningAsync")
-                .withTag(TracingTags.WORKSPACE_ID.getKey(), workspaceId)
-                .withTag(TracingTags.MACHINE_NAME.getKey(), name)
-                .asChildOf(tracer.activeSpan())
-                .start();
+  public CompletableFuture<Void> waitRunningAsync(String name, TracerUtil tracerUtil) {
+    final Span tracingSpan = tracerUtil.buildSpan("WaitRunningAsync", null, workspaceId, name);
 
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
     try {
@@ -386,9 +377,7 @@ public class KubernetesDeployments {
       podRunningFuture.whenComplete(
           (ok, ex) -> {
             watch.close();
-            if (tracingSpan != null) {
-              tracingSpan.finish();
-            }
+            tracerUtil.finishSpan(tracingSpan);
           });
       final Pod pod = podResource.get();
       if (pod == null) {
@@ -398,6 +387,7 @@ public class KubernetesDeployments {
         } else {
           ex = new InfrastructureException("No pod in deployment " + name + " found.");
         }
+        tracerUtil.finishSpanAsFailure(tracingSpan, ex.getMessage());
         podRunningFuture.completeExceptionally(ex);
       } else {
         handleStartingPodStatus(podRunningFuture, pod);

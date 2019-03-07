@@ -27,7 +27,6 @@ import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.opentracing.Scope;
 import io.opentracing.Span;
-import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -68,10 +67,9 @@ import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException
 import org.eclipse.che.api.workspace.server.spi.StateException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.tracing.OptionalTracer;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -117,7 +115,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
   private final RuntimeHangingDetector runtimeHangingDetector;
-  @Nullable protected final Tracer tracer;
+  protected final TracerUtil tracerUtil;
 
   @Inject
   public KubernetesInternalRuntime(
@@ -139,7 +137,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
-      @Nullable OptionalTracer tracer,
+      TracerUtil tracerUtil,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
     super(context, urlRewriter);
@@ -161,11 +159,10 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
-    this.tracer = OptionalTracer.fromNullable(tracer);
+    this.tracerUtil = tracerUtil;
   }
 
   @Override
-  @Traced
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     KubernetesRuntimeContext<E> context = getContext();
     String workspaceId = context.getIdentity().getWorkspaceId();
@@ -211,13 +208,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final EnvironmentContext currentContext = EnvironmentContext.getCurrent();
       CompletableFuture<Void> startFailure = startSynchronizer.getStartFailure();
 
-      final Scope waitRunningAsyncSpan =
-          tracer == null
-              ? null
-              : tracer
-                  .buildSpan("WaitMachinesStart")
-                  .asChildOf(tracer.activeSpan())
-                  .startActive(true);
+      final Scope waitRunningAsyncScope = tracerUtil.buildScope("WaitMachinesStart", workspaceId);
 
       for (KubernetesMachineImpl machine : machines.getMachines(context.getIdentity()).values()) {
         String machineName = machine.getName();
@@ -233,15 +224,13 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                 // see comments above why executor is explicitly put into arguments
                 .thenComposeAsync(checkFailure(startFailure), executor)
                 .thenCompose(setContext(currentContext, checkServers(toCancelFutures, machine)))
-                .exceptionally(publishFailedStatusAndRecordFailureTrace(startFailure, machineName));
+                .exceptionally(publishFailedStatus(startFailure, machineName));
         machinesFutures.put(machineName, machineBootChain);
       }
 
       waitMachines(machinesFutures, toCancelFutures, startFailure);
 
-      if (waitRunningAsyncSpan != null) {
-        waitRunningAsyncSpan.close();
-      }
+      tracerUtil.finishScope(waitRunningAsyncScope);
       startSynchronizer.complete();
     } catch (InfrastructureException | RuntimeException e) {
       Exception startFailureCause = startSynchronizer.getStartFailureNow();
@@ -387,20 +376,15 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
 
     // Need to get active span here to allow use in returned function
-    final Span activeSpan = tracer == null ? null : tracer.activeSpan();
+    final Span activeSpan = tracerUtil.getActiveSpan();
 
     return ignored -> {
       final Span tracingSpan =
-          tracer == null
-              ? null
-              : tracer
-                  .buildSpan("CheckServers")
-                  .withTag(
-                      TracingTags.WORKSPACE_ID.getKey(),
-                      getContext().getIdentity().getWorkspaceId())
-                  .withTag(TracingTags.MACHINE_NAME.getKey(), machine.getName())
-                  .asChildOf(activeSpan)
-                  .start();
+          tracerUtil.buildSpan(
+              "CheckServers",
+              activeSpan,
+              getContext().getIdentity().getWorkspaceId(),
+              machine.getName());
 
       // This completable future is used to unity the servers checks and start of probes
       final CompletableFuture<Void> serversAndProbesFuture = new CompletableFuture<>();
@@ -426,7 +410,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             });
       } catch (InfrastructureException ex) {
         serversAndProbesFuture.completeExceptionally(ex);
-        finishSpanAsFailure(tracingSpan, ex.getMessage());
+        tracerUtil.finishSpanAsFailure(tracingSpan, ex.getMessage());
         return serversAndProbesFuture;
       }
       serversReadyFuture.whenComplete(
@@ -445,9 +429,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                 }
                 serversAndProbesFuture.complete(null);
 
-                if (tracingSpan != null) {
-                  tracingSpan.finish();
-                }
+                tracerUtil.finishSpan(tracingSpan);
               });
       return serversAndProbesFuture;
     };
@@ -460,8 +442,14 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    */
   private Function<Void, CompletionStage<Void>> bootstrap(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
-    final Span activeSpan = tracer == null ? null : tracer.activeSpan();
+    final Span activeSpan = tracerUtil.getActiveSpan();
     return ignored -> {
+      Span tracingSpan =
+          tracerUtil.buildSpan(
+              "BootstrapInstallers",
+              activeSpan,
+              getContext().getIdentity().getWorkspaceId(),
+              machine.getName());
       // think about to return copy of machines in environment
       final InternalMachineConfig machineConfig =
           getContext().getEnvironment().getMachines().get(machine.getName());
@@ -480,10 +468,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                     namespace,
                     startSynchronizer)
                 .bootstrapAsync();
-        if (tracer != null) {
-          Span tracingSpan = tracer.buildSpan("BootstrapInstallers").asChildOf(activeSpan).start();
-          bootstrapperFuture.whenComplete((res, ex) -> tracingSpan.finish());
-        }
+        bootstrapperFuture.whenComplete((res, ex) -> tracerUtil.finishSpan(tracingSpan));
         toCancelFutures.add(bootstrapperFuture);
       } else {
         bootstrapperFuture = CompletableFuture.completedFuture(null);
@@ -496,7 +481,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    * Note that if this invocation caused a transition of failure to a completed state then
    * notification about machine start failed will be published.
    */
-  private Function<Throwable, Void> publishFailedStatusAndRecordFailureTrace(
+  private Function<Throwable, Void> publishFailedStatus(
       CompletableFuture<Void> failure, String machineName) {
     return ex -> {
       if (failure.completeExceptionally(ex)) {
@@ -518,16 +503,6 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     };
   }
 
-  private void finishSpanAsFailure(Span span, String reason) {
-    if (span != null) {
-      // record the startup as a failure and set the priority so that this span is not throttled
-      TracingTags.ERROR.set(span, true);
-      TracingTags.SAMPLING_PRIORITY.set(span, 1);
-      TracingTags.ERROR_REASON.set(span, reason);
-      span.finish();
-    }
-  }
-
   /**
    * Returns the future, which ends when machine is considered as running.
    *
@@ -537,7 +512,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   public CompletableFuture<Void> waitRunningAsync(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
     CompletableFuture<Void> waitFuture =
-        namespace.deployments().waitRunningAsync(machine.getPodName(), tracer);
+        namespace.deployments().waitRunningAsync(machine.getPodName(), tracerUtil);
 
     toCancelFutures.add(waitFuture);
     return waitFuture;

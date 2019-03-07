@@ -59,6 +59,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEventHandler;
@@ -114,6 +115,8 @@ public class KubernetesDeploymentsTest {
       eventNamespaceMixedOperation;
 
   @Captor private ArgumentCaptor<Watcher<Event>> eventWatcherCaptor;
+
+  @Mock TracerUtil tracerUtil;
 
   private KubernetesDeployments kubernetesDeployments;
 
@@ -239,7 +242,7 @@ public class KubernetesDeploymentsTest {
   public void shouldCompleteFutureForWaitingPidIfStatusIsRunning() {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -254,7 +257,7 @@ public class KubernetesDeploymentsTest {
   public void shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsSucceeded() throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_SUCCEEDED);
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -278,7 +281,7 @@ public class KubernetesDeploymentsTest {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     when(pod.getStatus().getReason()).thenReturn("Evicted");
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -302,7 +305,7 @@ public class KubernetesDeploymentsTest {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     when(podResource.getLog()).thenReturn("Pod fail log");
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -324,7 +327,7 @@ public class KubernetesDeploymentsTest {
       shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsFailedAndReasonNorLogsAreNotAvailable()
           throws Exception {
     // given
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
 
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     doThrow(new InfrastructureException("Unable to create client"))

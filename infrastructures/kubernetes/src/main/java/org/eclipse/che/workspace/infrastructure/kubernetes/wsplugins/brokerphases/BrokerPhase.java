@@ -31,6 +31,9 @@ import org.eclipse.che.commons.tracing.TracingTags;
 public abstract class BrokerPhase {
 
   protected BrokerPhase nextPhase;
+  protected String workspaceId;
+  protected String spanName;
+  protected Tracer tracer;
 
   @Beta
   public BrokerPhase then(BrokerPhase next) {
@@ -54,7 +57,7 @@ public abstract class BrokerPhase {
    *
    * <p>Meant to be used with {@link BrokerPhase#finishSpanIfExists(Span)}
    */
-  public Span startTracingPhase(Tracer tracer, String spanName, String workspaceId) {
+  public Span startTracingPhase() {
     if (tracer == null) {
       return null;
     }

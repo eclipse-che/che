@@ -38,12 +38,11 @@ import org.slf4j.LoggerFactory;
 public class ListenBrokerEvents extends BrokerPhase {
 
   private static final Logger LOG = LoggerFactory.getLogger(ListenBrokerEvents.class);
+  private static final String SPAN_NAME = "ListenBrokerEvents";
 
-  private final String workspaceId;
   private final BrokersResult brokersResult;
   private final EventService eventService;
   private final KubernetesPluginsToolingValidator pluginsValidator;
-  @Nullable private final Tracer tracer;
 
   public ListenBrokerEvents(
       String workspaceId,
@@ -56,11 +55,12 @@ public class ListenBrokerEvents extends BrokerPhase {
     this.brokersResult = brokersResult;
     this.eventService = eventService;
     this.tracer = tracer;
+    this.spanName = SPAN_NAME;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
-    Span tracingSpan = startTracingPhase(tracer, "ListenBrokerEvents", workspaceId);
+    Span tracingSpan = startTracingPhase();
     BrokerStatusListener brokerStatusListener =
         new BrokerStatusListener(workspaceId, pluginsValidator, brokersResult);
     try {

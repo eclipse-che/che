@@ -32,11 +32,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.Workspa
 @Beta
 public class PrepareStorage extends BrokerPhase {
 
-  private final String workspaceId;
+  private static final String SPAN_NAME = "PrepareStorage";
+
   private final KubernetesEnvironment brokerEnvironment;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final StartSynchronizer startSynchronizer;
-  @Nullable private final Tracer tracer;
 
   public PrepareStorage(
       String workspaceId,
@@ -49,11 +49,12 @@ public class PrepareStorage extends BrokerPhase {
     this.volumesStrategy = volumesStrategy;
     this.startSynchronizer = startSynchronizer;
     this.tracer = tracer;
+    this.spanName = SPAN_NAME;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
-    Span tracingSpan = startTracingPhase(tracer, "PrepareStorage", workspaceId);
+    Span tracingSpan = startTracingPhase();
     volumesStrategy.prepare(
         brokerEnvironment, workspaceId, startSynchronizer.getStartTimeoutMillis());
 
