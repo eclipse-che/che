@@ -239,7 +239,7 @@ public class KubernetesDeploymentsTest {
   public void shouldCompleteFutureForWaitingPidIfStatusIsRunning() {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -254,7 +254,7 @@ public class KubernetesDeploymentsTest {
   public void shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsSucceeded() throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_SUCCEEDED);
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -278,7 +278,7 @@ public class KubernetesDeploymentsTest {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     when(pod.getStatus().getReason()).thenReturn("Evicted");
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -302,7 +302,7 @@ public class KubernetesDeploymentsTest {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     when(podResource.getLog()).thenReturn("Pod fail log");
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -324,7 +324,7 @@ public class KubernetesDeploymentsTest {
       shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsFailedAndReasonNorLogsAreNotAvailable()
           throws Exception {
     // given
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, null);
 
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     doThrow(new InfrastructureException("Unable to create client"))

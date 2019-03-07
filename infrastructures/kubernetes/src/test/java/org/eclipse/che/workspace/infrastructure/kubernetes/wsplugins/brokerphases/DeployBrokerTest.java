@@ -77,7 +77,8 @@ public class DeployBrokerTest {
             k8sNamespace,
             k8sEnvironment,
             brokersResult,
-            unrecoverableEventListenerFactory);
+            unrecoverableEventListenerFactory,
+            null);
     deployBrokerPhase.then(nextBrokerPhase);
 
     when(nextBrokerPhase.execute()).thenReturn(plugins);

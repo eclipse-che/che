@@ -296,7 +296,8 @@ public class KubernetesInternalRuntimeTest {
     when(k8sEnv.getPodsCopy()).thenReturn(podsMap);
     when(k8sEnv.getCommands()).thenReturn(new ArrayList<>(singletonList(envCommand)));
 
-    when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
+    when(deployments.waitRunningAsync(any(), any()))
+        .thenReturn(CompletableFuture.completedFuture(null));
     when(bootstrapper.bootstrapAsync()).thenReturn(CompletableFuture.completedFuture(null));
     when(serversChecker.startAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
   }

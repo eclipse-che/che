@@ -38,6 +38,8 @@ import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -61,6 +63,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.annotation.Traced;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
@@ -125,6 +129,7 @@ public class KubernetesDeployments {
    * @return created pod
    * @throws InfrastructureException when any exception occurs
    */
+  @Traced
   public Pod deploy(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
     // Since we use the pod's metadata as the deployment's metadata
@@ -153,6 +158,7 @@ public class KubernetesDeployments {
     return createDeployment(deployment, workspaceId);
   }
 
+  @Traced
   public Pod deploy(Deployment deployment) throws InfrastructureException {
     ObjectMeta podMeta = deployment.getSpec().getTemplate().getMetadata();
     putLabel(podMeta, CHE_WORKSPACE_ID_LABEL, workspaceId);
@@ -345,7 +351,17 @@ public class KubernetesDeployments {
    *     </ul>
    *     otherwise, it must be explicitly closed
    */
-  public CompletableFuture<Void> waitRunningAsync(String name) {
+  public CompletableFuture<Void> waitRunningAsync(String name, @Nullable Tracer tracer) {
+    final Span tracingSpan =
+        tracer == null
+            ? null
+            : tracer
+                .buildSpan("WaitRunningAsync")
+                .withTag(TracingTags.WORKSPACE_ID.getKey(), workspaceId)
+                .withTag(TracingTags.MACHINE_NAME.getKey(), name)
+                .asChildOf(tracer.activeSpan())
+                .start();
+
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
     try {
       final String podName = getPodName(name);
@@ -367,7 +383,13 @@ public class KubernetesDeployments {
                 }
               });
 
-      podRunningFuture.whenComplete((ok, ex) -> watch.close());
+      podRunningFuture.whenComplete(
+          (ok, ex) -> {
+            watch.close();
+            if (tracingSpan != null) {
+              tracingSpan.finish();
+            }
+          });
       final Pod pod = podResource.get();
       if (pod == null) {
         InfrastructureException ex;
