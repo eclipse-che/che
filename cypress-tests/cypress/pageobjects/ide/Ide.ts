@@ -8,13 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
- /// <reference types="Cypress" />
+/// <reference types="Cypress" />
 
 
 export class Ide {
 
     private static readonly ROOT_URL: string = Cypress.env("root_url");
-    private static readonly LOAD_PAGE_TIMEOUT: number = Cypress.env("load_page_timeout");
+    private static readonly START_WORKSPACE_TIMEOUT: number = Cypress.env("start_workspace_timeout");
     private static readonly LANGUAGE_SERVER_INITIALIZATION_TIMEOUT: number = Cypress.env("language_server_initialization_timeout");
 
     private static readonly TOP_MENU_PANEL: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
@@ -31,7 +31,7 @@ export class Ide {
     }
 
     waitFilesButton() {
-        cy.get(Ide.FILES_BUTTON, { timeout: Ide.LOAD_PAGE_TIMEOUT })
+        cy.get(Ide.FILES_BUTTON)
             .should('be.visible');
     }
 
@@ -42,25 +42,26 @@ export class Ide {
     }
 
     waitTopMenuPanel() {
-        cy.get(Ide.TOP_MENU_PANEL, { timeout: Ide.LOAD_PAGE_TIMEOUT })
+        cy.get(Ide.TOP_MENU_PANEL)
             .should('be.visible');
     }
 
     waitLeftContentPanel() {
-        cy.get(Ide.LEFT_CONTENT_PANEL, { timeout: Ide.LOAD_PAGE_TIMEOUT })
+        cy.get(Ide.LEFT_CONTENT_PANEL)
             .should('be.visible');
     }
 
     waitPreloaderAbsent() {
-        cy.get(Ide.PRELOADER, { timeout: Ide.LOAD_PAGE_TIMEOUT })
+        cy.get(Ide.PRELOADER)
             .should('not.be.visible');
     }
 
     waitIde() {
-        this.waitTopMenuPanel();
-        this.waitLeftContentPanel();
-        this.waitFilesButton();
-        this.waitPreloaderAbsent();
+        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
+            .forEach(idePart => {
+                cy.get(idePart, { timeout: Ide.START_WORKSPACE_TIMEOUT })
+                    .should('be.visible')
+            })
     }
 
     waitStatusBarContains(expectedText: string) {
