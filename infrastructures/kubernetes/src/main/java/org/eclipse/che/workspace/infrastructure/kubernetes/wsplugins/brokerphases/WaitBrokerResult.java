@@ -51,6 +51,7 @@ public class WaitBrokerResult extends BrokerPhase {
     this.brokersResult = brokersResult;
     this.resultWaitingTimeout = resultWaitingTimeout;
     this.tracer = tracer;
+    this.spanName = SPAN_NAME;
   }
 
   @Override
