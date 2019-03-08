@@ -62,7 +62,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
@@ -128,7 +127,6 @@ public class KubernetesDeployments {
    * @return created pod
    * @throws InfrastructureException when any exception occurs
    */
-  @Traced
   public Pod deploy(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
     // Since we use the pod's metadata as the deployment's metadata
@@ -157,7 +155,6 @@ public class KubernetesDeployments {
     return createDeployment(deployment, workspaceId);
   }
 
-  @Traced
   public Pod deploy(Deployment deployment) throws InfrastructureException {
     ObjectMeta podMeta = deployment.getSpec().getTemplate().getMetadata();
     putLabel(podMeta, CHE_WORKSPACE_ID_LABEL, workspaceId);

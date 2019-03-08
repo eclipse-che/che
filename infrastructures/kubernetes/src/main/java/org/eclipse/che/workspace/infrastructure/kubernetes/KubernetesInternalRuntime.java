@@ -166,6 +166,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   protected void internalStart(Map<String, String> startOptions) throws InfrastructureException {
     KubernetesRuntimeContext<E> context = getContext();
     String workspaceId = context.getIdentity().getWorkspaceId();
+    Scope waitRunningAsyncScope = null;
     try {
       startSynchronizer.setStartThread();
       startSynchronizer.start();
@@ -208,7 +209,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final EnvironmentContext currentContext = EnvironmentContext.getCurrent();
       CompletableFuture<Void> startFailure = startSynchronizer.getStartFailure();
 
-      final Scope waitRunningAsyncScope = tracerUtil.buildScope("WaitMachinesStart", workspaceId);
+      waitRunningAsyncScope = tracerUtil.buildScope("WaitMachinesStart", workspaceId);
 
       for (KubernetesMachineImpl machine : machines.getMachines(context.getIdentity()).values()) {
         String machineName = machine.getName();
@@ -230,9 +231,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
 
       waitMachines(machinesFutures, toCancelFutures, startFailure);
 
-      tracerUtil.finishScope(waitRunningAsyncScope);
       startSynchronizer.complete();
     } catch (InfrastructureException | RuntimeException e) {
+      tracerUtil.addErrorStatusToScope(waitRunningAsyncScope, e.getMessage());
       Exception startFailureCause = startSynchronizer.getStartFailureNow();
       if (startFailureCause == null) {
         startFailureCause = e;
@@ -263,6 +264,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       }
       wrapAndRethrow(startFailureCause);
     } finally {
+      tracerUtil.finishScope(waitRunningAsyncScope);
       namespace.deployments().stopWatch();
     }
   }
