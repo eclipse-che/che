@@ -449,9 +449,9 @@ public class AddOrImportProjectFormTest {
     prepareJavaWorkspace(TEST_JAVA_WORKSPACE_NAME_EDIT);
     newWorkspace.clickOnTopCreateButton();
 
+    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
     testWorkspaceServiceClient.waitStatus(
         TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName(), RUNNING);
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
 
     ide.waitOpenedWorkspaceIsReadyToUse();
     consoles.waitJDTLSProjectResolveFinishedMessage(SPRING_SAMPLE_NAME);

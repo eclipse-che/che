@@ -12,7 +12,7 @@
 package org.eclipse.che.api.devfile.server.convert.tool.kubernetes;
 
 import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.WorkspaceExportException;
+import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;

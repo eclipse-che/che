@@ -27,7 +27,7 @@ import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Tool;
-import org.eclipse.che.api.devfile.server.DevfileFormatException;
+import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 
 /** Validates devfile logical integrity. */
 @Singleton

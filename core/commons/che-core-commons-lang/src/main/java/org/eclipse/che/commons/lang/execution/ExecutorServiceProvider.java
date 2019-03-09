@@ -17,6 +17,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -44,15 +45,18 @@ public class ExecutorServiceProvider implements Provider<ExecutorService> {
   private static final Logger LOG = getLogger(ExecutorServiceProvider.class);
 
   private final ThreadPoolExecutor executor;
-
   /**
    * @param corePoolSize - corePoolSize of ThreadPoolExecutor
    * @param maxPoolSize - maximumPoolSize of ThreadPoolExecutor
    * @param queueCapacity - queue capacity. if > 0 then this is capacity of {@link
    *     LinkedBlockingQueue} if <=0 then {@link SynchronousQueue} are used.
+   * @param rejectedExecutionHandler - {@link RejectedExecutionHandler} of ThreadPoolExecutor
    */
-  public ExecutorServiceProvider(int corePoolSize, int maxPoolSize, int queueCapacity) {
-
+  public ExecutorServiceProvider(
+      int corePoolSize,
+      int maxPoolSize,
+      int queueCapacity,
+      RejectedExecutionHandler rejectedExecutionHandler) {
     ThreadFactory factory =
         new ThreadFactoryBuilder()
             .setUncaughtExceptionHandler(LoggingUncaughtExceptionHandler.getInstance())
@@ -68,9 +72,22 @@ public class ExecutorServiceProvider implements Provider<ExecutorService> {
             SECONDS,
             queueCapacity > 0 ? new LinkedBlockingQueue<>(queueCapacity) : new SynchronousQueue<>(),
             factory);
-    executor.setRejectedExecutionHandler(
-        (r, __) -> LOG.warn("Executor rejected to handle the payload {}", r));
+    executor.setRejectedExecutionHandler(rejectedExecutionHandler);
     executor.prestartCoreThread();
+  }
+
+  /**
+   * @param corePoolSize - corePoolSize of ThreadPoolExecutor
+   * @param maxPoolSize - maximumPoolSize of ThreadPoolExecutor
+   * @param queueCapacity - queue capacity. if > 0 then this is capacity of {@link
+   *     LinkedBlockingQueue} if <=0 then {@link SynchronousQueue} are used.
+   */
+  public ExecutorServiceProvider(int corePoolSize, int maxPoolSize, int queueCapacity) {
+    this(
+        corePoolSize,
+        maxPoolSize,
+        queueCapacity,
+        (r, e) -> LOG.warn("Executor rejected to handle the payload {}", r));
   }
 
   @Override

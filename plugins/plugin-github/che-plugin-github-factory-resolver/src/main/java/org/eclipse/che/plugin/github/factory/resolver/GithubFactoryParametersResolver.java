@@ -24,6 +24,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
+import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
@@ -38,6 +39,8 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
   /** Parser which will allow to check validity of URLs and create objects. */
   private GithubURLParser githubUrlParser;
 
+  private final URLFetcher urlFetcher;
+
   /** Builder allowing to build objects from github URL. */
   private GithubSourceStorageBuilder githubSourceStorageBuilder;
 
@@ -50,10 +53,12 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
   @Inject
   public GithubFactoryParametersResolver(
       GithubURLParser githubUrlParser,
+      URLFetcher urlFetcher,
       GithubSourceStorageBuilder githubSourceStorageBuilder,
       URLFactoryBuilder urlFactoryBuilder,
       ProjectConfigDtoMerger projectConfigDtoMerger) {
     this.githubUrlParser = githubUrlParser;
+    this.urlFetcher = urlFetcher;
     this.githubSourceStorageBuilder = githubSourceStorageBuilder;
     this.urlFactoryBuilder = urlFactoryBuilder;
     this.projectConfigDtoMerger = projectConfigDtoMerger;
@@ -89,7 +94,9 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     // create factory from the following location if location exists, else create default factory
     FactoryDto factory =
         urlFactoryBuilder
-            .createFactoryFromDevfile(githubUrl.devfileFileLocation(), githubUrl::rawFileLocation)
+            .createFactoryFromDevfile(
+                githubUrl.devfileFileLocation(),
+                fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
             .orElseGet(
                 () ->
                     urlFactoryBuilder

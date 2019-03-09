@@ -58,11 +58,11 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
         PROJECT_NAME,
         ProjectTemplates.MAVEN_SPRING);
     ide.open(workspace);
+    ide.waitOpenedWorkspaceIsReadyToUse();
   }
 
   @Test
   public void checkWorkingWithTabsByUsingContextMenu() {
-    projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
     projectExplorer.quickExpandWithJavaScript();
     loader.waitOnClosed();
@@ -129,7 +129,7 @@ public class CheckWorkingWithTabsByUsingContextMenuTest {
   }
 
   private void openTabsInEditor() {
-    projectExplorer.waitItem(PATH_TO_JAVA_CLASS);
+    projectExplorer.quickRevealToItemWithJavaScript(PATH_TO_JAVA_CLASS);
     projectExplorer.openItemByPath(PATH_TO_JAVA_CLASS);
     editor.waitTabIsPresent(NAME_TO_JAVA_CLASS);
 

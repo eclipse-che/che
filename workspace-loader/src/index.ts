@@ -44,7 +44,7 @@ export class KeycloakLoader {
                     if (request.status == 200) {
                         resolve(this.injectKeycloakScript(JSON.parse(request.responseText)));
                     } else {
-                        reject(null);
+                        reject(new Error('Cannot load keycloak script'));
                     }
                 };
 
@@ -139,7 +139,7 @@ export class WorkspaceLoader {
         window.parent.postMessage("show-ide", "*");
     }
 
-    load(): Promise<void> {
+    async load(): Promise<void> {
         const workspaceKey = this.getWorkspaceKey();
 
         if (!workspaceKey || workspaceKey === "") {
@@ -147,18 +147,21 @@ export class WorkspaceLoader {
             return;
         }
 
-        return this.getWorkspace(workspaceKey)
-            .then((workspace) => {
-                this.workspace = workspace;
-                return this.handleWorkspace();
-            })
-            .then(() => this.openIDE())
-            .catch(err => {
+        try {
+            this.workspace = await this.getWorkspace(workspaceKey);
+            await this.handleWorkspace()
+            await this.openIDE();
+        }
+        catch(err) {
+            if(err) {
                 console.error(err);
                 this.loader.error(err);
-                this.loader.hideLoader();
-                this.loader.showReload();
-            });
+            } else {
+                this.loader.error('Unknown error has happened, try to reload page');
+            }
+            this.loader.hideLoader();
+            this.loader.showReload();
+        }
     }
 
     /**
@@ -386,7 +389,7 @@ export class WorkspaceLoader {
                     console.log('Failed to refresh token');
                     window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
                     this.keycloak.login();
-                    reject();
+                    reject(new Error('Failed to refresh token'));
                 });
             }
 

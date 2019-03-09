@@ -16,7 +16,8 @@ set -e
 check_github_token_is_set() {
   if [[ -z "${DEVFILE_DOCS_GITHUB_TOKEN}" ]]; then
     echo "GitHub token not found."
-    echo "Specify env var DEVFILE_DOCS_GITHUB_TOKEN or use --no-deploy argument if you do not want to push Docs automatically"
+    echo "Configure env var DEVFILE_DOCS_GITHUB_TOKEN or use --ssh argument if you have ssh keys configured"
+    echo "Also you is able to use --no-deploy argument if you do not want to push Docs automatically"
     echo "Exiting now..."
     exit 1
   else
@@ -30,6 +31,8 @@ build() {
   else
     build_native
   fi
+  cd $RUN_DIR
+  cp ../../../README.md ${TMP_DIR}/docs/index.md
 }
 
 build_with_docker() {
@@ -54,12 +57,23 @@ build_native() {
    npm link
    cd ..
    jsonschema2md -d schema -o docs -n -e json
-   mv ./docs/devfile.md ./docs/index.md
    echo "Building docs done."
 }
 
 deploy() {
-   rm -rf devfile && git clone https://${GH_TOKEN}@github.com/redhat-developer/devfile.git
+   cd ${TMP_DIR}
+   BRANCH_ARG=""
+   if [[ ! -z "${DEPLOY_BRANCH}" ]]; then
+       BRANCH_ARG="-b ${DEPLOY_BRANCH} --single-branch"
+   fi
+
+   if [[ "$USE_SSH" == "true" ]]; then
+     DOCS_REPOSITORY_URL="git@github.com:${DEPLOY_ORGANIZATION}/devfile.git"
+   else
+     DOCS_REPOSITORY_URL=https://${GH_TOKEN}@github.com/${DEPLOY_ORGANIZATION}/devfile.git
+   fi
+
+   rm -rf devfile && git clone ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ `git status --porcelain` ]]; then
@@ -90,10 +104,15 @@ cleanupTmpDir() {
 print_help() {
    echo "This script builds and deploys documentation in markdown format from devfile json schema."
    echo "Command line options:"
-   echo "--docker      Build docs in docker container"
-   echo "--no-deploy   Skip deploy result to remote"
-   echo "--message     Override default commit message. Example: --message=\"Update Devfile Docs\""
-   echo "--folder|-f   If specified then script will save docs files in the specified folder. Examples: -f=.|-f=/home/user"
+   echo " Build related options"
+   echo "   --docker      Build docs in docker container"
+   echo "   --folder|-f   If specified then script will save docs files in the specified folder. Examples: -f=.|-f=/home/user"
+   echo " Deploy related options"
+   echo "   --message     Override default commit message. Example: --message=\"Update Devfile Docs\""
+   echo "   --no-deploy   Skip deploy result to remote"
+   echo "   --org         Specifies organization of devfile repository to which Docs should be pushed. Default value: redhat-developer"
+   echo "   --branch|-b   Specifies branch to which Docs should be pushed. Default behaviour: use default GitHub repo branch"
+   echo "   --ssh         Configures script to use ssh link to GitHub Docs repository. Default: false"
 }
 
 parse_args() {
@@ -109,22 +128,34 @@ parse_args() {
                shift
            ;;
            --message=*)
-               MESSAGE="${i#*=}"
+               COMMIT_MESSAGE="${i#*=}"
                shift
            ;;
            -f=*| --folder=*)
                FOLDER="${i#*=}"
                shift
            ;;
-            -help|--help)
+           --org=*)
+               DEPLOY_ORGANIZATION="${i#*=}"
+               shift
+           ;;
+           --branch=*)
+               DEPLOY_BRANCH="${i#*=}"
+               shift
+           ;;
+           --ssh)
+               USE_SSH="true"
+               shift
+           ;;
+           -help|--help)
                print_help
                exit 0
                ;;
-            *)
-                echo "You've passed wrong arg '$key'."
-                echo -e "$HELP"
-                exit 1
-                ;;
+           *)
+               echo "You've passed wrong arg '$i'."
+               print_help
+               exit 1
+               ;;
         esac
      done
 }
@@ -132,14 +163,11 @@ parse_args() {
 copyDocs() {
   cd $RUN_DIR
   cp -r ${TMP_DIR}/docs/. -t ${FOLDER}
-  echo "Docs is saved as ${FOLDER}/index.md"
+  echo "Docs is saved into ${FOLDER}"
 }
 
 RUN_DIR=$(pwd)
 TMP_DIR="/tmp/devfile"
-
-DEFAULT_COMMIT_MESSAGE="Update devfile docs"
-COMMIT_MESSAGE=${MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
 
 DEFAULT_BUILD_DOCKER=false
 IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
@@ -147,12 +175,21 @@ IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
 DEFAULT_DEPLOY=true
 IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
 
-DEFAULT_DO_CLEANUP=true
-DO_CLEANUP=${DO_CLEANUP:-${DEFAULT_DO_CLEANUP}}
+DEFAULT_COMMIT_MESSAGE="Update devfile docs"
+COMMIT_MESSAGE=${COMMIT_MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
+
+DEFAULT_DEPLOY_ORGANIZATION=redhat-developer
+DEPLOY_ORGANIZATION=${DEPLOY_ORGANIZATION:-${DEFAULT_DEPLOY_ORGANIZATION}}
+
+DEFAULT_DEPLOY_BRANCH="" # means use default branch of GitHub repository
+DEPLOY_BRANCH=${DEFAULT_DEPLOY_BRANCH:-${DEPLOY_BRANCH}}
+
+DEFAULT_USE_SSH="false"
+USE_SSH=${DEFAULT_USE_SSH:-${USE_SSH}}
 
 parse_args "$@"
 
-if [[ "$IS_DEPLOY" == "true" ]]; then
+if [[ "$IS_DEPLOY" == "true" && "$USE_SSH" == "false" ]]; then
   check_github_token_is_set
 fi
 

@@ -28,7 +28,7 @@ import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.model.Env;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.model.Volume;
-import org.eclipse.che.api.devfile.server.WorkspaceExportException;
+import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;

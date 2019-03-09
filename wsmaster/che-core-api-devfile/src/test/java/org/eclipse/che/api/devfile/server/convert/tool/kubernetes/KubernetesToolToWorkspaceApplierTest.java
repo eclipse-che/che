@@ -18,27 +18,38 @@ import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.TOOL_NAME_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.convert.tool.kubernetes.KubernetesToolToWorkspaceApplier.YAML_CONTENT_TYPE;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
+import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.devfile.model.Tool;
-import org.eclipse.che.api.devfile.server.DevfileException;
+import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
 /** @author Sergii Leshchenko */
+@Listeners(MockitoTestNGListener.class)
 public class KubernetesToolToWorkspaceApplierTest {
 
   public static final String LOCAL_FILENAME = "local.yaml";
@@ -47,10 +58,11 @@ public class KubernetesToolToWorkspaceApplierTest {
   private WorkspaceConfigImpl workspaceConfig;
 
   private KubernetesToolToWorkspaceApplier applier;
+  @Mock private KubernetesRecipeParser k8sRecipeParser;
 
   @BeforeMethod
   public void setUp() {
-    applier = new KubernetesToolToWorkspaceApplier();
+    applier = new KubernetesToolToWorkspaceApplier(k8sRecipeParser);
 
     workspaceConfig = new WorkspaceConfigImpl();
   }
@@ -58,21 +70,21 @@ public class KubernetesToolToWorkspaceApplierTest {
   @Test(
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
-          "Unable to process tool '"
-              + TOOL_NAME
-              + "' of type '"
-              + KUBERNETES_TOOL_TYPE
-              + "' since there is no recipe content provider supplied. "
-              + "That means you're trying to submit an devfile with recipe-type tools to the bare "
-              + "devfile API or used factory URL does not support this feature.")
-  public void shouldThrowExceptionWhenRecipeToolIsPresentAndNoContentProviderSupplied()
+          "Fetching content of file `local.yaml` specified in `local` field of tool `foo` is not "
+              + "supported. Please provide its content in `localContent` field. Cause: fetch is not supported")
+  public void shouldThrowExceptionWhenRecipeToolIsPresentAndContentProviderDoesNotSupportFetching()
       throws Exception {
     // given
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
 
     // when
-    applier.apply(workspaceConfig, tool, null);
+    applier.apply(
+        workspaceConfig,
+        tool,
+        e -> {
+          throw new DevfileException("fetch is not supported");
+        });
   }
 
   @Test(
@@ -85,6 +97,7 @@ public class KubernetesToolToWorkspaceApplierTest {
               + "': .*")
   public void shouldThrowExceptionWhenRecipeContentIsNotAValidYaml() throws Exception {
     // given
+    doThrow(new ValidationException("non valid")).when(k8sRecipeParser).parse(anyString());
     Tool tool =
         new Tool().withType(KUBERNETES_TOOL_TYPE).withLocal(LOCAL_FILENAME).withName(TOOL_NAME);
 
@@ -95,7 +108,7 @@ public class KubernetesToolToWorkspaceApplierTest {
   @Test(
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
-          "Error during recipe content retrieval for tool '" + TOOL_NAME + "': fetch failed")
+          "Error during recipe content retrieval for tool 'foo' with type 'kubernetes': fetch failed")
   public void shouldThrowExceptionWhenExceptionHappensOnContentProvider() throws Exception {
     // given
     Tool tool =
@@ -115,6 +128,7 @@ public class KubernetesToolToWorkspaceApplierTest {
       throws Exception {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
     Tool tool =
         new Tool()
             .withType(KUBERNETES_TOOL_TYPE)
@@ -134,12 +148,17 @@ public class KubernetesToolToWorkspaceApplierTest {
     assertNotNull(recipe);
     assertEquals(recipe.getType(), KUBERNETES_TOOL_TYPE);
     assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
-    assertEquals(toK8SList(recipe.getContent()), toK8SList(yamlRecipeContent));
+
+    // it is expected that applier wrap original recipes objects in new Kubernetes list
+    KubernetesList expectedKubernetesList =
+        new KubernetesListBuilder().withItems(toK8SList(yamlRecipeContent).getItems()).build();
+    assertEquals(toK8SList(recipe.getContent()).getItems(), expectedKubernetesList.getItems());
   }
 
   @Test
   public void shouldUseLocalContentAsRecipeIfPresent() throws Exception {
     String yamlRecipeContent = getResource("petclinic.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
     Tool tool =
         new Tool()
             .withType(KUBERNETES_TOOL_TYPE)
@@ -148,7 +167,7 @@ public class KubernetesToolToWorkspaceApplierTest {
             .withName(TOOL_NAME)
             .withSelector(new HashMap<>());
 
-    applier.apply(workspaceConfig, tool, null);
+    applier.apply(workspaceConfig, tool, new FetchNotSupportedProvider());
 
     String defaultEnv = workspaceConfig.getDefaultEnv();
     assertNotNull(defaultEnv);
@@ -158,7 +177,11 @@ public class KubernetesToolToWorkspaceApplierTest {
     assertNotNull(recipe);
     assertEquals(recipe.getType(), KUBERNETES_TOOL_TYPE);
     assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
-    assertEquals(toK8SList(recipe.getContent()), toK8SList(yamlRecipeContent));
+
+    // it is expected that applier wrap original recipes objects in new Kubernetes list
+    KubernetesList expectedKubernetesList =
+        new KubernetesListBuilder().withItems(toK8SList(yamlRecipeContent).getItems()).build();
+    assertEquals(toK8SList(recipe.getContent()).getItems(), expectedKubernetesList.getItems());
   }
 
   @Test
@@ -166,6 +189,7 @@ public class KubernetesToolToWorkspaceApplierTest {
       throws Exception {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
     Tool tool =
         new Tool()
             .withType(OPENSHIFT_TOOL_TYPE)
@@ -185,7 +209,11 @@ public class KubernetesToolToWorkspaceApplierTest {
     assertNotNull(recipe);
     assertEquals(recipe.getType(), OPENSHIFT_TOOL_TYPE);
     assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
-    assertEquals(toK8SList(recipe.getContent()), toK8SList(yamlRecipeContent));
+
+    // it is expected that applier wrap original recipes objects in new Kubernetes list
+    KubernetesList expectedKubernetesList =
+        new KubernetesListBuilder().withItems(toK8SList(yamlRecipeContent).getItems()).build();
+    assertEquals(toK8SList(recipe.getContent()).getItems(), expectedKubernetesList.getItems());
   }
 
   @Test
@@ -200,6 +228,7 @@ public class KubernetesToolToWorkspaceApplierTest {
             .withLocal(LOCAL_FILENAME)
             .withName(TOOL_NAME)
             .withSelector(selector);
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     // when
     applier.apply(workspaceConfig, tool, s -> yamlRecipeContent);
@@ -223,6 +252,7 @@ public class KubernetesToolToWorkspaceApplierTest {
       throws Exception {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     final Map<String, String> selector = singletonMap("app.kubernetes.io/component", "webapp");
     Tool tool =
@@ -249,6 +279,7 @@ public class KubernetesToolToWorkspaceApplierTest {
           throws Exception {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     Tool tool =
         new Tool()

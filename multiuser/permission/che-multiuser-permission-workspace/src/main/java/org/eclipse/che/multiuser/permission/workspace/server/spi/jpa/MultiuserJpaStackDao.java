@@ -51,7 +51,8 @@ public class MultiuserJpaStackDao implements StackDao {
       " SELECT stack FROM StackPermissions perm "
           + "        LEFT JOIN perm.stack stack  "
           + "        WHERE (perm.userId IS NULL OR perm.userId  = :userId) "
-          + "        AND 'search' MEMBER OF perm.actions";
+          + "        AND 'search' MEMBER OF perm.actions"
+          + "        GROUP BY stack.id";
 
   private static final String findByPermissionsAndTagsQuery =
       " SELECT stack FROM StackPermissions perm "

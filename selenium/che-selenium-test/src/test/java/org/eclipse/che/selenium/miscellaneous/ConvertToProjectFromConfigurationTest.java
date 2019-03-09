@@ -50,8 +50,9 @@ public class ConvertToProjectFromConfigurationTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
   private static final String PHP_FOLDER_NAME = "phpFolder";
   private static final String JS_FOLDER_NAME = "jsFolder";
-  private static final String pathToPhpFile = PROJECT_NAME + "/src/main/webapp/" + PHP_FOLDER_NAME;
-  private static final String pathToJsFile =
+  private static final String PATH_TO_PHP_FILE =
+      PROJECT_NAME + "/src/main/webapp/" + PHP_FOLDER_NAME;
+  private static final String PATH_TO_JS_FILE =
       PROJECT_NAME + "/src/main/webapp/WEB-INF/" + JS_FOLDER_NAME;
 
   private static final String TEXT_FILE_JS =
@@ -91,11 +92,11 @@ public class ConvertToProjectFromConfigurationTest {
   public void checkConvertToProjectFromConfiguration() throws Exception {
     ide.waitOpenedWorkspaceIsReadyToUse();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
+    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/src/main/webapp");
 
     // create folder with php file and convert to project
     createNewFolder(PROJECT_NAME + "/src/main/webapp", PHP_FOLDER_NAME);
-    createNewFile("file.php", pathToPhpFile, FILE);
+    createNewFile("file.php", PATH_TO_PHP_FILE, FILE);
     projectExplorer.waitVisibilityByName("file.php");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/phpFolder/file.php");
     editor.waitActive();
@@ -111,8 +112,8 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.clickSaveButton();
     wizard.waitCloseProjectConfigForm();
 
-    projectExplorer.waitItem(pathToPhpFile);
-    projectExplorer.waitAndSelectItem(pathToPhpFile);
+    projectExplorer.waitItem(PATH_TO_PHP_FILE);
+    projectExplorer.waitAndSelectItem(PATH_TO_PHP_FILE);
     menu.runCommand(PROJECT, CONFIGURATION);
     wizard.waitOpenProjectConfigForm();
     wizard.waitTextParentDirectoryName("/" + PROJECT_NAME + "/src/main/webapp");
@@ -123,9 +124,10 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.waitCloseProjectConfigForm();
 
     // create folder with js file and convert to project
+    projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF");
     createNewFolder(PROJECT_NAME + "/src/main/webapp/WEB-INF", JS_FOLDER_NAME);
-    createNewFile("fileJS", pathToJsFile, JAVASCRIPT_FILE);
+    createNewFile("fileJS", PATH_TO_JS_FILE, JAVASCRIPT_FILE);
     projectExplorer.waitVisibilityByName("fileJS.js");
     projectExplorer.openItemByPath(PROJECT_NAME + "/src/main/webapp/WEB-INF/jsFolder/fileJS.js");
     editor.waitActive();
@@ -141,8 +143,8 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.clickSaveButton();
     wizard.waitCloseProjectConfigForm();
 
-    projectExplorer.waitItem(pathToJsFile);
-    projectExplorer.waitAndSelectItem(pathToJsFile);
+    projectExplorer.waitItem(PATH_TO_JS_FILE);
+    projectExplorer.waitAndSelectItem(PATH_TO_JS_FILE);
     menu.runCommand(PROJECT, CONFIGURATION);
     wizard.waitOpenProjectConfigForm();
     wizard.waitTextParentDirectoryName("/" + PROJECT_NAME + "/src/main/webapp/WEB-INF");
@@ -173,8 +175,7 @@ public class ConvertToProjectFromConfigurationTest {
     wizard.waitTextProjectNameInput(folderName);
   }
 
-  private void createNewFile(String name, String pathToFile, ContextMenuItems type)
-      throws Exception {
+  private void createNewFile(String name, String pathToFile, ContextMenuItems type) {
     projectExplorer.waitAndSelectItem(pathToFile);
     projectExplorer.openContextMenuByPathSelectedItem(pathToFile);
     projectExplorer.clickOnItemInContextMenu(NEW);
