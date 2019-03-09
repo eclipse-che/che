@@ -8,18 +8,17 @@
 #
 
 {{- if (.Values.global.cheWorkspacesNamespace) }}
-kind: RoleBinding
+kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: che-workspace-view
-  namespace: {{ .Values.global.cheWorkspacesNamespace }}
-roleRef:
-  kind: Role
   name: view
   namespace: {{ .Values.global.cheWorkspacesNamespace }}
-  apiGroup: rbac.authorization.k8s.io
-subjects:
-- kind: ServiceAccount
-  name: {{ .Values.global.cheWorkspaceServiceAccount }}
-  namespace: {{ .Values.global.cheWorkspacesNamespace }}
+rules:
+- apiGroups:
+  - ""
+  attributeRestrictions: null
+  resources:
+    - pods
+  verbs:
+    - list
 {{- end }}

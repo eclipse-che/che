@@ -135,7 +135,7 @@ public class KubernetesWorkspaceServiceAccount {
         .withNamespace(namespace)
         .endMetadata()
         .withNewRoleRef()
-        .withKind("ClusterRole")
+        .withKind("Role")
         .withName("view")
         .endRoleRef()
         .withSubjects(
