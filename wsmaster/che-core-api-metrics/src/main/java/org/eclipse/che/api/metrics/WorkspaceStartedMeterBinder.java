@@ -21,6 +21,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 
+/** Counts number of successfully started workspaces. */
 public class WorkspaceStartedMeterBinder implements MeterBinder {
   private final EventService eventService;
 
