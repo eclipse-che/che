@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
@@ -64,6 +65,7 @@ public class DeployBrokerTest {
 
   @Mock private BrokersResult brokersResult;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverableEventListenerFactory;
+  @Mock private TracerUtil tracerUtil;
 
   private List<ChePlugin> plugins = emptyList();
 
@@ -78,7 +80,7 @@ public class DeployBrokerTest {
             k8sEnvironment,
             brokersResult,
             unrecoverableEventListenerFactory,
-            null);
+            tracerUtil);
     deployBrokerPhase.then(nextBrokerPhase);
 
     when(nextBrokerPhase.execute()).thenReturn(plugins);

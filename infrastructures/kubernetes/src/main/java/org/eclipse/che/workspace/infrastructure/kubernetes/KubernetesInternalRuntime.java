@@ -381,6 +381,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     final Span activeSpan = tracerUtil.getActiveSpan();
 
     return ignored -> {
+      // Span must be created within this lambda block, otherwise the span begins as soon as
+      // this function is called (i.e. before the previous steps in the machine boot chain
+      // are complete
       final Span tracingSpan =
           tracerUtil.buildSpan(
               "CheckServers",
@@ -431,7 +434,11 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                 }
                 serversAndProbesFuture.complete(null);
 
-                tracerUtil.finishSpan(tracingSpan);
+                if (ex == null) {
+                  tracerUtil.finishSpan(tracingSpan);
+                } else {
+                  tracerUtil.finishSpanAsFailure(tracingSpan, ex.getMessage());
+                }
               });
       return serversAndProbesFuture;
     };
@@ -444,8 +451,14 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    */
   private Function<Void, CompletionStage<Void>> bootstrap(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
+
+    // Need to get active span here to allow use in returned function
     final Span activeSpan = tracerUtil.getActiveSpan();
+
     return ignored -> {
+      // Span must be created within this lambda block, otherwise the span begins as soon as
+      // this function is called (i.e. before the previous steps in the machine boot chain
+      // are complete
       Span tracingSpan =
           tracerUtil.buildSpan(
               "BootstrapInstallers",

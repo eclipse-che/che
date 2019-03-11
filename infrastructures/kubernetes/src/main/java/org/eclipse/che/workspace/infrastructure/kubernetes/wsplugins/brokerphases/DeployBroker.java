@@ -19,13 +19,12 @@ import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.opentracing.Span;
-import io.opentracing.Tracer;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
@@ -53,6 +52,7 @@ public class DeployBroker extends BrokerPhase {
   private final KubernetesEnvironment brokerEnvironment;
   private final BrokersResult brokersResult;
   private final UnrecoverablePodEventListenerFactory factory;
+  private final TracerUtil tracerUtil;
 
   public DeployBroker(
       String workspaceId,
@@ -60,20 +60,19 @@ public class DeployBroker extends BrokerPhase {
       KubernetesEnvironment brokerEnvironment,
       BrokersResult brokersResult,
       UnrecoverablePodEventListenerFactory factory,
-      @Nullable Tracer tracer) {
+      TracerUtil tracerUtil) {
     this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.brokerEnvironment = brokerEnvironment;
     this.brokersResult = brokersResult;
     this.factory = factory;
-    this.tracer = tracer;
-    this.spanName = SPAN_NAME;
+    this.tracerUtil = tracerUtil;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
     LOG.debug("Starting brokers pod for workspace '{}'", workspaceId);
-    Span tracingSpan = startTracingPhase();
+    Span tracingSpan = tracerUtil.buildSpan(SPAN_NAME, null, workspaceId, null);
     KubernetesDeployments deployments = namespace.deployments();
     try {
       // Creates config map that can inject Che tooling plugins meta files into a Che plugin
@@ -95,8 +94,12 @@ public class DeployBroker extends BrokerPhase {
       deployments.create(pluginBrokerPod);
 
       LOG.debug("Brokers pod is created for workspace '{}'", workspaceId);
-      finishSpanIfExists(tracingSpan);
+      tracerUtil.finishSpan(tracingSpan);
       return nextPhase.execute();
+    } catch (InfrastructureException e) {
+      // Ensure span is finished with exception message
+      tracerUtil.finishSpanAsFailure(tracingSpan, e.getMessage());
+      throw e;
     } finally {
       namespace.deployments().stopWatch();
       try {

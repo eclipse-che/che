@@ -13,11 +13,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphas
 
 import com.google.common.annotations.Beta;
 import io.opentracing.Span;
-import io.opentracing.Tracer;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
-import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -37,28 +36,33 @@ public class PrepareStorage extends BrokerPhase {
   private final KubernetesEnvironment brokerEnvironment;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final StartSynchronizer startSynchronizer;
+  private final TracerUtil tracerUtil;
 
   public PrepareStorage(
       String workspaceId,
       KubernetesEnvironment brokerEnvironment,
       WorkspaceVolumesStrategy volumesStrategy,
       StartSynchronizer startSynchronizer,
-      @Nullable Tracer tracer) {
+      TracerUtil tracerUtil) {
     this.workspaceId = workspaceId;
     this.brokerEnvironment = brokerEnvironment;
     this.volumesStrategy = volumesStrategy;
     this.startSynchronizer = startSynchronizer;
-    this.tracer = tracer;
-    this.spanName = SPAN_NAME;
+    this.tracerUtil = tracerUtil;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
-    Span tracingSpan = startTracingPhase();
-    volumesStrategy.prepare(
-        brokerEnvironment, workspaceId, startSynchronizer.getStartTimeoutMillis());
-
-    finishSpanIfExists(tracingSpan);
+    Span tracingSpan = tracerUtil.buildSpan(SPAN_NAME, null, workspaceId, null);
+    try {
+      volumesStrategy.prepare(
+          brokerEnvironment, workspaceId, startSynchronizer.getStartTimeoutMillis());
+    } catch (InfrastructureException e) {
+      // Ensure span is finished with exception message
+      tracerUtil.finishSpanAsFailure(tracingSpan, e.getMessage());
+      throw e;
+    }
+    tracerUtil.finishSpan(tracingSpan);
     return nextPhase.execute();
   }
 }
