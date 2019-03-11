@@ -10,12 +10,12 @@ Launching requires valid ```"baseUrl"``` which may be configured by next way:
 
 ### Launching
 
-- Launch testruner with dashboard:
+- Launch testrunner with dashboard:
   - go to the ```"cypress-tests"``` folder and perform ```"npm run cypress:open"``` in the terminal
 
-- Launch tests by "CLI" in the hiden mode:
-  - go to the ```"cypress-tests"``` folder and perform ```"npm run cypress:run-hiden <test-name>"``` (particular test)
-    or ```"npm run cypress:run-hiden"``` (all tests) in the terminal
+- Launch tests by "CLI" in the hidden mode:
+  - go to the ```"cypress-tests"``` folder and perform ```"npm run cypress:run-hidden <test-name>"``` (particular test)
+    or ```"npm run cypress:run-hidden"``` (all tests) in the terminal
 
 - Launch tests by "CLI" in the browser mode:
   - go to the ```"cypress-tests"``` folder and perform ```"npm run cypress:run <test-name>"``` (particular test)

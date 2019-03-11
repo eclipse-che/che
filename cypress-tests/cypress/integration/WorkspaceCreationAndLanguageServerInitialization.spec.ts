@@ -24,7 +24,7 @@ import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";
 import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
-import { NameGenerator } from "../pageobjects/workspace/NameGenerator";
+import { NameGenerator } from "../utils/NameGenerator";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 
