@@ -48,7 +48,7 @@ public class KubernetesWorkspaceServiceAccount {
 
   /**
    * Make sure that workspace service account exists and has `view` and `exec` role bindings, as
-   * well as create view and exec roles in namespace scope
+   * well as create workspace-view and exec roles in namespace scope
    *
    * @throws InfrastructureException when any exception occurred
    */

@@ -53,7 +53,7 @@ objects:
           livenessProbe:
             failureThreshold: 3
             initialDelaySeconds: 30
-            periodSeconds: 10
+            periodSeconds: 5
             successThreshold: 1
             tcpSocket:
               port: 5432
@@ -68,10 +68,10 @@ objects:
                   psql -h 127.0.0.1 -U $POSTGRESQL_USER -q -d
                   $POSTGRESQL_DATABASE -c 'SELECT 1'
             failureThreshold: 10
-            initialDelaySeconds: 50
-            periodSeconds: 10
+            initialDelaySeconds: 30
+            periodSeconds: 5
             successThreshold: 1
-            timeoutSeconds: 10
+            timeoutSeconds: 1
           ports:
           - containerPort: 5432
           resources: {}
@@ -117,7 +117,7 @@ parameters:
 - name: POSTGRESQL_LOG_DEBUG
   displayName: Postgres DB debug
   description: Enable Postgres DB debug log mode
-  value: 'true'
+  value: 'false'
 labels:
   app: postgres
   template: postgres
