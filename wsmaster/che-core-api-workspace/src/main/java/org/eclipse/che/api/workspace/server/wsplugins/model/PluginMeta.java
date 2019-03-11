@@ -38,6 +38,7 @@ public class PluginMeta {
   private String icon = null;
   private String url = null;
   private Map<String, String> attributes = null;
+  private List<String> extensions = null;
 
   public PluginMeta name(String name) {
     this.name = name;
@@ -205,5 +206,17 @@ public class PluginMeta {
 
   public String getLatestUpdateDate() {
     return latestUpdateDate;
+  }
+
+  public List<String> getExtensions() {
+    if (extensions == null) {
+      extensions = new ArrayList<>();
+    }
+    return extensions;
+  }
+
+  public PluginMeta extensions(List<String> extensions) {
+    this.extensions = extensions;
+    return this;
   }
 }
