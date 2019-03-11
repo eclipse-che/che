@@ -172,7 +172,7 @@ public class DevfileManagerTest {
     // then
     verify(workspaceManager).createWorkspace(captor.capture(), anyString(), anyMap());
     assertEquals("petclinic-dev-environment_2", captor.getValue().getName());
-    verify(devfileConverter).devFileToWorkspaceConfig(devfile, fileContentProvider);
+    verify(devfileConverter).devFileToWorkspaceConfig(eq(devfile), any());
   }
 
   private WorkspaceImpl createWorkspace(WorkspaceStatus status)

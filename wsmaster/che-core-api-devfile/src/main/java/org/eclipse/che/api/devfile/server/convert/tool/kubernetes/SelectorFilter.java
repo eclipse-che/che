@@ -11,11 +11,29 @@
  */
 package org.eclipse.che.api.devfile.server.convert.tool.kubernetes;
 
+import static java.util.stream.Collectors.toCollection;
+
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /** Helper class to filter Kubernetes objects by a selector. */
 public class SelectorFilter {
+
+  /**
+   * Uses the {@link #test(ObjectMeta, Map)} method to filter the provided list.
+   *
+   * @param list the list to filter
+   * @param selector the selector to match the metadata of the objects in the list with
+   * @return the filtered list
+   */
+  public static List<HasMetadata> filter(List<HasMetadata> list, Map<String, String> selector) {
+    return list.stream()
+        .filter(o -> test(o.getMetadata(), selector))
+        .collect(toCollection(ArrayList::new));
+  }
 
   /**
    * Returns true is specified object is matched by specified selector, false otherwise

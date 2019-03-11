@@ -15,7 +15,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
@@ -29,9 +28,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
@@ -94,7 +91,7 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
     List<HasMetadata> list = unmarshal(k8sTool, recipeFileContent);
 
     if (!k8sTool.getSelector().isEmpty()) {
-      list = filter(list, k8sTool.getSelector());
+      list = SelectorFilter.filter(list, k8sTool.getSelector());
     }
 
     estimateCommandsMachineName(workspaceConfig, k8sTool, list);
@@ -140,18 +137,6 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
               recipeTool.getLocal(), recipeTool.getName()));
     }
     return recipeFileContent;
-  }
-
-  /**
-   * Returns a lists consisting of the elements of the specified list that match the given selector.
-   *
-   * @param list list to filter
-   * @param selector selector that should be matched with objects' labels
-   */
-  private List<HasMetadata> filter(List<HasMetadata> list, Map<String, String> selector) {
-    return list.stream()
-        .filter(i -> SelectorFilter.test(i.getMetadata(), selector))
-        .collect(toCollection(ArrayList::new));
   }
 
   /**

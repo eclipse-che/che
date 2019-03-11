@@ -54,8 +54,8 @@ public class ContainerSearch {
       @Nullable String deploymentName,
       @Nullable String podName,
       @Nullable String containerName,
-      Map<String, String> podSelector,
-      Map<String, String> deploymentSelector) {
+      @Nullable Map<String, String> podSelector,
+      @Nullable Map<String, String> deploymentSelector) {
     this.deploymentName = deploymentName;
     this.podName = podName;
     this.containerName = containerName;

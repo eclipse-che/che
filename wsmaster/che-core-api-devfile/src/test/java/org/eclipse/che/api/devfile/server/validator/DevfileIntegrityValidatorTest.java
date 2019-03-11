@@ -15,22 +15,34 @@ import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.model.Entrypoint;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
+@Listeners(MockitoTestNGListener.class)
 public class DevfileIntegrityValidatorTest {
 
   private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
@@ -39,9 +51,11 @@ public class DevfileIntegrityValidatorTest {
 
   private DevfileIntegrityValidator integrityValidator;
 
+  @Mock private KubernetesRecipeParser kubernetesRecipeParser;
+
   @BeforeClass
   public void setUp() throws Exception {
-    integrityValidator = new DevfileIntegrityValidator();
+    integrityValidator = new DevfileIntegrityValidator(kubernetesRecipeParser);
     String devFileYamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
     initialDevfile = objectMapper.readValue(devFileYamlContent, Devfile.class);
@@ -173,6 +187,59 @@ public class DevfileIntegrityValidatorTest {
     broken.getProjects().get(0).setName("./" + initialDevfile.getProjects().get(0).getName());
     // when
     integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(expectedExceptions = DevfileFormatException.class)
+  public void shouldThrowExceptionOnSelectorFilteringOutEverything() throws Exception {
+    // given
+    when(kubernetesRecipeParser.parse(any(String.class)))
+        .thenReturn(
+            Collections.singletonList(
+                new PodBuilder()
+                    .withNewMetadata()
+                    .addToLabels("app", "test")
+                    .endMetadata()
+                    .build()));
+
+    Map<String, String> selector = new HashMap<>();
+    selector.put("app", "a different value");
+
+    Devfile devfile = copyOf(initialDevfile);
+    devfile.getTools().get(0).setLocalContent("content");
+    devfile.getTools().get(0).setSelector(selector);
+
+    // when
+    integrityValidator.validateContentReferences(devfile, __ -> "");
+
+    // then exception is thrown
+  }
+
+  @Test(expectedExceptions = DevfileFormatException.class)
+  public void shouldThrowExceptionOnEntrypointNotMatchingAnyContainer() throws Exception {
+    // given
+    when(kubernetesRecipeParser.parse(any(String.class)))
+        .thenReturn(
+            Collections.singletonList(
+                new PodBuilder()
+                    .withNewSpec()
+                    .addNewContainer()
+                    .withName("container")
+                    .endContainer()
+                    .endSpec()
+                    .build()));
+
+    Devfile devfile = copyOf(initialDevfile);
+    devfile.getTools().get(0).setLocalContent("content");
+    devfile
+        .getTools()
+        .get(0)
+        .setEntrypoints(
+            Collections.singletonList(new Entrypoint().withContainer("not that container")));
+
+    // when
+    integrityValidator.validateContentReferences(devfile, __ -> "");
+
+    // then exception is thrown
   }
 
   private Devfile copyOf(Devfile source) {
