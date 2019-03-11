@@ -12,7 +12,7 @@
 'use strict';
 import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import { ICommunicationClient, CODE_REQUEST_TIMEOUT, CommunicationClientEvent } from './json-rpc-client';
-import { WorkspaceLoader } from '../index';
+import { WorkspaceLoader } from '../workspace-loader';
 
 enum MasterChannels {
   ENVIRONMENT_OUTPUT = <any>'runtime/log',
