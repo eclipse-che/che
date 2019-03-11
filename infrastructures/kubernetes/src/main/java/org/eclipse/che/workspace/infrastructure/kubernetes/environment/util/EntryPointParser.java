@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment.util;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 
 /** Can be used to parse container entry-point definition specified as a YAML list of strings. */
-public final class EntryPointParser {
+public class EntryPointParser {
   private final YAMLMapper mapper = new YAMLMapper();
 
   /**
@@ -50,6 +51,22 @@ public final class EntryPointParser {
         args == null ? emptyList() : parseAsList(args, MachineConfig.CONTAINER_ARGS_ATTRIBUTE);
 
     return new EntryPoint(commandList, argList);
+  }
+
+  /**
+   * Serializes an entry (that might have been produced from {@link #parse(Map)}) back to a string
+   * representation.
+   *
+   * @param entry the command or args entry
+   * @return a serialized representation of the entry
+   */
+  public String serializeEntry(List<String> entry) {
+    try {
+      return mapper.writer().writeValueAsString(entry);
+    } catch (JsonProcessingException e) {
+      throw new IllegalStateException(
+          format("Failed to serialize list of strings %s to YAML", entry), e);
+    }
   }
 
   private List<String> parseAsList(String data, String attributeName)

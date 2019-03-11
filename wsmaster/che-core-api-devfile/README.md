@@ -148,7 +148,7 @@ Devfile can only contain one tool with `dockerimage` type.
      type: dockerimage
      image: eclipe/maven-jdk8:latest
      volumes:
-       - name: maven-repo
+       - name: mavenrepo
          containerPath: /root/.m2
      env:
        - name: ENV_VAR
@@ -162,6 +162,8 @@ Devfile can only contain one tool with `dockerimage` type.
            public: 'true'
            discoverable: 'false'
      memoryLimit: 1536M
+     command: ['tail']
+     args: ['-f', '/dev/null']
 ```
 
 ### Commands expanded

@@ -13,10 +13,13 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter.CONTAINER_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter.POD_NAME;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -29,11 +32,12 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPoint;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -50,6 +54,7 @@ public class DockerImageEnvironmentConverterTest {
 
   @Mock DockerImageEnvironment dockerEnv;
   @Mock InternalRecipe recipe;
+  @Mock private EntryPointParser entryPointParser;
 
   private Pod pod;
   private Map<String, InternalMachineConfig> machines;
@@ -57,7 +62,12 @@ public class DockerImageEnvironmentConverterTest {
 
   @BeforeMethod
   public void setup() throws Exception {
-    converter = new DockerImageEnvironmentConverter();
+    converter = new DockerImageEnvironmentConverter(entryPointParser);
+
+    lenient()
+        .when(entryPointParser.parse(any()))
+        .thenReturn(new EntryPoint(emptyList(), emptyList()));
+
     lenient().when(recipe.getContent()).thenReturn(RECIPE_CONTENT);
     lenient().when(recipe.getType()).thenReturn(RECIPE_TYPE);
     machines = ImmutableMap.of(MACHINE_NAME, mock(InternalMachineConfig.class));
@@ -95,12 +105,11 @@ public class DockerImageEnvironmentConverterTest {
   @Test
   public void shouldUseMachineConfigIfProvided() throws Exception {
     // given
-    Map<String, String> attributes = new HashMap<>(2);
-    attributes.put(MachineConfig.CONTAINER_COMMAND_ATTRIBUTE, "[/teh/script]");
-    attributes.put(MachineConfig.CONTAINER_ARGS_ATTRIBUTE, "['teh', 'argz']");
+    doReturn(new EntryPoint(singletonList("/teh/script"), asList("teh", "argz")))
+        .when(entryPointParser)
+        .parse(any());
 
     InternalMachineConfig machineConfig = mock(InternalMachineConfig.class);
-    when(machineConfig.getAttributes()).thenReturn(attributes);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>(1);
     machines.put(MACHINE_NAME, machineConfig);

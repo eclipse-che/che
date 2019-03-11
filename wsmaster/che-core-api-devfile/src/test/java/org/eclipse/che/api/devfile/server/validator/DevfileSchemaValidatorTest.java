@@ -46,7 +46,8 @@ public class DevfileSchemaValidatorTest {
       {"kubernetes_openshift_tool/devfile_openshift_tool.yaml"},
       {"kubernetes_openshift_tool/devfile_openshift_tool_local_and_content.yaml"},
       {"kubernetes_openshift_tool/devfile_openshift_tool_local_and_content_as_block.yaml"},
-      {"dockerimage_tool/devfile_dockerimage_tool.yaml"}
+      {"dockerimage_tool/devfile_dockerimage_tool.yaml"},
+      {"dockerimage_tool/devfile_dockerimage_tool_without_entry_point.yaml"}
     };
   }
 

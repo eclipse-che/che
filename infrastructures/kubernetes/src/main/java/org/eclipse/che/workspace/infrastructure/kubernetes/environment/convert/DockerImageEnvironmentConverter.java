@@ -20,6 +20,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -40,7 +41,12 @@ public class DockerImageEnvironmentConverter {
   static final String POD_NAME = "dockerimage";
   static final String CONTAINER_NAME = "container";
 
-  private EntryPointParser entryPointParser = new EntryPointParser();
+  private final EntryPointParser entryPointParser;
+
+  @Inject
+  public DockerImageEnvironmentConverter(EntryPointParser entryPointParser) {
+    this.entryPointParser = entryPointParser;
+  }
 
   public KubernetesEnvironment convert(DockerImageEnvironment environment)
       throws InfrastructureException {

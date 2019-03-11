@@ -162,7 +162,9 @@
               "mountSources": {},
               "volumes": {},
               "env": {},
-              "endpoints": {}
+              "endpoints": {},
+              "command": {},
+              "args": {}
             },
             "required": [
               "image",
@@ -236,6 +238,26 @@
             "type": "boolean",
             "description": "Describes whether projects sources should be mount to the tool. `CHE_PROJECTS_ROOT` environment variable should contains a path where projects sources are mount",
             "default": "false"
+          },
+          "command": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The command to run in the dockerimage tool instead of the default one provided in the image.",
+            "examples": [
+              "['/bin/sh', '-c']"
+            ]
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The arguments to supply to the command running the dockerimage tool. The arguments are supplied either to the default command provided in the image or to the overridden command.",
+            "examples": [
+              "['-R', '-f']"
+            ]
           },
           "volumes": {
             "type": "array",
