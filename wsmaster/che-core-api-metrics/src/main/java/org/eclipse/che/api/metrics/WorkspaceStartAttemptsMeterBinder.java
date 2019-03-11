@@ -27,7 +27,7 @@ import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
   private final EventService eventService;
 
-  private Counter startedCounter;
+  private Counter startingCounter;
 
   @Inject
   public WorkspaceStartAttemptsMeterBinder(EventService eventService) {
@@ -36,7 +36,7 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
 
   @Override
   public void bindTo(MeterRegistry registry) {
-    startedCounter =
+    startingCounter =
         Counter.builder(workspaceMetric("starting_attempts.total"))
             .description("The count of workspaces start attempts")
             .register(registry);
@@ -46,7 +46,7 @@ public class WorkspaceStartAttemptsMeterBinder implements MeterBinder {
         event -> {
           if (event.getPrevStatus() == WorkspaceStatus.STOPPED
               && event.getStatus() == WorkspaceStatus.STARTING) {
-            startedCounter.increment();
+            startingCounter.increment();
           }
         },
         WorkspaceStatusEvent.class);
