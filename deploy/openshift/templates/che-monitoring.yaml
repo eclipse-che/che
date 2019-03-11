@@ -4202,7 +4202,7 @@ objects:
             "dashLength": 10,
             "dashes": false,
             "datasource": "Che",
-            "description": "Percent of successfully started workspaces with 1 hour period",
+            "description": "",
             "fill": 1,
             "gridPos": {
               "h": 5,
@@ -4211,6 +4211,7 @@ objects:
               "y": 6
             },
             "id": 36,
+            "interval": "",
             "legend": {
               "avg": true,
               "current": true,
@@ -4223,29 +4224,36 @@ objects:
             "lines": true,
             "linewidth": 1,
             "links": [],
-            "nullPointMode": "null",
+            "nullPointMode": "null as zero",
             "paceLength": 10,
             "percentage": false,
             "pointradius": 2,
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
-            "stack": false,
+            "stack": true,
             "steppedLine": false,
             "targets": [
               {
-                "expr": "100*(1 - (sum(increase(che_workspace_failure_total{while=\"STARTING\"} [1h]))/sum(increase(che_workspace_started_total [1h]))))",
+                "expr": "sum(increase(che_workspace_failure_total{while=\"STARTING\"} [1h])) /(sum(increase(che_workspace_failure_total{while=\"STARTING\"} [1h])) + sum(increase(che_workspace_started_total [1h])))",
                 "format": "time_series",
                 "intervalFactor": 1,
-                "legendFormat": "success rate",
+                "legendFormat": "fail",
                 "refId": "A"
+              },
+              {
+                "expr": "sum(increase(che_workspace_started_total [1h]))/(sum(increase(che_workspace_failure_total{while=\"STARTING\"} [1h])) + sum(increase(che_workspace_started_total [1h])))",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "success",
+                "refId": "B"
               }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Workspace success start rate",
+            "title": "Workspace start rate",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -4261,11 +4269,11 @@ objects:
             },
             "yaxes": [
               {
-                "format": "percent",
+                "format": "percentunit",
                 "label": null,
                 "logBase": 1,
-                "max": "100",
-                "min": "0",
+                "max": null,
+                "min": null,
                 "show": true
               },
               {
