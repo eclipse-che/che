@@ -17,33 +17,35 @@ import com.google.inject.Inject;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.binder.MeterBinder;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 
-/** Counts number of attempts to start workspace. */
-public class WorkspaceStartingAttemptsMeterBinder implements MeterBinder {
+/** Counts number of successfully started workspaces. */
+@Singleton
+public class WorkspaceSuccessfulStartAttemptsMeterBinder implements MeterBinder {
   private final EventService eventService;
 
   private Counter startedCounter;
 
   @Inject
-  public WorkspaceStartingAttemptsMeterBinder(EventService eventService) {
+  public WorkspaceSuccessfulStartAttemptsMeterBinder(EventService eventService) {
     this.eventService = eventService;
   }
 
   @Override
   public void bindTo(MeterRegistry registry) {
     startedCounter =
-        Counter.builder(workspaceMetric("starting_attempts.total"))
-            .description("The count of workspaces starting attempts")
+        Counter.builder(workspaceMetric("started.total"))
+            .description("The count of started workspaces")
             .register(registry);
 
     // only subscribe to the event once we have the counters ready
     eventService.subscribe(
         event -> {
-          if (event.getPrevStatus() == WorkspaceStatus.STOPPED
-              && event.getStatus() == WorkspaceStatus.STARTING) {
+          if (event.getPrevStatus() == WorkspaceStatus.STARTING
+              && event.getStatus() == WorkspaceStatus.RUNNING) {
             startedCounter.increment();
           }
         },

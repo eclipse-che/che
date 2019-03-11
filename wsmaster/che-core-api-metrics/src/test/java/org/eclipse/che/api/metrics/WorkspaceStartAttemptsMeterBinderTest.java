@@ -27,7 +27,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class WorkspaceStartedMeterBinderTest {
+public class WorkspaceStartAttemptsMeterBinderTest {
 
   private EventService eventService;
   private MeterRegistry registry;
@@ -38,10 +38,11 @@ public class WorkspaceStartedMeterBinderTest {
     registry = new SimpleMeterRegistry();
   }
 
-  @Test(dataProvider = "allStatusTransitionsWithoutRunning")
+  @Test(dataProvider = "allStatusTransitionsWithoutStarting")
   public void shouldNotCollectEvents(WorkspaceStatus from, WorkspaceStatus to) {
     // given
-    WorkspaceStartedMeterBinder meterBinder = new WorkspaceStartedMeterBinder(eventService);
+    WorkspaceStartAttemptsMeterBinder meterBinder =
+        new WorkspaceStartAttemptsMeterBinder(eventService);
     meterBinder.bindTo(registry);
 
     // when
@@ -53,34 +54,35 @@ public class WorkspaceStartedMeterBinderTest {
             .withWorkspaceId("id1"));
 
     // then
-    Counter successful = registry.find("che.workspace.started.total").counter();
+    Counter successful = registry.find("che.workspace.starting_attempts.total").counter();
     Assert.assertEquals(successful.count(), 0.0);
   }
 
   @Test
-  public void shouldCollectOnlyStarted() {
+  public void shouldCollectOnlyStart() {
     // given
-    WorkspaceStartedMeterBinder meterBinder = new WorkspaceStartedMeterBinder(eventService);
+    WorkspaceStartAttemptsMeterBinder meterBinder =
+        new WorkspaceStartAttemptsMeterBinder(eventService);
     meterBinder.bindTo(registry);
 
     // when
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withPrevStatus(WorkspaceStatus.STARTING)
-            .withStatus(WorkspaceStatus.RUNNING)
+            .withPrevStatus(WorkspaceStatus.STOPPED)
+            .withStatus(WorkspaceStatus.STARTING)
             .withWorkspaceId("id1"));
     // then
-    Counter successful = registry.find("che.workspace.started.total").counter();
+    Counter successful = registry.find("che.workspace.starting_attempts.total").counter();
     Assert.assertEquals(successful.count(), 1.0);
   }
 
   @DataProvider
-  public Object[][] allStatusTransitionsWithoutRunning() {
+  public Object[][] allStatusTransitionsWithoutStarting() {
     List<List<WorkspaceStatus>> transitions = new ArrayList<>(9);
 
     for (WorkspaceStatus from : WorkspaceStatus.values()) {
       for (WorkspaceStatus to : WorkspaceStatus.values()) {
-        if (from == WorkspaceStatus.STARTING && to == WorkspaceStatus.RUNNING) {
+        if (from == WorkspaceStatus.STOPPED && to == WorkspaceStatus.STARTING) {
           continue;
         }
 

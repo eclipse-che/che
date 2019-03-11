@@ -4202,7 +4202,7 @@ objects:
             "dashLength": 10,
             "dashes": false,
             "datasource": "Che",
-            "description": "Percent of workspaces successfully started with 1 hour period",
+            "description": "Percent of successfully started workspaces with 1 hour period",
             "fill": 1,
             "gridPos": {
               "h": 5,
