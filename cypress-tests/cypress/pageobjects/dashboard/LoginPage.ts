@@ -19,7 +19,7 @@ export class LoginPage {
     private static readonly USERNAME_FIELD: string = "#username";
     private static readonly PASSWORD_FIELD: string = "#password";
     private static readonly LOGIN_BUTTON: string = "[name='login']";
-    private static readonly PAGE_URL: string = "http://che-eclipse-che.192.168.0.104.nip.io";
+    private static readonly PAGE_URL: string = Cypress.env("root_url");
 
     private typeToInputField(text: string, fieldLocator: string) {
         cy.get(fieldLocator)
@@ -51,14 +51,14 @@ export class LoginPage {
             })
     }
 
-    waitPageAbcence(){
+    waitPageAbcence() {
         [LoginPage.LOGIN_BUTTON, LoginPage.USERNAME_FIELD, LoginPage.PASSWORD_FIELD]
             .forEach(elementLocator => {
                 cy.get(elementLocator, { timeout: LoginPage.LOAD_PAGE_TIMEOUT }).should('not.be.visible');
             })
     }
 
-    login(username: string, password: string){
+    login(username: string, password: string) {
         this.waitPage();
         this.typeUsername(username);
         this.typePassword(password);
@@ -66,7 +66,7 @@ export class LoginPage {
         this.waitPageAbcence();
     }
 
-    defaultLogin(){
+    defaultLogin() {
         this.login(LoginPage.TEST_USER_NANE, LoginPage.TEST_USER_PASSWORD);
     }
 
