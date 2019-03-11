@@ -47,10 +47,8 @@ public class KubernetesWorkspaceServiceAccount {
   }
 
   /**
-   * Make sure that workspace service account exists and has `view` and `exec` role bindings.
-   *
-   * <p>Note that `view` role is used from cluster scope and `exec` role is created in the current
-   * namespace if does not exist.
+   * Make sure that workspace service account exists and has `view` and `exec` role bindings, as
+   * well as create workspace-view and exec roles in namespace scope
    *
    * @throws InfrastructureException when any exception occurred
    */
@@ -66,6 +64,12 @@ public class KubernetesWorkspaceServiceAccount {
     if (k8sClient.rbac().kubernetesRoles().inNamespace(namespace).withName(execRoleName).get()
         == null) {
       createExecRole(k8sClient, execRoleName);
+    }
+
+    String viewRoleName = "workspace-view";
+    if (k8sClient.rbac().kubernetesRoles().inNamespace(namespace).withName(viewRoleName).get()
+        == null) {
+      createViewRole(k8sClient, viewRoleName);
     }
 
     k8sClient
@@ -108,6 +112,22 @@ public class KubernetesWorkspaceServiceAccount {
     k8sClient.rbac().kubernetesRoles().inNamespace(namespace).create(execRole);
   }
 
+  private void createViewRole(KubernetesClient k8sClient, String name) {
+    KubernetesRole viewRole =
+        new KubernetesRoleBuilder()
+            .withNewMetadata()
+            .withName(name)
+            .endMetadata()
+            .withRules(
+                new KubernetesPolicyRuleBuilder()
+                    .withResources("pods")
+                    .withApiGroups("")
+                    .withVerbs("list")
+                    .build())
+            .build();
+    k8sClient.rbac().kubernetesRoles().inNamespace(namespace).create(viewRole);
+  }
+
   private KubernetesRoleBinding createViewRoleBinding() {
     return new KubernetesRoleBindingBuilder()
         .withNewMetadata()
@@ -115,8 +135,8 @@ public class KubernetesWorkspaceServiceAccount {
         .withNamespace(namespace)
         .endMetadata()
         .withNewRoleRef()
-        .withKind("ClusterRole")
-        .withName("view")
+        .withKind("Role")
+        .withName("workspace-view")
         .endRoleRef()
         .withSubjects(
             new KubernetesSubjectBuilder()
