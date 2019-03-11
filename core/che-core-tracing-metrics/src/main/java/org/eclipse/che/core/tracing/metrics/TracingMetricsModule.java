@@ -25,6 +25,5 @@ public class TracingMetricsModule extends AbstractModule {
     Multibinder<MetricsReporter> metricsReporterBinder =
         Multibinder.newSetBinder(binder(), MetricsReporter.class);
     metricsReporterBinder.addBinding().toProvider(MicrometerMetricsReporterProvider.class);
-    metricsReporterBinder.addBinding().toProvider(WorkspaceOperationsTracesReporterProvider.class);
   }
 }

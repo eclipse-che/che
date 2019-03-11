@@ -20,6 +20,8 @@ import javax.inject.Singleton;
  * Provider of {@link MicrometerMetricsReporter}, which is responsible for reporting metrics of
  * traced spans to prometheus server. Here is also specified configuration as for metrics name and
  * tags.
+ *
+ * <p>visit https://github.com/opentracing-contrib/java-metrics to find out about how
  */
 @Singleton
 public class MicrometerMetricsReporterProvider implements Provider<MicrometerMetricsReporter> {
@@ -33,6 +35,7 @@ public class MicrometerMetricsReporterProvider implements Provider<MicrometerMet
         MicrometerMetricsReporter.newMetricsReporter()
             .withName(TRACING_METRIC_NAME)
             .withTagLabel(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
+            .withTagLabel(Tags.HTTP_STATUS.getKey(), "null")
             .build();
   }
 
