@@ -161,7 +161,8 @@ public class KubernetesDeploymentsTest {
     futureDate.setYear(3000);
     when(event.getLastTimestamp()).thenReturn(PodEvents.convertDateToEventTimestamp(futureDate));
 
-    kubernetesDeployments = new KubernetesDeployments("namespace", "workspace123", clientFactory);
+    kubernetesDeployments =
+        new KubernetesDeployments("namespace", "workspace123", clientFactory, tracerUtil);
   }
 
   @Test
@@ -242,7 +243,7 @@ public class KubernetesDeploymentsTest {
   public void shouldCompleteFutureForWaitingPidIfStatusIsRunning() {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_RUNNING);
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -257,7 +258,7 @@ public class KubernetesDeploymentsTest {
   public void shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsSucceeded() throws Exception {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_SUCCEEDED);
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -281,7 +282,7 @@ public class KubernetesDeploymentsTest {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     when(pod.getStatus().getReason()).thenReturn("Evicted");
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -305,7 +306,7 @@ public class KubernetesDeploymentsTest {
     // given
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     when(podResource.getLog()).thenReturn("Pod fail log");
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     // when
     verify(podResource).watch(watcherCaptor.capture());
@@ -327,7 +328,7 @@ public class KubernetesDeploymentsTest {
       shouldCompleteExceptionallyFutureForWaitingPodIfStatusIsFailedAndReasonNorLogsAreNotAvailable()
           throws Exception {
     // given
-    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME, tracerUtil);
+    CompletableFuture future = kubernetesDeployments.waitRunningAsync(POD_NAME);
 
     when(status.getPhase()).thenReturn(POD_STATUS_PHASE_FAILED);
     doThrow(new InfrastructureException("Unable to create client"))
@@ -404,7 +405,9 @@ public class KubernetesDeploymentsTest {
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
-    new KubernetesDeployments("", "", clientFactory).doDeletePod(POD_NAME).get(5, TimeUnit.SECONDS);
+    new KubernetesDeployments("", "", clientFactory, tracerUtil)
+        .doDeletePod(POD_NAME)
+        .get(5, TimeUnit.SECONDS);
 
     verify(watch).close();
   }
@@ -419,7 +422,7 @@ public class KubernetesDeploymentsTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory)
+      new KubernetesDeployments("", "", clientFactory, tracerUtil)
           .doDeletePod(POD_NAME)
           .get(5, TimeUnit.SECONDS);
     } catch (KubernetesInfrastructureException e) {
@@ -439,7 +442,7 @@ public class KubernetesDeploymentsTest {
     Watch watch = mock(Watch.class);
     doReturn(watch).when(podResource).watch(any());
 
-    new KubernetesDeployments("", "", clientFactory)
+    new KubernetesDeployments("", "", clientFactory, tracerUtil)
         .doDeleteDeployment(DEPLOYMENT_NAME)
         .get(5, TimeUnit.SECONDS);
 
@@ -457,7 +460,7 @@ public class KubernetesDeploymentsTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory)
+      new KubernetesDeployments("", "", clientFactory, tracerUtil)
           .doDeleteDeployment(DEPLOYMENT_NAME)
           .get(5, TimeUnit.SECONDS);
     } catch (KubernetesInfrastructureException e) {
@@ -478,7 +481,7 @@ public class KubernetesDeploymentsTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory)
+      new KubernetesDeployments("", "", clientFactory, tracerUtil)
           .doDeletePod(POD_NAME)
           .get(5, TimeUnit.SECONDS);
     } catch (RuntimeException e) {
@@ -497,7 +500,7 @@ public class KubernetesDeploymentsTest {
     doReturn(watch).when(podResource).watch(any());
 
     try {
-      new KubernetesDeployments("", "", clientFactory)
+      new KubernetesDeployments("", "", clientFactory, tracerUtil)
           .doDeleteDeployment(DEPLOYMENT_NAME)
           .get(5, TimeUnit.SECONDS);
     } catch (RuntimeException e) {

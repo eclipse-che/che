@@ -34,6 +34,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.slf4j.Logger;
@@ -91,11 +92,14 @@ public class KubernetesNamespace {
   }
 
   public KubernetesNamespace(
-      KubernetesClientFactory clientFactory, String name, String workspaceId) {
+      KubernetesClientFactory clientFactory,
+      String name,
+      String workspaceId,
+      TracerUtil tracerUtil) {
     this.clientFactory = clientFactory;
     this.workspaceId = workspaceId;
     this.name = name;
-    this.deployments = new KubernetesDeployments(name, workspaceId, clientFactory);
+    this.deployments = new KubernetesDeployments(name, workspaceId, clientFactory, tracerUtil);
     this.services = new KubernetesServices(name, workspaceId, clientFactory);
     this.pvcs = new KubernetesPersistentVolumeClaims(name, workspaceId, clientFactory);
     this.ingresses = new KubernetesIngresses(name, workspaceId, clientFactory);

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 import org.mockito.Mock;
@@ -34,12 +35,13 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class OpenShiftProjectFactoryTest {
   @Mock private OpenShiftClientFactory clientFactory;
+  @Mock private TracerUtil tracerUtil;
   private OpenShiftProjectFactory projectFactory;
 
   @Test
   public void shouldCreateAndPrepareProjectWithPredefinedValueIfItIsNotEmpty() throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("projectName", "", clientFactory));
+    projectFactory = spy(new OpenShiftProjectFactory("projectName", "", clientFactory, tracerUtil));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -56,7 +58,7 @@ public class OpenShiftProjectFactoryTest {
   public void shouldCreateAndPrepareProjectWithWorkspaceIdAsNameIfConfiguredValueIsEmtpy()
       throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("", "", clientFactory));
+    projectFactory = spy(new OpenShiftProjectFactory("", "", clientFactory, tracerUtil));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -73,7 +75,8 @@ public class OpenShiftProjectFactoryTest {
   public void shouldPrepareWorkspaceServiceAccountIfItIsConfiguredAndProjectIsNotPredefined()
       throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("", "serviceAccount", clientFactory));
+    projectFactory =
+        spy(new OpenShiftProjectFactory("", "serviceAccount", clientFactory, tracerUtil));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -92,7 +95,8 @@ public class OpenShiftProjectFactoryTest {
   public void shouldNotPrepareWorkspaceServiceAccountIfItIsConfiguredAndProjectIsPredefined()
       throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("namespace", "serviceAccount", clientFactory));
+    projectFactory =
+        spy(new OpenShiftProjectFactory("namespace", "serviceAccount", clientFactory, tracerUtil));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -107,7 +111,7 @@ public class OpenShiftProjectFactoryTest {
   public void shouldNotPrepareWorkspaceServiceAccountIfItIsNotConfiguredAndProjectIsNotPredefined()
       throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("", "", clientFactory));
+    projectFactory = spy(new OpenShiftProjectFactory("", "", clientFactory, tracerUtil));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -124,7 +128,9 @@ public class OpenShiftProjectFactoryTest {
           throws Exception {
     // given
     projectFactory =
-        spy(new OpenShiftProjectFactory("projectName", "serviceAccountName", clientFactory));
+        spy(
+            new OpenShiftProjectFactory(
+                "projectName", "serviceAccountName", clientFactory, tracerUtil));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 

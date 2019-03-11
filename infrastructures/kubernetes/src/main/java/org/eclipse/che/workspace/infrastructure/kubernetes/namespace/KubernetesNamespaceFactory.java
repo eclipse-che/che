@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 
 /**
@@ -33,16 +34,19 @@ public class KubernetesNamespaceFactory {
   private final boolean isPredefined;
   private final String serviceAccountName;
   private final KubernetesClientFactory clientFactory;
+  protected final TracerUtil tracerUtil;
 
   @Inject
   public KubernetesNamespaceFactory(
       @Nullable @Named("che.infra.kubernetes.namespace") String namespaceName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
-      KubernetesClientFactory clientFactory) {
+      KubernetesClientFactory clientFactory,
+      TracerUtil tracerUtil) {
     this.namespaceName = namespaceName;
     this.isPredefined = !isNullOrEmpty(namespaceName);
     this.serviceAccountName = serviceAccountName;
     this.clientFactory = clientFactory;
+    this.tracerUtil = tracerUtil;
   }
 
   /**
@@ -94,7 +98,7 @@ public class KubernetesNamespaceFactory {
 
   @VisibleForTesting
   KubernetesNamespace doCreateNamespace(String workspaceId, String name) {
-    return new KubernetesNamespace(clientFactory, name, workspaceId);
+    return new KubernetesNamespace(clientFactory, name, workspaceId, tracerUtil);
   }
 
   @VisibleForTesting

@@ -18,6 +18,7 @@ import io.fabric8.openshift.api.model.Project;
 import io.fabric8.openshift.api.model.Route;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
@@ -64,8 +65,12 @@ public class OpenShiftProject extends KubernetesNamespace {
     this.routes = routes;
   }
 
-  public OpenShiftProject(OpenShiftClientFactory clientFactory, String name, String workspaceId) {
-    super(clientFactory, name, workspaceId);
+  public OpenShiftProject(
+      OpenShiftClientFactory clientFactory,
+      String name,
+      String workspaceId,
+      TracerUtil tracerUtil) {
+    super(clientFactory, name, workspaceId, tracerUtil);
     this.clientFactory = clientFactory;
     this.routes = new OpenShiftRoutes(name, workspaceId, clientFactory);
   }

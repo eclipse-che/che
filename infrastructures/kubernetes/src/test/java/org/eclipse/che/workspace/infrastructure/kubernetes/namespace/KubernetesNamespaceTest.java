@@ -37,6 +37,7 @@ import io.fabric8.kubernetes.client.dsl.MixedOperation;
 import io.fabric8.kubernetes.client.dsl.NonNamespaceOperation;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
 import org.mockito.stubbing.Answer;
@@ -66,6 +67,7 @@ public class KubernetesNamespaceTest {
   @Mock private KubernetesClient kubernetesClient;
   @Mock private NonNamespaceOperation namespaceOperation;
   @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
+  @Mock private TracerUtil tracerUtil;
 
   private KubernetesNamespace k8sNamespace;
 
@@ -99,7 +101,8 @@ public class KubernetesNamespaceTest {
   public void testKubernetesNamespacePreparingWhenNamespaceExists() throws Exception {
     // given
     prepareNamespace(NAMESPACE);
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID, tracerUtil);
 
     // when
     namespace.prepare();
@@ -112,7 +115,8 @@ public class KubernetesNamespaceTest {
 
     Resource resource = prepareNamespaceResource(NAMESPACE);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
-    KubernetesNamespace namespace = new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID);
+    KubernetesNamespace namespace =
+        new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID, tracerUtil);
 
     // when
     namespace.prepare();
@@ -162,7 +166,7 @@ public class KubernetesNamespaceTest {
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     doThrow(KubernetesClientException.class).when(kubernetesClient).serviceAccounts();
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare();
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID, tracerUtil).prepare();
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -173,7 +177,7 @@ public class KubernetesNamespaceTest {
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     when(serviceAccountResource.get()).thenReturn(null);
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare();
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID, tracerUtil).prepare();
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
@@ -192,7 +196,7 @@ public class KubernetesNamespaceTest {
         .when(serviceAccountResource)
         .watch(any());
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare();
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID, tracerUtil).prepare();
   }
 
   @Test
@@ -210,7 +214,7 @@ public class KubernetesNamespaceTest {
         .when(serviceAccountResource)
         .watch(any());
 
-    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID).prepare();
+    new KubernetesNamespace(clientFactory, NAMESPACE, WORKSPACE_ID, tracerUtil).prepare();
 
     verify(serviceAccountResource).get();
     verify(serviceAccountResource).watch(any());

@@ -527,7 +527,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   public CompletableFuture<Void> waitRunningAsync(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
     CompletableFuture<Void> waitFuture =
-        namespace.deployments().waitRunningAsync(machine.getPodName(), tracerUtil);
+        namespace.deployments().waitRunningAsync(machine.getPodName());
 
     toCancelFutures.add(waitFuture);
     return waitFuture;

@@ -110,14 +110,19 @@ public class KubernetesDeployments {
   private Watch podWatch;
   private Watch containerWatch;
   private Date watcherInitializationDate;
+  private TracerUtil tracerUtil;
 
   protected KubernetesDeployments(
-      String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
+      String namespace,
+      String workspaceId,
+      KubernetesClientFactory clientFactory,
+      TracerUtil tracerUtil) {
     this.namespace = namespace;
     this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
     this.containerEventsHandlers = new ConcurrentLinkedQueue<>();
     this.podActionHandlers = new ConcurrentLinkedQueue<>();
+    this.tracerUtil = tracerUtil;
   }
 
   /**
@@ -347,7 +352,7 @@ public class KubernetesDeployments {
    *     </ul>
    *     otherwise, it must be explicitly closed
    */
-  public CompletableFuture<Void> waitRunningAsync(String name, TracerUtil tracerUtil) {
+  public CompletableFuture<Void> waitRunningAsync(String name) {
     final Span tracingSpan = tracerUtil.buildSpan("WaitRunningAsync", null, workspaceId, name);
 
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();

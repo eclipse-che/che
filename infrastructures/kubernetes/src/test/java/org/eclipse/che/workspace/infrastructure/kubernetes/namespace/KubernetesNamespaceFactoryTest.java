@@ -21,6 +21,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -35,12 +36,13 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesNamespaceFactoryTest {
   @Mock private KubernetesClientFactory clientFactory;
+  @Mock private TracerUtil tracerUtil;
   private KubernetesNamespaceFactory namespaceFactory;
 
   @Test
   public void shouldReturnTrueIfNamespaceIsNotEmptyOnCheckingIfNamespaceIsPredefined() {
     // given
-    namespaceFactory = new KubernetesNamespaceFactory("predefined", "", clientFactory);
+    namespaceFactory = new KubernetesNamespaceFactory("predefined", "", clientFactory, tracerUtil);
 
     // when
     boolean isPredefined = namespaceFactory.isPredefined();
@@ -52,7 +54,7 @@ public class KubernetesNamespaceFactoryTest {
   @Test
   public void shouldReturnTrueIfNamespaceIsEmptyOnCheckingIfNamespaceIsPredefined() {
     // given
-    namespaceFactory = new KubernetesNamespaceFactory("", "", clientFactory);
+    namespaceFactory = new KubernetesNamespaceFactory("", "", clientFactory, tracerUtil);
 
     // when
     boolean isPredefined = namespaceFactory.isPredefined();
@@ -64,7 +66,7 @@ public class KubernetesNamespaceFactoryTest {
   @Test
   public void shouldReturnTrueIfNamespaceIsNullOnCheckingIfNamespaceIsPredefined() {
     // given
-    namespaceFactory = new KubernetesNamespaceFactory(null, "", clientFactory);
+    namespaceFactory = new KubernetesNamespaceFactory(null, "", clientFactory, tracerUtil);
 
     // when
     boolean isPredefined = namespaceFactory.isPredefined();
@@ -76,7 +78,8 @@ public class KubernetesNamespaceFactoryTest {
   @Test
   public void shouldCreateAndPrepareNamespaceWithPredefinedValueIfItIsNotEmpty() throws Exception {
     // given
-    namespaceFactory = spy(new KubernetesNamespaceFactory("predefined", "", clientFactory));
+    namespaceFactory =
+        spy(new KubernetesNamespaceFactory("predefined", "", clientFactory, tracerUtil));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespace(any(), any());
 
@@ -93,7 +96,7 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldCreateAndPrepareNamespaceWithWorkspaceIdAsNameIfConfiguredNameIsNotPredefined()
       throws Exception {
     // given
-    namespaceFactory = spy(new KubernetesNamespaceFactory("", "", clientFactory));
+    namespaceFactory = spy(new KubernetesNamespaceFactory("", "", clientFactory, tracerUtil));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespace(any(), any());
 
@@ -111,7 +114,7 @@ public class KubernetesNamespaceFactoryTest {
       shouldCreateNamespaceAndDoNotPrepareNamespaceOnCreatingNamespaceWithWorkspaceIdAndNameSpecified()
           throws Exception {
     // given
-    namespaceFactory = spy(new KubernetesNamespaceFactory("", "", clientFactory));
+    namespaceFactory = spy(new KubernetesNamespaceFactory("", "", clientFactory, tracerUtil));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespace(any(), any());
 
@@ -128,7 +131,8 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldPrepareWorkspaceServiceAccountIfItIsConfiguredAndNamespaceIsNotPredefined()
       throws Exception {
     // given
-    namespaceFactory = spy(new KubernetesNamespaceFactory("", "serviceAccount", clientFactory));
+    namespaceFactory =
+        spy(new KubernetesNamespaceFactory("", "serviceAccount", clientFactory, tracerUtil));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespace(any(), any());
 
@@ -149,7 +153,9 @@ public class KubernetesNamespaceFactoryTest {
       throws Exception {
     // given
     namespaceFactory =
-        spy(new KubernetesNamespaceFactory("namespace", "serviceAccount", clientFactory));
+        spy(
+            new KubernetesNamespaceFactory(
+                "namespace", "serviceAccount", clientFactory, tracerUtil));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespace(any(), any());
 
@@ -168,7 +174,7 @@ public class KubernetesNamespaceFactoryTest {
   public void shouldNotPrepareWorkspaceServiceAccountIfItIsNotConfiguredAndProjectIsNotPredefined()
       throws Exception {
     // given
-    namespaceFactory = spy(new KubernetesNamespaceFactory("", "", clientFactory));
+    namespaceFactory = spy(new KubernetesNamespaceFactory("", "", clientFactory, tracerUtil));
     KubernetesNamespace toReturnNamespace = mock(KubernetesNamespace.class);
     doReturn(toReturnNamespace).when(namespaceFactory).doCreateNamespace(any(), any());
 
