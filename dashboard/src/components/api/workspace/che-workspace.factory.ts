@@ -19,6 +19,7 @@ import {IObservableCallbackFn, Observable} from '../../utils/observable';
 import {CheBranding} from '../../branding/che-branding.factory';
 import {CheEnvironmentManager} from '../environment/che-environment-manager.factory';
 import {CheRecipeTypes} from '../recipe/che-recipe-types';
+import {CheNotification} from '../../notification/che-notification.factory';
 
 const WS_AGENT_HTTP_LINK: string = 'wsagent/http';
 const WS_AGENT_WS_LINK: string = 'wsagent/ws';
@@ -59,12 +60,13 @@ export enum WorkspaceStatus {
  */
 export class CheWorkspace {
 
-  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager'];
+  static $inject = ['$resource', '$http', '$q', 'cheJsonRpcApi', 'cheNotification', '$websocket', '$location', 'proxySettings', 'userDashboardConfig', 'lodash', 'cheEnvironmentRegistry', 'cheBranding', 'keycloakAuth', 'cheEnvironmentManager'];
 
   private $resource: ng.resource.IResourceService;
   private $http: ng.IHttpService;
   private $q: ng.IQService;
   private $websocket: any;
+  private cheNotification: CheNotification;
   private cheJsonRpcMasterApi: CheJsonRpcMasterApi;
   private listeners: Array<any>;
   private workspaceStatuses: Array<string>;
@@ -95,6 +97,7 @@ export class CheWorkspace {
               $http: ng.IHttpService,
               $q: ng.IQService,
               cheJsonRpcApi: CheJsonRpcApi,
+              cheNotification: CheNotification,
               $websocket: any,
               $location: ng.ILocationService,
               proxySettings: string,
@@ -111,6 +114,7 @@ export class CheWorkspace {
     this.$http = $http;
     this.$websocket = $websocket;
     this.lodash = lodash;
+    this.cheNotification = cheNotification;
 
     // current list of workspaces
     this.workspaces = [];
@@ -540,6 +544,7 @@ export class CheWorkspace {
    * @returns {ng.IPromise<any>} promise
    */
   startWorkspace(workspaceId: string, envName?: string): ng.IPromise<any> {
+    this.notifyIfEphemeral(workspaceId);
     const workspacePromisesKey = 'startWorkspace' + workspaceId;
     if (this.workspacePromises.has(workspacePromisesKey)) {
       return this.workspacePromises.get(workspacePromisesKey);
@@ -552,6 +557,19 @@ export class CheWorkspace {
     });
 
     return promise;
+  }
+
+  /**
+   * Notify user if workspace is ephemeral.
+   * 
+   * @param workspaceId 
+   */
+  notifyIfEphemeral(workspaceId: string): void {
+    let workspace = this.workspacesById.get(workspaceId);
+    let isEphemeral = workspace && workspace.config && workspace.config.attributes && workspace.config.attributes.persistVolumes ? !JSON.parse(workspace.config.attributes.persistVolumes) : false;
+    if (isEphemeral) {
+      this.cheNotification.showWarning('Your are starting an ephemeral workspace. All changes to the source code will be lost when the workspace is stopped unless they are pushed to a source code repository.');
+    }
   }
 
   /**

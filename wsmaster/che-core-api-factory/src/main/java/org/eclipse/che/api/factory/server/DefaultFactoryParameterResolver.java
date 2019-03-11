@@ -19,6 +19,7 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 
@@ -28,6 +29,10 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
  */
 @Singleton
 public class DefaultFactoryParameterResolver implements FactoryParametersResolver {
+
+  public static final String LOCAL_FILES_REFERENCES_ARE_NOT_SUPPORTED =
+      "Devfile requires local file content but this functionality is not supported when URL to raw content is specified. "
+          + "You can specify URL to Github repository instead.";
 
   private URLFactoryBuilder urlFactoryBuilder;
 
@@ -52,7 +57,9 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
       throws BadRequestException, ServerException {
     // create factory from the following devfile location
     return urlFactoryBuilder
-        .createFactoryFromDevfile(factoryParameters.get(URL_PARAMETER_NAME), null)
+        .createFactoryFromDevfile(
+            factoryParameters.get(URL_PARAMETER_NAME),
+            new FetchNotSupportedProvider(LOCAL_FILES_REFERENCES_ARE_NOT_SUPPORTED))
         .orElse(null);
   }
 }

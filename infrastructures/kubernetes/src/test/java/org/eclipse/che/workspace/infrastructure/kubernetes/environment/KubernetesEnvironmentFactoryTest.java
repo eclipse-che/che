@@ -53,10 +53,6 @@ import io.fabric8.kubernetes.api.model.ServiceBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.extensions.IngressBuilder;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.dsl.ParameterNamespaceListVisitFromServerGetDeleteRecreateWaitApplicable;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +62,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -81,37 +77,27 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesEnvironmentFactoryTest {
 
-  private static final String YAML_RECIPE = "application/x-yaml";
   public static final String MACHINE_NAME_1 = "machine1";
   public static final String MACHINE_NAME_2 = "machine2";
 
   private KubernetesEnvironmentFactory k8sEnvFactory;
 
-  @Mock private KubernetesClientFactory clientFactory;
   @Mock private KubernetesEnvironmentValidator k8sEnvValidator;
-  @Mock private KubernetesClient client;
   @Mock private InternalEnvironment internalEnvironment;
   @Mock private InternalRecipe internalRecipe;
   @Mock private InternalMachineConfig machineConfig1;
   @Mock private InternalMachineConfig machineConfig2;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
+  @Mock private KubernetesRecipeParser k8sRecipeParser;
 
   private Map<String, InternalMachineConfig> machines;
-
-  @Mock
-  private ParameterNamespaceListVisitFromServerGetDeleteRecreateWaitApplicable<HasMetadata, Boolean>
-      loadedRecipe;
 
   @BeforeMethod
   public void setup() throws Exception {
     k8sEnvFactory =
         new KubernetesEnvironmentFactory(
-            null, null, null, clientFactory, k8sEnvValidator, memoryProvisioner);
-    when(clientFactory.create()).thenReturn(client);
-    when(client.load(any(InputStream.class))).thenReturn(loadedRecipe);
+            null, null, null, k8sRecipeParser, k8sEnvValidator, memoryProvisioner);
     lenient().when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
-    when(internalRecipe.getContentType()).thenReturn(YAML_RECIPE);
-    when(internalRecipe.getContent()).thenReturn("recipe content");
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
 
@@ -122,7 +108,7 @@ public class KubernetesEnvironmentFactoryTest {
         new ServiceBuilder().withNewMetadata().withName("service1").endMetadata().build();
     Service service2 =
         new ServiceBuilder().withNewMetadata().withName("service2").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(asList(service1, service2));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(service1, service2));
 
     // when
     KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -140,7 +126,7 @@ public class KubernetesEnvironmentFactoryTest {
         new PersistentVolumeClaimBuilder().withNewMetadata().withName("pvc1").endMetadata().build();
     PersistentVolumeClaim pvc2 =
         new PersistentVolumeClaimBuilder().withNewMetadata().withName("pvc2").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(asList(pvc1, pvc2));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(pvc1, pvc2));
 
     // when
     KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -153,7 +139,7 @@ public class KubernetesEnvironmentFactoryTest {
 
   @Test
   public void ignoreIgressesWhenRecipeContainsThem() throws Exception {
-    when(loadedRecipe.get())
+    when(k8sRecipeParser.parse(any(InternalRecipe.class)))
         .thenReturn(
             asList(
                 new IngressBuilder().withNewMetadata().withName("ingress1").endMetadata().build(),
@@ -173,7 +159,7 @@ public class KubernetesEnvironmentFactoryTest {
   public void addSecretsWhenRecipeContainsThem() throws Exception {
     Secret secret =
         new SecretBuilder().withNewMetadata().withName("test-secret").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(singletonList(secret));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(secret));
 
     final KubernetesEnvironment parsed =
         k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -188,7 +174,7 @@ public class KubernetesEnvironmentFactoryTest {
   public void addConfigMapsWhenRecipeContainsThem() throws Exception {
     ConfigMap configMap =
         new ConfigMapBuilder().withNewMetadata().withName("test-configmap").endMetadata().build();
-    when(loadedRecipe.get()).thenReturn(singletonList(configMap));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(configMap));
 
     final KubernetesEnvironment parsed =
         k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -207,7 +193,7 @@ public class KubernetesEnvironmentFactoryTest {
             .endMetadata()
             .withSpec(new PodSpec())
             .build();
-    when(loadedRecipe.get()).thenReturn(singletonList(pod));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(pod));
 
     // when
     KubernetesEnvironment k8sEnv = k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
@@ -242,7 +228,7 @@ public class KubernetesEnvironmentFactoryTest {
             .endSpec()
             .build();
 
-    when(loadedRecipe.get()).thenReturn(singletonList(deployment));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(deployment));
 
     // when
     final KubernetesEnvironment k8sEnv =
@@ -286,7 +272,7 @@ public class KubernetesEnvironmentFactoryTest {
             .withNewSpec()
             .endSpec()
             .build();
-    when(loadedRecipe.get()).thenReturn(asList(deployment, pod));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(deployment, pod));
 
     // when
     final KubernetesEnvironment k8sEnv =
@@ -305,7 +291,8 @@ public class KubernetesEnvironmentFactoryTest {
 
   @Test(expectedExceptions = ValidationException.class)
   public void exceptionOnRecipeLoadError() throws Exception {
-    when(loadedRecipe.get()).thenThrow(new KubernetesClientException("Could not parse recipe"));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class)))
+        .thenThrow(new ValidationException("Could not parse recipe"));
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -316,7 +303,7 @@ public class KubernetesEnvironmentFactoryTest {
   public void exceptionOnObjectWithNoKindSpecified() throws Exception {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn(null);
-    when(loadedRecipe.get()).thenReturn(singletonList(object));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(object));
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -328,7 +315,7 @@ public class KubernetesEnvironmentFactoryTest {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn("MyObject");
     when(object.getMetadata()).thenReturn(null);
-    when(loadedRecipe.get()).thenReturn(singletonList(object));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(object));
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -340,7 +327,7 @@ public class KubernetesEnvironmentFactoryTest {
     HasMetadata object = mock(HasMetadata.class);
     when(object.getKind()).thenReturn("MyObject");
     when(object.getMetadata()).thenReturn(new ObjectMetaBuilder().withName(null).build());
-    when(loadedRecipe.get()).thenReturn(singletonList(object));
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(singletonList(object));
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -353,10 +340,10 @@ public class KubernetesEnvironmentFactoryTest {
     final long secondMachineRamRequest = 512;
     when(machineConfig1.getAttributes()).thenReturn(new HashMap<>());
     when(machineConfig2.getAttributes()).thenReturn(new HashMap<>());
-    final Set<Pod> pods =
+    final Set<PodData> pods =
         ImmutableSet.of(
-            mockPod(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
-            mockPod(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
+            createPodData(MACHINE_NAME_1, firstMachineRamLimit, firstMachineRamRequest),
+            createPodData(MACHINE_NAME_2, secondMachineRamLimit, secondMachineRamRequest));
 
     k8sEnvFactory.addRamAttributes(machines, pods);
 
@@ -366,17 +353,14 @@ public class KubernetesEnvironmentFactoryTest {
         .provision(eq(machineConfig2), eq(secondMachineRamLimit), eq(secondMachineRamRequest));
   }
 
-  private static Pod mockPod(String machineName, long ramLimit, long ramRequest) {
+  private static PodData createPodData(String machineName, long ramLimit, long ramRequest) {
     final String containerName = "container_" + machineName;
     final Container containerMock = mock(Container.class);
     final ResourceRequirements resourcesMock = mock(ResourceRequirements.class);
     final Quantity limitQuantityMock = mock(Quantity.class);
     final Quantity requestQuantityMock = mock(Quantity.class);
-    final Pod podMock = mock(Pod.class);
     final PodSpec specMock = mock(PodSpec.class);
     final ObjectMeta metadataMock = mock(ObjectMeta.class);
-    when(podMock.getSpec()).thenReturn(specMock);
-    when(podMock.getMetadata()).thenReturn(metadataMock);
     when(limitQuantityMock.getAmount()).thenReturn(String.valueOf(ramLimit));
     when(requestQuantityMock.getAmount()).thenReturn(String.valueOf(ramRequest));
     when(resourcesMock.getLimits()).thenReturn(ImmutableMap.of("memory", limitQuantityMock));
@@ -387,6 +371,6 @@ public class KubernetesEnvironmentFactoryTest {
         .thenReturn(
             ImmutableMap.of(format(MACHINE_NAME_ANNOTATION_FMT, containerName), machineName));
     when(specMock.getContainers()).thenReturn(ImmutableList.of(containerMock));
-    return podMock;
+    return new PodData(specMock, metadataMock);
   }
 }

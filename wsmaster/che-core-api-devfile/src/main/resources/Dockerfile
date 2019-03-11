@@ -26,7 +26,6 @@ RUN cd jsonschema2md && npm install && npm link
 COPY ./schema /schema
 RUN cd /schema && \
     jsonschema2md -d . -e json -n && \
-    mv ./out/devfile.md ./out/index.md && \
     tar zcf /tmp/out.tar.gz -C out .
 
 CMD zcat /tmp/out.tar.gz

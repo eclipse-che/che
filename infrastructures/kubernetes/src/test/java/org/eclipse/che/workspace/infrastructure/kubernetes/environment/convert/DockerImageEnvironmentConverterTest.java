@@ -12,21 +12,24 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert;
 
 import static java.lang.String.format;
-import static java.util.Collections.emptyMap;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter.CONTAINER_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter.POD_NAME;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
@@ -55,8 +58,8 @@ public class DockerImageEnvironmentConverterTest {
   @BeforeMethod
   public void setup() throws Exception {
     converter = new DockerImageEnvironmentConverter();
-    when(recipe.getContent()).thenReturn(RECIPE_CONTENT);
-    when(recipe.getType()).thenReturn(RECIPE_TYPE);
+    lenient().when(recipe.getContent()).thenReturn(RECIPE_CONTENT);
+    lenient().when(recipe.getType()).thenReturn(RECIPE_TYPE);
     machines = ImmutableMap.of(MACHINE_NAME, mock(InternalMachineConfig.class));
     final Map<String, String> annotations = new HashMap<>();
     annotations.put(format(MACHINE_NAME_ANNOTATION_FMT, CONTAINER_NAME), MACHINE_NAME);
@@ -89,13 +92,32 @@ public class DockerImageEnvironmentConverterTest {
     assertEquals(machines, actual.getMachines());
   }
 
-  @Test(
-      expectedExceptions = InfrastructureException.class,
-      expectedExceptionsMessageRegExp =
-          "DockerImage environment must contain at least one machine configuration")
-  public void throwsValidationExceptionWhenNoMachineConfigProvided() throws Exception {
-    when(dockerEnv.getMachines()).thenReturn(emptyMap());
+  @Test
+  public void shouldUseMachineConfigIfProvided() throws Exception {
+    // given
+    Map<String, String> attributes = new HashMap<>(2);
+    attributes.put(MachineConfig.CONTAINER_COMMAND_ATTRIBUTE, "[/teh/script]");
+    attributes.put(MachineConfig.CONTAINER_ARGS_ATTRIBUTE, "['teh', 'argz']");
 
-    converter.convert(dockerEnv);
+    InternalMachineConfig machineConfig = mock(InternalMachineConfig.class);
+    when(machineConfig.getAttributes()).thenReturn(attributes);
+
+    Map<String, InternalMachineConfig> machines = new HashMap<>(1);
+    machines.put(MACHINE_NAME, machineConfig);
+
+    when(dockerEnv.getMachines()).thenReturn(machines);
+    when(dockerEnv.getRecipe()).thenReturn(recipe);
+
+    Container ctn = pod.getSpec().getContainers().get(0);
+    ctn.setCommand(singletonList("/teh/script"));
+    ctn.setArgs(asList("teh", "argz"));
+
+    // when
+    KubernetesEnvironment env = converter.convert(dockerEnv);
+
+    // then
+    assertEquals(pod, env.getPodsCopy().values().iterator().next());
+    assertEquals(recipe, env.getRecipe());
+    assertEquals(machines, env.getMachines());
   }
 }

@@ -72,7 +72,9 @@ public class EditFilesWithTabsTest {
         ProjectTemplates.MAVEN_SPRING);
 
     ide1.open(testWorkspace);
+    ide1.waitOpenedWorkspaceIsReadyToUse();
     ide2.open(testWorkspace);
+    ide2.waitOpenedWorkspaceIsReadyToUse();
 
     prepareFiles();
   }
@@ -118,12 +120,12 @@ public class EditFilesWithTabsTest {
 
   /** Expands project for a defined browser instance ('user') */
   private void expandFoldersToClass(ProjectExplorer projectExplorer, CodenvyEditor editor) {
+    String path_for_expand =
+        projectName + "/src/main/java/org/eclipse/qa/examples/AppController.java";
+
     projectExplorer.waitItem(projectName);
-    projectExplorer.quickExpandWithJavaScript();
-
-    String path_for_expand = projectName + "/src/main/java/org.eclipse.qa.examples";
-    projectExplorer.openItemByPath(path_for_expand.replace(".", "/") + "/AppController.java");
-
+    projectExplorer.quickRevealToItemWithJavaScript(path_for_expand);
+    projectExplorer.openItemByPath(path_for_expand);
     editor.waitActive();
   }
 

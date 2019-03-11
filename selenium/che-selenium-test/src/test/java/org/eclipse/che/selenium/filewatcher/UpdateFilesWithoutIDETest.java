@@ -78,7 +78,9 @@ public class UpdateFilesWithoutIDETest {
         ws.getId(), Paths.get(resource.toURI()), PROJECT_NAME, ProjectTemplates.MAVEN_SPRING);
 
     ide1.open(ws);
+    ide1.waitOpenedWorkspaceIsReadyToUse();
     ide2.open(ws);
+    ide2.waitOpenedWorkspaceIsReadyToUse();
 
     events1.clickEventLogBtn();
     events2.clickEventLogBtn();

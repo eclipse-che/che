@@ -22,10 +22,8 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Route;
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,11 +34,18 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
+import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
+import org.eclipse.che.api.workspace.server.spi.environment.RecipeRetriever;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
-import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
 /**
  * Parses {@link InternalEnvironment} into {@link OpenShiftEnvironment}.
@@ -49,8 +54,8 @@ import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory
  */
 public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<OpenShiftEnvironment> {
 
-  private final OpenShiftClientFactory clientFactory;
   private final OpenShiftEnvironmentValidator envValidator;
+  private final KubernetesRecipeParser k8sObjectsParser;
   private final MemoryAttributeProvisioner memoryProvisioner;
 
   @Inject
@@ -58,12 +63,12 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
-      OpenShiftClientFactory clientFactory,
       OpenShiftEnvironmentValidator envValidator,
+      KubernetesRecipeParser k8sObjectsParser,
       MemoryAttributeProvisioner memoryProvisioner) {
     super(installerRegistry, recipeRetriever, machinesValidator);
-    this.clientFactory = clientFactory;
     this.envValidator = envValidator;
+    this.k8sObjectsParser = k8sObjectsParser;
     this.memoryProvisioner = memoryProvisioner;
   }
 
@@ -78,40 +83,8 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     if (sourceWarnings != null) {
       warnings.addAll(sourceWarnings);
     }
-    String content = recipe.getContent();
-    String contentType = recipe.getContentType();
-    checkNotNull(contentType, "OpenShift Recipe content type should not be null");
 
-    switch (contentType) {
-      case "application/x-yaml":
-      case "text/yaml":
-      case "text/x-yaml":
-        break;
-      default:
-        throw new ValidationException(
-            "Provided environment recipe content type '"
-                + contentType
-                + "' is unsupported. Supported values are: "
-                + "application/x-yaml, text/yaml, text/x-yaml");
-    }
-
-    final List<HasMetadata> list;
-    try {
-      // Behavior:
-      // - If `content` is a Kubernetes List, load().get() will get the objects in that list
-      // - If `content` is an OpenShift template, load().get() will get the objects in the template
-      //   with parameters substituted (e.g. with default values).
-      list = clientFactory.create().load(new ByteArrayInputStream(content.getBytes())).get();
-    } catch (KubernetesClientException e) {
-      // KubernetesClient wraps the error when a JsonMappingException occurs so we need the cause
-      String message = e.getCause() == null ? e.getMessage() : e.getCause().getMessage();
-      if (message.contains("\n")) {
-        // Clean up message if it comes from JsonMappingException. Format is e.g.
-        // `No resource type found for:v1#Route1\n at [...]`
-        message = message.split("\\n", 2)[0];
-      }
-      throw new ValidationException(format("Could not parse OpenShift recipe: %s", message));
-    }
+    final List<HasMetadata> list = k8sObjectsParser.parse(recipe);
 
     Map<String, Pod> pods = new HashMap<>();
     Map<String, Deployment> deployments = new HashMap<>();
@@ -124,9 +97,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       checkNotNull(object.getKind(), "Environment contains object without specified kind field");
       checkNotNull(object.getMetadata(), "%s metadata must not be null", object.getKind());
       checkNotNull(object.getMetadata().getName(), "%s name must not be null", object.getKind());
-
-      // needed because Che master namespace is set by K8s API during list loading
-      object.getMetadata().setNamespace(null);
 
       if (object instanceof DeploymentConfig) {
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
@@ -159,8 +129,6 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       }
     }
 
-    addRamAttributes(machines, pods.values());
-
     OpenShiftEnvironment osEnv =
         OpenShiftEnvironment.builder()
             .setInternalRecipe(recipe)
@@ -175,14 +143,16 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
             .setRoutes(routes)
             .build();
 
+    addRamAttributes(osEnv.getMachines(), osEnv.getPodsData().values());
+
     envValidator.validate(osEnv);
 
     return osEnv;
   }
 
   @VisibleForTesting
-  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<Pod> pods) {
-    for (Pod pod : pods) {
+  void addRamAttributes(Map<String, InternalMachineConfig> machines, Collection<PodData> pods) {
+    for (PodData pod : pods) {
       for (Container container : pod.getSpec().getContainers()) {
         final String machineName = Names.machineName(pod, container);
         InternalMachineConfig machineConfig;

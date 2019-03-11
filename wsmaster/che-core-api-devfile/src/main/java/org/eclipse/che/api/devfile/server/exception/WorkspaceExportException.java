@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.devfile.server.exception;
 
 /** Thrown when workspace can not be exported into devfile by some reason. */
 public class WorkspaceExportException extends Exception {

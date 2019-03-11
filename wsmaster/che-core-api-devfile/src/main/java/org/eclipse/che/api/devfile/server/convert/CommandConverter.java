@@ -17,8 +17,8 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DI
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.server.Constants;
-import org.eclipse.che.api.devfile.server.DevfileFormatException;
-import org.eclipse.che.api.devfile.server.WorkspaceExportException;
+import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 
 /**

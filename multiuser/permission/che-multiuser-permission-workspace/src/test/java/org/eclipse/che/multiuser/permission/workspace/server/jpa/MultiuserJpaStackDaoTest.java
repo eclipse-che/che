@@ -32,27 +32,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Max Shaposhnik (mshaposhnik@codenvy.com) */
-public class JpaStackDaoTest {
+public class MultiuserJpaStackDaoTest {
 
   private TckResourcesCleaner tckResourcesCleaner;
   private EntityManager manager;
   private MultiuserJpaStackDao dao;
 
-  private StackPermissionsImpl[] permissions;
   private UserImpl[] users;
   private StackImpl[] stacks;
 
   @BeforeClass
   public void setupEntities() throws Exception {
-    permissions =
-        new StackPermissionsImpl[] {
-          new StackPermissionsImpl("user1", "stack1", Arrays.asList("read", "use", "search")),
-          new StackPermissionsImpl("user1", "stack2", Arrays.asList("read", "search")),
-          new StackPermissionsImpl("*", "stack3", Arrays.asList("read", "search")),
-          new StackPermissionsImpl("user1", "stack4", Arrays.asList("read", "run")),
-          new StackPermissionsImpl("user2", "stack1", Arrays.asList("read", "use"))
-        };
-
     users =
         new UserImpl[] {
           new UserImpl("user1", "user1@com.com", "usr1"),
@@ -86,9 +76,6 @@ public class JpaStackDaoTest {
       manager.persist(recipe);
     }
 
-    for (StackPermissionsImpl recipePermissions : permissions) {
-      manager.persist(recipePermissions);
-    }
     manager.getTransaction().commit();
     manager.clear();
   }
@@ -120,8 +107,19 @@ public class JpaStackDaoTest {
   }
 
   @Test
-  public void shouldFindStackByPermissions() throws Exception {
+  public void shouldFindStackByDirectPermissions() throws Exception {
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[0].getId(), Arrays.asList("read", "use", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[1].getId(), Arrays.asList("read", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[2].getId(), Arrays.asList("read", "search")));
+
     List<StackImpl> results = dao.searchStacks(users[0].getId(), null, 0, 0);
+
     assertEquals(results.size(), 3);
     assertTrue(results.contains(stacks[0]));
     assertTrue(results.contains(stacks[1]));
@@ -129,7 +127,44 @@ public class JpaStackDaoTest {
   }
 
   @Test
+  public void shouldFindStackByPublicPermissions() throws Exception {
+    manager.persist(
+        new StackPermissionsImpl("*", stacks[0].getId(), Arrays.asList("read", "use", "search")));
+
+    List<StackImpl> results = dao.searchStacks(users[0].getId(), null, 0, 0);
+
+    assertEquals(results.size(), 1);
+    assertTrue(results.contains(stacks[0]));
+  }
+
+  @Test
+  public void shouldFindStackByPublicAndDirectPermissions() throws Exception {
+    manager.persist(
+        new StackPermissionsImpl("*", stacks[0].getId(), Arrays.asList("read", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[0].getId(), Arrays.asList("read", "search")));
+
+    List<StackImpl> results = dao.searchStacks(users[0].getId(), null, 0, 0);
+    assertEquals(results.size(), 1);
+    assertTrue(results.contains(stacks[0]));
+  }
+
+  @Test
   public void shouldFindRecipeByPermissionsAndTags() throws Exception {
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[0].getId(), Arrays.asList("read", "use", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[1].getId(), Arrays.asList("read", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[2].getId(), Arrays.asList("read", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[3].getId(), Arrays.asList("read", "search")));
+
     List<StackImpl> results =
         dao.searchStacks(users[0].getId(), Collections.singletonList("tag2"), 0, 0);
     assertEquals(results.size(), 2);
@@ -139,8 +174,22 @@ public class JpaStackDaoTest {
 
   @Test
   public void shouldNotFindRecipeByNonexistentTags() throws Exception {
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[0].getId(), Arrays.asList("read", "use", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[1].getId(), Arrays.asList("read", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[2].getId(), Arrays.asList("read", "search")));
+    manager.persist(
+        new StackPermissionsImpl(
+            users[0].getId(), stacks[3].getId(), Arrays.asList("read", "search")));
+
     List<StackImpl> results =
         dao.searchStacks(users[0].getId(), Collections.singletonList("unexisted_tag2"), 0, 0);
+
     assertTrue(results.isEmpty());
   }
 }
