@@ -24,20 +24,17 @@ export class TestWorkspace {
     }
 
     private createWorkspace(workspaceName: string) {
-        it("Do workspace creation request", () => {
-            cy.fixture('workspace/che-7-preview.json').then(workspaceJson => {
-
-                workspaceJson.name = workspaceName;
-
-                cy.request('POST', TestWorkspace.WORKSPACE_API_URL, workspaceJson);
-            }).then(response => {
-                let responceData = response.body;
-                this.workspaceId = responceData.id;
-                this.workspaceIdeUrl = responceData.links.ide;
-            })
+        cy.fixture('workspace/che-7-preview.json').then(workspaceJson => {
+            workspaceJson.name = workspaceName;
+            cy.request('POST', TestWorkspace.WORKSPACE_API_URL, workspaceJson);
+        }).then(response => {
+            let responceData = response.body;
+            this.workspaceId = responceData.id;
+            this.workspaceIdeUrl = responceData.links.ide;
+        }).then(() => {
+            this.startWorkspace();
         })
 
-        this.startWorkspace();
     };
 
     getName(): string {
@@ -53,25 +50,17 @@ export class TestWorkspace {
     }
 
     startWorkspace() {
-        it(`Start the \" ${this.workspaceName} \" workspace`, () => {
-            let workspaceApiUrl: string = `${TestWorkspace.API_ENDPOINT}workspace/${this.getId()}/runtime`;
-
-            cy.request('POST', workspaceApiUrl);
-        })
+        let workspaceApiUrl: string = `${TestWorkspace.API_ENDPOINT}workspace/${this.getId()}/runtime`;
+        cy.request('POST', workspaceApiUrl);
     }
 
     openWorkspaceIde() {
-        it(`Open workspace IDE`, () => {
-            cy.visit(this.workspaceIdeUrl);
-        })
+        cy.visit(this.workspaceIdeUrl);
     }
 
     deleteWorkspace() {
-        it(`Delete the \" ${this.workspaceName} \" workspace with id \" ${this.workspaceId} \"`, () => {
-            let workspaceApiUrl: string = `${TestWorkspace.API_ENDPOINT}workspace/${this.getId()}`;
-
-            cy.request('DELETE', workspaceApiUrl);
-        })
+        let workspaceApiUrl: string = `${TestWorkspace.API_ENDPOINT}workspace/${this.getId()}`;
+        cy.request('DELETE', workspaceApiUrl);
     }
 
 }
