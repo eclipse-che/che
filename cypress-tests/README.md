@@ -1,5 +1,6 @@
 This module contains tests based on using "Cypress" framework.
 
+
 ### Prerequisites
 Launching requires valid ```"baseUrl"``` which may be configured by next way:
  - by **"cypress.json"** - open ```"cypress.json"``` file placed in the ```"cypress-tests"``` folder,

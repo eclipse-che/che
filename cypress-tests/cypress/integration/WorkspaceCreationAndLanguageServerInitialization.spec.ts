@@ -106,11 +106,20 @@ describe("E2E test", () => {
 
     })
 
-    context("Delete workspace", () => {
-        it("Delete workspace", () => {
+    context("Stop and remove workspace", () => {
+        it("Stop workspace", () => {
             dashboard.openDashboard()
             dashboard.clickWorkspacesButton()
             workspaces.waitPage()
+            workspaces.waitWorkspaceListItem(workspaceName)
+            workspaces.waitWorkspaceWithRunningStatus(workspaceName)
+            workspaces.clickOnStopWorkspaceButton(workspaceName)
+            workspaces.waitWorkspaceWithStoppedStatus(workspaceName)
+        })
+
+        it("Delete workspace", () => {
+            workspaces.waitPage()
+            workspaces.waitWorkspaceListItem(workspaceName)
             workspaces.clickWorkspaceListItem(workspaceName);
             workspaces.clickDeleteButtonOnWorkspaceDetails();
             workspaces.clickConfirmDeletionButton();
