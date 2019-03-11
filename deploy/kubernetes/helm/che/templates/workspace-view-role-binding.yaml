@@ -15,7 +15,7 @@ metadata:
   namespace: {{ .Values.global.cheWorkspacesNamespace }}
 roleRef:
   kind: Role
-  name: view
+  name: workspace-view
   namespace: {{ .Values.global.cheWorkspacesNamespace }}
   apiGroup: rbac.authorization.k8s.io
 subjects:

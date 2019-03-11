@@ -11,7 +11,7 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: view
+  name: workspace-view
   namespace: {{ .Values.global.cheWorkspacesNamespace }}
 rules:
 - apiGroups:
