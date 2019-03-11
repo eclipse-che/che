@@ -41,10 +41,16 @@ export class NewWorkspace {
     }
 
     clickOnCreateAndOpenButton() {
+        let ideFrameLocator: string = "ide-iframe#ide-iframe-window";
+
         cy.get(NewWorkspace.CREATE_AND_OPEN_BUTTON)
             .first()
             .should('be.visible')
             .click();
+
+        //check that the workspace has started to boot
+        cy.get(ideFrameLocator)
+            .should('have.attr', 'aria-hidden', 'false')
     }
 
     clickOnAddOrImportProjectButton() {
