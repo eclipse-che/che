@@ -2,7 +2,7 @@
     "defaultCommandTimeout": 10000,
     "viewportWidth": 1920,
     "viewportHeight": 1080,
-    "baseUrl": "http://che-eclipse-che.172.19.20.205.nip.io",
+    "baseUrl": "http://testing-application-url",
    
     "env": {
         "test_user_name": "admin",
