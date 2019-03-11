@@ -19,8 +19,6 @@
     <title>Eclipse Che</title>
     <link rel="shortcut icon" href="/_app/favicon.ico"/>
     <link href="https://fonts.googleapis.com/css?family=Droid+Sans+Mono" rel="stylesheet" type="text/css"/>
-    <script src="/_app/bundle.js" defer></script>
-
     <script type="text/javascript" language="javascript">
 
         /**This parameter is needed to define sdk mode.*/
@@ -57,6 +55,8 @@
         };
 
         var Loader = new function() {
+
+            var keycloak;
 
             /*
              * Load keycloak settings
@@ -143,7 +143,7 @@
                       };
                     }
                 }
-                var keycloak = Keycloak(keycloakConfig());
+                keycloak = Keycloak(keycloakConfig());
                 
                 window['_keycloak'] = keycloak;
                 
@@ -162,17 +162,54 @@
                       redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
                     })
                     .success(function(authenticated) {
+                        // load GWT IDE
                         Loader.startLoading();
                     })
                     .error(function () {
                         console.log('[Keycloak] Failed to initialize Keycloak');
-                    });
+                    });    
             };
-
+            
             /*
              * Show loader and load compilation-mapping.txt file to determine which IDE JavaScript file will be loaded
              */
             this.startLoading = function() {
+                // going to detect IDE 
+                var wsKey = window.location.pathname.substr(1);
+                var request = new XMLHttpRequest();
+                request.open("GET", '/api/workspace/' + wsKey);
+                if(keycloak) {
+                    request.setRequestHeader('Authorization', 'Bearer ' + keycloak.token);
+                }
+                request.send();
+                request.onreadystatechange = function () {
+                    if (this.readyState !== 4) {
+                        return;
+                    }
+                    if (this.status !== 200) {
+                        var response = JSON.parse(this.responseText);
+                        errorMessage = 'Failed to get the workspace: "' + response.message;
+                        return;
+                    }
+                    var workspace = JSON.parse(this.responseText);
+                    var machines = workspace.runtime.machines;
+                    for (var machineName in machines) {
+                        var servers = machines[machineName].servers;
+                        for (var serverId in servers) {
+                            var attributes = servers[serverId].attributes;
+                            if (attributes['type'] === 'ide') {
+                                var url = servers[serverId].url + location.search;
+                                // Preconfigured IDE may use dedicated port. In this case Chrome browser fails
+                                // with error net::ERR_CONNECTION_REFUSED. Timer helps to open the URL without errors.
+                                setTimeout(function () {
+                                    window.location.href = url;
+                                }, 100);
+                                return;
+                            }
+                        }
+                    }                            
+                };
+                //GWT IDE Loading
                 setTimeout(() => {
                     document.getElementById("ide-loader").style.opacity = 1;
                 }, 1);
