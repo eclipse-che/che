@@ -11,8 +11,6 @@
 /// <reference types="Cypress" />
 
 export class Dashboard {
-
-    private static readonly ROOT_URL: string = Cypress.env("root_url");
     private static readonly PAGE_LOAD_TIMEOUT: number = Cypress.env("load_page_timeout");
 
     private static readonly DASHBOARD_BUTTON: string = "#dashboard-item";
@@ -24,7 +22,7 @@ export class Dashboard {
 
 
     openDashboard() {
-        cy.visit(Dashboard.ROOT_URL);
+        cy.visit("/");
     }
 
     waitDashboard() {

@@ -19,7 +19,6 @@ export class LoginPage {
     private static readonly USERNAME_FIELD: string = "#username";
     private static readonly PASSWORD_FIELD: string = "#password";
     private static readonly LOGIN_BUTTON: string = "[name='login']";
-    private static readonly PAGE_URL: string = Cypress.env("root_url");
 
     private typeToInputField(text: string, fieldLocator: string) {
         cy.get(fieldLocator)
@@ -29,7 +28,7 @@ export class LoginPage {
     }
 
     visitLoginPage() {
-        cy.visit(LoginPage.PAGE_URL);
+        cy.visit("/");
     }
 
     typeUsername(username: string) {

@@ -11,7 +11,7 @@
 /// <reference types="Cypress" />
 
 export class TestWorkspace {
-    private static readonly API_ENDPOINT: string = Cypress.env('api_endpoint');
+    private static readonly API_ENDPOINT: string = Cypress.config().baseUrl + "/api/";
     private static readonly WORKSPACE_API_URL: string = TestWorkspace.API_ENDPOINT + "workspace";
 
     private workspaceName: string = "";

@@ -13,7 +13,6 @@
 
 export class Ide {
 
-    private static readonly ROOT_URL: string = Cypress.env("root_url");
     private static readonly START_WORKSPACE_TIMEOUT: number = Cypress.env("start_workspace_timeout");
     private static readonly LANGUAGE_SERVER_INITIALIZATION_TIMEOUT: number = Cypress.env("language_server_initialization_timeout");
 
@@ -25,7 +24,7 @@ export class Ide {
     private static readonly IDE_IFRAME: string = "iframe[id='ide-application-iframe']";
 
     openIdeWithoutFrames(workspaceName: string) {
-        let workspaceUrl: string = `${Ide.ROOT_URL}/che/${workspaceName}`
+        let workspaceUrl: string = `/che/${workspaceName}`
 
         cy.visit(workspaceUrl);
     }
