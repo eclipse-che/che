@@ -53,7 +53,7 @@ objects:
           livenessProbe:
             failureThreshold: 3
             initialDelaySeconds: 30
-            periodSeconds: 5
+            periodSeconds: 10
             successThreshold: 1
             tcpSocket:
               port: 5432
@@ -117,7 +117,7 @@ parameters:
 - name: POSTGRESQL_LOG_DEBUG
   displayName: Postgres DB debug
   description: Enable Postgres DB debug log mode
-  value: 'false'
+  value: "false"
 labels:
   app: postgres
   template: postgres
