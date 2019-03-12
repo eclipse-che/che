@@ -21,35 +21,6 @@
     </parent>
     <artifactId>che-core-tracing-metrics</artifactId>
     <name>Che Core :: Tracing :: Metrics</name>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.jaegertracing</groupId>
-                <artifactId>jaeger-micrometer</artifactId>
-                <version>0.33.1</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentracing.contrib</groupId>
-                <artifactId>opentracing-api-extensions</artifactId>
-                <version>0.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentracing.contrib</groupId>
-                <artifactId>opentracing-api-extensions-tracer</artifactId>
-                <version>0.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentracing.contrib</groupId>
-                <artifactId>opentracing-metrics</artifactId>
-                <version>0.3.0</version>
-            </dependency>
-            <dependency>
-                <groupId>io.opentracing.contrib</groupId>
-                <artifactId>opentracing-metrics-micrometer</artifactId>
-                <version>0.3.0</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>com.google.inject</groupId>

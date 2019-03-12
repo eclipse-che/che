@@ -21,7 +21,14 @@ import javax.inject.Singleton;
  * traced spans to prometheus server. Here is also specified configuration as for metrics name and
  * tags.
  *
- * <p>visit https://github.com/opentracing-contrib/java-metrics to find out about how
+ * <p>This reporter is configured to report all spans with "span.kind" server, as well as provide
+ * additional label "http.status_code", if such tag is available in the span.
+ *
+ * <p>When defining tags , if "Default value" will be null, then the spans which don't have such
+ * tag, then  will not be reported.
+ *
+ * <p>Visit https://github.com/opentracing-contrib/java-metrics to find out about how to configure
+ * reporter.
  */
 @Singleton
 public class MicrometerMetricsReporterProvider implements Provider<MicrometerMetricsReporter> {
