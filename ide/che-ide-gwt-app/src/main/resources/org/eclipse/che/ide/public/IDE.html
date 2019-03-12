@@ -162,7 +162,6 @@
                       redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
                     })
                     .success(function(authenticated) {
-                        // load GWT IDE
                         Loader.startLoading();
                     })
                     .error(function () {
