@@ -1,0 +1,14 @@
+{
+    "defaultCommandTimeout": 10000,
+    "viewportWidth": 1920,
+    "viewportHeight": 1080,
+    "baseUrl": "http://sample-url",
+   
+    "env": {
+        "test_user_name": "admin",
+        "test_user_password": "admin",
+        "load_page_timeout": 120000,
+        "start_workspace_timeout": 240000,
+        "language_server_initialization_timeout": 180000
+    }
+}
