@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-golang-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.19.1-SNAPSHOT</version>
+        <version>6.19.1</version>
     </parent>
     <artifactId>che-plugin-golang-lang-shared</artifactId>
     <name>Che Plugin :: Golang :: Extension Shared</name>
