@@ -136,6 +136,44 @@ So, alternatively, if you need to post devfile with such tools to REST API, cont
               ... etc
 ```
 
+As with `dockerimage` tool described below, it is possible to override the entrypoint of the
+containers contained in the Kubernetes/Openshift list using the `command` and `args` properties (as
+[understood](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#notes)
+by Kubernetes). Of course, there can be more containers in the list (contained in pods or pod
+templates of deployments) and so there needs to be a way of selecting which containers to apply the
+entrypoint changes to.
+
+The entrypoints can be defined for example like this:
+
+```yaml
+...
+  tools:
+    - name: appDeployment
+      type: kubernetes
+      local: app-deployment.yaml
+      entrypoints:
+      - pod: mysqlServer
+        command: ['sleep']
+        args: ['infinity']
+      - deploymentSelector: prometheus
+        args: ['-f', '/opt/app/prometheus-config.yaml']
+```
+
+You can see that the `entrypoints` list contains constraints for picking the containers along with
+the command/args to apply to them. In the example above, the constraint is `pod: mysqlServer` which
+will cause the command to be applied to all containers defined in any pod called `mysqlServer`.
+
+Other types of constraints (and their combinations) are possible:
+
+* `container` - the name of the container
+* `pod` - the name of the pod that contains the containers to override
+* `podSelector` - the set of labels a pod needs to have
+* `deployment` - only containers in a pod template spec of a deployment with given name are
+                 overriden
+* `deploymentSelector` - the set of labels a deployment needs to have
+
+Zero or more of such constraints can be defined to precisely locate the containers inside
+the Kubernetes list.
 
 #### dockerimage
 Tool type which allows to define docker image based configuration of container in workspace.
