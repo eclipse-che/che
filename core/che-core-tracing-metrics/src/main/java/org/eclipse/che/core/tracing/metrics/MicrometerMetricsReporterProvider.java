@@ -25,7 +25,7 @@ import javax.inject.Singleton;
  * additional label "http.status_code", if such tag is available in the span.
  *
  * <p>When defining tags , if "Default value" will be null, then the spans which don't have such
- * tag, then  will not be reported.
+ * tag, then will not be reported.
  *
  * <p>Visit https://github.com/opentracing-contrib/java-metrics to find out about how to configure
  * reporter.
