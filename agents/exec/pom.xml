@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.19.1</version>
+        <version>6.19.2-SNAPSHOT</version>
     </parent>
     <artifactId>exec-agent-parent</artifactId>
     <packaging>pom</packaging>
