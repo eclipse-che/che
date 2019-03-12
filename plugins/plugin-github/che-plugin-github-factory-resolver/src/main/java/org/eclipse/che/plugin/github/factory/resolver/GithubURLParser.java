@@ -35,7 +35,7 @@ public class GithubURLParser {
    */
   protected static final Pattern GITHUB_PATTERN =
       Pattern.compile(
-          "^(?:http)(?:s)?(?:\\:\\/\\/)github.com/(?<repoUser>[^/]++)/(?<repoName>[^/]++)((?:/tree/(?<branchName>[^/]++)(?:/(?<subFolder>.*))?)|(/pull/(?<pullRequestId>[^/]++)))?$");
+          "^(?:http)(?:s)?(?:\\:\\/\\/)github.com/(?<repoUser>[^/]++)/(?<repoName>[^/]++)((/)|(?:/tree/(?<branchName>[^/]++)(?:/(?<subFolder>.*))?)|(/pull/(?<pullRequestId>[^/]++)))?$");
 
   /** Regexp to find repository and branch name from PR link */
   protected static final Pattern PR_DATA_PATTERN =
