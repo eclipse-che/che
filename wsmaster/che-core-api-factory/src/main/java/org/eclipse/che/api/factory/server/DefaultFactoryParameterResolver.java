@@ -13,14 +13,16 @@ package org.eclipse.che.api.factory.server;
 
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 
+import java.net.URI;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
+import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
+import org.eclipse.che.api.factory.server.urlfactory.URLFileContentProvider;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 
 /**
@@ -30,20 +32,20 @@ import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 @Singleton
 public class DefaultFactoryParameterResolver implements FactoryParametersResolver {
 
-  public static final String LOCAL_FILES_REFERENCES_ARE_NOT_SUPPORTED =
-      "Devfile requires local file content but this functionality is not supported when URL to raw content is specified. "
-          + "You can specify URL to Github repository instead.";
-
   private URLFactoryBuilder urlFactoryBuilder;
+  private final URLFetcher urlFetcher;
 
   @Inject
-  public DefaultFactoryParameterResolver(URLFactoryBuilder urlFactoryBuilder) {
+  public DefaultFactoryParameterResolver(
+      URLFactoryBuilder urlFactoryBuilder, URLFetcher urlFetcher) {
     this.urlFactoryBuilder = urlFactoryBuilder;
+    this.urlFetcher = urlFetcher;
   }
 
   @Override
   public boolean accept(Map<String, String> factoryParameters) {
-    return !factoryParameters.get(URL_PARAMETER_NAME).isEmpty();
+    String url = factoryParameters.get(URL_PARAMETER_NAME);
+    return url != null && !url.isEmpty();
   }
 
   /**
@@ -55,11 +57,12 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
   @Override
   public FactoryDto createFactory(@NotNull final Map<String, String> factoryParameters)
       throws BadRequestException, ServerException {
-    // create factory from the following devfile location
+    // This should never be null, because our contract in #accept prohibits that
+    String devfileLocation = factoryParameters.get(URL_PARAMETER_NAME);
+
     return urlFactoryBuilder
         .createFactoryFromDevfile(
-            factoryParameters.get(URL_PARAMETER_NAME),
-            new FetchNotSupportedProvider(LOCAL_FILES_REFERENCES_ARE_NOT_SUPPORTED))
+            devfileLocation, new URLFileContentProvider(URI.create(devfileLocation), urlFetcher))
         .orElse(null);
   }
 }
