@@ -5218,7 +5218,7 @@ objects:
                 "yBucketSize": null
               }
             ],
-            "title": "Workspace detailed",
+            "title": "Workspaces detailed",
             "type": "row"
           }
         ],
