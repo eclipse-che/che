@@ -106,7 +106,11 @@ public class URLFactoryBuilder {
               .withV(CURRENT_VERSION)
               .withWorkspace(DtoConverter.asDto(wsConfig)));
     } catch (DevfileException e) {
-      throw new BadRequestException(e.getMessage());
+      throw new BadRequestException(
+          "Error occurred during creation a workspace from devfile located at `"
+              + devfileLocation
+              + "`. Cause: "
+              + e.getMessage());
     }
   }
 

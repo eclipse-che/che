@@ -15,12 +15,12 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
@@ -44,6 +44,7 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
@@ -73,11 +74,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private static final String BROKER_VOLUME = "broker-config-volume";
   private static final String CONF_FOLDER = "/broker-config";
   private static final String CONFIG_FILE = "config.json";
-  private static final String CONTAINER_NAME_SUFFIX = "broker";
   private static final String PLUGINS_VOLUME_NAME = "plugins";
   private static final String BROKERS_POD_NAME = "che-plugin-broker";
-  private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
+  private final ObjectMapper objectMapper = new ObjectMapper();
   private final String cheWebsocketEndpoint;
   private final String brokerPullPolicy;
   private final AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
@@ -204,13 +204,18 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
         .build();
   }
 
-  private ConfigMap newConfigMap(String configMapName, Collection<PluginMeta> pluginsMetas) {
-    return new ConfigMapBuilder()
-        .withNewMetadata()
-        .withName(configMapName)
-        .endMetadata()
-        .withData(singletonMap(CONFIG_FILE, GSON.toJson(pluginsMetas)))
-        .build();
+  private ConfigMap newConfigMap(String configMapName, Collection<PluginMeta> pluginsMetas)
+      throws InternalInfrastructureException {
+    try {
+      return new ConfigMapBuilder()
+          .withNewMetadata()
+          .withName(configMapName)
+          .endMetadata()
+          .withData(singletonMap(CONFIG_FILE, objectMapper.writeValueAsString(pluginsMetas)))
+          .build();
+    } catch (JsonProcessingException e) {
+      throw new InternalInfrastructureException(e.getMessage(), e);
+    }
   }
 
   private EnvVar asEnvVar(Pair<String, String> envVar) {
@@ -222,7 +227,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       @Nullable Collection<PluginMeta> pluginsMeta,
       List<EnvVar> envVars,
       String image,
-      Pod pod) {
+      Pod pod)
+      throws InternalInfrastructureException {
 
     BrokerConfig brokerConfig = new BrokerConfig();
     String configMapVolume = null;
