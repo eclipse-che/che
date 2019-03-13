@@ -75,7 +75,7 @@ deploy() {
        git checkout -b "${DEPLOY_BRANCH}"
        git add -A
        git commit -am "${COMMIT_MESSAGE}"
-       git push
+       git push origin "${DEPLOY_BRANCH}"
    else
        echo "No changes in docs."
    fi
