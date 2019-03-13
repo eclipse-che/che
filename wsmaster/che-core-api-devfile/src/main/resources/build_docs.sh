@@ -62,21 +62,18 @@ build_native() {
 
 deploy() {
    cd ${TMP_DIR}
-   BRANCH_ARG=""
-   if [[ ! -z "${DEPLOY_BRANCH}" ]]; then
-       BRANCH_ARG="-b ${DEPLOY_BRANCH} --single-branch"
-   fi
-
    if [[ "$USE_SSH" == "true" ]]; then
      DOCS_REPOSITORY_URL="git@github.com:${DEPLOY_ORGANIZATION}/devfile.git"
    else
      DOCS_REPOSITORY_URL=https://${GH_TOKEN}@github.com/${DEPLOY_ORGANIZATION}/devfile.git
    fi
 
-   rm -rf devfile && git clone ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
+   rm -rf devfile && git clone ${DOCS_REPOSITORY_URL}
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ `git status --porcelain` ]]; then
+       git checkout -b "${DEPLOY_BRANCH}"
+       git add -A
        git commit -am "${COMMIT_MESSAGE}"
        git push
    else
@@ -175,13 +172,13 @@ IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
 DEFAULT_DEPLOY=true
 IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
 
-DEFAULT_COMMIT_MESSAGE="Update devfile docs"
+DEFAULT_COMMIT_MESSAGE="Update devfile docs to the latest version"
 COMMIT_MESSAGE=${COMMIT_MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
 
 DEFAULT_DEPLOY_ORGANIZATION=redhat-developer
 DEPLOY_ORGANIZATION=${DEPLOY_ORGANIZATION:-${DEFAULT_DEPLOY_ORGANIZATION}}
 
-DEFAULT_DEPLOY_BRANCH="" # means use default branch of GitHub repository
+DEFAULT_DEPLOY_BRANCH="docs_renewal" # means use default branch of GitHub repository
 DEPLOY_BRANCH=${DEFAULT_DEPLOY_BRANCH:-${DEPLOY_BRANCH}}
 
 DEFAULT_USE_SSH="false"
