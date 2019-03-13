@@ -14,6 +14,7 @@ package org.eclipse.che.api.metrics;
 import static org.eclipse.che.api.metrics.WorkspaceBinders.withStandardTags;
 import static org.eclipse.che.api.metrics.WorkspaceBinders.workspaceMetric;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -21,12 +22,17 @@ import io.micrometer.core.instrument.binder.MeterBinder;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.inject.Singleton;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * {@link MeterBinder} that is providing metrics about workspace successful or failed start time.
+ */
+@Singleton
 public class WorkspaceStartTrackerMeterBinder implements MeterBinder {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceStartTrackerMeterBinder.class);
@@ -39,8 +45,14 @@ public class WorkspaceStartTrackerMeterBinder implements MeterBinder {
 
   @Inject
   public WorkspaceStartTrackerMeterBinder(EventService eventService) {
+    this(eventService, new ConcurrentHashMap<>());
+  }
+
+  @VisibleForTesting
+  WorkspaceStartTrackerMeterBinder(
+      EventService eventService, Map<String, Long> workspaceStartTime) {
     this.eventService = eventService;
-    this.workspaceStartTime = new ConcurrentHashMap<>();
+    this.workspaceStartTime = workspaceStartTime;
   }
 
   @Override
@@ -50,7 +62,6 @@ public class WorkspaceStartTrackerMeterBinder implements MeterBinder {
         Timer.builder(workspaceMetric("start.time"))
             .description("The time of workspace start")
             .tags(withStandardTags("result", "success"))
-            // .publishPercentiles(0.5, 0.95) // median and 95th percentile
             .publishPercentileHistogram()
             .sla(Duration.ofSeconds(10))
             .minimumExpectedValue(Duration.ofSeconds(10))
@@ -61,7 +72,6 @@ public class WorkspaceStartTrackerMeterBinder implements MeterBinder {
         Timer.builder(workspaceMetric("start.time"))
             .description("The time of workspace start")
             .tags(withStandardTags("result", "fail"))
-            // .publishPercentiles(0.5, 0.95) // median and 95th percentile
             .publishPercentileHistogram()
             .sla(Duration.ofSeconds(10))
             .minimumExpectedValue(Duration.ofSeconds(10))
