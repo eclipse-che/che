@@ -44,8 +44,6 @@ module.exports = merge(common, {
                 target: 'http://localhost:8080',
                 changeOrigin: true
             },
-
-
         }
     },
     plugins: [
