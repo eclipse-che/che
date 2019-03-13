@@ -17,15 +17,21 @@ class KeycloakLoader {
         const msg = "Cannot load keycloak settings. This is normal for single-user mode.";
 
         return new Promise((resolve, reject) => {
-            if (window.parent && window.parent['_keycloak']) {
-                window['_keycloak'] = window.parent['_keycloak'];
-                resolve(window['_keycloak']);
-                return;
+            try {
+                if (window.parent && window.parent['_keycloak']) {
+                    window['_keycloak'] = window.parent['_keycloak'];
+                    resolve(window['_keycloak']);
+                    return;
+                }
+            } catch (e) {
+                // parent frame has different origin, so access to parent frame is forbidden
+                console.error(msg, e);
             }
+
             try {
                 const request = new XMLHttpRequest();
 
-                request.onerror = request.onabort = function () {
+                request.onerror = request.onabort = function() {
                     reject(new Error(msg));
                 };
 
@@ -101,11 +107,11 @@ class KeycloakLoader {
             window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
             keycloak
                 .init({
-                  onLoad: 'login-required',
-                  checkLoginIframe: false,
-                  useNonce: useNonce,
-                  scope: 'email profile',
-                  redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
+                    onLoad: 'login-required',
+                    checkLoginIframe: false,
+                    useNonce: useNonce,
+                    scope: 'email profile',
+                    redirectUri: keycloakSettings['che.keycloak.redirect_url.ide']
                 })
                 .success(() => {
                     resolve(keycloak);
@@ -194,7 +200,7 @@ class Loader {
                         return;
                     }
                     if (xhr.status !== 200) {
-                        const errorMessage = 'Failed to get the workspace: "'  + this.getRequestErrorMessage(xhr) + '"';
+                        const errorMessage = 'Failed to get the workspace: "' + this.getRequestErrorMessage(xhr) + '"';
                         reject(new Error(errorMessage));
                         return;
                     }
@@ -292,7 +298,7 @@ class Loader {
                     return;
                 }
                 if (request.status !== 204) {
-                    const errorMessage = 'Failed to authenticate: "'  + this.getRequestErrorMessage(xhr) + '"';
+                    const errorMessage = 'Failed to authenticate: "' + this.getRequestErrorMessage(xhr) + '"';
                     reject(new Error(errorMessage));
                     return;
                 }
@@ -321,44 +327,30 @@ class Loader {
 
 }
 
-(function () {
-    const keycloackAuthenticationPromise = new KeycloakLoader().loadKeycloakSettings();
-
+(async function() {
     const loader = new Loader();
 
-    const workspaceId = loader.getQueryParam('workspaceId'),
-        redirectUrl = loader.getQueryParam('redirectUrl');
-    const getWorkspacePromise = new Promise((resolve, reject) => {
+    const workspaceId = loader.getQueryParam('workspaceId');
+    const redirectUrl = loader.getQueryParam('redirectUrl');
+
+    try {
         if (!workspaceId) {
-            reject(new Error("Workspace ID isn't found in query parameters."));
+            throw new Error("Workspace ID isn't found in query parameters.");
         }
         if (!redirectUrl) {
-            reject(new Error("Redirect URL isn't found in query parameters."));
+            throw new Error("Redirect URL isn't found in query parameters.");
         }
-        resolve();
-    }).then(_ => {
-        return keycloackAuthenticationPromise;
-    }).then(_ => {
-        return loader.asyncGetWorkspace(workspaceId);
-    });
 
-    const checkServiceUrlPromise = getWorkspacePromise.then(workspace => {
-        return loader.asyncCheckServiceLink(workspace, redirectUrl);
-    })
+        await new KeycloakLoader().loadKeycloakSettings();
+        const workspace = await loader.asyncGetWorkspace(workspaceId);
+        await loader.asyncCheckServiceLink(workspace, redirectUrl);
+        const token = await loader.asyncGetWsToken(workspace);
+        await loader.asyncAuthenticate(redirectUrl, token);
 
-    const tokenAuthenticationPromise = getWorkspacePromise.then(workspace => {
-        return loader.asyncGetWsToken(workspace);
-    }).then(token => {
-        return loader.asyncAuthenticate(redirectUrl, token);
-    });
-
-    Promise.all([checkServiceUrlPromise, tokenAuthenticationPromise])
-        .then(_ => {
-            window.location.replace(redirectUrl);
-        })
-        .catch(errorMessage => {
-            console.error(errorMessage);
-            loader.hideLoader();
-            loader.error(errorMessage);
-        });
+        window.location.replace(redirectUrl);
+    } catch (errorMessage) {
+        console.error(errorMessage);
+        loader.hideLoader();
+        loader.error(errorMessage);
+    };
 })();
