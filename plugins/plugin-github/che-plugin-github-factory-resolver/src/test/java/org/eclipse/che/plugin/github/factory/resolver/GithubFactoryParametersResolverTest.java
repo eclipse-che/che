@@ -15,6 +15,7 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -67,11 +68,20 @@ public class GithubFactoryParametersResolverTest {
   @Captor private ArgumentCaptor<Supplier<ProjectConfigDto>> projectConfigDtoArgumentCaptor;
 
   /**
-   * Capturing the parameter when calling {@link URLFactoryBuilder#createFactoryFromJson(String)} or
-   * {@link URLFactoryBuilder#createFactoryFromDevfile(String,
+   * Capturing the location parameter when calling {@link
+   * URLFactoryBuilder#createFactoryFromJson(String, String)} or {@link
+   * URLFactoryBuilder#createFactoryFromDevfile(String, String,
    * org.eclipse.che.api.devfile.server.FileContentProvider)}
    */
   @Captor private ArgumentCaptor<String> fileLocationArgumentCaptor;
+
+  /**
+   * Capturing the filename parameter when calling {@link
+   * URLFactoryBuilder#createFactoryFromJson(String, String)} or {@link
+   * URLFactoryBuilder#createFactoryFromDevfile(String, String,
+   * org.eclipse.che.api.devfile.server.FileContentProvider)}
+   */
+  @Captor private ArgumentCaptor<String> fileNameArgumentCaptor;
 
   /** Instance of resolver that will be tested. */
   @InjectMocks private GithubFactoryParametersResolver githubFactoryParametersResolver;
@@ -106,21 +116,47 @@ public class GithubFactoryParametersResolverTest {
 
   /** Check that with a simple valid URL github url it works */
   @Test
+  public void shouldReturnGitHubSimpleRepoFactory() throws Exception {
+
+    String githubUrl = "https://github.com/eclipse/che";
+
+    FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo");
+    when(urlFactoryBuilder.createFactoryFromJson(anyString(), anyString()))
+        .thenReturn(Optional.empty());
+    when(urlFactoryBuilder.createFactoryFromDevfile(anyString(), anyString(), any()))
+        .thenReturn(Optional.empty());
+
+    when(projectConfigDtoMerger.merge(any(FactoryDto.class), any())).then(returnsFirstArg());
+
+    FactoryDto factory =
+        githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
+
+    // check we provide dockerfile and correct env
+    verify(urlFactoryBuilder).buildDefaultWorkspaceConfig(eq("che"));
+    assertEquals(factory, computedFactory);
+  }
+
+  /** Check that with a simple valid URL github url it works */
+  @Test
   public void shouldReturnGitHubSimpleJsonFactory() throws Exception {
 
     String githubUrl = "https://github.com/eclipse/che";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromJson(anyString()))
+    when(urlFactoryBuilder.createFactoryFromJson(anyString(), anyString()))
         .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
     // check we called the builder with the following factory json file
-    verify(urlFactoryBuilder).createFactoryFromJson(fileLocationArgumentCaptor.capture());
+    verify(urlFactoryBuilder)
+        .createFactoryFromJson(
+            fileLocationArgumentCaptor.capture(), fileNameArgumentCaptor.capture());
     assertEquals(
         fileLocationArgumentCaptor.getValue(),
         "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");
+
+    assertEquals(fileNameArgumentCaptor.getValue(), ".factory.json");
 
     // check we provide dockerfile and correct env
     verify(urlFactoryBuilder).buildDefaultWorkspaceConfig(eq("che"));
@@ -147,16 +183,20 @@ public class GithubFactoryParametersResolverTest {
     String githubUrl = "https://github.com/eclipse/che";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromDevfile(anyString(), any()))
+    when(urlFactoryBuilder.createFactoryFromDevfile(anyString(), anyString(), any()))
         .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
     // check we called the builder with the following devfile
-    verify(urlFactoryBuilder).createFactoryFromDevfile(fileLocationArgumentCaptor.capture(), any());
+    verify(urlFactoryBuilder)
+        .createFactoryFromDevfile(
+            fileLocationArgumentCaptor.capture(), fileNameArgumentCaptor.capture(), any());
     assertEquals(
         fileLocationArgumentCaptor.getValue(),
         "https://raw.githubusercontent.com/eclipse/che/master/.devfile");
+
+    assertEquals(fileNameArgumentCaptor.getValue(), ".devfile");
     // check project config built
     verify(projectConfigDtoMerger)
         .merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
@@ -181,16 +221,20 @@ public class GithubFactoryParametersResolverTest {
     String githubBranch = "4.2.x";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromJson(anyString()))
+    when(urlFactoryBuilder.createFactoryFromJson(anyString(), anyString()))
         .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
     // check we called the builder with the following factory json file
-    verify(urlFactoryBuilder).createFactoryFromJson(fileLocationArgumentCaptor.capture());
+    verify(urlFactoryBuilder)
+        .createFactoryFromJson(
+            fileLocationArgumentCaptor.capture(), fileNameArgumentCaptor.capture());
     assertEquals(
         fileLocationArgumentCaptor.getValue(),
         "https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.json");
+
+    assertEquals(fileNameArgumentCaptor.getValue(), ".factory.json");
 
     // check we provide dockerfile and correct env
     verify(urlFactoryBuilder).buildDefaultWorkspaceConfig(eq("che"));
@@ -219,16 +263,20 @@ public class GithubFactoryParametersResolverTest {
     String githubKeepdir = "dashboard";
 
     FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromJson(anyString()))
+    when(urlFactoryBuilder.createFactoryFromJson(anyString(), anyString()))
         .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
     // check we called the builder with the following factory json file
-    verify(urlFactoryBuilder).createFactoryFromJson(fileLocationArgumentCaptor.capture());
+    verify(urlFactoryBuilder)
+        .createFactoryFromJson(
+            fileLocationArgumentCaptor.capture(), fileNameArgumentCaptor.capture());
     assertEquals(
         fileLocationArgumentCaptor.getValue(),
         "https://raw.githubusercontent.com/eclipse/che/4.2.x/.factory.json");
+
+    assertEquals(fileNameArgumentCaptor.getValue(), ".factory.json");
 
     // check we provide dockerfile and correct env
     verify(urlFactoryBuilder).buildDefaultWorkspaceConfig(eq("che"));

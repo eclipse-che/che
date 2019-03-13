@@ -86,6 +86,13 @@ public interface FactoryDto extends Factory, Hyperlinks {
 
   FactoryDto withId(String id);
 
+  @FactoryParameter(obligation = OPTIONAL, setByServer = true)
+  String getSource();
+
+  void setSource(String source);
+
+  FactoryDto withSource(String source);
+
   @Override
   @FactoryParameter(obligation = OPTIONAL)
   String getName();

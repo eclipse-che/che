@@ -68,13 +68,18 @@ public class URLFactoryBuilder {
    * @param jsonFileLocation location of factory json file
    * @return a factory or null if factory json in not found
    */
-  public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation) {
+  public Optional<FactoryDto> createFactoryFromJson(
+      String jsonFileLocation, String jsonFilename) {
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
       final String factoryJsonContent = urlFetcher.fetchSafely(jsonFileLocation);
       if (!isNullOrEmpty(factoryJsonContent)) {
-        return Optional.of(
-            DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class));
+        FactoryDto factoryDto =
+            DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class);
+        if (!isNullOrEmpty(jsonFilename)) {
+          factoryDto.withSource(jsonFilename);
+        }
+        return Optional.of(factoryDto);
       }
     }
     return Optional.empty();
@@ -88,7 +93,7 @@ public class URLFactoryBuilder {
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
-      String devfileLocation, FileContentProvider fileContentProvider)
+      String devfileLocation, String devfileFilename, FileContentProvider fileContentProvider)
       throws BadRequestException, ServerException {
     if (devfileLocation == null) {
       return Optional.empty();
@@ -101,10 +106,14 @@ public class URLFactoryBuilder {
       Devfile devfile = devfileManager.parse(devfileYamlContent);
       WorkspaceConfigImpl wsConfig =
           devfileManager.createWorkspaceConfig(devfile, fileContentProvider);
-      return Optional.of(
+      FactoryDto factoryDto =
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
-              .withWorkspace(DtoConverter.asDto(wsConfig)));
+              .withWorkspace(DtoConverter.asDto(wsConfig));
+      if (!isNullOrEmpty(devfileFilename)) {
+        factoryDto.withSource(devfileFilename);
+      }
+      return Optional.of(factoryDto);
     } catch (DevfileException e) {
       throw new BadRequestException(
           "Error occurred during creation a workspace from devfile located at `"
