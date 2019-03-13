@@ -26,7 +26,7 @@ projects:
   - name: petclinic
     source:
       type: git
-      location: 'git@github.com:spring-projects/spring-petclinic.git'
+      location: 'https://github.com/che-samples/web-java-spring-petclinic.git'
 tools:
   - name: theia-editor
     type: cheEditor
