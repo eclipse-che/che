@@ -77,7 +77,7 @@ deploy() {
    cp -f docs/* ./devfile/docs
    cd devfile
    if [[ $(git ls-remote origin ${DEPLOY_BRANCH}) ]]; then
-       echo "Specified branch already exists on remote. That may means that PR of the previous script run is not merged or cleaned. Exiting now."
+       echo "Specified remote branch (${DEPLOY_BRANCH}) already exists on remote. That may means that PR of the previous script run is not merged or cleaned. Exiting now."
        exit 1
    fi
    if [[ `git status --porcelain` ]]; then
