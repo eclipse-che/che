@@ -62,15 +62,24 @@ build_native() {
 
 deploy() {
    cd ${TMP_DIR}
+   BRANCH_ARG=""
+   if [[ ! -z "${BASE_BRANCH}" ]]; then
+       BRANCH_ARG="-b ${BASE_BRANCH} --single-branch"
+   fi
+
    if [[ "$USE_SSH" == "true" ]]; then
      DOCS_REPOSITORY_URL="git@github.com:${DEPLOY_ORGANIZATION}/devfile.git"
    else
      DOCS_REPOSITORY_URL=https://${GH_TOKEN}@github.com/${DEPLOY_ORGANIZATION}/devfile.git
    fi
 
-   rm -rf devfile && git clone ${DOCS_REPOSITORY_URL}
+   rm -rf devfile && git clone ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
    cp -f docs/* ./devfile/docs
    cd devfile
+   if [[ $(git ls-remote origin ${DEPLOY_BRANCH}) ]]; then
+       echo "Specified branch already exists on remote. That may means that PR of the previous script run is not merged or cleaned. Exiting now."
+       exit 1
+   fi
    if [[ `git status --porcelain` ]]; then
        git checkout -b "${DEPLOY_BRANCH}"
        git add -A
@@ -109,6 +118,7 @@ print_help() {
    echo "   --no-deploy   Skip deploy result to remote"
    echo "   --org         Specifies organization of devfile repository to which Docs should be pushed. Default value: redhat-developer"
    echo "   --branch|-b   Specifies branch to which Docs should be pushed. Default behaviour: use default GitHub repo branch"
+   echo "   --base-branch Specifies base branch to checkout from. Otherwise repository default branch will be used"
    echo "   --ssh         Configures script to use ssh link to GitHub Docs repository. Default: false"
 }
 
@@ -138,6 +148,10 @@ parse_args() {
            ;;
            --branch=*)
                DEPLOY_BRANCH="${i#*=}"
+               shift
+           ;;
+           --base-branch=*)
+               BASE_BRANCH="${i#*=}"
                shift
            ;;
            --ssh)
@@ -178,8 +192,11 @@ COMMIT_MESSAGE=${COMMIT_MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
 DEFAULT_DEPLOY_ORGANIZATION=redhat-developer
 DEPLOY_ORGANIZATION=${DEPLOY_ORGANIZATION:-${DEFAULT_DEPLOY_ORGANIZATION}}
 
-DEFAULT_DEPLOY_BRANCH="docs_renewal" # means use default branch of GitHub repository
+DEFAULT_DEPLOY_BRANCH="docs_renewal"
 DEPLOY_BRANCH=${DEFAULT_DEPLOY_BRANCH:-${DEPLOY_BRANCH}}
+
+DEFAULT_BASE_BRANCH="" # means use default branch of GitHub repository
+BASE_BRANCH=${DEFAULT_BASE_BRANCH:-${BASE_BRANCH}}
 
 DEFAULT_USE_SSH="false"
 USE_SSH=${DEFAULT_USE_SSH:-${USE_SSH}}
