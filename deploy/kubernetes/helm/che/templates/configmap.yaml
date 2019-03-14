@@ -23,6 +23,7 @@ data:
 {{ else }}
   CHE_API: http://{{ template "cheHost" . }}/api
   CHE_WEBSOCKET_ENDPOINT:  ws://{{ template "cheHost" . }}/api/websocket
+  CHE_WEBSOCKET_ENDPOINT__MINOR:  ws://{{ template "cheHost" . }}/api/websocket-minor
   CHE_INFRA_KUBERNETES_BOOTSTRAPPER_BINARY__URL: http://{{ template "cheHost" . }}/agent-binaries/linux_amd64/bootstrapper/bootstrapper
 {{- end }}
   CHE_DEBUG_SERVER: "true"
