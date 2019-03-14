@@ -15,6 +15,7 @@ import com.google.common.annotations.Beta;
 import com.google.inject.Inject;
 import io.opentracing.Scope;
 import io.opentracing.Tracer;
+import io.opentracing.tag.Tags;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -47,7 +48,11 @@ public class TracingInterceptor implements MethodInterceptor {
   public Object invoke(MethodInvocation invocation) throws Throwable {
     String spanName = getSpanName(invocation);
     try (Scope scope =
-        tracer.buildSpan(spanName).asChildOf(tracer.activeSpan()).startActive(true)) {
+        tracer
+            .buildSpan(spanName)
+            .asChildOf(tracer.activeSpan())
+            .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
+            .startActive(true)) {
 
       Traced.TagsStack.push();
 
