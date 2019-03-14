@@ -49,6 +49,7 @@ wsmaster/che-core-api-workspace*/** @garagatyi
 wsmaster/che-core-api-factory/** @mshaposhnik
 wsmaster/che-core-api-factory-shared/**   @mshaposhnik
 wsmaster/che-core-api-workspace-activity/**   @mshaposhnik
+wsmaster/che-core-api-devfile/  @sleshchenko @mshaposhnik @metlos
 
 # wsagent
 wsagent/activity/** @skabashnyuk
@@ -63,6 +64,7 @@ wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabas
 
 # deploy
 deploy/** @riuvshin @l0rd @garagatyi @eivantsov @sleshchenko
+deploy/openshift/templates/che-monitoring.yaml @skabashnyuk @metlos
 
 # selenium tests
 selenium/** @musienko-maxim @dmytro-ndp @Ohrimenko1988
