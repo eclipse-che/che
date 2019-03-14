@@ -42,7 +42,7 @@ public class MicrometerMetricsReporterProvider implements Provider<MicrometerMet
         MicrometerMetricsReporter.newMetricsReporter()
             .withName(TRACING_METRIC_NAME)
             .withTagLabel(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
-            .withTagLabel(Tags.HTTP_STATUS.getKey(), "null")
+            .withTagLabel(Tags.HTTP_STATUS.getKey(), "undefined")
             .build();
   }
 
