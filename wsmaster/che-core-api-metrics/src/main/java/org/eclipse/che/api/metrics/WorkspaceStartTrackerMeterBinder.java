@@ -79,24 +79,26 @@ public class WorkspaceStartTrackerMeterBinder implements MeterBinder {
             .register(registry);
 
     // only subscribe to the event once we have the counters ready
-    eventService.subscribe(
-        event -> {
-          if (event.getPrevStatus() == WorkspaceStatus.STOPPED
-              && event.getStatus() == WorkspaceStatus.STARTING) {
-            workspaceStartTime.put(event.getWorkspaceId(), System.currentTimeMillis());
-          } else if (event.getPrevStatus() == WorkspaceStatus.STARTING) {
-            Long startTime = workspaceStartTime.remove(event.getWorkspaceId());
-            if (startTime != null) {
-              if (event.getStatus() == WorkspaceStatus.RUNNING) {
-                successTimer.record(Duration.ofMillis(System.currentTimeMillis() - startTime));
-              } else if (event.getStatus() == WorkspaceStatus.STOPPED) {
-                failTimer.record(Duration.ofMillis(System.currentTimeMillis() - startTime));
-              }
-            } else {
-              LOG.warn("No workspace start time recorded for workspace {}", event.getWorkspaceId());
-            }
-          }
-        },
-        WorkspaceStatusEvent.class);
+    eventService.subscribe(this::handleWorkspaceStatusChange, WorkspaceStatusEvent.class);
+  }
+
+  private void handleWorkspaceStatusChange(WorkspaceStatusEvent event) {
+    if (event.getPrevStatus() == WorkspaceStatus.STOPPED
+        && event.getStatus() == WorkspaceStatus.STARTING) {
+      workspaceStartTime.put(event.getWorkspaceId(), System.currentTimeMillis());
+    } else if (event.getPrevStatus() == WorkspaceStatus.STARTING) {
+      Long startTime = workspaceStartTime.remove(event.getWorkspaceId());
+      if (startTime == null) {
+        // this situation is possible when starting workspace is recovered or some bug happened
+        LOG.warn("No workspace start time recorded for workspace {}", event.getWorkspaceId());
+        return;
+      }
+
+      if (event.getStatus() == WorkspaceStatus.RUNNING) {
+        successTimer.record(Duration.ofMillis(System.currentTimeMillis() - startTime));
+      } else if (event.getStatus() == WorkspaceStatus.STOPPED) {
+        failTimer.record(Duration.ofMillis(System.currentTimeMillis() - startTime));
+      }
+    }
   }
 }
