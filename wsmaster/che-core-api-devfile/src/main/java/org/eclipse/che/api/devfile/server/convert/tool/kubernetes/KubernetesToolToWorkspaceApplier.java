@@ -208,11 +208,9 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
   private void applyEntrypoint(Entrypoint entrypoint, List<HasMetadata> list) {
     ContainerSearch search =
         new ContainerSearch(
-            entrypoint.getDeployment(),
-            entrypoint.getPod(),
-            entrypoint.getContainer(),
-            entrypoint.getPodSelector(),
-            entrypoint.getDeploymentSelector());
+            entrypoint.getParentName(),
+            entrypoint.getParentSelector(),
+            entrypoint.getContainerName());
 
     List<Container> cs = search.search(list);
 

@@ -234,7 +234,7 @@ public class DevfileIntegrityValidatorTest {
         .getTools()
         .get(0)
         .setEntrypoints(
-            Collections.singletonList(new Entrypoint().withContainer("not that container")));
+            Collections.singletonList(new Entrypoint().withContainerName("not that container")));
 
     // when
     integrityValidator.validateContentReferences(devfile, __ -> "");

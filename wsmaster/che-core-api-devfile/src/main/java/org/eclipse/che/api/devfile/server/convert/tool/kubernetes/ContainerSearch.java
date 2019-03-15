@@ -11,18 +11,26 @@
  */
 package org.eclipse.che.api.devfile.server.convert.tool.kubernetes;
 
+import static java.util.stream.Collectors.toList;
+
 import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.api.model.KubernetesResource;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodTemplateSpec;
+import io.fabric8.kubernetes.api.model.PodTemplate;
+import io.fabric8.kubernetes.api.model.ReplicationController;
+import io.fabric8.kubernetes.api.model.apps.DaemonSet;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.api.model.batch.CronJob;
+import io.fabric8.kubernetes.api.model.batch.Job;
+import io.fabric8.openshift.api.model.DeploymentConfig;
 import io.fabric8.openshift.api.model.Template;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -34,104 +42,84 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 public class ContainerSearch {
 
-  private final @Nullable String deploymentName;
-  private final @Nullable String podName;
+  private final @Nullable String parentName;
+  private final @Nullable Map<String, String> parentSelector;
   private final @Nullable String containerName;
-  private final @Nullable Map<String, String> podSelector;
-  private final @Nullable Map<String, String> deploymentSelector;
 
   /**
    * Constructs a new {@code ContainerSearch} instance in somewhat unsurprising manner.
    *
-   * @param deploymentName only search for containers in pods of deployments with given name
-   * @param podName only search for containers in pods with given name
+   * @param parentName the name of the parent object that should (indirectly) contain the containers
+   * @param parentSelector the selector for the
    * @param containerName only search for containers with given name
-   * @param podSelector only search for containers in pods with labels matching the selector
-   * @param deploymentSelector only search for containers in pods of deployments with labels
-   *     matching the selector
    */
   public ContainerSearch(
-      @Nullable String deploymentName,
-      @Nullable String podName,
-      @Nullable String containerName,
-      @Nullable Map<String, String> podSelector,
-      @Nullable Map<String, String> deploymentSelector) {
-    this.deploymentName = deploymentName;
-    this.podName = podName;
+      @Nullable String parentName,
+      @Nullable Map<String, String> parentSelector,
+      @Nullable String containerName) {
+    this.parentName = parentName;
+    this.parentSelector = parentSelector;
     this.containerName = containerName;
-    this.podSelector = podSelector;
-    this.deploymentSelector = deploymentSelector;
   }
 
   /**
-   * Searches for containers in the provided list of Kubernetes resources. If any given item in the
-   * list can contain a container (i.e. it is a pod, deployment, Kubernetes list or Openshift
-   * template) the item is searched for the containers recursively.
+   * Searches for containers in the provided list of Kubernetes objects. If any given item in the
+   * list can contain a container (i.e. it is a pod, deployment, etc.) the item is searched for the
+   * containers recursively.
    *
    * @param list the list of Kubernetes resources to sift through
-   * @return a list of containers found in the provided resource list
+   * @return a list of containers found in the provided object list
    */
-  public List<Container> search(Collection<? extends KubernetesResource> list) {
-    List<Container> ret = new ArrayList<>();
-
-    search(list, ret, false, false);
-
-    return ret;
+  public List<Container> search(Collection<? extends HasMetadata> list) {
+    return list.stream()
+        .filter(this::matchMeta)
+        .flatMap(this::findContainers)
+        .filter(this::matchContainer)
+        .collect(toList());
   }
 
-  private void search(
-      Collection<? extends KubernetesResource> list,
-      Collection<Container> results,
-      boolean insideDeployment,
-      boolean insidePod) {
-
-    for (KubernetesResource o : list) {
-      if (o instanceof Container) {
-        if (matchesContainer(insidePod, insideDeployment, ((Container) o).getName())) {
-          results.add((Container) o);
-        }
-      } else if (o instanceof Pod) {
-        if (matchesPod(insideDeployment, ((Pod) o).getMetadata())) {
-          search(((Pod) o).getSpec().getContainers(), results, insideDeployment, true);
-        }
-      } else if (o instanceof Deployment) {
-        Deployment d = (Deployment) o;
-        PodTemplateSpec p = d.getSpec().getTemplate();
-
-        if (matchesDeployment(d.getMetadata()) && matchesPod(true, p.getMetadata())) {
-          search(p.getSpec().getContainers(), results, true, true);
-        }
-      } else if (o instanceof Template) {
-        search(((Template) o).getObjects(), results, false, false);
-      } else if (o instanceof KubernetesList) {
-        search(((KubernetesList) o).getItems(), results, false, false);
-      }
+  private Stream<Container> findContainers(HasMetadata o) {
+    // hopefully, this covers all types of objects that can contain a container
+    if (o instanceof Pod) {
+      return ((Pod) o).getSpec().getContainers().stream();
+    } else if (o instanceof PodTemplate) {
+      return ((PodTemplate) o).getTemplate().getSpec().getContainers().stream();
+    } else if (o instanceof DaemonSet) {
+      return ((DaemonSet) o).getSpec().getTemplate().getSpec().getContainers().stream();
+    } else if (o instanceof Deployment) {
+      return ((Deployment) o).getSpec().getTemplate().getSpec().getContainers().stream();
+    } else if (o instanceof Job) {
+      return ((Job) o).getSpec().getTemplate().getSpec().getContainers().stream();
+    } else if (o instanceof ReplicaSet) {
+      return ((ReplicaSet) o).getSpec().getTemplate().getSpec().getContainers().stream();
+    } else if (o instanceof ReplicationController) {
+      return ((ReplicationController) o).getSpec().getTemplate().getSpec().getContainers().stream();
+    } else if (o instanceof StatefulSet) {
+      return ((StatefulSet) o).getSpec().getTemplate().getSpec().getContainers().stream();
+    } else if (o instanceof CronJob) {
+      return ((CronJob) o)
+          .getSpec()
+          .getJobTemplate()
+          .getSpec()
+          .getTemplate()
+          .getSpec()
+          .getContainers()
+          .stream();
+    } else if (o instanceof DeploymentConfig) {
+      return ((DeploymentConfig) o).getSpec().getTemplate().getSpec().getContainers().stream();
+    } else if (o instanceof Template) {
+      return ((Template) o).getObjects().stream().flatMap(this::findContainers);
+    } else {
+      return Stream.empty();
     }
   }
 
-  private boolean matchesContainer(
-      boolean insidePod, boolean insideDeployment, String containerName) {
-    if ((deploymentName != null || deploymentSelector != null) && !insideDeployment) {
-      return false;
-    }
-
-    if ((podName != null || podSelector != null) && !insidePod) {
-      return false;
-    }
-
-    return this.containerName == null || this.containerName.equals(containerName);
+  private boolean matchContainer(Container container) {
+    return this.containerName == null || this.containerName.equals(container.getName());
   }
 
-  private boolean matchesPod(boolean insideDeployment, ObjectMeta podMeta) {
-    if ((deploymentName != null || deploymentSelector != null) && !insideDeployment) {
-      return false;
-    }
-
-    return matches(podMeta, podName, podSelector);
-  }
-
-  private boolean matchesDeployment(ObjectMeta deploymentMeta) {
-    return matches(deploymentMeta, deploymentName, deploymentSelector);
+  private boolean matchMeta(HasMetadata object) {
+    return matches(object.getMetadata(), parentName, parentSelector);
   }
 
   private static boolean matches(
@@ -149,8 +137,8 @@ public class ContainerSearch {
       return true;
     }
 
-    String metaName = metaData.getName();
-    String metaGenerateName = metaData.getGenerateName();
+    String metaName = metaData == null ? null : metaData.getName();
+    String metaGenerateName = metaData == null ? null : metaData.getGenerateName();
 
     // do not compare by the generateName if a name exists
     if (metaName != null) {

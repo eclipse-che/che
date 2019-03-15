@@ -20,8 +20,24 @@ import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.PodTemplate;
+import io.fabric8.kubernetes.api.model.PodTemplateBuilder;
+import io.fabric8.kubernetes.api.model.ReplicationController;
+import io.fabric8.kubernetes.api.model.ReplicationControllerBuilder;
+import io.fabric8.kubernetes.api.model.apps.DaemonSet;
+import io.fabric8.kubernetes.api.model.apps.DaemonSetBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSet;
+import io.fabric8.kubernetes.api.model.apps.ReplicaSetBuilder;
+import io.fabric8.kubernetes.api.model.apps.StatefulSet;
+import io.fabric8.kubernetes.api.model.apps.StatefulSetBuilder;
+import io.fabric8.kubernetes.api.model.batch.CronJob;
+import io.fabric8.kubernetes.api.model.batch.CronJobBuilder;
+import io.fabric8.kubernetes.api.model.batch.Job;
+import io.fabric8.kubernetes.api.model.batch.JobBuilder;
+import io.fabric8.openshift.api.model.DeploymentConfig;
+import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.fabric8.openshift.api.model.Template;
 import io.fabric8.openshift.api.model.TemplateBuilder;
 import java.util.Collection;
@@ -37,6 +53,11 @@ public class ContainerSearchTest {
 
   @BeforeMethod
   public void setup() {
+    // These are all the object types that can be contained in a KubernetesList which can contain a
+    // container:
+    // Pod, PodTemplate, DaemonSet, Deployment, Job, ReplicaSet, ReplicationController, StatefulSet,
+    // CronJob, DeploymentConfig, Template
+
     Container container1 = new ContainerBuilder().withName("container1").build();
     Container container2 = new ContainerBuilder().withName("container2").build();
     Container container3 = new ContainerBuilder().withName("container3").build();
@@ -44,8 +65,13 @@ public class ContainerSearchTest {
     Container container5 = new ContainerBuilder().withName("container5").build();
     Container container6 = new ContainerBuilder().withName("container6").build();
     Container container7 = new ContainerBuilder().withName("container7").build();
+    Container container8 = new ContainerBuilder().withName("container8").build();
+    Container container9 = new ContainerBuilder().withName("container9").build();
+    Container container10 = new ContainerBuilder().withName("container10").build();
+    Container container11 = new ContainerBuilder().withName("container11").build();
+    Container container12 = new ContainerBuilder().withName("container12").build();
 
-    Pod topLevelPodWithName =
+    Pod podWithName =
         new PodBuilder()
             .withNewMetadata()
             .withName("podWithName")
@@ -56,7 +82,7 @@ public class ContainerSearchTest {
             .endSpec()
             .build();
 
-    Pod topLevelPodWithGenerateName =
+    Pod podWithGenerateName =
         new PodBuilder()
             .withNewMetadata()
             .withGenerateName("podWithGenerateName")
@@ -66,34 +92,26 @@ public class ContainerSearchTest {
             .endSpec()
             .build();
 
-    Deployment deploymentWithNameWithPodWithName =
-        new DeploymentBuilder()
+    PodTemplate podTemplate =
+        new PodTemplateBuilder()
             .withNewMetadata()
-            .withName("deploymentWithName")
+            .withName("podTemplate")
             .addToLabels("app", "che")
             .endMetadata()
-            .withNewSpec()
             .withNewTemplate()
-            .withNewMetadata()
-            .withName("podWithName")
-            .endMetadata()
             .withNewSpec()
             .withContainers(container3)
             .endSpec()
             .endTemplate()
-            .endSpec()
             .build();
 
-    Deployment deploymentWithNameWithPodWithGenerateName =
-        new DeploymentBuilder()
+    DaemonSet daemonSet =
+        new DaemonSetBuilder()
             .withNewMetadata()
-            .withName("deploymentWithName")
+            .withName("daemonSet")
             .endMetadata()
             .withNewSpec()
             .withNewTemplate()
-            .withNewMetadata()
-            .withGenerateName("podWithGenerateName")
-            .endMetadata()
             .withNewSpec()
             .withContainers(container4)
             .endSpec()
@@ -101,10 +119,11 @@ public class ContainerSearchTest {
             .endSpec()
             .build();
 
-    Deployment deploymentWithGenerateNameWithPodWithName =
+    Deployment deployment =
         new DeploymentBuilder()
             .withNewMetadata()
-            .withGenerateName("deploymentWithGenerateName")
+            .withName("deployment")
+            .addToLabels("app", "che")
             .endMetadata()
             .withNewSpec()
             .withNewTemplate()
@@ -118,18 +137,92 @@ public class ContainerSearchTest {
             .endSpec()
             .build();
 
-    Deployment deploymentWithGenerateNameWithPodWithGenerateName =
-        new DeploymentBuilder()
+    Job job =
+        new JobBuilder()
             .withNewMetadata()
-            .withGenerateName("deploymentWithGenerateName")
+            .withName("job")
             .endMetadata()
             .withNewSpec()
             .withNewTemplate()
-            .withNewMetadata()
-            .withGenerateName("podWithGenerateName")
-            .endMetadata()
             .withNewSpec()
             .withContainers(container6)
+            .endSpec()
+            .endTemplate()
+            .endSpec()
+            .build();
+
+    ReplicaSet replicaSet =
+        new ReplicaSetBuilder()
+            .withNewMetadata()
+            .withName("replicaSet")
+            .addToLabels("app", "che")
+            .endMetadata()
+            .withNewSpec()
+            .withNewTemplate()
+            .withNewSpec()
+            .withContainers(container7)
+            .endSpec()
+            .endTemplate()
+            .endSpec()
+            .build();
+
+    ReplicationController replicationController =
+        new ReplicationControllerBuilder()
+            .withNewMetadata()
+            .withName("replicationController")
+            .endMetadata()
+            .withNewSpec()
+            .withNewTemplate()
+            .withNewSpec()
+            .withContainers(container8)
+            .endSpec()
+            .endTemplate()
+            .endSpec()
+            .build();
+
+    StatefulSet statefulSet =
+        new StatefulSetBuilder()
+            .withNewMetadata()
+            .withName("statefulSet")
+            .addToLabels("app", "che")
+            .endMetadata()
+            .withNewSpec()
+            .withNewTemplate()
+            .withNewSpec()
+            .withContainers(container9)
+            .endSpec()
+            .endTemplate()
+            .endSpec()
+            .build();
+
+    CronJob cronJob =
+        new CronJobBuilder()
+            .withNewMetadata()
+            .withName("cronJob")
+            .endMetadata()
+            .withNewSpec()
+            .withNewJobTemplate()
+            .withNewSpec()
+            .withNewTemplate()
+            .withNewSpec()
+            .withContainers(container10)
+            .endSpec()
+            .endTemplate()
+            .endSpec()
+            .endJobTemplate()
+            .endSpec()
+            .build();
+
+    DeploymentConfig deploymentConfig =
+        new DeploymentConfigBuilder()
+            .withNewMetadata()
+            .withName("deploymentConfig")
+            .addToLabels("app", "che")
+            .endMetadata()
+            .withNewSpec()
+            .withNewTemplate()
+            .withNewSpec()
+            .withContainers(container11)
             .endSpec()
             .endTemplate()
             .endSpec()
@@ -147,31 +240,38 @@ public class ContainerSearchTest {
             .withName("podWithName")
             .endMetadata()
             .withNewSpec()
-            .withContainers(container7)
+            .withContainers(container12)
             .endSpec()
             .endTemplate()
             .endSpec()
             .endDeploymentObject()
             .build();
 
+    // Pod, PodTemplate, DaemonSet, Deployment, Job, ReplicaSet, ReplicationController, StatefulSet,
+    // CronJob, DeploymentConfig, Template
     testList =
         asList(
-            topLevelPodWithName,
-            topLevelPodWithGenerateName,
-            deploymentWithNameWithPodWithName,
-            deploymentWithNameWithPodWithGenerateName,
-            deploymentWithGenerateNameWithPodWithName,
-            deploymentWithGenerateNameWithPodWithGenerateName,
+            podWithName,
+            podWithGenerateName,
+            podTemplate,
+            daemonSet,
+            deployment,
+            job,
+            replicaSet,
+            replicationController,
+            statefulSet,
+            cronJob,
+            deploymentConfig,
             template);
   }
 
   @Test
   public void shouldFindAllContainersIfNotRestricted() {
-    ContainerSearch search = new ContainerSearch(null, null, null, null, null);
+    ContainerSearch search = new ContainerSearch(null, null, null);
 
     List<Container> results = search.search(testList);
 
-    Assert.assertEquals(results.size(), 7);
+    Assert.assertEquals(results.size(), 12);
     assertContainsContainer(results, "container1");
     assertContainsContainer(results, "container2");
     assertContainsContainer(results, "container3");
@@ -179,60 +279,36 @@ public class ContainerSearchTest {
     assertContainsContainer(results, "container5");
     assertContainsContainer(results, "container6");
     assertContainsContainer(results, "container7");
+    assertContainsContainer(results, "container8");
+    assertContainsContainer(results, "container9");
+    assertContainsContainer(results, "container10");
+    assertContainsContainer(results, "container11");
+    assertContainsContainer(results, "container12");
   }
 
   @Test
-  public void shouldRestrictByDeploymentName() {
-    ContainerSearch search = new ContainerSearch("deploymentWithName", null, null, null, null);
+  public void shouldRestrictByName() {
+    ContainerSearch search = new ContainerSearch("podWithName", null, null);
 
     List<Container> results = search.search(testList);
 
-    Assert.assertEquals(results.size(), 3);
-    assertContainsContainer(results, "container3");
-    assertContainsContainer(results, "container4");
-    assertContainsContainer(results, "container7");
-  }
-
-  @Test
-  public void shouldRestrictByDeploymentGenerateName() {
-    ContainerSearch search =
-        new ContainerSearch("deploymentWithGenerateName", null, null, null, null);
-
-    List<Container> results = search.search(testList);
-
-    Assert.assertEquals(results.size(), 2);
-    assertContainsContainer(results, "container5");
-    assertContainsContainer(results, "container6");
-  }
-
-  @Test
-  public void shouldRestrictByPodName() {
-    ContainerSearch search = new ContainerSearch(null, "podWithName", null, null, null);
-
-    List<Container> results = search.search(testList);
-
-    Assert.assertEquals(results.size(), 4);
+    Assert.assertEquals(results.size(), 1);
     assertContainsContainer(results, "container1");
-    assertContainsContainer(results, "container3");
-    assertContainsContainer(results, "container5");
-    assertContainsContainer(results, "container7");
   }
 
   @Test
-  public void shouldRestrictByPodGenerateName() {
-    ContainerSearch search = new ContainerSearch(null, "podWithGenerateName", null, null, null);
+  public void shouldRestrictByGenerateName() {
+    ContainerSearch search = new ContainerSearch("podWithGenerateName", null, null);
 
     List<Container> results = search.search(testList);
 
-    Assert.assertEquals(results.size(), 3);
+    Assert.assertEquals(results.size(), 1);
     assertContainsContainer(results, "container2");
-    assertContainsContainer(results, "container4");
-    assertContainsContainer(results, "container6");
   }
 
   @Test
   public void shouldRestrictByContainerName() {
-    ContainerSearch search = new ContainerSearch(null, null, "container7", null, null);
+    ContainerSearch search = new ContainerSearch(null, null, "container7");
 
     List<Container> results = search.search(testList);
 
@@ -241,36 +317,19 @@ public class ContainerSearchTest {
   }
 
   @Test
-  public void shouldRestrictByCombinationOfDeploymentAndPodName() {
-    ContainerSearch search =
-        new ContainerSearch("deploymentWithName", "podWithGenerateName", null, null, null);
-
-    List<Container> results = search.search(testList);
-
-    Assert.assertEquals(results.size(), 1);
-    assertContainsContainer(results, "container4");
-  }
-
-  @Test
-  public void shouldRestrictByDeploymentLabels() {
+  public void shouldRestrictByLabels() {
     Map<String, String> selector = ImmutableMap.of("app", "che");
-    ContainerSearch search = new ContainerSearch(null, null, null, null, selector);
+    ContainerSearch search = new ContainerSearch(null, selector, null);
 
     List<Container> results = search.search(testList);
 
-    Assert.assertEquals(results.size(), 1);
-    assertContainsContainer(results, "container3");
-  }
-
-  @Test
-  public void shouldRestrictByPodLabels() {
-    Map<String, String> selector = ImmutableMap.of("app", "che");
-    ContainerSearch search = new ContainerSearch(null, null, null, selector, null);
-
-    List<Container> results = search.search(testList);
-
-    Assert.assertEquals(results.size(), 1);
+    Assert.assertEquals(results.size(), 6);
     assertContainsContainer(results, "container1");
+    assertContainsContainer(results, "container3");
+    assertContainsContainer(results, "container5");
+    assertContainsContainer(results, "container7");
+    assertContainsContainer(results, "container9");
+    assertContainsContainer(results, "container11");
   }
 
   private static void assertContainsContainer(Collection<Container> containers, String name) {

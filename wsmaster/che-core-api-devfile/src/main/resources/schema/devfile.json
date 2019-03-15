@@ -368,25 +368,17 @@
             "items": {
               "type": "object",
               "properties": {
-                "deployment": {
+                "parentName": {
                   "type": "string",
-                  "description": "The name of the deployment (either the concrete name or the generateName from the metadata). If not specified, then all deployments are considered."
+                  "description": "The name of the top level object in the referenced object list in which to search for containers. If not specified, the objects to search through can have any name."
                 },
-                "pod": {
+                "containerName": {
                   "type": "string",
-                  "description": "The name of the pod (either the concrete name or the generateName from the metadata) containing the container to apply the entrypoint to. Optional if there is just one pod in the selected deployment (or as a top level entry in the list)."
+                  "description": "The name of the container to apply the entrypoint to. If not specified, the entrypoint is modified on all matching containers."
                 },
-                "container": {
-                  "type": "string",
-                  "description": "The name of the container to apply the entrypoint to. Optional if there is just a single container in the selected pods."
-                },
-                "deploymentSelector": {
+                "parentSelector": {
                   "$ref": "#/definitions/selector",
-                  "description": "The selector of the deployments."
-                },
-                "podSelector": {
-                  "$ref": "#/definitions/selector",
-                  "description": "The selector of the pods."
+                  "description": "The selector on labels of the top level objects in the referenced list in which to search for containers. If not specified, the objects to search through can have any labels."
                 },
                 "command": {
                   "type": "array",

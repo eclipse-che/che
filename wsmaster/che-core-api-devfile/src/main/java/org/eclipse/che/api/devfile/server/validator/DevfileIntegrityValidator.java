@@ -230,12 +230,7 @@ public class DevfileIntegrityValidator {
 
     for (Entrypoint ep : tool.getEntrypoints()) {
       ContainerSearch search =
-          new ContainerSearch(
-              ep.getDeployment(),
-              ep.getPod(),
-              ep.getContainer(),
-              ep.getPodSelector(),
-              ep.getDeploymentSelector());
+          new ContainerSearch(ep.getParentName(), ep.getParentSelector(), ep.getContainerName());
 
       List<Container> cs = search.search(filteredObjects);
 
