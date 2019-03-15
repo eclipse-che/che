@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-java-plain</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.19.2-SNAPSHOT</version>
+        <version>6.19.2</version>
     </parent>
     <artifactId>che-plugin-java-plain-server</artifactId>
     <name>Che Plugin :: Java :: Plain :: Server</name>

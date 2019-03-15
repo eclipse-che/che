@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-machine-auth</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.19.2-SNAPSHOT</version>
+        <version>6.19.2</version>
     </parent>
     <artifactId>che-multiuser-machine-authentication-ide</artifactId>
     <packaging>gwt-lib</packaging>
