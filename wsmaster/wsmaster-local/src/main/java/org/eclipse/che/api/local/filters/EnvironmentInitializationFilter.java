@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.local.filters;
 
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.io.IOException;
 import java.security.Principal;
@@ -56,8 +57,10 @@ public class EnvironmentInitializationFilter implements Filter {
 
     try {
       environmentContext.setSubject(subject);
-      TracingTags.USER_ID.set(tracer.activeSpan(), subject.getUserId());
-      TracingTags.USER_ID.set(subject.getUserId());
+      Span activeSpan = tracer.activeSpan();
+      if (activeSpan != null) {
+        TracingTags.USER_ID.set(tracer.activeSpan(), subject.getUserId());
+      }
       filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
     } finally {
       EnvironmentContext.reset();

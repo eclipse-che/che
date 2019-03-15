@@ -71,7 +71,7 @@ public class WorkspaceSharedPool {
             size *= coresMultiplier;
           }
         }
-        executor = Executors.newFixedThreadPool(size, factory);
+        executor = new TracedExecutorService(Executors.newFixedThreadPool(size, factory), tracer);
         break;
       default:
         throw new IllegalArgumentException(
