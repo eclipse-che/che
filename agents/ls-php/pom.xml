@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.19.2</version>
+        <version>6.19.3-SNAPSHOT</version>
     </parent>
     <artifactId>ls-php-agent</artifactId>
     <name>Language Server PHP Agent</name>
