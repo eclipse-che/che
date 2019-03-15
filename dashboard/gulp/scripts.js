@@ -80,20 +80,24 @@ function webpackWrapper(watch, test, callback) {
     webpackOptions.devtool = 'inline-source-map';
   }
 
+  var callbackCalled = false;
+
   var webpackChangeHandler = function (err, stats) {
-    if (err) {
-      conf.errorHandler('Webpack')(err);
-    }
     $.util.log(stats.toString({
       colors: $.util.colors.supportsColor,
       chunks: false,
       hash: false,
       version: false
     }));
-    browserSync.reload();
-    if (watch) {
-      watch = false;
-      callback();
+
+    if (!watch && stats.hasErrors()) {
+      $.util.log($.util.colors.red('[Webpack task failed with errors]'));
+      process.exit(1);
+    }
+
+    if (watch && !callbackCalled) {
+        callbackCalled = true;
+        callback();
     }
   };
 
@@ -111,7 +115,7 @@ gulp.task('scripts', ['colors', 'proxySettings'], function () {
   return webpackWrapper(false, false);
 });
 
-gulp.task('scripts:watch', ['scripts'], function (callback) {
+gulp.task('scripts:watch', ['colors', 'proxySettings'], function (callback) {
   return webpackWrapper(true, false, callback);
 });
 

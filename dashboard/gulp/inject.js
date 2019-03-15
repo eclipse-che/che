@@ -18,7 +18,7 @@ var conf = require('./conf');
 
 var $ = require('gulp-load-plugins')();
 
-gulp.task('inject', ['outputcolors', 'proxySettings', 'scripts', 'styles'], function () {
+function inject() {
   var injectStyles = gulp.src([
     path.join(conf.paths.tmp, '/serve/app/**/*.css'),
     path.join('!' + conf.paths.tmp, '/serve/app/vendor.css')
@@ -37,4 +37,8 @@ gulp.task('inject', ['outputcolors', 'proxySettings', 'scripts', 'styles'], func
     .pipe($.inject(injectStyles, injectOptions))
     .pipe($.inject(injectScripts, injectOptions))
     .pipe(gulp.dest(path.join(conf.paths.tmp, '/serve')));
-});
+}
+
+gulp.task('inject', ['outputcolors', 'proxySettings', 'scripts', 'styles'], inject);
+
+gulp.task('inject:watch', ['outputcolors', 'proxySettings', 'scripts:watch', 'styles'], inject);
