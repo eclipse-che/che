@@ -65,11 +65,6 @@ export class NewWorkspace {
             .should('have.attr', 'aria-checked', 'false')
     }
 
-
-    //##########################################################
-
-
-
     typeWorkspaceName(workspaceName: string) {
         cy.get(NewWorkspace.NAME_FIELD)
             .clear()
