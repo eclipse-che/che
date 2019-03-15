@@ -66,10 +66,10 @@ public class URLFactoryBuilder {
    * Build a factory using the provided json file or create default one
    *
    * @param jsonFileLocation location of factory json file
-   * @param jsonFilename name of factory json file
+   * @param jsonFileName name of factory json file
    * @return a factory or null if factory json in not found
    */
-  public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation, String jsonFilename) {
+  public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation, String jsonFileName) {
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
       final String factoryJsonContent = urlFetcher.fetchSafely(jsonFileLocation);
@@ -77,7 +77,7 @@ public class URLFactoryBuilder {
         FactoryDto factoryDto =
             DtoFactory.getInstance()
                 .createDtoFromJson(factoryJsonContent, FactoryDto.class)
-                .withSource(jsonFilename);
+                .withSource(jsonFileName);
         return Optional.of(factoryDto);
       }
     }
@@ -88,12 +88,12 @@ public class URLFactoryBuilder {
    * Build a factory using the provided devfile
    *
    * @param devfileLocation location of devfile
-   * @param devfileFilename name of devfile file
+   * @param devfileFileName name of devfile file
    * @param fileContentProvider service-specific devfile related file content provider
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
-      String devfileLocation, String devfileFilename, FileContentProvider fileContentProvider)
+      String devfileLocation, String devfileFileName, FileContentProvider fileContentProvider)
       throws BadRequestException, ServerException {
     if (devfileLocation == null) {
       return Optional.empty();
@@ -110,7 +110,7 @@ public class URLFactoryBuilder {
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
               .withWorkspace(DtoConverter.asDto(wsConfig))
-              .withSource(devfileFilename);
+              .withSource(devfileFileName);
       return Optional.of(factoryDto);
     } catch (DevfileException e) {
       throw new BadRequestException(
