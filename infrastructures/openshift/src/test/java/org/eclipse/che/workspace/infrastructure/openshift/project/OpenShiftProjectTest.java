@@ -33,7 +33,6 @@ import io.fabric8.openshift.api.model.ProjectRequestFluent.MetadataNested;
 import io.fabric8.openshift.client.OpenShiftClient;
 import io.fabric8.openshift.client.dsl.ProjectRequestOperation;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesIngresses;
@@ -69,7 +68,6 @@ public class OpenShiftProjectTest {
   @Mock private OpenShiftClient openShiftClient;
   @Mock private KubernetesClient kubernetesClient;
   @Mock private Resource<ServiceAccount, DoneableServiceAccount> serviceAccountResource;
-  @Mock private TracerUtil tracerUtil;
 
   private OpenShiftProject openShiftProject;
 
@@ -106,7 +104,7 @@ public class OpenShiftProjectTest {
     // given
     prepareProject(PROJECT_NAME);
     OpenShiftProject openShiftProject =
-        new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID, tracerUtil);
+        new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
 
     // when
     openShiftProject.prepare();
@@ -120,7 +118,7 @@ public class OpenShiftProjectTest {
     Resource resource = prepareProjectResource(PROJECT_NAME);
     doThrow(new KubernetesClientException("error", 403, null)).when(resource).get();
     OpenShiftProject openShiftProject =
-        new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID, tracerUtil);
+        new OpenShiftProject(clientFactory, PROJECT_NAME, WORKSPACE_ID);
 
     // when
     openShiftProject.prepare();

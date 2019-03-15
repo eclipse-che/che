@@ -19,7 +19,6 @@ import com.google.inject.Singleton;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespaceFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
 
@@ -39,9 +38,8 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   public OpenShiftProjectFactory(
       @Nullable @Named("che.infra.openshift.project") String projectName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
-      OpenShiftClientFactory clientFactory,
-      TracerUtil tracerUtil) {
-    super(projectName, serviceAccountName, clientFactory, tracerUtil);
+      OpenShiftClientFactory clientFactory) {
+    super(projectName, serviceAccountName, clientFactory);
     this.projectName = projectName;
     this.serviceAccountName = serviceAccountName;
     this.clientFactory = clientFactory;
@@ -88,7 +86,7 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   @VisibleForTesting
   OpenShiftProject doCreateProject(String workspaceId, String name) {
-    return new OpenShiftProject(clientFactory, name, workspaceId, tracerUtil);
+    return new OpenShiftProject(clientFactory, name, workspaceId);
   }
 
   @VisibleForTesting

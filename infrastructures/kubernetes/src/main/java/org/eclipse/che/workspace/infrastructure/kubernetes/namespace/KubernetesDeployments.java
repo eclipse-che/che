@@ -38,7 +38,6 @@ import io.fabric8.kubernetes.client.dsl.ExecListener;
 import io.fabric8.kubernetes.client.dsl.ExecWatch;
 import io.fabric8.kubernetes.client.dsl.PodResource;
 import io.fabric8.kubernetes.client.dsl.ScalableResource;
-import io.opentracing.Span;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -62,7 +61,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import okhttp3.Response;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.commons.tracing.TracerUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodActionHandler;
@@ -110,19 +108,14 @@ public class KubernetesDeployments {
   private Watch podWatch;
   private Watch containerWatch;
   private Date watcherInitializationDate;
-  private TracerUtil tracerUtil;
 
   protected KubernetesDeployments(
-      String namespace,
-      String workspaceId,
-      KubernetesClientFactory clientFactory,
-      TracerUtil tracerUtil) {
+      String namespace, String workspaceId, KubernetesClientFactory clientFactory) {
     this.namespace = namespace;
     this.workspaceId = workspaceId;
     this.clientFactory = clientFactory;
     this.containerEventsHandlers = new ConcurrentLinkedQueue<>();
     this.podActionHandlers = new ConcurrentLinkedQueue<>();
-    this.tracerUtil = tracerUtil;
   }
 
   /**
@@ -353,8 +346,6 @@ public class KubernetesDeployments {
    *     otherwise, it must be explicitly closed
    */
   public CompletableFuture<Void> waitRunningAsync(String name) {
-    final Span tracingSpan = tracerUtil.buildSpan("WaitRunningAsync", null, workspaceId, name);
-
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
     try {
       final String podName = getPodName(name);
@@ -376,11 +367,7 @@ public class KubernetesDeployments {
                 }
               });
 
-      podRunningFuture.whenComplete(
-          (ok, ex) -> {
-            watch.close();
-            tracerUtil.finishSpan(tracingSpan);
-          });
+      podRunningFuture.whenComplete((ok, ex) -> watch.close());
       final Pod pod = podResource.get();
       if (pod == null) {
         InfrastructureException ex;
@@ -389,7 +376,6 @@ public class KubernetesDeployments {
         } else {
           ex = new InfrastructureException("No pod in deployment " + name + " found.");
         }
-        tracerUtil.finishSpanAsFailure(tracingSpan, ex.getMessage());
         podRunningFuture.completeExceptionally(ex);
       } else {
         handleStartingPodStatus(podRunningFuture, pod);
