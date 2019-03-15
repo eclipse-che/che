@@ -68,17 +68,15 @@ public class URLFactoryBuilder {
    * @param jsonFileLocation location of factory json file
    * @return a factory or null if factory json in not found
    */
-  public Optional<FactoryDto> createFactoryFromJson(
-      String jsonFileLocation, String jsonFilename) {
+  public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation, String jsonFilename) {
     // Check if there is factory json file inside the repository
     if (jsonFileLocation != null) {
       final String factoryJsonContent = urlFetcher.fetchSafely(jsonFileLocation);
       if (!isNullOrEmpty(factoryJsonContent)) {
         FactoryDto factoryDto =
-            DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class);
-        if (!isNullOrEmpty(jsonFilename)) {
-          factoryDto.withSource(jsonFilename);
-        }
+            DtoFactory.getInstance()
+                .createDtoFromJson(factoryJsonContent, FactoryDto.class)
+                .withSource(jsonFilename);
         return Optional.of(factoryDto);
       }
     }
@@ -109,10 +107,8 @@ public class URLFactoryBuilder {
       FactoryDto factoryDto =
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
-              .withWorkspace(DtoConverter.asDto(wsConfig));
-      if (!isNullOrEmpty(devfileFilename)) {
-        factoryDto.withSource(devfileFilename);
-      }
+              .withWorkspace(DtoConverter.asDto(wsConfig))
+              .withSource(devfileFilename);
       return Optional.of(factoryDto);
     } catch (DevfileException e) {
       throw new BadRequestException(
