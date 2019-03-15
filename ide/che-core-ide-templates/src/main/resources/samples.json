@@ -554,9 +554,7 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "maven",
-      "spring",
-      "java"
+      "tomcat"
     ]
   },
   {
@@ -762,18 +760,36 @@
     },
     "commands": [
       {
-        "name": "build",
+        "name": "maven build",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install",
+        "commandLine": "mvn -Duser.home=${HOME} -f ${CHE_PROJECTS_ROOT}/console-java-simple clean install",
         "attributes": {
           "previewUrl": "",
           "goal": "Build"
         }
       },
       {
-        "name": "run",
+        "name": "maven build and run",
         "type": "mvn",
-        "commandLine": "mvn -f ${current.project.path} clean install \njava -jar ${current.project.path}/target/*.jar",
+        "commandLine": "mvn -Duser.home=${HOME} -f ${CHE_PROJECTS_ROOT}/console-java-simple clean install \njava -jar ${CHE_PROJECTS_ROOT}/console-java-simple/target/*.jar",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "gradle build",
+        "type": "gralde",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/console-java-simple; gradle build",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "gradle run",
+        "type": "gradle",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/console-java-simple; gradle run",
         "attributes": {
           "previewUrl": "",
           "goal": "Run"
@@ -784,7 +800,8 @@
     "category": "Samples",
     "tags": [
       "java",
-      "maven"
+      "maven",
+      "gradle"
     ]
   },
   {
@@ -904,7 +921,26 @@
       "location": "https://github.com/openshiftio-vertx-boosters/vertx-http-booster",
       "parameters": {}
     },
-    "commands": [],
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "commandLine": "mvn -Duser.home=${HOME} -f ${CHE_PROJECTS_ROOT}/vertx-http-booster clean package",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "run",
+        "type": "mvn",
+        "commandLine": "mvn -Duser.home=${HOME} -f ${CHE_PROJECTS_ROOT}/vertx-http-booster vertx:run",
+        "attributes": {
+          "previewUrl": "${server.8080/tcp}",
+          "goal": "Run"
+        }
+      }
+    ],
     "links": [],
     "category": "Samples",
     "tags": [
@@ -930,7 +966,26 @@
       "location": "https://github.com/openshiftio-vertx-boosters/vertx-health-checks-booster",
       "parameters": {}
     },
-    "commands": [],
+    "commands": [
+      {
+        "name": "build",
+        "type": "mvn",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/vertx-health-checks-booster; mvn -Duser.home=${HOME} clean package",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "run",
+        "type": "mvn",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/vertx-health-checks-booster; mvn -Duser.home=${HOME} vertx:run",
+        "attributes": {
+          "previewUrl": "${server.8080/tcp}",
+          "goal": "Run"
+        }
+      }
+    ],
     "links": [],
     "category": "Samples",
     "tags": [
@@ -987,6 +1042,69 @@
     "category": "Samples",
     "tags": [
       "spring boot"
+    ]
+  },
+  {
+    "name": "spring-boot-gs-rest-service",
+    "displayName": "spring-boot-gs-rest-service",
+    "path": "/gs-rest-service",
+    "description": "Spring Boot Guide to build a RESTful web service ",
+    "projectType": "maven",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "java"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/spring-guides/gs-rest-service",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "mvn build",
+        "type": "mvn",
+        "commandLine": "mvn -Duser.home=${HOME} -f ${CHE_PROJECTS_ROOT}/gs-rest-service/complete clean package",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "mvn run",
+        "type": "mvn",
+        "commandLine": "mvn -Duser.home=${HOME} -f ${CHE_PROJECTS_ROOT}/gs-rest-service/complete spring-boot:run",
+        "attributes": {
+          "previewUrl": "${server.8080/tcp}/greeting",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "gradle build",
+        "type": "gralde",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/gs-rest-service/complete; gradle build",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "gradle run",
+        "type": "gradle",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/gs-rest-service/complete; gradle bootRun",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      }      
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "spring boot v2"
     ]
   },
   {
