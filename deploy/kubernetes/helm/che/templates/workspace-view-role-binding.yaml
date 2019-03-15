@@ -14,8 +14,9 @@ metadata:
   name: che-workspace-view
   namespace: {{ .Values.global.cheWorkspacesNamespace }}
 roleRef:
-  kind: ClusterRole
-  name: view
+  kind: Role
+  name: workspace-view
+  namespace: {{ .Values.global.cheWorkspacesNamespace }}
   apiGroup: rbac.authorization.k8s.io
 subjects:
 - kind: ServiceAccount

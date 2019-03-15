@@ -49,10 +49,8 @@ class OpenShiftWorkspaceServiceAccount {
   }
 
   /**
-   * Make sure that workspace service account exists and has `view` and `exec` role bindings.
-   *
-   * <p>Note that `view` role is used from cluster scope and `exec` role is created in the current
-   * namespace if does not exist.
+   * Make sure that workspace service account exists and has `view` and `exec` role bindings, as
+   * well as create workspace-view and exec roles in namespace scope
    *
    * @throws InfrastructureException when any exception occurred
    */
@@ -67,6 +65,11 @@ class OpenShiftWorkspaceServiceAccount {
     String execRoleName = "exec";
     if (osClient.roles().inNamespace(projectName).withName(execRoleName).get() == null) {
       createExecRole(osClient, execRoleName);
+    }
+
+    String viewRoleName = "workspace-view";
+    if (osClient.roles().inNamespace(projectName).withName(viewRoleName).get() == null) {
+      createViewRole(osClient, viewRoleName);
     }
 
     osClient.roleBindings().inNamespace(projectName).createOrReplace(createExecRoleBinding());
@@ -97,6 +100,17 @@ class OpenShiftWorkspaceServiceAccount {
     osClient.roles().inNamespace(projectName).create(execRole);
   }
 
+  private void createViewRole(OpenShiftClient osClient, String name) {
+    Role viewRole =
+        new RoleBuilder()
+            .withNewMetadata()
+            .withName(name)
+            .endMetadata()
+            .withRules(new PolicyRuleBuilder().withResources("pods").withVerbs("list").build())
+            .build();
+    osClient.roles().inNamespace(projectName).create(viewRole);
+  }
+
   private RoleBinding createViewRoleBinding() {
     return new RoleBindingBuilder()
         .withNewMetadata()
@@ -104,7 +118,8 @@ class OpenShiftWorkspaceServiceAccount {
         .withNamespace(projectName)
         .endMetadata()
         .withNewRoleRef()
-        .withName("view")
+        .withName("workspace-view")
+        .withNamespace(projectName)
         .endRoleRef()
         .withSubjects(
             new ObjectReferenceBuilder()
