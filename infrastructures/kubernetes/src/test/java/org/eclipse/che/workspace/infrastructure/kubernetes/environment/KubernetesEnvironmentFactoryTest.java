@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -242,6 +243,32 @@ public class KubernetesEnvironmentFactoryTest {
     assertEquals(
         k8sEnv.getPodsData().get("deployment-test").getMetadata(), podTemplate.getMetadata());
     assertEquals(k8sEnv.getPodsData().get("deployment-test").getSpec(), podTemplate.getSpec());
+  }
+
+  @Test
+  public void shouldUseDeploymentNameAsPodTemplateNameIfItIsMissing() throws Exception {
+    // given
+    PodTemplateSpec podTemplate = new PodTemplateSpecBuilder().withNewSpec().endSpec().build();
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withNewMetadata()
+            .withName("deployment-test")
+            .endMetadata()
+            .withNewSpec()
+            .withTemplate(podTemplate)
+            .endSpec()
+            .build();
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(deployment));
+
+    // when
+    final KubernetesEnvironment k8sEnv =
+        k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    // then
+    Deployment deploymentTest = k8sEnv.getDeploymentsCopy().get("deployment-test");
+    assertNotNull(deploymentTest);
+    PodTemplateSpec resultPodTemplate = deploymentTest.getSpec().getTemplate();
+    assertEquals(resultPodTemplate.getMetadata().getName(), "deployment-test");
   }
 
   @Test
