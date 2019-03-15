@@ -140,12 +140,12 @@ export class LoadFactoryController {
    * Looks for source of factory (devfile of .factory.json) and prints message to user.
    */
   processFactorySource(): void {
-         if (this.factory.source) {
-            let sourceString = this.factory.source === 'repo' ?
-                           ": not found. Default environment will be applied" :
-                           ": found " + this.factory.source + ", applying it";
-            this.getLoadingSteps()[this.getCurrentProgressStep()].text += sourceString);
-         }
+    if (this.factory.source) {
+      let sourceString = this.factory.source === 'repo' ?
+                         ": not found. Default environment will be applied" :
+                         ": found " + this.factory.source + ", applying it";
+      this.getLoadingSteps()[this.getCurrentProgressStep()].text += sourceString);
+    }
     this.fetchWorkspaces();
   }
 
