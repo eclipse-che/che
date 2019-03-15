@@ -72,7 +72,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentPro
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
-import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -141,7 +140,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
-      @Nullable OptionalTracer tracer,
+      Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
       @Assisted KubernetesNamespace namespace) {
     super(context, urlRewriter);
@@ -163,7 +162,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
-    this.tracer = OptionalTracer.fromNullable(tracer);
+    this.tracer = tracer;
   }
 
   @Override

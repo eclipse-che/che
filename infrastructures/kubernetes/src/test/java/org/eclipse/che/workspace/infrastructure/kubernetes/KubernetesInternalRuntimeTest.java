@@ -65,6 +65,7 @@ import io.fabric8.kubernetes.api.model.extensions.Ingress;
 import io.fabric8.kubernetes.api.model.extensions.IngressBackend;
 import io.fabric8.kubernetes.api.model.extensions.IngressRule;
 import io.fabric8.kubernetes.api.model.extensions.IngressSpec;
+import io.opentracing.Tracer;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -106,7 +107,6 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
-import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
@@ -226,7 +226,7 @@ public class KubernetesInternalRuntimeTest {
                   mockContainer(CONTAINER_NAME_2, EXPOSED_PORT_2, INTERNAL_PORT))));
 
   @Mock(answer = Answers.RETURNS_MOCKS)
-  private OptionalTracer tracer;
+  private Tracer tracer;
 
   private CommandImpl envCommand = new CommandImpl("envCommand", "echo hello", "env");
 
