@@ -483,7 +483,14 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
                     namespace,
                     startSynchronizer)
                 .bootstrapAsync();
-        bootstrapperFuture.whenComplete((res, ex) -> tracerUtil.finishSpan(tracingSpan));
+        bootstrapperFuture.whenComplete(
+            (res, ex) -> {
+              if (ex != null) {
+                tracerUtil.finishSpanAsFailure(tracingSpan, ex.getMessage());
+              } else {
+                tracerUtil.finishSpan(tracingSpan);
+              }
+            });
         toCancelFutures.add(bootstrapperFuture);
       } else {
         bootstrapperFuture = CompletableFuture.completedFuture(null);
@@ -526,9 +533,19 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    */
   public CompletableFuture<Void> waitRunningAsync(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
+    Span tracingSpan =
+        tracerUtil.buildSpan(
+            "WaitRunningAsync", null, machine.getWorkspaceId(), machine.getPodName());
     CompletableFuture<Void> waitFuture =
         namespace.deployments().waitRunningAsync(machine.getPodName());
-
+    waitFuture.whenComplete(
+        (res, ex) -> {
+          if (ex != null) {
+            tracerUtil.finishSpanAsFailure(tracingSpan, ex.getMessage());
+          } else {
+            tracerUtil.finishSpan(tracingSpan);
+          }
+        });
     toCancelFutures.add(waitFuture);
     return waitFuture;
   }
