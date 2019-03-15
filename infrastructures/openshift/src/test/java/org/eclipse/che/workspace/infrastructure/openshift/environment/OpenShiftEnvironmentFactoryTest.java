@@ -293,6 +293,21 @@ public class OpenShiftEnvironmentFactoryTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment can not contain two 'Service' objects with the same name 'db'")
+  public void exceptionOnObjectsWithTheSameNameAndKind() throws Exception {
+    HasMetadata object1 =
+        new ServiceBuilder().withNewMetadata().withName("db").endMetadata().build();
+    HasMetadata object2 =
+        new ServiceBuilder().withNewMetadata().withName("db").endMetadata().build();
+
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(object1, object2));
+
+    osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
       expectedExceptionsMessageRegExp = "Environment contains object without specified kind field")
   public void exceptionOnObjectWithNoKindSpecified() throws Exception {
     HasMetadata object = mock(HasMetadata.class);
