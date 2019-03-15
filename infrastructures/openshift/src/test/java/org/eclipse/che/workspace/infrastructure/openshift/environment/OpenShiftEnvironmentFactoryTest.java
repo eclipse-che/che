@@ -17,6 +17,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger.DEPLOYMENT_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -61,6 +63,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvi
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -87,6 +90,7 @@ public class OpenShiftEnvironmentFactoryTest {
   @Mock private InternalMachineConfig machineConfig2;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
+  @Mock private PodMerger podMerger;
 
   private Map<String, InternalMachineConfig> machines;
 
@@ -94,7 +98,7 @@ public class OpenShiftEnvironmentFactoryTest {
   public void setup() throws Exception {
     osEnvFactory =
         new OpenShiftEnvironmentFactory(
-            null, null, null, openShiftEnvValidator, k8sRecipeParser, memoryProvisioner);
+            null, null, null, openShiftEnvValidator, k8sRecipeParser, memoryProvisioner, podMerger);
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
 
@@ -266,7 +270,7 @@ public class OpenShiftEnvironmentFactoryTest {
   }
 
   @Test
-  public void bothPodsAndDeploymentsIncludedInPodData() throws Exception {
+  public void shouldMergeDeploymentAndPodIntoOneDeployment() throws Exception {
     // given
     PodTemplateSpec podTemplate =
         new PodTemplateSpecBuilder()
@@ -294,20 +298,84 @@ public class OpenShiftEnvironmentFactoryTest {
             .endSpec()
             .build();
     when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(deployment, pod));
+    Deployment merged = createEmptyDeployment("merged");
+    when(podMerger.merge(any())).thenReturn(merged);
 
     // when
-    final KubernetesEnvironment osEnv =
+    final KubernetesEnvironment k8sEnv =
         osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
     // then
-    assertEquals(osEnv.getPodsData().size(), 2);
+    verify(podMerger).merge(asList(new PodData(pod), new PodData(deployment)));
+    assertEquals(k8sEnv.getPodsData().size(), 1);
 
-    assertEquals(
-        osEnv.getPodsData().get("deployment-test").getMetadata(), podTemplate.getMetadata());
-    assertEquals(osEnv.getPodsData().get("deployment-test").getSpec(), podTemplate.getSpec());
+    assertTrue(k8sEnv.getPodsCopy().isEmpty());
 
-    assertEquals(osEnv.getPodsData().get("bare-pod").getMetadata(), pod.getMetadata());
-    assertEquals(osEnv.getPodsData().get("bare-pod").getSpec(), pod.getSpec());
+    assertEquals(k8sEnv.getDeploymentsCopy().size(), 1);
+    assertEquals(k8sEnv.getDeploymentsCopy().get("merged"), merged);
+  }
+
+  @Test
+  public void shouldReconfigureServiceToMatchMergedDeployment() throws Exception {
+    // given
+    Pod pod1 =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("bare-pod1")
+            .withLabels(ImmutableMap.of("name", "pod1"))
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Pod pod2 =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("bare-pod2")
+            .withLabels(ImmutableMap.of("name", "pod2"))
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Service service1 =
+        new ServiceBuilder()
+            .withNewMetadata()
+            .withName("pod1-service")
+            .endMetadata()
+            .withNewSpec()
+            .withSelector(ImmutableMap.of("name", "pod1"))
+            .endSpec()
+            .build();
+    Service service2 =
+        new ServiceBuilder()
+            .withNewMetadata()
+            .withName("pod2-service")
+            .endMetadata()
+            .withNewSpec()
+            .withSelector(ImmutableMap.of("name", "pod2"))
+            .endSpec()
+            .build();
+    when(k8sRecipeParser.parse(any(InternalRecipe.class)))
+        .thenReturn(asList(pod1, pod2, service1, service2));
+    Deployment merged = createEmptyDeployment("merged");
+    when(podMerger.merge(any())).thenReturn(merged);
+
+    // when
+    final KubernetesEnvironment k8sEnv =
+        osEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    // then
+    verify(podMerger).merge(asList(new PodData(pod1), new PodData(pod2)));
+    PodData mergedPodData = k8sEnv.getPodsData().get("merged");
+    assertEquals(mergedPodData.getMetadata().getLabels().get(DEPLOYMENT_NAME_LABEL), "merged");
+    assertTrue(
+        k8sEnv
+            .getServices()
+            .values()
+            .stream()
+            .allMatch(
+                s ->
+                    ImmutableMap.of(DEPLOYMENT_NAME_LABEL, "merged")
+                        .equals(s.getSpec().getSelector())));
   }
 
   @Test(expectedExceptions = ValidationException.class)
@@ -416,5 +484,21 @@ public class OpenShiftEnvironmentFactoryTest {
             ImmutableMap.of(format(MACHINE_NAME_ANNOTATION_FMT, containerName), machineName));
     when(specMock.getContainers()).thenReturn(ImmutableList.of(containerMock));
     return new PodData(specMock, metadataMock);
+  }
+
+  private Deployment createEmptyDeployment(String name) {
+    return new DeploymentBuilder()
+        .withNewMetadata()
+        .withName(name)
+        .endMetadata()
+        .withNewSpec()
+        .withNewTemplate()
+        .withNewMetadata()
+        .endMetadata()
+        .withNewSpec()
+        .endSpec()
+        .endTemplate()
+        .endSpec()
+        .build();
   }
 }

@@ -90,6 +90,20 @@ public class KubernetesObjectUtil {
     selector.put(key, value);
   }
 
+  /** Sets the specified key/value par of a selector into target Kubernetes service. */
+  public static void setSelector(Service target, String key, String value) {
+    ServiceSpec spec = target.getSpec();
+
+    if (spec == null) {
+      spec = new ServiceSpec();
+      target.setSpec(spec);
+    }
+
+    HashMap<String, String> selector = new HashMap<>();
+    selector.put(key, value);
+    spec.setSelector(selector);
+  }
+
   /**
    * Returns new instance of {@link PersistentVolumeClaim} with specified name, accessMode and
    * quantity.

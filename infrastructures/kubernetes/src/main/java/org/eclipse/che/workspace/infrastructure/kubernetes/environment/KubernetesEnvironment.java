@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
@@ -353,6 +354,28 @@ public class KubernetesEnvironment extends InternalEnvironment {
 
     public void setMetadata(ObjectMeta podMeta) {
       this.podMeta = podMeta;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof PodData)) {
+        return false;
+      }
+      final PodData that = (PodData) obj;
+      return Objects.equals(podSpec, that.podSpec) && Objects.equals(podMeta, that.podMeta);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(podSpec, podMeta);
+    }
+
+    @Override
+    public String toString() {
+      return "PodData{" + "podSpec=" + podSpec + ", podMeta=" + podMeta + '}';
     }
   }
 }
