@@ -4206,7 +4206,7 @@ objects:
             "fill": 1,
             "gridPos": {
               "h": 5,
-              "w": 11,
+              "w": 5,
               "x": 0,
               "y": 6
             },
@@ -4270,6 +4270,93 @@ objects:
             "yaxes": [
               {
                 "format": "percentunit",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": false
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "fill": 1,
+            "gridPos": {
+              "h": 5,
+              "w": 6,
+              "x": 5,
+              "y": 6
+            },
+            "id": 44,
+            "legend": {
+              "avg": true,
+              "current": true,
+              "max": true,
+              "min": true,
+              "rightSide": false,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null as zero",
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 2,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "rate(che_workspace_start_time_seconds_sum[5m])/rate(che_workspace_start_time_seconds_count [5m])",
+                "format": "time_series",
+                "hide": false,
+                "intervalFactor": 1,
+                "legendFormat": "{{result}}",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Average workspace start time",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "s",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -4993,6 +5080,146 @@ objects:
               "align": false,
               "alignLevel": null
             }
+          },
+          {
+            "collapsed": true,
+            "gridPos": {
+              "h": 1,
+              "w": 24,
+              "x": 0,
+              "y": 35
+            },
+            "id": 42,
+            "panels": [
+              {
+                "cards": {
+                  "cardPadding": null,
+                  "cardRound": null
+                },
+                "color": {
+                  "cardColor": "#b4ff00",
+                  "colorScale": "sqrt",
+                  "colorScheme": "interpolateReds",
+                  "exponent": 0.5,
+                  "mode": "spectrum"
+                },
+                "dataFormat": "tsbuckets",
+                "datasource": "Che",
+                "gridPos": {
+                  "h": 12,
+                  "w": 11,
+                  "x": 0,
+                  "y": 14
+                },
+                "heatmap": {},
+                "highlightCards": true,
+                "id": 38,
+                "legend": {
+                  "show": true
+                },
+                "links": [],
+                "targets": [
+                  {
+                    "expr": "increase(che_workspace_start_time_seconds_bucket{result=\"fail\"}[1h])",
+                    "format": "heatmap",
+                    "interval": "1m",
+                    "intervalFactor": 1,
+                    "legendFormat": "{{le}}",
+                    "refId": "A"
+                  }
+                ],
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "Failed start",
+                "tooltip": {
+                  "show": true,
+                  "showHistogram": false
+                },
+                "type": "heatmap",
+                "xAxis": {
+                  "show": true
+                },
+                "xBucketNumber": null,
+                "xBucketSize": null,
+                "yAxis": {
+                  "decimals": null,
+                  "format": "short",
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true,
+                  "splitFactor": null
+                },
+                "yBucketBound": "auto",
+                "yBucketNumber": null,
+                "yBucketSize": null
+              },
+              {
+                "cards": {
+                  "cardPadding": null,
+                  "cardRound": null
+                },
+                "color": {
+                  "cardColor": "#b4ff00",
+                  "colorScale": "sqrt",
+                  "colorScheme": "interpolateBlues",
+                  "exponent": 0.5,
+                  "mode": "spectrum"
+                },
+                "dataFormat": "tsbuckets",
+                "datasource": "Che",
+                "gridPos": {
+                  "h": 12,
+                  "w": 13,
+                  "x": 11,
+                  "y": 14
+                },
+                "heatmap": {},
+                "highlightCards": true,
+                "id": 40,
+                "legend": {
+                  "show": true
+                },
+                "links": [],
+                "targets": [
+                  {
+                    "expr": "increase(che_workspace_start_time_seconds_bucket{result=\"success\"} [1h])",
+                    "format": "heatmap",
+                    "interval": "1m",
+                    "intervalFactor": 1,
+                    "legendFormat": "{{le}}",
+                    "refId": "A"
+                  }
+                ],
+                "timeFrom": null,
+                "timeShift": null,
+                "title": "Success start",
+                "tooltip": {
+                  "show": true,
+                  "showHistogram": false
+                },
+                "type": "heatmap",
+                "xAxis": {
+                  "show": true
+                },
+                "xBucketNumber": null,
+                "xBucketSize": null,
+                "yAxis": {
+                  "decimals": null,
+                  "format": "short",
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true,
+                  "splitFactor": null
+                },
+                "yBucketBound": "auto",
+                "yBucketNumber": null,
+                "yBucketSize": null
+              }
+            ],
+            "title": "Workspaces detailed",
+            "type": "row"
           }
         ],
         "refresh": "5s",
