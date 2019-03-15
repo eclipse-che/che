@@ -57,16 +57,24 @@ describe("E2E test", () => {
         })
 
         it(`Create a \"${workspaceName}\" workspace`, () => {
+            let javaPluginName: string = "Language Support for Java(TM)";
+
             newWorkspace.typeWorkspaceName(workspaceName);
             newWorkspace.clickOnChe7Stack();
             newWorkspace.waitChe7StackSelected();
             newWorkspace.clickOnAddOrImportProjectButton();
             newWorkspace.enableWebJavaSpringCheckbox();
             newWorkspace.clickOnAddButton();
+            newWorkspace.waitPluginListItem(javaPluginName);
+            newWorkspace.waitPluginDisabling(javaPluginName);
+            newWorkspace.clickOnPluginListItemSwitcher(javaPluginName);
+            newWorkspace.waitPluginEnabling(javaPluginName);
+
             newWorkspace.clickOnCreateAndOpenButton();
         })
 
         it("Wait IDE availability", () => {
+            ide.waitIdeInIframe();
             ide.openIdeWithoutFrames(workspaceName);
             ide.waitIde();
         })

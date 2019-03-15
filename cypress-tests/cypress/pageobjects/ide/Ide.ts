@@ -20,8 +20,19 @@ export class Ide {
     private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
     public static readonly FILES_BUTTON: string = ".theia-app-left .p-TabBar-content li[title='Files']";
     private static readonly PRELOADER: string = ".theia-preload";
+    private static readonly IDE_IFRAME: string = "iframe#ide-application-iframe";
 
-    private static readonly IDE_IFRAME: string = "iframe[id='ide-application-iframe']";
+
+    waitIdeInIframe() {
+        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
+            .forEach(idePart => {
+                cy.get(Ide.IDE_IFRAME, { timeout: Ide.START_WORKSPACE_TIMEOUT })
+                    .should(iframe => {
+                        expect(iframe.contents().find(idePart)).to.have.length(1)
+                        expect(iframe.contents().find(idePart)).to.be.visible
+                    })
+            })
+    }
 
     openIdeWithoutFrames(workspaceName: string) {
         let workspaceUrl: string = `/che/${workspaceName}`

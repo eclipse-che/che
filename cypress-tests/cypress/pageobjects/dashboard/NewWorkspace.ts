@@ -1,3 +1,5 @@
+import { ElementStateChecker } from "../../utils/ElementStateChecker";
+
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -12,6 +14,8 @@
 
 export class NewWorkspace {
 
+    private readonly elementStateChecker: ElementStateChecker = new ElementStateChecker();
+
     private static readonly CHE_7_STACK: string = "div[data-stack-id='che7-preview']";
     private static readonly SELECTED_CHE_7_STACK: string = ".stack-selector-item-selected[data-stack-id='che7-preview']"
     private static readonly CREATE_AND_OPEN_BUTTON: string = "che-button-save-flat[che-button-title='Create & Open']>button"
@@ -20,6 +24,50 @@ export class NewWorkspace {
     private static readonly WEB_JAVA_SPRING_CHECKBOX_ENABLED: string = "#sample-web-java-spring>md-checkbox[aria-checked='true']";
     private static readonly ADD_BUTTON: string = "button[aria-disabled='false'][name='addButton']";
     private static readonly NAME_FIELD: string = "#workspace-name-input";
+
+
+    private getPluginListItemLocator(pluginName: string): string {
+        return `.plugin-item div[plugin-item-name='${pluginName}']`
+    }
+
+    private getPluginListItemSwitcherLocator(pluginName: string): string {
+        return `${this.getPluginListItemLocator(pluginName)} md-switch`
+    }
+
+    waitPluginListItem(pluginName: string) {
+        cy.get(this.getPluginListItemLocator(pluginName))
+            .should(element => {
+                expect(this.elementStateChecker.isVisible(element)).to.be.true
+            })
+    }
+
+    clickOnPluginListItemSwitcher(pluginName: string) {
+        cy.get(this.getPluginListItemSwitcherLocator(pluginName))
+            .should(element => {
+                expect(this.elementStateChecker.isVisible(element)).to.be.true
+            })
+            .click({ force: true })
+    }
+
+    waitPluginEnabling(pluginName: string) {
+        cy.get(this.getPluginListItemSwitcherLocator(pluginName))
+            .should(element => {
+                expect(this.elementStateChecker.isVisible(element)).to.be.true
+            })
+            .should('have.attr', 'aria-checked', 'true')
+    }
+
+    waitPluginDisabling(pluginName: string) {
+        cy.get(this.getPluginListItemSwitcherLocator(pluginName))
+            .should(element => {
+                expect(this.elementStateChecker.isVisible(element)).to.be.true
+            })
+            .should('have.attr', 'aria-checked', 'false')
+    }
+
+
+    //##########################################################
+
 
 
     typeWorkspaceName(workspaceName: string) {
