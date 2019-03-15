@@ -79,7 +79,6 @@ public class PodMergerTest {
     ObjectMeta podMeta = podTemplate.getMetadata();
     verifyContainsAllFrom(podMeta, podData1.getMetadata());
     verifyContainsAllFrom(podMeta, podData2.getMetadata());
-    Map<String, String> deploymentSelector = merged.getSpec().getSelector().getMatchLabels();
   }
 
   @Test
