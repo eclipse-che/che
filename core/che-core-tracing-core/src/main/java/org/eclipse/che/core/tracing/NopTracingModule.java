@@ -15,6 +15,7 @@ import com.google.inject.AbstractModule;
 import io.opentracing.Tracer;
 import io.opentracing.noop.NoopTracerFactory;
 
+/** Guice module that is used if tracing is not enabled. */
 public class NopTracingModule extends AbstractModule {
 
   @Override
