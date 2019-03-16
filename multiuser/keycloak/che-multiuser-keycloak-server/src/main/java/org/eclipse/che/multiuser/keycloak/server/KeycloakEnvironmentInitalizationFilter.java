@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.io.IOException;
 import java.security.Principal;
@@ -143,7 +144,10 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
 
     try {
       EnvironmentContext.getCurrent().setSubject(subject);
-      TracingTags.USER_ID.set(tracer.activeSpan(), subject.getUserId());
+      Span activeSpan = tracer.activeSpan();
+      if (activeSpan != null) {
+        TracingTags.USER_ID.set(tracer.activeSpan(), subject.getUserId());
+      }
       filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
     } finally {
       EnvironmentContext.reset();
