@@ -19,7 +19,7 @@ import org.eclipse.lsp4j.Range;
 public class RangeComparator implements Comparator<Range> {
   Comparator<Position> positionComparator = new PositionComparator();
 
-  public static RangeComparator INSTANCE = new RangeComparator();
+  public static final RangeComparator INSTANCE = new RangeComparator();
 
   @Override
   public int compare(Range o1, Range o2) {

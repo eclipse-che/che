@@ -50,12 +50,13 @@ public class InstallExtension {
    * Codenvy IDE.
    */
   public static final String EXT_RESOURCES_DIR_PARAMETER = "--extResourcesDir=";
-  /** Location of the directory that contains 3rd-party extensions. */
-  public static Path extDirPath = null;
-  /** Location of the directory that contains resource files to re-build Codenvy IDE. */
-  public static Path extResourcesWorkDirPath = null;
 
   public static void main(String[] args) throws IOException {
+    /* Location of the directory that contains 3rd-party extensions. */
+    Path extDirPath = null;
+    /* Location of the directory that contains resource files to re-build Che IDE. */
+    Path extResourcesWorkDirPath = null;
+
     for (String arg : args) {
       if (arg.startsWith(EXT_DIR_PARAMETER)) {
         extDirPath = Paths.get(arg.substring(EXT_DIR_PARAMETER.length()));

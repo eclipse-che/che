@@ -38,10 +38,10 @@ import java.util.List;
 public final class Path {
 
   /** Path separator character constant "/" used in paths. */
-  public static char SEPARATOR = '/';
+  public static final char SEPARATOR = '/';
 
   /** Device separator character constant ":" used in paths. */
-  public static char DEVICE_SEPARATOR = ':';
+  public static final char DEVICE_SEPARATOR = ':';
 
   /** masks for separator values */
   private static final int HAS_LEADING = 1;

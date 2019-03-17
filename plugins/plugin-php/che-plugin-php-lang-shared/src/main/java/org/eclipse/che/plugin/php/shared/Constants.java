@@ -15,19 +15,19 @@ package org.eclipse.che.plugin.php.shared;
 public final class Constants {
 
   /** Language attribute name */
-  public static String LANGUAGE = "language";
+  public static final String LANGUAGE = "language";
 
   /** PHP Project Type ID */
-  public static String PHP_PROJECT_TYPE_ID = "php";
+  public static final String PHP_PROJECT_TYPE_ID = "php";
 
   /** PHP Project category * */
-  public static String PHP_CATEGORY = "PHP";
+  public static final String PHP_CATEGORY = "PHP";
 
   /** PHP Language */
-  public static String PHP_LANG = "php";
+  public static final String PHP_LANG = "php";
 
   /** Default extension for PHP files */
-  public static String PHP_EXT = "php";
+  public static final String PHP_EXT = "php";
 
   private Constants() {}
 }

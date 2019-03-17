@@ -26,7 +26,7 @@ import org.slf4j.Logger;
 public class MethodNameConfigurator {
   private static final Logger LOGGER = getLogger(MethodNameConfigurator.class);
 
-  public static AtomicInteger id = new AtomicInteger(0);
+  public static final AtomicInteger id = new AtomicInteger(0);
 
   private final JsonRpcMarshaller marshaller;
   private final ResponseDispatcher dispatcher;

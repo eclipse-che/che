@@ -31,7 +31,7 @@ import org.eclipse.che.jdt.ls.extension.api.dto.ClasspathEntry;
 @Singleton
 public class ClasspathContainer
     implements ProjectClasspathChangedEvent.ProjectClasspathChangedHandler {
-  public static String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
+  public static final String JRE_CONTAINER = "org.eclipse.jdt.launching.JRE_CONTAINER";
 
   private final JavaLanguageExtensionServiceClient extensionService;
   private final PromiseProvider promiseProvider;

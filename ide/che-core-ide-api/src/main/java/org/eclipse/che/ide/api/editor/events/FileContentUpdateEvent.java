@@ -16,7 +16,7 @@ import com.google.gwt.event.shared.GwtEvent;
 /** Event that notifies of file content changes. */
 public class FileContentUpdateEvent extends GwtEvent<FileContentUpdateHandler> {
   /** The event type. */
-  public static Type<FileContentUpdateHandler> TYPE = new Type<>();
+  public static final Type<FileContentUpdateHandler> TYPE = new Type<>();
 
   /** The path to the file that is updated. */
   private final String filePath;

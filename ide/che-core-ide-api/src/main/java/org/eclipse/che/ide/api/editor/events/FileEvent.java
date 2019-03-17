@@ -32,7 +32,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
  */
 public class FileEvent extends GwtEvent<FileEvent.FileEventHandler> {
 
-  public static Type<FileEventHandler> TYPE = new Type<>();
+  public static final Type<FileEventHandler> TYPE = new Type<>();
   private VirtualFile file;
   private FileOperation fileOperation;
   private EditorTab tab;

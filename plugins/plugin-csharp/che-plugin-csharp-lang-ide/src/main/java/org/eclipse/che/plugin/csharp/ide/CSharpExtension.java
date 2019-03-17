@@ -28,7 +28,7 @@ import org.eclipse.che.plugin.csharp.ide.action.CreateCSharpSourceFileAction;
 @Extension(title = "C#")
 public class CSharpExtension {
 
-  public static String CSHARP_CATEGORY = "C#";
+  public static final String CSHARP_CATEGORY = "C#";
 
   @Inject
   public CSharpExtension(

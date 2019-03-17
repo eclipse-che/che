@@ -21,7 +21,7 @@ import org.eclipse.lsp4j.Position;
  * @author Thomas Mäder
  */
 public class CharStreamIterator {
-  public static BiConsumer<Integer, Integer> NULL_CONSUMER =
+  public static final BiConsumer<Integer, Integer> NULL_CONSUMER =
       new BiConsumer<Integer, Integer>() {
         @Override
         public void accept(Integer t, Integer u) {}

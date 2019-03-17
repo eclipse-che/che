@@ -15,16 +15,16 @@ package org.eclipse.che.plugin.csharp.shared;
 public final class Constants {
 
   /** Language attribute name */
-  public static String LANGUAGE = "language";
+  public static final String LANGUAGE = "language";
 
   /** C# Project Type ID */
-  public static String CSHARP_PROJECT_TYPE_ID = "csharp";
+  public static final String CSHARP_PROJECT_TYPE_ID = "csharp";
 
   /** C# Language */
-  public static String CSHARP_LANG = "csharp_lang";
+  public static final String CSHARP_LANG = "csharp_lang";
 
   /** Default extension for C# files */
-  public static String CSHARP_EXT = "cs";
+  public static final String CSHARP_EXT = "cs";
 
   private Constants() {}
 }

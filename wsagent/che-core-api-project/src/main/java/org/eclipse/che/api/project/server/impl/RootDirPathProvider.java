@@ -29,7 +29,7 @@ import javax.inject.Singleton;
 @Singleton
 public class RootDirPathProvider implements Provider<String> {
 
-  public static String DEFAULT = "/projects";
+  public static final String DEFAULT = "/projects";
 
   @Inject(optional = true)
   @Named("che.user.workspaces.storage")

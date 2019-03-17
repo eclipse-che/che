@@ -16,7 +16,7 @@ import com.google.gwt.event.shared.GwtEvent;
 /** {@link GwtEvent} class for paste events. */
 public class PasteEvent extends GwtEvent<PasteHandler> {
   /** The type of the event. */
-  public static Type<PasteHandler> TYPE = new Type<PasteHandler>();
+  public static final Type<PasteHandler> TYPE = new Type<PasteHandler>();
 
   @Override
   public Type<PasteHandler> getAssociatedType() {

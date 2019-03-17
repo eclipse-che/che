@@ -109,10 +109,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       Collection<PluginMeta> pluginsMeta, RuntimeIdentity runtimeID, BrokersResult brokersResult)
       throws InfrastructureException {
 
-    BrokersConfigs brokersConfigs = new BrokersConfigs();
-    Pod pod = brokersConfigs.pod = newPod();
-    brokersConfigs.configMaps = new HashMap<>();
-    brokersConfigs.machines = new HashMap<>();
+    BrokersConfigs brokersConfigs = BrokersConfigs.instance();
+    Pod pod = brokersConfigs.pod;
 
     PodSpec spec = pod.getSpec();
     List<EnvVar> envVars =
@@ -181,17 +179,6 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return container;
   }
 
-  private Pod newPod() {
-    return new PodBuilder()
-        .withNewMetadata()
-        .withName(BROKERS_POD_NAME)
-        .endMetadata()
-        .withNewSpec()
-        .withRestartPolicy("Never")
-        .endSpec()
-        .build();
-  }
-
   private ConfigMap newConfigMap(String configMapName, Collection<PluginMeta> pluginsMetas)
       throws InternalInfrastructureException {
     try {
@@ -249,8 +236,36 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
 
   public static class BrokersConfigs {
 
-    public Map<String, InternalMachineConfig> machines;
-    public Map<String, ConfigMap> configMaps;
-    public Pod pod;
+    public final Map<String, InternalMachineConfig> machines;
+    public final Map<String, ConfigMap> configMaps;
+    public final Pod pod;
+
+    private static Pod newPod() {
+      return new PodBuilder()
+          .withNewMetadata()
+          .withName(BROKERS_POD_NAME)
+          .endMetadata()
+          .withNewSpec()
+          .withRestartPolicy("Never")
+          .endSpec()
+          .build();
+    }
+
+    public static BrokersConfigs instance() {
+
+      Map<String, InternalMachineConfig> machines = new HashMap<>();
+      Map<String, ConfigMap> configMaps = new HashMap<>();
+      Pod pod = newPod();
+      return new BrokersConfigs(machines, configMaps, pod);
+    }
+
+    public BrokersConfigs(
+        final Map<String, InternalMachineConfig> machines,
+        final Map<String, ConfigMap> configMaps,
+        final Pod pod) {
+      this.machines = machines;
+      this.configMaps = configMaps;
+      this.pod = pod;
+    }
   }
 }

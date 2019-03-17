@@ -19,7 +19,7 @@ import com.google.gwt.event.shared.GwtEvent;
  * @author Nikolay Zamosenchuk
  */
 public class SelectionChangedEvent extends GwtEvent<SelectionChangedHandler> {
-  public static Type<SelectionChangedHandler> TYPE = new Type<>();
+  public static final Type<SelectionChangedHandler> TYPE = new Type<>();
 
   private final Selection<?> selection;
 

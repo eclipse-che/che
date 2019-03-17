@@ -38,7 +38,7 @@ import org.eclipse.che.workspace.infrastructure.docker.model.DockerEnvironment;
  */
 public class DockerRuntimeInfrastructure extends RuntimeInfrastructure {
 
-  public static String NAME = "docker";
+  public static final String NAME = "docker";
 
   private final Map<String, DockerEnvironmentConverter> envConverters;
   private final DockerEnvironmentProvisioner dockerEnvProvisioner;

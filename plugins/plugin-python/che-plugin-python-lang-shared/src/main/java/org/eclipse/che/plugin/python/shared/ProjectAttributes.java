@@ -17,11 +17,11 @@ package org.eclipse.che.plugin.python.shared;
  * @author Valeriy Svydenko
  */
 public final class ProjectAttributes {
-  public static String LANGUAGE = "language";
-  public static String PYTHON_ID = "python";
-  public static String PYTHON_NAME = "Python";
-  public static String PYTHON_CATEGORY = "Python";
-  public static String PYTHON_EXT = "py";
+  public static final String LANGUAGE = "language";
+  public static final String PYTHON_ID = "python";
+  public static final String PYTHON_NAME = "Python";
+  public static final String PYTHON_CATEGORY = "Python";
+  public static final String PYTHON_EXT = "py";
 
   private ProjectAttributes() {
     throw new UnsupportedOperationException("Unused constructor.");

@@ -32,7 +32,7 @@ import org.eclipse.che.plugin.ceylon.ide.action.CreateCeylonFileAction;
 @Extension(title = "Ceylon")
 public class CeylonExtension {
 
-  public static String CEYLON_CATEGORY = "Ceylon";
+  public static final String CEYLON_CATEGORY = "Ceylon";
 
   @Inject
   public CeylonExtension(

@@ -14,12 +14,12 @@ package org.eclipse.che.plugin.golang.shared;
 /** @author Eugene Ivantsov */
 public final class Constants {
   /** Language attribute name */
-  public static String LANGUAGE = "language";
+  public static final String LANGUAGE = "language";
   /** Node JS Project Type ID */
-  public static String GOLANG_PROJECT_TYPE_ID = "golang";
+  public static final String GOLANG_PROJECT_TYPE_ID = "golang";
 
   /** Default extension for Go files */
-  public static String GOLANG_FILE_EXT = "go";
+  public static final String GOLANG_FILE_EXT = "go";
 
   private Constants() {
     throw new UnsupportedOperationException("You can't create instance of Constants class");

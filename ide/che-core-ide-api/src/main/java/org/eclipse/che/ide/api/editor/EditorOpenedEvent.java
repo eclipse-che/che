@@ -21,7 +21,7 @@ import org.eclipse.che.ide.api.resources.VirtualFile;
  */
 public class EditorOpenedEvent extends GwtEvent<EditorOpenedEventHandler> {
 
-  public static Type<EditorOpenedEventHandler> TYPE = new Type<>();
+  public static final Type<EditorOpenedEventHandler> TYPE = new Type<>();
 
   private final VirtualFile file;
   private final EditorPartPresenter editor;

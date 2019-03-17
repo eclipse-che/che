@@ -19,7 +19,7 @@ import com.google.gwt.event.shared.GwtEvent;
  * @author Nikolay Zamosenchuk
  */
 public class ActivePartChangedEvent extends GwtEvent<ActivePartChangedHandler> {
-  public static Type<ActivePartChangedHandler> TYPE = new Type<>();
+  public static final Type<ActivePartChangedHandler> TYPE = new Type<>();
 
   private final PartPresenter activePart;
 

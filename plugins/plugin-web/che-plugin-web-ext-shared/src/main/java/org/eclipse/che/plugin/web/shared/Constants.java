@@ -18,25 +18,25 @@ public final class Constants {
   public static final String LANGUAGE = "language";
 
   /** TS Project Type ID */
-  public static String TS_PROJECT_TYPE_ID = "typescript";
+  public static final String TS_PROJECT_TYPE_ID = "typescript";
 
   /** TS Language */
-  public static String TS_LANG = "typescript";
+  public static final String TS_LANG = "typescript";
 
   /** Default extension for TS files */
-  public static String TS_EXT = "ts";
+  public static final String TS_EXT = "ts";
 
   /** TypeScript file mime type */
   public static final String TS_MIME_TYPE = "application/typescript";
 
   /** Vue Project Type ID */
-  public static String VUE_PROJECT_TYPE_ID = "vue";
+  public static final String VUE_PROJECT_TYPE_ID = "vue";
 
   /** Vue Language */
-  public static String VUE_LANG = "vue";
+  public static final String VUE_LANG = "vue";
 
   /** Default extension for Vue files */
-  public static String VUE_EXT = "vue";
+  public static final String VUE_EXT = "vue";
 
   /** TypeScript file mime type */
   public static final String VUE_MIME_TYPE = "text/x-vue";

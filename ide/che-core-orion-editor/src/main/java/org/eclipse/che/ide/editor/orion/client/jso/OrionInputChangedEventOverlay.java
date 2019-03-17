@@ -16,7 +16,7 @@ public class OrionInputChangedEventOverlay extends OrionEventOverlay {
 
   protected OrionInputChangedEventOverlay() {}
 
-  public static String TYPE = "InputChanged";
+  public static final String TYPE = "InputChanged";
 
   /**
    * Title the editor title for now not used in our app, not tested well so don't depend your logic

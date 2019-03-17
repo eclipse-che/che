@@ -30,7 +30,7 @@ import org.eclipse.che.plugin.cpp.ide.action.CreateHeaderSourceFileAction;
 @Extension(title = "Cpp")
 public class CppExtension {
 
-  public static String C_CATEGORY = "C/C++";
+  public static final String C_CATEGORY = "C/C++";
 
   @Inject
   public CppExtension(

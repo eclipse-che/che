@@ -27,7 +27,7 @@ public class FactoryAcceptedEvent extends GwtEvent<FactoryAcceptedHandler> {
     this.factory = factory;
   }
 
-  public static Type<FactoryAcceptedHandler> TYPE = new Type<>();
+  public static final Type<FactoryAcceptedHandler> TYPE = new Type<>();
 
   @Override
   public Type<FactoryAcceptedHandler> getAssociatedType() {

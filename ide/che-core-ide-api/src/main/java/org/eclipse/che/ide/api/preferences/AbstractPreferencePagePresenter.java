@@ -20,7 +20,7 @@ package org.eclipse.che.ide.api.preferences;
  */
 public abstract class AbstractPreferencePagePresenter implements PreferencePagePresenter {
 
-  public static String DEFAULT_CATEGORY = "IDE";
+  public static final String DEFAULT_CATEGORY = "IDE";
 
   protected DirtyStateListener delegate;
 

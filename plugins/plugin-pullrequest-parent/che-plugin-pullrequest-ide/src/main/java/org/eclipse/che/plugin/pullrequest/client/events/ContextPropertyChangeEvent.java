@@ -17,7 +17,7 @@ import org.eclipse.che.plugin.pullrequest.client.workflow.Context;
 
 /** @author Kevin Pollet */
 public class ContextPropertyChangeEvent extends GwtEvent<ContextPropertyChangeHandler> {
-  public static Type<ContextPropertyChangeHandler> TYPE = new Type<>();
+  public static final Type<ContextPropertyChangeHandler> TYPE = new Type<>();
 
   private final Context context;
   private final ContextProperty contextProperty;
