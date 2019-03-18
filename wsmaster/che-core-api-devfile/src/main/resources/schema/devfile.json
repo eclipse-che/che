@@ -245,6 +245,7 @@
             "items": {
               "type": "string"
             },
+            "default": null,
             "description": "The command to run in the dockerimage tool instead of the default one provided in the image.",
             "examples": [
               "['/bin/sh', '-c']"
@@ -255,6 +256,7 @@
             "items": {
               "type": "string"
             },
+            "default": null,
             "description": "The arguments to supply to the command running the dockerimage tool. The arguments are supplied either to the default command provided in the image or to the overridden command.",
             "examples": [
               "['-R', '-f']"
@@ -385,6 +387,7 @@
                   "items": {
                     "type": "string"
                   },
+                  "default": null,
                   "description": "The command to run in the tool instead of the default one provided in the image of the container.",
                   "examples": [
                     "['/bin/sh', '-c']"
@@ -395,6 +398,7 @@
                   "items": {
                     "type": "string"
                   },
+                  "default": null,
                   "description": "The arguments to supply to the command running the tool. The arguments are supplied either to the default command provided in the image of the container or to the overridden command.",
                   "examples": [
                     "['-R', '-f']"
