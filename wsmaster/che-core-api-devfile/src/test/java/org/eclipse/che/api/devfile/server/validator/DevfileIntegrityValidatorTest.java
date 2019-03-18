@@ -24,6 +24,7 @@ import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.devfile.model.Action;
@@ -205,8 +206,10 @@ public class DevfileIntegrityValidatorTest {
     selector.put("app", "a different value");
 
     Devfile devfile = copyOf(initialDevfile);
-    devfile.getTools().get(0).setLocalContent("content");
-    devfile.getTools().get(0).setSelector(selector);
+    // this is the openshift tool which is the only one sensitive to the selector in our example
+    // devfile
+    devfile.getTools().get(3).setLocalContent("content");
+    devfile.getTools().get(3).setSelector(selector);
 
     // when
     integrityValidator.validateContentReferences(devfile, __ -> "");
@@ -240,6 +243,27 @@ public class DevfileIntegrityValidatorTest {
     integrityValidator.validateContentReferences(devfile, __ -> "");
 
     // then exception is thrown
+  }
+
+  @Test
+  public void shouldNotValidateContentReferencesOnNonKuberenetesTools() throws Exception {
+    // given
+
+    // just remove all the content-referencing tools and check that all still works
+    Devfile devfile = copyOf(initialDevfile);
+    Iterator<Tool> it = devfile.getTools().iterator();
+    while (it.hasNext()) {
+      String toolType = it.next().getType();
+      if (toolType.equals(KUBERNETES_TOOL_TYPE) || toolType.equals(OPENSHIFT_TOOL_TYPE)) {
+        it.remove();
+      }
+    }
+
+    // when
+    integrityValidator.validateContentReferences(devfile, __ -> "");
+
+    // then
+    // no exception is thrown
   }
 
   private Devfile copyOf(Devfile source) {

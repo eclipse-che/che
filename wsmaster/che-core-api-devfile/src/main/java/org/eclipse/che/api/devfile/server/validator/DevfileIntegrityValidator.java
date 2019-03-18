@@ -201,15 +201,34 @@ public class DevfileIntegrityValidator {
     }
   }
 
+  /**
+   * Validates that the selector, if any, selects some objects from the tool's referenced content.
+   * Only does anything for kubernetes and openshift tools.
+   *
+   * @param tool the tool to check
+   * @param contentProvider the content provider to use when fetching content
+   * @return the list of referenced objects matching the selector or empty list
+   * @throws ValidationException on failure to validate the referenced content
+   * @throws InfrastructureException on failure to parse the referenced content
+   * @throws IOException on failure to retrieve the referenced content
+   * @throws DevfileException if the selector filters out all referenced objects
+   */
   private List<HasMetadata> validateSelector(Tool tool, FileContentProvider contentProvider)
       throws ValidationException, InfrastructureException, IOException, DevfileException {
 
-    List<HasMetadata> content = getReferencedKubernetesList(tool, contentProvider);
+    if (!tool.getType().equals(KUBERNETES_TOOL_TYPE)
+        && !tool.getType().equals(OPENSHIFT_TOOL_TYPE)) {
+      return Collections.emptyList();
+    }
 
     Map<String, String> selector = tool.getSelector();
-    if (selector != null) {
-      content = SelectorFilter.filter(content, selector);
+    if (selector == null || selector.isEmpty()) {
+      return Collections.emptyList();
     }
+
+    List<HasMetadata> content = getReferencedKubernetesList(tool, contentProvider);
+
+    content = SelectorFilter.filter(content, selector);
 
     if (content.isEmpty()) {
       throw new DevfileException(
