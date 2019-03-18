@@ -95,7 +95,7 @@ public class DevfileIntegrityValidator {
    * @param devfile the validated devfile
    * @param provider the file content provider to fetch the referenced content with.
    * @throws DevfileFormatException when some selectors don't match any objects in the referenced
-   *     content
+   *     content or any other exception thrown during the validation
    */
   public void validateContentReferences(Devfile devfile, FileContentProvider provider)
       throws DevfileFormatException {
