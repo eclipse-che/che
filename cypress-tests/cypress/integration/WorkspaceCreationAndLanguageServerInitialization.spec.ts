@@ -25,7 +25,6 @@ import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
 import { NameGenerator } from "../utils/NameGenerator";
-import { TestWorkspaceUtil } from "../utils/workspace/TestWorkspaceUtil";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";

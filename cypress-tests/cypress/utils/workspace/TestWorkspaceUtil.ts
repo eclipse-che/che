@@ -45,9 +45,7 @@ export class TestWorkspaceUtil {
                     this.waitRunningStatus(workspaceNamespace, workspaceName, attempt)
 
                 })
-
         })
-
     }
 
 

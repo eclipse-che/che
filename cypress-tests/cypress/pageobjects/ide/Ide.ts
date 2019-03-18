@@ -18,7 +18,6 @@ export class Ide {
 
     private static readonly START_WORKSPACE_TIMEOUT: number = Cypress.env("start_workspace_timeout");
     private static readonly LANGUAGE_SERVER_INITIALIZATION_TIMEOUT: number = Cypress.env("language_server_initialization_timeout");
-    private static readonly API_ENDPOINT: string = "/api/che%3Awksp-rape?includeInternalServers=false"
 
     private static readonly TOP_MENU_PANEL: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
     private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
