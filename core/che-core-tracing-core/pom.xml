@@ -21,15 +21,6 @@
     </parent>
     <artifactId>che-core-tracing-core</artifactId>
     <name>Che Core :: Tracing :: Core</name>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>io.opentracing</groupId>
-                <artifactId>opentracing-noop</artifactId>
-                <version>${io.opentracing.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>aopalliance</groupId>
