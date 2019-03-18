@@ -20,6 +20,6 @@ public class NopTracingModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(Tracer.class).toInstance(NoopTracerFactory.create());
+    bind(Tracer.class).toProvider(new TracerProvider(NoopTracerFactory.create()));
   }
 }
