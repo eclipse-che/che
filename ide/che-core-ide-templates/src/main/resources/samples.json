@@ -1048,7 +1048,7 @@
     "name": "spring-boot-gs-rest-service",
     "displayName": "spring-boot-gs-rest-service",
     "path": "/gs-rest-service",
-    "description": "Spring Boot Guide to build a RESTful web service ",
+    "description": "Spring Boot Guide to build a RESTful web service",
     "projectType": "maven",
     "mixins": [],
     "attributes": {
