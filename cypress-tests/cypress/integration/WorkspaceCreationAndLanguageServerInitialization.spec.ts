@@ -92,7 +92,7 @@ describe("E2E test", () => {
             projectTree.waitProjectTreeContainer();
         })
 
-        it("Expand project and open file in editor", () => {
+        it.skip("Expand project and open file in editor", () => {
             projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
         })
 
