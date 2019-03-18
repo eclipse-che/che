@@ -16,7 +16,7 @@ agents/go-agents/** @garagatyi
 
 # assembly
 assembly/** @riuvshin @skabashnyuk
-assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk @amisevsk
+assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk @garagatyi
 
 # core
 core/** @skabashnyuk
