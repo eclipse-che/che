@@ -220,12 +220,12 @@ public class DevfileIntegrityValidator {
       return Collections.emptyList();
     }
 
+    List<HasMetadata> content = getReferencedKubernetesList(tool, contentProvider);
+
     Map<String, String> selector = tool.getSelector();
     if (selector == null || selector.isEmpty()) {
-      return Collections.emptyList();
+      return content;
     }
-
-    List<HasMetadata> content = getReferencedKubernetesList(tool, contentProvider);
 
     content = SelectorFilter.filter(content, selector);
 

@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.factory.server;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -102,6 +104,21 @@ public class DefaultFactoryParameterResolverTest {
     Map<String, String> factoryParameters = new HashMap<>();
     factoryParameters.put(URL_PARAMETER_NAME, "scheme:/myloc/devfile");
     doReturn(DEVFILE).when(urlFetcher).fetchSafely(eq("scheme:/myloc/devfile"));
+    doReturn("localfile").when(urlFetcher).fetch("scheme:/localfile");
+    doReturn(
+            singletonList(
+                new PodBuilder()
+                    .withNewMetadata()
+                    .withName("pod")
+                    .endMetadata()
+                    .withNewSpec()
+                    .addNewContainer()
+                    .withImage("image")
+                    .endContainer()
+                    .endSpec()
+                    .build()))
+        .when(kubernetesRecipeParser)
+        .parse("localfile");
 
     // when
     res.createFactory(factoryParameters);
