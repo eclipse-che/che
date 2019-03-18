@@ -142,8 +142,8 @@ export class LoadFactoryController {
   processFactorySource(): void {
     if (this.factory.source) {
       let sourceString = this.factory.source === 'repo' ?
-                         ": not found. Default environment will be applied" :
-                         ": found " + this.factory.source + ", applying it";
+                   ": .devfile not found in repository root. Default environment will be applied" :
+                   ": found " + this.factory.source + ", applying it";
       this.getLoadingSteps()[this.getCurrentProgressStep()].text += sourceString);
     }
     this.fetchWorkspaces();
