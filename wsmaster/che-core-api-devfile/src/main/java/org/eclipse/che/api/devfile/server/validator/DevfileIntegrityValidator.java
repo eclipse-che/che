@@ -18,10 +18,9 @@ import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashSet;
@@ -256,7 +255,7 @@ public class DevfileIntegrityValidator {
       if (cs.isEmpty()) {
         throw new DevfileFormatException(
             format(
-                "Tool %s contains an entry point that doesn't match any container: %s",
+                "Tool %s contains an entry point that doesn't match any container:\n%s",
                 tool.getName(), toYAML(ep)));
       }
     }
@@ -279,10 +278,6 @@ public class DevfileIntegrityValidator {
   }
 
   private static String toYAML(Entrypoint ep) throws DevfileException {
-    try {
-      return new YAMLMapper().writer().writeValueAsString(ep);
-    } catch (JsonProcessingException e) {
-      throw new DevfileException("Could not serialize entrypoint to YAML. This is a bug.", e);
-    }
+    return Serialization.asYaml(ep);
   }
 }
