@@ -253,7 +253,6 @@
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
           <class name="org.eclipse.che.selenium.theia.Che7PreviewStackStartTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromBlankStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaMySqlStackTest"/>
           <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromNodeStackTest"/>

@@ -282,7 +282,7 @@ public class AddOrImportForm {
     return asList(seleniumWebDriverHelper.waitVisibilityAndGetText(samplesItem).split("\n")).get(1);
   }
 
-  private Map<String, String> getSamplesNamesAndDescriptions() {
+  public Map<String, String> getSamplesNamesAndDescriptions() {
     return getSamples()
         .stream()
         .collect(

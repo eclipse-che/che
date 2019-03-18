@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.selenium.site.ocpoauth;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 
 import com.google.inject.Inject;
 import org.eclipse.che.api.core.BadRequestException;
@@ -128,7 +128,7 @@ public class LoginNewUserWithOpenShiftOAuthTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(BLANK);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 

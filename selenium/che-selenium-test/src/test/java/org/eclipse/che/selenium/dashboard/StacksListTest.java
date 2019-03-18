@@ -15,7 +15,9 @@ import static java.lang.String.format;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.ANDROID;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.BLANK;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MAVEN;
 import static org.eclipse.che.selenium.core.constant.TestStacksConstants.JAVA_MYSQL;
+import static org.eclipse.che.selenium.core.constant.TestStacksConstants.NODE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -105,19 +107,19 @@ public class StacksListTest {
 
     // search stacks by a full name
     stacks.typeToSearchInput(JAVA.getName());
-    assertTrue(stacks.isStackItemExisted(JAVA.getName()));
+    assertTrue(stacks.isStackItemExisted(JAVA_MAVEN.getName()));
     assertTrue(stacks.isStackItemExisted(JAVA_MYSQL.getName()));
     assertFalse(stacks.isStackItemExisted(BLANK.getName()));
 
     stacks.typeToSearchInput(BLANK.getName());
     assertTrue(stacks.isStackItemExisted(BLANK.getName()));
-    assertFalse(stacks.isStackItemExisted(JAVA.getName()));
+    assertFalse(stacks.isStackItemExisted(JAVA_MAVEN.getName()));
     assertFalse(stacks.isStackItemExisted(JAVA_MYSQL.getName()));
 
     // search stacks by a part name
     stacks.typeToSearchInput(BLANK.getName().substring(BLANK.getName().length() / 2));
     assertTrue(stacks.isStackItemExisted(BLANK.getName()));
-    assertFalse(stacks.isStackItemExisted(JAVA.getName()));
+    assertFalse(stacks.isStackItemExisted(JAVA_MAVEN.getName()));
     assertFalse(stacks.isStackItemExisted(JAVA_MYSQL.getName()));
   }
 
@@ -147,7 +149,7 @@ public class StacksListTest {
     String stackName;
 
     // create stack duplicate by Duplicate Stack button
-    stackName = createDuplicatedStack(JAVA.getName());
+    stackName = createDuplicatedStack(NODE.getName());
     assertTrue(stacks.isDuplicatedStackExisted(stackName));
 
     // delete stack by the Action delete stack button

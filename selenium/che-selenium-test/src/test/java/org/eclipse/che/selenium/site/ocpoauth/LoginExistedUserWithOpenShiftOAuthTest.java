@@ -12,7 +12,7 @@
 package org.eclipse.che.selenium.site.ocpoauth;
 
 import static java.lang.String.format;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Inject;
@@ -141,7 +141,7 @@ public class LoginExistedUserWithOpenShiftOAuthTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(BLANK);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
 

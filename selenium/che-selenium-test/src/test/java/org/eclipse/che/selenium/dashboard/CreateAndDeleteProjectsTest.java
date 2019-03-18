@@ -13,9 +13,8 @@ package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.BLANK_PROJECT;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.PROJECTS;
 
 import com.google.inject.Inject;
@@ -44,7 +43,7 @@ import org.testng.annotations.Test;
 public class CreateAndDeleteProjectsTest {
 
   private static final String WORKSPACE = generate("workspace", 4);
-  private static final String SECOND_WEB_JAVA_SPRING_PROJECT_NAME = WEB_JAVA_SPRING + "-1";
+  private static final String SECOND_BLANK_PROJECT_NAME = BLANK_PROJECT + "-1";
 
   private String dashboardWindow;
 
@@ -87,18 +86,15 @@ public class CreateAndDeleteProjectsTest {
 
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(BLANK);
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
-    // create 'web-java-spring' and 'console-java-simple' projects
+    // create two 'blank-project' projects
     projectSourcePage.clickOnAddOrImportProjectButton();
-    projectSourcePage.selectSample(WEB_JAVA_SPRING);
-    projectSourcePage.selectSample(CONSOLE_JAVA_SIMPLE);
+    projectSourcePage.selectSample(BLANK_PROJECT);
     projectSourcePage.clickOnAddProjectButton();
-
-    // create 'web-java-spring-1' project
     projectSourcePage.clickOnAddOrImportProjectButton();
-    projectSourcePage.selectSample(WEB_JAVA_SPRING);
+    projectSourcePage.selectSample(BLANK_PROJECT);
     projectSourcePage.clickOnAddProjectButton();
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
@@ -112,13 +108,12 @@ public class CreateAndDeleteProjectsTest {
     ide.waitOpenedWorkspaceIsReadyToUse();
 
     // wait for projects initializing
-    explorer.waitItem(WEB_JAVA_SPRING);
-    explorer.waitItem(CONSOLE_JAVA_SIMPLE);
-    explorer.waitItem(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
+    explorer.waitItem(BLANK_PROJECT);
+    explorer.waitItem(SECOND_BLANK_PROJECT_NAME);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
     mavenPluginStatusBar.waitClosingInfoPanel();
-    explorer.waitDefinedTypeOfFolder(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
-    explorer.waitDefinedTypeOfFolder(WEB_JAVA_SPRING, PROJECT_FOLDER);
+    explorer.waitDefinedTypeOfFolder(BLANK_PROJECT, PROJECT_FOLDER);
+    explorer.waitDefinedTypeOfFolder(SECOND_BLANK_PROJECT_NAME, PROJECT_FOLDER);
     notificationsPopupPanel.waitPopupPanelsAreClosed();
   }
 
@@ -129,11 +124,11 @@ public class CreateAndDeleteProjectsTest {
     workspaces.selectWorkspaceItemName(WORKSPACE);
     workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
 
-    deleteProject(WEB_JAVA_SPRING);
+    deleteProject(BLANK_PROJECT);
 
-    workspaceProjects.waitProjectIsPresent(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
+    workspaceProjects.waitProjectIsPresent(SECOND_BLANK_PROJECT_NAME);
 
-    deleteProject(CONSOLE_JAVA_SIMPLE);
+    deleteProject(SECOND_BLANK_PROJECT_NAME);
   }
 
   private void deleteProject(String projectName) {

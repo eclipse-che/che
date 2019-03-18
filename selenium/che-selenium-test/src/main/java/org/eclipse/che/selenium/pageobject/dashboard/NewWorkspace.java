@@ -147,6 +147,8 @@ public class NewWorkspace {
     ECLIPSE_CHE("che-in-che"),
     ECLIPSE_VERTX("vert.x"),
     GO("go-default"),
+    JAVA_MAVEN("java-default"),
+    JAVA_GRADLE("java-gradle"),
     JAVA_CENTOS("java-centos"),
     JAVA_THEIA_DOCKER("simple-theia-docker"),
     JAVA_THEIA_ON_KUBERNETES("java-theia-kubernetes"),

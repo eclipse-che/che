@@ -30,6 +30,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.E
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_GRADLE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MAVEN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_THEIA_ON_KUBERNETES;
@@ -76,12 +78,12 @@ public class NewWorkspacePageTest {
   private static final List<String> NOT_VALID_NAMES =
       asList("wksp-", "-wksp", "wk sp", "wk_sp", "wksp@", "wksp$", "wksp&", "wksp*");
   private static final String LETTER_FOR_SEARCHING = "j";
-  private static final List<NewWorkspace.Stack> EXPECTED_JDK_STACKS = asList(JAVA, ECLIPSE_CHE);
+  private static final List<NewWorkspace.Stack> EXPECTED_JDK_STACKS =
+      asList(CHE_7_PREVIEW, CHE_7_PREVIEW_DEV, ECLIPSE_CHE);
 
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_QUICK_START_STACKS =
       asList(
           BLANK,
-          JAVA,
           DOT_NET,
           ANDROID,
           CPP,
@@ -90,6 +92,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_CHE,
           GO,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
+          JAVA_GRADLE,
+          JAVA,
           JAVA_THEIA_ON_KUBERNETES,
           JAVA_THEIA_OPENSHIFT,
           NODE,
@@ -100,7 +104,6 @@ public class NewWorkspacePageTest {
   private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
       asList(
           BLANK,
-          JAVA,
           DOT_NET,
           ANDROID,
           CPP,
@@ -109,6 +112,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_CHE,
           GO,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
+          JAVA_GRADLE,
+          JAVA,
           JAVA_THEIA_ON_KUBERNETES,
           NODE,
           PHP,
@@ -118,7 +123,6 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
       asList(
           BLANK,
-          JAVA,
           JAVA_MYSQL,
           DOT_NET,
           ANDROID,
@@ -134,7 +138,6 @@ public class NewWorkspacePageTest {
   private static List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_SINGLE_MACHINE_STACKS =
       asList(
           BLANK,
-          JAVA,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -150,6 +153,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_VERTX,
           GO,
           JAVA_CENTOS,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           KOTLIN,
           NODE,
           PHP,
@@ -160,7 +165,6 @@ public class NewWorkspacePageTest {
   private static List<NewWorkspace.Stack> EXPECTED_K8S_SINGLE_MACHINE_STACKS =
       asList(
           BLANK,
-          JAVA,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -176,6 +180,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_VERTX,
           GO,
           JAVA_CENTOS,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           KOTLIN,
           NODE,
           PHP,
@@ -186,7 +192,6 @@ public class NewWorkspacePageTest {
   private static List<NewWorkspace.Stack> EXPECTED_DOCKER_SINGLE_MACHINE_STACKS =
       asList(
           BLANK,
-          JAVA,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -227,7 +232,6 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack>
       EXPECTED_OPENSHIFT_QUICK_START_STACKS_REVERSE_ORDER =
           asList(
-              JAVA,
               BLANK,
               RAILS,
               PYTHON,
@@ -235,6 +239,8 @@ public class NewWorkspacePageTest {
               NODE,
               JAVA_THEIA_OPENSHIFT,
               JAVA_THEIA_ON_KUBERNETES,
+              JAVA,
+              JAVA_GRADLE,
               JAVA_MYSQL_THEIA_ON_KUBERNETES,
               GO,
               ECLIPSE_CHE,
@@ -246,13 +252,14 @@ public class NewWorkspacePageTest {
 
   private static final List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
-          JAVA,
           BLANK,
           RAILS,
           PYTHON,
           PHP,
           NODE,
           JAVA_THEIA_ON_KUBERNETES,
+          JAVA,
+          JAVA_GRADLE,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
           GO,
           ECLIPSE_CHE,
@@ -265,7 +272,6 @@ public class NewWorkspacePageTest {
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
           JAVA_MYSQL,
-          JAVA,
           BLANK,
           JAVA_THEIA_DOCKER,
           RAILS,
@@ -444,8 +450,8 @@ public class NewWorkspacePageTest {
     newWorkspace.waitPageLoad();
 
     // empty RAM
-    newWorkspace.selectStack(JAVA);
-    newWorkspace.waitStackSelected(JAVA);
+    newWorkspace.selectStack(BLANK);
+    newWorkspace.waitStackSelected(BLANK);
     newWorkspace.waitRamValue(MACHINE_NAME, 2.0);
     newWorkspace.typeToRamField("");
     newWorkspace.waitRedRamFieldBorders();

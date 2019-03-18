@@ -94,6 +94,7 @@ public class ProjectSourcePage {
     String CONSOLE_JAVA_SIMPLE = "console-java-simple";
     String WEB_JAVA_PETCLINIC = "web-java-petclinic";
     String CONSOLE_PYTHON3_SIMPLE = "console-python3-simple";
+    String BLANK_PROJECT = "blank-project";
   }
 
   @FindBy(id = Locators.ADD_OR_IMPORT_PROJECT_BUTTON)

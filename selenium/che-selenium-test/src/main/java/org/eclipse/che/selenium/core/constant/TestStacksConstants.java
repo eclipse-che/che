@@ -30,7 +30,8 @@ public enum TestStacksConstants {
   NODE("node-default", "Node"),
   PHP("php-default", "PHP"),
   PYTHON("python-default", "Python"),
-  RAILS("rails-default", "Rails");
+  RAILS("rails-default", "Rails"),
+  JAVA_MAVEN("java-default", "Java Maven");
 
   private final String id;
   private final String name;

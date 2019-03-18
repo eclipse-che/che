@@ -17,7 +17,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.J
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_THEIA_ON_KUBERNETES;
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.BLANK_PROJECT;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -47,10 +47,9 @@ public class CreateWorkspaceTest {
   private static final String WS_NAME_TOO_LONG =
       ("The name has to be less than 100 characters long.");
 
-  private String projectName = WEB_JAVA_SPRING;
+  private String projectName = BLANK_PROJECT;
   private String newProjectName = projectName + "-1";
-  private String projectDescription =
-      "A basic example using Spring servlets. The app returns values entered into a submit form.";
+  private String projectDescription = "A blank project example.";
   private String newProjectDescription = "This is " + projectDescription;
 
   @Inject private Dashboard dashboard;
@@ -98,7 +97,7 @@ public class CreateWorkspaceTest {
 
     // change the RAM number by the increment and decrement buttons
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(BLANK);
     assertTrue(newWorkspace.isMachineExists(machineName));
     assertEquals(newWorkspace.getRAM(machineName), 2.0);
     newWorkspace.clickOnIncrementMemoryButton(machineName);
@@ -137,7 +136,7 @@ public class CreateWorkspaceTest {
 
     // change the RAM number by the increment and decrement buttons
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(BLANK);
     assertTrue(newWorkspace.isMachineExists(machineName));
     assertEquals(newWorkspace.getRAM(machineName), 2.0);
     newWorkspace.clickOnIncrementMemoryButton(machineName);
@@ -285,8 +284,8 @@ public class CreateWorkspaceTest {
   public void checkProjectSourcePage() {
     newWorkspace.clickOnAllStacksTab();
 
-    // add a project from the 'web-java-spring' sample
-    newWorkspace.selectStack(JAVA);
+    // add a project from the 'blank-project' sample
+    newWorkspace.selectStack(BLANK);
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(projectName);
     projectSourcePage.clickOnAddProjectButton();

@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces;
 
-import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.testng.Assert.assertEquals;
 
@@ -50,9 +49,9 @@ public class AddOrImportProjectFormTest {
   private static final String TEST_JAVA_WORKSPACE_NAME = "test-java-workspace";
   private static final String TEST_JAVA_WORKSPACE_NAME_EDIT = generate("test-java-workspace", 4);
   private static final String NAME_WITH_SPECIAL_CHARACTERS = "@#$%^&*";
-  private static final String SPRING_SAMPLE_NAME = "web-java-spring";
-  private static final String EXPECTED_SPRING_REPOSITORY_URL =
-      "https://github.com/che-samples/web-java-spring.git";
+  private static final String SPRING_BOOT_GS_REST_SERVICE_NAME = "spring-boot-gs-rest-service";
+  private static final String EXPECTED_SPRING_BOOT_REPOSITORY_URL =
+      "https://github.com/spring-guides/gs-rest-service";
   private static final String CONSOLE_SAMPLE_NAME = "console-java-simple";
   private static final String RENAMED_CONSOLE_SAMPLE_NAME = "java-console-test";
   private static final String EXPECTED_CONSOLE_REPOSITORY_URL =
@@ -63,40 +62,10 @@ public class AddOrImportProjectFormTest {
   private static final String BLANK_DEFAULT_URL = "https://github.com/che-samples/blank";
   private static final ImmutableMap<String, String> EXPECTED_SAMPLES_WITH_DESCRIPTIONS =
       ImmutableMap.of(
-          SPRING_SAMPLE_NAME,
-          "A basic example using Spring servlets. The app returns values entered into a submit form.",
+          SPRING_BOOT_GS_REST_SERVICE_NAME,
+          "Spring Boot Guide to build a RESTful web service ",
           CONSOLE_SAMPLE_NAME,
           "A hello world Java application.");
-  private static final String EXPECTED_TEXT_IN_EDITOR =
-      "package org.eclipse.che.examples;\n"
-          + "\n"
-          + "import org.springframework.web.servlet.ModelAndView;\n"
-          + "import org.springframework.web.servlet.mvc.Controller;\n"
-          + "\n"
-          + "import javax.servlet.http.HttpServletRequest;\n"
-          + "import javax.servlet.http.HttpServletResponse;\n"
-          + "\n"
-          + "public class GreetingController implements Controller\n"
-          + "{\n"
-          + "\n"
-          + "   @Override\n"
-          + "   public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response) throws Exception\n"
-          + "   {\n"
-          + "      String userName = request.getParameter(\"user\");\n"
-          + "      String result = \"\";\n"
-          + "      if (userName != null)\n"
-          + "      {\n"
-          + "        result = \"Hello, \" + userName + \"!\";\n"
-          + "      }\n"
-          + "\n"
-          + "      ModelAndView view = new ModelAndView(\"hello_view\");\n"
-          + "      view.addObject(\"greeting\", result);\n"
-          + "      return view;\n"
-          + "   }\n"
-          + "}\n";
-
-  private static final String PATH_TO_JAVA_FILE =
-      "/src/main/java/org/eclipse/che/examples/GreetingController.java";
 
   @Inject private Ide ide;
   @Inject private Dashboard dashboard;
@@ -144,10 +113,11 @@ public class AddOrImportProjectFormTest {
   public void checkOfCheckboxes() {
     // preparing
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack(Stack.JAVA);
+    newWorkspace.selectStack(Stack.JAVA_GRADLE);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
+    System.out.println(addOrImportForm.getSamplesNamesAndDescriptions());
     addOrImportForm.waitSamplesWithDescriptions(EXPECTED_SAMPLES_WITH_DESCRIPTIONS);
     waitAllCheckboxesDisabled();
     addOrImportForm.waitCancelButtonDisabled();
@@ -164,13 +134,13 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitSampleCheckboxDisabled(CONSOLE_SAMPLE_NAME);
 
     // select and unselect single checkbox by clicking on it
-    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnSampleCheckbox(SPRING_BOOT_GS_REST_SERVICE_NAME);
+    addOrImportForm.waitSampleCheckboxEnabled(SPRING_BOOT_GS_REST_SERVICE_NAME);
     addOrImportForm.waitCancelButtonEnabled();
     addOrImportForm.waitAddButtonEnabled();
 
-    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxDisabled(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnSampleCheckbox(SPRING_BOOT_GS_REST_SERVICE_NAME);
+    addOrImportForm.waitSampleCheckboxDisabled(SPRING_BOOT_GS_REST_SERVICE_NAME);
     addOrImportForm.waitCancelButtonDisabled();
     addOrImportForm.waitAddButtonDisabled();
 
@@ -190,7 +160,7 @@ public class AddOrImportProjectFormTest {
   public void checkProjectSamples() {
     // preparing
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack(Stack.JAVA);
+    newWorkspace.selectStack(Stack.JAVA_GRADLE);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
@@ -225,7 +195,7 @@ public class AddOrImportProjectFormTest {
 
     addOrImportForm.clickOnAddButton();
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
-    addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitProjectTabAppearance(SPRING_BOOT_GS_REST_SERVICE_NAME);
 
     addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
     checkProjectTabAppearanceAndFields(
@@ -233,16 +203,16 @@ public class AddOrImportProjectFormTest {
         EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(CONSOLE_SAMPLE_NAME),
         EXPECTED_CONSOLE_REPOSITORY_URL);
 
-    addOrImportForm.clickOnProjectTab(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnProjectTab(SPRING_BOOT_GS_REST_SERVICE_NAME);
     checkProjectTabAppearanceAndFields(
-        SPRING_SAMPLE_NAME,
-        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_SAMPLE_NAME),
-        EXPECTED_SPRING_REPOSITORY_URL);
+        SPRING_BOOT_GS_REST_SERVICE_NAME,
+        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_BOOT_GS_REST_SERVICE_NAME),
+        EXPECTED_SPRING_BOOT_REPOSITORY_URL);
 
     // remove sample
     projectOptions.clickOnRemoveButton();
     addOrImportForm.waitProjectTabAppearance(CONSOLE_SAMPLE_NAME);
-    addOrImportForm.waitProjectTabDisappearance(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitProjectTabDisappearance(SPRING_BOOT_GS_REST_SERVICE_NAME);
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
 
@@ -306,10 +276,10 @@ public class AddOrImportProjectFormTest {
     // without saving
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
-    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnSampleCheckbox(SPRING_BOOT_GS_REST_SERVICE_NAME);
+    addOrImportForm.waitSampleCheckboxEnabled(SPRING_BOOT_GS_REST_SERVICE_NAME);
     addOrImportForm.clickOnAddButton();
-    addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitProjectTabAppearance(SPRING_BOOT_GS_REST_SERVICE_NAME);
     addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
     projectOptions.waitProjectNameFieldValue(CONSOLE_SAMPLE_NAME);
 
@@ -317,8 +287,8 @@ public class AddOrImportProjectFormTest {
     projectOptions.typeTextInDescriptionField("");
     projectOptions.typeTextInRepositoryUrlField("");
 
-    addOrImportForm.clickOnProjectTab(SPRING_SAMPLE_NAME);
-    projectOptions.waitProjectNameFieldValue(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnProjectTab(SPRING_BOOT_GS_REST_SERVICE_NAME);
+    projectOptions.waitProjectNameFieldValue(SPRING_BOOT_GS_REST_SERVICE_NAME);
 
     addOrImportForm.clickOnProjectTab(CONSOLE_SAMPLE_NAME);
     checkProjectTabAppearanceAndFields(
@@ -423,17 +393,17 @@ public class AddOrImportProjectFormTest {
     assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
     // add workspace with specified "RAM" value
-    newWorkspace.setMachineRAM("dev-machine", 3.0);
-    newWorkspace.waitRamValue("dev-machine", 3.0);
+    newWorkspace.setMachineRAM("maven-container", 3.0);
+    newWorkspace.waitRamValue("maven-container", 3.0);
 
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
 
-    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnSampleCheckbox(SPRING_BOOT_GS_REST_SERVICE_NAME);
+    addOrImportForm.waitSampleCheckboxEnabled(SPRING_BOOT_GS_REST_SERVICE_NAME);
 
     addOrImportForm.clickOnAddButton();
-    addOrImportForm.waitProjectTabAppearance(SPRING_SAMPLE_NAME);
+    addOrImportForm.waitProjectTabAppearance(SPRING_BOOT_GS_REST_SERVICE_NAME);
 
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(TEST_BLANK_WORKSPACE_NAME);
@@ -443,23 +413,6 @@ public class AddOrImportProjectFormTest {
     prepareJavaWorkspace(TEST_JAVA_WORKSPACE_NAME);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
     workspaceOverview.checkNameWorkspace(TEST_JAVA_WORKSPACE_NAME);
-
-    seleniumWebDriver.navigate().back();
-
-    prepareJavaWorkspace(TEST_JAVA_WORKSPACE_NAME_EDIT);
-    newWorkspace.clickOnTopCreateButton();
-
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    testWorkspaceServiceClient.waitStatus(
-        TEST_JAVA_WORKSPACE_NAME_EDIT, defaultTestUser.getName(), RUNNING);
-
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    consoles.waitJDTLSProjectResolveFinishedMessage(SPRING_SAMPLE_NAME);
-    projectExplorer.waitItem(SPRING_SAMPLE_NAME);
-    projectExplorer.quickRevealToItemWithJavaScript(SPRING_SAMPLE_NAME + PATH_TO_JAVA_FILE);
-    projectExplorer.openItemByPath(SPRING_SAMPLE_NAME + PATH_TO_JAVA_FILE);
-    editor.waitActive();
-    editor.waitTextIntoEditor(EXPECTED_TEXT_IN_EDITOR);
   }
 
   private void waitAllCheckboxesDisabled() {
@@ -502,13 +455,13 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
 
-    addOrImportForm.clickOnSampleCheckbox(SPRING_SAMPLE_NAME);
-    addOrImportForm.waitSampleCheckboxEnabled(SPRING_SAMPLE_NAME);
+    addOrImportForm.clickOnSampleCheckbox(SPRING_BOOT_GS_REST_SERVICE_NAME);
+    addOrImportForm.waitSampleCheckboxEnabled(SPRING_BOOT_GS_REST_SERVICE_NAME);
 
     addOrImportForm.clickOnAddButton();
     checkProjectTabAppearanceAndFields(
-        SPRING_SAMPLE_NAME,
-        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_SAMPLE_NAME),
-        EXPECTED_SPRING_REPOSITORY_URL);
+        SPRING_BOOT_GS_REST_SERVICE_NAME,
+        EXPECTED_SAMPLES_WITH_DESCRIPTIONS.get(SPRING_BOOT_GS_REST_SERVICE_NAME),
+        EXPECTED_SPRING_BOOT_REPOSITORY_URL);
   }
 }

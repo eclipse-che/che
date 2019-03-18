@@ -12,8 +12,8 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.BLANK_PROJECT;
 import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.CONFIG_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.GIT_TAB_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage.TabNames.TEMPLATE_TAB_ID;
@@ -366,7 +366,7 @@ public class CreateFactoryTest {
   }
 
   private TestWorkspace createWorkspaceWithProject(String workspaceName) {
-    // create a workspace from the Java stack with the web-java-spring project
+    // create a workspace from the Blank stack with the blank-project project
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
@@ -376,13 +376,13 @@ public class CreateFactoryTest {
 
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(BLANK);
     newWorkspace.typeWorkspaceName(workspaceName);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
-    projectSourcePage.selectSample(WEB_JAVA_SPRING);
+    projectSourcePage.selectSample(BLANK_PROJECT);
     projectSourcePage.clickOnAddProjectButton();
-    projectSourcePage.waitCreatedProjectButton(WEB_JAVA_SPRING);
+    projectSourcePage.waitCreatedProjectButton(BLANK_PROJECT);
 
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
 
@@ -393,7 +393,7 @@ public class CreateFactoryTest {
   }
 
   private TestWorkspace createWorkspaceWithoutProject(String workspaceName) {
-    // create a workspace from the Java stack with the web-java-spring project
+    // create a workspace from the Blank stack with the blank-project project
     dashboard.waitDashboardToolbarTitle();
     dashboard.selectWorkspacesItemOnDashboard();
     dashboard.waitToolbarTitleName("Workspaces");
@@ -403,7 +403,7 @@ public class CreateFactoryTest {
 
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(BLANK);
     newWorkspace.typeWorkspaceName(workspaceName);
 
     newWorkspace.clickOnCreateButtonAndEditWorkspace();

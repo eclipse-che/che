@@ -15,7 +15,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.FILE;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.New.NEW;
 import static org.eclipse.che.selenium.core.constant.TestMenuCommandsConstants.Project.PROJECT;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.OVERVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.SHARE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces.Status.STOPPED;
@@ -54,7 +54,7 @@ public class ShareWorkspaceMemberTest {
   private static final String ADMIN_PERMISSIONS =
       "read, use, run, configure, setPermissions, delete";
   private static final String MEMBER_PERMISSIONS = "read, use, run, configure";
-  private static final String PROJECT_NAME = "web-java-spring";
+  private static final String PROJECT_NAME = "blank-project";
   private static final String FILE_NAME = "readme.txt";
   private static final String FILE_CONTENT = generate("", 10);
 
@@ -179,13 +179,11 @@ public class ShareWorkspaceMemberTest {
   }
 
   private void createWorkspace(String workspaceName) {
-    createWorkspaceHelper.createWorkspaceFromStackWithProject(JAVA, workspaceName, PROJECT_NAME);
+    createWorkspaceHelper.createWorkspaceFromStackWithProject(BLANK, workspaceName, PROJECT_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
     projectExplorer.waitProjectInitialization(PROJECT_NAME);
-
-    consoles.waitJDTLSProjectResolveFinishedMessage(PROJECT_NAME);
 
     projectExplorer.waitAndSelectItem(PROJECT_NAME);
     projectExplorer.openItemByPath(PROJECT_NAME);
