@@ -37,8 +37,8 @@ import org.eclipse.che.commons.annotation.Nullable;
  * Container search goes through a list of Kubernetes resources and recursively looks for containers
  * that match the provided criteria.
  *
- * <p>The deployment and pod name criteria work both on the {@code name} and, if name is not set on
- * given deployment/pod, on the {@code generateName} of the objects.
+ * <p>The {@code parentName} constraint works both on the {@code name} and, if name is not set on
+ * given k8s object, on the {@code generateName}.
  */
 public class ContainerSearch {
 
