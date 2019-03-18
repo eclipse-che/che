@@ -57,4 +57,10 @@ public interface ApiInfo {
   ApiInfo withIdeVersion(String ideVersion);
 
   void setIdeVersion(String ideVersion);
+
+  String getProductVersion();
+
+  ApiInfo withProductVersion(String ideVersion);
+
+  void setProductVersion(String ideVersion);
 }
