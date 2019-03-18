@@ -152,28 +152,28 @@ The entrypoints can be defined for example like this:
       type: kubernetes
       local: app-deployment.yaml
       entrypoints:
-      - pod: mysqlServer
+      - parentName: mysqlServer
         command: ['sleep']
         args: ['infinity']
-      - deploymentSelector: prometheus
+      - parentSelector:
+          app: prometheus
         args: ['-f', '/opt/app/prometheus-config.yaml']
 ```
 
 You can see that the `entrypoints` list contains constraints for picking the containers along with
-the command/args to apply to them. In the example above, the constraint is `pod: mysqlServer` which
-will cause the command to be applied to all containers defined in any pod called `mysqlServer`.
+the command/args to apply to them. In the example above, the constraint is `parentName: mysqlServer`
+which will cause the command to be applied to all containers defined in any parent object called
+`mysqlServer`. The parent object is assumed to be a top level object in the list defined in the
+referenced file, e.g. `app-deployment.yaml` in the example above.
 
 Other types of constraints (and their combinations) are possible:
 
-* `container` - the name of the container
-* `pod` - the name of the pod that contains the containers to override
-* `podSelector` - the set of labels a pod needs to have
-* `deployment` - only containers in a pod template spec of a deployment with given name are
-                 overriden
-* `deploymentSelector` - the set of labels a deployment needs to have
+* `containerName` - the name of the container
+* `parentName` - the name of the parent object that (indirectly) contains the containers to override
+* `parentSelector` - the set of labels the parent object needs to have
 
-Zero or more of such constraints can be defined to precisely locate the containers inside
-the Kubernetes list.
+Combination of these constraints can be used to precisely locate the containers inside the 
+referenced Kubernetes list.
 
 #### dockerimage
 Tool type which allows to define docker image based configuration of container in workspace.
