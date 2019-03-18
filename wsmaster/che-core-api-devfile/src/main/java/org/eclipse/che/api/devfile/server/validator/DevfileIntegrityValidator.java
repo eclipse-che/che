@@ -241,7 +241,7 @@ public class DevfileIntegrityValidator {
   }
 
   private void validateEntrypointSelector(Tool tool, List<HasMetadata> filteredObjects)
-      throws DevfileFormatException {
+      throws DevfileException {
 
     if (tool.getEntrypoints() == null || tool.getEntrypoints().isEmpty()) {
       return;
@@ -278,11 +278,11 @@ public class DevfileIntegrityValidator {
     return content;
   }
 
-  private static String toYAML(Entrypoint ep) {
+  private static String toYAML(Entrypoint ep) throws DevfileException {
     try {
       return new YAMLMapper().writer().writeValueAsString(ep);
     } catch (JsonProcessingException e) {
-      throw new IllegalStateException("Could not serialize entrypoint to YAML. This is a bug.", e);
+      throw new DevfileException("Could not serialize entrypoint to YAML. This is a bug.", e);
     }
   }
 }
