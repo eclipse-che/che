@@ -11,11 +11,7 @@
 export class ElementStateChecker {
 
     public isVisible(element: JQuery<HTMLElement>): boolean {
-        if (element === null) {
-            return false;
-        }
-
-        if (element === undefined) {
+        if (element === null || element === undefined) {
             return false;
         }
 
@@ -24,5 +20,5 @@ export class ElementStateChecker {
             element[0].getClientRects().length > 0
     }
 
-    
+
 }
