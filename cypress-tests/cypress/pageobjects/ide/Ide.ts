@@ -1,3 +1,6 @@
+import { Promise, resolve, reject } from "bluebird";
+import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
+
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -15,6 +18,7 @@ export class Ide {
 
     private static readonly START_WORKSPACE_TIMEOUT: number = Cypress.env("start_workspace_timeout");
     private static readonly LANGUAGE_SERVER_INITIALIZATION_TIMEOUT: number = Cypress.env("language_server_initialization_timeout");
+    private static readonly API_ENDPOINT: string = "/api/che%3Awksp-rape?includeInternalServers=false"
 
     private static readonly TOP_MENU_PANEL: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
     private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
@@ -23,15 +27,31 @@ export class Ide {
     private static readonly IDE_IFRAME: string = "iframe#ide-application-iframe";
 
 
-    waitIdeInIframe() {
-        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
-            .forEach(idePart => {
-                cy.get(Ide.IDE_IFRAME, { timeout: Ide.START_WORKSPACE_TIMEOUT })
-                    .should(iframe => {
-                        expect(iframe.contents().find(idePart)).to.have.length(1)
-                        expect(iframe.contents().find(idePart)).to.be.visible
-                    })
-            })
+    private readonly testWorkspaceUtil: TestWorkspaceUtil = new TestWorkspaceUtil();
+
+
+
+    waitIdeInIframe(workspaceNamespace: string, workspaceName: string) {
+        this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName).then(() => {
+            [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
+                .forEach(idePart => {
+                    cy.get(Ide.IDE_IFRAME, { timeout: Ide.START_WORKSPACE_TIMEOUT })
+                        .should(iframe => {
+                            expect(iframe.contents().find(idePart)).to.have.length(1)
+                            expect(iframe.contents().find(idePart)).to.be.visible
+                        })
+                })
+        });
+    }
+
+    waitIde(workspaceNamespace: string, workspaceName: string) {
+        this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName).then(() => {
+            [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
+                .forEach(idePart => {
+                    cy.get(idePart, { timeout: Ide.START_WORKSPACE_TIMEOUT })
+                        .should('be.visible')
+                })
+        });
     }
 
     openIdeWithoutFrames(workspaceName: string) {
@@ -64,14 +84,6 @@ export class Ide {
     waitPreloaderAbsent() {
         cy.get(Ide.PRELOADER)
             .should('not.be.visible');
-    }
-
-    waitIde() {
-        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
-            .forEach(idePart => {
-                cy.get(idePart, { timeout: Ide.START_WORKSPACE_TIMEOUT })
-                    .should('be.visible')
-            })
     }
 
     waitStatusBarContains(expectedText: string) {

@@ -25,8 +25,10 @@ import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
 import { NameGenerator } from "../utils/NameGenerator";
+import { TestWorkspaceUtil } from "../utils/workspace/TestWorkspaceUtil";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
+const namespace: string = "che";
 
 const loginPage: LoginPage = new LoginPage();
 const dashboard: Dashboard = new Dashboard();
@@ -74,9 +76,9 @@ describe("E2E test", () => {
         })
 
         it("Wait IDE availability", () => {
-            ide.waitIdeInIframe();
+            ide.waitIdeInIframe(namespace, workspaceName);
             ide.openIdeWithoutFrames(workspaceName);
-            ide.waitIde();
+            ide.waitIde(namespace, workspaceName);
         })
 
     })
@@ -95,13 +97,15 @@ describe("E2E test", () => {
             projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
         })
 
-        it("Check \"Java Language Server\" initialization by statusbar", () => {
+        //unskip after resolving issue https://github.com/eclipse/che/issues/12904
+        it.skip("Check \"Java Language Server\" initialization by statusbar", () => {
             ide.waitStatusBarContains("Starting Java Language Server")
             ide.waitStatusBarContains("100% Starting Java Language Server")
             ide.waitStatusBarTextAbcence("Starting Java Language Server")
         })
 
-        it("Check \"Java Language Server\" initialization by suggestion invoking", () => {
+        //unskip after resolving issue https://github.com/eclipse/che/issues/12904
+        it.skip("Check \"Java Language Server\" initialization by suggestion invoking", () => {
             editor.waitEditorAvailable(filePath, tabTitle);
             editor.clickOnTab(filePath);
             editor.waitEditorAvailable(filePath, tabTitle);
