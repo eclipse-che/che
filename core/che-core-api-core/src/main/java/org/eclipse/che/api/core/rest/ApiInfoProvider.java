@@ -36,7 +36,7 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
   private ApiInfo apiInfo;
 
   @Inject
-  public ApiInfoProvider(@Named("che.product.version") String version) {
+  public ApiInfoProvider(@Named("che.product.build_info") String version) {
     this.apiInfo = readApiInfo(version);
   }
 
@@ -47,9 +47,8 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
 
   private ApiInfo readApiInfo(String version) {
     try {
-      try (
-
-          InputStream manifestInputStream = ApiInfoProvider.class.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+      try (InputStream manifestInputStream =
+          ApiInfoProvider.class.getResourceAsStream("/META-INF/MANIFEST.MF")) {
 
         final Manifest manifest = new Manifest(manifestInputStream);
         final Attributes mainAttributes = manifest.getMainAttributes();
