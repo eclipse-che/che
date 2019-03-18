@@ -50,7 +50,7 @@ public class ContainerSearch {
    * Constructs a new {@code ContainerSearch} instance in somewhat unsurprising manner.
    *
    * @param parentName the name of the parent object that should (indirectly) contain the containers
-   * @param parentSelector the selector for the
+   * @param parentSelector the labels to match on the parent object, if any
    * @param containerName only search for containers with given name
    */
   public ContainerSearch(
@@ -72,7 +72,7 @@ public class ContainerSearch {
    */
   public List<Container> search(Collection<? extends HasMetadata> list) {
     return list.stream()
-        .filter(this::matchMeta)
+        .filter(this::matchMetadata)
         .flatMap(this::findContainers)
         .filter(this::matchContainer)
         .collect(toList());
@@ -118,21 +118,13 @@ public class ContainerSearch {
     return this.containerName == null || this.containerName.equals(container.getName());
   }
 
-  private boolean matchMeta(HasMetadata object) {
-    return matches(object.getMetadata(), parentName, parentSelector);
+  private boolean matchMetadata(HasMetadata object) {
+    ObjectMeta metaData = object.getMetadata();
+    return matchesByName(metaData, parentName)
+        && (parentSelector == null || SelectorFilter.test(metaData, parentSelector));
   }
 
-  private static boolean matches(
-      ObjectMeta metaData, @Nullable String name, @Nullable Map<String, String> labels) {
-    if (name == null) {
-      return labels == null || matchesBySelector(metaData, labels);
-    } else {
-      boolean ret = matchesByName(metaData, name);
-      return labels == null ? ret : ret && matchesBySelector(metaData, labels);
-    }
-  }
-
-  private static boolean matchesByName(ObjectMeta metaData, String name) {
+  private boolean matchesByName(@Nullable ObjectMeta metaData, @Nullable String name) {
     if (name == null) {
       return true;
     }
@@ -146,9 +138,5 @@ public class ContainerSearch {
     } else {
       return name.equals(metaGenerateName);
     }
-  }
-
-  private static boolean matchesBySelector(ObjectMeta metaData, Map<String, String> labels) {
-    return SelectorFilter.test(metaData, labels);
   }
 }
