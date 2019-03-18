@@ -12,6 +12,7 @@
 package org.eclipse.che.commons.tracing;
 
 import com.google.common.annotations.Beta;
+import io.opentracing.Span;
 import io.opentracing.tag.Tags;
 
 /** The standard tags used in Che server. */
@@ -68,6 +69,13 @@ public final class TracingTags {
    */
   public static final AnnotationAwareIntTag SAMPLING_PRIORITY =
       new AnnotationAwareIntTag(Tags.SAMPLING_PRIORITY.getKey());
+
+  /** Set error status and associated tags on a span, given a throwable */
+  public static void setErrorStatus(Span span, Throwable e) {
+    TracingTags.ERROR.set(span, true);
+    TracingTags.ERROR_REASON.set(span, e.getMessage());
+    TracingTags.SAMPLING_PRIORITY.set(span, 1);
+  }
 
   private TracingTags() {}
 }
