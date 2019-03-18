@@ -11,10 +11,15 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.PREPARE_STORAGE_PHASE;
+
 import com.google.common.annotations.Beta;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
+import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
@@ -33,22 +38,35 @@ public class PrepareStorage extends BrokerPhase {
   private final KubernetesEnvironment brokerEnvironment;
   private final WorkspaceVolumesStrategy volumesStrategy;
   private final StartSynchronizer startSynchronizer;
+  private final Tracer tracer;
 
   public PrepareStorage(
       String workspaceId,
       KubernetesEnvironment brokerEnvironment,
       WorkspaceVolumesStrategy volumesStrategy,
-      StartSynchronizer startSynchronizer) {
+      StartSynchronizer startSynchronizer,
+      Tracer tracer) {
     this.workspaceId = workspaceId;
     this.brokerEnvironment = brokerEnvironment;
     this.volumesStrategy = volumesStrategy;
     this.startSynchronizer = startSynchronizer;
+    this.tracer = tracer;
   }
 
   @Override
   public List<ChePlugin> execute() throws InfrastructureException {
-    volumesStrategy.prepare(
-        brokerEnvironment, workspaceId, startSynchronizer.getStartTimeoutMillis());
+    Span tracingSpan = tracer.buildSpan(PREPARE_STORAGE_PHASE).start();
+    TracingTags.WORKSPACE_ID.set(tracingSpan, workspaceId);
+
+    try {
+      volumesStrategy.prepare(
+          brokerEnvironment, workspaceId, startSynchronizer.getStartTimeoutMillis());
+    } catch (InfrastructureException e) {
+      TracingTags.setErrorStatus(tracingSpan, e);
+      throw e;
+    } finally {
+      tracingSpan.finish();
+    }
 
     return nextPhase.execute();
   }

@@ -13,6 +13,10 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.BOOTSTRAP_INSTALLERS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.CHECK_SERVERS;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_MACHINES_START;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.util.TracingSpanConstants.WAIT_RUNNING_ASYNC;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.assistedinject.Assisted;
@@ -71,7 +75,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentPro
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.tracing.TracingTags;
-import org.eclipse.che.commons.tracing.TracingUtil;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
@@ -209,7 +212,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       final EnvironmentContext currentContext = EnvironmentContext.getCurrent();
       CompletableFuture<Void> startFailure = startSynchronizer.getStartFailure();
 
-      try (Scope waitRunningAsyncScope = tracer.buildSpan("WaitMachinesStart").startActive(true)) {
+      try (Scope waitRunningAsyncScope = tracer.buildSpan(WAIT_MACHINES_START).startActive(true)) {
         TracingTags.WORKSPACE_ID.set(waitRunningAsyncScope.span(), workspaceId);
         for (KubernetesMachineImpl machine : machines.getMachines(context.getIdentity()).values()) {
           String machineName = machine.getName();
@@ -382,9 +385,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       // Span must be created within this lambda block, otherwise the span begins as soon as
       // this function is called (i.e. before the previous steps in the machine boot chain
       // are complete
-      final Span tracingSpan = tracer.buildSpan("CheckServers").asChildOf(activeSpan).start();
-      TracingUtil.setWorkspaceIdAndMachineName(
-          tracingSpan, getContext().getIdentity().getWorkspaceId(), machine.getName());
+      final Span tracingSpan = tracer.buildSpan(CHECK_SERVERS).asChildOf(activeSpan).start();
+      TracingTags.WORKSPACE_ID.set(tracingSpan, getContext().getIdentity().getWorkspaceId());
+      TracingTags.MACHINE_NAME.set(tracingSpan, machine.getName());
 
       // This completable future is used to unity the servers checks and start of probes
       final CompletableFuture<Void> serversAndProbesFuture = new CompletableFuture<>();
@@ -410,7 +413,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
             });
       } catch (InfrastructureException ex) {
         serversAndProbesFuture.completeExceptionally(ex);
-        TracingUtil.setErrorStatus(tracingSpan, ex);
+        TracingTags.setErrorStatus(tracingSpan, ex);
         tracingSpan.finish();
         return serversAndProbesFuture;
       }
@@ -419,7 +422,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
               (ok, ex) -> {
                 if (ex != null) {
                   serversAndProbesFuture.completeExceptionally(ex);
-                  TracingUtil.setErrorStatus(tracingSpan, ex);
+                  TracingTags.setErrorStatus(tracingSpan, ex);
                   tracingSpan.finish();
                   return;
                 }
@@ -461,9 +464,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         // Span must be created within this lambda block, otherwise the span begins as soon as
         // this function is called (i.e. before the previous steps in the machine boot chain
         // are complete
-        Span tracingSpan = tracer.buildSpan("BootstrapInstallers").asChildOf(activeSpan).start();
-        TracingUtil.setWorkspaceIdAndMachineName(
-            tracingSpan, getContext().getIdentity().getWorkspaceId(), machine.getName());
+        Span tracingSpan = tracer.buildSpan(BOOTSTRAP_INSTALLERS).asChildOf(activeSpan).start();
+        TracingTags.WORKSPACE_ID.set(tracingSpan, getContext().getIdentity().getWorkspaceId());
+        TracingTags.MACHINE_NAME.set(tracingSpan, machine.getName());
 
         bootstrapperFuture =
             bootstrapperFactory
@@ -477,7 +480,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
         bootstrapperFuture.whenComplete(
             (res, ex) -> {
               if (ex != null) {
-                TracingUtil.setErrorStatus(tracingSpan, ex);
+                TracingTags.setErrorStatus(tracingSpan, ex);
               }
               tracingSpan.finish();
             });
@@ -523,9 +526,9 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
    */
   public CompletableFuture<Void> waitRunningAsync(
       List<CompletableFuture<?>> toCancelFutures, KubernetesMachineImpl machine) {
-    Span tracingSpan = tracer.buildSpan("WaitRunningAsync").start();
-    TracingUtil.setWorkspaceIdAndMachineName(
-        tracingSpan, machine.getWorkspaceId(), machine.getName());
+    Span tracingSpan = tracer.buildSpan(WAIT_RUNNING_ASYNC).start();
+    TracingTags.WORKSPACE_ID.set(tracingSpan, machine.getWorkspaceId());
+    TracingTags.MACHINE_NAME.set(tracingSpan, machine.getName());
 
     CompletableFuture<Void> waitFuture =
         namespace.deployments().waitRunningAsync(machine.getPodName());
@@ -533,7 +536,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     waitFuture.whenComplete(
         (res, ex) -> {
           if (ex != null) {
-            TracingUtil.setErrorStatus(tracingSpan, ex);
+            TracingTags.setErrorStatus(tracingSpan, ex);
           }
           tracingSpan.finish();
         });

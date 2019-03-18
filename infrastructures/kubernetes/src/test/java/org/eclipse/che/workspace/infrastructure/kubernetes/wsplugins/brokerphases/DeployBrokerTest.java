@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.opentracing.Tracer;
 import java.util.List;
 import java.util.Set;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
@@ -37,6 +38,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -65,6 +67,9 @@ public class DeployBrokerTest {
   @Mock private BrokersResult brokersResult;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverableEventListenerFactory;
 
+  @Mock(answer = Answers.RETURNS_MOCKS)
+  private Tracer tracer;
+
   private List<ChePlugin> plugins = emptyList();
 
   private DeployBroker deployBrokerPhase;
@@ -77,7 +82,8 @@ public class DeployBrokerTest {
             k8sNamespace,
             k8sEnvironment,
             brokersResult,
-            unrecoverableEventListenerFactory);
+            unrecoverableEventListenerFactory,
+            tracer);
     deployBrokerPhase.then(nextBrokerPhase);
 
     when(nextBrokerPhase.execute()).thenReturn(plugins);
