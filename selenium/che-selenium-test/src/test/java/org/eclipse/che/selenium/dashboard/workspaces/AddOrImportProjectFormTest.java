@@ -63,7 +63,7 @@ public class AddOrImportProjectFormTest {
   private static final ImmutableMap<String, String> EXPECTED_SAMPLES_WITH_DESCRIPTIONS =
       ImmutableMap.of(
           SPRING_BOOT_GS_REST_SERVICE_NAME,
-          "Spring Boot Guide to build a RESTful web service ",
+          "Spring Boot Guide to build a RESTful web service",
           CONSOLE_SAMPLE_NAME,
           "A hello world Java application.");
 
