@@ -29,7 +29,11 @@ public class TracerProvider implements Provider<Tracer> {
   private final Tracer tracer;
 
   public TracerProvider() {
-    this.tracer = TracerResolver.resolveTracer();
+    this(TracerResolver.resolveTracer());
+  }
+
+  public TracerProvider(Tracer tracer) {
+    this.tracer = tracer;
     GlobalTracer.register(tracer);
   }
 
