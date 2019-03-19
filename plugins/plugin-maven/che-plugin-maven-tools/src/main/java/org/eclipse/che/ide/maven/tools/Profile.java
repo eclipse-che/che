@@ -308,7 +308,9 @@ public class Profile {
       profile.appendChild(newPropertiesElement(properties));
     }
 
-    if (dependencyManagement != null && !dependencyManagement.getDependencies().isEmpty()) {
+    if (dependencies != null
+        && dependencyManagement != null
+        && !dependencyManagement.getDependencies().isEmpty()) {
       profile.appendChild(newDependencyManagementElement(dependencies.get()));
     }
 

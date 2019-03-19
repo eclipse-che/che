@@ -194,6 +194,8 @@ class WorkspaceStatusNotification implements PopupLoader.ActionDelegate {
             popupLoaderFactory.getPopup(
                 locale.wsAgentStopped(), locale.wsAgentStoppedDescription(), widget);
         break;
+      default:
+        throw new RuntimeException("Internal error: Unknown workspace phase.");
     }
 
     popup.setDelegate(this);

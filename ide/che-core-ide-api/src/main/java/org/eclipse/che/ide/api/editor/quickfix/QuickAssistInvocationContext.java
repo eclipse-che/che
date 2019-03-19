@@ -27,9 +27,6 @@ public final class QuickAssistInvocationContext {
 
   public QuickAssistInvocationContext(
       @Nullable final Integer offset, @NotNull final TextEditor textEditor) {
-    if (textEditor == null) {
-      throw new IllegalArgumentException("editor handle cannot be null");
-    }
     this.offset = offset;
     this.textEditor = textEditor;
   }

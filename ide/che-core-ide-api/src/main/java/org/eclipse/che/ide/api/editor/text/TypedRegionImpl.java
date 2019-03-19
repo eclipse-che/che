@@ -41,7 +41,8 @@ public class TypedRegionImpl extends RegionImpl implements TypedRegion {
     if (o instanceof TypedRegionImpl) {
       TypedRegionImpl r = (TypedRegionImpl) o;
       return super.equals(r)
-          && ((fType == null && r.getType() == null) || fType.equals(r.getType()));
+          && ((fType == null && r.getType() == null)
+              || (fType != null && fType.equals(r.getType())));
     }
     return false;
   }

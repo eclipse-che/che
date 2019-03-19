@@ -301,7 +301,10 @@ public class AppContextImpl
 
     Log.debug(
         AppContextImpl.class,
-        "Project Root: " + projectsRoot + " workspace: " + workspace.getConfig().getName());
+        "Project Root: "
+            + projectsRoot
+            + " workspace: "
+            + (workspace != null ? workspace.getConfig().getName() : "null"));
 
     return projectsRoot;
   }

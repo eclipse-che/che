@@ -71,6 +71,6 @@ public class AttributeValue implements Value {
 
   @Override
   public int hashCode() {
-    return values != null ? values.hashCode() : 0;
+    return values.hashCode();
   }
 }

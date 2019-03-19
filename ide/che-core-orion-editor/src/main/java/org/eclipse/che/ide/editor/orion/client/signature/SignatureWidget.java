@@ -39,6 +39,7 @@ import elemental.html.HTMLCollection;
 import elemental.html.SpanElement;
 import elemental.html.Window;
 import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.editor.signature.ParameterInfo;
 import org.eclipse.che.ide.api.editor.signature.SignatureHelp;
 import org.eclipse.che.ide.api.editor.signature.SignatureInfo;
@@ -63,12 +64,14 @@ public class SignatureWidget implements EventListener {
   private final PopupResources popupResources;
   /** The related editor. */
   private final OrionEditorWidget textEditor;
-  /** The main element for the popup. */
-  private final Element popupElement;
 
-  private final Element popupBodyElement;
+  /** The main element for the popup. */
+  @NotNull private final Element popupElement;
+
+  @NotNull private final Element popupBodyElement;
+
   /** The list (ul) element for the popup. */
-  private final Element listElement;
+  @NotNull private final Element listElement;
 
   private final EventListener popupListener;
   private final OrionKeyModeOverlay assistMode;
@@ -617,22 +620,24 @@ public class SignatureWidget implements EventListener {
     return visible;
   }
 
+  @NotNull
   private Element getExtraTopRow() {
-    return (listElement == null) ? null : listElement.getFirstElementChild();
+    return listElement.getFirstElementChild();
   }
 
+  @NotNull
   private Element getExtraBottomRow() {
-    return (listElement == null) ? null : listElement.getLastElementChild();
+    return listElement.getLastElementChild();
   }
 
   private Element getFirstItemInDOM() {
     Element extraTopRow = getExtraTopRow();
-    return (extraTopRow == null) ? null : extraTopRow.getNextElementSibling();
+    return extraTopRow.getNextElementSibling();
   }
 
   private Element getLastItemInDOM() {
     Element extraBottomRow = getExtraBottomRow();
-    return (extraBottomRow == null) ? null : extraBottomRow.getPreviousElementSibling();
+    return extraBottomRow.getPreviousElementSibling();
   }
 
   private int getItemId(Element item) {

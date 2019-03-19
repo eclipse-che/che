@@ -59,7 +59,8 @@ public class TypedPosition extends Position {
     if (o instanceof TypedPosition) {
       if (super.equals(o)) {
         TypedPosition p = (TypedPosition) o;
-        return (fType == null && p.getType() == null) || fType.equals(p.getType());
+        return (fType == null && p.getType() == null)
+            || (fType != null && fType.equals(p.getType()));
       }
     }
     return false;

@@ -715,7 +715,7 @@ public final class Path {
    * are as follows:
    *
    * <ul>
-   *   <li>the empty string is not valid
+   *   <li>the empty string or null are not valid
    *   <li>any string containing the slash character ('/') is not valid
    *   <li>any string containing segment or device separator characters on the local file system,
    *       such as the backslash ('\') and colon (':') on some file systems.
@@ -726,6 +726,9 @@ public final class Path {
    * @since 4.0.0-RC5
    */
   protected static boolean isValidSegment(String segment) {
+    if (segment == null) {
+      return false;
+    }
     int size = segment.length();
     if (size == 0) return false;
     for (int i = 0; i < size; i++) {
@@ -875,10 +878,10 @@ public final class Path {
    */
   public Path removeFileExtension() {
     String extension = getFileExtension();
-    if (extension == null || extension.equals("")) {
+    String lastSegment = lastSegment();
+    if (lastSegment == null || extension == null || extension.equals("")) {
       return this;
     }
-    String lastSegment = lastSegment();
     int index = lastSegment.lastIndexOf(extension) - 1;
     return removeLastSegments(1).append(lastSegment.substring(0, index));
   }

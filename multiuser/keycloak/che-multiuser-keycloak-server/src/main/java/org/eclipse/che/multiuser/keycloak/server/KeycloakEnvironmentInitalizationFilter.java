@@ -90,6 +90,7 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
       Jwt jwtToken = (Jwt) httpRequest.getAttribute("token");
       if (jwtToken == null) {
         sendError(response, 401, "Cannot detect or instantiate user.");
+        return;
       }
       Claims claims = (Claims) jwtToken.getBody();
 

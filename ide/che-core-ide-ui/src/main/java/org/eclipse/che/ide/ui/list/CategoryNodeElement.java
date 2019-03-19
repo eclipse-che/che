@@ -135,8 +135,10 @@ public class CategoryNodeElement extends FlowPanel {
 
             if (keyDownEvent.isUpArrow() || keyDownEvent.isDownArrow()) {
               keyDownEvent.preventDefault();
-              element.scrollIntoView();
-              selectElement(element);
+              if (element != null) {
+                element.scrollIntoView();
+                selectElement(element);
+              }
             }
           }
         },

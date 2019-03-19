@@ -135,10 +135,12 @@ public class BreakpointRendererImpl implements BreakpointRenderer {
 
   @Override
   public void setLineActive(final int lineNumber, final boolean active) {
-    if (active && this.lineStyler != null) {
-      this.lineStyler.addLineStyles(lineNumber, this.editorResources.editorCss().debugLine());
-    } else {
-      this.lineStyler.removeLineStyles(lineNumber, this.editorResources.editorCss().debugLine());
+    if (this.lineStyler != null) {
+      if (active) {
+        this.lineStyler.addLineStyles(lineNumber, this.editorResources.editorCss().debugLine());
+      } else {
+        this.lineStyler.removeLineStyles(lineNumber, this.editorResources.editorCss().debugLine());
+      }
     }
   }
 

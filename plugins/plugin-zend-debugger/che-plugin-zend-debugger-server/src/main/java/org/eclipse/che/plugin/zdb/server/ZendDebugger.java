@@ -196,6 +196,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   @Override
   public SimpleValue getValue(VariablePath variablePath) {
     IDbgVariable matchingVariable = debugVariableStorage.findVariable(variablePath);
+    // TODO: 'A "NullPointerException" could be thrown; "matchingVariable" is nullable here.'
     matchingVariable.makeComplete();
     return matchingVariable.getValue();
   }
@@ -262,6 +263,7 @@ public class ZendDebugger implements Debugger, IEngineMessageHandler {
   @Override
   public void setValue(Variable variable) throws DebuggerException {
     Variable matchingVariable = debugVariableStorage.findVariable(variable.getVariablePath());
+    // TODO: 'A "NullPointerException" could be thrown; "matchingVariable" is nullable here.'
     ((ZendDbgVariable) matchingVariable).setValue(variable.getValue().getString());
   }
 
