@@ -49,46 +49,48 @@ public class ComposerCommandExecutor {
     eventService.publish(
         new ComposerOutputImpl(String.join(" ", commandLine), ComposerOutput.State.START));
 
-    LineConsumer lineConsumer =
+    try (LineConsumer lineConsumer =
         new AbstractLineConsumer() {
           @Override
           public void writeLine(String line) throws IOException {
             eventService.publish(new ComposerOutputImpl(line, ComposerOutput.State.IN_PROGRESS));
           }
-        };
+        }) {
 
-    // process will be stopped after timeout
-    Watchdog watcher = new Watchdog(10, TimeUnit.MINUTES);
+      // process will be stopped after timeout
+      Watchdog watcher = new Watchdog(10, TimeUnit.MINUTES);
 
-    try {
-      final Process process = pb.start();
-      final ValueHolder<Boolean> isTimeoutExceeded = new ValueHolder<>(false);
-      watcher.start(
-          () -> {
-            isTimeoutExceeded.set(true);
-            ProcessUtil.kill(process);
-          });
-      // consume logs until process ends
-      ProcessUtil.process(process, lineConsumer);
-      process.waitFor();
-      eventService.publish(new ComposerOutputImpl("Done", ComposerOutput.State.DONE));
-      if (isTimeoutExceeded.get()) {
-        LOG.error("Command time expired : command-line " + Arrays.toString(commandLine));
-        eventService.publish(
-            new ComposerOutputImpl(
-                "Installing dependencies time expired", ComposerOutput.State.ERROR));
-        throw new TimeoutException();
-      } else if (process.exitValue() != 0) {
-        LOG.error("Command failed : command-line " + Arrays.toString(commandLine));
-        eventService.publish(new ComposerOutputImpl("Error occurred", ComposerOutput.State.ERROR));
-        throw new IOException(
-            "Process failed. Exit code "
-                + process.exitValue()
-                + " command-line : "
-                + Arrays.toString(commandLine));
+      try {
+        final Process process = pb.start();
+        final ValueHolder<Boolean> isTimeoutExceeded = new ValueHolder<>(false);
+        watcher.start(
+            () -> {
+              isTimeoutExceeded.set(true);
+              ProcessUtil.kill(process);
+            });
+        // consume logs until process ends
+        ProcessUtil.process(process, lineConsumer);
+        process.waitFor();
+        eventService.publish(new ComposerOutputImpl("Done", ComposerOutput.State.DONE));
+        if (isTimeoutExceeded.get()) {
+          LOG.error("Command time expired : command-line " + Arrays.toString(commandLine));
+          eventService.publish(
+              new ComposerOutputImpl(
+                  "Installing dependencies time expired", ComposerOutput.State.ERROR));
+          throw new TimeoutException();
+        } else if (process.exitValue() != 0) {
+          LOG.error("Command failed : command-line " + Arrays.toString(commandLine));
+          eventService.publish(
+              new ComposerOutputImpl("Error occurred", ComposerOutput.State.ERROR));
+          throw new IOException(
+              "Process failed. Exit code "
+                  + process.exitValue()
+                  + " command-line : "
+                  + Arrays.toString(commandLine));
+        }
+      } finally {
+        watcher.stop();
       }
-    } finally {
-      watcher.stop();
     }
   }
 }

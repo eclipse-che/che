@@ -692,23 +692,18 @@ public class DockerConnector {
    * @apiNote this method implements 1.20 docker API and requires docker not less than 1.8.0 version
    */
   public InputStream getResource(final GetResourceParams params) throws IOException {
-    DockerConnection connection = null;
-    try {
-      connection =
-          connectionFactory
-              .openConnection(dockerDaemonUri)
-              .method("GET")
-              .path(apiVersionPathPrefix + "/containers/" + params.getContainer() + "/archive")
-              .query("path", params.getSourcePath());
+    try (DockerConnection connection =
+        connectionFactory
+            .openConnection(dockerDaemonUri)
+            .method("GET")
+            .path(apiVersionPathPrefix + "/containers/" + params.getContainer() + "/archive")
+            .query("path", params.getSourcePath())) {
 
       final DockerResponse response = connection.request();
       if (response.getStatus() != OK.getStatusCode()) {
         throw getDockerException(response);
       }
       return new CloseConnectionInputStream(response.getInputStream(), connection);
-    } catch (IOException io) {
-      connection.close();
-      throw io;
     }
   }
 
@@ -807,9 +802,10 @@ public class DockerConnector {
 
     if (params.getRemote() != null) {
       // build context provided by remote URL
-      DockerConnection dockerConnection =
-          connectionFactory.openConnection(dockerDaemonUri).query("remote", params.getRemote());
-      return buildImage(dockerConnection, params, progressMonitor);
+      try (DockerConnection dockerConnection =
+          connectionFactory.openConnection(dockerDaemonUri).query("remote", params.getRemote())) {
+        return buildImage(dockerConnection, params, progressMonitor);
+      }
     }
 
     // build context is set of files
@@ -819,13 +815,14 @@ public class DockerConnector {
       files = params.getFiles().toArray(files);
       createTarArchive(tar, files);
       try (InputStream tarInput = new FileInputStream(tar)) {
-        DockerConnection dockerConnection =
+        try (DockerConnection dockerConnection =
             connectionFactory
                 .openConnection(dockerDaemonUri)
                 .header("Content-Type", "application/x-compressed-tar")
                 .header("Content-Length", tar.length())
-                .entity(tarInput);
-        return buildImage(dockerConnection, params, progressMonitor);
+                .entity(tarInput)) {
+          return buildImage(dockerConnection, params, progressMonitor);
+        }
       }
     } finally {
       FileCleaner.addFile(tar);

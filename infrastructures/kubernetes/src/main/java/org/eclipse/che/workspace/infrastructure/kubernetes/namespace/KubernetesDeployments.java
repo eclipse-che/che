@@ -31,6 +31,7 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import io.fabric8.kubernetes.api.model.apps.DoneableDeployment;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
 import io.fabric8.kubernetes.client.Watcher;
@@ -173,40 +174,34 @@ public class KubernetesDeployments {
       throws InfrastructureException {
     final String deploymentName = deployment.getMetadata().getName();
     final CompletableFuture<Pod> createFuture = new CompletableFuture<>();
-    final Watch createWatch =
-        clientFactory
-            .create(workspaceId)
-            .pods()
-            .inNamespace(namespace)
-            .watch(new CreateWatcher(createFuture, workspaceId, deploymentName));
-    try {
-      clientFactory
-          .create(workspaceId)
-          .apps()
-          .deployments()
-          .inNamespace(namespace)
-          .create(deployment);
-      return createFuture.get(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
-    } catch (KubernetesClientException e) {
-      throw new KubernetesInfrastructureException(e);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new InfrastructureException(
-          String.format(
-              "Interrupted while waiting for Pod creation. -id: %s -message: %s",
-              deploymentName, e.getMessage()));
-    } catch (ExecutionException e) {
-      throw new InfrastructureException(
-          String.format(
-              "Error occured while waiting for Pod creation. -id: %s -message: %s",
-              deploymentName, e.getCause().getMessage()));
-    } catch (TimeoutException e) {
-      throw new InfrastructureException(
-          String.format(
-              "Pod creation timeout exceeded. -id: %s -message: %s",
-              deploymentName, e.getMessage()));
-    } finally {
-      createWatch.close();
+    try (final KubernetesClient clientForWatcher = clientFactory.create(workspaceId)) {
+      final Watch createWatch =
+          clientForWatcher
+              .pods()
+              .inNamespace(namespace)
+              .watch(new CreateWatcher(createFuture, workspaceId, deploymentName));
+      try (final KubernetesClient clientForDeploy = clientFactory.create(workspaceId)) {
+        clientForDeploy.apps().deployments().inNamespace(namespace).create(deployment);
+        return createFuture.get(POD_CREATION_TIMEOUT_MIN, TimeUnit.MINUTES);
+      } catch (KubernetesClientException e) {
+        throw new KubernetesInfrastructureException(e);
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        throw new InfrastructureException(
+            String.format(
+                "Interrupted while waiting for Pod creation. -id: %s -message: %s",
+                deploymentName, e.getMessage()));
+      } catch (ExecutionException e) {
+        throw new InfrastructureException(
+            String.format(
+                "Error occured while waiting for Pod creation. -id: %s -message: %s",
+                deploymentName, e.getCause().getMessage()));
+      } catch (TimeoutException e) {
+        throw new InfrastructureException(
+            String.format(
+                "Pod creation timeout exceeded. -id: %s -message: %s",
+                deploymentName, e.getMessage()));
+      }
     }
   }
 
@@ -219,8 +214,8 @@ public class KubernetesDeployments {
    */
   public Pod create(Pod pod) throws InfrastructureException {
     putLabel(pod, CHE_WORKSPACE_ID_LABEL, workspaceId);
-    try {
-      return clientFactory.create(workspaceId).pods().inNamespace(namespace).create(pod);
+    try (final KubernetesClient client = clientFactory.create(workspaceId)) {
+      return client.pods().inNamespace(namespace).create(pod);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
@@ -232,9 +227,8 @@ public class KubernetesDeployments {
    * @throws InfrastructureException when any exception occurs
    */
   public List<Pod> get() throws InfrastructureException {
-    try {
-      return clientFactory
-          .create(workspaceId)
+    try (final KubernetesClient client = clientFactory.create(workspaceId)) {
+      return client
           .pods()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)
@@ -272,10 +266,10 @@ public class KubernetesDeployments {
     String podName = getPodName(name);
     CompletableFuture<Pod> future = new CompletableFuture<>();
     Watch watch = null;
-    try {
+    try (final KubernetesClient client = clientFactory.create(workspaceId)) {
 
       PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
+          client.pods().inNamespace(namespace).withName(podName);
 
       watch =
           podResource.watch(
@@ -349,36 +343,38 @@ public class KubernetesDeployments {
     final CompletableFuture<Void> podRunningFuture = new CompletableFuture<>();
     try {
       final String podName = getPodName(name);
-      final PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
-      final Watch watch =
-          podResource.watch(
-              new Watcher<Pod>() {
-                @Override
-                public void eventReceived(Action action, Pod pod) {
-                  handleStartingPodStatus(podRunningFuture, pod);
-                }
+      try (final KubernetesClient client = clientFactory.create(workspaceId)) {
+        final PodResource<Pod, DoneablePod> podResource =
+            client.pods().inNamespace(namespace).withName(podName);
+        final Watch watch =
+            podResource.watch(
+                new Watcher<Pod>() {
+                  @Override
+                  public void eventReceived(Action action, Pod pod) {
+                    handleStartingPodStatus(podRunningFuture, pod);
+                  }
 
-                @Override
-                public void onClose(KubernetesClientException cause) {
-                  podRunningFuture.completeExceptionally(
-                      new InfrastructureException(
-                          "Waiting for pod '" + podName + "' was interrupted"));
-                }
-              });
+                  @Override
+                  public void onClose(KubernetesClientException cause) {
+                    podRunningFuture.completeExceptionally(
+                        new InfrastructureException(
+                            "Waiting for pod '" + podName + "' was interrupted"));
+                  }
+                });
 
-      podRunningFuture.whenComplete((ok, ex) -> watch.close());
-      final Pod pod = podResource.get();
-      if (pod == null) {
-        InfrastructureException ex;
-        if (name.equals(podName)) { // `name` refers to bare pod
-          ex = new InfrastructureException("Specified pod " + podName + " doesn't exist");
+        podRunningFuture.whenComplete((ok, ex) -> watch.close());
+        final Pod pod = podResource.get();
+        if (pod == null) {
+          InfrastructureException ex;
+          if (name.equals(podName)) { // `name` refers to bare pod
+            ex = new InfrastructureException("Specified pod " + podName + " doesn't exist");
+          } else {
+            ex = new InfrastructureException("No pod in deployment " + name + " found.");
+          }
+          podRunningFuture.completeExceptionally(ex);
         } else {
-          ex = new InfrastructureException("No pod in deployment " + name + " found.");
+          handleStartingPodStatus(podRunningFuture, pod);
         }
-        podRunningFuture.completeExceptionally(ex);
-      } else {
-        handleStartingPodStatus(podRunningFuture, pod);
       }
     } catch (KubernetesClientException | InfrastructureException ex) {
       podRunningFuture.completeExceptionally(ex);
@@ -697,9 +693,8 @@ public class KubernetesDeployments {
    * @throws InfrastructureException when any other exception occurs
    */
   public void delete(String name) throws InfrastructureException {
-    try {
-      Pod pod =
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get();
+    try (final KubernetesClient client = clientFactory.create(workspaceId)) {
+      Pod pod = client.pods().inNamespace(namespace).withName(name).get();
       if (pod != null) {
         doDeletePod(name).get(POD_REMOVAL_TIMEOUT_MIN, TimeUnit.MINUTES);
       } else {
@@ -845,9 +840,9 @@ public class KubernetesDeployments {
 
   protected CompletableFuture<Void> doDeletePod(String podName) throws InfrastructureException {
     Watch toCloseOnException = null;
-    try {
+    try (final KubernetesClient client = clientFactory.create(workspaceId)) {
       PodResource<Pod, DoneablePod> podResource =
-          clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(podName);
+          client.pods().inNamespace(namespace).withName(podName);
       if (podResource.get() == null) {
         throw new InfrastructureException(
             String.format("No pod found to delete for name %s", podName));
@@ -894,38 +889,40 @@ public class KubernetesDeployments {
   }
 
   private Optional<Pod> findPod(String name) throws InfrastructureException {
-    Pod pod = clientFactory.create(workspaceId).pods().inNamespace(namespace).withName(name).get();
-    if (pod != null) {
-      return Optional.of(pod);
-    }
-    Deployment deployment =
-        clientFactory
-            .create(workspaceId)
-            .apps()
-            .deployments()
-            .inNamespace(namespace)
-            .withName(name)
-            .get();
-    if (deployment == null) {
-      return Optional.empty();
-    }
-    Map<String, String> selector = deployment.getSpec().getSelector().getMatchLabels();
-    List<Pod> pods =
-        clientFactory
-            .create(workspaceId)
-            .pods()
-            .inNamespace(namespace)
-            .withLabels(selector)
-            .list()
-            .getItems();
-    if (pods.isEmpty()) {
-      return Optional.empty();
-    } else if (pods.size() > 1) {
-      throw new InfrastructureException(
-          String.format("Found multiple pods in Deployment '%s'", name));
-    }
+    try (KubernetesClient client = clientFactory.create(workspaceId)) {
+      Pod pod = client.pods().inNamespace(namespace).withName(name).get();
+      if (pod != null) {
+        return Optional.of(pod);
+      }
+      Deployment deployment =
+          clientFactory
+              .create(workspaceId)
+              .apps()
+              .deployments()
+              .inNamespace(namespace)
+              .withName(name)
+              .get();
+      if (deployment == null) {
+        return Optional.empty();
+      }
+      Map<String, String> selector = deployment.getSpec().getSelector().getMatchLabels();
+      List<Pod> pods =
+          clientFactory
+              .create(workspaceId)
+              .pods()
+              .inNamespace(namespace)
+              .withLabels(selector)
+              .list()
+              .getItems();
+      if (pods.isEmpty()) {
+        return Optional.empty();
+      } else if (pods.size() > 1) {
+        throw new InfrastructureException(
+            String.format("Found multiple pods in Deployment '%s'", name));
+      }
 
-    return Optional.of(pods.get(0));
+      return Optional.of(pods.get(0));
+    }
   }
 
   /**

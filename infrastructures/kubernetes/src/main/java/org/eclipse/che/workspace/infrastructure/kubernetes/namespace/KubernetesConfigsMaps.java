@@ -15,6 +15,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
 
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -46,8 +47,8 @@ public class KubernetesConfigsMaps {
    */
   public void create(ConfigMap configMap) throws InfrastructureException {
     putLabel(configMap, CHE_WORKSPACE_ID_LABEL, workspaceId);
-    try {
-      clientFactory.create(workspaceId).configMaps().inNamespace(namespace).create(configMap);
+    try (final KubernetesClient client = clientFactory.create(workspaceId)) {
+      client.configMaps().inNamespace(namespace).create(configMap);
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
     }
@@ -59,9 +60,8 @@ public class KubernetesConfigsMaps {
    * @throws InfrastructureException when any exception occurs
    */
   public void delete() throws InfrastructureException {
-    try {
-      clientFactory
-          .create(workspaceId)
+    try (final KubernetesClient client = clientFactory.create(workspaceId)) {
+      client
           .configMaps()
           .inNamespace(namespace)
           .withLabel(CHE_WORKSPACE_ID_LABEL, workspaceId)

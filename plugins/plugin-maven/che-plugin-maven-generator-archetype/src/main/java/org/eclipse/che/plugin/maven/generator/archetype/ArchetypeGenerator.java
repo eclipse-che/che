@@ -126,44 +126,46 @@ public class ArchetypeGenerator {
     eventService.publish(
         new ArchetypeOutputImpl("Start Project generation", ArchetypeOutput.State.START));
 
-    LineConsumer lineConsumer =
+    try (LineConsumer lineConsumer =
         new AbstractLineConsumer() {
           @Override
           public void writeLine(String line) throws IOException {
             eventService.publish(new ArchetypeOutputImpl(line, ArchetypeOutput.State.IN_PROGRESS));
           }
-        };
+        }) {
 
-    // process will be stopped after timeout
-    Watchdog watcher = new Watchdog(60, TimeUnit.SECONDS);
+      // process will be stopped after timeout
+      Watchdog watcher = new Watchdog(60, TimeUnit.SECONDS);
 
-    try {
-      final Process process = pb.start();
-      final ValueHolder<Boolean> isTimeoutExceeded = new ValueHolder<>(false);
-      watcher.start(
-          () -> {
-            isTimeoutExceeded.set(true);
-            ProcessUtil.kill(process);
-          });
-      // consume logs until process ends
-      ProcessUtil.process(process, lineConsumer);
-      process.waitFor();
-      eventService.publish(new ArchetypeOutputImpl("Done", DONE));
-      if (isTimeoutExceeded.get()) {
-        LOG.error("Generation project time expired : command-line " + Arrays.toString(commandLine));
-        eventService.publish(new ArchetypeOutputImpl("Generation project time expired", ERROR));
-        throw new TimeoutException();
-      } else if (process.exitValue() != 0) {
-        LOG.error("Generation project fail : command-line " + Arrays.toString(commandLine));
-        eventService.publish(new ArchetypeOutputImpl("Generation project occurs error", ERROR));
-        throw new IOException(
-            "Process failed. Exit code "
-                + process.exitValue()
-                + " command-line : "
-                + Arrays.toString(commandLine));
+      try {
+        final Process process = pb.start();
+        final ValueHolder<Boolean> isTimeoutExceeded = new ValueHolder<>(false);
+        watcher.start(
+            () -> {
+              isTimeoutExceeded.set(true);
+              ProcessUtil.kill(process);
+            });
+        // consume logs until process ends
+        ProcessUtil.process(process, lineConsumer);
+        process.waitFor();
+        eventService.publish(new ArchetypeOutputImpl("Done", DONE));
+        if (isTimeoutExceeded.get()) {
+          LOG.error(
+              "Generation project time expired : command-line " + Arrays.toString(commandLine));
+          eventService.publish(new ArchetypeOutputImpl("Generation project time expired", ERROR));
+          throw new TimeoutException();
+        } else if (process.exitValue() != 0) {
+          LOG.error("Generation project fail : command-line " + Arrays.toString(commandLine));
+          eventService.publish(new ArchetypeOutputImpl("Generation project occurs error", ERROR));
+          throw new IOException(
+              "Process failed. Exit code "
+                  + process.exitValue()
+                  + " command-line : "
+                  + Arrays.toString(commandLine));
+        }
+      } finally {
+        watcher.stop();
       }
-    } finally {
-      watcher.stop();
     }
   }
 
