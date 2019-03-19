@@ -36,8 +36,8 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
   private ApiInfo apiInfo;
 
   @Inject
-  public ApiInfoProvider(@Named("che.product.build_info") String version) {
-    this.apiInfo = readApiInfo(version);
+  public ApiInfoProvider(@Named("che.product.build_info") String buildInfo) {
+    this.apiInfo = readApiInfo(buildInfo);
   }
 
   @Override
@@ -45,7 +45,7 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
     return apiInfo;
   }
 
-  private ApiInfo readApiInfo(String version) {
+  private ApiInfo readApiInfo(String buildInfo) {
     try {
       try (InputStream manifestInputStream =
           ApiInfoProvider.class.getResourceAsStream("/META-INF/MANIFEST.MF")) {
@@ -61,7 +61,7 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
             .withSpecificationVersion(mainAttributes.getValue("Specification-Version"))
             .withImplementationVersion(mainAttributes.getValue("Implementation-Version"))
             .withScmRevision(mainAttributes.getValue("SCM-Revision"))
-            .withProductVersion(version);
+            .withBuildInfo(buildInfo);
       }
 
     } catch (Exception e) {
