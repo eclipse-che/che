@@ -136,6 +136,44 @@ So, alternatively, if you need to post devfile with such tools to REST API, cont
               ... etc
 ```
 
+As with `dockerimage` tool described below, it is possible to override the entrypoint of the
+containers contained in the Kubernetes/Openshift list using the `command` and `args` properties (as
+[understood](https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#notes)
+by Kubernetes). Of course, there can be more containers in the list (contained in pods or pod
+templates of deployments) and so there needs to be a way of selecting which containers to apply the
+entrypoint changes to.
+
+The entrypoints can be defined for example like this:
+
+```yaml
+...
+  tools:
+    - name: appDeployment
+      type: kubernetes
+      local: app-deployment.yaml
+      entrypoints:
+      - parentName: mysqlServer
+        command: ['sleep']
+        args: ['infinity']
+      - parentSelector:
+          app: prometheus
+        args: ['-f', '/opt/app/prometheus-config.yaml']
+```
+
+You can see that the `entrypoints` list contains constraints for picking the containers along with
+the command/args to apply to them. In the example above, the constraint is `parentName: mysqlServer`
+which will cause the command to be applied to all containers defined in any parent object called
+`mysqlServer`. The parent object is assumed to be a top level object in the list defined in the
+referenced file, e.g. `app-deployment.yaml` in the example above.
+
+Other types of constraints (and their combinations) are possible:
+
+* `containerName` - the name of the container
+* `parentName` - the name of the parent object that (indirectly) contains the containers to override
+* `parentSelector` - the set of labels the parent object needs to have
+
+Combination of these constraints can be used to precisely locate the containers inside the 
+referenced Kubernetes list.
 
 #### dockerimage
 Tool type which allows to define docker image based configuration of container in workspace.

@@ -142,7 +142,8 @@
               "name": {},
               "local": {},
               "localContent": {},
-              "selector": {}
+              "selector": {},
+              "entrypoints": {}
             },
             "required": [
               "local"
@@ -244,7 +245,8 @@
             "items": {
               "type": "string"
             },
-            "description": "The command to run in the dockerimage tool instead of the default one provided in the image.",
+            "default": null,
+            "description": "The command to run in the dockerimage tool instead of the default one provided in the image. Defaults to null, meaning use whatever is defined in the image.",
             "examples": [
               "['/bin/sh', '-c']"
             ]
@@ -254,7 +256,8 @@
             "items": {
               "type": "string"
             },
-            "description": "The arguments to supply to the command running the dockerimage tool. The arguments are supplied either to the default command provided in the image or to the overridden command.",
+            "default": null,
+            "description": "The arguments to supply to the command running the dockerimage tool. The arguments are supplied either to the default command provided in the image or to the overridden command. Defaults to null, meaning use whatever is defined in the image.",
             "examples": [
               "['-R', '-f']"
             ]
@@ -358,6 +361,48 @@
                     "type": "string"
                   },
                   "javaType": "java.util.Map<String, String>"
+                }
+              }
+            }
+          },
+          "entrypoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "parentName": {
+                  "type": "string",
+                  "description": "The name of the top level object in the referenced object list in which to search for containers. If not specified, the objects to search through can have any name."
+                },
+                "containerName": {
+                  "type": "string",
+                  "description": "The name of the container to apply the entrypoint to. If not specified, the entrypoint is modified on all matching containers."
+                },
+                "parentSelector": {
+                  "$ref": "#/definitions/selector",
+                  "description": "The selector on labels of the top level objects in the referenced list in which to search for containers. If not specified, the objects to search through can have any labels."
+                },
+                "command": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": null,
+                  "description": "The command to run in the tool instead of the default one provided in the image of the container. Defaults to null, meaning use whatever is defined in the image.",
+                  "examples": [
+                    "['/bin/sh', '-c']"
+                  ]
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "default": null,
+                  "description": "The arguments to supply to the command running the tool. The arguments are supplied either to the default command provided in the image of the container or to the overridden command. Defaults to null, meaning use whatever is defined in the image.",
+                  "examples": [
+                    "['-R', '-f']"
+                  ]
                 }
               }
             }
