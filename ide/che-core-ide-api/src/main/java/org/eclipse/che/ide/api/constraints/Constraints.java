@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.ide.api.constraints;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Represents constraints for some action. Constraints are used to specify action's position in the
  * default group, see {@link org.eclipse.che.ide.api.action.DefaultActionGroup}.
@@ -38,7 +40,7 @@ public class Constraints {
    * @param anchor anchor
    * @param relativeId Id of the relative
    */
-  public Constraints(Anchor anchor, String relativeId) {
+  public Constraints(@NotNull Anchor anchor, String relativeId) {
     myAnchor = anchor;
     this.relativeId = relativeId;
   }
@@ -50,7 +52,7 @@ public class Constraints {
    * @param direction direction
    * @param relativeId Id of the relative
    */
-  public Constraints(Direction direction, String relativeId) {
+  public Constraints(@NotNull Direction direction, String relativeId) {
     this.direction = direction;
     this.relativeId = relativeId;
   }
@@ -60,7 +62,8 @@ public class Constraints {
       return new Constraints(myAnchor, relativeId);
     } else if (direction != null) {
       return new Constraints(direction, relativeId);
+    } else {
+      throw new RuntimeException("Internal error: Both of myAnchor and direction are null.");
     }
-    return null;
   }
 }
