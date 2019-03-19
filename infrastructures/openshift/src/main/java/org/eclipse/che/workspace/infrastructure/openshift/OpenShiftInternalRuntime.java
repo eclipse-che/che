@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.openshift.api.model.Route;
+import io.opentracing.Tracer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,9 +29,7 @@ import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
-import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
@@ -75,7 +74,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner,
       RuntimeHangingDetector runtimeHangingDetector,
-      @Nullable OptionalTracer tracer,
+      Tracer tracer,
       @Assisted OpenShiftRuntimeContext context,
       @Assisted OpenShiftProject project) {
     super(

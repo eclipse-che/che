@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwt;
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.io.IOException;
 import java.security.Principal;
@@ -36,7 +37,6 @@ import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.multiuser.api.permission.server.AuthorizedSubject;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
@@ -64,13 +64,13 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
       RequestTokenExtractor tokenExtractor,
       PermissionChecker permissionChecker,
       KeycloakSettings settings,
-      OptionalTracer tracer) {
+      Tracer tracer) {
     this.userManager = userManager;
     this.tokenExtractor = tokenExtractor;
     this.permissionChecker = permissionChecker;
     this.keycloakSettings = settings;
     this.keycloakProfileRetriever = keycloakProfileRetriever;
-    this.tracer = OptionalTracer.fromNullable(tracer);
+    this.tracer = tracer;
   }
 
   @Override
@@ -144,7 +144,8 @@ public class KeycloakEnvironmentInitalizationFilter extends AbstractKeycloakFilt
 
     try {
       EnvironmentContext.getCurrent().setSubject(subject);
-      if (tracer != null) {
+      Span activeSpan = tracer.activeSpan();
+      if (activeSpan != null) {
         TracingTags.USER_ID.set(tracer.activeSpan(), subject.getUserId());
       }
       filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
