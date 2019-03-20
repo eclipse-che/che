@@ -134,11 +134,13 @@
                                 <configuration>
                                     <target>
                                         <!-- install node modules -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <exec dir="${basedir}" executable="npx" failonerror="true">
+                                            <arg value="yarn@1.9.4" />
                                             <arg value="install" />
                                         </exec>
                                         <!-- build workspace loader -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <exec dir="${basedir}" executable="npx" failonerror="true">
+                                            <arg value="yarn@1.9.4" />
                                             <arg value="run" />
                                             <arg value="build" />
                                         </exec>
@@ -154,7 +156,8 @@
                                 <configuration>
                                     <target>
                                         <!-- test workspace loader -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
+                                        <exec dir="${basedir}" executable="npx" failonerror="true">
+                                            <arg value="yarn@1.9.4" />
                                             <arg value="run" />
                                             <arg value="test" />
                                         </exec>
