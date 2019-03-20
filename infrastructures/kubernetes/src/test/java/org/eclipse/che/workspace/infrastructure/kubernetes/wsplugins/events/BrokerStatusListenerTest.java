@@ -89,7 +89,7 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verify(brokersResult).addResult(emptyList());
+    verify(brokersResult).brokerResult(emptyList());
   }
 
   @Test
@@ -124,7 +124,7 @@ public class BrokerStatusListenerTest {
     brokerStatusListener.onEvent(event);
 
     // then
-    verify(brokersResult, never()).addResult(anyList());
+    verify(brokersResult, never()).brokerResult(anyList());
   }
 
   @Test
