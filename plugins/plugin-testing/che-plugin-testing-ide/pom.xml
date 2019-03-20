@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-testing-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>7.0.0-beta-2.0-SNAPSHOT</version>
+        <version>7.0.0-beta-2.0</version>
     </parent>
     <artifactId>che-plugin-testing-ide</artifactId>
     <packaging>gwt-lib</packaging>
