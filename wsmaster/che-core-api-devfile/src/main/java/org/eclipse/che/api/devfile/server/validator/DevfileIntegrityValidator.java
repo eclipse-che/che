@@ -113,7 +113,8 @@ public class DevfileIntegrityValidator {
   private Set<String> validateTools(Devfile devfile) throws DevfileFormatException {
     Set<String> existingNames = new HashSet<>();
     Tool editorTool = null;
-    Tool recipeTool = null;
+    Tool dockerimageTool = null;
+    Tool k8sOSTool = null;
     for (Tool tool : devfile.getTools()) {
       if (!existingNames.add(tool.getName())) {
         throw new DevfileFormatException(format("Duplicate tool name found:'%s'", tool.getName()));
@@ -128,21 +129,33 @@ public class DevfileIntegrityValidator {
           }
           editorTool = tool;
           break;
+
         case PLUGIN_TOOL_TYPE:
           // do nothing
           break;
+
         case KUBERNETES_TOOL_TYPE:
-        case OPENSHIFT_TOOL_TYPE:
           // fall through
-        case DOCKERIMAGE_TOOL_TYPE:
-          if (recipeTool != null) {
+        case OPENSHIFT_TOOL_TYPE:
+          if (dockerimageTool != null) {
             throw new DevfileFormatException(
-                format(
-                    "Multiple non plugin or editor type tools found: '%s', '%s'",
-                    recipeTool.getName(), tool.getName()));
+                "Devfile cannot contain kubernetes/openshift and dockerimage tool at the same time");
           }
-          recipeTool = tool;
+          k8sOSTool = tool;
           break;
+
+        case DOCKERIMAGE_TOOL_TYPE:
+          if (k8sOSTool != null) {
+            throw new DevfileFormatException(
+                "Devfile cannot contain kubernetes/openshift and dockerimage tool at the same time");
+          }
+          if (dockerimageTool != null) {
+            throw new DevfileFormatException(
+                "Devfile cannot contain multiple dockerimage tools at the same time");
+          }
+          dockerimageTool = tool;
+          break;
+
         default:
           throw new DevfileFormatException(
               format("Unsupported tool '%s' type provided:'%s'", tool.getName(), tool.getType()));

@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
@@ -102,20 +104,8 @@ public class KubernetesEnvironment extends InternalEnvironment {
     this.secrets = secrets;
     this.configMaps = configMaps;
     this.podData = new HashMap<>();
-    pods.entrySet()
-        .forEach(
-            e -> {
-              Pod pod = e.getValue();
-              podData.put(e.getKey(), new PodData(pod.getSpec(), pod.getMetadata()));
-            });
-    deployments
-        .entrySet()
-        .forEach(
-            e -> {
-              PodTemplateSpec podTemplate = e.getValue().getSpec().getTemplate();
-              podData.put(
-                  e.getKey(), new PodData(podTemplate.getSpec(), podTemplate.getMetadata()));
-            });
+    pods.forEach((name, pod) -> podData.put(name, new PodData(pod)));
+    deployments.forEach((name, deployment) -> podData.put(name, new PodData(deployment)));
   }
 
   protected KubernetesEnvironment(
@@ -139,20 +129,8 @@ public class KubernetesEnvironment extends InternalEnvironment {
     this.secrets = secrets;
     this.configMaps = configMaps;
     this.podData = new HashMap<>();
-    pods.entrySet()
-        .forEach(
-            e -> {
-              Pod pod = e.getValue();
-              podData.put(e.getKey(), new PodData(pod.getSpec(), pod.getMetadata()));
-            });
-    deployments
-        .entrySet()
-        .forEach(
-            e -> {
-              PodTemplateSpec podTemplate = e.getValue().getSpec().getTemplate();
-              podData.put(
-                  e.getKey(), new PodData(podTemplate.getSpec(), podTemplate.getMetadata()));
-            });
+    pods.forEach((name, pod) -> podData.put(name, new PodData(pod)));
+    deployments.forEach((name, deployment) -> podData.put(name, new PodData(deployment)));
   }
 
   @Override
@@ -338,6 +316,30 @@ public class KubernetesEnvironment extends InternalEnvironment {
       this.podMeta = podMeta;
     }
 
+    public PodData(Pod pod) {
+      this(pod.getSpec(), pod.getMetadata());
+    }
+
+    public PodData(Deployment deployment) {
+      PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
+
+      // it is not required for PodTemplate to have name specified
+      // but many of Che Server components rely that PodData has name
+      // so, provision name from deployment if it is missing
+      ObjectMeta podTemplateMeta = podTemplate.getMetadata();
+      if (podTemplateMeta == null) {
+        podTemplate.setMetadata(
+            new ObjectMetaBuilder().withName(deployment.getMetadata().getName()).build());
+      } else {
+        if (podTemplateMeta.getName() == null) {
+          podTemplateMeta.setName(deployment.getMetadata().getName());
+        }
+      }
+
+      this.podSpec = podTemplate.getSpec();
+      this.podMeta = podTemplate.getMetadata();
+    }
+
     public PodSpec getSpec() {
       return podSpec;
     }
@@ -352,6 +354,28 @@ public class KubernetesEnvironment extends InternalEnvironment {
 
     public void setMetadata(ObjectMeta podMeta) {
       this.podMeta = podMeta;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      }
+      if (!(obj instanceof PodData)) {
+        return false;
+      }
+      final PodData that = (PodData) obj;
+      return Objects.equals(podSpec, that.podSpec) && Objects.equals(podMeta, that.podMeta);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(podSpec, podMeta);
+    }
+
+    @Override
+    public String toString() {
+      return "PodData{" + "podSpec=" + podSpec + ", podMeta=" + podMeta + '}';
     }
   }
 }

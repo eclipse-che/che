@@ -81,16 +81,13 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Multiple non plugin or editor type tools found: 'k8s', 'os'")
-  public void shouldThrowExceptionOnMultipleNonPluginTools() throws Exception {
+          "Devfile cannot contain multiple dockerimage tools at the same time")
+  public void shouldThrowExceptionOnMultipleDockerimagesTools() throws Exception {
     Devfile broken = copyOf(initialDevfile);
+    broken.getCommands().clear();
     broken.getTools().clear();
-    broken
-        .getTools()
-        .add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE).withLocal("foo.yaml"));
-    broken
-        .getTools()
-        .add(new Tool().withName("os").withType(OPENSHIFT_TOOL_TYPE).withLocal("bar.yaml"));
+    broken.getTools().add(new Tool().withName("dockerimage1").withType(DOCKERIMAGE_TOOL_TYPE));
+    broken.getTools().add(new Tool().withName("dockerimage2").withType(DOCKERIMAGE_TOOL_TYPE));
     // when
     integrityValidator.validateDevfile(broken);
   }
@@ -98,15 +95,29 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Multiple non plugin or editor type tools found: 'k8s', 'dockerimage'")
-  public void shouldThrowExceptionOnKubernetesAndDockerimagesTools() throws Exception {
+          "Devfile cannot contain kubernetes/openshift and dockerimage tool at the same time")
+  public void shouldThrowExceptionIfDevfileContainK8sAndDockerimageTool() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getCommands().clear();
     broken.getTools().clear();
-    broken
-        .getTools()
-        .add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE).withLocal("foo.yaml"));
+    broken.getTools().add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE));
     broken.getTools().add(new Tool().withName("dockerimage").withType(DOCKERIMAGE_TOOL_TYPE));
+
+    // when
+    integrityValidator.validateDevfile(broken);
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Devfile cannot contain kubernetes/openshift and dockerimage tool at the same time")
+  public void shouldThrowExceptionIfDevfileContainOpenShiftAndDockerimageTool() throws Exception {
+    Devfile broken = copyOf(initialDevfile);
+    broken.getCommands().clear();
+    broken.getTools().clear();
+    broken.getTools().add(new Tool().withName("openshift").withType(OPENSHIFT_TOOL_TYPE));
+    broken.getTools().add(new Tool().withName("dockerimage").withType(DOCKERIMAGE_TOOL_TYPE));
+
     // when
     integrityValidator.validateDevfile(broken);
   }
