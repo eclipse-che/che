@@ -12,6 +12,8 @@
 package org.eclipse.che.api.devfile.server.convert.tool.kubernetes;
 
 import static io.fabric8.kubernetes.client.utils.Serialization.unmarshal;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
@@ -24,15 +26,20 @@ import static org.mockito.Mockito.doThrow;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertTrue;
 
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
+import io.fabric8.kubernetes.api.model.Pod;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.devfile.model.Entrypoint;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
@@ -298,6 +305,47 @@ public class KubernetesToolToWorkspaceApplierTest {
     // then
     CommandImpl actualCommand = workspaceConfig.getCommands().get(0);
     assertNull(actualCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE));
+  }
+
+  @Test
+  public void shouldChangeEntrypointsOnMatchingContainers() throws Exception {
+    // given
+    String yamlRecipeContent = getResource("petclinic.yaml");
+    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
+
+    List<String> command = asList("teh", "command");
+    Tool tool =
+        new Tool()
+            .withType(OPENSHIFT_TOOL_TYPE)
+            .withLocal(LOCAL_FILENAME)
+            .withName(TOOL_NAME)
+            .withEntrypoints(
+                singletonList(new Entrypoint().withParentName("petclinic").withCommand(command)))
+            .withSelector(Collections.emptyMap());
+
+    // when
+    applier.apply(workspaceConfig, tool, s -> yamlRecipeContent);
+
+    // then
+    RecipeImpl recipe = workspaceConfig.getEnvironments().get(TOOL_NAME).getRecipe();
+    KubernetesList list = toK8SList(recipe.getContent());
+    for (HasMetadata o : list.getItems()) {
+      if (o instanceof Pod) {
+        Pod p = (Pod) o;
+
+        // ignore pods that don't have containers
+        if (p.getSpec() == null) {
+          continue;
+        }
+
+        Container c = p.getSpec().getContainers().get(0);
+        if (o.getMetadata().getName().equals("petclinic")) {
+          assertEquals(c.getCommand(), command);
+        } else {
+          assertTrue(c.getCommand() == null || c.getCommand().isEmpty());
+        }
+      }
+    }
   }
 
   private KubernetesList toK8SList(String content) {

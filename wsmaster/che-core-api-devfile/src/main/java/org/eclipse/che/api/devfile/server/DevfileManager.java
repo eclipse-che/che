@@ -148,8 +148,11 @@ public class DevfileManager {
     checkArgument(devfile != null, "Devfile must not be null");
     checkArgument(fileContentProvider != null, "File content provider must not be null");
 
+    FileContentProvider cachingProvider = FileContentProvider.cached(fileContentProvider);
+
     integrityValidator.validateDevfile(devfile);
-    return devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
+    integrityValidator.validateContentReferences(devfile, cachingProvider);
+    return devfileConverter.devFileToWorkspaceConfig(devfile, cachingProvider);
   }
 
   /**

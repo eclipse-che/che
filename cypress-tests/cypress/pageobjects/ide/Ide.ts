@@ -1,3 +1,6 @@
+import { Promise, resolve, reject } from "bluebird";
+import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
+
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -20,8 +23,35 @@ export class Ide {
     private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
     public static readonly FILES_BUTTON: string = ".theia-app-left .p-TabBar-content li[title='Files']";
     private static readonly PRELOADER: string = ".theia-preload";
+    private static readonly IDE_IFRAME: string = "iframe#ide-application-iframe";
 
-    private static readonly IDE_IFRAME: string = "iframe[id='ide-application-iframe']";
+
+    private readonly testWorkspaceUtil: TestWorkspaceUtil = new TestWorkspaceUtil();
+
+
+
+    waitIdeInIframe(workspaceNamespace: string, workspaceName: string) {
+        this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName).then(() => {
+            [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
+                .forEach(idePart => {
+                    cy.get(Ide.IDE_IFRAME, { timeout: Ide.START_WORKSPACE_TIMEOUT })
+                        .should(iframe => {
+                            expect(iframe.contents().find(idePart)).to.have.length(1)
+                            expect(iframe.contents().find(idePart)).to.be.visible
+                        })
+                })
+        });
+    }
+
+    waitIde(workspaceNamespace: string, workspaceName: string) {
+        this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName).then(() => {
+            [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
+                .forEach(idePart => {
+                    cy.get(idePart, { timeout: Ide.START_WORKSPACE_TIMEOUT })
+                        .should('be.visible')
+                })
+        });
+    }
 
     openIdeWithoutFrames(workspaceName: string) {
         let workspaceUrl: string = `/che/${workspaceName}`
@@ -53,14 +83,6 @@ export class Ide {
     waitPreloaderAbsent() {
         cy.get(Ide.PRELOADER)
             .should('not.be.visible');
-    }
-
-    waitIde() {
-        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
-            .forEach(idePart => {
-                cy.get(idePart, { timeout: Ide.START_WORKSPACE_TIMEOUT })
-                    .should('be.visible')
-            })
     }
 
     waitStatusBarContains(expectedText: string) {
