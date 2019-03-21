@@ -20,6 +20,7 @@ import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.factory.server.urlfactory.DefaultFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
 import org.eclipse.che.api.factory.server.urlfactory.URLFileContentProvider;
@@ -62,8 +63,9 @@ public class DefaultFactoryParameterResolver implements FactoryParametersResolve
 
     return urlFactoryBuilder
         .createFactoryFromDevfile(
-            devfileLocation,
-            null,
+            new DefaultFactoryUrl()
+                .withDevfileFileLocation(devfileLocation)
+                .withDevfileFilename(null),
             new URLFileContentProvider(URI.create(devfileLocation), urlFetcher))
         .orElse(null);
   }

@@ -95,14 +95,11 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
-                githubUrl.devfileFileLocation(),
-                githubUrl.getDevfileFilename(),
-                fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
+                githubUrl, fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
             .orElseGet(
                 () ->
                     urlFactoryBuilder
-                        .createFactoryFromJson(
-                            githubUrl.factoryFileLocation(), githubUrl.getFactoryFilename())
+                        .createFactoryFromJson(githubUrl)
                         .orElseGet(
                             () ->
                                 newDto(FactoryDto.class)

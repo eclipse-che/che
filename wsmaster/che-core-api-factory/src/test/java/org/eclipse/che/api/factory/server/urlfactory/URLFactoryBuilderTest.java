@@ -94,7 +94,13 @@ public class URLFactoryBuilderTest {
     String myLocation = "http://foo-location";
     when(urlFetcher.fetchSafely(myLocation)).thenReturn(jsonFactory);
 
-    FactoryDto factory = urlFactoryBuilder.createFactoryFromJson(myLocation, ".factory.json").get();
+    FactoryDto factory =
+        urlFactoryBuilder
+            .createFactoryFromJson(
+                new DefaultFactoryUrl()
+                    .withFactoryFileLocation(myLocation)
+                    .withFactoryFilename(".factory.json"))
+            .get();
 
     assertEquals(templateFactory.withSource(".factory.json"), factory);
   }
@@ -118,7 +124,11 @@ public class URLFactoryBuilderTest {
 
     FactoryDto factory =
         urlFactoryBuilder
-            .createFactoryFromDevfile(myLocation, "devfile.yml", s -> myLocation + ".list")
+            .createFactoryFromDevfile(
+                new DefaultFactoryUrl()
+                    .withDevfileFileLocation(myLocation)
+                    .withDevfileFilename("devfile.yml"),
+                s -> myLocation + ".list")
             .get();
 
     WorkspaceConfigDto expectedWorkspaceConfig = asDto(workspaceConfigImpl);
