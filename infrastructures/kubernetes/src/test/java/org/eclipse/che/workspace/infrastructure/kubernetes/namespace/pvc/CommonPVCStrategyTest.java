@@ -68,6 +68,7 @@ public class CommonPVCStrategyTest {
 
   private static final String PVC_QUANTITY = "10Gi";
   private static final String PVC_ACCESS_MODE = "RWO";
+  private static final String PVC_STORAGE_CLASS_NAME = "special";
 
   private static final String[] WORKSPACE_SUBPATHS = {"/projects", "/logs"};
 
@@ -99,6 +100,7 @@ public class CommonPVCStrategyTest {
             PVC_QUANTITY,
             PVC_ACCESS_MODE,
             true,
+            PVC_STORAGE_CLASS_NAME,
             pvcSubPathHelper,
             factory,
             ephemeralWorkspaceAdapter,
@@ -163,6 +165,7 @@ public class CommonPVCStrategyTest {
             PVC_QUANTITY,
             PVC_ACCESS_MODE,
             false,
+            PVC_STORAGE_CLASS_NAME,
             pvcSubPathHelper,
             factory,
             ephemeralWorkspaceAdapter,

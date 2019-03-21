@@ -11,11 +11,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimFluent.SpecNested;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Quantity;
@@ -109,12 +112,26 @@ public class KubernetesObjectUtil {
    * quantity.
    */
   public static PersistentVolumeClaim newPVC(String name, String accessMode, String quantity) {
-    return new PersistentVolumeClaimBuilder()
-        .withNewMetadata()
-        .withName(name)
-        .endMetadata()
-        .withNewSpec()
-        .withAccessModes(accessMode)
+    return newPVC(name, accessMode, quantity, null);
+  }
+
+  /**
+   * Returns new instance of {@link PersistentVolumeClaim} with specified name, accessMode, quantity
+   * and storageClassName.
+   */
+  public static PersistentVolumeClaim newPVC(
+      String name, String accessMode, String quantity, String storageClassName) {
+    SpecNested<PersistentVolumeClaimBuilder> specs =
+        new PersistentVolumeClaimBuilder()
+            .withNewMetadata()
+            .withName(name)
+            .endMetadata()
+            .withNewSpec()
+            .withAccessModes(accessMode);
+    if (!isNullOrEmpty(storageClassName)) {
+      specs.withStorageClassName(storageClassName);
+    }
+    return specs
         .withNewResources()
         .withRequests(ImmutableMap.of(STORAGE_PARAM, new Quantity(quantity)))
         .endResources()

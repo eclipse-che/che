@@ -88,6 +88,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   private final String pvcQuantity;
   private final String configuredPVCName;
   private final String pvcAccessMode;
+  private final String pvcStorageClassName;
   private final PVCSubPathHelper pvcSubPathHelper;
   private final KubernetesNamespaceFactory factory;
   private final EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
@@ -101,6 +102,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       @Named("che.infra.kubernetes.pvc.quantity") String pvcQuantity,
       @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
       @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
+      @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       PVCSubPathHelper pvcSubPathHelper,
       KubernetesNamespaceFactory factory,
       EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
@@ -111,6 +113,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     this.pvcQuantity = pvcQuantity;
     this.pvcAccessMode = pvcAccessMode;
     this.preCreateDirs = preCreateDirs;
+    this.pvcStorageClassName = pvcStorageClassName;
     this.pvcSubPathHelper = pvcSubPathHelper;
     this.factory = factory;
     this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
@@ -129,7 +132,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
    * @return pvc that should be used for the specified runtime identity
    */
   protected PersistentVolumeClaim createCommonPVC(String workspaceId) {
-    return newPVC(configuredPVCName, pvcAccessMode, pvcQuantity);
+    return newPVC(configuredPVCName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
   }
 
   @Override

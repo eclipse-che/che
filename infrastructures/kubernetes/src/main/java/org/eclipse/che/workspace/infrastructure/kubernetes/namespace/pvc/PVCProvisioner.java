@@ -48,8 +48,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 public class PVCProvisioner {
 
   private final String pvcNamePrefix;
-  private final String pvcAccessMode;
   private final String pvcQuantity;
+  private final String pvcAccessMode;
+  private final String pvcStorageClassName;
   private final PodsVolumes podsVolumes;
 
   @Inject
@@ -57,10 +58,12 @@ public class PVCProvisioner {
       @Named("che.infra.kubernetes.pvc.name") String pvcNamePrefix,
       @Named("che.infra.kubernetes.pvc.quantity") String pvcQuantity,
       @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
+      @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       PodsVolumes podsVolumes) {
-    this.pvcAccessMode = pvcAccessMode;
-    this.pvcQuantity = pvcQuantity;
     this.pvcNamePrefix = pvcNamePrefix;
+    this.pvcQuantity = pvcQuantity;
+    this.pvcAccessMode = pvcAccessMode;
+    this.pvcStorageClassName = pvcStorageClassName;
     this.podsVolumes = podsVolumes;
   }
 
@@ -181,7 +184,7 @@ public class PVCProvisioner {
       // when PVC is not found in environment then create new one
       else {
         final String uniqueName = Names.generateName(pvcNamePrefix);
-        pvc = newPVC(uniqueName, pvcAccessMode, pvcQuantity);
+        pvc = newPVC(uniqueName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
         putLabel(pvc, CHE_WORKSPACE_ID_LABEL, workspaceId);
         putLabel(pvc, CHE_VOLUME_NAME_LABEL, volumeName);
         k8sEnv.getPersistentVolumeClaims().put(uniqueName, pvc);
