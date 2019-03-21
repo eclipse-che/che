@@ -12,8 +12,8 @@
 package org.eclipse.che.api.factory.server.urlfactory;
 
 /**
- * Provides basic information about the remote factory URL. Specific vendor implementations may
- * provide wider range of details about the URL.
+ * Provides basic information about the remote factory URL components. Vendor specific
+ * implementations may provide wider range of details about the URL (like username, repository etc).
  */
 public interface RemoteFactoryUrl {
 
