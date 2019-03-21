@@ -102,7 +102,6 @@ List of available Che plugins and more information about registry can be found o
 
 #### kubernetes/openshift
 More complex tool type, which allows to apply configuration from kubernetes/openshift lists. Content of the tool may be provided either via `local` attribute which points to the file with tool content.
-Currently, devfile can only contain one tool with `kubernetes` or `openshift` type.
 ```
 ...
   tools:
@@ -222,8 +221,9 @@ Devfile allows to specify commands set to be available for execution in workspac
 ### Live working examples
 
   - [NodeJS simple "Hello World" example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-sample/devfile.yml)
+  - [NodeJS Application with Mongo DB example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-with-db-sample/devfile.yml)
   - [Java Spring-Petclinic example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-java-spring-petclinic/devfile.yml)
   - [Theia frontend plugin example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/theia-hello-world-frontend-plugin/devfile.yml)
 
 ### Planned features
-There is still a lot of plans to extend Devfile possibilities, such as support multiple kubernetes/openshift tools etc
+There is still a lot of plans to extend Devfile possibilities, such as support multiple dockerimage tools etc
