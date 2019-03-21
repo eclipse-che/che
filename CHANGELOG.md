@@ -1,5 +1,68 @@
 # Change Log
 
+## [7.0.0-beta-2.0](https://github.com/eclipse/che/tree/7.0.0-beta-2.0) (2019-03-20)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.2...7.0.0-beta-2.0)
+
+**Merged pull requests:**
+
+- RELEASE: Set next development version [\#12922](https://github.com/eclipse/che/pull/12922) ([riuvshin](https://github.com/riuvshin))
+- Create method for waiting Theia IDE into iframe for cypress tests [\#12912](https://github.com/eclipse/che/pull/12912) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Add new codeowners to properties files [\#12907](https://github.com/eclipse/che/pull/12907) ([garagatyi](https://github.com/garagatyi))
+- Update brokers version to v0.14.0 [\#12903](https://github.com/eclipse/che/pull/12903) ([garagatyi](https://github.com/garagatyi))
+- NopTracer is used if tracing is not enabled [\#12897](https://github.com/eclipse/che/pull/12897) ([skabashnyuk](https://github.com/skabashnyuk))
+- Add option to Che deployment.yaml to allow self-signed certificates for OIDC [\#12874](https://github.com/eclipse/che/pull/12874) ([johnmcollier](https://github.com/johnmcollier))
+- Apply entrypoint to all containers matching the criteria in the k8s or openshift tools [\#12856](https://github.com/eclipse/che/pull/12856) ([metlos](https://github.com/metlos))
+
+## [6.19.2](https://github.com/eclipse/che/tree/6.19.2) (2019-03-15)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.1...6.19.2)
+
+**Merged pull requests:**
+
+- Pre create directories with 777 permissions [\#12892](https://github.com/eclipse/che/pull/12892) ([eivantsov](https://github.com/eivantsov))
+- Update owners for devfile and monitoring configuration [\#12885](https://github.com/eclipse/che/pull/12885) ([skabashnyuk](https://github.com/skabashnyuk))
+- Fix of devfile example link [\#12879](https://github.com/eclipse/che/pull/12879) ([mshaposhnik](https://github.com/mshaposhnik))
+- Fix Che 6 workspaces on multiuser deployment [\#12877](https://github.com/eclipse/che/pull/12877) ([mmorhun](https://github.com/mmorhun))
+- CHE-12574: Loader.js should execute authentication promise only after successful execution of check server promise [\#12876](https://github.com/eclipse/che/pull/12876) ([mmorhun](https://github.com/mmorhun))
+- Added devfile examples into the readme [\#12869](https://github.com/eclipse/che/pull/12869) ([mshaposhnik](https://github.com/mshaposhnik))
+- Fixed accepting factory if GitHub repo URL contains trailing slash [\#12867](https://github.com/eclipse/che/pull/12867) ([sleshchenko](https://github.com/sleshchenko))
+- Don't restart workspace in case of errors [\#12860](https://github.com/eclipse/che/pull/12860) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Workspace start time metrics [\#12859](https://github.com/eclipse/che/pull/12859) ([skabashnyuk](https://github.com/skabashnyuk))
+- Expose Traces as metrics for Prometheus [\#12823](https://github.com/eclipse/che/pull/12823) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Improved default referenced file resolution in devfile [\#12800](https://github.com/eclipse/che/pull/12800) ([metlos](https://github.com/metlos))
+
+## [6.19.1](https://github.com/eclipse/che/tree/6.19.1) (2019-03-12)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-1.0...6.19.1)
+
+**Merged pull requests:**
+
+- Rework detecting IDE URL [\#12864](https://github.com/eclipse/che/pull/12864) ([vparfonov](https://github.com/vparfonov))
+- CHE-12395: Add 'extensions' field to meta model [\#12858](https://github.com/eclipse/che/pull/12858) ([garagatyi](https://github.com/garagatyi))
+- Successfully started workspaces ratio [\#12852](https://github.com/eclipse/che/pull/12852) ([skabashnyuk](https://github.com/skabashnyuk))
+- Update lodash to v4.17.11 [\#12849](https://github.com/eclipse/che/pull/12849) ([benoitf](https://github.com/benoitf))
+- Implement first E2E suite for Che 7 [\#12848](https://github.com/eclipse/che/pull/12848) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Fix docs site checkout [\#12841](https://github.com/eclipse/che/pull/12841) ([mshaposhnik](https://github.com/mshaposhnik))
+- Fix docs site checkout [\#12839](https://github.com/eclipse/che/pull/12839) ([mshaposhnik](https://github.com/mshaposhnik))
+- Update plugins brokers version to v0.13.0 [\#12834](https://github.com/eclipse/che/pull/12834) ([garagatyi](https://github.com/garagatyi))
+- Fixed search stacks query [\#12833](https://github.com/eclipse/che/pull/12833) ([sleshchenko](https://github.com/sleshchenko))
+- Add general readme about devfile. [\#12829](https://github.com/eclipse/che/pull/12829) ([mshaposhnik](https://github.com/mshaposhnik))
+- Fix ephemeral mode toggle in workspace overview page [\#12828](https://github.com/eclipse/che/pull/12828) ([amisevsk](https://github.com/amisevsk))
+- Provide more informative error message [\#12814](https://github.com/eclipse/che/pull/12814) ([skabashnyuk](https://github.com/skabashnyuk))
+- Correct the selenium tests to make more reliability [\#12812](https://github.com/eclipse/che/pull/12812) ([artaleks9](https://github.com/artaleks9))
+- Make Devfile parse k8s/os recipe content in the same way as infrastructures do [\#12810](https://github.com/eclipse/che/pull/12810) ([sleshchenko](https://github.com/sleshchenko))
+- Fixed fetching content of files referenced in Devfile [\#12807](https://github.com/eclipse/che/pull/12807) ([sleshchenko](https://github.com/sleshchenko))
+- Add an ability to configure organization/branch/ssh for Devfile Docs publishing [\#12803](https://github.com/eclipse/che/pull/12803) ([sleshchenko](https://github.com/sleshchenko))
+-  Try to fix loader [\#12802](https://github.com/eclipse/che/pull/12802) ([evidolob](https://github.com/evidolob))
+- Increase Keycloak idle session timeout [\#12801](https://github.com/eclipse/che/pull/12801) ([mmorhun](https://github.com/mmorhun))
+- Create view role rather than rely on view clusterRole [\#12789](https://github.com/eclipse/che/pull/12789) ([eivantsov](https://github.com/eivantsov))
+- RELEASE: Update CHANGELOG [\#12786](https://github.com/eclipse/che/pull/12786) ([riuvshin](https://github.com/riuvshin))
+- correct typo in comment [\#12785](https://github.com/eclipse/che/pull/12785) ([RickJWagner](https://github.com/RickJWagner))
+- Selenium: Correct selenium tests to increase reliability [\#12784](https://github.com/eclipse/che/pull/12784) ([artaleks9](https://github.com/artaleks9))
+- Add support for command and args in dockerimage tool of devfile [\#12761](https://github.com/eclipse/che/pull/12761) ([metlos](https://github.com/metlos))
+-  Add devfile for dashboard [\#12757](https://github.com/eclipse/che/pull/12757) ([evidolob](https://github.com/evidolob))
+- Improved error message when a local resource of Devfile is not supported [\#12743](https://github.com/eclipse/che/pull/12743) ([sleshchenko](https://github.com/sleshchenko))
+- Support entrypoint definition in dockerimage recipe based workspaces on k8s and os [\#12716](https://github.com/eclipse/che/pull/12716) ([metlos](https://github.com/metlos))
+
+
 ## [7.0.0-beta-1.0](https://github.com/eclipse/che/tree/7.0.0-beta-1.0) (2019-02-27)
 [Full Changelog](https://github.com/eclipse/che/compare/6.19.0...7.0.0-beta-1.0)
 
