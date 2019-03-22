@@ -71,6 +71,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
             PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
             append(pluginsAliases, pluginComponent.getId() + "=" + pluginComponent.getName()));
 
+    String pluginIdVersion = resolveIdAndVersion(pluginComponent.getId());
     for (CommandImpl command : workspaceConfig.getCommands()) {
       String commandComponent = command.getAttributes().get(COMPONENT_NAME_COMMAND_ATTRIBUTE);
 
@@ -83,7 +84,16 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         continue;
       }
 
-      command.getAttributes().put(PLUGIN_ATTRIBUTE, pluginComponent.getId());
+      command.getAttributes().put(PLUGIN_ATTRIBUTE, pluginIdVersion);
+    }
+  }
+
+  private String resolveIdAndVersion(String ref) {
+    int lastSlashPosition = ref.lastIndexOf("/");
+    if (lastSlashPosition < 0) {
+      return ref;
+    } else {
+      return ref.substring(lastSlashPosition + 1);
     }
   }
 

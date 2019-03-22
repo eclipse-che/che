@@ -52,17 +52,31 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         EDITOR_COMPONENT_TYPE.equals(editorComponent.getType()),
         format("Plugin must have `%s` type", EDITOR_COMPONENT_TYPE));
 
-    String editorToolName = editorComponent.getName();
+    String editorComponentName = editorComponent.getName();
     String editorId = editorComponent.getId();
 
     workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, editorId);
 
-    workspaceConfig.getAttributes().put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorToolName);
+    workspaceConfig
+        .getAttributes()
+        .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentName);
 
+    String editorIdVersion = resolveIdAndVersion(editorComponent.getId());
     workspaceConfig
         .getCommands()
         .stream()
-        .filter(c -> c.getAttributes().get(COMPONENT_NAME_COMMAND_ATTRIBUTE).equals(editorToolName))
-        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, editorComponent.getId()));
+        .filter(
+            c ->
+                c.getAttributes().get(COMPONENT_NAME_COMMAND_ATTRIBUTE).equals(editorComponentName))
+        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, editorIdVersion));
+  }
+
+  private String resolveIdAndVersion(String ref) {
+    int lastSlashPosition = ref.lastIndexOf("/");
+    if (lastSlashPosition < 0) {
+      return ref;
+    } else {
+      return ref.substring(lastSlashPosition + 1);
+    }
   }
 }

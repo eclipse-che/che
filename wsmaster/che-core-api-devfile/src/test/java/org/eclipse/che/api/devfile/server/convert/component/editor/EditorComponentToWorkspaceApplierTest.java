@@ -77,4 +77,28 @@ public class EditorComponentToWorkspaceApplierTest {
         workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
         "org.eclipse.che.super-editor:0.0.1");
   }
+
+  @Test
+  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
+      throws Exception {
+    // given
+    Component superPluginComponent = new Component();
+    superPluginComponent.setName("editor");
+    superPluginComponent.setId(
+        "https://custom-plugin.registry/plugins/org.eclipse.che.super-editor:0.0.1");
+    superPluginComponent.setType(EDITOR_COMPONENT_TYPE);
+
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    CommandImpl command = new CommandImpl();
+    command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, "editor");
+    workspaceConfig.getCommands().add(command);
+
+    // when
+    editorComponentApplier.apply(workspaceConfig, superPluginComponent, null);
+
+    // then
+    assertEquals(
+        workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
+        "org.eclipse.che.super-editor:0.0.1");
+  }
 }
