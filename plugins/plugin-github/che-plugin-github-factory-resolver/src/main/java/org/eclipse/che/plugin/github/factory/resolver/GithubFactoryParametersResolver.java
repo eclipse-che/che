@@ -95,13 +95,16 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     FactoryDto factory =
         urlFactoryBuilder
             .createFactoryFromDevfile(
-                githubUrl.devfileFileLocation(),
-                fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
+                githubUrl, fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
             .orElseGet(
                 () ->
                     urlFactoryBuilder
-                        .createFactoryFromJson(githubUrl.factoryFileLocation())
-                        .orElseGet(() -> newDto(FactoryDto.class).withV(CURRENT_VERSION)));
+                        .createFactoryFromJson(githubUrl)
+                        .orElseGet(
+                            () ->
+                                newDto(FactoryDto.class)
+                                    .withV(CURRENT_VERSION)
+                                    .withSource("repo")));
     // add workspace configuration if not defined
     if (factory.getWorkspace() == null) {
       factory.setWorkspace(
