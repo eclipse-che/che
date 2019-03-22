@@ -12,6 +12,8 @@
 package org.eclipse.che.workspace.infrastructure.openshift.environment;
 
 import static java.lang.String.format;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger.DEPLOYMENT_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -29,6 +31,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Warning;
@@ -45,6 +49,7 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
@@ -57,6 +62,7 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
   private final OpenShiftEnvironmentValidator envValidator;
   private final KubernetesRecipeParser k8sObjectsParser;
   private final MemoryAttributeProvisioner memoryProvisioner;
+  private final PodMerger podMerger;
 
   @Inject
   public OpenShiftEnvironmentFactory(
@@ -65,11 +71,13 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       MachineConfigsValidator machinesValidator,
       OpenShiftEnvironmentValidator envValidator,
       KubernetesRecipeParser k8sObjectsParser,
-      MemoryAttributeProvisioner memoryProvisioner) {
+      MemoryAttributeProvisioner memoryProvisioner,
+      PodMerger podMerger) {
     super(installerRegistry, recipeRetriever, machinesValidator);
     this.envValidator = envValidator;
     this.k8sObjectsParser = k8sObjectsParser;
     this.memoryProvisioner = memoryProvisioner;
+    this.podMerger = podMerger;
   }
 
   @Override
@@ -101,32 +109,29 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
       if (object instanceof DeploymentConfig) {
         throw new ValidationException("Supporting of deployment configs is not implemented yet.");
       } else if (object instanceof Pod) {
-        Pod pod = (Pod) object;
-        pods.put(pod.getMetadata().getName(), pod);
+        putInto(pods, object.getMetadata().getName(), (Pod) object);
       } else if (object instanceof Deployment) {
-        Deployment deployment = (Deployment) object;
-        deployments.put(deployment.getMetadata().getName(), deployment);
+        putInto(deployments, object.getMetadata().getName(), (Deployment) object);
       } else if (object instanceof Service) {
-        Service service = (Service) object;
-        services.put(service.getMetadata().getName(), service);
+        putInto(services, object.getMetadata().getName(), (Service) object);
       } else if (object instanceof Route) {
-        Route route = (Route) object;
-        routes.put(route.getMetadata().getName(), route);
+        putInto(routes, object.getMetadata().getName(), (Route) object);
       } else if (object instanceof PersistentVolumeClaim) {
-        PersistentVolumeClaim pvc = (PersistentVolumeClaim) object;
-        pvcs.put(pvc.getMetadata().getName(), pvc);
+        putInto(pvcs, object.getMetadata().getName(), (PersistentVolumeClaim) object);
       } else if (object instanceof Secret) {
-        Secret secret = (Secret) object;
-        secrets.put(secret.getMetadata().getName(), secret);
+        putInto(secrets, object.getMetadata().getName(), (Secret) object);
       } else if (object instanceof ConfigMap) {
-        ConfigMap configMap = (ConfigMap) object;
-        configMaps.put(configMap.getMetadata().getName(), configMap);
+        putInto(configMaps, object.getMetadata().getName(), (ConfigMap) object);
       } else {
         throw new ValidationException(
             format(
                 "Found unknown object type in recipe -- name: '%s', kind: '%s'",
                 object.getMetadata().getName(), object.getKind()));
       }
+    }
+
+    if (deployments.size() + pods.size() > 1) {
+      mergePods(pods, deployments, services);
     }
 
     OpenShiftEnvironment osEnv =
@@ -148,6 +153,66 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
     envValidator.validate(osEnv);
 
     return osEnv;
+  }
+
+  /**
+   * Merges the specified pods and deployments to a single Deployment.
+   *
+   * <p>Note that method will modify the specified collections and put work result there.
+   *
+   * @param pods pods to merge
+   * @param deployments deployments to merge
+   * @param services services to reconfigure to point new deployment
+   * @throws ValidationException if the specified lists has pods with conflicting configuration
+   */
+  private void mergePods(
+      Map<String, Pod> pods, Map<String, Deployment> deployments, Map<String, Service> services)
+      throws ValidationException {
+    List<PodData> podsData =
+        Stream.concat(
+                pods.values().stream().map(PodData::new),
+                deployments.values().stream().map(PodData::new))
+            .collect(Collectors.toList());
+
+    Deployment deployment = podMerger.merge(podsData);
+    String deploymentName = deployment.getMetadata().getName();
+
+    // provision merged deployment instead of recipe pods/deployments
+    pods.clear();
+    deployments.clear();
+    deployments.put(deploymentName, deployment);
+
+    // multiple pods/deployments are merged to one deployment
+    // to avoid issues because of overriding labels
+    // provision const label and selector to match all services to merged Deployment
+    deployment
+        .getSpec()
+        .getTemplate()
+        .getMetadata()
+        .getLabels()
+        .put(DEPLOYMENT_NAME_LABEL, deploymentName);
+    services.values().forEach(s -> setSelector(s, DEPLOYMENT_NAME_LABEL, deploymentName));
+  }
+
+  /**
+   * Puts the specified key/value pair into the specified map or throw an exception if map already
+   * contains such key.
+   *
+   * @param map the map to put key/value pair
+   * @param key key that should be put
+   * @param value value that should be put
+   * @param <T> type of object to put
+   * @throws ValidationException if the specified map already contains the specified key
+   */
+  private <T extends HasMetadata> void putInto(Map<String, T> map, String key, T value)
+      throws ValidationException {
+    if (map.put(key, value) != null) {
+      String kind = value.getKind();
+      String name = value.getMetadata().getName();
+      throw new ValidationException(
+          format(
+              "Environment can not contain two '%s' objects with the same name '%s'", kind, name));
+    }
   }
 
   @VisibleForTesting

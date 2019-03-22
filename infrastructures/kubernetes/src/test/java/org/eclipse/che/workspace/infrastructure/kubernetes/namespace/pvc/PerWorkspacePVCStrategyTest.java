@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
@@ -51,6 +52,7 @@ public class PerWorkspacePVCStrategyTest {
 
   private static final String PVC_QUANTITY = "10Gi";
   private static final String PVC_ACCESS_MODE = "RWO";
+  private static final String PVC_STORAGE_CLASS_NAME = "special";
 
   @Mock private PVCSubPathHelper pvcSubPathHelper;
   @Mock private KubernetesNamespaceFactory factory;
@@ -72,6 +74,7 @@ public class PerWorkspacePVCStrategyTest {
             PVC_QUANTITY,
             PVC_ACCESS_MODE,
             true,
+            PVC_STORAGE_CLASS_NAME,
             pvcSubPathHelper,
             factory,
             ephemeralWorkspaceAdapter,
@@ -113,6 +116,32 @@ public class PerWorkspacePVCStrategyTest {
     // then
     assertEquals(commonPVC.getMetadata().getName(), PVC_NAME_PREFIX + "-" + WORKSPACE_ID);
     assertEquals(commonPVC.getMetadata().getLabels().get(CHE_WORKSPACE_ID_LABEL), WORKSPACE_ID);
+    assertEquals(commonPVC.getSpec().getStorageClassName(), PVC_STORAGE_CLASS_NAME);
+  }
+
+  @Test
+  public void shouldReturnNullStorageClassNameWhenStorageClassNameIsEmptyOrNull() throws Exception {
+    String[] storageClassNames = {"", null};
+
+    for (String storageClassName : storageClassNames) {
+      final PerWorkspacePVCStrategy strategy =
+          new PerWorkspacePVCStrategy(
+              PVC_NAME_PREFIX,
+              PVC_QUANTITY,
+              PVC_ACCESS_MODE,
+              true,
+              storageClassName,
+              pvcSubPathHelper,
+              factory,
+              ephemeralWorkspaceAdapter,
+              volumeConverter,
+              podsVolumes,
+              subpathPrefixes);
+
+      final PersistentVolumeClaim commonPVC = strategy.createCommonPVC(WORKSPACE_ID);
+
+      assertNull(commonPVC.getSpec().getStorageClassName());
+    }
   }
 
   @Test

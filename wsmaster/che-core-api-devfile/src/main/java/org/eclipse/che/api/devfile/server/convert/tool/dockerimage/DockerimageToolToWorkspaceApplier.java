@@ -31,6 +31,7 @@ import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.Constants;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.tool.ToolToWorkspaceApplier;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
@@ -66,6 +67,8 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
    * @param dockerimageTool dockerimage tool that should be applied
    * @param contentProvider optional content provider that may be used for external tool resource
    *     fetching
+   * @throws DevfileException if specified workspace config already has default environment where
+   *     dockerimage tool should be stored
    * @throws IllegalArgumentException if specified workspace config or plugin tool is null
    * @throws IllegalArgumentException if specified tool has type different from dockerimage
    */
@@ -73,12 +76,16 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
   public void apply(
       WorkspaceConfigImpl workspaceConfig,
       Tool dockerimageTool,
-      FileContentProvider contentProvider) {
+      FileContentProvider contentProvider)
+      throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
     checkArgument(dockerimageTool != null, "Tool must not be null");
     checkArgument(
         DOCKERIMAGE_TOOL_TYPE.equals(dockerimageTool.getType()),
         format("Plugin must have `%s` type", DOCKERIMAGE_TOOL_TYPE));
+    if (workspaceConfig.getDefaultEnv() != null) {
+      throw new DevfileException("Workspace already contains environment");
+    }
 
     String machineName = dockerimageTool.getName();
     MachineConfigImpl machineConfig = new MachineConfigImpl();

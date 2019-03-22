@@ -35,7 +35,7 @@ items:
 - apiVersion: v1
   kind: Pod
   metadata:
-    name: petclinic
+    name: mysql
     labels:
       app.kubernetes.io/name: mysql
       app.kubernetes.io/component: database

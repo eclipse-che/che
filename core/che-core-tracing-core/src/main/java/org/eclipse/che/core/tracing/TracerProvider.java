@@ -17,6 +17,8 @@ import io.opentracing.contrib.tracerresolver.TracerResolver;
 import io.opentracing.util.GlobalTracer;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Guice @{@link javax.inject.Provider} of @{@link io.opentracing.Tracer} objects. Register Tracer
@@ -26,6 +28,7 @@ import javax.inject.Singleton;
 @Beta
 @Singleton
 public class TracerProvider implements Provider<Tracer> {
+  private static final Logger LOG = LoggerFactory.getLogger(TracerProvider.class);
   private final Tracer tracer;
 
   public TracerProvider() {
@@ -39,6 +42,7 @@ public class TracerProvider implements Provider<Tracer> {
 
   @Override
   public Tracer get() {
+    LOG.debug("{} tracer is used ", tracer);
     return tracer;
   }
 }

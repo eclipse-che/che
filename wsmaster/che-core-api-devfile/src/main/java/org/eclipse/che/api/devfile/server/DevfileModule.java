@@ -16,6 +16,7 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
 
 import com.google.inject.AbstractModule;
@@ -52,6 +53,9 @@ public class DevfileModule extends AbstractModule {
         newMapBinder(binder(), String.class, ToolToWorkspaceApplier.class);
     toolToWorkspaceApplier.addBinding(EDITOR_TOOL_TYPE).to(EditorToolToWorkspaceApplier.class);
     toolToWorkspaceApplier.addBinding(PLUGIN_TOOL_TYPE).to(PluginToolToWorkspaceApplier.class);
+    toolToWorkspaceApplier
+        .addBinding(OPENSHIFT_TOOL_TYPE)
+        .to(KubernetesToolToWorkspaceApplier.class);
     toolToWorkspaceApplier
         .addBinding(KUBERNETES_TOOL_TYPE)
         .to(KubernetesToolToWorkspaceApplier.class);

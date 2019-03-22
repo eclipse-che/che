@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.local.filters;
 
+import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.io.IOException;
 import java.security.Principal;
@@ -28,7 +29,6 @@ import javax.servlet.http.HttpSession;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.eclipse.che.commons.tracing.OptionalTracer;
 import org.eclipse.che.commons.tracing.TracingTags;
 
 /**
@@ -39,7 +39,7 @@ import org.eclipse.che.commons.tracing.TracingTags;
 @Singleton
 public class EnvironmentInitializationFilter implements Filter {
 
-  @Inject OptionalTracer optionalTracer;
+  @Inject Tracer tracer;
 
   @Override
   public void init(FilterConfig filterConfig) throws ServletException {}
@@ -57,11 +57,10 @@ public class EnvironmentInitializationFilter implements Filter {
 
     try {
       environmentContext.setSubject(subject);
-      Tracer tracer = OptionalTracer.fromNullable(optionalTracer);
-      if (tracer != null) {
+      Span activeSpan = tracer.activeSpan();
+      if (activeSpan != null) {
         TracingTags.USER_ID.set(tracer.activeSpan(), subject.getUserId());
       }
-      TracingTags.USER_ID.set(subject.getUserId());
       filterChain.doFilter(addUserInRequest(httpRequest, subject), response);
     } finally {
       EnvironmentContext.reset();
