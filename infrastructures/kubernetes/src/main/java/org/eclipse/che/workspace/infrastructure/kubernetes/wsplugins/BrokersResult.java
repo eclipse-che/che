@@ -57,7 +57,7 @@ public class BrokersResult {
    *
    * @param toolingFromBroker tooling evaluated by a broker that needs to be added into a workspace
    * @throws InfrastructureException if called second time which indicates incorrect usage of the
-   *     {@link BrokersResult}
+   * {@link BrokersResult}
    * @throws IllegalStateException if called before the call of {@link #get(long, TimeUnit)}
    */
   public void setResult(List<ChePlugin> toolingFromBroker) throws InfrastructureException {
@@ -67,7 +67,7 @@ public class BrokersResult {
     }
     if (future.isDone()) {
       throw new InfrastructureException(
-          "Broker result is submitted when no more results are expected");
+          "Plugins brokering result is unexpectedly submitted more than one time. This indicates unexpected behavior of the system");
     }
     future.complete(new ArrayList<>(toolingFromBroker));
   }

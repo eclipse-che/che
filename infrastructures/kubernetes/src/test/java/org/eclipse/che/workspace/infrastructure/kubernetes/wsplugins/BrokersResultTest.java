@@ -66,7 +66,7 @@ public class BrokersResultTest {
   @Test(
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp =
-          "Broker result is submitted when no more results are expected")
+          "Plugins brokering result is unexpectedly submitted more than one time. This indicates unexpected behavior of the system")
   public void shouldThrowExceptionIfResultIsSubmittedSecondTime() throws Exception {
     // given
     executeBrokerGet();
