@@ -59,10 +59,20 @@ public class EditorToolToWorkspaceApplier implements ToolToWorkspaceApplier {
 
     workspaceConfig.getAttributes().put(EDITOR_TOOL_ALIAS_WORKSPACE_ATTRIBUTE, editorToolName);
 
+    String editorIdVersion = resolveIdAndVersion(editorTool.getId());
     workspaceConfig
         .getCommands()
         .stream()
         .filter(c -> c.getAttributes().get(TOOL_NAME_COMMAND_ATTRIBUTE).equals(editorToolName))
-        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, editorTool.getId()));
+        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, editorIdVersion));
+  }
+
+  private String resolveIdAndVersion(String ref) {
+    int lastSlashPosition = ref.lastIndexOf("/");
+    if (lastSlashPosition < 0) {
+      return ref;
+    } else {
+      return ref.substring(lastSlashPosition + 1);
+    }
   }
 }
