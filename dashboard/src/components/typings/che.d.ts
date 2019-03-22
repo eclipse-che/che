@@ -508,6 +508,7 @@ declare namespace che {
     button?: any;
     policies?: any;
     links?: string[];
+    source?: string;
   }
 
   export interface IRegistry {
