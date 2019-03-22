@@ -60,7 +60,7 @@ public class BrokersResultTest {
       expectedExceptionsMessageRegExp =
           "Submitting a broker result is not allowed before calling BrokerResult#get")
   public void shouldThrowExceptionOnCallingAddResultBeforeCallGet() throws Exception {
-    brokersResult.brokerResult(emptyList());
+    brokersResult.setResult(emptyList());
   }
 
   @Test(
@@ -73,10 +73,10 @@ public class BrokersResultTest {
     waitBrokerGetCalled();
 
     // when
-    brokersResult.brokerResult(singletonList(new ChePlugin()));
+    brokersResult.setResult(singletonList(new ChePlugin()));
 
     // then
-    brokersResult.brokerResult(singletonList(new ChePlugin()));
+    brokersResult.setResult(singletonList(new ChePlugin()));
   }
 
   @Test
@@ -85,7 +85,7 @@ public class BrokersResultTest {
     ChePlugin chePlugin = new ChePlugin();
     executeWhenResultIsStarted(
         () -> {
-          brokersResult.brokerResult(singletonList(chePlugin));
+          brokersResult.setResult(singletonList(chePlugin));
           return null;
         });
 

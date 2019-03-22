@@ -60,7 +60,7 @@ public class BrokersResult {
    *     {@link BrokersResult}
    * @throws IllegalStateException if called before the call of {@link #get(long, TimeUnit)}
    */
-  public void brokerResult(List<ChePlugin> toolingFromBroker) throws InfrastructureException {
+  public void setResult(List<ChePlugin> toolingFromBroker) throws InfrastructureException {
     if (!started.get()) {
       throw new IllegalStateException(
           "Submitting a broker result is not allowed before calling BrokerResult#get");
@@ -74,9 +74,9 @@ public class BrokersResult {
 
   /**
    * Waits for the tooling that needs to be injected into a workspace being submitted by a call of
-   * {@link #brokerResult(List)}.
+   * {@link #setResult(List)}.
    *
-   * <p>If provided timeout elapses before needed call of {@link #brokerResult(List)} method ends
+   * <p>If provided timeout elapses before needed call of {@link #setResult(List)} method ends
    * with an exception. This method is based on {@link CompletableFuture#get(long, TimeUnit)} so it
    * also inherits parameters and thrown exception.
    *
