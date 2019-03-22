@@ -57,7 +57,7 @@ public class BrokersResult {
    *
    * @param toolingFromBroker tooling evaluated by a broker that needs to be added into a workspace
    * @throws InfrastructureException if called second time which indicates incorrect usage of the
-   * {@link BrokersResult}
+   *     {@link BrokersResult}
    * @throws IllegalStateException if called before the call of {@link #get(long, TimeUnit)}
    */
   public void setResult(List<ChePlugin> toolingFromBroker) throws InfrastructureException {
@@ -76,9 +76,9 @@ public class BrokersResult {
    * Waits for the tooling that needs to be injected into a workspace being submitted by a call of
    * {@link #setResult(List)}.
    *
-   * <p>If provided timeout elapses before needed call of {@link #setResult(List)} method ends
-   * with an exception. This method is based on {@link CompletableFuture#get(long, TimeUnit)} so it
-   * also inherits parameters and thrown exception.
+   * <p>If provided timeout elapses before needed call of {@link #setResult(List)} method ends with
+   * an exception. This method is based on {@link CompletableFuture#get(long, TimeUnit)} so it also
+   * inherits parameters and thrown exception.
    *
    * @return tooling submitted by broker that needs to be injected into a workspace
    * @throws IllegalStateException if called more than one time
