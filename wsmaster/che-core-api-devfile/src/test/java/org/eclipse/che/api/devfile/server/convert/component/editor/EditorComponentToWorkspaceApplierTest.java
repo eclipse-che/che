@@ -27,15 +27,15 @@ import org.testng.annotations.Test;
 /** @author Sergii Leshchenko */
 public class EditorComponentToWorkspaceApplierTest {
 
-  private EditorComponentToWorkspaceApplier editorToolApplier;
+  private EditorComponentToWorkspaceApplier editorComponentApplier;
 
   @BeforeMethod
   public void setUp() {
-    editorToolApplier = new EditorComponentToWorkspaceApplier();
+    editorComponentApplier = new EditorComponentToWorkspaceApplier();
   }
 
   @Test
-  public void shouldProvisionWorkspaceEditorAttributeDuringCheEditorToolApplying()
+  public void shouldProvisionWorkspaceEditorAttributeDuringCheEditorComponentApplying()
       throws Exception {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -45,7 +45,7 @@ public class EditorComponentToWorkspaceApplierTest {
     editorComponent.setId("org.eclipse.che.super-editor:0.0.1");
 
     // when
-    editorToolApplier.apply(workspaceConfig, editorComponent, null);
+    editorComponentApplier.apply(workspaceConfig, editorComponent, null);
 
     // then
     assertEquals(
@@ -56,7 +56,8 @@ public class EditorComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributesDuringCheEditorToolApplying() throws Exception {
+  public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying()
+      throws Exception {
     // given
     Component superPluginComponent = new Component();
     superPluginComponent.setName("editor");
@@ -69,7 +70,7 @@ public class EditorComponentToWorkspaceApplierTest {
     workspaceConfig.getCommands().add(command);
 
     // when
-    editorToolApplier.apply(workspaceConfig, superPluginComponent, null);
+    editorComponentApplier.apply(workspaceConfig, superPluginComponent, null);
 
     // then
     assertEquals(
