@@ -110,7 +110,7 @@ public class DevfileManager {
    * Creates {@link WorkspaceImpl} from given devfile with available name search
    *
    * @param devfile source devfile
-   * @param fileContentProvider content provider for recipe-type tool
+   * @param fileContentProvider content provider for recipe-type component
    * @return created {@link WorkspaceImpl} instance
    * @throws DevfileFormatException when devfile integrity validation fail
    * @throws DevfileRecipeFormatException when devfile recipe format is invalid
@@ -136,7 +136,7 @@ public class DevfileManager {
    * Creates {@link WorkspaceConfigImpl} from given devfile with integrity validation
    *
    * @param devfile source devfile
-   * @param fileContentProvider content provider for recipe-type tool
+   * @param fileContentProvider content provider for recipe-type component
    * @return created {@link WorkspaceConfigImpl} instance
    * @throws DevfileFormatException when devfile integrity validation fail
    * @throws DevfileRecipeFormatException when devfile recipe format is invalid

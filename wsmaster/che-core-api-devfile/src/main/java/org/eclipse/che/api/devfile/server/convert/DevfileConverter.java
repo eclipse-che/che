@@ -22,13 +22,13 @@ import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.devfile.model.Command;
+import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.DevfileFactory;
 import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
-import org.eclipse.che.api.devfile.server.convert.tool.ToolProvisioner;
-import org.eclipse.che.api.devfile.server.convert.tool.ToolToWorkspaceApplier;
+import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
+import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
@@ -45,19 +45,19 @@ public class DevfileConverter {
 
   private final ProjectConverter projectConverter;
   private final CommandConverter commandConverter;
-  private final Map<String, ToolToWorkspaceApplier> toolTypeToApplier;
-  private final Set<ToolProvisioner> toolProvisioners;
+  private final Map<String, ComponentToWorkspaceApplier> componentTypeToApplier;
+  private final Set<ComponentProvisioner> componentProvisioners;
 
   @Inject
   public DevfileConverter(
       ProjectConverter projectConverter,
       CommandConverter commandConverter,
-      Set<ToolProvisioner> toolProvisioners,
-      Map<String, ToolToWorkspaceApplier> toolTypeToApplier) {
+      Set<ComponentProvisioner> componentProvisioners,
+      Map<String, ComponentToWorkspaceApplier> componentTypeToApplier) {
     this.projectConverter = projectConverter;
     this.commandConverter = commandConverter;
-    this.toolProvisioners = toolProvisioners;
-    this.toolTypeToApplier = toolTypeToApplier;
+    this.componentProvisioners = componentProvisioners;
+    this.componentTypeToApplier = componentTypeToApplier;
   }
 
   /**
@@ -92,8 +92,8 @@ public class DevfileConverter {
       devfile.getCommands().add(commandConverter.toDevfileCommand(command));
     }
 
-    for (ToolProvisioner toolConverter : toolProvisioners) {
-      toolConverter.provision(devfile, wsConfig);
+    for (ComponentProvisioner componentProvisioner : componentProvisioners) {
+      componentProvisioner.provision(devfile, wsConfig);
     }
 
     return devfile;
@@ -103,14 +103,14 @@ public class DevfileConverter {
    * Converts given {@link Devfile} into {@link WorkspaceConfigImpl workspace config}.
    *
    * @param devfile initial devfile
-   * @param contentProvider content provider for recipe-type tool
+   * @param contentProvider content provider for recipe-type component
    * @return constructed workspace config
    * @throws DevfileException when general devfile error occurs
    * @throws DevfileException when devfile requires additional files content but the specified
    *     content provider does not support it
    * @throws DevfileFormatException when devfile format is invalid
-   * @throws DevfileRecipeFormatException when content of the file specified in recipe type tool is
-   *     empty or its format is invalid
+   * @throws DevfileRecipeFormatException when content of the file specified in recipe type
+   *     component is empty or its format is invalid
    */
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
       Devfile devfile, FileContentProvider contentProvider) throws DevfileException {
@@ -126,17 +126,17 @@ public class DevfileConverter {
       config.getCommands().add(commandConverter.toWorkspaceCommand(command));
     }
 
-    // note that tool applier modifies commands in workspace config
+    // note that component applier modifies commands in workspace config
     // so, commands should be already converted
-    for (Tool tool : devfile.getTools()) {
-      ToolToWorkspaceApplier applier = toolTypeToApplier.get(tool.getType());
+    for (Component component : devfile.getComponents()) {
+      ComponentToWorkspaceApplier applier = componentTypeToApplier.get(component.getType());
       if (applier == null) {
         throw new DevfileException(
             String.format(
-                "Devfile contains tool `%s` with type `%s` that can not be converted to workspace",
-                tool.getName(), tool.getType()));
+                "Devfile contains component `%s` with type `%s` that can not be converted to workspace",
+                component.getName(), component.getType()));
       }
-      applier.apply(config, tool, contentProvider);
+      applier.apply(config, component, contentProvider);
     }
 
     devfile

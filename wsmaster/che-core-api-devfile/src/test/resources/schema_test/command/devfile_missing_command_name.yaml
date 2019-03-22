@@ -13,13 +13,13 @@
 ---
 specVersion: 0.0.1
 name: petclinic-dev-environment
-tools:
+components:
  - name: theia
    type: cheEditor
    id: eclipse/theia:0.0.3
 commands:
   - actions:
       - type: exec
-        tool: mvn-stack
+        component: mvn-stack
         command: mvn package
         workdir: /projects/spring-petclinic
