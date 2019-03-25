@@ -28,7 +28,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
- * Provision chePlugin tools in {@link Devfile} according to the value of {@link
+ * Provision chePlugin components in {@link Devfile} according to the value of {@link
  * Constants#WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE} in the specified {@link WorkspaceConfigImpl}.
  *
  * @author Sergii Leshchenko
