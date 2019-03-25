@@ -26,7 +26,6 @@
     <description>Compiles Che IDE GWT application and packages it as a WAR-like archive which contains pure output of the GWT compiler</description>
     <properties>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
-        <product.version>${project.version}</product.version>
     </properties>
     <dependencies>
         <dependency>
@@ -199,7 +198,7 @@
                             <tasks>
                                 <echo append="false" file="${project.build.directory}/classes/org/eclipse/che/ide/ext/help/client/BuildInfo.properties">revision = ${revision}
                                     buildTime = ${timestamp}
-                                    version = ${product.version}</echo>
+                                    version = ${build.info}</echo>
                             </tasks>
                         </configuration>
                     </execution>

@@ -208,6 +208,25 @@
                         WEB-INF/lib/jsr305*.jar</packagingExcludes>
                 </configuration>
             </plugin>
+            <!-- adding "build info" for Che WS Agent API -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>buildinfo</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <echo append="false" file="${project.build.outputDirectory}/che/buildinfo.properties">che.product.build_info = ${build.info}</echo>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 </project>

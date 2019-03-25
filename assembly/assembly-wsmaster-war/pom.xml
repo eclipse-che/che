@@ -537,6 +537,7 @@
                     </execution>
                 </executions>
             </plugin>
+            <!-- adding "build info" for Che Server API -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-antrun-plugin</artifactId>
@@ -549,33 +550,11 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <echo append="false" file="${project.build.outputDirectory}/che/buildinfo.properties">che.product.build_info = ${build.info}
-                                    che.assembly.scm_revision = ${revision}
-                                    che.assembly.build_time =  ${timestamp}
-                                    che.assembly.version = ${build.info}</echo>
+                                <echo append="false" file="${project.build.outputDirectory}/che/buildinfo.properties">che.product.build_info = ${build.info}</echo>
                             </tasks>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>buildnumber-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <timestampFormat>{0, date, yyyy-MM-dd HH:mm:ss}</timestampFormat>
-                    <buildNumberPropertyName>revision</buildNumberPropertyName>
-                    <doCheck>false</doCheck>
-                    <doUpdate>false</doUpdate>
-                    <shortRevisionLength>16</shortRevisionLength>
-                </configuration>
             </plugin>
         </plugins>
     </build>
