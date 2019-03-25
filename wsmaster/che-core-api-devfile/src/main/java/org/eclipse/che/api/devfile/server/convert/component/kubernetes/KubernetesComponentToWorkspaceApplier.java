@@ -303,9 +303,9 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   }
 
   private List<HasMetadata> unmarshalComponentObjects(
-      Component k8sComponent, String toolLocalContent) throws DevfileRecipeFormatException {
+      Component k8sComponent, String componentLocalContent) throws DevfileRecipeFormatException {
     try {
-      return unmarshal(toolLocalContent);
+      return unmarshal(componentLocalContent);
     } catch (DevfileRecipeFormatException e) {
       throw new DevfileRecipeFormatException(
           format(
@@ -323,7 +323,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     }
   }
 
-  private String asYaml(Component tool, List<HasMetadata> list)
+  private String asYaml(Component component, List<HasMetadata> list)
       throws DevfileRecipeFormatException {
     try {
       return Serialization.asYaml(new KubernetesListBuilder().withItems(list).build());
@@ -331,7 +331,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       throw new DevfileRecipeFormatException(
           format(
               "Unable to deserialize specified local file content for component '%s'. Error: %s",
-              tool.getName(), e.getMessage()),
+              component.getName(), e.getMessage()),
           e);
     }
   }

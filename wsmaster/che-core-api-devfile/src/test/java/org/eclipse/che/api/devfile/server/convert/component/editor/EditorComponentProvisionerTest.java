@@ -54,7 +54,7 @@ public class EditorComponentProvisionerTest {
   }
 
   @Test
-  public void shouldUseEditorIdAsToolNameIfAliasIsMissingDuringEditorToolProvisioning()
+  public void shouldUseEditorIdAsComponentNameIfAliasIsMissingDuringEditorComponentProvisioning()
       throws Exception {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();

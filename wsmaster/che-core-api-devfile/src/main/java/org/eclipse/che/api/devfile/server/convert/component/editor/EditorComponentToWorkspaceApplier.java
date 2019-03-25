@@ -47,7 +47,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
       Component editorComponent,
       FileContentProvider contentProvider) {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
-    checkArgument(editorComponent != null, "Tool must not be null");
+    checkArgument(editorComponent != null, "Component must not be null");
     checkArgument(
         EDITOR_COMPONENT_TYPE.equals(editorComponent.getType()),
         format("Plugin must have `%s` type", EDITOR_COMPONENT_TYPE));

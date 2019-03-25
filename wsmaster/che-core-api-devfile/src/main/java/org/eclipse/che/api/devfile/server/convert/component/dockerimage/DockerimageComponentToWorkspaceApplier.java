@@ -64,7 +64,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
    * Applies changes on workspace config according to the specified dockerimage component.
    *
    * @param workspaceConfig workspace config on which changes should be applied
-   * @param dockerimageTool dockerimage component that should be applied
+   * @param dockerimageComponent dockerimage component that should be applied
    * @param contentProvider optional content provider that may be used for external component
    *     resource fetching
    * @throws DevfileException if specified workspace config already has default environment where
@@ -75,24 +75,24 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   @Override
   public void apply(
       WorkspaceConfigImpl workspaceConfig,
-      Component dockerimageTool,
+      Component dockerimageComponent,
       FileContentProvider contentProvider)
       throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
-    checkArgument(dockerimageTool != null, "Tool must not be null");
+    checkArgument(dockerimageComponent != null, "Component must not be null");
     checkArgument(
-        DOCKERIMAGE_COMPONENT_TYPE.equals(dockerimageTool.getType()),
+        DOCKERIMAGE_COMPONENT_TYPE.equals(dockerimageComponent.getType()),
         format("Plugin must have `%s` type", DOCKERIMAGE_COMPONENT_TYPE));
     if (workspaceConfig.getDefaultEnv() != null) {
       throw new DevfileException("Workspace already contains environment");
     }
 
-    String machineName = dockerimageTool.getName();
+    String machineName = dockerimageComponent.getName();
     MachineConfigImpl machineConfig = new MachineConfigImpl();
 
-    dockerimageTool.getEnv().forEach(e -> machineConfig.getEnv().put(e.getName(), e.getValue()));
+    dockerimageComponent.getEnv().forEach(e -> machineConfig.getEnv().put(e.getName(), e.getValue()));
 
-    for (Endpoint endpoint : dockerimageTool.getEndpoints()) {
+    for (Endpoint endpoint : dockerimageComponent.getEndpoints()) {
       HashMap<String, String> attributes = new HashMap<>(endpoint.getAttributes());
 
       String protocol = attributes.remove("protocol");
@@ -110,7 +110,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
                   Integer.toString(endpoint.getPort()), protocol, path, attributes));
     }
 
-    dockerimageTool
+    dockerimageComponent
         .getVolumes()
         .forEach(
             v ->
@@ -118,7 +118,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
                     .getVolumes()
                     .put(v.getName(), new VolumeImpl().withPath(v.getContainerPath())));
 
-    if (dockerimageTool.getMountSources()) {
+    if (dockerimageComponent.getMountSources()) {
       machineConfig
           .getVolumes()
           .put(PROJECTS_VOLUME_NAME, new VolumeImpl().withPath(projectFolderPath));
@@ -128,25 +128,25 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         .getAttributes()
         .put(
             MEMORY_LIMIT_ATTRIBUTE,
-            Long.toString(KubernetesSize.toBytes(dockerimageTool.getMemoryLimit())));
+            Long.toString(KubernetesSize.toBytes(dockerimageComponent.getMemoryLimit())));
 
     setEntryPointAttribute(
-        machineConfig, CONTAINER_COMMAND_ATTRIBUTE, dockerimageTool.getCommand());
-    setEntryPointAttribute(machineConfig, CONTAINER_ARGS_ATTRIBUTE, dockerimageTool.getArgs());
+        machineConfig, CONTAINER_COMMAND_ATTRIBUTE, dockerimageComponent.getCommand());
+    setEntryPointAttribute(machineConfig, CONTAINER_ARGS_ATTRIBUTE, dockerimageComponent.getArgs());
 
     RecipeImpl recipe =
-        new RecipeImpl(DockerImageEnvironment.TYPE, null, dockerimageTool.getImage(), null);
+        new RecipeImpl(DockerImageEnvironment.TYPE, null, dockerimageComponent.getImage(), null);
     EnvironmentImpl environment =
         new EnvironmentImpl(recipe, ImmutableMap.of(machineName, machineConfig));
-    workspaceConfig.getEnvironments().put(dockerimageTool.getName(), environment);
-    workspaceConfig.setDefaultEnv(dockerimageTool.getName());
+    workspaceConfig.getEnvironments().put(dockerimageComponent.getName(), environment);
+    workspaceConfig.setDefaultEnv(dockerimageComponent.getName());
 
     workspaceConfig
         .getCommands()
         .stream()
         .filter(
             c ->
-                dockerimageTool
+                dockerimageComponent
                     .getName()
                     .equals(c.getAttributes().get(Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE)))
         .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));

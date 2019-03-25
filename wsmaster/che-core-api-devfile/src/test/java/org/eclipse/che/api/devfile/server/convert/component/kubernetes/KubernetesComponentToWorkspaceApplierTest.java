@@ -88,7 +88,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
       expectedExceptionsMessageRegExp =
           "Fetching content of file `local.yaml` specified in `local` field of component `foo` is not "
               + "supported. Please provide its content in `localContent` field. Cause: fetch is not supported")
-  public void shouldThrowExceptionWhenRecipeToolIsPresentAndContentProviderDoesNotSupportFetching()
+  public void shouldThrowExceptionWhenRecipeComponentIsPresentAndContentProviderDoesNotSupportFetching()
       throws Exception {
     // given
     Component component =
@@ -184,7 +184,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
           "Components can not have objects with the same name and kind but there are multiple objects with kind 'Service' and name 'db'")
-  public void shouldThrowExceptionIfToolHasMultipleObjectsWithTheSameKindAndName()
+  public void shouldThrowExceptionIfComponentHasMultipleObjectsWithTheSameKindAndName()
       throws Exception {
     // given
     List<HasMetadata> objects = new ArrayList<>();
@@ -215,7 +215,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
       expectedExceptionsMessageRegExp =
           "Components can not have objects with the same name and kind "
               + "but there are multiple objects with kind 'Service' and name 'db'")
-  public void shouldThrowExceptionIfDifferentToolsHaveObjectsWithTheSameKindAndName()
+  public void shouldThrowExceptionIfDifferentComponentsHaveObjectsWithTheSameKindAndName()
       throws Exception {
     // given
     List<HasMetadata> objects = new ArrayList<>();
@@ -262,8 +262,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
         .getEnvironments()
         .put("default", new EnvironmentImpl(existingRecipe, emptyMap()));
 
-    List<HasMetadata> toolsObject = new ArrayList<>();
-    Deployment toolDeployment =
+    List<HasMetadata> componentsObject = new ArrayList<>();
+    Deployment componentDeployment =
         new DeploymentBuilder()
             .withNewMetadata()
             .withName("db")
@@ -271,8 +271,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
             .withNewSpec()
             .endSpec()
             .build();
-    toolsObject.add(new DeploymentBuilder(toolDeployment).build());
-    doReturn(toolsObject).when(k8sRecipeParser).parse(anyString());
+    componentsObject.add(new DeploymentBuilder(componentDeployment).build());
+    doReturn(componentsObject).when(k8sRecipeParser).parse(anyString());
     Component component =
         new Component()
             .withType(KUBERNETES_COMPONENT_TYPE)
@@ -285,7 +285,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionToolObjectsIntoExistingKubernetesRecipe() throws Exception {
+  public void shouldProvisionComponentObjectsIntoExistingKubernetesRecipe() throws Exception {
     // given
     workspaceConfig.setDefaultEnv("default");
     RecipeImpl existingRecipe =
@@ -305,8 +305,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
             .build();
     recipeObjects.add(new DeploymentBuilder(recipeDeployment).build());
 
-    List<HasMetadata> toolsObject = new ArrayList<>();
-    Deployment toolDeployment =
+    List<HasMetadata> componentsObject = new ArrayList<>();
+    Deployment componentDeployment =
         new DeploymentBuilder()
             .withNewMetadata()
             .withName("web-app")
@@ -314,8 +314,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
             .withNewSpec()
             .endSpec()
             .build();
-    toolsObject.add(new DeploymentBuilder(toolDeployment).build());
-    doReturn(toolsObject).doReturn(recipeObjects).when(k8sRecipeParser).parse(anyString());
+    componentsObject.add(new DeploymentBuilder(componentDeployment).build());
+    doReturn(componentsObject).doReturn(recipeObjects).when(k8sRecipeParser).parse(anyString());
     Component component =
         new Component()
             .withType(KUBERNETES_COMPONENT_TYPE)
@@ -330,7 +330,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     // it is expected that applier wrap original recipes objects in new Kubernetes list
     KubernetesList expectedKubernetesList =
         new KubernetesListBuilder()
-            .withItems(Arrays.asList(recipeDeployment, toolDeployment))
+            .withItems(Arrays.asList(recipeDeployment, componentDeployment))
             .build();
     EnvironmentImpl resultEnv =
         workspaceConfig.getEnvironments().get(workspaceConfig.getDefaultEnv());
@@ -340,7 +340,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldUpgradeKubernetesEnvironmentToOpenShiftTypeOnOpenShiftToolProvisioning()
+  public void shouldUpgradeKubernetesEnvironmentToOpenShiftTypeOnOpenShiftComponentProvisioning()
       throws Exception {
     // given
     workspaceConfig.setDefaultEnv("default");
@@ -350,8 +350,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
         .getEnvironments()
         .put("default", new EnvironmentImpl(existingRecipe, emptyMap()));
 
-    List<HasMetadata> toolsObject = new ArrayList<>();
-    Deployment toolDeployment =
+    List<HasMetadata> componentsObject = new ArrayList<>();
+    Deployment componentDeployment =
         new DeploymentBuilder()
             .withNewMetadata()
             .withName("web-app")
@@ -359,8 +359,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
             .withNewSpec()
             .endSpec()
             .build();
-    toolsObject.add(new DeploymentBuilder(toolDeployment).build());
-    doReturn(toolsObject).doReturn(new ArrayList<>()).when(k8sRecipeParser).parse(anyString());
+    componentsObject.add(new DeploymentBuilder(componentDeployment).build());
+    doReturn(componentsObject).doReturn(new ArrayList<>()).when(k8sRecipeParser).parse(anyString());
     Component component =
         new Component()
             .withType(OPENSHIFT_COMPONENT_TYPE)
@@ -471,7 +471,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   }
 
   @Test(dependsOnMethods = "shouldFilterRecipeWithGivenSelectors", enabled = false)
-  public void shouldSetMachineNameAttributeToCommandConfiguredInOpenShiftToolWithOneContainer()
+  public void shouldSetMachineNameAttributeToCommandConfiguredInOpenShiftComponentWithOneContainer()
       throws Exception {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
@@ -498,7 +498,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
   @Test
   public void
-      shouldNotSetMachineNameAttributeToCommandConfiguredInOpenShiftToolWithMultipleContainers()
+  shouldNotSetMachineNameAttributeToCommandConfiguredInOpenShiftComponentWithMultipleContainers()
           throws Exception {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
