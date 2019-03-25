@@ -90,7 +90,7 @@ public class GithubURLParser {
         .withRepository(repoName)
         .withBranch(branchName)
         .withSubfolder(matcher.group("subFolder"))
-        .withDevfileFilename(".devfile")
+        .withDevfileFilename("devfile.yml")
         .withFactoryFilename(".factory.json");
   }
 }

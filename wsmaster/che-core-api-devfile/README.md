@@ -42,7 +42,7 @@ For the detailed explanation of all devfile components assignment and possible v
 
 ### Getting Started
 The simplest way to use devfile is to have it deployed into GitHub source repository and then create factory from this repo.
-This is as simple as create `.devfile` file in the root of your GH repo, and then execute the factory: 
+This is as simple as create `devfile.yml` file in the root of your GH repo, and then execute the factory: 
 ```
 https://<your-che-host>/f?url=https://github.com/mygroup/myrepo
 ```
@@ -59,7 +59,7 @@ curl -X POST  -H "Authorization: <TOKEN>" -H "Content-Type: application/yaml" -d
 If you're a user of `chectl` tool, it is also possible to execute workspace from devfile, using `workspace:start` command 
 parameter as follows:
 ```
-chectl workspace:start --devfile=.devfile
+chectl workspace:start --devfile=devfile.yml
 ```` 
 Please note that currently this way only works for the local (same machine) devfiles - URL can't be used here atm.
 
