@@ -58,4 +58,12 @@ public class Constants {
    * the endpoint public.
    */
   public static final String PUBLIC_ENDPOINT_ATTRIBUTE = "public";
+
+  /**
+   * {@link Endpoint} attribute name which can identify endpoint as discoverable(means that it is
+   * accessible by its name from workspace's containers). Attribute value {@code true} makes a
+   * endpoint discoverable, any other value or lack of the attribute makes the endpoint
+   * non-discoverable.
+   */
+  public static final String DISCOVERABLE_ENDPOINT_ATTRIBUTE = "discoverable";
 }

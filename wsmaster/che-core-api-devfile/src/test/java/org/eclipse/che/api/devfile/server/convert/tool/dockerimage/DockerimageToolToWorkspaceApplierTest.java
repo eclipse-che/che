@@ -13,9 +13,11 @@ package org.eclipse.che.api.devfile.server.convert.tool.dockerimage;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
+import static org.eclipse.che.api.devfile.server.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -28,8 +30,11 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.util.Arrays;
 import java.util.List;
@@ -224,6 +229,63 @@ public class DockerimageToolToWorkspaceApplierTest {
     assertEquals(attributes.size(), 2);
     assertEquals(attributes.get(ServerConfig.INTERNAL_SERVER_ATTRIBUTE), "true");
     assertEquals(attributes.get("secure"), "false");
+  }
+
+  @Test
+  public void shouldProvisionServiceForDiscoverableServer() throws Exception {
+    // given
+    Endpoint endpoint =
+        new Endpoint()
+            .withName("jdk-ls")
+            .withPort(4923)
+            .withAttributes(
+                ImmutableMap.of(
+                    "protocol",
+                    "http",
+                    "path",
+                    "/ls",
+                    PUBLIC_ENDPOINT_ATTRIBUTE,
+                    "false",
+                    "secure",
+                    "false",
+                    DISCOVERABLE_ENDPOINT_ATTRIBUTE,
+                    "true"));
+    Tool dockerimageTool =
+        new Tool()
+            .withName("jdk")
+            .withType(DOCKERIMAGE_TOOL_TYPE)
+            .withImage("eclipse/ubuntu_jdk8:latest")
+            .withMemoryLimit("1G")
+            .withEndpoints(singletonList(endpoint));
+
+    // when
+    dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
+
+    // then
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+
+    List<HasMetadata> objects = objectsCaptor.getValue();
+    assertEquals(objects.size(), 2);
+    assertTrue(objects.get(0) instanceof Deployment);
+    Deployment deployment = (Deployment) objects.get(0);
+    assertEquals(
+        deployment.getSpec().getTemplate().getMetadata().getLabels().get(CHE_ORIGINAL_NAME_LABEL),
+        "jdk");
+
+    assertTrue(objects.get(1) instanceof Service);
+    Service service = (Service) objects.get(1);
+    assertEquals(service.getMetadata().getName(), "jdk-ls");
+    assertEquals(service.getSpec().getSelector(), ImmutableMap.of(CHE_ORIGINAL_NAME_LABEL, "jdk"));
+    List<ServicePort> ports = service.getSpec().getPorts();
+    assertEquals(ports.size(), 1);
+    ServicePort port = ports.get(0);
+    assertEquals(port.getPort(), new Integer(4923));
+    assertEquals(port.getTargetPort(), new IntOrString(4923));
   }
 
   @Test

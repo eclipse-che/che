@@ -16,6 +16,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
@@ -26,6 +27,11 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import java.util.ArrayList;
@@ -119,6 +125,7 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
           .put(PROJECTS_VOLUME_NAME, new VolumeImpl().withPath(projectFolderPath));
     }
 
+    List<HasMetadata> componentObjects = new ArrayList<>();
     Deployment deployment =
         buildDeployment(
             machineName,
@@ -131,11 +138,18 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
                 .collect(Collectors.toCollection(ArrayList::new)),
             dockerimageTool.getCommand(),
             dockerimageTool.getArgs());
+    componentObjects.add(deployment);
+
+    dockerimageTool
+        .getEndpoints()
+        .stream()
+        .filter(e -> "true".equals(e.getAttributes().get(DISCOVERABLE_ENDPOINT_ATTRIBUTE)))
+        .forEach(e -> componentObjects.add(createService(deployment, e)));
 
     k8sEnvProvisioner.provision(
         workspaceConfig,
         KubernetesEnvironment.TYPE,
-        singletonList(deployment),
+        componentObjects,
         ImmutableMap.of(machineName, machineConfig));
 
     workspaceConfig
@@ -201,5 +215,26 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
     }
 
     return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);
+  }
+
+  private Service createService(Deployment deployment, Endpoint endpoint) {
+    ServicePort servicePort =
+        new ServicePortBuilder()
+            .withPort(endpoint.getPort())
+            .withProtocol("TCP")
+            .withNewTargetPort(endpoint.getPort())
+            .build();
+    return new ServiceBuilder()
+        .withNewMetadata()
+        .withName(endpoint.getName())
+        .endMetadata()
+        .withNewSpec()
+        .withSelector(
+            ImmutableMap.of(
+                CHE_ORIGINAL_NAME_LABEL,
+                deployment.getSpec().getTemplate().getMetadata().getName()))
+        .withPorts(singletonList(servicePort))
+        .endSpec()
+        .build();
   }
 }
