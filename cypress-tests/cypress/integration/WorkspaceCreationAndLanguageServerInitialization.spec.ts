@@ -76,6 +76,8 @@ describe("E2E test", () => {
 
         it("Wait IDE availability", () => {
             ide.waitIdeInIframe(namespace, workspaceName);
+            cy.log("wait for project importing")
+            cy.wait(60000)
             ide.openIdeWithoutFrames(workspaceName);
             ide.waitIde(namespace, workspaceName);
         })
