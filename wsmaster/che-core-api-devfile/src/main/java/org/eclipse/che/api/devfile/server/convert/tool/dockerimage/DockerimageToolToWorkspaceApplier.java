@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.Constants;
@@ -90,25 +91,9 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
     String machineName = dockerimageTool.getName();
     MachineConfigImpl machineConfig = new MachineConfigImpl();
 
-    dockerimageTool.getEnv().forEach(e -> machineConfig.getEnv().put(e.getName(), e.getValue()));
-
-    for (Endpoint endpoint : dockerimageTool.getEndpoints()) {
-      HashMap<String, String> attributes = new HashMap<>(endpoint.getAttributes());
-
-      String protocol = attributes.remove("protocol");
-      if (isNullOrEmpty(protocol)) {
-        protocol = "http";
-      }
-
-      String path = attributes.remove("path");
-
-      machineConfig
-          .getServers()
-          .put(
-              endpoint.getName(),
-              new ServerConfigImpl(
-                  Integer.toString(endpoint.getPort()), protocol, path, attributes));
-    }
+    dockerimageTool
+        .getEndpoints()
+        .forEach(e -> machineConfig.getServers().put(e.getName(), toServerConfig(e)));
 
     dockerimageTool
         .getVolumes()
@@ -162,5 +147,23 @@ public class DockerimageToolToWorkspaceApplier implements ToolToWorkspaceApplier
     String val = entryPointParser.serializeEntry(attributeValue);
 
     machineConfig.getAttributes().put(attributeName, val);
+  }
+
+  private ServerConfigImpl toServerConfig(Endpoint endpoint) {
+    HashMap<String, String> attributes = new HashMap<>(endpoint.getAttributes());
+
+    String protocol = attributes.remove("protocol");
+    if (isNullOrEmpty(protocol)) {
+      protocol = "http";
+    }
+
+    String path = attributes.remove("path");
+
+    String isPublic = attributes.remove("public");
+    if ("false".equals(isPublic)) {
+      attributes.put(ServerConfig.INTERNAL_SERVER_ATTRIBUTE, "true");
+    }
+
+    return new ServerConfigImpl(Integer.toString(endpoint.getPort()), protocol, path, attributes);
   }
 }

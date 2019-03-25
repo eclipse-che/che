@@ -23,6 +23,7 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.model.Env;
@@ -163,6 +164,11 @@ public class DockerimageToolProvisioner implements ToolProvisioner {
     Map<String, String> attributes = new HashMap<>(config.getAttributes());
     putIfNotNull(attributes, "protocol", config.getProtocol());
     putIfNotNull(attributes, "path", config.getPath());
+
+    String isInternal = config.getAttributes().remove(ServerConfig.INTERNAL_SERVER_ATTRIBUTE);
+    if ("true".equals(isInternal)) {
+      attributes.put("public", "false");
+    }
 
     return new Endpoint()
         .withName(name)
