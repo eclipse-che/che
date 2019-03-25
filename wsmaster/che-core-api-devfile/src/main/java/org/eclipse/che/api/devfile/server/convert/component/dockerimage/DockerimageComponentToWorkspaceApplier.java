@@ -90,7 +90,9 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
     String machineName = dockerimageComponent.getName();
     MachineConfigImpl machineConfig = new MachineConfigImpl();
 
-    dockerimageComponent.getEnv().forEach(e -> machineConfig.getEnv().put(e.getName(), e.getValue()));
+    dockerimageComponent
+        .getEnv()
+        .forEach(e -> machineConfig.getEnv().put(e.getName(), e.getValue()));
 
     for (Endpoint endpoint : dockerimageComponent.getEndpoints()) {
       HashMap<String, String> attributes = new HashMap<>(endpoint.getAttributes());

@@ -88,8 +88,9 @@ public class KubernetesComponentToWorkspaceApplierTest {
       expectedExceptionsMessageRegExp =
           "Fetching content of file `local.yaml` specified in `local` field of component `foo` is not "
               + "supported. Please provide its content in `localContent` field. Cause: fetch is not supported")
-  public void shouldThrowExceptionWhenRecipeComponentIsPresentAndContentProviderDoesNotSupportFetching()
-      throws Exception {
+  public void
+      shouldThrowExceptionWhenRecipeComponentIsPresentAndContentProviderDoesNotSupportFetching()
+          throws Exception {
     // given
     Component component =
         new Component()
@@ -498,7 +499,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
   @Test
   public void
-  shouldNotSetMachineNameAttributeToCommandConfiguredInOpenShiftComponentWithMultipleContainers()
+      shouldNotSetMachineNameAttributeToCommandConfiguredInOpenShiftComponentWithMultipleContainers()
           throws Exception {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
