@@ -19,14 +19,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import java.util.Collection;
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
@@ -46,8 +44,8 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class BrokerEnvironmentFactoryTest {
 
-  private static final String SUPPORTED_TYPE = "Test type 1";
   private static final String INIT_IMAGE = "init:image";
+  private static final String UNIFIED_BROKER_IMAGE = "unified:image";
   private static final String IMAGE_PULL_POLICY = "Never";
   private static final String PUSH_ENDPOINT = "http://localhost:8080";
 
@@ -66,8 +64,7 @@ public class BrokerEnvironmentFactoryTest {
                 IMAGE_PULL_POLICY,
                 authEnableEnvVarProvider,
                 machineTokenEnvVarProvider,
-                ImmutableMap.of(
-                    SUPPORTED_TYPE, "testRepo/image:tag", "Test type 2", "testRepo/image2:tag2"),
+                UNIFIED_BROKER_IMAGE,
                 INIT_IMAGE) {
               @Override
               protected KubernetesEnvironment doCreate(BrokersConfigs brokersConfigs) {
@@ -84,33 +81,10 @@ public class BrokerEnvironmentFactoryTest {
     when(runtimeId.getWorkspaceId()).thenReturn("wsid");
   }
 
-  @Test(
-      expectedExceptions = InfrastructureException.class,
-      expectedExceptionsMessageRegExp = "Plugin '.*:.*' has invalid type 'null'")
-  public void shouldThrowExceptionIfBrokerTypeIsMissing() throws Exception {
-    // given
-    Collection<PluginMeta> metas = singletonList(new PluginMeta());
-
-    // when
-    factory.create(metas, runtimeId, new BrokersResult());
-  }
-
-  @Test(
-      expectedExceptions = InfrastructureException.class,
-      expectedExceptionsMessageRegExp =
-          "Plugin '.*:.*' has unsupported type 'Unsupported test type'")
-  public void shouldThrowExceptionIfImageForBrokerIsNonFound() throws Exception {
-    // given
-    Collection<PluginMeta> metas = singletonList(new PluginMeta().type("Unsupported test type"));
-
-    // when
-    factory.create(metas, runtimeId, new BrokersResult());
-  }
-
   @Test
   public void testInitBrokerContainer() throws Exception {
     // given
-    Collection<PluginMeta> metas = singletonList(new PluginMeta().type(SUPPORTED_TYPE));
+    Collection<PluginMeta> metas = singletonList(new PluginMeta());
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
@@ -145,7 +119,7 @@ public class BrokerEnvironmentFactoryTest {
   @Test
   public void shouldNameContainersAfterPluginBrokerImage() throws Exception {
     // given
-    Collection<PluginMeta> metas = singletonList(new PluginMeta().type(SUPPORTED_TYPE));
+    Collection<PluginMeta> metas = singletonList(new PluginMeta());
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
@@ -162,6 +136,6 @@ public class BrokerEnvironmentFactoryTest {
 
     List<Container> containers = brokerPodSpec.getContainers();
     assertEquals(containers.size(), 1);
-    assertEquals(containers.get(0).getName(), "testrepo-image-tag");
+    assertEquals(containers.get(0).getName(), "unified-image");
   }
 }

@@ -14,14 +14,12 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 
@@ -30,32 +28,11 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 public class BrokersResult {
 
   private final CompletableFuture<List<ChePlugin>> future;
-  private final AtomicInteger brokersNumber;
   private final AtomicBoolean started;
-  private final List<ChePlugin> plugins;
 
   public BrokersResult() {
     future = new CompletableFuture<>();
-    brokersNumber = new AtomicInteger();
     started = new AtomicBoolean();
-    plugins = Collections.synchronizedList(new ArrayList<>());
-  }
-
-  /**
-   * Notifies {@code BrokerResult} that one more broker will be launched and we need to wait
-   * response from it.
-   *
-   * <p>It should be called before the call of {@link #get(long, TimeUnit)}, otherwise {@link
-   * IllegalStateException} would be thrown
-   *
-   * @throws IllegalStateException if called after call of {@link #get(long, TimeUnit)}
-   */
-  public void oneMoreBroker() {
-    if (started.get()) {
-      throw new IllegalStateException(
-          "Call of BrokerResult#oneMoreBroker is not allowed after call BrokerResult#get");
-    }
-    brokersNumber.incrementAndGet();
   }
 
   /**
@@ -76,42 +53,34 @@ public class BrokersResult {
   }
 
   /**
-   * Submits a result of a broker execution.
-   *
-   * <p>It also count down the number of brokers that are waited for the result submission.
+   * Submits the result of a broker execution.
    *
    * @param toolingFromBroker tooling evaluated by a broker that needs to be added into a workspace
-   * @throws InfrastructureException if called more times than {@link #oneMoreBroker()} which
-   *     indicates incorrect usage of the {@link BrokersResult}
+   * @throws InfrastructureException if called second time which indicates incorrect usage of the
+   *     {@link BrokersResult}
    * @throws IllegalStateException if called before the call of {@link #get(long, TimeUnit)}
    */
-  public void addResult(List<ChePlugin> toolingFromBroker) throws InfrastructureException {
+  public void setResult(List<ChePlugin> toolingFromBroker) throws InfrastructureException {
     if (!started.get()) {
       throw new IllegalStateException(
           "Submitting a broker result is not allowed before calling BrokerResult#get");
     }
-    int previousBrokersNumber = brokersNumber.getAndDecrement();
-    if (previousBrokersNumber == 0) {
+    if (future.isDone()) {
       throw new InfrastructureException(
-          "Broker result is submitted when no more results are expected");
+          "Plugins brokering result is unexpectedly submitted more than one time. This indicates unexpected behavior of the system");
     }
-    plugins.addAll(toolingFromBroker);
-    if (previousBrokersNumber == 1) {
-      future.complete(new ArrayList<>(plugins));
-    }
+    future.complete(new ArrayList<>(toolingFromBroker));
   }
 
   /**
-   * Waits for the tooling that needs to be injected into a workspace being submitted by calls of
-   * {@link #addResult(List)}.
+   * Waits for the tooling that needs to be injected into a workspace being submitted by a call of
+   * {@link #setResult(List)}.
    *
-   * <p>Number of calls of {@link #addResult(List)} needs to be the same as number of calls of
-   * {@link #oneMoreBroker()}. Returned list is a combination of lists submitted to {@link
-   * #addResult(List)}. If provided timeout elapses before all needed calls of {@link
-   * #addResult(List)} method ends with an exception. This method is based on {@link
-   * CompletableFuture#get(long, TimeUnit)} so it also inherits parameters and thrown exception.
+   * <p>If provided timeout elapses before needed call of {@link #setResult(List)} method ends with
+   * an exception. This method is based on {@link CompletableFuture#get(long, TimeUnit)} so it also
+   * inherits parameters and thrown exception.
    *
-   * @return tooling submitted by one or several brokers that needs to be injected into a workspace
+   * @return tooling submitted by broker that needs to be injected into a workspace
    * @throws IllegalStateException if called more than one time
    * @see CompletableFuture#get(long, TimeUnit)
    */
