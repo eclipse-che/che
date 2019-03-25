@@ -30,6 +30,9 @@ export class ProjectTree {
     }
 
     openProjectTreeContainer() {
+        cy.log("wait for project importing")
+        cy.wait(60000)
+
         cy.get(Ide.FILES_BUTTON)
             .should('be.visible')
             .then(filesButton => {
