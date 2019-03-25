@@ -18,6 +18,7 @@ export class Ide {
 
     private static readonly START_WORKSPACE_TIMEOUT: number = Cypress.env("start_workspace_timeout");
     private static readonly LANGUAGE_SERVER_INITIALIZATION_TIMEOUT: number = Cypress.env("language_server_initialization_timeout");
+    private static readonly LOAD_PAGE_TIMEOUT: number = Cypress.env("load_page_timeout");
 
     private static readonly TOP_MENU_PANEL: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
     private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
@@ -29,6 +30,20 @@ export class Ide {
     private readonly testWorkspaceUtil: TestWorkspaceUtil = new TestWorkspaceUtil();
 
 
+
+    waitNotification(notificationMessage: string) {
+        let notificationLocator: string = `div[id='notification-container-3-${notificationMessage}-|']`
+
+        cy.get(notificationLocator, { timeout: Ide.LOAD_PAGE_TIMEOUT })
+            .should('be.visible')
+    }
+
+    waitNotificationDisappearance(notificationMessage: string) {
+        let notificationLocator: string = `div[id='notification-container-3-${notificationMessage}-|']`
+
+        cy.get(notificationLocator, { timeout: Ide.LOAD_PAGE_TIMEOUT })
+            .should('not.be.visible')
+    }
 
     waitIdeInIframe(workspaceNamespace: string, workspaceName: string) {
         this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName).then(() => {
