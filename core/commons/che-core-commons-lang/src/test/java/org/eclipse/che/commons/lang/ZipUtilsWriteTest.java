@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
@@ -88,7 +89,7 @@ public class ZipUtilsWriteTest {
     }
     Collection<String> entries = listEntries(zipFile.toFile());
     assertTrue(entries.contains("foo.bar"));
-    assertTrue(entries.contains("inner/temp.bla"));
+    assertTrue(entries.contains(Paths.get("inner/temp.bla").toString()));
   }
 
   @Test
@@ -98,7 +99,7 @@ public class ZipUtilsWriteTest {
     }
     Collection<String> entries = listEntries(zipFile.toFile());
     String tempFileName = tempDir.getFileName().toString();
-    assertTrue(entries.contains(tempFileName + "/foo.bar"));
-    assertTrue(entries.contains(tempFileName + "/inner/temp.bla"));
+    assertTrue(entries.contains(Paths.get(tempFileName + "/foo.bar").toString()));
+    assertTrue(entries.contains(Paths.get(tempFileName + "/inner/temp.bla").toString()));
   }
 }
