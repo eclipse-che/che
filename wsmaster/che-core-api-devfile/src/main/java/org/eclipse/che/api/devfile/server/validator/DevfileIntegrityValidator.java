@@ -113,8 +113,6 @@ public class DevfileIntegrityValidator {
   private Set<String> validateTools(Devfile devfile) throws DevfileFormatException {
     Set<String> existingNames = new HashSet<>();
     Tool editorTool = null;
-    Tool dockerimageTool = null;
-    Tool k8sOSTool = null;
     for (Tool tool : devfile.getTools()) {
       if (!existingNames.add(tool.getName())) {
         throw new DevfileFormatException(format("Duplicate tool name found:'%s'", tool.getName()));
@@ -131,29 +129,10 @@ public class DevfileIntegrityValidator {
           break;
 
         case PLUGIN_TOOL_TYPE:
-          // do nothing
-          break;
-
         case KUBERNETES_TOOL_TYPE:
-          // fall through
         case OPENSHIFT_TOOL_TYPE:
-          if (dockerimageTool != null) {
-            throw new DevfileFormatException(
-                "Devfile cannot contain kubernetes/openshift and dockerimage tool at the same time");
-          }
-          k8sOSTool = tool;
-          break;
-
         case DOCKERIMAGE_TOOL_TYPE:
-          if (k8sOSTool != null) {
-            throw new DevfileFormatException(
-                "Devfile cannot contain kubernetes/openshift and dockerimage tool at the same time");
-          }
-          if (dockerimageTool != null) {
-            throw new DevfileFormatException(
-                "Devfile cannot contain multiple dockerimage tools at the same time");
-          }
-          dockerimageTool = tool;
+          // do nothing
           break;
 
         default:
@@ -290,7 +269,11 @@ public class DevfileIntegrityValidator {
     return content;
   }
 
-  private static String toYAML(Entrypoint ep) throws DevfileException {
-    return Serialization.asYaml(ep);
+  private String toYAML(Entrypoint ep) throws DevfileException {
+    try {
+      return Serialization.asYaml(ep);
+    } catch (Exception e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
   }
 }

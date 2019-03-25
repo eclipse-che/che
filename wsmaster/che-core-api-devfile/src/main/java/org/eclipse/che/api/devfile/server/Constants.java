@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import org.eclipse.che.api.devfile.model.Endpoint;
+
 public class Constants {
 
   private Constants() {}
@@ -49,4 +51,11 @@ public class Constants {
 
   /** Workspace command attributes that indicates with which tool it is associated. */
   public static final String TOOL_NAME_COMMAND_ATTRIBUTE = "toolName";
+
+  /**
+   * {@link Endpoint} attribute name which can identify endpoint as public or internal. Attribute
+   * value {@code false} makes a endpoint internal, any other value or lack of the attribute makes
+   * the endpoint public.
+   */
+  public static final String PUBLIC_ENDPOINT_ATTRIBUTE = "public";
 }

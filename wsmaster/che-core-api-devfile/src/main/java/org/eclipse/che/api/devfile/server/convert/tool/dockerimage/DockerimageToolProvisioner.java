@@ -14,6 +14,7 @@ package org.eclipse.che.api.devfile.server.convert.tool.dockerimage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 
 import java.util.HashMap;
@@ -167,7 +168,7 @@ public class DockerimageToolProvisioner implements ToolProvisioner {
 
     String isInternal = config.getAttributes().remove(ServerConfig.INTERNAL_SERVER_ATTRIBUTE);
     if ("true".equals(isInternal)) {
-      attributes.put("public", "false");
+      attributes.put(PUBLIC_ENDPOINT_ATTRIBUTE, "false");
     }
 
     return new Endpoint()
