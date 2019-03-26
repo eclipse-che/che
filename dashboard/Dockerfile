@@ -12,7 +12,7 @@
 # Build step: $ docker build -t eclipse-che-dashboard
 # It builds an archive file that can be used by doing later
 #  $ docker run --rm eclipse-che-dashboard | tar -C target/ -zxf -
-FROM node:8.10.0
+FROM node:8.15.1
 
 RUN apt-get update && \
     apt-get install -y git \
