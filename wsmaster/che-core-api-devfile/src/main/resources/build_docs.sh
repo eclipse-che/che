@@ -117,7 +117,7 @@ print_help() {
    echo "   --message     Override default commit message. Example: --message=\"Update Devfile Docs\""
    echo "   --no-deploy   Skip deploy result to remote"
    echo "   --org         Specifies organization of devfile repository to which Docs should be pushed. Default value: redhat-developer"
-   echo "   --branch|-b   Specifies branch to which Docs should be pushed. Default behaviour: use default GitHub repo branch"
+   echo "   --branch|-b   Specifies branch to which Docs should be pushed. Default is 'docs_renewal'. If branch already exists on remote, error will be thrown."
    echo "   --base-branch Specifies base branch to checkout from. Otherwise repository default branch will be used"
    echo "   --ssh         Configures script to use ssh link to GitHub Docs repository. Default: false"
 }
