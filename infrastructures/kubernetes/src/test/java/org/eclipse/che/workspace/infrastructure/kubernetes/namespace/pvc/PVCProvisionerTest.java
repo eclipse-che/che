@@ -63,6 +63,7 @@ public class PVCProvisionerTest {
 
   private static final String PVC_QUANTITY = "10Gi";
   private static final String PVC_ACCESS_MODE = "RWO";
+  private static final String PVC_STORAGE_CLASS_NAME = "default";
 
   private static final RuntimeIdentity IDENTITY =
       new RuntimeIdentityImpl(WORKSPACE_ID, "env1", "id1");
@@ -77,7 +78,9 @@ public class PVCProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
-    provisioner = new PVCProvisioner(PVC_NAME_PREFIX, PVC_QUANTITY, PVC_ACCESS_MODE, podsVolumes);
+    provisioner =
+        new PVCProvisioner(
+            PVC_NAME_PREFIX, PVC_QUANTITY, PVC_ACCESS_MODE, PVC_STORAGE_CLASS_NAME, podsVolumes);
 
     k8sEnv = KubernetesEnvironment.builder().build();
 

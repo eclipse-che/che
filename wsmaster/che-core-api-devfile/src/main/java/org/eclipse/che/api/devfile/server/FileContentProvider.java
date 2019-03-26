@@ -12,6 +12,9 @@
 package org.eclipse.che.api.devfile.server;
 
 import java.io.IOException;
+import java.lang.ref.SoftReference;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 
 /**
@@ -22,6 +25,22 @@ import org.eclipse.che.api.devfile.server.exception.DevfileException;
  * @author Sergii Leshchenko
  */
 public interface FileContentProvider {
+
+  /**
+   * Short for {@code new CachingProvider(contentProvider);}. If the {@code contentProvider} is
+   * itself an instance of the {@link CachingProvider}, no new instance is produced.
+   *
+   * @param contentProvider the content provider to cache
+   * @return a file content provider that caches the responses
+   */
+  static FileContentProvider cached(FileContentProvider contentProvider) {
+    if (contentProvider instanceof CachingProvider) {
+      return contentProvider;
+    } else {
+      return new CachingProvider(contentProvider);
+    }
+  }
+
   /**
    * Fetches content of the specified file.
    *
@@ -51,6 +70,35 @@ public interface FileContentProvider {
     @Override
     public String fetchContent(String fileName) throws DevfileException {
       throw new DevfileException(message);
+    }
+  }
+
+  /**
+   * A file content provider that caches responses from the content provider it is wrapping. Useful
+   * in situations where repeated calls to the {@link #fetchContent(String)} are necessary.
+   */
+  class CachingProvider implements FileContentProvider {
+
+    private final FileContentProvider provider;
+
+    // we don't want to be holding on to large strings with content
+    private final Map<String, SoftReference<String>> cache = new HashMap<>();
+
+    public CachingProvider(FileContentProvider provider) {
+      this.provider = provider;
+    }
+
+    @Override
+    public String fetchContent(String fileName) throws IOException, DevfileException {
+      SoftReference<String> ref = cache.get(fileName);
+      String ret = ref == null ? null : ref.get();
+
+      if (ret == null) {
+        ret = provider.fetchContent(fileName);
+        cache.put(fileName, new SoftReference<>(ret));
+      }
+
+      return ret;
     }
   }
 }

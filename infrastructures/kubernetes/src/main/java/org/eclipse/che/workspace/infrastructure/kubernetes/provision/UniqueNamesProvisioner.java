@@ -80,7 +80,7 @@ public class UniqueNamesProvisioner<T extends KubernetesEnvironment>
       }
     }
 
-    // We expliticly need to modify the deployments in the environment to provision unique names
+    // We explicitly need to modify the deployments in the environment to provision unique names
     // for them.
     final Collection<Deployment> deployments = k8sEnv.getDeploymentsCopy().values();
     for (Deployment deployment : deployments) {

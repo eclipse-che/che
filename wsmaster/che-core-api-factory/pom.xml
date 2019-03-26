@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-master-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.0.0-beta-2.0-SNAPSHOT</version>
+        <version>7.0.0-beta-3.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-core-api-factory</artifactId>
     <packaging>jar</packaging>
@@ -135,6 +135,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-model</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-account</artifactId>
             <scope>test</scope>
@@ -152,6 +157,11 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-sql-schema</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.infrastructure</groupId>
+            <artifactId>infrastructure-kubernetes</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

@@ -89,4 +89,28 @@ public class PluginToolToWorkspaceApplierTest {
         workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
         "org.eclipse.che.super-plugin:0.0.1");
   }
+
+  @Test
+  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
+      throws Exception {
+    // given
+    Tool superPluginTool = new Tool();
+    superPluginTool.setName("super-plugin");
+    superPluginTool.setId(
+        "https://custom-plugin.registry/plugins/org.eclipse.che.super-plugin:0.0.1");
+    superPluginTool.setType(PLUGIN_TOOL_TYPE);
+
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    CommandImpl command = new CommandImpl();
+    command.getAttributes().put(TOOL_NAME_COMMAND_ATTRIBUTE, "super-plugin");
+    workspaceConfig.getCommands().add(command);
+
+    // when
+    pluginToolApplier.apply(workspaceConfig, superPluginTool, null);
+
+    // then
+    assertEquals(
+        workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
+        "org.eclipse.che.super-plugin:0.0.1");
+  }
 }

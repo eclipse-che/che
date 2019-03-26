@@ -286,5 +286,20 @@ public class TestFactoryInitializer {
     public FactoryDto withLinks(List<Link> links) {
       return factoryDto.withLinks(links);
     }
+
+    @Override
+    public String getSource() {
+      return factoryDto.getSource();
+    }
+
+    @Override
+    public void setSource(String source) {
+      factoryDto.setSource(source);
+    }
+
+    @Override
+    public FactoryDto withSource(String source) {
+      return factoryDto.withSource(source);
+    }
   }
 }

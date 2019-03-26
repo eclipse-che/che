@@ -125,12 +125,28 @@ export class LoadFactoryController {
           this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
           this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no workspace config.';
         } else {
-          this.fetchWorkspaces();
+          this.loadFactoryService.goToNextStep();
+          this.$timeout(() => {
+             this.processFactorySource();
+          }, 1500);
         }
       }, (error: any) => {
         this.handleError(error);
       });
     }
+  }
+
+  /**
+   * Looks for source of factory (devfile of .factory.json) and prints message to user.
+   */
+  processFactorySource(): void {
+    if (this.factory.source) {
+      let sourceString = this.factory.source === 'repo' ?
+                   ': .devfile not found in repository root. Default environment will be applied' :
+                   ': found " + this.factory.source + ", applying it';
+      this.getLoadingSteps()[this.getCurrentProgressStep()].text += sourceString);
+    }
+    this.fetchWorkspaces();
   }
 
   /**

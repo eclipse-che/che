@@ -42,6 +42,7 @@ global:
     useCertManager: true
     useStaging: true
     secretName: che-tls
+    useSelfSignedCerts: false
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"

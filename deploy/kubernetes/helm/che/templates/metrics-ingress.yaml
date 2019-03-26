@@ -38,7 +38,7 @@ spec:
   tls:
   - hosts:
     - {{ template "prometheusHost" . }}
-    - {{ template "granfanaHost" . }}
+    - {{ template "grafanaHost" . }}
     secretName: {{ .Values.global.tls.secretName }}
 {{- end }}
   rules:

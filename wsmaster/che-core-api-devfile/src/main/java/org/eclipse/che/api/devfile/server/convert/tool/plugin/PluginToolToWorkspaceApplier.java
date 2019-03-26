@@ -71,6 +71,7 @@ public class PluginToolToWorkspaceApplier implements ToolToWorkspaceApplier {
             PLUGINS_TOOLS_ALIASES_WORKSPACE_ATTRIBUTE,
             append(pluginsAliases, pluginTool.getId() + "=" + pluginTool.getName()));
 
+    String pluginIdVersion = resolveIdAndVersion(pluginTool.getId());
     for (CommandImpl command : workspaceConfig.getCommands()) {
       String commandTool = command.getAttributes().get(TOOL_NAME_COMMAND_ATTRIBUTE);
 
@@ -83,7 +84,16 @@ public class PluginToolToWorkspaceApplier implements ToolToWorkspaceApplier {
         continue;
       }
 
-      command.getAttributes().put(PLUGIN_ATTRIBUTE, pluginTool.getId());
+      command.getAttributes().put(PLUGIN_ATTRIBUTE, pluginIdVersion);
+    }
+  }
+
+  private String resolveIdAndVersion(String ref) {
+    int lastSlashPosition = ref.lastIndexOf("/");
+    if (lastSlashPosition < 0) {
+      return ref;
+    } else {
+      return ref.substring(lastSlashPosition + 1);
     }
   }
 
