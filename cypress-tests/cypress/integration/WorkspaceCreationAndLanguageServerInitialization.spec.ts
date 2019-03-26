@@ -78,8 +78,8 @@ describe("E2E test", () => {
             ide.waitIdeInIframe(namespace, workspaceName);
             ide.openIdeWithoutFrames(workspaceName);
             ide.waitIde(namespace, workspaceName);
-            ide.waitNotification("Che Workspace: Finished cloning projects.");
-            ide.waitNotificationDisappearance("Che Workspace: Finished cloning projects.");
+            // ide.waitNotification("Che Workspace: Finished cloning projects.");
+            // ide.waitNotificationDisappearance("Che Workspace: Finished cloning projects.");
         })
 
     })
@@ -92,6 +92,7 @@ describe("E2E test", () => {
         it("Open project tree container", () => {
             projectTree.openProjectTreeContainer();
             projectTree.waitProjectTreeContainer();
+            projectTree.waitProjectImported("web-java-spring", "src", 40, 5000)
         })
 
         it("Expand project and open file in editor", () => {

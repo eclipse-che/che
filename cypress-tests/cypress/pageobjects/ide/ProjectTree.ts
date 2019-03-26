@@ -11,10 +11,13 @@
 /// <reference types="Cypress" />
 
 import { Ide } from "./Ide";
+import { ElementStateChecker } from "../../utils/ElementStateChecker";
+import { Promise, resolve } from "bluebird";
 
 export class ProjectTree {
 
     private readonly ide: Ide = new Ide();
+    private readonly elementStateChecker: ElementStateChecker = new ElementStateChecker();
     private static readonly PROJECT_TREE_CONTAINER: string = "#theia-left-side-panel .theia-TreeContainer";
 
     private getItemId(itemPath: string): string {
@@ -36,11 +39,11 @@ export class ProjectTree {
                 let isProjectTreeContainerOpened: boolean = filesButton.hasClass("p-mod-current");
 
                 //if project tree container is not opened click on "Files" button
-                if (! isProjectTreeContainerOpened) {
+                if (!isProjectTreeContainerOpened) {
                     this.ide.clickOnFilesButton();
                 }
-            }).then(()=>{
-              this.waitProjectTreeContainer();  
+            }).then(() => {
+                this.waitProjectTreeContainer();
             })
     }
 
@@ -117,6 +120,26 @@ export class ProjectTree {
 
     }
 
+    colapseItem(itemPath: string) {
+        let expandIconLocator: string = this.getExpandIconLocator(itemPath);
+        let treeItemLocator: string = this.getTreeItemLocator(itemPath);
+
+        cy.get(expandIconLocator)
+            .should('be.visible')
+            .then(expandIcon => {
+                // if item expanded click and colapse it
+                if (!expandIcon.hasClass('theia-mod-collapsed')) {
+                    cy.get(treeItemLocator)
+                        .should('be.visible')
+                        .click();
+                }
+            })
+            .then(() => {
+                this.waitItemColapsed(itemPath);
+            })
+
+    }
+
     expandPathAndOpenFile(pathToItem: string, fileName: string) {
         let currentPath: string = "";
         let paths: Array<string> = new Array();
@@ -134,6 +157,42 @@ export class ProjectTree {
 
         //open file  
         this.clickOnItem(`${pathToItem}/${fileName}`)
+    }
+
+    waitProjectImported(projectName: string, rootSubitem: string, attempts: number, pollingEvery: number) {
+        let currentAttempt: number = 1;
+
+        this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+    }
+
+    waitImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt:number, pollingEvery: number): Promise<void>{
+        return new Promise((resolve, reject)=>{
+            let rootItem: string = `/${projectName}`;  
+        
+            this.expandItem(rootItem)
+            this.waitItemExpanded(rootItem)
+    
+            cy.wait(pollingEvery).then(()=>{
+                cy.get('body')
+                        .then(body => {
+                            let elementLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
+
+                            if(body.find(elementLocator).length > 0){
+                                return;
+                            }
+
+                            if(currentAttempt >= attempts){
+                                assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
+                            }
+    
+                            currentAttempt ++
+                            this.colapseItem(rootItem)
+                            this.waitItemColapsed(rootItem)
+    
+                            this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                        })
+            })
+        })
     }
 
 
