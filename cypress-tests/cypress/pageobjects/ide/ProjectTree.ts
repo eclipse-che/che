@@ -177,7 +177,10 @@ export class ProjectTree {
                     .then(body => {
                         let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
                         let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
-
+                        
+                        if (currentAttempt >= attempts) {
+                            assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
+                        }
 
                         if (body.find(rootItemLocator).length === 0) {
                             currentAttempt++
@@ -192,10 +195,6 @@ export class ProjectTree {
 
                         if (body.find(rootSubitemLocator).length > 0) {
                             return;
-                        }
-
-                        if (currentAttempt >= attempts) {
-                            assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
                         }
 
                         currentAttempt++
