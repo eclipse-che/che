@@ -178,14 +178,15 @@ export class ProjectTree {
                         let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
                         let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
 
-                        this.ide.waitIde()
-                        this.openProjectTreeContainer();
-                        this.waitProjectTreeContainer();
-
 
                         if (body.find(rootItemLocator).length === 0) {
                             currentAttempt++
+                            
                             cy.reload();
+                            this.ide.waitIde()
+                            this.openProjectTreeContainer();
+                            this.waitProjectTreeContainer();
+
                             this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                         }
 
