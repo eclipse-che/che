@@ -176,7 +176,7 @@ export class ProjectTree {
                 cy.get('body')
                     .then(body => {
                         let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
-                        let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}1111`)
+                        let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
 
                         if (currentAttempt >= attempts) {
                             assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
