@@ -41,12 +41,12 @@ public class GithubUrlTest {
     assertNotNull(this.githubUrl);
   }
 
-  /** Check when there is .devfile in the repository */
+  /** Check when there is devfile in the repository */
   @Test
   public void checkDevfileLocation() {
     assertEquals(
         githubUrl.devfileFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/master/.devfile");
+        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
   }
 
   /** Check when there is .factory.json file in the repository */

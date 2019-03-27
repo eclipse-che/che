@@ -182,9 +182,9 @@ public class GithubFactoryParametersResolverTest {
     verify(urlFactoryBuilder).createFactoryFromDevfile(factoryUrlArgumentCaptor.capture(), any());
     assertEquals(
         factoryUrlArgumentCaptor.getValue().devfileFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/master/.devfile");
+        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
 
-    assertEquals(factoryUrlArgumentCaptor.getValue().getDevfileFilename(), ".devfile");
+    assertEquals(factoryUrlArgumentCaptor.getValue().getDevfileFilename(), "devfile.yaml");
     // check project config built
     verify(projectConfigDtoMerger)
         .merge(any(FactoryDto.class), projectConfigDtoArgumentCaptor.capture());
