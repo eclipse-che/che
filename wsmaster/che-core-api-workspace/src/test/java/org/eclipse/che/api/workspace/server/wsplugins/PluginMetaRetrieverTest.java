@@ -176,15 +176,15 @@ public class PluginMetaRetrieverTest {
   @DataProvider(name = "pluginProvider")
   public static Object[][] pluginProvider() {
     return new Object[][] {
-        {createAttributes("my-plugin:4.0", ""), BASE_REGISTRY + "/plugins/my-plugin/4.0/meta.yaml"},
-        {
-            createAttributes("http://registry.myregistry.com:8080/my-plugin:4.0", ""),
-            "http://registry.myregistry.com:8080/my-plugin/4.0/meta.yaml"
-        },
-        {
-            createAttributes("https://myregistry.com/registry/my.plugin:4.0", ""),
-            "https://myregistry.com/registry/my.plugin/4.0/meta.yaml"
-        }
+      {createAttributes("my-plugin:4.0", ""), BASE_REGISTRY + "/plugins/my-plugin/4.0/meta.yaml"},
+      {
+        createAttributes("http://registry.myregistry.com:8080/my-plugin:4.0", ""),
+        "http://registry.myregistry.com:8080/my-plugin/4.0/meta.yaml"
+      },
+      {
+        createAttributes("https://myregistry.com/registry/my.plugin:4.0", ""),
+        "https://myregistry.com/registry/my.plugin/4.0/meta.yaml"
+      }
     };
   }
 
