@@ -47,7 +47,8 @@ public class WorkspaceValidator {
   private static final Pattern WS_NAME =
       Pattern.compile("[a-zA-Z0-9][-_.a-zA-Z0-9]{1,98}[a-zA-Z0-9]");
 
-  private static final Pattern VOLUME_NAME = Pattern.compile("[a-z][a-z0-9]{1,18}");
+  private static final Pattern VOLUME_NAME =
+      Pattern.compile("[a-zA-Z][a-zA-Z0-9-_.]{0,18}[a-zA-Z0-9]");
   private static final Pattern VOLUME_PATH = Pattern.compile("/.+");
 
   /**

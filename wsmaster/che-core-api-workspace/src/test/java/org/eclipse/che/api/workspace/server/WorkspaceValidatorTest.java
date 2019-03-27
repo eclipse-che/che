@@ -275,12 +275,14 @@ public class WorkspaceValidatorTest {
   @DataProvider(name = "illegalVolumeNameProvider")
   public static Object[][] illegalVolumeNameProvider() {
     return new Object[][] {
-      {"0volume"},
-      {"CAPITAL"},
+      {"0begin_with_number"},
+      {"begin_with_dot."},
+      {"begin_with_underscore_"},
+      {"begin_with_hyphen-"},
+      {"with_@_special_char"},
+      {"with_@_special_char"},
       {"veryveryveryveryveryveryverylongname"},
       {"volume/name"},
-      {"volume_name"},
-      {"volume-name"}
     };
   }
 

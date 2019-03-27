@@ -20,19 +20,13 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NA
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
@@ -43,17 +37,11 @@ import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.tool.ToolToWorkspaceApplier;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
  * Applies changes on workspace config according to the specified kubernetes/openshift tool.
@@ -62,13 +50,14 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  */
 public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier {
 
-  @VisibleForTesting static final String YAML_CONTENT_TYPE = "application/x-yaml";
-
   private final KubernetesRecipeParser objectsParser;
+  private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
 
   @Inject
-  public KubernetesToolToWorkspaceApplier(KubernetesRecipeParser objectsParser) {
+  public KubernetesToolToWorkspaceApplier(
+      KubernetesRecipeParser objectsParser, KubernetesEnvironmentProvisioner k8sEnvProvisioner) {
     this.objectsParser = objectsParser;
+    this.k8sEnvProvisioner = k8sEnvProvisioner;
   }
 
   /**
@@ -97,8 +86,7 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
 
     String toolContent = retrieveContent(k8sTool, contentProvider);
 
-    List<HasMetadata> toolObjects = new ArrayList<>();
-    fillIn(toolObjects, unmarshalToolObjects(k8sTool, toolContent));
+    List<HasMetadata> toolObjects = new ArrayList<>(unmarshalToolObjects(k8sTool, toolContent));
 
     if (!k8sTool.getSelector().isEmpty()) {
       toolObjects = SelectorFilter.filter(toolObjects, k8sTool.getSelector());
@@ -108,101 +96,7 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
 
     applyEntrypoints(k8sTool.getEntrypoints(), toolObjects);
 
-    provisionEnvironment(workspaceConfig, k8sTool, toolObjects);
-  }
-
-  /**
-   * Provision default environment with the specified kubernetes/openshift tool.
-   *
-   * <p>If there is already a default environment with kubernetes/openshift then content will be
-   * updated with new list.
-   *
-   * @param workspaceConfig workspace where recipe should be provisioned
-   * @param k8sTool kubernetes/openshift tool that should be provisioned
-   * @param toolObjects parsed objects of the specified tool
-   * @throws DevfileRecipeFormatException if exception occurred during existing environment parsing
-   * @throws DevfileRecipeFormatException if exception occurred during kubernetes object
-   *     serialization
-   * @throws DevfileException if any other exception occurred
-   */
-  private void provisionEnvironment(
-      WorkspaceConfigImpl workspaceConfig, Tool k8sTool, List<HasMetadata> toolObjects)
-      throws DevfileException, DevfileRecipeFormatException {
-    String defaultEnv = workspaceConfig.getDefaultEnv();
-    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
-    if (environment == null) {
-      RecipeImpl recipe =
-          new RecipeImpl(k8sTool.getType(), YAML_CONTENT_TYPE, asYaml(k8sTool, toolObjects), null);
-      String envName = k8sTool.getName();
-      workspaceConfig.getEnvironments().put(envName, new EnvironmentImpl(recipe, emptyMap()));
-      workspaceConfig.setDefaultEnv(envName);
-    } else {
-      RecipeImpl envRecipe = environment.getRecipe();
-
-      // check if it is needed to update recipe type since
-      // kubernetes tool is compatible with openshift but not vice versa
-      if (OPENSHIFT_TOOL_TYPE.equals(k8sTool.getType())
-          && KubernetesEnvironment.TYPE.equals(envRecipe.getType())) {
-        envRecipe.setType(OpenShiftEnvironment.TYPE);
-      }
-
-      // workspace already has k8s/OS recipe
-      // it is needed to merge existing recipe objects with tool's ones
-      List<HasMetadata> envObjects = unmarshalDefaultEnvObjects(workspaceConfig);
-      fillIn(envObjects, toolObjects);
-
-      envRecipe.setContent(asYaml(k8sTool, envObjects));
-    }
-  }
-
-  /**
-   * Fill in the specified target list with the specified objects.
-   *
-   * @param target list that should be filled in
-   * @param objects objects to fill in
-   * @throws DevfileFormatException if objects list contains item with no unique combination of kind
-   *     and name
-   */
-  private void fillIn(List<HasMetadata> target, List<HasMetadata> objects)
-      throws DevfileFormatException {
-    Set<Pair<String, String>> uniqueKindToName = new HashSet<>();
-    for (HasMetadata existingMeta : target) {
-      uniqueKindToName.add(
-          new Pair<>(existingMeta.getKind(), existingMeta.getMetadata().getName()));
-    }
-
-    for (HasMetadata hasMeta : objects) {
-      if (!uniqueKindToName.add(new Pair<>(hasMeta.getKind(), hasMeta.getMetadata().getName()))) {
-        throw new DevfileFormatException(
-            format(
-                "Tools can not have objects with the same name and kind but there are multiple objects with kind '%s' and name '%s'",
-                hasMeta.getKind(), hasMeta.getMetadata().getName()));
-      }
-      target.add(hasMeta);
-    }
-  }
-
-  private List<HasMetadata> unmarshalDefaultEnvObjects(WorkspaceConfigImpl workspaceConfig)
-      throws DevfileException {
-    String defaultEnvName = workspaceConfig.getDefaultEnv();
-    if (defaultEnvName == null) {
-      return new ArrayList<>();
-    }
-    EnvironmentImpl defaultEnv = workspaceConfig.getEnvironments().get(defaultEnvName);
-    if (defaultEnv == null) {
-      return new ArrayList<>();
-    }
-    RecipeImpl envRecipe = defaultEnv.getRecipe();
-    if (!OpenShiftEnvironment.TYPE.equals(envRecipe.getType())
-        && !KubernetesEnvironment.TYPE.equals(envRecipe.getType())) {
-      throw new DevfileException(
-          format(
-              "Kubernetes tool can only be applied to a workspace with either kubernetes or "
-                  + "openshift recipe type but workspace has a recipe of type '%s'",
-              envRecipe.getType()));
-    }
-
-    return unmarshal(envRecipe.getContent());
+    k8sEnvProvisioner.provision(workspaceConfig, k8sTool.getType(), toolObjects, emptyMap());
   }
 
   private String retrieveContent(Tool recipeTool, @Nullable FileContentProvider fileContentProvider)
@@ -307,18 +201,6 @@ public class KubernetesToolToWorkspaceApplier implements ToolToWorkspaceApplier 
       return objectsParser.parse(recipeContent);
     } catch (Exception e) {
       throw new DevfileRecipeFormatException(e.getMessage(), e);
-    }
-  }
-
-  private String asYaml(Tool tool, List<HasMetadata> list) throws DevfileRecipeFormatException {
-    try {
-      return Serialization.asYaml(new KubernetesListBuilder().withItems(list).build());
-    } catch (KubernetesClientException e) {
-      throw new DevfileRecipeFormatException(
-          format(
-              "Unable to deserialize specified local file content for tool '%s'. Error: %s",
-              tool.getName(), e.getMessage()),
-          e);
     }
   }
 

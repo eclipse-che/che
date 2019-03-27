@@ -15,6 +15,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -158,7 +159,8 @@ public class DockerimageToolProvisionerTest {
     EnvironmentImpl dockerEnv = new EnvironmentImpl();
     dockerEnv.setRecipe(new RecipeImpl("dockerimage", null, "eclipse/ubuntu_jdk8:latest", null));
     ServerConfigImpl serverConfig =
-        new ServerConfigImpl("8080/TCP", "http", "/api", ImmutableMap.of("public", "true"));
+        new ServerConfigImpl(
+            "8080/TCP", "http", "/api", ImmutableMap.of(PUBLIC_ENDPOINT_ATTRIBUTE, "true"));
     dockerEnv
         .getMachines()
         .put(
@@ -187,7 +189,7 @@ public class DockerimageToolProvisionerTest {
     assertEquals(endpoint.getAttributes().size(), 3);
     assertEquals(endpoint.getAttributes().get("protocol"), "http");
     assertEquals(endpoint.getAttributes().get("path"), "/api");
-    assertEquals(endpoint.getAttributes().get("public"), "true");
+    assertEquals(endpoint.getAttributes().get(PUBLIC_ENDPOINT_ATTRIBUTE), "true");
   }
 
   @Test
