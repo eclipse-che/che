@@ -45,7 +45,7 @@ export class Ide {
             .should('not.be.visible')
     }
 
-    waitIdeInIframe(workspaceNamespace: string, workspaceName: string) {
+    waitWorkspaceAndIdeInIframe(workspaceNamespace: string, workspaceName: string) {
         this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName).then(() => {
             [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
                 .forEach(idePart => {
@@ -58,7 +58,7 @@ export class Ide {
         });
     }
 
-    waitIde(workspaceNamespace: string, workspaceName: string) {
+    waitWorkspaceAndIde(workspaceNamespace: string, workspaceName: string) {
         this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName).then(() => {
             [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
                 .forEach(idePart => {
@@ -66,6 +66,14 @@ export class Ide {
                         .should('be.visible')
                 })
         });
+    }
+
+    waitIde(){
+        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON, Ide.PRELOADER]
+                .forEach(idePart => {
+                    cy.get(idePart, { timeout: Ide.START_WORKSPACE_TIMEOUT })
+                        .should('be.visible')
+                })
     }
 
     openIdeWithoutFrames(workspaceName: string) {

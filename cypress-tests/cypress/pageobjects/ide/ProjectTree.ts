@@ -165,32 +165,44 @@ export class ProjectTree {
         this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
     }
 
-    waitImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt:number, pollingEvery: number): Promise<void>{
-        return new Promise((resolve, reject)=>{
-            let rootItem: string = `/${projectName}`;  
-        
+    waitImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): Promise<void> {
+        return new Promise((resolve, reject) => {
+            let rootItem: string = `/${projectName}`;
+
             this.expandItem(rootItem)
             this.waitItemExpanded(rootItem)
-    
-            cy.wait(pollingEvery).then(()=>{
+
+            cy.wait(pollingEvery).then(() => {
                 cy.get('body')
-                        .then(body => {
-                            let elementLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
+                    .then(body => {
+                        let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
+                        let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
 
-                            if(body.find(elementLocator).length > 0){
-                                return;
-                            }
+                        this.ide.waitIde()
+                        this.openProjectTreeContainer();
+                        this.waitProjectTreeContainer();
 
-                            if(currentAttempt >= attempts){
-                                assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
-                            }
-    
-                            currentAttempt ++
-                            this.colapseItem(rootItem)
-                            this.waitItemColapsed(rootItem)
-    
+
+                        if (body.find(rootItemLocator).length === 0) {
+                            currentAttempt++
+                            cy.reload();
                             this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
-                        })
+                        }
+
+                        if (body.find(rootSubitemLocator).length > 0) {
+                            return;
+                        }
+
+                        if (currentAttempt >= attempts) {
+                            assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
+                        }
+
+                        currentAttempt++
+                        this.colapseItem(rootItem)
+                        this.waitItemColapsed(rootItem)
+
+                        this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                    })
             })
         })
     }
