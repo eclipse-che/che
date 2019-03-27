@@ -197,18 +197,18 @@
                         <artifactId>maven-antrun-plugin</artifactId>
                         <executions>
                             <execution>
-                                <id>install-yarn</id>
+                                <id>install-deps</id>
                                 <phase>compile</phase>
                                 <goals>
                                     <goal>run</goal>
                                 </goals>
                                 <configuration>
                                     <target>
-                                        <!-- install yarn -->
-                                        <exec dir="${basedir}" executable="npm" failonerror="true">
-                                            <arg value="install" />
-                                            <arg value="yarn" />
-                                        </exec>
+                                      <!-- install dependencies -->
+                                      <exec dir="${basedir}" executable="yarn" failonerror="true">
+                                        <arg value="install" />
+                                        <arg value="--ignore-optional" />
+                                      </exec>
                                     </target>
                                 </configuration>
                             </execution>
@@ -221,8 +221,8 @@
                                 <configuration>
                                     <target>
                                         <!-- build user dashboard -->
-                                        <exec dir="${basedir}" executable="node_modules/yarn/bin/yarn" failonerror="true">
-                                            <arg value="install" />
+                                        <exec dir="${basedir}" executable="yarn" failonerror="true">
+                                            <arg value="build" />
                                         </exec>
                                         <!-- Change base HREF of the application that will be hosted on /dashboard -->
                                         <replace file="${basedir}/target/dist/index.html">
@@ -233,7 +233,7 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>compilation</id>
+                                <id>test-dashboard</id>
                                 <phase>test</phase>
                                 <goals>
                                     <goal>run</goal>
@@ -241,8 +241,7 @@
                                 <configuration>
                                     <target unless="skipTests">
                                         <!-- Run unit tests -->
-                                        <exec dir="${basedir}" executable="node_modules/yarn/bin/yarn" failonerror="true">
-                                            <arg value="run" />
+                                        <exec dir="${basedir}" executable="yarn" failonerror="true">
                                             <arg value="test" />
                                         </exec>
                                     </target>

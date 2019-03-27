@@ -23,10 +23,11 @@ $ mvn -Pnative clean install
 
 Required tools for native build:
 - Python `v2.7.x`(`v3.x.x`currently not supported)
-- Node.js `v5.x.x`, `v6.x.x` or `v8.x.x`
-- npm
+- Node.js `v8.x.x` or `v9.x.x`
+- yarn `v1.13.0` or higher
+- gulp
 
-Installation instructions for Node.js and npm can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). 
+Installation instructions for Node.js can be found on the following [link](https://docs.npmjs.com/getting-started/installing-node). 
 
 ## Running
 In order to run the project, the serve command is used

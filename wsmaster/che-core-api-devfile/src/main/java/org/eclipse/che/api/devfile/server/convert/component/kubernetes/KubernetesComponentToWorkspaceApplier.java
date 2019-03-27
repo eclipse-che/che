@@ -20,19 +20,13 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NA
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
@@ -43,17 +37,11 @@ import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.commons.annotation.Nullable;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
-import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
  * Applies changes on workspace config according to the specified kubernetes/openshift component.
@@ -62,13 +50,14 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  */
 public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspaceApplier {
 
-  @VisibleForTesting static final String YAML_CONTENT_TYPE = "application/x-yaml";
-
   private final KubernetesRecipeParser objectsParser;
+  private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
 
   @Inject
-  public KubernetesComponentToWorkspaceApplier(KubernetesRecipeParser objectsParser) {
+  public KubernetesComponentToWorkspaceApplier(
+      KubernetesRecipeParser objectsParser, KubernetesEnvironmentProvisioner k8sEnvProvisioner) {
     this.objectsParser = objectsParser;
+    this.k8sEnvProvisioner = k8sEnvProvisioner;
   }
 
   /**
@@ -102,8 +91,8 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     String componentContent = retrieveContent(k8sComponent, contentProvider);
 
-    List<HasMetadata> componentObjects = new ArrayList<>();
-    fillIn(componentObjects, unmarshalComponentObjects(k8sComponent, componentContent));
+    List<HasMetadata> componentObjects =
+        new ArrayList<>(unmarshalComponentObjects(k8sComponent, componentContent));
 
     if (!k8sComponent.getSelector().isEmpty()) {
       componentObjects = SelectorFilter.filter(componentObjects, k8sComponent.getSelector());
@@ -113,107 +102,8 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
 
-    provisionEnvironment(workspaceConfig, k8sComponent, componentObjects);
-  }
-
-  /**
-   * Provision default environment with the specified kubernetes/openshift component.
-   *
-   * <p>If there is already a default environment with kubernetes/openshift then content will be
-   * updated with new list.
-   *
-   * @param workspaceConfig workspace where recipe should be provisioned
-   * @param k8sComponent kubernetes/openshift component that should be provisioned
-   * @param componentObjects parsed objects of the specified component
-   * @throws DevfileRecipeFormatException if exception occurred during existing environment parsing
-   * @throws DevfileRecipeFormatException if exception occurred during kubernetes object
-   *     serialization
-   * @throws DevfileException if any other exception occurred
-   */
-  private void provisionEnvironment(
-      WorkspaceConfigImpl workspaceConfig,
-      Component k8sComponent,
-      List<HasMetadata> componentObjects)
-      throws DevfileException, DevfileRecipeFormatException {
-    String defaultEnv = workspaceConfig.getDefaultEnv();
-    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
-    if (environment == null) {
-      RecipeImpl recipe =
-          new RecipeImpl(
-              k8sComponent.getType(),
-              YAML_CONTENT_TYPE,
-              asYaml(k8sComponent, componentObjects),
-              null);
-      String envName = k8sComponent.getName();
-      workspaceConfig.getEnvironments().put(envName, new EnvironmentImpl(recipe, emptyMap()));
-      workspaceConfig.setDefaultEnv(envName);
-    } else {
-      RecipeImpl envRecipe = environment.getRecipe();
-
-      // check if it is needed to update recipe type since
-      // kubernetes component is compatible with openshift but not vice versa
-      if (OPENSHIFT_COMPONENT_TYPE.equals(k8sComponent.getType())
-          && KubernetesEnvironment.TYPE.equals(envRecipe.getType())) {
-        envRecipe.setType(OpenShiftEnvironment.TYPE);
-      }
-
-      // workspace already has k8s/OS recipe
-      // it is needed to merge existing recipe objects with component's ones
-      List<HasMetadata> envObjects = unmarshalDefaultEnvObjects(workspaceConfig);
-      fillIn(envObjects, componentObjects);
-
-      envRecipe.setContent(asYaml(k8sComponent, envObjects));
-    }
-  }
-
-  /**
-   * Fill in the specified target list with the specified objects.
-   *
-   * @param target list that should be filled in
-   * @param objects objects to fill in
-   * @throws DevfileFormatException if objects list contains item with no unique combination of kind
-   *     and name
-   */
-  private void fillIn(List<HasMetadata> target, List<HasMetadata> objects)
-      throws DevfileFormatException {
-    Set<Pair<String, String>> uniqueKindToName = new HashSet<>();
-    for (HasMetadata existingMeta : target) {
-      uniqueKindToName.add(
-          new Pair<>(existingMeta.getKind(), existingMeta.getMetadata().getName()));
-    }
-
-    for (HasMetadata hasMeta : objects) {
-      if (!uniqueKindToName.add(new Pair<>(hasMeta.getKind(), hasMeta.getMetadata().getName()))) {
-        throw new DevfileFormatException(
-            format(
-                "Components can not have objects with the same name and kind but there are multiple objects with kind '%s' and name '%s'",
-                hasMeta.getKind(), hasMeta.getMetadata().getName()));
-      }
-      target.add(hasMeta);
-    }
-  }
-
-  private List<HasMetadata> unmarshalDefaultEnvObjects(WorkspaceConfigImpl workspaceConfig)
-      throws DevfileException {
-    String defaultEnvName = workspaceConfig.getDefaultEnv();
-    if (defaultEnvName == null) {
-      return new ArrayList<>();
-    }
-    EnvironmentImpl defaultEnv = workspaceConfig.getEnvironments().get(defaultEnvName);
-    if (defaultEnv == null) {
-      return new ArrayList<>();
-    }
-    RecipeImpl envRecipe = defaultEnv.getRecipe();
-    if (!OpenShiftEnvironment.TYPE.equals(envRecipe.getType())
-        && !KubernetesEnvironment.TYPE.equals(envRecipe.getType())) {
-      throw new DevfileException(
-          format(
-              "Kubernetes component can only be applied to a workspace with either kubernetes or "
-                  + "openshift recipe type but workspace has a recipe of type '%s'",
-              envRecipe.getType()));
-    }
-
-    return unmarshal(envRecipe.getContent());
+    k8sEnvProvisioner.provision(
+        workspaceConfig, k8sComponent.getType(), componentObjects, emptyMap());
   }
 
   private String retrieveContent(
@@ -320,19 +210,6 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       return objectsParser.parse(recipeContent);
     } catch (Exception e) {
       throw new DevfileRecipeFormatException(e.getMessage(), e);
-    }
-  }
-
-  private String asYaml(Component component, List<HasMetadata> list)
-      throws DevfileRecipeFormatException {
-    try {
-      return Serialization.asYaml(new KubernetesListBuilder().withItems(list).build());
-    } catch (KubernetesClientException e) {
-      throw new DevfileRecipeFormatException(
-          format(
-              "Unable to deserialize specified local file content for component '%s'. Error: %s",
-              component.getName(), e.getMessage()),
-          e);
     }
   }
 

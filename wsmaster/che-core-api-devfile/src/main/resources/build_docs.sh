@@ -51,7 +51,7 @@ build_native() {
    mkdir -p ${TMP_DIR}/schema
    cp -f schema/* ${TMP_DIR}/schema
    cd ${TMP_DIR}
-   git clone -b '1.1.0' --single-branch https://github.com/adobe/jsonschema2md.git
+   git clone -b 'v2.0.0' --single-branch https://github.com/adobe/jsonschema2md.git
    cd jsonschema2md
    npm install
    npm link
@@ -63,8 +63,8 @@ build_native() {
 deploy() {
    cd ${TMP_DIR}
    BRANCH_ARG=""
-   if [[ ! -z "${DEPLOY_BRANCH}" ]]; then
-       BRANCH_ARG="-b ${DEPLOY_BRANCH} --single-branch"
+   if [[ ! -z "${BASE_BRANCH}" ]]; then
+       BRANCH_ARG="-b ${BASE_BRANCH} --single-branch"
    fi
 
    if [[ "$USE_SSH" == "true" ]]; then
@@ -76,9 +76,15 @@ deploy() {
    rm -rf devfile && git clone ${BRANCH_ARG} ${DOCS_REPOSITORY_URL}
    cp -f docs/* ./devfile/docs
    cd devfile
+   if [[ $(git ls-remote origin ${DEPLOY_BRANCH}) ]]; then
+       echo "Specified branch (${DEPLOY_BRANCH}) already exists on remote. That may means that PR of the previous script run is not merged or cleaned. Exiting now."
+       exit 1
+   fi
    if [[ `git status --porcelain` ]]; then
+       git checkout -b "${DEPLOY_BRANCH}"
+       git add -A
        git commit -am "${COMMIT_MESSAGE}"
-       git push
+       git push origin "${DEPLOY_BRANCH}"
    else
        echo "No changes in docs."
    fi
@@ -111,7 +117,8 @@ print_help() {
    echo "   --message     Override default commit message. Example: --message=\"Update Devfile Docs\""
    echo "   --no-deploy   Skip deploy result to remote"
    echo "   --org         Specifies organization of devfile repository to which Docs should be pushed. Default value: redhat-developer"
-   echo "   --branch|-b   Specifies branch to which Docs should be pushed. Default behaviour: use default GitHub repo branch"
+   echo "   --branch|-b   Specifies branch to which Docs should be pushed. Default is 'docs_renewal'. If branch already exists on remote, error will be thrown."
+   echo "   --base-branch Specifies base branch to checkout from. Otherwise repository default branch will be used"
    echo "   --ssh         Configures script to use ssh link to GitHub Docs repository. Default: false"
 }
 
@@ -141,6 +148,10 @@ parse_args() {
            ;;
            --branch=*)
                DEPLOY_BRANCH="${i#*=}"
+               shift
+           ;;
+           --base-branch=*)
+               BASE_BRANCH="${i#*=}"
                shift
            ;;
            --ssh)
@@ -175,14 +186,17 @@ IS_DOCKER=${IS_DOCKER:-${DEFAULT_BUILD_DOCKER}}
 DEFAULT_DEPLOY=true
 IS_DEPLOY=${IS_DEPLOY:-${DEFAULT_DEPLOY}}
 
-DEFAULT_COMMIT_MESSAGE="Update devfile docs"
+DEFAULT_COMMIT_MESSAGE="Update devfile docs to the latest version"
 COMMIT_MESSAGE=${COMMIT_MESSAGE:-${DEFAULT_COMMIT_MESSAGE}}
 
 DEFAULT_DEPLOY_ORGANIZATION=redhat-developer
 DEPLOY_ORGANIZATION=${DEPLOY_ORGANIZATION:-${DEFAULT_DEPLOY_ORGANIZATION}}
 
-DEFAULT_DEPLOY_BRANCH="" # means use default branch of GitHub repository
+DEFAULT_DEPLOY_BRANCH="docs_renewal"
 DEPLOY_BRANCH=${DEFAULT_DEPLOY_BRANCH:-${DEPLOY_BRANCH}}
+
+DEFAULT_BASE_BRANCH="" # means use default branch of GitHub repository
+BASE_BRANCH=${DEFAULT_BASE_BRANCH:-${BASE_BRANCH}}
 
 DEFAULT_USE_SSH="false"
 USE_SSH=${DEFAULT_USE_SSH:-${USE_SSH}}

@@ -144,7 +144,7 @@ export class LoadFactoryController {
       let sourceString = this.factory.source === 'repo' ?
                    ': devfile.yaml not found in repository root. Default environment will be applied' :
                    ': found " + this.factory.source + ", applying it';
-      this.getLoadingSteps()[this.getCurrentProgressStep()].text += sourceString);
+      this.getLoadingSteps()[this.getCurrentProgressStep()].text += sourceString;
     }
     this.fetchWorkspaces();
   }

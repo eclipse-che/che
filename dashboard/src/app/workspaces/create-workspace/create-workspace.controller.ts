@@ -412,7 +412,7 @@ export class CreateWorkspaceController {
 
   isPluginDefined(): boolean {
     if (this.workspaceConfig && this.workspaceConfig.attributes) {
-      return Object.keys(this.workspaceConfig.attributes).indexOf('editor') >= 0 || Object.keys(this.workspaceConfig.attributes).indexOf('plugins') >= 0;
+      return this.workspaceConfig.attributes.editor != null || this.workspaceConfig.attributes.plugins != null;
     }
 
     return false;

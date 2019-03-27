@@ -113,8 +113,6 @@ public class DevfileIntegrityValidator {
   private Set<String> validateComponents(Devfile devfile) throws DevfileFormatException {
     Set<String> existingNames = new HashSet<>();
     Component editorComponent = null;
-    Component dockerimageComponent = null;
-    Component k8sOSComponent = null;
     for (Component component : devfile.getComponents()) {
       if (!existingNames.add(component.getName())) {
         throw new DevfileFormatException(
@@ -132,29 +130,10 @@ public class DevfileIntegrityValidator {
           break;
 
         case PLUGIN_COMPONENT_TYPE:
-          // do nothing
-          break;
-
         case KUBERNETES_COMPONENT_TYPE:
-          // fall through
         case OPENSHIFT_COMPONENT_TYPE:
-          if (dockerimageComponent != null) {
-            throw new DevfileFormatException(
-                "Devfile cannot contain kubernetes/openshift and dockerimage component at the same time");
-          }
-          k8sOSComponent = component;
-          break;
-
         case DOCKERIMAGE_COMPONENT_TYPE:
-          if (k8sOSComponent != null) {
-            throw new DevfileFormatException(
-                "Devfile cannot contain kubernetes/openshift and dockerimage component at the same time");
-          }
-          if (dockerimageComponent != null) {
-            throw new DevfileFormatException(
-                "Devfile cannot contain multiple dockerimage components at the same time");
-          }
-          dockerimageComponent = component;
+          // do nothing
           break;
 
         default:
@@ -294,7 +273,11 @@ public class DevfileIntegrityValidator {
     return content;
   }
 
-  private static String toYAML(Entrypoint ep) throws DevfileException {
-    return Serialization.asYaml(ep);
+  private String toYAML(Entrypoint ep) throws DevfileException {
+    try {
+      return Serialization.asYaml(ep);
+    } catch (Exception e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
   }
 }
