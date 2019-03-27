@@ -23,7 +23,6 @@
     <packaging>war</packaging>
     <name>Che IDE :: Compiling WS Master WAR</name>
     <properties>
-        <build.info>${project.version}</build.info>
         <generated.sources.directory>${project.build.directory}/generated-sources/gen</generated.sources.directory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
