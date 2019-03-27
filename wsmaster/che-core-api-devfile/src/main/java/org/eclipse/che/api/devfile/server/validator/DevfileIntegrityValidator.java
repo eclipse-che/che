@@ -12,11 +12,11 @@
 package org.eclipse.che.api.devfile.server.validator;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -33,13 +33,13 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
+import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Entrypoint;
 import org.eclipse.che.api.devfile.model.Project;
-import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
-import org.eclipse.che.api.devfile.server.convert.tool.kubernetes.ContainerSearch;
-import org.eclipse.che.api.devfile.server.convert.tool.kubernetes.SelectorFilter;
+import org.eclipse.che.api.devfile.server.convert.component.kubernetes.ContainerSearch;
+import org.eclipse.che.api.devfile.server.convert.component.kubernetes.SelectorFilter;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -67,9 +67,9 @@ public class DevfileIntegrityValidator {
    *
    * <pre>
    * <ul>
-   *   <li>All listed items (projects, tools, commands) have unique names</li>
-   *   <li>There is only one tool of type cheEditor</li>
-   *   <li>All tools exists which are referenced/required by command actions</li>
+   *   <li>All listed items (projects, components, commands) have unique names</li>
+   *   <li>There is only one component of type cheEditor</li>
+   *   <li>All components exists which are referenced/required by command actions</li>
    *   <li>Project names conforms naming rules</li>
    * </ul>
    * </pre>
@@ -85,8 +85,8 @@ public class DevfileIntegrityValidator {
    */
   public void validateDevfile(Devfile devfile) throws DevfileFormatException {
     validateProjects(devfile);
-    Set<String> toolNames = validateTools(devfile);
-    validateCommands(devfile, toolNames);
+    Set<String> componentNames = validateComponents(devfile);
+    validateCommands(devfile, componentNames);
   }
 
   /**
@@ -100,9 +100,9 @@ public class DevfileIntegrityValidator {
   public void validateContentReferences(Devfile devfile, FileContentProvider provider)
       throws DevfileFormatException {
     try {
-      for (Tool tool : devfile.getTools()) {
-        List<HasMetadata> selectedObjects = validateSelector(tool, provider);
-        validateEntrypointSelector(tool, selectedObjects);
+      for (Component component : devfile.getComponents()) {
+        List<HasMetadata> selectedObjects = validateSelector(component, provider);
+        validateEntrypointSelector(component, selectedObjects);
       }
     } catch (Exception e) {
       throw new DevfileFormatException(
@@ -110,40 +110,43 @@ public class DevfileIntegrityValidator {
     }
   }
 
-  private Set<String> validateTools(Devfile devfile) throws DevfileFormatException {
+  private Set<String> validateComponents(Devfile devfile) throws DevfileFormatException {
     Set<String> existingNames = new HashSet<>();
-    Tool editorTool = null;
-    for (Tool tool : devfile.getTools()) {
-      if (!existingNames.add(tool.getName())) {
-        throw new DevfileFormatException(format("Duplicate tool name found:'%s'", tool.getName()));
+    Component editorComponent = null;
+    for (Component component : devfile.getComponents()) {
+      if (!existingNames.add(component.getName())) {
+        throw new DevfileFormatException(
+            format("Duplicate component name found:'%s'", component.getName()));
       }
-      switch (tool.getType()) {
-        case EDITOR_TOOL_TYPE:
-          if (editorTool != null) {
+      switch (component.getType()) {
+        case EDITOR_COMPONENT_TYPE:
+          if (editorComponent != null) {
             throw new DevfileFormatException(
                 format(
-                    "Multiple editor tools found: '%s', '%s'",
-                    editorTool.getName(), tool.getName()));
+                    "Multiple editor components found: '%s', '%s'",
+                    editorComponent.getName(), component.getName()));
           }
-          editorTool = tool;
+          editorComponent = component;
           break;
 
-        case PLUGIN_TOOL_TYPE:
-        case KUBERNETES_TOOL_TYPE:
-        case OPENSHIFT_TOOL_TYPE:
-        case DOCKERIMAGE_TOOL_TYPE:
+        case PLUGIN_COMPONENT_TYPE:
+        case KUBERNETES_COMPONENT_TYPE:
+        case OPENSHIFT_COMPONENT_TYPE:
+        case DOCKERIMAGE_COMPONENT_TYPE:
           // do nothing
           break;
 
         default:
           throw new DevfileFormatException(
-              format("Unsupported tool '%s' type provided:'%s'", tool.getName(), tool.getType()));
+              format(
+                  "Unsupported component '%s' type provided:'%s'",
+                  component.getName(), component.getType()));
       }
     }
     return existingNames;
   }
 
-  private void validateCommands(Devfile devfile, Set<String> toolNames)
+  private void validateCommands(Devfile devfile, Set<String> componentNames)
       throws DevfileFormatException {
     Set<String> existingNames = new HashSet<>();
     for (Command command : devfile.getCommands()) {
@@ -166,11 +169,11 @@ public class DevfileIntegrityValidator {
       }
       Action action = command.getActions().get(0);
 
-      if (!toolNames.contains(action.getTool())) {
+      if (!componentNames.contains(action.getComponent())) {
         throw new DevfileFormatException(
             format(
-                "Command '%s' has action that refers to non-existing tools '%s'",
-                command.getName(), action.getTool()));
+                "Command '%s' has action that refers to non-existing components '%s'",
+                command.getName(), action.getComponent()));
       }
     }
   }
@@ -193,10 +196,10 @@ public class DevfileIntegrityValidator {
   }
 
   /**
-   * Validates that the selector, if any, selects some objects from the tool's referenced content.
-   * Only does anything for kubernetes and openshift tools.
+   * Validates that the selector, if any, selects some objects from the component's referenced
+   * content. Only does anything for kubernetes and openshift components.
    *
-   * @param tool the tool to check
+   * @param component the component to check
    * @param contentProvider the content provider to use when fetching content
    * @return the list of referenced objects matching the selector or empty list
    * @throws ValidationException on failure to validate the referenced content
@@ -204,17 +207,18 @@ public class DevfileIntegrityValidator {
    * @throws IOException on failure to retrieve the referenced content
    * @throws DevfileException if the selector filters out all referenced objects
    */
-  private List<HasMetadata> validateSelector(Tool tool, FileContentProvider contentProvider)
+  private List<HasMetadata> validateSelector(
+      Component component, FileContentProvider contentProvider)
       throws ValidationException, InfrastructureException, IOException, DevfileException {
 
-    if (!tool.getType().equals(KUBERNETES_TOOL_TYPE)
-        && !tool.getType().equals(OPENSHIFT_TOOL_TYPE)) {
+    if (!component.getType().equals(KUBERNETES_COMPONENT_TYPE)
+        && !component.getType().equals(OPENSHIFT_COMPONENT_TYPE)) {
       return Collections.emptyList();
     }
 
-    List<HasMetadata> content = getReferencedKubernetesList(tool, contentProvider);
+    List<HasMetadata> content = getReferencedKubernetesList(component, contentProvider);
 
-    Map<String, String> selector = tool.getSelector();
+    Map<String, String> selector = component.getSelector();
     if (selector == null || selector.isEmpty()) {
       return content;
     }
@@ -224,21 +228,21 @@ public class DevfileIntegrityValidator {
     if (content.isEmpty()) {
       throw new DevfileException(
           format(
-              "The selector of the tool %s filters out all objects from the list.",
-              tool.getName()));
+              "The selector of the component %s filters out all objects from the list.",
+              component.getName()));
     }
 
     return content;
   }
 
-  private void validateEntrypointSelector(Tool tool, List<HasMetadata> filteredObjects)
+  private void validateEntrypointSelector(Component component, List<HasMetadata> filteredObjects)
       throws DevfileException {
 
-    if (tool.getEntrypoints() == null || tool.getEntrypoints().isEmpty()) {
+    if (component.getEntrypoints() == null || component.getEntrypoints().isEmpty()) {
       return;
     }
 
-    for (Entrypoint ep : tool.getEntrypoints()) {
+    for (Entrypoint ep : component.getEntrypoints()) {
       ContainerSearch search =
           new ContainerSearch(ep.getParentName(), ep.getParentSelector(), ep.getContainerName());
 
@@ -247,20 +251,20 @@ public class DevfileIntegrityValidator {
       if (cs.isEmpty()) {
         throw new DevfileFormatException(
             format(
-                "Tool %s contains an entry point that doesn't match any container:\n%s",
-                tool.getName(), toYAML(ep)));
+                "Component %s contains an entry point that doesn't match any container:\n%s",
+                component.getName(), toYAML(ep)));
       }
     }
   }
 
   private List<HasMetadata> getReferencedKubernetesList(
-      Tool tool, FileContentProvider contentProvider)
+      Component component, FileContentProvider contentProvider)
       throws ValidationException, InfrastructureException, IOException, DevfileException {
     List<HasMetadata> content;
-    if (tool.getLocalContent() != null) {
-      content = kubernetesRecipeParser.parse(tool.getLocalContent());
-    } else if (tool.getLocal() != null) {
-      String data = contentProvider.fetchContent(tool.getLocal());
+    if (component.getLocalContent() != null) {
+      content = kubernetesRecipeParser.parse(component.getLocalContent());
+    } else if (component.getLocal() != null) {
+      String data = contentProvider.fetchContent(component.getLocal());
       content = kubernetesRecipeParser.parse(data);
     } else {
       content = Collections.emptyList();

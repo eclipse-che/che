@@ -33,9 +33,9 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
+import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Endpoint;
-import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
@@ -101,17 +101,17 @@ public class DevfileManagerTest {
     command.getActions().add(new Action());
     devfile.getCommands().add(command);
 
-    Tool tool = new Tool();
-    tool.getEndpoints().add(new Endpoint());
-    devfile.getTools().add(tool);
+    Component component = new Component();
+    component.getEndpoints().add(new Endpoint());
+    devfile.getComponents().add(component);
 
     // when
     Devfile parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
 
     // then
     assertNotNull(parsed.getCommands().get(0).getAttributes());
-    assertNotNull(parsed.getTools().get(0).getSelector());
-    assertNotNull(parsed.getTools().get(0).getEndpoints().get(0).getAttributes());
+    assertNotNull(parsed.getComponents().get(0).getSelector());
+    assertNotNull(parsed.getComponents().get(0).getEndpoints().get(0).getAttributes());
   }
 
   @Test(

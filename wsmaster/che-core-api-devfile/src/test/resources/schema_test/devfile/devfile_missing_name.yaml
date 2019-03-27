@@ -12,6 +12,6 @@
 
 ---
 specVersion: 0.0.1
-tools:
+components:
   - name: maven
     id: eclipse/maven-jdk8:1.0.0

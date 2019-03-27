@@ -12,8 +12,8 @@
 package org.eclipse.che.api.devfile.server.convert;
 
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EXEC_ACTION_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.TOOL_NAME_COMMAND_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
@@ -41,7 +41,7 @@ public class CommandConverterTest {
   public void shouldConvertWorkspaceCommandToDevfileCommand() throws Exception {
     // given
     CommandImpl workspaceCommand = new CommandImpl("build", "mvn clean install", "custom");
-    workspaceCommand.getAttributes().put(TOOL_NAME_COMMAND_ATTRIBUTE, "dockerimageTool");
+    workspaceCommand.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, "dockerimageComponent");
     workspaceCommand.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, "/tmp");
     workspaceCommand.getAttributes().put("anotherAttribute", "value");
 
@@ -54,7 +54,7 @@ public class CommandConverterTest {
     assertEquals(devfileCommand.getAttributes().size(), 1);
     assertEquals(devfileCommand.getAttributes().get("anotherAttribute"), "value");
     Action action = devfileCommand.getActions().get(0);
-    assertEquals(action.getTool(), "dockerimageTool");
+    assertEquals(action.getComponent(), "dockerimageComponent");
     assertEquals(action.getWorkdir(), "/tmp");
     assertEquals(action.getCommand(), "mvn clean install");
     assertEquals(action.getType(), EXEC_ACTION_TYPE);
@@ -63,8 +63,8 @@ public class CommandConverterTest {
   @Test(
       expectedExceptions = WorkspaceExportException.class,
       expectedExceptionsMessageRegExp =
-          "Command `build` has no specified tool where it should be run")
-  public void shouldThrowAnExceptionIfWorkspaceCommandDoesNotHaveToolNameAttribute()
+          "Command `build` has no specified component where it should be run")
+  public void shouldThrowAnExceptionIfWorkspaceCommandDoesNotHaveComponentNameAttribute()
       throws Exception {
     // given
     CommandImpl workspaceCommand = new CommandImpl("build", "mvn clean install", "custom");
@@ -80,7 +80,7 @@ public class CommandConverterTest {
     devfileCommand.setName("build");
     devfileCommand.setAttributes(ImmutableMap.of("attr", "value"));
     Action action = new Action();
-    action.setTool("dockerimageTool");
+    action.setComponent("dockerimageComponent");
     action.setType(EXEC_ACTION_TYPE);
     action.setWorkdir("/tmp");
     action.setCommand("mvn clean install");
@@ -96,7 +96,8 @@ public class CommandConverterTest {
     assertEquals(workspaceCommand.getAttributes().get("attr"), "value");
     assertEquals(workspaceCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), "/tmp");
     assertEquals(
-        workspaceCommand.getAttributes().get(TOOL_NAME_COMMAND_ATTRIBUTE), "dockerimageTool");
+        workspaceCommand.getAttributes().get(COMPONENT_NAME_COMMAND_ATTRIBUTE),
+        "dockerimageComponent");
     assertEquals(workspaceCommand.getCommandLine(), "mvn clean install");
   }
 

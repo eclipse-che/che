@@ -21,22 +21,22 @@ public class Constants {
 
   public static final String CURRENT_SPEC_VERSION = "0.0.1";
 
-  public static final String EDITOR_TOOL_TYPE = "cheEditor";
+  public static final String EDITOR_COMPONENT_TYPE = "cheEditor";
 
-  public static final String PLUGIN_TOOL_TYPE = "chePlugin";
+  public static final String PLUGIN_COMPONENT_TYPE = "chePlugin";
 
-  public static final String KUBERNETES_TOOL_TYPE = "kubernetes";
+  public static final String KUBERNETES_COMPONENT_TYPE = "kubernetes";
 
-  public static final String OPENSHIFT_TOOL_TYPE = "openshift";
+  public static final String OPENSHIFT_COMPONENT_TYPE = "openshift";
 
-  public static final String DOCKERIMAGE_TOOL_TYPE = "dockerimage";
+  public static final String DOCKERIMAGE_COMPONENT_TYPE = "dockerimage";
 
   /** Action type that should be used for commands execution. */
   public static final String EXEC_ACTION_TYPE = "exec";
 
   /**
-   * Workspace config attribute which contains comma-separated list of mappings of chePlugin tool id
-   * to its name.
+   * Workspace config attribute which contains comma-separated list of mappings of chePlugin
+   * component id to its name.
    *
    * <p>Example value:
    *
@@ -44,13 +44,14 @@ public class Constants {
    * eclipse/maven-jdk8:1.0.0=mvn-stack,eclipse/theia-jdtls:0.0.3=jdt.ls
    * </pre>
    */
-  public static final String PLUGINS_TOOLS_ALIASES_WORKSPACE_ATTRIBUTE = "pluginToolsAliases";
+  public static final String PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE =
+      "pluginComponentsAliases";
 
-  /** Workspace config attribute which contains cheEditor tool name. */
-  public static final String EDITOR_TOOL_ALIAS_WORKSPACE_ATTRIBUTE = "editorToolName";
+  /** Workspace config attribute which contains cheEditor component name. */
+  public static final String EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE = "editorComponentName";
 
-  /** Workspace command attributes that indicates with which tool it is associated. */
-  public static final String TOOL_NAME_COMMAND_ATTRIBUTE = "toolName";
+  /** Workspace command attributes that indicates with which component it is associated. */
+  public static final String COMPONENT_NAME_COMMAND_ATTRIBUTE = "componentName";
 
   /**
    * {@link Endpoint} attribute name which can identify endpoint as public or internal. Attribute

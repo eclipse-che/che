@@ -40,14 +40,18 @@ public class DevfileSchemaValidatorTest {
   @DataProvider
   public Object[][] validDevfiles() {
     return new Object[][] {
-      {"editor_plugin_tool/devfile_editor_plugins.yaml"},
-      {"kubernetes_openshift_tool/devfile_kubernetes_tool_local.yaml"},
-      {"kubernetes_openshift_tool/devfile_kubernetes_tool_local_and_content_as_block.yaml"},
-      {"kubernetes_openshift_tool/devfile_openshift_tool.yaml"},
-      {"kubernetes_openshift_tool/devfile_openshift_tool_local_and_content.yaml"},
-      {"kubernetes_openshift_tool/devfile_openshift_tool_local_and_content_as_block.yaml"},
-      {"dockerimage_tool/devfile_dockerimage_tool.yaml"},
-      {"dockerimage_tool/devfile_dockerimage_tool_without_entry_point.yaml"}
+      {"editor_plugin_component/devfile_editor_plugins.yaml"},
+      {"kubernetes_openshift_component/devfile_kubernetes_component_local.yaml"},
+      {
+        "kubernetes_openshift_component/devfile_kubernetes_component_local_and_content_as_block.yaml"
+      },
+      {"kubernetes_openshift_component/devfile_openshift_component.yaml"},
+      {"kubernetes_openshift_component/devfile_openshift_component_local_and_content.yaml"},
+      {
+        "kubernetes_openshift_component/devfile_openshift_component_local_and_content_as_block.yaml"
+      },
+      {"dockerimage_component/devfile_dockerimage_component.yaml"},
+      {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"}
     };
   }
 
@@ -82,24 +86,24 @@ public class DevfileSchemaValidatorTest {
         "devfile/devfile_with_undeclared_field.yaml",
         "Devfile schema validation failed. Error: /devfile object instance has properties which are not allowed by the schema: [\"unknown\"]"
       },
-      // Tool model testing
+      // component model testing
       {
-        "tool/devfile_missing_tool_name.yaml",
-        "Devfile schema validation failed. Error: /devfile/tools/0 object has missing required properties ([\"name\"])"
+        "component/devfile_missing_component_name.yaml",
+        "Devfile schema validation failed. Error: /devfile/components/0 object has missing required properties ([\"name\"])"
       },
       {
-        "tool/devfile_missing_tool_type.yaml",
-        "Devfile schema validation failed. Error: /devfile/tools/0 object has missing required properties ([\"type\"])"
+        "component/devfile_missing_component_type.yaml",
+        "Devfile schema validation failed. Error: /devfile/components/0 object has missing required properties ([\"type\"])"
       },
       {
-        "tool/devfile_tool_with_undeclared_field.yaml",
-        "Devfile schema validation failed. Errors: [/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"unknown\"],"
+        "component/devfile_component_with_undeclared_field.yaml",
+        "Devfile schema validation failed. Errors: [/devfile/components/0 object instance has properties which are not allowed by the schema: [\"unknown\"],"
             + "instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"unknown\"],"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"id\",\"unknown\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"local\"]),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"id\",\"unknown\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"unknown\"],"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"unknown\"],"
+            + "/devfile/components/0 object has missing required properties ([\"local\"]),"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"unknown\"],"
+            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
       },
       // Command model testing
       {
@@ -114,84 +118,84 @@ public class DevfileSchemaValidatorTest {
         "command/devfile_multiple_commands_actions.yaml",
         "Devfile schema validation failed. Error: /devfile/commands/0/actions array is too long: must have at most 1 elements but instance has 2 elements"
       },
-      // cheEditor/chePlugin tool model testing
+      // cheEditor/chePlugin component model testing
       {
-        "editor_plugin_tool/devfile_editor_tool_with_missing_id.yaml",
+        "editor_plugin_component/devfile_editor_component_with_missing_id.yaml",
         "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/tools/0 object has missing required properties ([\"local\"]),"
-            + "/devfile/tools/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
+            + "/devfile/components/0 object has missing required properties ([\"local\"]),"
+            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
       },
       {
-        "editor_plugin_tool/devfile_editor_tool_with_indistinctive_field_local.yaml",
+        "editor_plugin_component/devfile_editor_component_with_indistinctive_field_local.yaml",
         "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"local\"],"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"id\"],"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"id\",\"local\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"local\"],"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\"],"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"local\"],"
+            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
       },
-      // kubernetes/openshift tool model testing
+      // kubernetes/openshift component model testing
       {
-        "kubernetes_openshift_tool/devfile_openshift_tool_with_missing_local.yaml",
+        "kubernetes_openshift_component/devfile_openshift_component_with_missing_local.yaml",
         "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/tools/0 object has missing required properties ([\"local\"]),"
-            + "/devfile/tools/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
+            + "/devfile/components/0 object has missing required properties ([\"local\"]),"
+            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
       },
       {
-        "kubernetes_openshift_tool/devfile_openshift_tool_content_without_local.yaml",
-        "Devfile schema validation failed. Errors: [/devfile/tools/0 property \"localContent\" of object has missing property dependencies (schema requires [\"local\"]; missing: [\"local\"]),"
+        "kubernetes_openshift_component/devfile_openshift_component_content_without_local.yaml",
+        "Devfile schema validation failed. Errors: [/devfile/components/0 property \"localContent\" of object has missing property dependencies (schema requires [\"local\"]; missing: [\"local\"]),"
             + "instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"localContent\",\"selector\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/tools/0 object has missing required properties ([\"local\"]),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"localContent\",\"selector\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"localContent\",\"selector\"],"
+            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
+            + "/devfile/components/0 object has missing required properties ([\"local\"]),"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"localContent\",\"selector\"],"
+            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
       },
       {
-        "kubernetes_openshift_tool/devfile_kubernetes_tool_content_without_local.yaml",
-        "Devfile schema validation failed. Errors: [/devfile/tools/0 property \"localContent\" of object has missing property dependencies (schema requires [\"local\"]; missing: [\"local\"]),"
+        "kubernetes_openshift_component/devfile_kubernetes_component_content_without_local.yaml",
+        "Devfile schema validation failed. Errors: [/devfile/components/0 property \"localContent\" of object has missing property dependencies (schema requires [\"local\"]; missing: [\"local\"]),"
             + "instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"localContent\",\"selector\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/tools/0 object has missing required properties ([\"local\"]),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"localContent\",\"selector\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"localContent\",\"selector\"],"
+            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
+            + "/devfile/components/0 object has missing required properties ([\"local\"]),"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"localContent\",\"selector\"],"
+            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
       },
       {
-        "kubernetes_openshift_tool/devfile_openshift_tool_with_indistinctive_field_id.yaml",
+        "kubernetes_openshift_component/devfile_openshift_component_with_indistinctive_field_id.yaml",
         "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3)"
-            + ",/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"local\",\"selector\"],"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"id\"],"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"id\",\"local\",\"selector\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+            + ",/devfile/components/0 object instance has properties which are not allowed by the schema: [\"local\",\"selector\"],"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\"],"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"local\",\"selector\"],"
+            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
       },
-      // Dockerimage tool model testing
+      // Dockerimage component model testing
       {
-        "dockerimage_tool/devfile_dockerimage_tool_with_missing_image.yaml",
+        "dockerimage_component/devfile_dockerimage_component_with_missing_image.yaml",
         "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"memoryLimit\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"memoryLimit\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"local\"]),"
-            + "/devfile/tools/0 object has missing required properties ([\"image\"])]"
-      },
-      {
-        "dockerimage_tool/devfile_dockerimage_tool_with_missing_memory_limit.yaml",
-        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"image\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"image\"],/devfile/tools/0 object has missing required properties ([\"local\"]),"
-            + "/devfile/tools/0 object has missing required properties ([\"memoryLimit\"])]"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"memoryLimit\"],"
+            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"memoryLimit\"],"
+            + "/devfile/components/0 object has missing required properties ([\"local\"]),"
+            + "/devfile/components/0 object has missing required properties ([\"image\"])]"
       },
       {
-        "dockerimage_tool/devfile_dockerimage_tool_with_indistinctive_field_selector.yaml",
+        "dockerimage_component/devfile_dockerimage_component_with_missing_memory_limit.yaml",
         "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"endpoints\",\"env\",\"image\",\"memoryLimit\",\"selector\",\"volumes\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"endpoints\",\"env\",\"image\",\"memoryLimit\",\"volumes\"],"
-            + "/devfile/tools/0 object has missing required properties ([\"local\"]),"
-            + "/devfile/tools/0 object instance has properties which are not allowed by the schema: [\"selector\"]]"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"image\"],"
+            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"image\"],/devfile/components/0 object has missing required properties ([\"local\"]),"
+            + "/devfile/components/0 object has missing required properties ([\"memoryLimit\"])]"
+      },
+      {
+        "dockerimage_component/devfile_dockerimage_component_with_indistinctive_field_selector.yaml",
+        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"endpoints\",\"env\",\"image\",\"memoryLimit\",\"selector\",\"volumes\"],"
+            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"endpoints\",\"env\",\"image\",\"memoryLimit\",\"volumes\"],"
+            + "/devfile/components/0 object has missing required properties ([\"local\"]),"
+            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"selector\"]]"
       },
     };
   }

@@ -5,7 +5,7 @@ projects:
     source:
       type: git
       location: 'https://github.com/eclipse/che.git'
-tools:
+components:
   - name: theia-editor
     type: cheEditor
     id: org.eclipse.che.editor.theia:1.0.0
@@ -19,6 +19,6 @@ commands:
   - name: fastbuild
     actions:
       - type: exec
-        tool: che-dev
+        component: che-dev
         command: cd /projects/che && mvn clean install -Pnative -DskipTests=true
         workdir: /projects/che

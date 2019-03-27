@@ -11,9 +11,9 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -28,11 +28,11 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.devfile.model.Action;
 import org.eclipse.che.api.devfile.model.Command;
+import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.model.Entrypoint;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
-import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
@@ -69,20 +69,24 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Duplicate tool name found:'mvn-stack'")
-  public void shouldThrowExceptionOnDuplicateToolName() throws Exception {
+      expectedExceptionsMessageRegExp = "Duplicate component name found:'mvn-stack'")
+  public void shouldThrowExceptionOnDuplicateComponentName() throws Exception {
     Devfile broken = copyOf(initialDevfile);
-    broken.getTools().add(new Tool().withName(initialDevfile.getTools().get(0).getName()));
+    broken
+        .getComponents()
+        .add(new Component().withName(initialDevfile.getComponents().get(0).getName()));
     // when
     integrityValidator.validateDevfile(broken);
   }
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Multiple editor tools found: 'theia-ide', 'editor-2'")
+      expectedExceptionsMessageRegExp = "Multiple editor components found: 'theia-ide', 'editor-2'")
   public void shouldThrowExceptionOnMultipleEditors() throws Exception {
     Devfile broken = copyOf(initialDevfile);
-    broken.getTools().add(new Tool().withName("editor-2").withType(EDITOR_TOOL_TYPE));
+    broken
+        .getComponents()
+        .add(new Component().withName("editor-2").withType(EDITOR_COMPONENT_TYPE));
     // when
     integrityValidator.validateDevfile(broken);
   }
@@ -124,11 +128,11 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Command 'build' has action that refers to non-existing tools 'no_such_tool'")
-  public void shouldThrowExceptionOnUnexistingCommandActionTool() throws Exception {
+          "Command 'build' has action that refers to non-existing components 'no_such_component'")
+  public void shouldThrowExceptionOnUnexistingCommandActionComponent() throws Exception {
     Devfile broken = copyOf(initialDevfile);
     broken.getCommands().get(0).getActions().clear();
-    broken.getCommands().get(0).getActions().add(new Action().withTool("no_such_tool"));
+    broken.getCommands().get(0).getActions().add(new Action().withComponent("no_such_component"));
 
     // when
     integrityValidator.validateDevfile(broken);
@@ -172,10 +176,11 @@ public class DevfileIntegrityValidatorTest {
     selector.put("app", "a different value");
 
     Devfile devfile = copyOf(initialDevfile);
-    // this is the openshift tool which is the only one sensitive to the selector in our example
+    // this is the openshift component which is the only one sensitive to the selector in our
+    // example
     // devfile
-    devfile.getTools().get(3).setLocalContent("content");
-    devfile.getTools().get(3).setSelector(selector);
+    devfile.getComponents().get(3).setLocalContent("content");
+    devfile.getComponents().get(3).setSelector(selector);
 
     // when
     integrityValidator.validateContentReferences(devfile, __ -> "");
@@ -198,9 +203,9 @@ public class DevfileIntegrityValidatorTest {
                     .build()));
 
     Devfile devfile = copyOf(initialDevfile);
-    devfile.getTools().get(0).setLocalContent("content");
+    devfile.getComponents().get(0).setLocalContent("content");
     devfile
-        .getTools()
+        .getComponents()
         .get(0)
         .setEntrypoints(
             Collections.singletonList(new Entrypoint().withContainerName("not that container")));
@@ -212,15 +217,16 @@ public class DevfileIntegrityValidatorTest {
   }
 
   @Test
-  public void shouldNotValidateContentReferencesOnNonKuberenetesTools() throws Exception {
+  public void shouldNotValidateContentReferencesOnNonKuberenetesComponents() throws Exception {
     // given
 
-    // just remove all the content-referencing tools and check that all still works
+    // just remove all the content-referencing components and check that all still works
     Devfile devfile = copyOf(initialDevfile);
-    Iterator<Tool> it = devfile.getTools().iterator();
+    Iterator<Component> it = devfile.getComponents().iterator();
     while (it.hasNext()) {
-      String toolType = it.next().getType();
-      if (toolType.equals(KUBERNETES_TOOL_TYPE) || toolType.equals(OPENSHIFT_TOOL_TYPE)) {
+      String componentType = it.next().getType();
+      if (componentType.equals(KUBERNETES_COMPONENT_TYPE)
+          || componentType.equals(OPENSHIFT_COMPONENT_TYPE)) {
         it.remove();
       }
     }
@@ -247,11 +253,15 @@ public class DevfileIntegrityValidatorTest {
                       .withLocation(project.getSource().getType())));
     }
     result.setProjects(projects);
-    List<Tool> tools = new ArrayList<>();
-    for (Tool tool : source.getTools()) {
-      tools.add(new Tool().withId(tool.getId()).withName(tool.getName()).withType(tool.getType()));
+    List<Component> components = new ArrayList<>();
+    for (Component component : source.getComponents()) {
+      components.add(
+          new Component()
+              .withId(component.getId())
+              .withName(component.getName())
+              .withType(component.getType()));
     }
-    result.setTools(tools);
+    result.setComponents(components);
     List<Command> commands = new ArrayList<>();
     for (Command command : source.getCommands()) {
       List<Action> actions = new ArrayList<>();
@@ -259,7 +269,7 @@ public class DevfileIntegrityValidatorTest {
         actions.add(
             new Action()
                 .withCommand(action.getCommand())
-                .withTool(action.getTool())
+                .withComponent(action.getComponent())
                 .withType(action.getType())
                 .withWorkdir(action.getWorkdir()));
       }

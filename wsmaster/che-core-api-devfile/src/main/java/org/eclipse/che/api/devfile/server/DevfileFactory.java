@@ -47,14 +47,14 @@ public class DevfileFactory {
         .filter(command -> command.getAttributes() == null)
         .forEach(command -> command.setAttributes(new HashMap<>()));
     devfile
-        .getTools()
+        .getComponents()
         .stream()
-        .filter(tool -> tool.getSelector() == null)
+        .filter(component -> component.getSelector() == null)
         .forEach(command -> command.setSelector(new HashMap<>()));
     devfile
-        .getTools()
+        .getComponents()
         .stream()
-        .flatMap(tool -> tool.getEndpoints().stream())
+        .flatMap(component -> component.getEndpoints().stream())
         .filter(endpoint -> endpoint.getAttributes() == null)
         .forEach(endpoint -> endpoint.setAttributes(new HashMap<>()));
   }

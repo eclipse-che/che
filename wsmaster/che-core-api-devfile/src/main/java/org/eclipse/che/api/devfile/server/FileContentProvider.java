@@ -18,8 +18,8 @@ import java.util.Map;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 
 /**
- * Some types of {@link org.eclipse.che.api.devfile.model.Tool} may have configuration located in a
- * separate file. It fetches content of file by its name.
+ * Some types of {@link org.eclipse.che.api.devfile.model.Component} may have configuration located
+ * in a separate file. It fetches content of file by its name.
  *
  * @author Max Shaposhnyk
  * @author Sergii Leshchenko
