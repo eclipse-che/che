@@ -46,7 +46,7 @@ public class GithubUrlTest {
   public void checkDevfileLocation() {
     assertEquals(
         githubUrl.devfileFileLocation(),
-        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yml");
+        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
   }
 
   /** Check when there is .factory.json file in the repository */

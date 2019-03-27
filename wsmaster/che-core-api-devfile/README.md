@@ -42,7 +42,7 @@ For the detailed explanation of all devfile components assignment and possible v
 
 ### Getting Started
 The simplest way to use devfile is to have it deployed into GitHub source repository and then create factory from this repo.
-This is as simple as create `devfile.yml` file in the root of your GH repo, and then execute the factory: 
+This is as simple as create `devfile.yaml` file in the root of your GH repo, and then execute the factory: 
 ```
 https://<your-che-host>/f?url=https://github.com/mygroup/myrepo
 ```
@@ -59,7 +59,7 @@ curl -X POST  -H "Authorization: <TOKEN>" -H "Content-Type: application/yaml" -d
 If you're a user of `chectl` tool, it is also possible to execute workspace from devfile, using `workspace:start` command 
 parameter as follows:
 ```
-chectl workspace:start --devfile=devfile.yml
+chectl workspace:start --devfile=devfile.yaml
 ```` 
 Please note that currently this way only works for the local (same machine) devfiles - URL can't be used here atm.
 
@@ -220,10 +220,10 @@ Devfile allows to specify commands set to be available for execution in workspac
 
 ### Live working examples
 
-  - [NodeJS simple "Hello World" example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-sample/devfile.yml)
-  - [NodeJS Application with Mongo DB example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-with-db-sample/devfile.yml)
-  - [Java Spring-Petclinic example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-java-spring-petclinic/devfile.yml)
-  - [Theia frontend plugin example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/theia-hello-world-frontend-plugin/devfile.yml)
+  - [NodeJS simple "Hello World" example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-sample/devfile.yaml)
+  - [NodeJS Application with Mongo DB example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-with-db-sample/devfile.yaml)
+  - [Java Spring-Petclinic example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-java-spring-petclinic/devfile.yaml)
+  - [Theia frontend plugin example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/theia-hello-world-frontend-plugin/devfile.yaml)
 
 ### Planned features
 There is still a lot of plans to extend Devfile possibilities, such as support multiple dockerimage components etc
