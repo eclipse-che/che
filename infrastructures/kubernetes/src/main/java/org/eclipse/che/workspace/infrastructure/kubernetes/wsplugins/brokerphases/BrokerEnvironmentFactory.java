@@ -16,7 +16,9 @@ import static java.util.Collections.singletonMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.Beta;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
@@ -34,8 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.inject.Inject;
-import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -43,7 +43,7 @@ import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
-import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
@@ -65,10 +65,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResu
 @Beta
 public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> {
 
-  private static final String CONFIG_MAP_NAME_SUFFIX = "broker-config-map";
+  @VisibleForTesting static final String CONFIG_MAP_NAME_SUFFIX = "broker-config-map";
+  @VisibleForTesting static final String CONFIG_FILE = "config.json";
   private static final String BROKER_VOLUME = "broker-config-volume";
   private static final String CONF_FOLDER = "/broker-config";
-  private static final String CONFIG_FILE = "config.json";
   private static final String PLUGINS_VOLUME_NAME = "plugins";
   private static final String BROKERS_POD_NAME = "che-plugin-broker";
 
@@ -79,34 +79,35 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private final MachineTokenEnvVarProvider machineTokenEnvVarProvider;
   private final String unifiedBrokerImage;
   private final String initBrokerImage;
+  private final String pluginRegistryUrl;
 
-  @Inject
   public BrokerEnvironmentFactory(
-      @Named("che.websocket.endpoint") String cheWebsocketEndpoint,
-      @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
+      String cheWebsocketEndpoint,
+      String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
-      @Named("che.workspace.plugin_broker.unified.image") String unifiedBrokerImage,
-      @Named("che.workspace.plugin_broker.init.image") String initBrokerImage) {
+      String unifiedBrokerImage,
+      String initBrokerImage,
+      String pluginRegistryUrl) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.brokerPullPolicy = brokerPullPolicy;
     this.authEnableEnvVarProvider = authEnableEnvVarProvider;
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
     this.unifiedBrokerImage = unifiedBrokerImage;
     this.initBrokerImage = initBrokerImage;
+    this.pluginRegistryUrl = pluginRegistryUrl;
   }
 
   /**
    * Creates {@link KubernetesEnvironment} with everything needed to deploy Plugin broker.
    *
-   * @param pluginsMeta meta info of plugins that needs to be resolved by the broker
+   * @param pluginFQN fully qualified names of plugins that needs to be resolved by the broker
    * @param runtimeID ID of the runtime the broker would be started
    * @param brokersResult needs to be called with {@link BrokersResult#oneMoreBroker()} for each
    *     broker to allow proper waiting of execution of all the brokers
    * @return kubernetes environment (or its extension) with the Plugin broker objects
    */
-  public E create(
-      Collection<PluginMeta> pluginsMeta, RuntimeIdentity runtimeID, BrokersResult brokersResult)
+  public E create(Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID)
       throws InfrastructureException {
 
     BrokersConfigs brokersConfigs = new BrokersConfigs();
@@ -122,7 +123,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
             .collect(Collectors.toList());
 
     BrokerConfig brokerConfig =
-        createBrokerConfig(runtimeID, pluginsMeta, envVars, unifiedBrokerImage, pod);
+        createBrokerConfig(runtimeID, pluginFQNs, envVars, unifiedBrokerImage, pod);
     brokersConfigs.machines.put(brokerConfig.machineName, brokerConfig.machineConfig);
     brokersConfigs.configMaps.put(brokerConfig.configMapName, brokerConfig.configMap);
     spec.getContainers().add(brokerConfig.container);
@@ -168,7 +169,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                     "%s:%s:%s",
                     runtimeId.getWorkspaceId(),
                     MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
-                    runtimeId.getOwnerId()))
+                    runtimeId.getOwnerId()),
+                "--download-metas",
+                "--registry-address",
+                Strings.nullToEmpty(pluginRegistryUrl))
             .withImagePullPolicy(brokerPullPolicy)
             .withEnv(envVars);
     if (brokerVolumeName != null) {
@@ -192,14 +196,14 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
         .build();
   }
 
-  private ConfigMap newConfigMap(String configMapName, Collection<PluginMeta> pluginsMetas)
+  private ConfigMap newConfigMap(String configMapName, Collection<PluginFQN> pluginFQNs)
       throws InternalInfrastructureException {
     try {
       return new ConfigMapBuilder()
           .withNewMetadata()
           .withName(configMapName)
           .endMetadata()
-          .withData(singletonMap(CONFIG_FILE, objectMapper.writeValueAsString(pluginsMetas)))
+          .withData(singletonMap(CONFIG_FILE, objectMapper.writeValueAsString(pluginFQNs)))
           .build();
     } catch (JsonProcessingException e) {
       throw new InternalInfrastructureException(e.getMessage(), e);
@@ -212,7 +216,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
 
   private BrokerConfig createBrokerConfig(
       RuntimeIdentity runtimeId,
-      @Nullable Collection<PluginMeta> pluginsMeta,
+      @Nullable Collection<PluginFQN> pluginFQNs,
       List<EnvVar> envVars,
       String image,
       Pod pod)
@@ -220,10 +224,10 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
 
     BrokerConfig brokerConfig = new BrokerConfig();
     String configMapVolume = null;
-    if (pluginsMeta != null) {
+    if (pluginFQNs != null) {
       brokerConfig.configMapName = generateUniqueName(CONFIG_MAP_NAME_SUFFIX);
       brokerConfig.configMapVolume = generateUniqueName(BROKER_VOLUME);
-      brokerConfig.configMap = newConfigMap(brokerConfig.configMapName, pluginsMeta);
+      brokerConfig.configMap = newConfigMap(brokerConfig.configMapName, pluginFQNs);
       configMapVolume = brokerConfig.configMapVolume;
     }
     brokerConfig.container = newContainer(runtimeId, envVars, image, configMapVolume);

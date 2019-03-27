@@ -21,7 +21,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
-import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
@@ -95,7 +95,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
   public List<ChePlugin> getTooling(
       RuntimeIdentity runtimeID,
       StartSynchronizer startSynchronizer,
-      Collection<PluginMeta> pluginsMeta,
+      Collection<PluginFQN> pluginFQNs,
       boolean isEphemeral)
       throws InfrastructureException {
 
@@ -103,7 +103,7 @@ public class PluginBrokerManager<E extends KubernetesEnvironment> {
     KubernetesNamespace kubernetesNamespace = factory.create(workspaceId);
     BrokersResult brokersResult = new BrokersResult();
 
-    E brokerEnvironment = brokerEnvironmentFactory.create(pluginsMeta, runtimeID, brokersResult);
+    E brokerEnvironment = brokerEnvironmentFactory.create(pluginFQNs, runtimeID);
     if (isEphemeral) {
       EphemeralWorkspaceUtility.makeEphemeral(brokerEnvironment.getAttributes());
     }
