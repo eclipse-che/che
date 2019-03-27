@@ -11,16 +11,12 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.Container;
@@ -36,7 +32,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
@@ -82,7 +77,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private final String brokerPullPolicy;
   private final AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
   private final MachineTokenEnvVarProvider machineTokenEnvVarProvider;
-  private final Map<String, String> pluginTypeToImage;
+  private final String unifiedBrokerImage;
   private final String initBrokerImage;
 
   @Inject
@@ -91,13 +86,13 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       @Named("che.workspace.plugin_broker.pull_policy") String brokerPullPolicy,
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
-      @Named("che.workspace.plugin_broker.images") Map<String, String> pluginTypeToImage,
+      @Named("che.workspace.plugin_broker.unified.image") String unifiedBrokerImage,
       @Named("che.workspace.plugin_broker.init.image") String initBrokerImage) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.brokerPullPolicy = brokerPullPolicy;
     this.authEnableEnvVarProvider = authEnableEnvVarProvider;
     this.machineTokenEnvVarProvider = machineTokenEnvVarProvider;
-    this.pluginTypeToImage = pluginTypeToImage;
+    this.unifiedBrokerImage = unifiedBrokerImage;
     this.initBrokerImage = initBrokerImage;
   }
 
@@ -126,32 +121,25 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
             .map(this::asEnvVar)
             .collect(Collectors.toList());
 
-    Multimap<String, PluginMeta> brokersImageToMetas = sortByBrokerImage(pluginsMeta);
-    for (Entry<String, Collection<PluginMeta>> brokerImageToMetas :
-        brokersImageToMetas.asMap().entrySet()) {
-      BrokerConfig brokerConfig =
-          createBrokerConfig(
-              runtimeID, brokerImageToMetas.getValue(), envVars, brokerImageToMetas.getKey(), pod);
-
-      brokersConfigs.machines.put(brokerConfig.machineName, brokerConfig.machineConfig);
-      brokersConfigs.configMaps.put(brokerConfig.configMapName, brokerConfig.configMap);
-      spec.getContainers().add(brokerConfig.container);
-      spec.getVolumes()
-          .add(
-              new VolumeBuilder()
-                  .withName(brokerConfig.configMapVolume)
-                  .withNewConfigMap()
-                  .withName(brokerConfig.configMapName)
-                  .endConfigMap()
-                  .build());
-
-      brokersResult.oneMoreBroker();
-    }
+    BrokerConfig brokerConfig =
+        createBrokerConfig(runtimeID, pluginsMeta, envVars, unifiedBrokerImage, pod);
+    brokersConfigs.machines.put(brokerConfig.machineName, brokerConfig.machineConfig);
+    brokersConfigs.configMaps.put(brokerConfig.configMapName, brokerConfig.configMap);
+    spec.getContainers().add(brokerConfig.container);
+    spec.getVolumes()
+        .add(
+            new VolumeBuilder()
+                .withName(brokerConfig.configMapVolume)
+                .withNewConfigMap()
+                .withName(brokerConfig.configMapName)
+                .endConfigMap()
+                .build());
 
     // Add init broker that cleans up /plugins
-    BrokerConfig brokerConfig = createBrokerConfig(runtimeID, null, envVars, initBrokerImage, pod);
-    pod.getSpec().getInitContainers().add(brokerConfig.container);
-    brokersConfigs.machines.put(brokerConfig.machineName, brokerConfig.machineConfig);
+    BrokerConfig initBrokerConfig =
+        createBrokerConfig(runtimeID, null, envVars, initBrokerImage, pod);
+    pod.getSpec().getInitContainers().add(initBrokerConfig.container);
+    brokersConfigs.machines.put(initBrokerConfig.machineName, initBrokerConfig.machineConfig);
 
     return doCreate(brokersConfigs);
   }
@@ -249,31 +237,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     return brokerConfig;
   }
 
-  private Multimap<String, PluginMeta> sortByBrokerImage(Collection<PluginMeta> pluginMetas)
-      throws InfrastructureException {
-    Multimap<String, PluginMeta> sortedPlugins = ArrayListMultimap.create();
-    for (PluginMeta pluginMeta : pluginMetas) {
-      String type = pluginMeta.getType();
-      if (isNullOrEmpty(type)) {
-        throw new InfrastructureException(
-            format(
-                "Plugin '%s:%s' has invalid type '%s'",
-                pluginMeta.getId(), pluginMeta.getVersion(), type));
-      }
-      String image = pluginTypeToImage.get(type);
-      if (isNullOrEmpty(image)) {
-        throw new InfrastructureException(
-            format(
-                "Plugin '%s:%s' has unsupported type '%s'",
-                pluginMeta.getId(), pluginMeta.getVersion(), type));
-      }
-      sortedPlugins.put(image, pluginMeta);
-    }
-
-    return sortedPlugins;
-  }
-
   private static class BrokerConfig {
+
     String configMapName;
     ConfigMap configMap;
     Container container;
@@ -283,6 +248,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   }
 
   public static class BrokersConfigs {
+
     public Map<String, InternalMachineConfig> machines;
     public Map<String, ConfigMap> configMaps;
     public Pod pod;

@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
@@ -76,61 +75,6 @@ public class DevfileIntegrityValidatorTest {
     broken
         .getComponents()
         .add(new Component().withName(initialDevfile.getComponents().get(0).getName()));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Devfile cannot contain multiple dockerimage components at the same time")
-  public void shouldThrowExceptionOnMultipleDockerimagesComponents() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getCommands().clear();
-    broken.getComponents().clear();
-    broken
-        .getComponents()
-        .add(new Component().withName("dockerimage1").withType(DOCKERIMAGE_COMPONENT_TYPE));
-    broken
-        .getComponents()
-        .add(new Component().withName("dockerimage2").withType(DOCKERIMAGE_COMPONENT_TYPE));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Devfile cannot contain kubernetes/openshift and dockerimage component at the same time")
-  public void shouldThrowExceptionIfDevfileContainK8sAndDockerimageComponent() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getCommands().clear();
-    broken.getComponents().clear();
-    broken.getComponents().add(new Component().withName("k8s").withType(KUBERNETES_COMPONENT_TYPE));
-    broken
-        .getComponents()
-        .add(new Component().withName("dockerimage").withType(DOCKERIMAGE_COMPONENT_TYPE));
-
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Devfile cannot contain kubernetes/openshift and dockerimage component at the same time")
-  public void shouldThrowExceptionIfDevfileContainOpenShiftAndDockerimageComponent()
-      throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getCommands().clear();
-    broken.getComponents().clear();
-    broken
-        .getComponents()
-        .add(new Component().withName("openshift").withType(OPENSHIFT_COMPONENT_TYPE));
-    broken
-        .getComponents()
-        .add(new Component().withName("dockerimage").withType(DOCKERIMAGE_COMPONENT_TYPE));
-
     // when
     integrityValidator.validateDevfile(broken);
   }

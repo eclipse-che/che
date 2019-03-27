@@ -14,8 +14,6 @@ import {IPlugin, PluginRegistry} from '../../../../components/api/plugin-registr
 import IWorkspaceConfig = che.IWorkspaceConfig;
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 
-const PLUGINS_ATTRIBUTE = 'plugins';
-const EDITOR_ATTRIBUTE = 'editor';
 const PLUGIN_SEPARATOR = ',';
 const PLUGIN_VERSION_SEPARATOR = ':';
 const PLUGIN_TYPE = 'Che Plugin';
@@ -125,14 +123,14 @@ export class WorkspacePluginsController {
 
     if (plugin.type === EDITOR_TYPE) {
       this.selectedEditor = plugin.isEnabled ? name : '';
-      this.workspaceConfig.attributes[EDITOR_ATTRIBUTE] = this.selectedEditor;
+      this.workspaceConfig.attributes.editor = this.selectedEditor;
     } else {
       if (plugin.isEnabled) {
         this.selectedPlugins.push(name);
       } else {
         this.selectedPlugins.splice(this.selectedPlugins.indexOf(name), 1);
       }
-      this.workspaceConfig.attributes[PLUGINS_ATTRIBUTE] = this.selectedPlugins.join(PLUGIN_SEPARATOR);
+      this.workspaceConfig.attributes.plugins = this.selectedPlugins.join(PLUGIN_SEPARATOR);
     }
     
     this.cleanupInstallers();
@@ -156,11 +154,11 @@ export class WorkspacePluginsController {
    */
   private updatePlugins(): void {
     // get selected plugins from workspace configuration attribute - "plugins" (coma separated values):
-    this.selectedPlugins = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes[PLUGINS_ATTRIBUTE] ?
-      this.workspaceConfig.attributes[PLUGINS_ATTRIBUTE].split(PLUGIN_SEPARATOR) : [];
+    this.selectedPlugins = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes.plugins ?
+      this.workspaceConfig.attributes.plugins.split(PLUGIN_SEPARATOR) : [];
     // get selected plugins from workspace configuration attribute - "editor":
-    this.selectedEditor = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes[EDITOR_ATTRIBUTE] ?
-     this.workspaceConfig.attributes[EDITOR_ATTRIBUTE] : '';
+    this.selectedEditor = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes.editor ?
+     this.workspaceConfig.attributes.editor : '';
     // check each plugin's enabled state:
     this.plugins.forEach((plugin: IPlugin) => {
       plugin.isEnabled = this.isPluginEnabled(plugin);

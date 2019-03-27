@@ -20,27 +20,21 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NA
 import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
-import static org.eclipse.che.api.devfile.server.convert.component.kubernetes.KubernetesComponentToWorkspaceApplier.YAML_CONTENT_TYPE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
-import io.fabric8.kubernetes.api.model.KubernetesListBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.api.model.apps.DeploymentBuilder;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,13 +44,13 @@ import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.model.Entrypoint;
 import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -75,10 +69,13 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
   private KubernetesComponentToWorkspaceApplier applier;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
+  @Mock private KubernetesEnvironmentProvisioner k8sEnvProvisioner;
+
+  @Captor private ArgumentCaptor<List<HasMetadata>> objectsCaptor;
 
   @BeforeMethod
   public void setUp() {
-    applier = new KubernetesComponentToWorkspaceApplier(k8sRecipeParser);
+    applier = new KubernetesComponentToWorkspaceApplier(k8sRecipeParser, k8sEnvProvisioner);
 
     workspaceConfig = new WorkspaceConfigImpl();
   }
@@ -166,217 +163,12 @@ public class KubernetesComponentToWorkspaceApplierTest {
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
 
     // then
-    String defaultEnv = workspaceConfig.getDefaultEnv();
-    assertNotNull(defaultEnv);
-    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
-    assertNotNull(environment);
-    RecipeImpl recipe = environment.getRecipe();
-    assertNotNull(recipe);
-    assertEquals(recipe.getType(), KUBERNETES_COMPONENT_TYPE);
-    assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
-
-    // it is expected that applier wrap original recipes objects in new Kubernetes list
-    KubernetesList expectedKubernetesList =
-        new KubernetesListBuilder().withItems(toK8SList(yamlRecipeContent).getItems()).build();
-    assertEquals(toK8SList(recipe.getContent()).getItems(), expectedKubernetesList.getItems());
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Components can not have objects with the same name and kind but there are multiple objects with kind 'Service' and name 'db'")
-  public void shouldThrowExceptionIfComponentHasMultipleObjectsWithTheSameKindAndName()
-      throws Exception {
-    // given
-    List<HasMetadata> objects = new ArrayList<>();
-    Service service =
-        new ServiceBuilder()
-            .withNewMetadata()
-            .withName("db")
-            .endMetadata()
-            .withNewSpec()
-            .endSpec()
-            .build();
-    objects.add(new ServiceBuilder(service).build());
-    objects.add(new ServiceBuilder(service).build());
-    doReturn(objects).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
-
-    // when
-    applier.apply(workspaceConfig, component, s -> "content");
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Components can not have objects with the same name and kind "
-              + "but there are multiple objects with kind 'Service' and name 'db'")
-  public void shouldThrowExceptionIfDifferentComponentsHaveObjectsWithTheSameKindAndName()
-      throws Exception {
-    // given
-    List<HasMetadata> objects = new ArrayList<>();
-    Service service1 =
-        new ServiceBuilder()
-            .withNewMetadata()
-            .withName("db")
-            .endMetadata()
-            .withNewSpec()
-            .endSpec()
-            .build();
-    Service service2 =
-        new ServiceBuilder()
-            .withNewMetadata()
-            .withName("db")
-            .endMetadata()
-            .withNewSpec()
-            .endSpec()
-            .build();
-    objects.add(new ServiceBuilder(service1).build());
-    objects.add(new ServiceBuilder(service2).build());
-    doReturn(objects).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
-
-    // when
-    applier.apply(workspaceConfig, component, s -> "content");
-  }
-
-  @Test(
-      expectedExceptions = DevfileException.class,
-      expectedExceptionsMessageRegExp =
-          "Kubernetes component can only be applied to a workspace with either kubernetes or openshift "
-              + "recipe type but workspace has a recipe of type 'any'")
-  public void shouldThrowAnExceptionIfWorkspaceAlreadyContainNonK8sNorOSRecipe() throws Exception {
-    // given
-    workspaceConfig.setDefaultEnv("default");
-    RecipeImpl existingRecipe = new RecipeImpl("any", "yaml", "existing-content", null);
-    workspaceConfig
-        .getEnvironments()
-        .put("default", new EnvironmentImpl(existingRecipe, emptyMap()));
-
-    List<HasMetadata> componentsObject = new ArrayList<>();
-    Deployment componentDeployment =
-        new DeploymentBuilder()
-            .withNewMetadata()
-            .withName("db")
-            .endMetadata()
-            .withNewSpec()
-            .endSpec()
-            .build();
-    componentsObject.add(new DeploymentBuilder(componentDeployment).build());
-    doReturn(componentsObject).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
-
-    // when
-    applier.apply(workspaceConfig, component, s -> "content");
-  }
-
-  @Test
-  public void shouldProvisionComponentObjectsIntoExistingKubernetesRecipe() throws Exception {
-    // given
-    workspaceConfig.setDefaultEnv("default");
-    RecipeImpl existingRecipe =
-        new RecipeImpl(KUBERNETES_COMPONENT_TYPE, "yaml", "existing-content", null);
-    workspaceConfig
-        .getEnvironments()
-        .put("default", new EnvironmentImpl(existingRecipe, emptyMap()));
-
-    List<HasMetadata> recipeObjects = new ArrayList<>();
-    Deployment recipeDeployment =
-        new DeploymentBuilder()
-            .withNewMetadata()
-            .withName("db")
-            .endMetadata()
-            .withNewSpec()
-            .endSpec()
-            .build();
-    recipeObjects.add(new DeploymentBuilder(recipeDeployment).build());
-
-    List<HasMetadata> componentsObject = new ArrayList<>();
-    Deployment componentDeployment =
-        new DeploymentBuilder()
-            .withNewMetadata()
-            .withName("web-app")
-            .endMetadata()
-            .withNewSpec()
-            .endSpec()
-            .build();
-    componentsObject.add(new DeploymentBuilder(componentDeployment).build());
-    doReturn(componentsObject).doReturn(recipeObjects).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
-
-    // when
-    applier.apply(workspaceConfig, component, s -> "content");
-
-    // then
-    // it is expected that applier wrap original recipes objects in new Kubernetes list
-    KubernetesList expectedKubernetesList =
-        new KubernetesListBuilder()
-            .withItems(Arrays.asList(recipeDeployment, componentDeployment))
-            .build();
-    EnvironmentImpl resultEnv =
-        workspaceConfig.getEnvironments().get(workspaceConfig.getDefaultEnv());
-    assertEquals(
-        toK8SList(resultEnv.getRecipe().getContent()).getItems(),
-        expectedKubernetesList.getItems());
-  }
-
-  @Test
-  public void shouldUpgradeKubernetesEnvironmentToOpenShiftTypeOnOpenShiftComponentProvisioning()
-      throws Exception {
-    // given
-    workspaceConfig.setDefaultEnv("default");
-    RecipeImpl existingRecipe =
-        new RecipeImpl(KUBERNETES_COMPONENT_TYPE, "yaml", "existing-content", null);
-    workspaceConfig
-        .getEnvironments()
-        .put("default", new EnvironmentImpl(existingRecipe, emptyMap()));
-
-    List<HasMetadata> componentsObject = new ArrayList<>();
-    Deployment componentDeployment =
-        new DeploymentBuilder()
-            .withNewMetadata()
-            .withName("web-app")
-            .endMetadata()
-            .withNewSpec()
-            .endSpec()
-            .build();
-    componentsObject.add(new DeploymentBuilder(componentDeployment).build());
-    doReturn(componentsObject).doReturn(new ArrayList<>()).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
-
-    // when
-    applier.apply(workspaceConfig, component, s -> "content");
-
-    // then
-    EnvironmentImpl resultEnv =
-        workspaceConfig.getEnvironments().get(workspaceConfig.getDefaultEnv());
-    RecipeImpl resultRecipe = resultEnv.getRecipe();
-    assertEquals(resultRecipe.getType(), OpenShiftEnvironment.TYPE);
+    verify(k8sEnvProvisioner)
+        .provision(
+            workspaceConfig,
+            KubernetesEnvironment.TYPE,
+            toK8SList(yamlRecipeContent).getItems(),
+            emptyMap());
   }
 
   @Test
@@ -393,19 +185,12 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
     applier.apply(workspaceConfig, component, new FetchNotSupportedProvider());
 
-    String defaultEnv = workspaceConfig.getDefaultEnv();
-    assertNotNull(defaultEnv);
-    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
-    assertNotNull(environment);
-    RecipeImpl recipe = environment.getRecipe();
-    assertNotNull(recipe);
-    assertEquals(recipe.getType(), KUBERNETES_COMPONENT_TYPE);
-    assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
-
-    // it is expected that applier wrap original recipes objects in new Kubernetes list
-    KubernetesList expectedKubernetesList =
-        new KubernetesListBuilder().withItems(toK8SList(yamlRecipeContent).getItems()).build();
-    assertEquals(toK8SList(recipe.getContent()).getItems(), expectedKubernetesList.getItems());
+    verify(k8sEnvProvisioner)
+        .provision(
+            workspaceConfig,
+            KubernetesEnvironment.TYPE,
+            toK8SList(yamlRecipeContent).getItems(),
+            emptyMap());
   }
 
   @Test
@@ -425,19 +210,12 @@ public class KubernetesComponentToWorkspaceApplierTest {
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
 
     // then
-    String defaultEnv = workspaceConfig.getDefaultEnv();
-    assertNotNull(defaultEnv);
-    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
-    assertNotNull(environment);
-    RecipeImpl recipe = environment.getRecipe();
-    assertNotNull(recipe);
-    assertEquals(recipe.getType(), OPENSHIFT_COMPONENT_TYPE);
-    assertEquals(recipe.getContentType(), YAML_CONTENT_TYPE);
-
-    // it is expected that applier wrap original recipes objects in new Kubernetes list
-    KubernetesList expectedKubernetesList =
-        new KubernetesListBuilder().withItems(toK8SList(yamlRecipeContent).getItems()).build();
-    assertEquals(toK8SList(recipe.getContent()).getItems(), expectedKubernetesList.getItems());
+    verify(k8sEnvProvisioner)
+        .provision(
+            workspaceConfig,
+            OpenShiftEnvironment.TYPE,
+            toK8SList(yamlRecipeContent).getItems(),
+            emptyMap());
   }
 
   @Test
@@ -458,13 +236,13 @@ public class KubernetesComponentToWorkspaceApplierTest {
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
 
     // then
-    String defaultEnv = workspaceConfig.getDefaultEnv();
-    assertNotNull(defaultEnv);
-    EnvironmentImpl environment = workspaceConfig.getEnvironments().get(defaultEnv);
-    assertNotNull(environment);
-    RecipeImpl recipe = environment.getRecipe();
-
-    List<HasMetadata> resultItemsList = toK8SList(recipe.getContent()).getItems();
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(OpenShiftEnvironment.TYPE),
+            objectsCaptor.capture(),
+            eq(emptyMap()));
+    List<HasMetadata> resultItemsList = objectsCaptor.getValue();
     assertEquals(resultItemsList.size(), 3);
     assertEquals(1, resultItemsList.stream().filter(it -> "Pod".equals(it.getKind())).count());
     assertEquals(1, resultItemsList.stream().filter(it -> "Service".equals(it.getKind())).count());
@@ -544,9 +322,9 @@ public class KubernetesComponentToWorkspaceApplierTest {
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
 
     // then
-    RecipeImpl recipe = workspaceConfig.getEnvironments().get(COMPONENT_NAME).getRecipe();
-    KubernetesList list = toK8SList(recipe.getContent());
-    for (HasMetadata o : list.getItems()) {
+    verify(k8sEnvProvisioner).provision(any(), any(), objectsCaptor.capture(), any());
+    List<HasMetadata> list = objectsCaptor.getValue();
+    for (HasMetadata o : list) {
       if (o instanceof Pod) {
         Pod p = (Pod) o;
 

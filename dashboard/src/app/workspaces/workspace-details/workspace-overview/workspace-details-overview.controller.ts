@@ -49,7 +49,7 @@ export class WorkspaceDetailsOverviewController {
   private inputmodel: ng.INgModelController;
   private isLoading: boolean;
   private isEphemeralMode: boolean;
-  private attributesCopy: {[attrName: string]: string};
+  private attributesCopy: che.IWorkspaceConfigAttributes;
 
   /**
    * Default constructor that is using resource
