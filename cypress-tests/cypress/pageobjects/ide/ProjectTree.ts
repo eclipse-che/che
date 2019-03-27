@@ -176,15 +176,17 @@ export class ProjectTree {
                 cy.get('body')
                     .then(body => {
                         let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
-                        let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
-                        
+                        let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}1111`)
+
                         if (currentAttempt >= attempts) {
                             assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
                         }
 
                         if (body.find(rootItemLocator).length === 0) {
+                            cy.log(`==>> Project '${projectName}' has not benn found. Refreshing page and try again (attempt ${currentAttempt} of ${attempts})`)
+
                             currentAttempt++
-                            
+
                             cy.reload();
                             this.ide.waitIde()
                             this.openProjectTreeContainer();
@@ -196,6 +198,8 @@ export class ProjectTree {
                         if (body.find(rootSubitemLocator).length > 0) {
                             return;
                         }
+
+                        cy.log(`==>> Root sub item '${rootSubitem}' has not benn found (attempt ${currentAttempt} of ${attempts})`)
 
                         currentAttempt++
                         this.colapseItem(rootItem)
