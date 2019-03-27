@@ -204,11 +204,12 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                      <!-- install dependencies -->
-                                      <exec dir="${basedir}" executable="yarn" failonerror="true">
-                                        <arg value="install" />
-                                        <arg value="--ignore-optional" />
-                                      </exec>
+                                        <!-- install dependencies -->
+                                        <exec dir="${basedir}" executable="npx" failonerror="true">
+                                            <arg value="yarn" />
+                                            <arg value="install" />
+                                            <arg value="--ignore-optional" />
+                                        </exec>
                                     </target>
                                 </configuration>
                             </execution>
@@ -221,7 +222,8 @@
                                 <configuration>
                                     <target>
                                         <!-- build user dashboard -->
-                                        <exec dir="${basedir}" executable="yarn" failonerror="true">
+                                        <exec dir="${basedir}" executable="npx" failonerror="true">
+                                            <arg value="yarn" />
                                             <arg value="build" />
                                         </exec>
                                         <!-- Change base HREF of the application that will be hosted on /dashboard -->
@@ -241,7 +243,8 @@
                                 <configuration>
                                     <target unless="skipTests">
                                         <!-- Run unit tests -->
-                                        <exec dir="${basedir}" executable="yarn" failonerror="true">
+                                        <exec dir="${basedir}" executable="npx" failonerror="true">
+                                            <arg value="yarn" />
                                             <arg value="test" />
                                         </exec>
                                     </target>
