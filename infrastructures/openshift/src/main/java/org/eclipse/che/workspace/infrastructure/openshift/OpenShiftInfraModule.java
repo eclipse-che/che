@@ -16,12 +16,10 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Key;
 import com.google.inject.TypeLiteral;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -148,24 +146,5 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     bind(new TypeLiteral<KubernetesEnvironmentProvisioner<OpenShiftEnvironment>>() {})
         .to(OpenShiftEnvironmentProvisioner.class);
-
-    MapBinder<String, String> pluginBrokers =
-        MapBinder.newMapBinder(
-            binder(),
-            String.class,
-            String.class,
-            Names.named("che.workspace.plugin_broker.images"));
-    pluginBrokers
-        .addBinding("Che Plugin")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
-    pluginBrokers
-        .addBinding("Che Editor")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.image")));
-    pluginBrokers
-        .addBinding("Theia plugin")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.theia.image")));
-    pluginBrokers
-        .addBinding("VS Code extension")
-        .to(Key.get(String.class, Names.named("che.workspace.plugin_broker.vscode.image")));
   }
 }

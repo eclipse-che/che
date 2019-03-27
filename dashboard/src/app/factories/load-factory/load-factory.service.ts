@@ -30,6 +30,7 @@ export class LoadFactoryService {
 
     this.loadingSteps = [
       {text: 'Loading factory', inProgressText: '', logs: '', hasError: false},
+      {text: 'Looking for devfile', inProgressText: '', logs: '', hasError: false},
       {text: 'Initializing workspace', inProgressText: 'Provision workspace and associating it with the existing user', logs: '', hasError: false},
       {text: 'Starting workspace runtime', inProgressText: 'Retrieving the stack\'s image and launching it', logs: '', hasError: false},
       {text: 'Starting workspace agent', inProgressText: 'Agents provide RESTful services like intellisense and SSH', logs: '', hasError: false},

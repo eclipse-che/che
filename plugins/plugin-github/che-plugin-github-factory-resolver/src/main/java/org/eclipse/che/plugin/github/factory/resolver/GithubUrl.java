@@ -13,6 +13,7 @@ package org.eclipse.che.plugin.github.factory.resolver;
 
 import com.google.common.base.Strings;
 import java.util.StringJoiner;
+import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 
 /**
  * Representation of a github URL, allowing to get details from it.
@@ -22,7 +23,7 @@ import java.util.StringJoiner;
  *
  * @author Florent Benoit
  */
-public class GithubUrl {
+public class GithubUrl implements RemoteFactoryUrl {
 
   /** Master branch is the default. */
   private static final String DEFAULT_BRANCH_NAME = "master";
@@ -84,6 +85,7 @@ public class GithubUrl {
    *
    * @return the devfile file name
    */
+  @Override
   public String getDevfileFilename() {
     return this.devfileFilename;
   }
@@ -98,6 +100,7 @@ public class GithubUrl {
    *
    * @return the factory file name
    */
+  @Override
   public String getFactoryFilename() {
     return this.factoryFilename;
   }
@@ -148,7 +151,8 @@ public class GithubUrl {
    *
    * @return location of factory json file in a repository
    */
-  protected String factoryFileLocation() {
+  @Override
+  public String factoryFileLocation() {
     return rawFileLocation(factoryFilename);
   }
 
@@ -157,7 +161,8 @@ public class GithubUrl {
    *
    * @return location of devfile yaml file in a repository
    */
-  protected String devfileFileLocation() {
+  @Override
+  public String devfileFileLocation() {
     return rawFileLocation(devfileFilename);
   }
 
@@ -166,7 +171,7 @@ public class GithubUrl {
    *
    * @return location of specified file in a repository
    */
-  protected String rawFileLocation(String fileName) {
+  public String rawFileLocation(String fileName) {
     return new StringJoiner("/")
         .add("https://raw.githubusercontent.com")
         .add(username)

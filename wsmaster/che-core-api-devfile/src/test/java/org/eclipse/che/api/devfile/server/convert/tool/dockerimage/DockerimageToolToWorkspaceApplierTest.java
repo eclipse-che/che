@@ -13,34 +13,47 @@ package org.eclipse.che.api.devfile.server.convert.tool.dockerimage;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CONTAINER_ARGS_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.CONTAINER_COMMAND_ATTRIBUTE;
-import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
+import io.fabric8.kubernetes.api.model.Container;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.PodTemplateSpec;
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.model.Env;
 import org.eclipse.che.api.devfile.model.Tool;
 import org.eclipse.che.api.devfile.model.Volume;
-import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
+import org.eclipse.che.api.devfile.server.convert.tool.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
@@ -55,17 +68,22 @@ public class DockerimageToolToWorkspaceApplierTest {
 
   private DockerimageToolToWorkspaceApplier dockerimageToolApplier;
 
-  @Mock private EntryPointParser entryPointParser;
+  @Mock private KubernetesEnvironmentProvisioner k8sEnvProvisioner;
+
+  @Captor private ArgumentCaptor<List<HasMetadata>> objectsCaptor;
+  @Captor private ArgumentCaptor<Map<String, MachineConfigImpl>> machinesCaptor;
 
   @BeforeMethod
   public void setUp() throws Exception {
     dockerimageToolApplier =
-        new DockerimageToolToWorkspaceApplier(PROJECTS_MOUNT_PATH, entryPointParser);
+        new DockerimageToolToWorkspaceApplier(PROJECTS_MOUNT_PATH, k8sEnvProvisioner);
     workspaceConfig = new WorkspaceConfigImpl();
   }
 
   @Test
-  public void shouldProvisionEnvironmentWithDockerimageRecipe() throws Exception {
+  public void
+      shouldProvisionK8sEnvironmentWithMachineConfigAndGeneratedDeploymentForSpecifiedDockerimage()
+          throws Exception {
     // given
     Tool dockerimageTool =
         new Tool()
@@ -78,21 +96,29 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    String defaultEnvName = workspaceConfig.getDefaultEnv();
-    assertNotNull(defaultEnvName);
-    EnvironmentImpl defaultEnv = workspaceConfig.getEnvironments().get(defaultEnvName);
-    RecipeImpl recipe = defaultEnv.getRecipe();
-    assertEquals(recipe.getType(), "dockerimage");
-    assertEquals(recipe.getContent(), "eclipse/ubuntu_jdk8:latest");
-
-    assertEquals(defaultEnv.getMachines().size(), 1);
-
-    MachineConfigImpl machineConfig = defaultEnv.getMachines().get("jdk");
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk");
     assertNotNull(machineConfig);
+
+    List<HasMetadata> objects = objectsCaptor.getValue();
+    assertEquals(objects.size(), 1);
+    assertTrue(objects.get(0) instanceof Deployment);
+    Deployment deployment = (Deployment) objects.get(0);
+    PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
+    Map<String, String> annotations = podTemplate.getMetadata().getAnnotations();
+    assertEquals(annotations.get(String.format(MACHINE_NAME_ANNOTATION_FMT, "jdk")), "jdk");
+    Container container = podTemplate.getSpec().getContainers().get(0);
+    assertEquals(container.getName(), "jdk");
+    assertEquals(container.getImage(), "eclipse/ubuntu_jdk8:latest");
   }
 
   @Test
-  public void shouldProvisionMachineConfigWithEnvVarSpecified() throws Exception {
+  public void shouldProvisionSpecifiedEnvVars() throws Exception {
     // given
     Tool dockerimageTool =
         new Tool()
@@ -106,15 +132,28 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
-    Map<String, String> envVars = machineConfig.getEnv();
-    assertEquals(envVars.size(), 1);
-    assertEquals(envVars.get("envName"), "envValue");
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    List<HasMetadata> objects = objectsCaptor.getValue();
+    assertEquals(objects.size(), 1);
+    assertTrue(objects.get(0) instanceof Deployment);
+    Deployment deployment = (Deployment) objects.get(0);
+    PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getContainers().size(), 1);
+    Container container = podTemplate.getSpec().getContainers().get(0);
+    int env = container.getEnv().size();
+    assertEquals(env, 1);
+    EnvVar containerEnvVar = container.getEnv().get(0);
+    assertEquals(containerEnvVar.getName(), "envName");
+    assertEquals(containerEnvVar.getValue(), "envValue");
   }
 
   @Test
-  public void shouldProvisionMachineConfigWithMemoryLimitAttributeServersSpecified()
-      throws Exception {
+  public void shouldProvisionContainerWithMemoryLimitSpecified() throws Exception {
     // given
     Tool dockerimageTool =
         new Tool()
@@ -127,8 +166,21 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
-    assertEquals(machineConfig.getAttributes().get(MEMORY_LIMIT_ATTRIBUTE), "1000000000");
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    List<HasMetadata> objects = objectsCaptor.getValue();
+    assertEquals(objects.size(), 1);
+    assertTrue(objects.get(0) instanceof Deployment);
+    Deployment deployment = (Deployment) objects.get(0);
+    PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getContainers().size(), 1);
+    Container container = podTemplate.getSpec().getContainers().get(0);
+    Quantity memoryLimit = container.getResources().getLimits().get("memory");
+    assertEquals(memoryLimit.getAmount(), "1G");
   }
 
   @Test
@@ -144,11 +196,59 @@ public class DockerimageToolToWorkspaceApplierTest {
                     "http",
                     "path",
                     "/ls",
-                    "public",
+                    PUBLIC_ENDPOINT_ATTRIBUTE,
+                    "false",
+                    "secure",
+                    "false"));
+    Tool dockerimageTool =
+        new Tool()
+            .withName("jdk")
+            .withType(DOCKERIMAGE_TOOL_TYPE)
+            .withImage("eclipse/ubuntu_jdk8:latest")
+            .withMemoryLimit("1G")
+            .withEndpoints(singletonList(endpoint));
+
+    // when
+    dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
+
+    // then
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk");
+    assertNotNull(machineConfig);
+    assertEquals(machineConfig.getServers().size(), 1);
+    ServerConfigImpl serverConfig = machineConfig.getServers().get("jdk-ls");
+    assertEquals(serverConfig.getProtocol(), "http");
+    assertEquals(serverConfig.getPath(), "/ls");
+    assertEquals(serverConfig.getPort(), "4923");
+    Map<String, String> attributes = serverConfig.getAttributes();
+    assertEquals(attributes.size(), 2);
+    assertEquals(attributes.get(ServerConfig.INTERNAL_SERVER_ATTRIBUTE), "true");
+    assertEquals(attributes.get("secure"), "false");
+  }
+
+  @Test
+  public void shouldProvisionServiceForDiscoverableServer() throws Exception {
+    // given
+    Endpoint endpoint =
+        new Endpoint()
+            .withName("jdk-ls")
+            .withPort(4923)
+            .withAttributes(
+                ImmutableMap.of(
+                    "protocol",
+                    "http",
+                    "path",
+                    "/ls",
+                    PUBLIC_ENDPOINT_ATTRIBUTE,
                     "false",
                     "secure",
                     "false",
-                    "discoverable",
+                    DISCOVERABLE_ENDPOINT_ATTRIBUTE,
                     "true"));
     Tool dockerimageTool =
         new Tool()
@@ -162,17 +262,30 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
-    assertEquals(machineConfig.getServers().size(), 1);
-    ServerConfigImpl serverConfig = machineConfig.getServers().get("jdk-ls");
-    assertEquals(serverConfig.getProtocol(), "http");
-    assertEquals(serverConfig.getPath(), "/ls");
-    assertEquals(serverConfig.getPort(), "4923");
-    Map<String, String> attributes = serverConfig.getAttributes();
-    assertEquals(attributes.size(), 3);
-    assertEquals(attributes.get("public"), "false");
-    assertEquals(attributes.get("secure"), "false");
-    assertEquals(attributes.get("discoverable"), "true");
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+
+    List<HasMetadata> objects = objectsCaptor.getValue();
+    assertEquals(objects.size(), 2);
+    assertTrue(objects.get(0) instanceof Deployment);
+    Deployment deployment = (Deployment) objects.get(0);
+    assertEquals(
+        deployment.getSpec().getTemplate().getMetadata().getLabels().get(CHE_ORIGINAL_NAME_LABEL),
+        "jdk");
+
+    assertTrue(objects.get(1) instanceof Service);
+    Service service = (Service) objects.get(1);
+    assertEquals(service.getMetadata().getName(), "jdk-ls");
+    assertEquals(service.getSpec().getSelector(), ImmutableMap.of(CHE_ORIGINAL_NAME_LABEL, "jdk"));
+    List<ServicePort> ports = service.getSpec().getPorts();
+    assertEquals(ports.size(), 1);
+    ServicePort port = ports.get(0);
+    assertEquals(port.getPort(), new Integer(4923));
+    assertEquals(port.getTargetPort(), new IntOrString(4923));
   }
 
   @Test
@@ -191,7 +304,14 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk");
+    assertNotNull(machineConfig);
     assertEquals(machineConfig.getServers().size(), 1);
     ServerConfigImpl serverConfig = machineConfig.getServers().get("jdk-ls");
     assertEquals(serverConfig.getProtocol(), "http");
@@ -213,7 +333,14 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk");
+    assertNotNull(machineConfig);
     VolumeImpl volume = machineConfig.getVolumes().get("data");
     assertNotNull(volume);
     assertEquals(volume.getPath(), "/tmp/data/");
@@ -234,7 +361,14 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk");
+    assertNotNull(machineConfig);
     VolumeImpl projectsVolume = machineConfig.getVolumes().get(PROJECTS_VOLUME_NAME);
     assertNotNull(projectsVolume);
     assertEquals(projectsVolume.getPath(), PROJECTS_MOUNT_PATH);
@@ -254,8 +388,15 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
-    Assert.assertFalse(machineConfig.getVolumes().containsKey(PROJECTS_VOLUME_NAME));
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk");
+    assertNotNull(machineConfig);
+    assertFalse(machineConfig.getVolumes().containsKey(PROJECTS_VOLUME_NAME));
   }
 
   @Test
@@ -263,12 +404,6 @@ public class DockerimageToolToWorkspaceApplierTest {
     // given
     List<String> command = singletonList("/usr/bin/rf");
     List<String> args = Arrays.asList("-r", "f");
-
-    String serializedCommand = command.toString();
-    String serializedArgs = args.toString();
-
-    doReturn(serializedCommand).when(entryPointParser).serializeEntry(eq(command));
-    doReturn(serializedArgs).when(entryPointParser).serializeEntry(eq(args));
 
     Tool dockerimageTool =
         new Tool()
@@ -283,24 +418,20 @@ public class DockerimageToolToWorkspaceApplierTest {
     dockerimageToolApplier.apply(workspaceConfig, dockerimageTool, null);
 
     // then
-    MachineConfigImpl machineConfig = getMachineConfig(workspaceConfig, "jdk");
-    Assert.assertEquals(
-        machineConfig.getAttributes().get(CONTAINER_COMMAND_ATTRIBUTE), serializedCommand);
-    Assert.assertEquals(
-        machineConfig.getAttributes().get(CONTAINER_ARGS_ATTRIBUTE), serializedArgs);
-  }
-
-  private MachineConfigImpl getMachineConfig(
-      WorkspaceConfigImpl workspaceConfig, String machineName) {
-    String defaultEnvName = workspaceConfig.getDefaultEnv();
-    assertNotNull(defaultEnvName);
-
-    EnvironmentImpl defaultEnv = workspaceConfig.getEnvironments().get(defaultEnvName);
-    assertNotNull(defaultEnv);
-
-    MachineConfigImpl machineConfig = defaultEnv.getMachines().get(machineName);
-    assertNotNull(machineConfig);
-
-    return machineConfig;
+    verify(k8sEnvProvisioner)
+        .provision(
+            eq(workspaceConfig),
+            eq(KubernetesEnvironment.TYPE),
+            objectsCaptor.capture(),
+            machinesCaptor.capture());
+    List<HasMetadata> objects = objectsCaptor.getValue();
+    assertEquals(objects.size(), 1);
+    assertTrue(objects.get(0) instanceof Deployment);
+    Deployment deployment = (Deployment) objects.get(0);
+    PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
+    assertEquals(podTemplate.getSpec().getContainers().size(), 1);
+    Container container = podTemplate.getSpec().getContainers().get(0);
+    assertEquals(container.getCommand(), command);
+    assertEquals(container.getArgs(), args);
   }
 }

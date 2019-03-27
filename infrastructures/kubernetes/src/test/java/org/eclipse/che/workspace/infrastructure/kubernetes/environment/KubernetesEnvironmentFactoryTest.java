@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_MESSAGE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger.DEPLOYMENT_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
@@ -89,6 +91,7 @@ public class KubernetesEnvironmentFactoryTest {
   @Mock private InternalMachineConfig machineConfig2;
   @Mock private MemoryAttributeProvisioner memoryProvisioner;
   @Mock private KubernetesRecipeParser k8sRecipeParser;
+  @Mock private PodMerger podMerger;
 
   private Map<String, InternalMachineConfig> machines;
 
@@ -96,7 +99,7 @@ public class KubernetesEnvironmentFactoryTest {
   public void setup() throws Exception {
     k8sEnvFactory =
         new KubernetesEnvironmentFactory(
-            null, null, null, k8sRecipeParser, k8sEnvValidator, memoryProvisioner);
+            null, null, null, k8sRecipeParser, k8sEnvValidator, memoryProvisioner, podMerger);
     lenient().when(internalEnvironment.getRecipe()).thenReturn(internalRecipe);
     machines = ImmutableMap.of(MACHINE_NAME_1, machineConfig1, MACHINE_NAME_2, machineConfig2);
   }
@@ -245,7 +248,33 @@ public class KubernetesEnvironmentFactoryTest {
   }
 
   @Test
-  public void bothPodsAndDeploymentsIncludedInPodData() throws Exception {
+  public void shouldUseDeploymentNameAsPodTemplateNameIfItIsMissing() throws Exception {
+    // given
+    PodTemplateSpec podTemplate = new PodTemplateSpecBuilder().withNewSpec().endSpec().build();
+    Deployment deployment =
+        new DeploymentBuilder()
+            .withNewMetadata()
+            .withName("deployment-test")
+            .endMetadata()
+            .withNewSpec()
+            .withTemplate(podTemplate)
+            .endSpec()
+            .build();
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(deployment));
+
+    // when
+    final KubernetesEnvironment k8sEnv =
+        k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    // then
+    Deployment deploymentTest = k8sEnv.getDeploymentsCopy().get("deployment-test");
+    assertNotNull(deploymentTest);
+    PodTemplateSpec resultPodTemplate = deploymentTest.getSpec().getTemplate();
+    assertEquals(resultPodTemplate.getMetadata().getName(), "deployment-test");
+  }
+
+  @Test
+  public void shouldMergeDeploymentAndPodIntoOneDeployment() throws Exception {
     // given
     PodTemplateSpec podTemplate =
         new PodTemplateSpecBuilder()
@@ -273,26 +302,105 @@ public class KubernetesEnvironmentFactoryTest {
             .endSpec()
             .build();
     when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(deployment, pod));
+    Deployment merged = createEmptyDeployment("merged");
+    when(podMerger.merge(any())).thenReturn(merged);
 
     // when
     final KubernetesEnvironment k8sEnv =
         k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
 
     // then
-    assertEquals(k8sEnv.getPodsData().size(), 2);
+    verify(podMerger).merge(asList(new PodData(pod), new PodData(deployment)));
+    assertEquals(k8sEnv.getPodsData().size(), 1);
 
-    assertEquals(
-        k8sEnv.getPodsData().get("deployment-test").getMetadata(), podTemplate.getMetadata());
-    assertEquals(k8sEnv.getPodsData().get("deployment-test").getSpec(), podTemplate.getSpec());
+    assertTrue(k8sEnv.getPodsCopy().isEmpty());
 
-    assertEquals(k8sEnv.getPodsData().get("bare-pod").getMetadata(), pod.getMetadata());
-    assertEquals(k8sEnv.getPodsData().get("bare-pod").getSpec(), pod.getSpec());
+    assertEquals(k8sEnv.getDeploymentsCopy().size(), 1);
+    assertEquals(k8sEnv.getDeploymentsCopy().get("merged"), merged);
+  }
+
+  @Test
+  public void shouldReconfigureServiceToMatchMergedDeployment() throws Exception {
+    // given
+    Pod pod1 =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("bare-pod1")
+            .withLabels(ImmutableMap.of("name", "pod1"))
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Pod pod2 =
+        new PodBuilder()
+            .withNewMetadata()
+            .withName("bare-pod2")
+            .withLabels(ImmutableMap.of("name", "pod2"))
+            .endMetadata()
+            .withNewSpec()
+            .endSpec()
+            .build();
+    Service service1 =
+        new ServiceBuilder()
+            .withNewMetadata()
+            .withName("pod1-service")
+            .endMetadata()
+            .withNewSpec()
+            .withSelector(ImmutableMap.of("name", "pod1"))
+            .endSpec()
+            .build();
+    Service service2 =
+        new ServiceBuilder()
+            .withNewMetadata()
+            .withName("pod2-service")
+            .endMetadata()
+            .withNewSpec()
+            .withSelector(ImmutableMap.of("name", "pod2"))
+            .endSpec()
+            .build();
+    when(k8sRecipeParser.parse(any(InternalRecipe.class)))
+        .thenReturn(asList(pod1, pod2, service1, service2));
+    Deployment merged = createEmptyDeployment("merged");
+    when(podMerger.merge(any())).thenReturn(merged);
+
+    // when
+    final KubernetesEnvironment k8sEnv =
+        k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+
+    // then
+    verify(podMerger).merge(asList(new PodData(pod1), new PodData(pod2)));
+    PodData mergedPodData = k8sEnv.getPodsData().get("merged");
+    assertEquals(mergedPodData.getMetadata().getLabels().get(DEPLOYMENT_NAME_LABEL), "merged");
+    assertTrue(
+        k8sEnv
+            .getServices()
+            .values()
+            .stream()
+            .allMatch(
+                s ->
+                    ImmutableMap.of(DEPLOYMENT_NAME_LABEL, "merged")
+                        .equals(s.getSpec().getSelector())));
   }
 
   @Test(expectedExceptions = ValidationException.class)
   public void exceptionOnRecipeLoadError() throws Exception {
     when(k8sRecipeParser.parse(any(InternalRecipe.class)))
         .thenThrow(new ValidationException("Could not parse recipe"));
+
+    k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
+  }
+
+  @Test(
+      expectedExceptions = ValidationException.class,
+      expectedExceptionsMessageRegExp =
+          "Environment can not contain two 'Service' objects with the same name 'db'")
+  public void exceptionOnObjectsWithTheSameNameAndKind() throws Exception {
+    HasMetadata object1 =
+        new ServiceBuilder().withNewMetadata().withName("db").endMetadata().build();
+    HasMetadata object2 =
+        new ServiceBuilder().withNewMetadata().withName("db").endMetadata().build();
+
+    when(k8sRecipeParser.parse(any(InternalRecipe.class))).thenReturn(asList(object1, object2));
 
     k8sEnvFactory.doCreate(internalRecipe, emptyMap(), emptyList());
   }
@@ -372,5 +480,21 @@ public class KubernetesEnvironmentFactoryTest {
             ImmutableMap.of(format(MACHINE_NAME_ANNOTATION_FMT, containerName), machineName));
     when(specMock.getContainers()).thenReturn(ImmutableList.of(containerMock));
     return new PodData(specMock, metadataMock);
+  }
+
+  private Deployment createEmptyDeployment(String name) {
+    return new DeploymentBuilder()
+        .withNewMetadata()
+        .withName(name)
+        .endMetadata()
+        .withNewSpec()
+        .withNewTemplate()
+        .withNewMetadata()
+        .endMetadata()
+        .withNewSpec()
+        .endSpec()
+        .endTemplate()
+        .endSpec()
+        .build();
   }
 }

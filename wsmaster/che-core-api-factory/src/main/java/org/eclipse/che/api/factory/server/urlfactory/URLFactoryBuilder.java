@@ -65,16 +65,20 @@ public class URLFactoryBuilder {
   /**
    * Build a factory using the provided json file or create default one
    *
-   * @param jsonFileLocation location of factory json file
+   * @param remoteFactoryUrl parsed factory URL object
    * @return a factory or null if factory json in not found
    */
-  public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation) {
+  public Optional<FactoryDto> createFactoryFromJson(RemoteFactoryUrl remoteFactoryUrl) {
     // Check if there is factory json file inside the repository
-    if (jsonFileLocation != null) {
-      final String factoryJsonContent = urlFetcher.fetchSafely(jsonFileLocation);
+    if (remoteFactoryUrl.factoryFileLocation() != null) {
+      final String factoryJsonContent =
+          urlFetcher.fetchSafely(remoteFactoryUrl.factoryFileLocation());
       if (!isNullOrEmpty(factoryJsonContent)) {
-        return Optional.of(
-            DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class));
+        FactoryDto factoryDto =
+            DtoFactory.getInstance()
+                .createDtoFromJson(factoryJsonContent, FactoryDto.class)
+                .withSource(remoteFactoryUrl.getFactoryFilename());
+        return Optional.of(factoryDto);
       }
     }
     return Optional.empty();
@@ -83,17 +87,18 @@ public class URLFactoryBuilder {
   /**
    * Build a factory using the provided devfile
    *
-   * @param devfileLocation location of devfile
+   * @param remoteFactoryUrl parsed factory URL object
    * @param fileContentProvider service-specific devfile related file content provider
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
-      String devfileLocation, FileContentProvider fileContentProvider)
+      RemoteFactoryUrl remoteFactoryUrl, FileContentProvider fileContentProvider)
       throws BadRequestException, ServerException {
-    if (devfileLocation == null) {
+    if (remoteFactoryUrl.devfileFileLocation() == null) {
       return Optional.empty();
     }
-    final String devfileYamlContent = urlFetcher.fetchSafely(devfileLocation);
+    final String devfileYamlContent =
+        urlFetcher.fetchSafely(remoteFactoryUrl.devfileFileLocation());
     if (isNullOrEmpty(devfileYamlContent)) {
       return Optional.empty();
     }
@@ -101,14 +106,16 @@ public class URLFactoryBuilder {
       Devfile devfile = devfileManager.parse(devfileYamlContent);
       WorkspaceConfigImpl wsConfig =
           devfileManager.createWorkspaceConfig(devfile, fileContentProvider);
-      return Optional.of(
+      FactoryDto factoryDto =
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
-              .withWorkspace(DtoConverter.asDto(wsConfig)));
+              .withWorkspace(DtoConverter.asDto(wsConfig))
+              .withSource(remoteFactoryUrl.getDevfileFilename());
+      return Optional.of(factoryDto);
     } catch (DevfileException e) {
       throw new BadRequestException(
           "Error occurred during creation a workspace from devfile located at `"
-              + devfileLocation
+              + remoteFactoryUrl.devfileFileLocation()
               + "`. Cause: "
               + e.getMessage());
     }

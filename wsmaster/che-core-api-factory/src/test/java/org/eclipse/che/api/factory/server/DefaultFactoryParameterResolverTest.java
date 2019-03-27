@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.factory.server;
 
+import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,6 +39,7 @@ import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -46,7 +49,8 @@ import org.testng.annotations.Test;
 public class DefaultFactoryParameterResolverTest {
 
   private static final String DEVFILE =
-      "specVersion: 0.0.1\n"
+      ""
+          + "specVersion: 0.0.1\n"
           + "name: test\n"
           + "tools:\n"
           + "- type: kubernetes\n"
@@ -54,6 +58,7 @@ public class DefaultFactoryParameterResolverTest {
           + "  local: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
+  @Mock private KubernetesRecipeParser kubernetesRecipeParser;
 
   @Test
   public void shouldResolveRelativeFiles() throws Exception {
@@ -61,7 +66,8 @@ public class DefaultFactoryParameterResolverTest {
 
     // we need to set up an "almost real" devfile converter which is a little bit involved
     DevfileSchemaValidator validator = new DevfileSchemaValidator(new DevfileSchemaProvider());
-    DevfileIntegrityValidator integrityValidator = new DevfileIntegrityValidator();
+    DevfileIntegrityValidator integrityValidator =
+        new DevfileIntegrityValidator(kubernetesRecipeParser);
     Set<ToolProvisioner> toolProvisioners = new HashSet<>();
     Map<String, ToolToWorkspaceApplier> appliers = new HashMap<>();
     ToolToWorkspaceApplier applier = mock(ToolToWorkspaceApplier.class);
@@ -98,6 +104,21 @@ public class DefaultFactoryParameterResolverTest {
     Map<String, String> factoryParameters = new HashMap<>();
     factoryParameters.put(URL_PARAMETER_NAME, "scheme:/myloc/devfile");
     doReturn(DEVFILE).when(urlFetcher).fetchSafely(eq("scheme:/myloc/devfile"));
+    doReturn("localfile").when(urlFetcher).fetch("scheme:/localfile");
+    doReturn(
+            singletonList(
+                new PodBuilder()
+                    .withNewMetadata()
+                    .withName("pod")
+                    .endMetadata()
+                    .withNewSpec()
+                    .addNewContainer()
+                    .withImage("image")
+                    .endContainer()
+                    .endSpec()
+                    .build()))
+        .when(kubernetesRecipeParser)
+        .parse("localfile");
 
     // when
     res.createFactory(factoryParameters);
