@@ -3851,6 +3851,100 @@ objects:
               "x": 0,
               "y": 0
             },
+            "id": 46,
+            "panels": [],
+            "title": "Users",
+            "type": "row"
+          },
+          {
+            "cacheTimeout": null,
+            "colorBackground": false,
+            "colorValue": false,
+            "colors": [
+              "#299c46",
+              "rgba(237, 129, 40, 0.89)",
+              "#d44a3a"
+            ],
+            "datasource": "Che",
+            "format": "none",
+            "gauge": {
+              "maxValue": 100,
+              "minValue": 0,
+              "show": false,
+              "thresholdLabels": false,
+              "thresholdMarkers": true
+            },
+            "gridPos": {
+              "h": 5,
+              "w": 5,
+              "x": 0,
+              "y": 1
+            },
+            "id": 49,
+            "interval": null,
+            "links": [],
+            "mappingType": 1,
+            "mappingTypes": [
+              {
+                "name": "value to text",
+                "value": 1
+              },
+              {
+                "name": "range to text",
+                "value": 2
+              }
+            ],
+            "maxDataPoints": 100,
+            "nullPointMode": "connected",
+            "nullText": null,
+            "postfix": "",
+            "postfixFontSize": "50%",
+            "prefix": "",
+            "prefixFontSize": "50%",
+            "rangeMaps": [
+              {
+                "from": "null",
+                "text": "N/A",
+                "to": "null"
+              }
+            ],
+            "sparkline": {
+              "fillColor": "rgba(31, 118, 189, 0.18)",
+              "full": false,
+              "lineColor": "rgb(31, 120, 193)",
+              "show": false
+            },
+            "tableColumn": "",
+            "targets": [
+              {
+                "expr": "che_user_total",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "refId": "A"
+              }
+            ],
+            "thresholds": "",
+            "timeFrom": null,
+            "title": "Number of Users",
+            "type": "singlestat",
+            "valueFontSize": "80%",
+            "valueMaps": [
+              {
+                "op": "=",
+                "text": "N/A",
+                "value": "null"
+              }
+            ],
+            "valueName": "current"
+          },
+          {
+            "collapsed": false,
+            "gridPos": {
+              "h": 1,
+              "w": 24,
+              "x": 0,
+              "y": 6
+            },
             "id": 20,
             "panels": [],
             "title": "Workspaces",
@@ -3878,7 +3972,7 @@ objects:
               "h": 5,
               "w": 5,
               "x": 0,
-              "y": 1
+              "y": 7
             },
             "id": 14,
             "interval": null,
@@ -3948,7 +4042,7 @@ objects:
               "h": 5,
               "w": 6,
               "x": 5,
-              "y": 1
+              "y": 7
             },
             "id": 8,
             "legend": {
@@ -4034,7 +4128,7 @@ objects:
               "h": 5,
               "w": 6,
               "x": 11,
-              "y": 1
+              "y": 7
             },
             "id": 6,
             "legend": {
@@ -4120,7 +4214,7 @@ objects:
               "h": 5,
               "w": 7,
               "x": 17,
-              "y": 1
+              "y": 7
             },
             "id": 10,
             "legend": {
@@ -4208,7 +4302,7 @@ objects:
               "h": 5,
               "w": 5,
               "x": 0,
-              "y": 6
+              "y": 12
             },
             "id": 36,
             "interval": "",
@@ -4301,7 +4395,7 @@ objects:
               "h": 5,
               "w": 6,
               "x": 5,
-              "y": 6
+              "y": 12
             },
             "id": 44,
             "legend": {
@@ -4383,7 +4477,7 @@ objects:
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 11
+              "y": 17
             },
             "id": 24,
             "panels": [],
@@ -4401,7 +4495,7 @@ objects:
               "h": 7,
               "w": 11,
               "x": 0,
-              "y": 12
+              "y": 18
             },
             "id": 16,
             "legend": {
@@ -4483,7 +4577,7 @@ objects:
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 19
+              "y": 25
             },
             "id": 22,
             "panels": [],
@@ -4501,7 +4595,7 @@ objects:
               "h": 7,
               "w": 9,
               "x": 0,
-              "y": 20
+              "y": 26
             },
             "id": 18,
             "legend": {
@@ -4613,7 +4707,7 @@ objects:
               "h": 7,
               "w": 7,
               "x": 9,
-              "y": 20
+              "y": 26
             },
             "id": 26,
             "legend": {
@@ -4710,7 +4804,7 @@ objects:
               "h": 7,
               "w": 7,
               "x": 16,
-              "y": 20
+              "y": 26
             },
             "id": 32,
             "legend": {
@@ -4809,7 +4903,7 @@ objects:
               "h": 8,
               "w": 9,
               "x": 0,
-              "y": 27
+              "y": 33
             },
             "id": 30,
             "legend": {
@@ -4902,7 +4996,7 @@ objects:
               "h": 8,
               "w": 7,
               "x": 9,
-              "y": 27
+              "y": 33
             },
             "id": 34,
             "legend": {
@@ -4997,7 +5091,7 @@ objects:
               "h": 8,
               "w": 7,
               "x": 16,
-              "y": 27
+              "y": 33
             },
             "id": 28,
             "legend": {
@@ -5087,7 +5181,7 @@ objects:
               "h": 1,
               "w": 24,
               "x": 0,
-              "y": 35
+              "y": 41
             },
             "id": 42,
             "panels": [
