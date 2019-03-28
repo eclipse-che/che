@@ -17,6 +17,7 @@ import static org.testng.Assert.assertEquals;
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.testng.annotations.BeforeMethod;
@@ -33,7 +34,7 @@ public class ProjectConverterTest {
   }
 
   @Test
-  public void testConvertingDevfileProjectToProjectConfig() {
+  public void testConvertingDevfileProjectToProjectConfig() throws Exception {
     Project devfileProject =
         new Project()
             .withName("myProject")
@@ -57,7 +58,7 @@ public class ProjectConverterTest {
   public void testConvertingProjectConfigToDevfileProject() {
     ProjectConfigImpl workspaceProject = new ProjectConfigImpl();
     workspaceProject.setName("myProject");
-    workspaceProject.setPath("/ignored");
+    workspaceProject.setPath("/clone/path");
     SourceStorageImpl sourceStorage = new SourceStorageImpl();
     sourceStorage.setType("git");
     sourceStorage.setLocation("https://github.com/eclipse/che.git");
@@ -71,5 +72,74 @@ public class ProjectConverterTest {
     assertEquals(source.getType(), "git");
     assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
     assertEquals(source.getRefspec(), "master");
+    assertEquals(devfileProject.getClonePath(), "clone/path");
+  }
+
+  @Test
+  public void testClonePathSetWhenConvertingDevfileToProjectConfig() throws Exception {
+    Project devfileProject =
+        new Project()
+            .withName("myProject")
+            .withClonePath("down/the/rabbit/hole/myProject")
+            .withSource(
+                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+
+    ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
+
+    assertEquals(workspaceProject.getName(), "myProject");
+    assertEquals(workspaceProject.getPath(), "/down/the/rabbit/hole/myProject");
+    SourceStorageImpl source = workspaceProject.getSource();
+    assertEquals(source.getType(), "git");
+    assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
+  }
+
+  @Test(expectedExceptions = DevfileException.class)
+  public void testClonePathCannotEscapeProjectsRoot() throws Exception {
+    Project devfileProject =
+        new Project()
+            .withName("myProject")
+            .withClonePath("cant/hack/../../../usr/bin")
+            .withSource(
+                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+
+    projectConverter.toWorkspaceProject(devfileProject);
+  }
+
+  @Test(expectedExceptions = DevfileException.class)
+  public void testClonePathCannotBeAbsolute() throws Exception {
+    Project devfileProject =
+        new Project()
+            .withName("myProject")
+            .withClonePath("/usr/bin")
+            .withSource(
+                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+
+    projectConverter.toWorkspaceProject(devfileProject);
+  }
+
+  @Test
+  public void testUpDirOkInClonePathAsLongAsItDoesntEscapeProjectsRoot() throws Exception {
+    Project devfileProject =
+        new Project()
+            .withName("myProject")
+            .withClonePath("cant/hack/../../usr/bin")
+            .withSource(
+                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+
+    ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
+    // this is OK, because the absolute-looking path is applied to the projects root
+    assertEquals(workspaceProject.getPath(), "/usr/bin");
+  }
+
+  @Test(expectedExceptions = DevfileException.class)
+  public void testCloningIntoProjectsRootFails() throws Exception {
+    Project devfileProject =
+        new Project()
+            .withName("myProject")
+            .withClonePath("not/../in/root/../..")
+            .withSource(
+                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+
+    projectConverter.toWorkspaceProject(devfileProject);
   }
 }

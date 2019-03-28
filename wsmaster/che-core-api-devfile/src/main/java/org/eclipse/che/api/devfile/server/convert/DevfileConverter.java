@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.server.DevfileFactory;
 import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
@@ -33,6 +34,7 @@ import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
 /**
@@ -145,11 +147,10 @@ public class DevfileConverter {
       applier.apply(config, component, contentProvider);
     }
 
-    devfile
-        .getProjects()
-        .stream()
-        .map(projectConverter::toWorkspaceProject)
-        .forEach(project -> config.getProjects().add(project));
+    for (Project project : devfile.getProjects()) {
+      ProjectConfigImpl projectConfig = projectConverter.toWorkspaceProject(project);
+      config.getProjects().add(projectConfig);
+    }
 
     return config;
   }
