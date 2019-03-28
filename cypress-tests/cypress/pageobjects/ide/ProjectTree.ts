@@ -172,8 +172,7 @@ export class ProjectTree {
             this.expandItem(rootItem)
             this.waitItemExpanded(rootItem)
 
-            cy.wait(pollingEvery).then(() => {
-                cy.get('body')
+            cy.get('body')
                     .then(body => {
                         let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
                         let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
@@ -192,6 +191,7 @@ export class ProjectTree {
                             this.openProjectTreeContainer();
                             this.waitProjectTreeContainer();
 
+                            cy.wait(pollingEvery)
                             this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                         }
 
@@ -205,10 +205,10 @@ export class ProjectTree {
                         this.colapseItem(rootItem)
                         this.waitItemColapsed(rootItem)
 
+                        cy.wait(pollingEvery)
                         this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                     })
             })
-        })
     }
 
 

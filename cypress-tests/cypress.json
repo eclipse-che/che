@@ -1,5 +1,5 @@
 {
-    "numTestsKeptInMemory": 0,
+    "numTestsKeptInMemory": 10,
     "defaultCommandTimeout": 10000,
     "viewportWidth": 1920,
     "viewportHeight": 1080,

@@ -78,8 +78,6 @@ describe("E2E test", () => {
             ide.waitWorkspaceAndIdeInIframe(namespace, workspaceName);
             ide.openIdeWithoutFrames(workspaceName);
             ide.waitWorkspaceAndIde(namespace, workspaceName);
-            // ide.waitNotification("Che Workspace: Finished cloning projects.");
-            // ide.waitNotificationDisappearance("Che Workspace: Finished cloning projects.");
         })
 
     })

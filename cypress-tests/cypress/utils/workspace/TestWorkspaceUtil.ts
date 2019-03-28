@@ -37,6 +37,7 @@ export class TestWorkspaceUtil {
                     }
 
                     if (response.body.status === expectedWorkspaceStatus) {
+                        resolve();
                         return;
                     }
 
