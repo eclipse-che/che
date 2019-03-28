@@ -90,7 +90,7 @@ describe("E2E test", () => {
         it("Open project tree container", () => {
             projectTree.openProjectTreeContainer();
             projectTree.waitProjectTreeContainer();
-            projectTree.waitProjectImported("web-java-spring", "src", 4, 30000)
+            projectTree.waitProjectImported("web-java-spring", "src")
         })
 
         it("Expand project and open file in editor", () => {

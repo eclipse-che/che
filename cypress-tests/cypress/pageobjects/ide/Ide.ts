@@ -46,15 +46,15 @@ export class Ide {
     }
 
     waitWorkspaceAndIdeInIframe(workspaceNamespace: string, workspaceName: string) {
-        cy.log("====>>>> Ide.waitWorkspaceAndIdeInIframe")
+        cy.log("**=> Ide.waitWorkspaceAndIdeInIframe**")
             .then(() => {
-                cy.log("==>> Wait until workspace is started")
+                cy.log("**Wait until workspace is started**")
             })
             .then(() => {
                 this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName)
             })
-            .then(()=>{
-                cy.log("==>> Wait until defined parts of IDE are visible")
+            .then(() => {
+                cy.log("**Wait until defined parts of IDE are visible**")
             })
             .then(() => {
                 [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON]
@@ -69,7 +69,7 @@ export class Ide {
     }
 
     waitWorkspaceAndIde(workspaceNamespace: string, workspaceName: string) {
-        cy.log("====>>>> Ide.waitWorkspaceAndIde")
+        cy.log("**=> Ide.waitWorkspaceAndIde**")
             .then(() => {
                 this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName)
             })
@@ -91,7 +91,7 @@ export class Ide {
     }
 
     openIdeWithoutFrames(workspaceName: string) {
-        cy.log("====>>>> Ide.openIdeWithoutFrames")
+        cy.log("**=> Ide.openIdeWithoutFrames**")
             .then(() => {
                 let workspaceUrl: string = `/che/${workspaceName}`
 

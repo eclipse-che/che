@@ -159,7 +159,9 @@ export class ProjectTree {
         this.clickOnItem(`${pathToItem}/${fileName}`)
     }
 
-    waitProjectImported(projectName: string, rootSubitem: string, attempts: number, pollingEvery: number) {
+    waitProjectImported(projectName: string, rootSubitem: string) {
+        let attempts: number = 4;
+        let pollingEvery: number = 30000;
         let currentAttempt: number = 1;
 
         this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)

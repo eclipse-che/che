@@ -30,18 +30,17 @@ export class TestWorkspaceUtil {
                     }
 
                     if (response.status != 200) {
-                        cy.log(`==>> Request attempt has responce code '${response.status}' diferent to '200' (attempt ${attempt} of ${maximumAttempts})`)
+                        cy.log(`**Request attempt has responce code '${response.status}' diferent to '200' (attempt ${attempt} of ${maximumAttempts})**`)
                         cy.wait(delayBetweenAttempts);
                         attempt++
                         this.waitRunningStatus(workspaceNamespace, workspaceName, attempt)
                     }
 
                     if (response.body.status === expectedWorkspaceStatus) {
-                        resolve();
                         return;
                     }
 
-                    cy.log(`==>> Request attempt has workspace status ${response.body.status} diferent to '${expectedWorkspaceStatus}' (attempt ${attempt} of ${maximumAttempts})`)
+                    cy.log(`**Request attempt has workspace status ${response.body.status} diferent to '${expectedWorkspaceStatus}' (attempt ${attempt} of ${maximumAttempts})**`)
                     cy.wait(delayBetweenAttempts);
                     attempt++
                     this.waitRunningStatus(workspaceNamespace, workspaceName, attempt)
