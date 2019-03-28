@@ -16,8 +16,8 @@ import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.devfile.server.Constants.DISCOVERABLE_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.convert.component.dockerimage.DockerimageComponentToWorkspaceApplier.CHE_COMPONENT_NAME_LABEL;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -274,13 +274,13 @@ public class DockerimageComponentToWorkspaceApplierTest {
     assertTrue(objects.get(0) instanceof Deployment);
     Deployment deployment = (Deployment) objects.get(0);
     assertEquals(
-        deployment.getSpec().getTemplate().getMetadata().getLabels().get(CHE_ORIGINAL_NAME_LABEL),
+        deployment.getSpec().getTemplate().getMetadata().getLabels().get(CHE_COMPONENT_NAME_LABEL),
         "jdk");
 
     assertTrue(objects.get(1) instanceof Service);
     Service service = (Service) objects.get(1);
     assertEquals(service.getMetadata().getName(), "jdk-ls");
-    assertEquals(service.getSpec().getSelector(), ImmutableMap.of(CHE_ORIGINAL_NAME_LABEL, "jdk"));
+    assertEquals(service.getSpec().getSelector(), ImmutableMap.of(CHE_COMPONENT_NAME_LABEL, "jdk"));
     List<ServicePort> ports = service.getSpec().getPorts();
     assertEquals(ports.size(), 1);
     ServicePort port = ports.get(0);
