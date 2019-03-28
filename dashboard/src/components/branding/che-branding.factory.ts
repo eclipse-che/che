@@ -102,7 +102,7 @@ export class CheBranding {
   updateVersion(): void {
     this.cheService.fetchServicesInfo().then(() => {
       let info = this.cheService.getServicesInfo();
-      this.$rootScope.productVersion = (info && info.implementationVersion) ? info.implementationVersion : '';
+      this.$rootScope.productVersion = (info && info.buildInfo) ? info.buildInfo : '';
     });
   }
 

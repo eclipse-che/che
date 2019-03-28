@@ -198,7 +198,7 @@
                             <tasks>
                                 <echo append="false" file="${project.build.directory}/classes/org/eclipse/che/ide/ext/help/client/BuildInfo.properties">revision = ${revision}
                                     buildTime = ${timestamp}
-                                    version = ${project.version}</echo>
+                                    version = ${build.info}</echo>
                             </tasks>
                         </configuration>
                     </execution>
