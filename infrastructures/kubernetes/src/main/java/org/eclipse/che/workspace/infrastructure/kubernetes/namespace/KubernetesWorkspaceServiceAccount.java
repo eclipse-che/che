@@ -120,7 +120,7 @@ public class KubernetesWorkspaceServiceAccount {
             .endMetadata()
             .withRules(
                 new KubernetesPolicyRuleBuilder()
-                    .withResources("pods")
+                    .withResources("pods", "services")
                     .withApiGroups("")
                     .withVerbs("list")
                     .build())

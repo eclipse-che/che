@@ -106,7 +106,8 @@ class OpenShiftWorkspaceServiceAccount {
             .withNewMetadata()
             .withName(name)
             .endMetadata()
-            .withRules(new PolicyRuleBuilder().withResources("pods").withVerbs("list").build())
+            .withRules(
+                new PolicyRuleBuilder().withResources("pods", "services").withVerbs("list").build())
             .build();
     osClient.roles().inNamespace(projectName).create(viewRole);
   }
