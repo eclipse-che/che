@@ -30,8 +30,15 @@
   },
   "required": [
     "specVersion",
-    "name",
-    "components"
+    "name"
+  ],
+  "anyOf": [
+    {
+      "required": ["projects"]
+    },
+    {
+      "required": ["components"]
+    }
   ],
   "additionalProperties": false,
   "properties": {
