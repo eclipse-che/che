@@ -739,6 +739,100 @@
   {
     "id": "java-default",
     "creator": "ide",
+    "name": "Java",
+    "description": "Default Java Stack with JDK 8, Maven and Tomcat.",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "JDK",
+      "Maven",
+      "Tomcat"
+    ],
+    "components": [
+      {
+        "name": "Ubuntu",
+        "version": "16.04"
+      },
+      {
+        "name": "JDK",
+        "version": "1.8.0_162"
+      },
+      {
+        "name": "Maven",
+        "version": "3.3.9"
+      },
+      {
+        "name": "Tomcat",
+        "version": "8.0.24"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "dev-machine": {
+              "installers": [
+                "org.eclipse.che.exec",
+                "org.eclipse.che.terminal",
+                "org.eclipse.che.ws-agent",
+                "org.eclipse.che.ls.java"
+              ],
+              "servers": {
+                "tomcat8": {
+                  "port": "8080",
+                  "protocol": "http"
+                },
+                "tomcat8-debug": {
+                  "port": "8000",
+                  "protocol": "http"
+                },
+                "codeserver": {
+                  "port": "9876",
+                  "protocol": "http"
+                }
+              },
+              "attributes": {
+                "memoryLimitBytes": "2147483648"
+              },
+              "volumes": {
+                "m2": {
+                  "path": "/home/user/.m2"
+                },
+                "javadata": {
+                  "path": "/home/user/jdtls/data"
+                }
+              }
+            }
+          },
+          "recipe": {
+            "content": "eclipse/ubuntu_jdk8",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "commands": [
+        {
+          "commandLine": "mvn clean install -f ${current.project.path}",
+          "name": "build",
+          "type": "mvn",
+          "attributes": {
+            "previewUrl": "",
+            "goal": "Build"
+          }
+        }
+      ]
+    },
+    "stackIcon": {
+      "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "java-maven",
+    "creator": "ide",
     "name": "Java Maven",
     "description": "Default Java Stack with OpenJKD 11 and Maven 3.6",
     "scope": "general",
@@ -792,7 +886,7 @@
                 "MAVEN_CONFIG": "/home/user/.m2",
                 "MAVEN_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
                 "JAVA_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
-                "PS1": "$(echo ${0})\\$",
+                "PS1": "$(echo ${0})\\$ ",
                 "HOME": "/home/user"
               }
             }
@@ -809,13 +903,13 @@
       "attributes": {
         "plugins": "che-machine-exec-plugin:0.0.1,org.eclipse.che.vscode-redhat.java:0.38.0",
         "editor": "org.eclipse.che.editor.theia:next",
-        "sidecar.org.eclipse.che.vscode-redhat.java.memory_limit": "1024Mi",
+        "sidecar.org.eclipse.che.vscode-redhat.java.memory_limit": "1500Mi",
         "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi"
       },
       "commands": []
     },
     "stackIcon": {
-      "name": "type-java.svg",
+      "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
   },
@@ -873,7 +967,7 @@
               "env": {
                 "GRADLE_USER_HOME": "/home/user/.gradle",
                 "JAVA_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
-                "PS1": "$(echo ${0})\\$",
+                "PS1": "$(echo ${0})\\$ ",
                 "HOME": "/home/user"
               }
             }
@@ -890,13 +984,13 @@
       "attributes": {
         "plugins": "che-machine-exec-plugin:0.0.1,org.eclipse.che.vscode-redhat.java:0.38.0",
         "editor": "org.eclipse.che.editor.theia:next",
-        "sidecar.org.eclipse.che.vscode-redhat.java.memory_limit": "1024Mi",
+        "sidecar.org.eclipse.che.vscode-redhat.java.memory_limit": "1500Mi",
         "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi"
       },
       "commands": []
     },
     "stackIcon": {
-      "name": "type-java.svg",
+      "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
   },
