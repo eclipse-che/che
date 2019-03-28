@@ -48,6 +48,7 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
+        <build.info>${project.version}</build.info>
         <che.dashboard.version>6.19.3-SNAPSHOT</che.dashboard.version>
         <che.docs.version>6.19.0</che.docs.version>
         <che.lib.version>6.19.0</che.lib.version>

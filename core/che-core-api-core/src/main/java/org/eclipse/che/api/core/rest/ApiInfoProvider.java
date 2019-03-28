@@ -15,10 +15,9 @@ import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import javax.servlet.ServletContext;
-import javax.ws.rs.core.Context;
 import org.eclipse.che.api.core.rest.shared.dto.ApiInfo;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.slf4j.Logger;
@@ -37,8 +36,8 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
   private ApiInfo apiInfo;
 
   @Inject
-  public ApiInfoProvider(@Context ServletContext context) {
-    this.apiInfo = readApiInfo(context);
+  public ApiInfoProvider(@Named("che.product.build_info") String buildInfo) {
+    this.apiInfo = readApiInfo(buildInfo);
   }
 
   @Override
@@ -46,10 +45,12 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
     return apiInfo;
   }
 
-  private ApiInfo readApiInfo(ServletContext context) {
+  private ApiInfo readApiInfo(String buildInfo) {
     try {
-      try (InputStream inputStream = context.getResourceAsStream("/META-INF/MANIFEST.MF")) {
-        final Manifest manifest = new Manifest(inputStream);
+      try (InputStream manifestInputStream =
+          ApiInfoProvider.class.getResourceAsStream("/META-INF/MANIFEST.MF")) {
+
+        final Manifest manifest = new Manifest(manifestInputStream);
         final Attributes mainAttributes = manifest.getMainAttributes();
         final DtoFactory dtoFactory = DtoFactory.getInstance();
         return dtoFactory
@@ -59,8 +60,10 @@ public class ApiInfoProvider implements Provider<ApiInfo> {
             .withSpecificationTitle("Che REST API")
             .withSpecificationVersion(mainAttributes.getValue("Specification-Version"))
             .withImplementationVersion(mainAttributes.getValue("Implementation-Version"))
-            .withScmRevision(mainAttributes.getValue("SCM-Revision"));
+            .withScmRevision(mainAttributes.getValue("SCM-Revision"))
+            .withBuildInfo(buildInfo);
       }
+
     } catch (Exception e) {
       LOG.error("Unable to read API info. Error: " + e.getMessage(), e);
       throw new RuntimeException("Unable to read API information", e);
