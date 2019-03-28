@@ -109,8 +109,8 @@
           "type"
         ],
         "dependencies": {
-          "localContent": [
-            "local"
+          "referenceContent": [
+            "reference"
           ]
         },
         "additionalProperties": false,
@@ -140,13 +140,13 @@
                 ]
               },
               "name": {},
-              "local": {},
-              "localContent": {},
+              "reference": {},
+              "referenceContent": {},
               "selector": {},
               "entrypoints": {}
             },
             "required": [
-              "local"
+              "reference"
             ],
             "additionalProperties": false
           },
@@ -200,15 +200,15 @@
               "eclipse/maven-jdk8:1.0.0"
             ]
           },
-          "local": {
-            "description": "Describes location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
+          "reference": {
+            "description": "Describes absolute or devfile-relative location of Kubernetes list yaml file. Applicable only for 'kubernetes' and 'openshift' type components",
             "type": "string",
             "examples": [
               "petclinic-app.yaml"
             ]
           },
-          "localContent": {
-            "description": "Inlined content of a file specified in field 'local'",
+          "referenceContent": {
+            "description": "Inlined content of a file specified in field 'reference'",
             "type": "string",
             "examples": [
               "{\"kind\":\"List\",\"items\":[{\"apiVersion\":\"v1\",\"kind\":\"Pod\",\"metadata\":{\"name\":\"ws\"},\"spec\":{\"containers\":[{\"image\":\"eclipse/che-dev:nightly\"}]}}]}"

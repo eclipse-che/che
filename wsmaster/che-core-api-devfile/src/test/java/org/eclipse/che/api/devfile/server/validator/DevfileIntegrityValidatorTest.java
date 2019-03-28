@@ -179,7 +179,7 @@ public class DevfileIntegrityValidatorTest {
     // this is the openshift component which is the only one sensitive to the selector in our
     // example
     // devfile
-    devfile.getComponents().get(3).setLocalContent("content");
+    devfile.getComponents().get(3).setReferenceContent("content");
     devfile.getComponents().get(3).setSelector(selector);
 
     // when
@@ -203,7 +203,7 @@ public class DevfileIntegrityValidatorTest {
                     .build()));
 
     Devfile devfile = copyOf(initialDevfile);
-    devfile.getComponents().get(0).setLocalContent("content");
+    devfile.getComponents().get(0).setReferenceContent("content");
     devfile
         .getComponents()
         .get(0)

@@ -44,34 +44,13 @@ public interface FileContentProvider {
   /**
    * Fetches content of the specified file.
    *
-   * @param fileName file name to fetch content. Only devfile-relative files are currently
-   *     supported, so it means file should be localed at the same directory level as devfile (no
-   *     matter in repository or PR or branch etc )
+   * @param fileURL absolute or devfile-relative file URL to fetch content
    * @return content of the specified file
    * @throws IOException when there is an error during content retrieval
    * @throws DevfileException when implementation does not support fetching of additional files
    *     content
    */
-  String fetchContent(String fileName) throws IOException, DevfileException;
-
-  /** Default implementation of {@link FileContentProvider} that does not support fetching. */
-  class FetchNotSupportedProvider implements FileContentProvider {
-
-    private String message;
-
-    public FetchNotSupportedProvider() {
-      this.message = "File content fetching is not supported";
-    }
-
-    public FetchNotSupportedProvider(String message) {
-      this.message = message;
-    }
-
-    @Override
-    public String fetchContent(String fileName) throws DevfileException {
-      throw new DevfileException(message);
-    }
-  }
+  String fetchContent(String fileURL) throws IOException, DevfileException;
 
   /**
    * A file content provider that caches responses from the content provider it is wrapping. Useful
@@ -89,13 +68,13 @@ public interface FileContentProvider {
     }
 
     @Override
-    public String fetchContent(String fileName) throws IOException, DevfileException {
-      SoftReference<String> ref = cache.get(fileName);
+    public String fetchContent(String fileURL) throws IOException, DevfileException {
+      SoftReference<String> ref = cache.get(fileURL);
       String ret = ref == null ? null : ref.get();
 
       if (ret == null) {
-        ret = provider.fetchContent(fileName);
-        cache.put(fileName, new SoftReference<>(ret));
+        ret = provider.fetchContent(fileURL);
+        cache.put(fileURL, new SoftReference<>(ret));
       }
 
       return ret;

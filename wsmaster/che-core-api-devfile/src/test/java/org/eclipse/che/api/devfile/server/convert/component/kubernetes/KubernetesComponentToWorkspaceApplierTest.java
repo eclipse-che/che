@@ -42,7 +42,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.model.Entrypoint;
-import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
+import org.eclipse.che.api.devfile.server.URLFileContentProvider;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -62,7 +62,7 @@ import org.testng.reporters.Files;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesComponentToWorkspaceApplierTest {
 
-  public static final String LOCAL_FILENAME = "local.yaml";
+  public static final String REFERENCE_FILENAME = "reference.yaml";
   public static final String COMPONENT_NAME = "foo";
 
   private WorkspaceConfigImpl workspaceConfig;
@@ -83,8 +83,8 @@ public class KubernetesComponentToWorkspaceApplierTest {
   @Test(
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
-          "Fetching content of file `local.yaml` specified in `local` field of component `foo` is not "
-              + "supported. Please provide its content in `localContent` field. Cause: fetch is not supported")
+          "Fetching content of file `reference.yaml` specified in `reference` field of component `foo` is not "
+              + "supported. Please provide its content in `referenceContent` field. Cause: fetch is not supported")
   public void
       shouldThrowExceptionWhenRecipeComponentIsPresentAndContentProviderDoesNotSupportFetching()
           throws Exception {
@@ -92,7 +92,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME);
 
     // when
@@ -108,7 +108,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
           "Error occurred during parsing list from file "
-              + LOCAL_FILENAME
+              + REFERENCE_FILENAME
               + " for component '"
               + COMPONENT_NAME
               + "': .*")
@@ -118,7 +118,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME);
 
     // when
@@ -134,7 +134,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME);
 
     // when
@@ -155,7 +155,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME)
             .withSelector(new HashMap<>());
 
@@ -172,18 +172,18 @@ public class KubernetesComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldUseLocalContentAsRecipeIfPresent() throws Exception {
+  public void shouldUseReferenceContentAsRecipeIfPresent() throws Exception {
     String yamlRecipeContent = getResource("petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
     Component component =
         new Component()
             .withType(KUBERNETES_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
-            .withLocalContent(yamlRecipeContent)
+            .withReference(REFERENCE_FILENAME)
+            .withReferenceContent(yamlRecipeContent)
             .withName(COMPONENT_NAME)
             .withSelector(new HashMap<>());
 
-    applier.apply(workspaceConfig, component, new FetchNotSupportedProvider());
+    applier.apply(workspaceConfig, component, new URLFileContentProvider(null, null));
 
     verify(k8sEnvProvisioner)
         .provision(
@@ -202,7 +202,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME)
             .withSelector(new HashMap<>());
 
@@ -227,7 +227,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME)
             .withSelector(selector);
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
@@ -260,7 +260,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME)
             .withSelector(selector);
     CommandImpl command = new CommandImpl();
@@ -286,7 +286,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME)
             .withSelector(new HashMap<>());
 
@@ -312,7 +312,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     Component component =
         new Component()
             .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withLocal(LOCAL_FILENAME)
+            .withReference(REFERENCE_FILENAME)
             .withName(COMPONENT_NAME)
             .withEntrypoints(
                 singletonList(new Entrypoint().withParentName("petclinic").withCommand(command)))

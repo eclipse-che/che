@@ -261,10 +261,10 @@ public class DevfileIntegrityValidator {
       Component component, FileContentProvider contentProvider)
       throws ValidationException, InfrastructureException, IOException, DevfileException {
     List<HasMetadata> content;
-    if (component.getLocalContent() != null) {
-      content = kubernetesRecipeParser.parse(component.getLocalContent());
-    } else if (component.getLocal() != null) {
-      String data = contentProvider.fetchContent(component.getLocal());
+    if (component.getReferenceContent() != null) {
+      content = kubernetesRecipeParser.parse(component.getReferenceContent());
+    } else if (component.getReference() != null) {
+      String data = contentProvider.fetchContent(component.getReference());
       content = kubernetesRecipeParser.parse(data);
     } else {
       content = Collections.emptyList();

@@ -41,7 +41,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.FileContentProvider.FetchNotSupportedProvider;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
@@ -56,16 +55,19 @@ public class DevfileService extends Service {
   private DevfileSchemaProvider schemaCachedProvider;
   private ObjectMapper objectMapper;
   private DevfileManager devfileManager;
+  private URLFileContentProvider urlFileContentProvider;
 
   @Inject
   public DevfileService(
       WorkspaceLinksGenerator linksGenerator,
       DevfileSchemaProvider schemaCachedProvider,
-      DevfileManager devfileManager) {
+      DevfileManager devfileManager,
+      URLFetcher urlFetcher) {
     this.linksGenerator = linksGenerator;
     this.schemaCachedProvider = schemaCachedProvider;
     this.devfileManager = devfileManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
+    this.urlFileContentProvider = new URLFileContentProvider(null, urlFetcher);
   }
 
   /**
@@ -119,11 +121,7 @@ public class DevfileService extends Service {
     WorkspaceImpl workspace;
     try {
       Devfile devfile = devfileManager.parse(data);
-      workspace =
-          devfileManager.createWorkspace(
-              devfile,
-              new FetchNotSupportedProvider(
-                  "Devfile Service does not support fetching local file referenced in Devfile."));
+      workspace = devfileManager.createWorkspace(devfile, urlFileContentProvider);
     } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());
     }

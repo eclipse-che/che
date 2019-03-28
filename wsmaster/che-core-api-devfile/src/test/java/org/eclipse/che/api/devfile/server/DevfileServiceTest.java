@@ -54,6 +54,7 @@ public class DevfileServiceTest {
   @Mock private WorkspaceLinksGenerator linksGenerator;
 
   @Mock private DevfileManager devfileManager;
+  @Mock private URLFetcher urlFetcher;
   private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
   private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -64,7 +65,8 @@ public class DevfileServiceTest {
 
   @BeforeMethod
   public void initService() {
-    this.devFileService = new DevfileService(linksGenerator, schemaProvider, devfileManager);
+    this.devFileService =
+        new DevfileService(linksGenerator, schemaProvider, devfileManager, urlFetcher);
   }
 
   @Test
