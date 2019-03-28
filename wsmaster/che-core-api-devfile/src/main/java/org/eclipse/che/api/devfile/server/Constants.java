@@ -67,4 +67,11 @@ public class Constants {
    * non-discoverable.
    */
   public static final String DISCOVERABLE_ENDPOINT_ATTRIBUTE = "discoverable";
+
+  /**
+   * The attribute of Devfile that should be devfile when no editor is needed and default one should
+   * not be provisioned. Attributes value {@code true} deactivates provisioning of default editor,
+   * any other value of lack of the attributes activates provisioning of default editor
+   */
+  public static final String EDITOR_FREE_DEVFILE_ATTRIBUTE = "editorFree";
 }

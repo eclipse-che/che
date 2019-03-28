@@ -48,6 +48,7 @@ public class DevfileConverterTest {
   @Mock private CommandConverter commandConverter;
   @Mock private ComponentProvisioner componentProvisioner;
   @Mock private ComponentToWorkspaceApplier componentToWorkspaceApplier;
+  @Mock private DefaultEditorProvisioner defaultEditorToolApplier;
 
   private DevfileConverter devfileConverter;
 
@@ -58,7 +59,8 @@ public class DevfileConverterTest {
             projectConverter,
             commandConverter,
             ImmutableSet.of(componentProvisioner),
-            ImmutableMap.of(COMPONENT_TYPE, componentToWorkspaceApplier));
+            ImmutableMap.of(COMPONENT_TYPE, componentToWorkspaceApplier),
+            defaultEditorToolApplier);
   }
 
   @Test
@@ -165,6 +167,20 @@ public class DevfileConverterTest {
 
     // then
     assertEquals(workspaceConfig.getName(), "petclinic");
+  }
+
+  @Test
+  public void shouldInvokeDefaultEditorProvisionerDuringConvertingDevfileToWorkrspaceConfig()
+      throws Exception {
+    // given
+    FileContentProvider fileContentProvider = mock(FileContentProvider.class);
+    Devfile devfile = newDevfile("petclinic");
+
+    // when
+    devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
+
+    // then
+    verify(defaultEditorToolApplier).apply(devfile);
   }
 
   @Test

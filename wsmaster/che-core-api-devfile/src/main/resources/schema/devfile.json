@@ -32,14 +32,6 @@
     "specVersion",
     "name"
   ],
-  "anyOf": [
-    {
-      "required": ["projects"]
-    },
-    {
-      "required": ["components"]
-    }
-  ],
   "additionalProperties": false,
   "properties": {
     "specVersion": {
@@ -486,6 +478,18 @@
           }
         }
       }
+    },
+    "attributes" : {
+      "type": "object",
+      "editorFree": {
+        "type": "boolean",
+        "description": "Defines that no editor is needed and default one should not be provisioned.",
+        "default": "false"
+      },
+      "additionalProperties": {
+        "type": "string"
+      },
+      "javaType": "java.util.Map<String, String>"
     }
   }
 }
