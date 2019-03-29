@@ -116,6 +116,33 @@ public class WorkspaceImpl implements Workspace {
   public WorkspaceImpl(
       String id,
       Account account,
+      Runtime runtime,
+      Map<String, String> attributes,
+      boolean isTemporary,
+      WorkspaceStatus status) {
+    this.id = id;
+    if (account != null) {
+      this.account = new AccountImpl(account);
+    }
+    if (runtime != null) {
+      this.runtime =
+          new RuntimeImpl(
+              runtime.getActiveEnv(),
+              runtime.getMachines(),
+              runtime.getOwner(),
+              runtime.getCommands(),
+              runtime.getWarnings());
+    }
+    if (attributes != null) {
+      this.attributes = new HashMap<>(attributes);
+    }
+    this.isTemporary = isTemporary;
+    this.status = status;
+  }
+
+  public WorkspaceImpl(
+      String id,
+      Account account,
       WorkspaceConfig config,
       Runtime runtime,
       Map<String, String> attributes,
