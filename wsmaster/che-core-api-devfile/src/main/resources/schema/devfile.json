@@ -195,6 +195,7 @@
           "id": {
             "type": "string",
             "description": "Describes the component FQN",
+            "pattern": "^[a-zA-Z0-9_\\-\\./]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$",
             "examples": [
               "eclipse/maven-jdk8:1.0.0"
             ]

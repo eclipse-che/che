@@ -135,6 +135,16 @@ public class DevfileSchemaValidatorTest {
             + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"local\"],"
             + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
       },
+      {
+        "editor_plugin_component/devfile_editor_component_without_version.yaml",
+        "Devfile schema validation failed. Error: "
+            + "/devfile/components/0/id ECMA 262 regex \"^[a-zA-Z0-9_\\-\\./]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\" does not match input string \"eclipse/theia\""
+      },
+      {
+        "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
+        "Devfile schema validation failed. Error: "
+            + "/devfile/components/0/id ECMA 262 regex \"^[a-zA-Z0-9_\\-\\./]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\" does not match input string \"eclipse/theia:dev:v1\""
+      },
       // kubernetes/openshift component model testing
       {
         "kubernetes_openshift_component/devfile_openshift_component_with_missing_local.yaml",
