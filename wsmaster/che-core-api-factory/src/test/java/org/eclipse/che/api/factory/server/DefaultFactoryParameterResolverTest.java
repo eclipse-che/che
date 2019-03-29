@@ -25,14 +25,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.che.api.devfile.model.Tool;
+import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.CommandConverter;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
 import org.eclipse.che.api.devfile.server.convert.ProjectConverter;
-import org.eclipse.che.api.devfile.server.convert.tool.ToolProvisioner;
-import org.eclipse.che.api.devfile.server.convert.tool.ToolToWorkspaceApplier;
+import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
+import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
@@ -52,9 +52,9 @@ public class DefaultFactoryParameterResolverTest {
       ""
           + "specVersion: 0.0.1\n"
           + "name: test\n"
-          + "tools:\n"
+          + "components:\n"
           + "- type: kubernetes\n"
-          + "  name: tool\n"
+          + "  name: component\n"
           + "  local: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
@@ -68,18 +68,18 @@ public class DefaultFactoryParameterResolverTest {
     DevfileSchemaValidator validator = new DevfileSchemaValidator(new DevfileSchemaProvider());
     DevfileIntegrityValidator integrityValidator =
         new DevfileIntegrityValidator(kubernetesRecipeParser);
-    Set<ToolProvisioner> toolProvisioners = new HashSet<>();
-    Map<String, ToolToWorkspaceApplier> appliers = new HashMap<>();
-    ToolToWorkspaceApplier applier = mock(ToolToWorkspaceApplier.class);
+    Set<ComponentProvisioner> componentProvisioners = new HashSet<>();
+    Map<String, ComponentToWorkspaceApplier> appliers = new HashMap<>();
+    ComponentToWorkspaceApplier applier = mock(ComponentToWorkspaceApplier.class);
     appliers.put("kubernetes", applier);
 
     doAnswer(
             i -> {
-              // in here we mock that the tool applier requests the contents of the referenced
+              // in here we mock that the component applier requests the contents of the referenced
               // local file. That's all we need to happen
               FileContentProvider p = i.getArgument(2);
-              Tool tool = i.getArgument(1);
-              p.fetchContent(tool.getLocal());
+              Component component = i.getArgument(1);
+              p.fetchContent(component.getLocal());
               return null;
             })
         .when(applier)
@@ -87,7 +87,7 @@ public class DefaultFactoryParameterResolverTest {
 
     DevfileConverter devfileConverter =
         new DevfileConverter(
-            new ProjectConverter(), new CommandConverter(), toolProvisioners, appliers);
+            new ProjectConverter(), new CommandConverter(), componentProvisioners, appliers);
 
     WorkspaceManager workspaceManager = mock(WorkspaceManager.class);
 

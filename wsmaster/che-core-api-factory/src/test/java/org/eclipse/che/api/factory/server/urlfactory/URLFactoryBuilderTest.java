@@ -13,7 +13,7 @@ package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
@@ -112,7 +112,7 @@ public class URLFactoryBuilderTest {
     WorkspaceConfigImpl workspaceConfigImpl = new WorkspaceConfigImpl();
     String myLocation = "http://foo-location/";
     RecipeImpl expectedRecipe =
-        new RecipeImpl(KUBERNETES_TOOL_TYPE, "application/x-yaml", "content", "");
+        new RecipeImpl(KUBERNETES_COMPONENT_TYPE, "application/x-yaml", "content", "");
     EnvironmentImpl expectedEnv = new EnvironmentImpl(expectedRecipe, emptyMap());
     workspaceConfigImpl.setEnvironments(singletonMap("name", expectedEnv));
     workspaceConfigImpl.setDefaultEnv("name");

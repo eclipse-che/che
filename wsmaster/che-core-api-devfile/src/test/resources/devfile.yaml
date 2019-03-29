@@ -18,7 +18,7 @@ projects:
     source:
       type: git
       location: 'git@github.com:spring-projects/spring-petclinic.git'
-tools:
+components:
   - name: mvn-stack
     type: chePlugin
     id: eclipse/maven-jdk8:1.0.0
@@ -39,7 +39,7 @@ commands:
   - name: build
     actions:
       - type: exec
-        tool: mvn-stack
+        component: mvn-stack
         command: mvn package
         workdir: /projects/spring-petclinic
   - name: run
@@ -47,11 +47,11 @@ commands:
       runType: sequential
     actions:
       - type: exec
-        tool: mvn-stack
+        component: mvn-stack
         command: mvn spring-boot:run
         workdir: /projects/spring-petclinic
   - name: other
     actions:
       - type: exec
-        tool: jdt.ls
+        component: jdt.ls
         command: run.sh

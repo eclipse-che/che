@@ -165,6 +165,7 @@ import org.eclipse.che.ide.ui.toolbar.MainToolbar;
 import org.eclipse.che.ide.ui.toolbar.ToolbarPresenter;
 import org.eclipse.che.ide.util.browser.UserAgent;
 import org.eclipse.che.ide.util.input.KeyCodeMap;
+import org.eclipse.che.ide.workspace.EphemeralStateStatusBarItem;
 import org.eclipse.che.ide.workspace.StartWorkspaceAction;
 import org.eclipse.che.ide.workspace.StopWorkspaceAction;
 import org.vectomatic.dom.svg.ui.SVGImage;
@@ -410,6 +411,8 @@ public class StandardComponentInitializer {
   @Inject private OpenInTerminalAction openInTerminalAction;
 
   @Inject private FreeDiskSpaceStatusBarAction freeDiskSpaceStatusBarAction;
+
+  @Inject private EphemeralStateStatusBarItem ephemeralStateStatusBarItem;
 
   @Inject
   @Named("XMLFileType")
@@ -884,6 +887,7 @@ public class StandardComponentInitializer {
     DefaultActionGroup rightStatusPanelGroup =
         (DefaultActionGroup) actionManager.getAction(GROUP_RIGHT_STATUS_PANEL);
     rightStatusPanelGroup.add(freeDiskSpaceStatusBarAction);
+    rightStatusPanelGroup.add(ephemeralStateStatusBarItem);
 
     // Define hot-keys
     keyBinding

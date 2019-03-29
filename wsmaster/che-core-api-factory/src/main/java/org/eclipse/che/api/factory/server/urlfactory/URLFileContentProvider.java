@@ -45,7 +45,7 @@ public class URLFileContentProvider implements FileContentProvider {
                   + " referenced files are actually stored relative to the devfile on the same"
                   + " host. If none of that is possible, try to host your devfile on some other"
                   + " location together with the referenced files in such a way that resolving the"
-                  + " \"local\" name of a tool as a relative path against the devfile location"
+                  + " \"local\" name of a component as a relative path against the devfile location"
                   + " gives a true downloadable URL for that file. The current attempt to download"
                   + " the file failed with the following error message: %s",
               fileName, devfileLocation, fileUrl, e.getMessage()),

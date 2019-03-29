@@ -13,7 +13,7 @@ package org.eclipse.che.api.devfile.server;
 
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 
-/** Thrown when the provided content of recipe-type tool is empty or invalid. */
+/** Thrown when the provided content of recipe-type component is empty or invalid. */
 public class DevfileRecipeFormatException extends DevfileException {
 
   public DevfileRecipeFormatException(String message) {

@@ -34,20 +34,22 @@ public class CommandConverter {
    *
    * @param command source workspace command
    * @return created devfile command based on the specified workspace command
-   * @throws WorkspaceExportException if workspace command does not has specified tool name
+   * @throws WorkspaceExportException if workspace command does not has specified component name
    *     attribute where it should be run
    */
   public Command toDevfileCommand(CommandImpl command) throws WorkspaceExportException {
-    String toolName = command.getAttributes().remove(Constants.TOOL_NAME_COMMAND_ATTRIBUTE);
-    if (toolName == null) {
+    String componentName =
+        command.getAttributes().remove(Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE);
+    if (componentName == null) {
       throw new WorkspaceExportException(
-          format("Command `%s` has no specified tool where it should be run", command.getName()));
+          format(
+              "Command `%s` has no specified component where it should be run", command.getName()));
     }
 
     Command devCommand = new Command().withName(command.getName());
     Action action = new Action().withCommand(command.getCommandLine()).withType(command.getType());
     action.setWorkdir(command.getAttributes().remove(WORKING_DIRECTORY_ATTRIBUTE));
-    action.setTool(toolName);
+    action.setComponent(componentName);
     action.setType(Constants.EXEC_ACTION_TYPE);
     devCommand.getActions().add(action);
     devCommand.setAttributes(command.getAttributes());
@@ -83,7 +85,9 @@ public class CommandConverter {
       command.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, commandAction.getWorkdir());
     }
 
-    command.getAttributes().put(Constants.TOOL_NAME_COMMAND_ATTRIBUTE, commandAction.getTool());
+    command
+        .getAttributes()
+        .put(Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE, commandAction.getComponent());
 
     command.getAttributes().putAll(devCommand.getAttributes());
 

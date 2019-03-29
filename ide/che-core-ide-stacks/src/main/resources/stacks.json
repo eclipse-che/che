@@ -831,6 +831,170 @@
     }
   },
   {
+    "id": "java-maven",
+    "creator": "ide",
+    "name": "Java Maven",
+    "description": "Default Java Stack with OpenJKD 11 and Maven 3.6",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "OpenJDK",
+      "Maven",
+      "Spring Boot v2",
+      "Vert.x",
+      "Debian"
+    ],
+    "components": [
+      {
+         "name": "Debian",
+         "version": "9.8"
+      },
+      {
+        "name": "OpenJDK",
+        "version": "11.0.2"
+      },
+      {
+        "name": "Maven",
+        "version": "3.6.0"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "maven-container": {
+              "servers": {
+                "8080/tcp": {
+                  "port": "8080",
+                  "protocol": "http"
+                }
+              },
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              },
+              "volumes": {
+                "m2": {
+                  "path": "/home/user/.m2"
+                },
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "env": {
+                "MAVEN_CONFIG": "/home/user/.m2",
+                "MAVEN_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              }
+            }
+          },
+          "recipe": {
+            "content": "maven:3.6.0-jdk-11",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "plugins": "che-machine-exec-plugin:0.0.1,org.eclipse.che.vscode-redhat.java:0.38.0",
+        "editor": "org.eclipse.che.editor.theia:next",
+        "sidecar.org.eclipse.che.vscode-redhat.java.memory_limit": "1500Mi",
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi"
+      },
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "java-gradle",
+    "creator": "ide",
+    "name": "Java Gradle",
+    "description": "Java Stack with OpenJDK 11 and Gradle 5.2.1",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "OpenJDK",
+      "Gradle",
+      "Spring Boot v2",
+      "Debian"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "9.8"
+     },
+     {
+        "name": "OpenJDK",
+        "version": "11.0.2"
+      },
+      {
+        "name": "Gradle",
+        "version": "5.2.1"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "gradle-container": {
+              "servers": {
+                "8080/tcp": {
+                  "port": "8080",
+                  "protocol": "http"
+                }
+              },
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              },
+              "volumes": {
+                "gradle": {
+                  "path": "/home/user/.gradle"
+                },
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "env": {
+                "GRADLE_USER_HOME": "/home/user/.gradle",
+                "JAVA_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              }
+            }
+          },
+          "recipe": {
+            "content": "gradle:5.2.1-jdk11",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "plugins": "che-machine-exec-plugin:0.0.1,org.eclipse.che.vscode-redhat.java:0.38.0",
+        "editor": "org.eclipse.che.editor.theia:next",
+        "sidecar.org.eclipse.che.vscode-redhat.java.memory_limit": "1500Mi",
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi"
+      },
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "blank-default",
     "creator": "ide",
     "name": "Blank",
