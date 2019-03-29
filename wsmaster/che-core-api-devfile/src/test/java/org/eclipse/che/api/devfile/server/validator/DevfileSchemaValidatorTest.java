@@ -42,6 +42,7 @@ public class DevfileSchemaValidatorTest {
     return new Object[][] {
       {"editor_plugin_component/devfile_editor_plugins.yaml"},
       {"kubernetes_openshift_component/devfile_kubernetes_component_reference.yaml"},
+      {"kubernetes_openshift_component/devfile_kubernetes_component_absolute_reference.yaml"},
       {
         "kubernetes_openshift_component/devfile_kubernetes_component_reference_and_content_as_block.yaml"
       },
