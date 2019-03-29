@@ -62,6 +62,29 @@
              * Load keycloak settings
              */
             this.loadKeycloakSettings = function() {
+                if (window.location.href !== document.referrer) {
+                    /*
+                     * Get token from the parent window.
+                     */
+                    window.addEventListener('messsage', (event) => {
+                        if (event.data &&
+                            event.data.startWith('id-token:') &&
+                            event.origin === window.parent.location) {
+                            keycloak = {
+                                token: event.data.subString(9)
+                            }
+                            window['_keycloak'] = keycloak;
+                            Loader.startLoading();
+                        }
+                    });
+                    window.postMessage('get-id-token', window.parent.location);
+                    setInterval(function() {
+                        window.postMessage('get-id-token', window.parent.location);
+                    }, 10000);
+
+                    return;
+                }
+
                 var msg = "Cannot load keycloak settings. This is normal for single-user mode.";
                 try {
                     if (window.parent && window.parent['_keycloak']) {

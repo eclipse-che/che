@@ -172,6 +172,11 @@ angular.element(document).ready(() => {
       /* tslint:disable */
       window['_keycloak'] = keycloak;
       /* tslint:enable */
+      windows.addEventListener('message', (event: any) => {
+        if ('get-id-token' === event.data) {
+          event.source.postMessage('id-token:' + window['_keycloak'].idToken, event.origin);
+        }
+      });
     });
   }).catch((error: any) => {
     console.error('Keycloak initialization failed with error: ', error);

@@ -61,12 +61,20 @@ var ActivityTracker = new function () {
 
         var keycloak = window['_keycloak'];
         if (keycloak) {
-            keycloak.updateToken(5)
-                .success(function (refreshed) {
-                    var token = "Bearer " + keycloak.token;
-                    request.setRequestHeader("Authorization", token);
-                    request.send();
-                });
+            if (document.referrer === window.location.href) {
+                keycloak.updateToken(5)
+                    .success(function (refreshed) {
+                        var token = "Bearer " + keycloak.token;
+                        request.setRequestHeader("Authorization", token);
+                        request.send();
+                    });
+            } else {
+                /* The token will be from the parent window
+                 * and updated periodically. */
+                var token = "Bearer " + keycloak.token;
+                request.setRequestHeader("Authorization", token);
+                request.send();
+            }
         } else {
             request.send();
         }
