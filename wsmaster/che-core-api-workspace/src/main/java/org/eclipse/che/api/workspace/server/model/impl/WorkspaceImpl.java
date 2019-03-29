@@ -38,6 +38,7 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 import org.eclipse.persistence.descriptors.DescriptorEventAdapter;
@@ -90,6 +91,8 @@ public class WorkspaceImpl implements Workspace {
   @JoinColumn(name = "config_id")
   private WorkspaceConfigImpl config;
 
+  @Transient private DevfileImpl devfile;
+
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "workspace_attributes", joinColumns = @JoinColumn(name = "workspace_id"))
   @MapKeyColumn(name = "attributes_key")
@@ -111,6 +114,37 @@ public class WorkspaceImpl implements Workspace {
 
   public WorkspaceImpl(String id, Account account, WorkspaceConfig config) {
     this(id, account, config, null, null, false, null);
+  }
+
+  public WorkspaceImpl(
+      String id,
+      Account account,
+      Devfile devfile,
+      Runtime runtime,
+      Map<String, String> attributes,
+      boolean isTemporary,
+      WorkspaceStatus status) {
+    this.id = id;
+    if (account != null) {
+      this.account = new AccountImpl(account);
+    }
+    if (devfile != null) {
+      this.devfile = new DevfileImpl(devfile);
+    }
+    if (runtime != null) {
+      this.runtime =
+          new RuntimeImpl(
+              runtime.getActiveEnv(),
+              runtime.getMachines(),
+              runtime.getOwner(),
+              runtime.getCommands(),
+              runtime.getWarnings());
+    }
+    if (attributes != null) {
+      this.attributes = new HashMap<>(attributes);
+    }
+    this.isTemporary = isTemporary;
+    this.status = status;
   }
 
   public WorkspaceImpl(
@@ -187,6 +221,11 @@ public class WorkspaceImpl implements Workspace {
   @Override
   public WorkspaceConfigImpl getConfig() {
     return config;
+  }
+
+  @Override
+  public DevfileImpl getDevfile() {
+    return devfile;
   }
 
   public void setConfig(WorkspaceConfigImpl config) {

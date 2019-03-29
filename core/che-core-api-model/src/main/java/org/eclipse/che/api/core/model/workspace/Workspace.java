@@ -12,6 +12,7 @@
 package org.eclipse.che.api.core.model.workspace;
 
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -59,6 +60,8 @@ public interface Workspace {
    * configuration so the configuration is mandatory for every workspace instance.
    */
   WorkspaceConfig getConfig();
+
+  Devfile getDevfile();
 
   /**
    * Returns the runtime of this workspace instance. If status of this workspace instance is either
