@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.plugin.github.factory.resolver;
+package org.eclipse.che.api.factory.server.github;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
