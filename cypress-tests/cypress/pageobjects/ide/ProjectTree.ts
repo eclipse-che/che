@@ -24,7 +24,7 @@ export class ProjectTree {
         return `div[id='/projects:/projects/${itemPath}']`;
     }
 
-    private getColapsedItemLocator(itemPath: string): string {
+    private getCollapsedItemLocator(itemPath: string): string {
         return `${this.getExpandIconLocator(itemPath)}.theia-mod-collapsed`;
     }
 
@@ -51,8 +51,8 @@ export class ProjectTree {
         cy.get(this.getExpandedItemLocator(itemPath)).should('be.visible');
     }
 
-    waitItemColapsed(itemPath: string) {
-        cy.get(this.getColapsedItemLocator(itemPath)).should('be.visible');
+    waitItemCollapsed(itemPath: string) {
+        cy.get(this.getCollapsedItemLocator(itemPath)).should('be.visible');
     }
 
     waitProjectTreeContainer() {
@@ -107,7 +107,7 @@ export class ProjectTree {
         cy.get(expandIconLocator)
             .should('be.visible')
             .then(expandIcon => {
-                // if item colapsed click and expand it
+                // if item collapsed click and expand it
                 if (expandIcon.hasClass('theia-mod-collapsed')) {
                     cy.get(treeItemLocator)
                         .should('be.visible')
@@ -120,14 +120,14 @@ export class ProjectTree {
 
     }
 
-    colapseItem(itemPath: string) {
+    collapseItem(itemPath: string) {
         let expandIconLocator: string = this.getExpandIconLocator(itemPath);
         let treeItemLocator: string = this.getTreeItemLocator(itemPath);
 
         cy.get(expandIconLocator)
             .should('be.visible')
             .then(expandIcon => {
-                // if item expanded click and colapse it
+                // if item expanded click and collapse it
                 if (!expandIcon.hasClass('theia-mod-collapsed')) {
                     cy.get(treeItemLocator)
                         .should('be.visible')
@@ -135,7 +135,7 @@ export class ProjectTree {
                 }
             })
             .then(() => {
-                this.waitItemColapsed(itemPath);
+                this.waitItemCollapsed(itemPath);
             })
 
     }
@@ -162,15 +162,15 @@ export class ProjectTree {
     waitProjectImported(projectName: string, rootSubitem: string) {
         cy.log("**=> ProjectTree.waitProjectImported**")
             .then(() => {
-                let attempts: number = 4;
-                let pollingEvery: number = 30000;
+                let attempts: number = Cypress.env("ProjectTree.waitProjectImportedAttempts");
+                let pollingEvery: number = Cypress.env("ProjectTree.waiProjectImportedPollingEvery");
                 let currentAttempt: number = 1;
 
-                this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
             })
     }
 
-    private waitImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): Promise<void> {
+    private doWaitProjectImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): Promise<void> {
         return new Promise((resolve, reject) => {
             let rootItem: string = `/${projectName}`;
 
@@ -188,6 +188,7 @@ export class ProjectTree {
 
                     cy.wait(2000)
 
+                    //If project root folder is not present, reload page, wait IDE and retry again
                     if (body.find(rootItemLocator).length === 0) {
                         cy.log(`**Project '${projectName}' has not benn found. Refreshing page and try again (attempt ${currentAttempt} of ${attempts})**`)
 
@@ -199,24 +200,24 @@ export class ProjectTree {
                         this.waitProjectTreeContainer();
 
                         cy.wait(pollingEvery)
-                        this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                        this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                     }
 
                     if (body.find(rootSubitemLocator).length > 0) {
                         return;
                     }
 
+                    //If project root sub item is not present, collapse project folder, open project folder and retry again
                     cy.log(`**Root sub item '${rootSubitem}' has not benn found (attempt ${currentAttempt} of ${attempts})**`)
-
                     currentAttempt++
-                    this.colapseItem(rootItem)
-                    this.waitItemColapsed(rootItem)
-
+                    this.collapseItem(rootItem)
+                    this.waitItemCollapsed(rootItem)
                     cy.wait(pollingEvery)
-                    this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                    this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                 })
         })
     }
+
 
 
 }

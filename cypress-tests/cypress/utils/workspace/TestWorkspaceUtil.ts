@@ -16,8 +16,8 @@ import { Promise, resolve, reject } from "bluebird";
 export class TestWorkspaceUtil {
 
     private waitRunningStatus(workspaceNamespace: string, workspaceName: string, attempt: number): Promise<void> {
-        const maximumAttempts: number = 15;
-        const delayBetweenAttempts: number = 60000;
+        const maximumAttempts: number = Cypress.env("TestWorkspaceUtil.waitRunningStatusAttempts");
+        const delayBetweenAttempts: number = Cypress.env("TestWorkspaceUtil.waitRunningStatusPollingEvery");
         const expectedWorkspaceStatus: string = 'RUNNING';
 
         return new Promise((resolve, reject) => {
