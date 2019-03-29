@@ -283,16 +283,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-auth-github</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
-                <artifactId>che-core-api-factory-github</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-account</artifactId>
                 <version>${che.version}</version>
                 <classifier>tests</classifier>
@@ -300,6 +290,11 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-auth</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-auth-github</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -365,6 +360,11 @@
                 <artifactId>che-core-api-factory</artifactId>
                 <version>${che.version}</version>
                 <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-factory-github</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
