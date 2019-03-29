@@ -160,14 +160,17 @@ export class ProjectTree {
     }
 
     waitProjectImported(projectName: string, rootSubitem: string) {
-        let attempts: number = 4;
-        let pollingEvery: number = 30000;
-        let currentAttempt: number = 1;
+        cy.log("**=> ProjectTree.waitProjectImported**")
+            .then(() => {
+                let attempts: number = 4;
+                let pollingEvery: number = 30000;
+                let currentAttempt: number = 1;
 
-        this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+            })
     }
 
-    waitImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): Promise<void> {
+    private waitImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): Promise<void> {
         return new Promise((resolve, reject) => {
             let rootItem: string = `/${projectName}`;
 
@@ -175,42 +178,44 @@ export class ProjectTree {
             this.waitItemExpanded(rootItem)
 
             cy.get('body')
-                    .then(body => {
-                        let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
-                        let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
+                .then(body => {
+                    let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
+                    let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
 
-                        if (currentAttempt >= attempts) {
-                            assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
-                        }
+                    if (currentAttempt >= attempts) {
+                        assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
+                    }
 
-                        if (body.find(rootItemLocator).length === 0) {
-                            cy.log(`==>> Project '${projectName}' has not benn found. Refreshing page and try again (attempt ${currentAttempt} of ${attempts})`)
+                    cy.wait(2000)
 
-                            currentAttempt++
-
-                            cy.reload();
-                            this.ide.waitIde()
-                            this.openProjectTreeContainer();
-                            this.waitProjectTreeContainer();
-
-                            cy.wait(pollingEvery)
-                            this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
-                        }
-
-                        if (body.find(rootSubitemLocator).length > 0) {
-                            return;
-                        }
-
-                        cy.log(`==>> Root sub item '${rootSubitem}' has not benn found (attempt ${currentAttempt} of ${attempts})`)
+                    if (body.find(rootItemLocator).length === 0) {
+                        cy.log(`**Project '${projectName}' has not benn found. Refreshing page and try again (attempt ${currentAttempt} of ${attempts})**`)
 
                         currentAttempt++
-                        this.colapseItem(rootItem)
-                        this.waitItemColapsed(rootItem)
+
+                        cy.reload();
+                        this.ide.waitIde()
+                        this.openProjectTreeContainer();
+                        this.waitProjectTreeContainer();
 
                         cy.wait(pollingEvery)
                         this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
-                    })
-            })
+                    }
+
+                    if (body.find(rootSubitemLocator).length > 0) {
+                        return;
+                    }
+
+                    cy.log(`**Root sub item '${rootSubitem}' has not benn found (attempt ${currentAttempt} of ${attempts})**`)
+
+                    currentAttempt++
+                    this.colapseItem(rootItem)
+                    this.waitItemColapsed(rootItem)
+
+                    cy.wait(pollingEvery)
+                    this.waitImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                })
+        })
     }
 
 
