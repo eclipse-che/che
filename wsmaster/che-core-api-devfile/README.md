@@ -63,7 +63,32 @@ chectl workspace:start --devfile=devfile.yaml
 ```` 
 Please note that currently this way only works for the local (same machine) devfiles - URL can't be used here atm.
 
+### Project details
+A single devfile can specify several projects. For each project, one has to specify the type of the
+source repository, its location and optionally also the directory to which the project should be 
+cloned to.
 
+As an example, consider this devfile:
+
+```yaml
+specVersion: 0.0.1
+name: example-devfile
+projects:
+- name: frontend
+  source:
+    type: git
+    location: https://github.com/acmecorp/frontend.git
+- name: backend
+  clonePath: src/github.com/acmecorp/backend
+  source:
+    type: git
+    location: https://github.com/acmecorp/backend.git
+```
+
+In the example above, we see a devfile with 2 projects, `frontend` and `backend`, each located in
+its own repository on github. `backend` has a specific requirement to be cloned into the 
+`src/github.com/acmecorp/backend` directory under the source root (implicitly defined by the Che
+runtime) while frontend will be cloned into `frontend` directory under the source root.
  
 ### Supported component types
 There are currently four types of components supported. There is two simpler types, such as `cheEditor` and `chePlugin` and 
