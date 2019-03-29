@@ -120,8 +120,8 @@ Alternatively, if you need to post devfile with such components to REST API, con
   components:
     - name: mysql
       type: kubernetes
-      local: petclinic.yaml
-       referenceContent: |
+      reference: petclinic.yaml
+      referenceContent: |
            kind: List
            items:
             -
