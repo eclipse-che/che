@@ -58,6 +58,10 @@ global:
     appenderName: "plaintext"
   tracingEnabled: false
   metricsEnabled: false
+  # Run Che and Che workspaces as the same non-root user
+  securityContext:
+    runAsUser: 1724
+    fsGroup: 1724
 
 prometheus:
   alertmanager:
