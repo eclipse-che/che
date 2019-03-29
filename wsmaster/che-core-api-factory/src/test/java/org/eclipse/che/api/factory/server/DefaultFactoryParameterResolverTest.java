@@ -55,7 +55,7 @@ public class DefaultFactoryParameterResolverTest {
           + "components:\n"
           + "- type: kubernetes\n"
           + "  name: component\n"
-          + "  local: ../localfile\n";
+          + "  reference: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
   @Mock private KubernetesRecipeParser kubernetesRecipeParser;
@@ -79,7 +79,7 @@ public class DefaultFactoryParameterResolverTest {
               // local file. That's all we need to happen
               FileContentProvider p = i.getArgument(2);
               Component component = i.getArgument(1);
-              p.fetchContent(component.getLocal());
+              p.fetchContent(component.getReference());
               return null;
             })
         .when(applier)
