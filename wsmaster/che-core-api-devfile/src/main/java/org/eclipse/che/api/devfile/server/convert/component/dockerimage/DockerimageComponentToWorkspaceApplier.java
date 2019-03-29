@@ -20,7 +20,6 @@ import static org.eclipse.che.api.devfile.server.Constants.DISCOVERABLE_ENDPOINT
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 
 import com.google.common.collect.ImmutableMap;
@@ -61,6 +60,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
  * @author Sergii Leshchenko
  */
 public class DockerimageComponentToWorkspaceApplier implements ComponentToWorkspaceApplier {
+
+  /**
+   * Label that contains component name to which object belongs to and it is provisioned for
+   * generated deployments and its pod templates.
+   */
+  static final String CHE_COMPONENT_NAME_LABEL = "che.component.name";
 
   private final String projectFolderPath;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
@@ -182,13 +187,14 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
     Containers.addRamLimit(container, memoryLimit);
     return new DeploymentBuilder()
         .withNewMetadata()
+        .addToLabels(CHE_COMPONENT_NAME_LABEL, name)
         .withName(name)
         .endMetadata()
         .withNewSpec()
         .withNewTemplate()
         .withNewMetadata()
         .withName(name)
-        .addToLabels(CHE_ORIGINAL_NAME_LABEL, name)
+        .addToLabels(CHE_COMPONENT_NAME_LABEL, name)
         .addToAnnotations(String.format(MACHINE_NAME_ANNOTATION_FMT, name), name)
         .endMetadata()
         .withNewSpec()
@@ -231,7 +237,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         .withNewSpec()
         .withSelector(
             ImmutableMap.of(
-                CHE_ORIGINAL_NAME_LABEL,
+                CHE_COMPONENT_NAME_LABEL,
                 deployment.getSpec().getTemplate().getMetadata().getName()))
         .withPorts(singletonList(servicePort))
         .endSpec()
