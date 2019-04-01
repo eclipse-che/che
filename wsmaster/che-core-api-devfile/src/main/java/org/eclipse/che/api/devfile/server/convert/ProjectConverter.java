@@ -14,8 +14,11 @@ package org.eclipse.che.api.devfile.server.convert;
 import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.REFSPEC_PARAMETER_NAME;
 
 import com.google.common.base.Strings;
+import java.net.URI;
+import java.net.URISyntaxException;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 
@@ -41,7 +44,17 @@ public class ProjectConverter {
             .withLocation(projectConfig.getSource().getLocation())
             .withRefspec(refspec);
 
-    return new Project().withName(projectConfig.getName()).withSource(source);
+    String path = projectConfig.getPath();
+    while (path != null && path.startsWith("/")) {
+      path = path.substring(1);
+    }
+
+    // don't specify the clonePath if it is the same as the project name
+    if (projectConfig.getName().equals(path)) {
+      path = null;
+    }
+
+    return new Project().withName(projectConfig.getName()).withSource(source).withClonePath(path);
   }
 
   /**
@@ -50,10 +63,17 @@ public class ProjectConverter {
    * @param devProject base devfile project
    * @return created workspace project based on the specified devfile project
    */
-  public ProjectConfigImpl toWorkspaceProject(Project devProject) {
+  public ProjectConfigImpl toWorkspaceProject(Project devProject) throws DevfileException {
+    String clonePath = devProject.getClonePath();
+    if (clonePath == null || clonePath.isEmpty()) {
+      clonePath = "/" + devProject.getName();
+    } else {
+      clonePath = "/" + sanitizeClonePath(clonePath);
+    }
+
     ProjectConfigImpl projectConfig = new ProjectConfigImpl();
     projectConfig.setName(devProject.getName());
-    projectConfig.setPath("/" + projectConfig.getName());
+    projectConfig.setPath(clonePath);
 
     projectConfig.setSource(toSourceStorage(devProject.getSource()));
     return projectConfig;
@@ -71,5 +91,60 @@ public class ProjectConverter {
     }
 
     return sourceStorage;
+  }
+
+  private String sanitizeClonePath(String clonePath) throws DevfileException {
+    URI uri = clonePathToURI(clonePath);
+
+    if (uri.isAbsolute()) {
+      throw new DevfileException(
+          "The clonePath must be a relative path. This seems to be an URI with a scheme: "
+              + clonePath);
+    }
+
+    uri = uri.normalize();
+
+    String path = uri.getPath();
+
+    if (path.isEmpty()) {
+      // the user tried to trick us with something like "blah/.."
+      throw new DevfileException(
+          "Cloning directly into projects root is not allowed."
+              + " The clonePath that resolves to empty path: "
+              + clonePath);
+    }
+
+    if (path.startsWith("/")) {
+      // while technically we could allow this, because the project config contains what resembles
+      // an absolute path, it is better to explicitly disallow this in devfile, which is
+      // user-authored. Just don't give the user impression we can support absolute paths.
+      throw new DevfileException(
+          "The clonePath must be a relative. This seems to be an absolute path: " + clonePath);
+    }
+
+    if (path.startsWith("..")) {
+      // an attempt to escape the projects root, e.g. "ich/../muss/../../raus". That's a no-no.
+      throw new DevfileException(
+          "The clonePath cannot escape the projects root. Don't use .. to try and do that."
+              + " The invalid path was: "
+              + clonePath);
+    }
+
+    return path;
+  }
+
+  /**
+   * This merely re-throws the failure during the URI conversion as {@code DevfileException}.
+   *
+   * @param clonePath the path to convert to URI
+   * @return the URI representing the clonePath
+   * @throws DevfileException when the clonePath cannot be converted to an URI
+   */
+  private URI clonePathToURI(String clonePath) throws DevfileException {
+    try {
+      return new URI(clonePath);
+    } catch (URISyntaxException e) {
+      throw new DevfileException("Failed to parse the clonePath.", e);
+    }
   }
 }
