@@ -47,17 +47,20 @@ public class DevfileConverter {
   private final CommandConverter commandConverter;
   private final Map<String, ComponentToWorkspaceApplier> componentTypeToApplier;
   private final Set<ComponentProvisioner> componentProvisioners;
+  private final DefaultEditorProvisioner defaultEditorProvisioner;
 
   @Inject
   public DevfileConverter(
       ProjectConverter projectConverter,
       CommandConverter commandConverter,
       Set<ComponentProvisioner> componentProvisioners,
-      Map<String, ComponentToWorkspaceApplier> componentTypeToApplier) {
+      Map<String, ComponentToWorkspaceApplier> componentTypeToApplier,
+      DefaultEditorProvisioner defaultEditorProvisioner) {
     this.projectConverter = projectConverter;
     this.commandConverter = commandConverter;
     this.componentProvisioners = componentProvisioners;
     this.componentTypeToApplier = componentTypeToApplier;
+    this.defaultEditorProvisioner = defaultEditorProvisioner;
   }
 
   /**
@@ -118,6 +121,9 @@ public class DevfileConverter {
     checkArgument(contentProvider != null, "Content provider must not be null");
 
     validateCurrentVersion(devfile);
+
+    defaultEditorProvisioner.apply(devfile);
+
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
     config.setName(devfile.getName());

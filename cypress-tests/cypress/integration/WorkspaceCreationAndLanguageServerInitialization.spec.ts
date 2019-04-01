@@ -75,9 +75,9 @@ describe("E2E test", () => {
         })
 
         it("Wait IDE availability", () => {
-            ide.waitIdeInIframe(namespace, workspaceName);
+            ide.waitWorkspaceAndIdeInIframe(namespace, workspaceName);
             ide.openIdeWithoutFrames(workspaceName);
-            ide.waitIde(namespace, workspaceName);
+            ide.waitWorkspaceAndIde(namespace, workspaceName);
         })
 
     })
@@ -90,6 +90,7 @@ describe("E2E test", () => {
         it("Open project tree container", () => {
             projectTree.openProjectTreeContainer();
             projectTree.waitProjectTreeContainer();
+            projectTree.waitProjectImported("web-java-spring", "src")
         })
 
         it("Expand project and open file in editor", () => {

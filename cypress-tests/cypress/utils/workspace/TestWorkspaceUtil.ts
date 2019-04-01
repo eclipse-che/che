@@ -16,8 +16,8 @@ import { Promise, resolve, reject } from "bluebird";
 export class TestWorkspaceUtil {
 
     private waitRunningStatus(workspaceNamespace: string, workspaceName: string, attempt: number): Promise<void> {
-        const maximumAttempts: number = 300;
-        const delayBetweenAttempts: number = 5000;
+        const maximumAttempts: number = Cypress.env("TestWorkspaceUtil.waitRunningStatusAttempts");
+        const delayBetweenAttempts: number = Cypress.env("TestWorkspaceUtil.waitRunningStatusPollingEvery");
         const expectedWorkspaceStatus: string = 'RUNNING';
 
         return new Promise((resolve, reject) => {
@@ -30,7 +30,7 @@ export class TestWorkspaceUtil {
                     }
 
                     if (response.status != 200) {
-                        cy.log(`Request attempt has responce code ${response.status} diferent to '200', next attempt`)
+                        cy.log(`**Request attempt has responce code '${response.status}' diferent to '200' (attempt ${attempt} of ${maximumAttempts})**`)
                         cy.wait(delayBetweenAttempts);
                         attempt++
                         this.waitRunningStatus(workspaceNamespace, workspaceName, attempt)
@@ -40,6 +40,7 @@ export class TestWorkspaceUtil {
                         return;
                     }
 
+                    cy.log(`**Request attempt has workspace status ${response.body.status} diferent to '${expectedWorkspaceStatus}' (attempt ${attempt} of ${maximumAttempts})**`)
                     cy.wait(delayBetweenAttempts);
                     attempt++
                     this.waitRunningStatus(workspaceNamespace, workspaceName, attempt)

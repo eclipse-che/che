@@ -1,3 +1,5 @@
+import { resolve, Promise, reject } from "bluebird";
+
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -19,6 +21,5 @@ export class ElementStateChecker {
             element[0].offsetHeight > 0 &&
             element[0].getClientRects().length > 0
     }
-
 
 }

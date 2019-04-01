@@ -30,8 +30,7 @@
   },
   "required": [
     "specVersion",
-    "name",
-    "components"
+    "name"
   ],
   "additionalProperties": false,
   "properties": {
@@ -196,6 +195,7 @@
           "id": {
             "type": "string",
             "description": "Describes the component FQN",
+            "pattern": "^[a-zA-Z0-9_\\-\\./]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$",
             "examples": [
               "eclipse/maven-jdk8:1.0.0"
             ]
@@ -479,6 +479,18 @@
           }
         }
       }
+    },
+    "attributes" : {
+      "type": "object",
+      "editorFree": {
+        "type": "boolean",
+        "description": "Defines that no editor is needed and default one should not be provisioned.",
+        "default": "false"
+      },
+      "additionalProperties": {
+        "type": "string"
+      },
+      "javaType": "java.util.Map<String, String>"
     }
   }
 }

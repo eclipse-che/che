@@ -41,6 +41,9 @@ public class DevfileFactory {
    * @param devfile devfile where all maps (including nested objects) should be initialized
    */
   public static void initializeMaps(Devfile devfile) {
+    if (devfile.getAttributes() == null) {
+      devfile.setAttributes(new HashMap<>());
+    }
     devfile
         .getCommands()
         .stream()
