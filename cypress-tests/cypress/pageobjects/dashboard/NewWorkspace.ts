@@ -120,12 +120,16 @@ export class NewWorkspace {
 
     waitProjectAdding(projectName: string) {
         cy.get(`#project-source-selector toggle-single-button#${projectName}`)
-            .should('be.visible')
+            .should(element => {
+                expect(this.elementStateChecker.isVisible(element)).to.be.true
+            })
     }
 
     waitProjectAbsence(projectName: string) {
         cy.get(`#project-source-selector toggle-single-button#${projectName}`)
-            .should('not.be.visible')
+            .should(element => {
+                expect(this.elementStateChecker.isVisible(element)).to.be.false
+            })
     }
 
     clickOnAddButton() {
