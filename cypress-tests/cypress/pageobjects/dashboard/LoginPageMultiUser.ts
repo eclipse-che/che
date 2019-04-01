@@ -17,7 +17,7 @@ import "reflect-metadata";
 /// <reference types="Cypress" />
 
 @injectable()
-export class LoginPage implements ILoginPage {
+export class LoginPageMultiUser implements ILoginPage {
     private static readonly LOAD_PAGE_TIMEOUT: number = Cypress.env('load_page_timeout');
     private static readonly TEST_USER_NANE: string = Cypress.env('test_user_name');
     private static readonly TEST_USER_PASSWORD: string = Cypress.env('test_user_password');
@@ -41,48 +41,41 @@ export class LoginPage implements ILoginPage {
     }
 
     private typeUsername(username: string) {
-        this.typeToInputField(username, LoginPage.USERNAME_FIELD);
+        this.typeToInputField(username, LoginPageMultiUser.USERNAME_FIELD);
     }
 
     private typePassword(password: string) {
-        this.typeToInputField(password, LoginPage.PASSWORD_FIELD);
+        this.typeToInputField(password, LoginPageMultiUser.PASSWORD_FIELD);
     }
 
     private clickOnLoginButton() {
-        cy.get(LoginPage.LOGIN_BUTTON)
+        cy.get(LoginPageMultiUser.LOGIN_BUTTON)
             .click();
     }
 
     private waitPage() {
-        [LoginPage.LOGIN_BUTTON, LoginPage.USERNAME_FIELD, LoginPage.PASSWORD_FIELD]
+        [LoginPageMultiUser.LOGIN_BUTTON, LoginPageMultiUser.USERNAME_FIELD, LoginPageMultiUser.PASSWORD_FIELD]
             .forEach(elementLocator => {
-                cy.get(elementLocator, { timeout: LoginPage.LOAD_PAGE_TIMEOUT })
+                cy.get(elementLocator, { timeout: LoginPageMultiUser.LOAD_PAGE_TIMEOUT })
                     .should('be.visible');
             })
     }
 
     private waitPageAbcence() {
-        [LoginPage.LOGIN_BUTTON, LoginPage.USERNAME_FIELD, LoginPage.PASSWORD_FIELD]
+        [LoginPageMultiUser.LOGIN_BUTTON, LoginPageMultiUser.USERNAME_FIELD, LoginPageMultiUser.PASSWORD_FIELD]
             .forEach(elementLocator => {
-                cy.get(elementLocator, { timeout: LoginPage.LOAD_PAGE_TIMEOUT })
+                cy.get(elementLocator, { timeout: LoginPageMultiUser.LOAD_PAGE_TIMEOUT })
                     .should('not.be.visible');
             })
     }
 
-    // login() {
-    //     this.visitLoginPage();
-    //     this.waitPage();
-    //     this.typeUsername(LoginPage.TEST_USER_NANE);
-    //     this.typePassword(LoginPage.TEST_USER_PASSWORD);
-    //     this.clickOnLoginButton();
-    //     this.waitPageAbcence();
-    // }
-
     login() {
-        this.dashboard.openDashboard();
-        this.dashboard.waitLoaderPage();
-        this.dashboard.waitLoaderPageAbcence()
-        this.dashboard.waitDashboard();
+        this.visitLoginPage();
+        this.waitPage();
+        this.typeUsername(LoginPageMultiUser.TEST_USER_NANE);
+        this.typePassword(LoginPageMultiUser.TEST_USER_PASSWORD);
+        this.clickOnLoginButton();
+        this.waitPageAbcence();
     }
 
 }

@@ -17,7 +17,7 @@
  * 4. Check Language Server initialization
  * 5. Delete workspace using dashboard
  */
-import { LoginPage } from "../pageobjects/dashboard/LoginPage";
+import { LoginPageMultiUser } from "../pageobjects/dashboard/LoginPageMultiUser";
 import { Dashboard } from "../pageobjects/dashboard/Dashboard";
 import { Workspaces } from "../pageobjects/dashboard/Workspaces";
 import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";
@@ -47,6 +47,9 @@ describe("E2E test", () => {
     context("Prepare dashboard", () => {
         it("Open dashboard", () => {
             loginPage.login();
+            dashboard.waitLoaderPage();
+            dashboard.waitLoaderPageAbcence()
+            dashboard.waitDashboard();
         })
 
     })
