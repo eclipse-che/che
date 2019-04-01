@@ -170,8 +170,8 @@ export class ProjectTree {
             })
     }
 
-    private doWaitProjectImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): Promise<void> {
-        return new Promise((resolve, reject) => {
+    private doWaitProjectImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): PromiseLike<void> {
+        return new Cypress.Promise((resolve:any, reject:any) => {
             let rootItem: string = `/${projectName}`;
 
             this.expandItem(rootItem)

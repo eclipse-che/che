@@ -10,7 +10,6 @@
 
 /// <reference types="Cypress" />
 
-import { Promise, reject } from "bluebird";
 
 export class Editor {
 
@@ -95,8 +94,8 @@ export class Editor {
         return lineCoordinate;
     }
 
-    public addAttributeToLines(): Promise<number> {
-        return new Promise<number>((resolve, reject) => {
+    public addAttributeToLines(): PromiseLike<number> {
+        return new Cypress.Promise<number>((resolve:any, reject:any) => {
             let elementsArray: Array<JQuery<HTMLElement>> = new Array();
 
             cy.get(Editor.EDITOR_LINES)

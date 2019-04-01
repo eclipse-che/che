@@ -4,8 +4,11 @@
       "noImplicitAny": true,
       "module": "es6",
       "target": "es5",
+      "lib": ["es6", "dom"],
       "jsx": "react",
       "allowJs": true,
-      "types": ["cypress"]
+      "types": ["cypress", "reflect-metadata"],
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true
     }
   }
