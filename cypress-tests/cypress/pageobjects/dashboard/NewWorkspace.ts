@@ -20,8 +20,6 @@ export class NewWorkspace {
     private static readonly SELECTED_CHE_7_STACK: string = ".stack-selector-item-selected[data-stack-id='che7-preview']"
     private static readonly CREATE_AND_OPEN_BUTTON: string = "che-button-save-flat[che-button-title='Create & Open']>button"
     private static readonly ADD_OR_IMPORT_PROJECT_BUTTON: string = ".add-import-project-toggle-button";
-    private static readonly WEB_JAVA_SPRING_CHECKBOX: string = "#sample-web-java-spring>md-checkbox>div";
-    private static readonly WEB_JAVA_SPRING_CHECKBOX_ENABLED: string = "#sample-web-java-spring>md-checkbox[aria-checked='true']";
     private static readonly ADD_BUTTON: string = "button[aria-disabled='false'][name='addButton']";
     private static readonly NAME_FIELD: string = "#workspace-name-input";
 
@@ -102,13 +100,22 @@ export class NewWorkspace {
             .click();
     }
 
-    enableWebJavaSpringCheckbox() {
-        cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX)
+    enableSampleCheckbox(sampleName: string) {
+        cy.get(`#sample-${sampleName}>md-checkbox>div`)
             .first()
+            .should(element => {
+                expect(this.elementStateChecker.isVisible(element)).to.be.true
+            })
             .click({ force: true });
 
-        //check that checkbox is succesfully enabled
-        cy.get(NewWorkspace.WEB_JAVA_SPRING_CHECKBOX_ENABLED);
+        this.waitSampleCheckboxEnabling(sampleName)
+    }
+
+    waitSampleCheckboxEnabling(sampleName: string) {
+        cy.get(`#sample-${sampleName}>md-checkbox[aria-checked='true']`)
+            .should(element => {
+                expect(this.elementStateChecker.isVisible(element)).to.be.true
+            });
     }
 
     clickOnAddButton() {
