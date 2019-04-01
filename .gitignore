@@ -92,4 +92,4 @@ requirements.lock
 */coverage
 */.grunt
 */.lock-wscript
-
+*/cypress-tests/dist

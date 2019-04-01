@@ -11,4 +11,3 @@
  export interface ILoginPage{
      login():void;
  }
- 
