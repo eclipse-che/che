@@ -33,14 +33,14 @@ export class ProjectTree {
     }
 
     openProjectTreeContainer() {
-        cy.get(Ide.FILES_BUTTON)
+        cy.get(Ide.EXPLORER_BUTTON)
             .should('be.visible')
             .then(filesButton => {
                 let isProjectTreeContainerOpened: boolean = filesButton.hasClass("p-mod-current");
 
                 //if project tree container is not opened click on "Files" button
                 if (!isProjectTreeContainerOpened) {
-                    this.ide.clickOnFilesButton();
+                    this.ide.clickOnExplorerButton();
                 }
             }).then(() => {
                 this.waitProjectTreeContainer();
