@@ -67,6 +67,7 @@ describe("E2E test", () => {
             newWorkspace.clickOnAddOrImportProjectButton();
             newWorkspace.enableSampleCheckbox(sampleName);
             newWorkspace.clickOnAddButton();
+            newWorkspace.waitProjectAdding(sampleName);
             newWorkspace.waitPluginListItem(javaPluginName);
             newWorkspace.waitPluginDisabling(javaPluginName);
             newWorkspace.clickOnPluginListItemSwitcher(javaPluginName);

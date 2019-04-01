@@ -118,6 +118,16 @@ export class NewWorkspace {
             });
     }
 
+    waitProjectAdding(projectName: string) {
+        cy.get(`#project-source-selector toggle-single-button#${projectName}`)
+            .should('be.visible')
+    }
+
+    waitProjectAbsence(projectName: string) {
+        cy.get(`#project-source-selector toggle-single-button#${projectName}`)
+            .should('not.be.visible')
+    }
+
     clickOnAddButton() {
         cy.get(NewWorkspace.ADD_BUTTON)
             .should('be.visible')
