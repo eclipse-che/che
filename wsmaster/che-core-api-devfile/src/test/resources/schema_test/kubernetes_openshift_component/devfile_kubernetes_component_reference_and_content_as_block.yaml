@@ -15,20 +15,25 @@ specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
   - name: mysql
-    type: openshift
+    type: kubernetes
     reference: petclinic.yaml
+    referenceContent: |
+      kind: List
+      items:
+       -
+        apiVersion: v1
+        kind: Pod
+        metadata:
+         name: ws
+        spec:
+         containers:
+          -
+           image: 'eclipse/che-dev:nightly'
+           name: dev
+           resources:
+            limits:
+             memory: 512Mi
     selector:
       app.kubernetes.io/name: mysql
       app.kubernetes.io/component: database
       app.kubernetes.io/part-of: petclinic
-commands:
-  - name: build
-    actions:
-      - type: exec
-        component: mysql
-        command: mvn clean
-        workdir: /projects/spring-petclinic
-      - type: exec
-        component: mysql
-        command: mvn package
-        workdir: /projects/spring-petclinic

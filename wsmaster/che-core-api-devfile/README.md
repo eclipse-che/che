@@ -109,28 +109,27 @@ List of available Che plugins and more information about registry can be found o
 
 
 #### kubernetes/openshift
-More complex component type, which allows to apply configuration from kubernetes/openshift lists. Content of the component may be provided either via `local` attribute which points to the file with component content.
+More complex component type, which allows to apply configuration from kubernetes/openshift lists. Content of the component may be provided either via `reference` attribute which points to the file with component content.
 ```
 ...
   components:
     - name: mysql
       type: kubernetes
-      local: petclinic.yaml
+      reference: petclinic.yaml
       selector:
         app.kubernetes.io/name: mysql
         app.kubernetes.io/component: database
         app.kubernetes.io/part-of: petclinic
 ```
-Contents of the `local` file is currently read _ONLY_ if the devfile and local file both placed in the same public GitHub repository. 
-So, alternatively, if you need to post devfile with such components to REST API, contents of K8S/Openshift list can be embedded into devfile using `localContent` field:
+Alternatively, if you need to post devfile with such components to REST API, contents of K8S/Openshift list can be embedded into devfile using `referenceContent` field:
 
 ```
 ...
   components:
     - name: mysql
       type: kubernetes
-      local: petclinic.yaml
-       localContent: |
+      reference: petclinic.yaml
+      referenceContent: |
            kind: List
            items:
             -
@@ -157,7 +156,7 @@ The entrypoints can be defined for example like this:
   components:
     - name: appDeployment
       type: kubernetes
-      local: app-deployment.yaml
+      reference: app-deployment.yaml
       entrypoints:
       - parentName: mysqlServer
         command: ['sleep']

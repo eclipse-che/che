@@ -15,9 +15,8 @@ specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
   - name: mysql
-    type: kubernetes
-    local: petclinic.yaml
-    localContent: |
+    type: openshift
+    referenceContent: |
       kind: List
       items:
        -
@@ -33,6 +32,7 @@ components:
            resources:
             limits:
              memory: 512Mi
+    reference: petclinic.yaml
     selector:
       app.kubernetes.io/name: mysql
       app.kubernetes.io/component: database

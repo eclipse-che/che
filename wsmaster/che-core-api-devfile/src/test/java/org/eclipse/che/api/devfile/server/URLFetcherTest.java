@@ -9,10 +9,10 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.factory.server.urlfactory;
+package org.eclipse.che.api.devfile.server;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.eclipse.che.api.factory.server.urlfactory.URLFetcher.MAXIMUM_READ_BYTES;
+import static org.eclipse.che.api.devfile.server.URLFetcher.MAXIMUM_READ_BYTES;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -30,7 +30,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Testing {@link URLFetcher}
+ * Testing {@link org.eclipse.che.api.devfile.server.URLFetcher}
  *
  * @author Florent Benoit
  */

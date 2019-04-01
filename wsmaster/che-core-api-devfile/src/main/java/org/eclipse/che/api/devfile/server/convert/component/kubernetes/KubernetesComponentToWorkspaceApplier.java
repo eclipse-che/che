@@ -110,19 +110,19 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       Component recipeComponent, @Nullable FileContentProvider fileContentProvider)
       throws DevfileException {
     checkArgument(fileContentProvider != null, "Content provider must not be null");
-    if (!isNullOrEmpty(recipeComponent.getLocalContent())) {
-      return recipeComponent.getLocalContent();
+    if (!isNullOrEmpty(recipeComponent.getReferenceContent())) {
+      return recipeComponent.getReferenceContent();
     }
 
     String recipeFileContent;
     try {
-      recipeFileContent = fileContentProvider.fetchContent(recipeComponent.getLocal());
+      recipeFileContent = fileContentProvider.fetchContent(recipeComponent.getReference());
     } catch (DevfileException e) {
       throw new DevfileException(
           format(
-              "Fetching content of file `%s` specified in `local` field of component `%s` is not supported. "
-                  + "Please provide its content in `localContent` field. Cause: %s",
-              recipeComponent.getLocal(), recipeComponent.getName(), e.getMessage()),
+              "Fetching content of file `%s` specified in `reference` field of component `%s` is not supported. "
+                  + "Please provide its content in `referenceContent` field. Cause: %s",
+              recipeComponent.getReference(), recipeComponent.getName(), e.getMessage()),
           e);
     } catch (IOException e) {
       throw new DevfileException(
@@ -134,8 +134,8 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     if (isNullOrEmpty(recipeFileContent)) {
       throw new DevfileException(
           format(
-              "The local file '%s' defined in component '%s' is empty.",
-              recipeComponent.getLocal(), recipeComponent.getName()));
+              "The reference file '%s' defined in component '%s' is empty.",
+              recipeComponent.getReference(), recipeComponent.getName()));
     }
     return recipeFileContent;
   }
@@ -193,14 +193,15 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   }
 
   private List<HasMetadata> unmarshalComponentObjects(
-      Component k8sComponent, String componentLocalContent) throws DevfileRecipeFormatException {
+      Component k8sComponent, String componentreferenceContent)
+      throws DevfileRecipeFormatException {
     try {
-      return unmarshal(componentLocalContent);
+      return unmarshal(componentreferenceContent);
     } catch (DevfileRecipeFormatException e) {
       throw new DevfileRecipeFormatException(
           format(
               "Error occurred during parsing list from file %s for component '%s': %s",
-              k8sComponent.getLocal(), k8sComponent.getName(), e.getMessage()),
+              k8sComponent.getReference(), k8sComponent.getName(), e.getMessage()),
           e);
     }
   }

@@ -28,6 +28,7 @@ import java.util.Set;
 import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
+import org.eclipse.che.api.devfile.server.URLFetcher;
 import org.eclipse.che.api.devfile.server.convert.CommandConverter;
 import org.eclipse.che.api.devfile.server.convert.DefaultEditorProvisioner;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
@@ -38,7 +39,6 @@ import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
-import org.eclipse.che.api.factory.server.urlfactory.URLFetcher;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
@@ -56,7 +56,7 @@ public class DefaultFactoryParameterResolverTest {
           + "components:\n"
           + "- type: kubernetes\n"
           + "  name: component\n"
-          + "  local: ../localfile\n";
+          + "  reference: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
   @Mock private KubernetesRecipeParser kubernetesRecipeParser;
@@ -80,7 +80,7 @@ public class DefaultFactoryParameterResolverTest {
               // local file. That's all we need to happen
               FileContentProvider p = i.getArgument(2);
               Component component = i.getArgument(1);
-              p.fetchContent(component.getLocal());
+              p.fetchContent(component.getReference());
               return null;
             })
         .when(applier)
