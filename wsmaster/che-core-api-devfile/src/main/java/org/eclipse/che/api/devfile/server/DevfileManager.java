@@ -49,10 +49,10 @@ import org.eclipse.che.commons.env.EnvironmentContext;
 public class DevfileManager {
 
   private final ObjectMapper objectMapper;
-  private DevfileSchemaValidator schemaValidator;
-  private DevfileIntegrityValidator integrityValidator;
-  private DevfileConverter devfileConverter;
-  private WorkspaceManager workspaceManager;
+  private final DevfileSchemaValidator schemaValidator;
+  private final DevfileIntegrityValidator integrityValidator;
+  private final DevfileConverter devfileConverter;
+  private final WorkspaceManager workspaceManager;
 
   @Inject
   public DevfileManager(

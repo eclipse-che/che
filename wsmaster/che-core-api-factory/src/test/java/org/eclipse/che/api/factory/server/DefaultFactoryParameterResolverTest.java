@@ -29,6 +29,7 @@ import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.CommandConverter;
+import org.eclipse.che.api.devfile.server.convert.DefaultEditorProvisioner;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
 import org.eclipse.che.api.devfile.server.convert.ProjectConverter;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
@@ -87,7 +88,11 @@ public class DefaultFactoryParameterResolverTest {
 
     DevfileConverter devfileConverter =
         new DevfileConverter(
-            new ProjectConverter(), new CommandConverter(), componentProvisioners, appliers);
+            new ProjectConverter(),
+            new CommandConverter(),
+            componentProvisioners,
+            appliers,
+            new DefaultEditorProvisioner(null, new String[] {}));
 
     WorkspaceManager workspaceManager = mock(WorkspaceManager.class);
 

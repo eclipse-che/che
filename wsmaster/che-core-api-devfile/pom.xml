@@ -60,6 +60,10 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-client</artifactId>
         </dependency>
@@ -203,8 +207,8 @@
                     <sourceDirectory>${basedir}/src/main/resources/schema</sourceDirectory>
                     <targetPackage>org.eclipse.che.api.devfile.model</targetPackage>
                     <includeAdditionalProperties>false</includeAdditionalProperties>
-                    <includeHashcodeAndEquals>false</includeHashcodeAndEquals>
-                    <includeToString>false</includeToString>
+                    <includeHashcodeAndEquals>true</includeHashcodeAndEquals>
+                    <includeToString>true</includeToString>
                     <initializeCollections>true</initializeCollections>
                     <generateBuilders>true</generateBuilders>
                 </configuration>
