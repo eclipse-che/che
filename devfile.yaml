@@ -14,7 +14,7 @@ components:
     id: che-machine-exec-plugin:0.0.1
   - name: che-dev
     type: kubernetes
-    local: .che-dev.yaml
+    reference: .che-dev.yaml
 commands:
   - name: fastbuild
     actions:
