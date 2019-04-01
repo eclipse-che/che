@@ -9,9 +9,12 @@ As a continuation of this, the brand new `devfile` format was introduced, which 
 The minimal devfile sufficient to run a workspace from it, consists of the following parts:
  - Specification version
  - Name
- - A list of components: the development components and user runtimes 
- 
+
+Without any further configuration a workspace with default editor will be launched along with its default plugins which are configured on Che Server.
+By default, `Che Theia` is configured as a default one along with `Che Machine Exec` plugin.
+
 To get more functional workspace, the following parts can be added:
+ - A list of components: the development components and user runtimes
  - A list of projects: the source code repositories
  - A list of commands: actions to manage the workspace components like running the dev tools, starting the runtime environments etc...
 
@@ -72,7 +75,7 @@ Please note that all components inside single devfile must have unique names.
 Detailed component types explanation below:
 
 #### cheEditor 
-Describes the editor which used in workspace by defining it's id. 
+Describes the editor which used in workspace by defining its id.
 Devfile can only contain one component with `cheEditor` type.
 
 ```
@@ -82,6 +85,11 @@ components:
     type: cheEditor
     id: org.eclipse.che.editor.theia:1.0.0
 ```
+
+If it is missing then a default editor will be provided along with its default plugins.
+The default plugins will be provided also for an explicitly defined editor with the same ID as the default one (even if in a different version).
+By default, `Che Theia` is configured as default editor along with `Che Machine Exec` plugin.
+You're able to put `editorFree:true` attribute into Devfile attributes in case you do not need any editor in your workspace.
 
 #### chePlugin
 Describes the plugin which used in workspace by defining it's id. 
