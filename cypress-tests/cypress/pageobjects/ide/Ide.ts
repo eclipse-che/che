@@ -22,7 +22,7 @@ export class Ide {
 
     private static readonly TOP_MENU_PANEL: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
     private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
-    public static readonly FILES_BUTTON: string = ".theia-app-left .p-TabBar-content li[title='Files']";
+    public static readonly EXPLORER_BUTTON: string = ".theia-app-left .p-TabBar-content li[title='Explorer']";
     private static readonly PRELOADER: string = ".theia-preload";
     private static readonly IDE_IFRAME: string = "iframe#ide-application-iframe";
 
@@ -57,7 +57,7 @@ export class Ide {
                 cy.log("**Wait until defined parts of IDE are visible**")
             })
             .then(() => {
-                [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON]
+                [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.EXPLORER_BUTTON]
                     .forEach(idePartLocator => {
                         cy.get(Ide.IDE_IFRAME, { timeout: Ide.LOAD_PAGE_TIMEOUT })
                             .should(iframe => {
@@ -74,7 +74,7 @@ export class Ide {
                 this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName)
             })
             .then(() => {
-                [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON]
+                [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.EXPLORER_BUTTON]
                     .forEach(idePart => {
                         cy.get(idePart, { timeout: Ide.LOAD_PAGE_TIMEOUT })
                             .should('be.visible')
@@ -83,7 +83,7 @@ export class Ide {
     }
 
     waitIde() {
-        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.FILES_BUTTON]
+        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.EXPLORER_BUTTON]
             .forEach(idePart => {
                 cy.get(idePart, { timeout: Ide.LOAD_PAGE_TIMEOUT })
                     .should('be.visible')
@@ -99,13 +99,13 @@ export class Ide {
             })
     }
 
-    waitFilesButton() {
-        cy.get(Ide.FILES_BUTTON)
+    waitExplorerButton() {
+        cy.get(Ide.EXPLORER_BUTTON)
             .should('be.visible');
     }
 
-    clickOnFilesButton() {
-        cy.get(Ide.FILES_BUTTON)
+    clickOnExplorerButton() {
+        cy.get(Ide.EXPLORER_BUTTON)
             .first()
             .click();
     }

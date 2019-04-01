@@ -17,7 +17,6 @@
  * 4. Check Language Server initialization
  * 5. Delete workspace using dashboard
  */
-import { LoginPage } from "../pageobjects/dashboard/LoginPage";
 import { Dashboard } from "../pageobjects/dashboard/Dashboard";
 import { Workspaces } from "../pageobjects/dashboard/Workspaces";
 import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";
@@ -25,12 +24,15 @@ import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
 import { NameGenerator } from "../utils/NameGenerator";
+import { ILoginPage } from "../pageobjects/dashboard/interfaces/ILoginPage";
+import { e2eContainer } from "../inversifyJS/inversify.config";
+import { TYPES } from "../inversifyJS/types";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
 const sampleName: string = "console-java-simple";
 
-const loginPage: LoginPage = new LoginPage();
+const loginPage: ILoginPage = e2eContainer.get<ILoginPage>(TYPES.ILoginPage);
 const dashboard: Dashboard = new Dashboard();
 const workspaces: Workspaces = new Workspaces();
 const newWorkspace: NewWorkspace = new NewWorkspace();
@@ -43,7 +45,7 @@ describe("E2E test", () => {
 
     context("Prepare dashboard", () => {
         it("Open dashboard", () => {
-            dashboard.openDashboard();
+            loginPage.login();
             dashboard.waitLoaderPage();
             dashboard.waitLoaderPageAbcence()
             dashboard.waitDashboard();

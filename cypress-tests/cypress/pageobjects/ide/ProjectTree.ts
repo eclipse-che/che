@@ -33,14 +33,14 @@ export class ProjectTree {
     }
 
     openProjectTreeContainer() {
-        cy.get(Ide.FILES_BUTTON)
+        cy.get(Ide.EXPLORER_BUTTON)
             .should('be.visible')
             .then(filesButton => {
                 let isProjectTreeContainerOpened: boolean = filesButton.hasClass("p-mod-current");
 
                 //if project tree container is not opened click on "Files" button
                 if (!isProjectTreeContainerOpened) {
-                    this.ide.clickOnFilesButton();
+                    this.ide.clickOnExplorerButton();
                 }
             }).then(() => {
                 this.waitProjectTreeContainer();
@@ -170,8 +170,8 @@ export class ProjectTree {
             })
     }
 
-    private doWaitProjectImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): Promise<void> {
-        return new Promise((resolve, reject) => {
+    private doWaitProjectImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): PromiseLike<void> {
+        return new Cypress.Promise((resolve:any, reject:any) => {
             let rootItem: string = `/${projectName}`;
 
             this.expandItem(rootItem)
