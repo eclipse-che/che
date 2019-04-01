@@ -91,6 +91,11 @@
                 "examples": [
                   "git@github.com:spring-projects/spring-petclinic.git"
                 ]
+              },
+              "refspec": {
+                "type": "string",
+                "description": "The name of the refspec to check out after the clone. This can be a branch, tag, commit id or anything the particular source type understands.",
+                "examples": [ "master", "feature-42", "304df5a" ]
               }
             }
           }

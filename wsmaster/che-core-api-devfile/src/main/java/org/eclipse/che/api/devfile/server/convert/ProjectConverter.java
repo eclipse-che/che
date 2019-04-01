@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
+import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.REFSPEC_PARAMETER_NAME;
+
+import com.google.common.base.Strings;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -31,10 +34,13 @@ public class ProjectConverter {
    * @return created devfile project based on the specified workspace project
    */
   public Project toDevfileProject(ProjectConfigImpl projectConfig) {
+    String refspec = projectConfig.getSource().getParameters().get(REFSPEC_PARAMETER_NAME);
     Source source =
         new Source()
             .withType(projectConfig.getSource().getType())
-            .withLocation(projectConfig.getSource().getLocation());
+            .withLocation(projectConfig.getSource().getLocation())
+            .withRefspec(refspec);
+
     return new Project().withName(projectConfig.getName()).withSource(source);
   }
 
@@ -49,10 +55,21 @@ public class ProjectConverter {
     projectConfig.setName(devProject.getName());
     projectConfig.setPath("/" + projectConfig.getName());
 
-    SourceStorageImpl sourceStorage = new SourceStorageImpl();
-    sourceStorage.setType(devProject.getSource().getType());
-    sourceStorage.setLocation(devProject.getSource().getLocation());
-    projectConfig.setSource(sourceStorage);
+    projectConfig.setSource(toSourceStorage(devProject.getSource()));
     return projectConfig;
+  }
+
+  private SourceStorageImpl toSourceStorage(Source source) {
+    SourceStorageImpl sourceStorage = new SourceStorageImpl();
+
+    sourceStorage.setType(source.getType());
+    sourceStorage.setLocation(source.getLocation());
+    String refspec = source.getRefspec();
+
+    if (!Strings.isNullOrEmpty(refspec)) {
+      sourceStorage.getParameters().put(REFSPEC_PARAMETER_NAME, refspec);
+    }
+
+    return sourceStorage;
   }
 }

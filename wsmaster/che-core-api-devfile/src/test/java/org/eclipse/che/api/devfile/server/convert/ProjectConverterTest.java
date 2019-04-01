@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
+import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.REFSPEC_PARAMETER_NAME;
 import static org.testng.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.model.Source;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
@@ -36,7 +38,10 @@ public class ProjectConverterTest {
         new Project()
             .withName("myProject")
             .withSource(
-                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+                new Source()
+                    .withLocation("https://github.com/eclipse/che.git")
+                    .withType("git")
+                    .withRefspec("master"));
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
 
@@ -45,23 +50,26 @@ public class ProjectConverterTest {
     SourceStorageImpl source = workspaceProject.getSource();
     assertEquals(source.getType(), "git");
     assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
+    assertEquals(source.getParameters().get(REFSPEC_PARAMETER_NAME), "master");
   }
 
   @Test
   public void testConvertingProjectConfigToDevfileProject() {
-    ProjectConfigImpl workpsaceProject = new ProjectConfigImpl();
-    workpsaceProject.setName("myProject");
-    workpsaceProject.setPath("/ignored");
+    ProjectConfigImpl workspaceProject = new ProjectConfigImpl();
+    workspaceProject.setName("myProject");
+    workspaceProject.setPath("/ignored");
     SourceStorageImpl sourceStorage = new SourceStorageImpl();
     sourceStorage.setType("git");
     sourceStorage.setLocation("https://github.com/eclipse/che.git");
-    workpsaceProject.setSource(sourceStorage);
+    sourceStorage.setParameters(ImmutableMap.of(REFSPEC_PARAMETER_NAME, "master"));
+    workspaceProject.setSource(sourceStorage);
 
-    Project devfileProject = projectConverter.toDevfileProject(workpsaceProject);
+    Project devfileProject = projectConverter.toDevfileProject(workspaceProject);
 
     assertEquals(devfileProject.getName(), "myProject");
     Source source = devfileProject.getSource();
     assertEquals(source.getType(), "git");
     assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
+    assertEquals(source.getRefspec(), "master");
   }
 }

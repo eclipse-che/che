@@ -16,6 +16,12 @@ import java.util.Map;
 /** @author gazarenkov */
 public interface SourceStorage {
 
+  /**
+   * The key with this name in the parameters designates the exact revision the source corresponds
+   * to. This can be a branch, tag, commit id or anything the particular VCS type understands.
+   */
+  String REFSPEC_PARAMETER_NAME = "refspec";
+
   String getType();
 
   String getLocation();
