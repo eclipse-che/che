@@ -17,7 +17,6 @@
  * 4. Check Language Server initialization
  * 5. Delete workspace using dashboard
  */
-import { LoginPageMultiUser } from "../pageobjects/dashboard/LoginPageMultiUser";
 import { Dashboard } from "../pageobjects/dashboard/Dashboard";
 import { Workspaces } from "../pageobjects/dashboard/Workspaces";
 import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";

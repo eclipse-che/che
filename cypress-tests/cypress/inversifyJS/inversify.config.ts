@@ -1,7 +1,6 @@
 import { Container } from "inversify";
 import { ILoginPage } from "../pageobjects/dashboard/interfaces/ILoginPage";
 import { TYPES } from "./types";
-import { LoginPageMultiUser } from "../pageobjects/dashboard/LoginPageMultiUser";
 import { LoginPageSingleUser } from "../pageobjects/dashboard/LoginPageSingleUser";
 
 /*********************************************************************
