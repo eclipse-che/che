@@ -1,6 +1,6 @@
 {
     "numTestsKeptInMemory": 10,
-    "defaultCommandTimeout": 10000,
+    "defaultCommandTimeout": 20000,
     "viewportWidth": 1920,
     "viewportHeight": 1080,
     "baseUrl": "http://sample-url",

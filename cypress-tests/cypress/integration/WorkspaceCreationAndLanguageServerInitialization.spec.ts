@@ -28,6 +28,7 @@ import { NameGenerator } from "../utils/NameGenerator";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
+const sampleName: string = "console-java-simple";
 
 const loginPage: LoginPage = new LoginPage();
 const dashboard: Dashboard = new Dashboard();
@@ -64,8 +65,9 @@ describe("E2E test", () => {
             newWorkspace.clickOnChe7Stack();
             newWorkspace.waitChe7StackSelected();
             newWorkspace.clickOnAddOrImportProjectButton();
-            newWorkspace.enableWebJavaSpringCheckbox();
+            newWorkspace.enableSampleCheckbox(sampleName);
             newWorkspace.clickOnAddButton();
+            newWorkspace.waitProjectAdding(sampleName);
             newWorkspace.waitPluginListItem(javaPluginName);
             newWorkspace.waitPluginDisabling(javaPluginName);
             newWorkspace.clickOnPluginListItemSwitcher(javaPluginName);
@@ -83,14 +85,14 @@ describe("E2E test", () => {
     })
 
     context("Work with IDE", () => {
-        let fileFolderPath: string = "web-java-spring/src/main/java/org/eclipse/che/examples";
-        let tabTitle: string = "GreetingController.java";
+        let fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
+        let tabTitle: string = "HelloWorld.java";
         let filePath: string = `${fileFolderPath}/${tabTitle}`
 
         it("Open project tree container", () => {
             projectTree.openProjectTreeContainer();
             projectTree.waitProjectTreeContainer();
-            projectTree.waitProjectImported("web-java-spring", "src")
+            projectTree.waitProjectImported(sampleName, "src")
         })
 
         it("Expand project and open file in editor", () => {
