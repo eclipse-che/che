@@ -31,7 +31,7 @@ public class WorkspaceDetailsOverviewTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
   private static final String CHANGED_WORKSPACE_NAME = NameGenerator.generate(WORKSPACE_NAME, 4);
   private static final String MACHINE_NAME = "dev-machine";
-  private static final String SAMPLE_NAME = "web-java-spring";
+  private static final String SAMPLE_NAME = "console-java-simple";
   private static final String TOO_SHORT_NAME = "wk";
   private static final String MAX_LONG_NAME = NameGenerator.generate("wksp-", 95);
   private static final String TOO_LONG_NAME = NameGenerator.generate(MAX_LONG_NAME, 1);
