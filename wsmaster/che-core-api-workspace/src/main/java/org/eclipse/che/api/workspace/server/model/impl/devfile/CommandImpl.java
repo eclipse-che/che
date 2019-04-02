@@ -18,14 +18,44 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Action;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileCommand")
+@Table(name = "devfile_command")
 public class CommandImpl implements Command {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "name", nullable = false)
   private String name;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_actions_id")
   private List<ActionImpl> actions;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "command_attributes",
+      joinColumns = @JoinColumn(name = "command_id"))
+  @MapKeyColumn(name = "attributes_key")
+  @Column(name = "attributes")
   private Map<String, String> attributes;
 
   public CommandImpl() {}
@@ -86,7 +116,8 @@ public class CommandImpl implements Command {
       return false;
     }
     CommandImpl command = (CommandImpl) o;
-    return Objects.equals(getName(), command.getName())
+    return Objects.equals(id, command.id)
+        && Objects.equals(name, command.name)
         && Objects.equals(getActions(), command.getActions())
         && Objects.equals(getAttributes(), command.getAttributes());
   }
@@ -99,7 +130,10 @@ public class CommandImpl implements Command {
   @Override
   public String toString() {
     return "CommandImpl{"
-        + "name='"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
         + name
         + '\''
         + ", actions="

@@ -12,13 +12,32 @@
 package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileProject")
+@Table(name = "devfile_project")
 public class ProjectImpl implements Project {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "name", nullable = false)
   private String name;
+
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "source_id")
   private SourceImpl source;
 
   public ProjectImpl() {}
@@ -61,8 +80,9 @@ public class ProjectImpl implements Project {
       return false;
     }
     ProjectImpl project = (ProjectImpl) o;
-    return Objects.equals(getName(), project.getName())
-        && Objects.equals(getSource(), project.getSource());
+    return Objects.equals(id, project.id)
+        && Objects.equals(name, project.name)
+        && Objects.equals(source, project.source);
   }
 
   @Override
@@ -72,6 +92,15 @@ public class ProjectImpl implements Project {
 
   @Override
   public String toString() {
-    return "ProjectImpl{" + "name='" + name + '\'' + ", source=" + source + '}';
+    return "ProjectImpl{"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", source="
+        + source
+        + '}';
   }
 }

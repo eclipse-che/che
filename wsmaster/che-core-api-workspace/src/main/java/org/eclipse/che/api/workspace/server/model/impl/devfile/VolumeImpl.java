@@ -12,12 +12,27 @@
 package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Volume;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileVolume")
+@Table(name = "devfile_volume")
 public class VolumeImpl implements Volume {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "name", nullable = false)
   private String name;
+
+  @Column(name = "container_path", nullable = false)
   private String containerPath;
 
   public VolumeImpl() {}
@@ -58,8 +73,9 @@ public class VolumeImpl implements Volume {
       return false;
     }
     VolumeImpl volume = (VolumeImpl) o;
-    return Objects.equals(getName(), volume.getName())
-        && Objects.equals(getContainerPath(), volume.getContainerPath());
+    return Objects.equals(id, volume.id)
+        && Objects.equals(name, volume.name)
+        && Objects.equals(containerPath, volume.containerPath);
   }
 
   @Override
@@ -70,7 +86,10 @@ public class VolumeImpl implements Volume {
   @Override
   public String toString() {
     return "VolumeImpl{"
-        + "name='"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
         + name
         + '\''
         + ", containerPath='"

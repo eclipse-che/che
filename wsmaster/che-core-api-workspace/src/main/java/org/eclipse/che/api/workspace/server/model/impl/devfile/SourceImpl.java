@@ -12,13 +12,30 @@
 package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileSource")
+@Table(name = "devfile_source")
 public class SourceImpl implements Source {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "type", nullable = false)
   private String type;
+
+  @Column(name = "location", nullable = false)
   private String location;
+
+  @Column(name = "refspec")
   private String refspec;
 
   public SourceImpl() {}
@@ -69,9 +86,10 @@ public class SourceImpl implements Source {
       return false;
     }
     SourceImpl source = (SourceImpl) o;
-    return Objects.equals(getType(), source.getType())
-        && Objects.equals(getLocation(), source.getLocation())
-        && Objects.equals(getRefspec(), source.getRefspec());
+    return Objects.equals(id, source.id)
+        && Objects.equals(type, source.type)
+        && Objects.equals(location, source.location)
+        && Objects.equals(refspec, source.refspec);
   }
 
   @Override
@@ -82,7 +100,10 @@ public class SourceImpl implements Source {
   @Override
   public String toString() {
     return "SourceImpl{"
-        + "type='"
+        + "id='"
+        + id
+        + '\''
+        + ", type='"
         + type
         + '\''
         + ", location='"

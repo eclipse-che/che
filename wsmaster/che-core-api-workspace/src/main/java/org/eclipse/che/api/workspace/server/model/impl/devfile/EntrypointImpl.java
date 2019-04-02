@@ -16,16 +16,56 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileEntrypoint")
+@Table(name = "devfile_entrypoint")
 public class EntrypointImpl implements Entrypoint {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "parent_name", nullable = false)
   private String parentName;
-  private Map<String, String> parentSelector;
+
+  @Column(name = "container_name", nullable = false)
   private String containerName;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "entrypoint_commands",
+      joinColumns = @JoinColumn(name = "entrypoint_id"))
+  @Column(name = "commands")
   private List<String> command;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "entrypoint_args",
+      joinColumns = @JoinColumn(name = "entrypoint_id"))
+  @Column(name = "args")
   private List<String> args;
+
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "entrypoint_selector",
+      joinColumns = @JoinColumn(name = "entrypoint_id"))
+  @MapKeyColumn(name = "selectors_key")
+  @Column(name = "selectors")
+  private Map<String, String> parentSelector;
 
   public EntrypointImpl() {}
 

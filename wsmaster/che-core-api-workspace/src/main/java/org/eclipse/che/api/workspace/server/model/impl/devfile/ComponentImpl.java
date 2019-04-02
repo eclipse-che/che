@@ -17,6 +17,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
@@ -24,21 +35,67 @@ import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Volume;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileComponent")
+@Table(name = "devfile_component")
 public class ComponentImpl implements Component {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "name", nullable = false)
   private String name;
+
+  @Column(name = "type", nullable = false)
   private String type;
-  private String id;
+
+  @Column(name = "component_id")
+  private String component_id;
+
+  @Column(name = "reference")
   private String reference;
+
+  @Column(name = "reference_content")
   private String referenceContent;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_entrypoints_id")
   private List<EntrypointImpl> entrypoints;
+
+  @Column(name = "image")
   private String image;
+
+  @Column(name = "memory_limit")
   private String memoryLimit;
+
+  @Column(name = "mount_sources")
   private boolean mountSources;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "component_command",
+      joinColumns = @JoinColumn(name = "component_id"))
+  @Column(name = "commands")
   private List<String> command;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "component_args",
+      joinColumns = @JoinColumn(name = "component_id"))
+  @Column(name = "args")
   private List<String> args;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_volumes_id")
   private List<VolumeImpl> volumes;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_env_id")
   private List<EnvImpl> env;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_endpoints_id")
   private List<EndpointImpl> endpoints;
 
   public ComponentImpl() {}
@@ -46,7 +103,7 @@ public class ComponentImpl implements Component {
   public ComponentImpl(
       String name,
       String type,
-      String id,
+      String component_id,
       String reference,
       String referenceContent,
       List<? extends Entrypoint> entrypoints,
@@ -60,7 +117,7 @@ public class ComponentImpl implements Component {
       List<? extends Endpoint> endpoints) {
     this.name = name;
     this.type = type;
-    this.id = id;
+    this.component_id = component_id;
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (entrypoints != null) {
@@ -102,7 +159,7 @@ public class ComponentImpl implements Component {
         component.getEndpoints());
   }
 
-  public ComponentImpl(String name, String type, String id) {}
+  public ComponentImpl(String name, String type, String component_id) {}
 
   @Override
   public String getName() {
@@ -124,11 +181,11 @@ public class ComponentImpl implements Component {
 
   @Override
   public String getId() {
-    return id;
+    return component_id;
   }
 
   public void setId(String id) {
-    this.id = id;
+    this.component_id = id;
   }
 
   @Override
@@ -263,8 +320,9 @@ public class ComponentImpl implements Component {
     }
     ComponentImpl component = (ComponentImpl) o;
     return getMountSources() == component.getMountSources()
-        && Objects.equals(getName(), component.getName())
-        && Objects.equals(getType(), component.getType())
+        && Objects.equals(id, component.id)
+        && Objects.equals(name, component.name)
+        && Objects.equals(type, component.type)
         && Objects.equals(getId(), component.getId())
         && Objects.equals(getReference(), component.getReference())
         && Objects.equals(getReferenceContent(), component.getReferenceContent())
@@ -307,7 +365,7 @@ public class ComponentImpl implements Component {
         + type
         + '\''
         + ", id='"
-        + id
+        + component_id
         + '\''
         + ", reference='"
         + reference

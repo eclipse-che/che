@@ -14,13 +14,40 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileEndpoint")
+@Table(name = "devfile_endpoint")
 public class EndpointImpl implements Endpoint {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "name", nullable = false)
   private String name;
+
+  @Column(name = "port", nullable = false)
   private Integer port;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "environment_attributes",
+      joinColumns = @JoinColumn(name = "environment_id"))
+  @MapKeyColumn(name = "attributes_key")
+  @Column(name = "attributes")
   private Map<String, String> attributes;
 
   public EndpointImpl() {}
@@ -74,8 +101,9 @@ public class EndpointImpl implements Endpoint {
       return false;
     }
     EndpointImpl endpoint = (EndpointImpl) o;
-    return Objects.equals(getName(), endpoint.getName())
-        && Objects.equals(getPort(), endpoint.getPort())
+    return Objects.equals(id, endpoint.id)
+        && Objects.equals(name, endpoint.name)
+        && Objects.equals(port, endpoint.port)
         && Objects.equals(getAttributes(), endpoint.getAttributes());
   }
 
@@ -87,7 +115,10 @@ public class EndpointImpl implements Endpoint {
   @Override
   public String toString() {
     return "EndpointImpl{"
-        + "name='"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
         + name
         + '\''
         + ", port="
