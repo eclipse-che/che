@@ -11,11 +11,14 @@
  */
 package org.eclipse.che.api.metrics;
 
+import static java.lang.Double.NaN;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.UserManager;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -31,7 +34,7 @@ public class UserMeterBinderTest {
   private MeterRegistry registry;
 
   @BeforeMethod
-  public void setup() {
+  public void setUp() {
     registry = new SimpleMeterRegistry();
     UserMeterBinder meterBinder = new UserMeterBinder(userManager);
     meterBinder.bindTo(registry);
@@ -42,5 +45,12 @@ public class UserMeterBinderTest {
     when(userManager.getTotalCount()).thenReturn(5L);
 
     assertEquals(registry.find("che.user.total").gauge().value(), 5.0);
+  }
+
+  @Test
+  public void shouldCollectNaNUserCountIfExceptionOccursInManager() throws Exception {
+    doThrow(ServerException.class).when(userManager).getTotalCount();
+
+    assertEquals(registry.find("che.user.total").gauge().value(), NaN);
   }
 }
