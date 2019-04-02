@@ -21,14 +21,14 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
- * Provision chePlugin components in {@link Devfile} according to the value of {@link
+ * Provision chePlugin components in {@link DevfileImpl} according to the value of {@link
  * Constants#WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE} in the specified {@link WorkspaceConfigImpl}.
  *
  * @author Sergii Leshchenko
@@ -36,7 +36,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 public class PluginProvisioner implements ComponentProvisioner {
 
   /**
-   * Provision chePlugin components in {@link Devfile} according to the value of {@link
+   * Provision chePlugin components in {@link DevfileImpl} according to the value of {@link
    * Constants#WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE} in the specified {@link WorkspaceConfigImpl}.
    *
    * @param devfile devfile that should be provisioned with chePlugin components
@@ -44,7 +44,7 @@ public class PluginProvisioner implements ComponentProvisioner {
    * @throws IllegalArgumentException if the specified workspace config or devfile is null
    */
   @Override
-  public void provision(Devfile devfile, WorkspaceConfigImpl workspaceConfig) {
+  public void provision(DevfileImpl devfile, WorkspaceConfigImpl workspaceConfig) {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
     checkArgument(devfile != null, "Workspace config must not be null");
 
@@ -57,11 +57,11 @@ public class PluginProvisioner implements ComponentProvisioner {
     Map<String, String> pluginIdToComponentName = extractPluginIdToComponentName(workspaceConfig);
 
     for (String pluginId : pluginsAttribute.split(",")) {
-      Component pluginComponent =
-          new Component()
-              .withId(pluginId)
-              .withType(PLUGIN_COMPONENT_TYPE)
-              .withName(pluginIdToComponentName.getOrDefault(pluginId, pluginId));
+      ComponentImpl pluginComponent =
+          new ComponentImpl(
+              PLUGIN_COMPONENT_TYPE,
+              pluginIdToComponentName.getOrDefault(pluginId, pluginId),
+              pluginId);
       devfile.getComponents().add(pluginComponent);
     }
   }

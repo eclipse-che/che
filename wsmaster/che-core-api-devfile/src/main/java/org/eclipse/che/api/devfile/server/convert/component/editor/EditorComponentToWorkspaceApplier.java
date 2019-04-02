@@ -19,7 +19,7 @@ import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIA
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 
-import org.eclipse.che.api.devfile.model.Component;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;

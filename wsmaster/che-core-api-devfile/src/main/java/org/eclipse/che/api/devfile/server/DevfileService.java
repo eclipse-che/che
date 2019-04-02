@@ -40,11 +40,11 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
 @Api(value = "/devfile", description = "Devfile REST API")
@@ -120,7 +120,7 @@ public class DevfileService extends Service {
 
     WorkspaceImpl workspace;
     try {
-      Devfile devfile = devfileManager.parse(data);
+      DevfileImpl devfile = devfileManager.parse(data);
       workspace = devfileManager.createWorkspace(devfile, urlFileContentProvider);
     } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());

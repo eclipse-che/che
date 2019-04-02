@@ -11,21 +11,21 @@
  */
 package org.eclipse.che.api.devfile.server.convert.component;
 
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 
 /**
- * Provision component in {@link Devfile} according to the specified {@link WorkspaceConfigImpl}.
- * Different implementations process different part of {@link WorkspaceConfigImpl} and provision
- * different components types.
+ * Provision component in {@link DevfileImpl} according to the specified {@link
+ * WorkspaceConfigImpl}. Different implementations process different part of {@link
+ * WorkspaceConfigImpl} and provision different components types.
  *
  * @author Sergii Leshchenko
  */
 public interface ComponentProvisioner {
 
   /**
-   * Applies needed changes on {@link Devfile} according to the specified {@link
+   * Applies needed changes on {@link DevfileImpl} according to the specified {@link
    * WorkspaceConfigImpl}.
    *
    * @param devfile devfile that should be updated with the specified workspace config
@@ -34,6 +34,6 @@ public interface ComponentProvisioner {
    * @throws WorkspaceExportException if the specified workspace config can not be applied on
    *     devfile
    */
-  void provision(Devfile devfile, WorkspaceConfigImpl workspaceConfig)
+  void provision(DevfileImpl devfile, WorkspaceConfigImpl workspaceConfig)
       throws WorkspaceExportException;
 }

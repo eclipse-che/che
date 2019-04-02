@@ -15,11 +15,13 @@ import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.REFS
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
-import org.eclipse.che.api.devfile.model.Project;
-import org.eclipse.che.api.devfile.model.Source;
+import org.eclipse.che.api.core.model.workspace.devfile.Project;
+import org.eclipse.che.api.core.model.workspace.devfile.Source;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -35,14 +37,11 @@ public class ProjectConverterTest {
 
   @Test
   public void testConvertingDevfileProjectToProjectConfig() throws Exception {
-    Project devfileProject =
-        new Project()
-            .withName("myProject")
-            .withSource(
-                new Source()
-                    .withLocation("https://github.com/eclipse/che.git")
-                    .withType("git")
-                    .withRefspec("master"));
+    ProjectImpl devfileProject =
+        new ProjectImpl(
+            "myProject",
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            null);
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
 
@@ -77,12 +76,11 @@ public class ProjectConverterTest {
 
   @Test
   public void testClonePathSetWhenConvertingDevfileToProjectConfig() throws Exception {
-    Project devfileProject =
-        new Project()
-            .withName("myProject")
-            .withClonePath("down/the/rabbit/hole/myProject")
-            .withSource(
-                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+    ProjectImpl devfileProject =
+        new ProjectImpl(
+            "myProject",
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            "down/the/rabbit/hole/myProject");
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
 
@@ -95,36 +93,33 @@ public class ProjectConverterTest {
 
   @Test(expectedExceptions = DevfileException.class)
   public void testClonePathCannotEscapeProjectsRoot() throws Exception {
-    Project devfileProject =
-        new Project()
-            .withName("myProject")
-            .withClonePath("cant/hack/../../../usr/bin")
-            .withSource(
-                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+    ProjectImpl devfileProject =
+        new ProjectImpl(
+            "myProject",
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            "cant/hack/../../../usr/bin");
 
     projectConverter.toWorkspaceProject(devfileProject);
   }
 
   @Test(expectedExceptions = DevfileException.class)
   public void testClonePathCannotBeAbsolute() throws Exception {
-    Project devfileProject =
-        new Project()
-            .withName("myProject")
-            .withClonePath("/usr/bin")
-            .withSource(
-                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+    ProjectImpl devfileProject =
+        new ProjectImpl(
+            "myProject",
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            "/usr/bin");
 
     projectConverter.toWorkspaceProject(devfileProject);
   }
 
   @Test
   public void testUpDirOkInClonePathAsLongAsItDoesntEscapeProjectsRoot() throws Exception {
-    Project devfileProject =
-        new Project()
-            .withName("myProject")
-            .withClonePath("cant/hack/../../usr/bin")
-            .withSource(
-                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+    ProjectImpl devfileProject =
+        new ProjectImpl(
+            "myProject",
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            "cant/hack/../../usr/bin");
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
     // this is OK, because the absolute-looking path is applied to the projects root
@@ -133,12 +128,11 @@ public class ProjectConverterTest {
 
   @Test(expectedExceptions = DevfileException.class)
   public void testCloningIntoProjectsRootFails() throws Exception {
-    Project devfileProject =
-        new Project()
-            .withName("myProject")
-            .withClonePath("not/../in/root/../..")
-            .withSource(
-                new Source().withLocation("https://github.com/eclipse/che.git").withType("git"));
+    ProjectImpl devfileProject =
+        new ProjectImpl(
+            "myProject",
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            "not/../in/root/../..");
 
     projectConverter.toWorkspaceProject(devfileProject);
   }

@@ -35,17 +35,15 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Entrypoint;
 import org.eclipse.che.api.devfile.server.URLFileContentProvider;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
@@ -89,11 +87,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
       shouldThrowExceptionWhenRecipeComponentIsPresentAndContentProviderDoesNotSupportFetching()
           throws Exception {
     // given
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME);
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
 
     // when
     applier.apply(
@@ -115,11 +112,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
   public void shouldThrowExceptionWhenRecipeContentIsNotAValidYaml() throws Exception {
     // given
     doThrow(new ValidationException("non valid")).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME);
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
 
     // when
     applier.apply(workspaceConfig, component, s -> "some_non_yaml_content");
@@ -131,11 +127,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
           "Error during recipe content retrieval for component 'foo' with type 'kubernetes': fetch failed")
   public void shouldThrowExceptionWhenExceptionHappensOnContentProvider() throws Exception {
     // given
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME);
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
 
     // when
     applier.apply(
@@ -152,12 +147,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
 
     // when
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
@@ -175,13 +168,11 @@ public class KubernetesComponentToWorkspaceApplierTest {
   public void shouldUseReferenceContentAsRecipeIfPresent() throws Exception {
     String yamlRecipeContent = getResource("petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(KUBERNETES_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withReferenceContent(yamlRecipeContent)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setReferenceContent(yamlRecipeContent);
+    component.setName(COMPONENT_NAME);
 
     applier.apply(workspaceConfig, component, new URLFileContentProvider(null, null));
 
@@ -199,12 +190,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
     // given
     String yamlRecipeContent = getResource("petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
-    Component component =
-        new Component()
-            .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(OPENSHIFT_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
 
     // when
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
@@ -224,12 +213,11 @@ public class KubernetesComponentToWorkspaceApplierTest {
     String yamlRecipeContent = getResource("petclinic.yaml");
 
     final Map<String, String> selector = singletonMap("app.kubernetes.io/component", "webapp");
-    Component component =
-        new Component()
-            .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(selector);
+    ComponentImpl component = new ComponentImpl();
+    component.setType(OPENSHIFT_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
+    component.setSelector(selector);
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     // when
@@ -257,12 +245,11 @@ public class KubernetesComponentToWorkspaceApplierTest {
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     final Map<String, String> selector = singletonMap("app.kubernetes.io/component", "webapp");
-    Component component =
-        new Component()
-            .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(selector);
+    ComponentImpl component = new ComponentImpl();
+    component.setType(OPENSHIFT_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
+    component.setSelector(selector);
     CommandImpl command = new CommandImpl();
     command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, COMPONENT_NAME);
     workspaceConfig.getCommands().add(command);
@@ -283,12 +270,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
     String yamlRecipeContent = getResource("petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
-    Component component =
-        new Component()
-            .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withSelector(new HashMap<>());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(OPENSHIFT_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
 
     CommandImpl command = new CommandImpl();
     command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, COMPONENT_NAME);
@@ -309,14 +294,15 @@ public class KubernetesComponentToWorkspaceApplierTest {
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     List<String> command = asList("teh", "command");
-    Component component =
-        new Component()
-            .withType(OPENSHIFT_COMPONENT_TYPE)
-            .withReference(REFERENCE_FILENAME)
-            .withName(COMPONENT_NAME)
-            .withEntrypoints(
-                singletonList(new Entrypoint().withParentName("petclinic").withCommand(command)))
-            .withSelector(Collections.emptyMap());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setName(COMPONENT_NAME);
+
+    EntrypointImpl entrypoint = new EntrypointImpl();
+    entrypoint.setParentName("petclinic");
+    entrypoint.setCommand(command);
+    component.setEntrypoints(singletonList(entrypoint));
 
     // when
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);

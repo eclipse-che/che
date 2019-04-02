@@ -26,13 +26,13 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.devfile.server.URLFetcher;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
@@ -109,7 +109,7 @@ public class URLFactoryBuilderTest {
   @Test
   public void checkWithCustomDevfileAndRecipe() throws Exception {
 
-    Devfile devfile = new Devfile();
+    DevfileImpl devfile = new DevfileImpl();
     WorkspaceConfigImpl workspaceConfigImpl = new WorkspaceConfigImpl();
     String myLocation = "http://foo-location/";
     RecipeImpl expectedRecipe =
@@ -120,7 +120,7 @@ public class URLFactoryBuilderTest {
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
     when(devfileManager.parse(anyString())).thenReturn(devfile);
-    when(devfileManager.createWorkspaceConfig(any(Devfile.class), any()))
+    when(devfileManager.createWorkspaceConfig(any(DevfileImpl.class), any()))
         .thenReturn(workspaceConfigImpl);
 
     FactoryDto factory =

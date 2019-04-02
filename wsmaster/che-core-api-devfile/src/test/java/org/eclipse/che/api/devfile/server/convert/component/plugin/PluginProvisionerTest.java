@@ -16,9 +16,9 @@ import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -46,19 +46,19 @@ public class PluginProvisionerTest {
         .put(
             PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
             "org.eclipse.che.super-plugin:0.0.1=super-plugin,custom-plugin:v1=custom");
-    Devfile devfile = new Devfile();
+    DevfileImpl devfile = new DevfileImpl();
 
     // when
     pluginComponentProvisioner.provision(devfile, workspaceConfig);
 
     // then
     assertEquals(devfile.getComponents().size(), 2);
-    Component superPluginComponent = devfile.getComponents().get(0);
+    ComponentImpl superPluginComponent = devfile.getComponents().get(0);
     assertEquals(superPluginComponent.getName(), "super-plugin");
     assertEquals(superPluginComponent.getId(), "org.eclipse.che.super-plugin:0.0.1");
     assertEquals(superPluginComponent.getType(), PLUGIN_COMPONENT_TYPE);
 
-    Component customPluginComponent = devfile.getComponents().get(1);
+    ComponentImpl customPluginComponent = devfile.getComponents().get(1);
     assertEquals(customPluginComponent.getName(), "custom");
     assertEquals(customPluginComponent.getId(), "custom-plugin:v1");
     assertEquals(customPluginComponent.getType(), PLUGIN_COMPONENT_TYPE);
@@ -72,14 +72,14 @@ public class PluginProvisionerTest {
     workspaceConfig
         .getAttributes()
         .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, "org.eclipse.che.super-plugin:0.0.1");
-    Devfile devfile = new Devfile();
+    DevfileImpl devfile = new DevfileImpl();
 
     // when
     pluginComponentProvisioner.provision(devfile, workspaceConfig);
 
     // then
     assertEquals(devfile.getComponents().size(), 1);
-    Component superPluginComponent = devfile.getComponents().get(0);
+    ComponentImpl superPluginComponent = devfile.getComponents().get(0);
     assertEquals(superPluginComponent.getName(), "org.eclipse.che.super-plugin:0.0.1");
     assertEquals(superPluginComponent.getId(), "org.eclipse.che.super-plugin:0.0.1");
     assertEquals(superPluginComponent.getType(), PLUGIN_COMPONENT_TYPE);

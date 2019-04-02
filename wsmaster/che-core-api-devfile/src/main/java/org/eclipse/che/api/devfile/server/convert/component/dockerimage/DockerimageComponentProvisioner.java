@@ -25,26 +25,25 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.model.Endpoint;
-import org.eclipse.che.api.devfile.model.Env;
-import org.eclipse.che.api.devfile.model.Volume;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPoint;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
 
 /**
- * Provision dockerimage component in {@link Devfile} according to the value of environment with
+ * Provision dockerimage component in {@link DevfileImpl} according to the value of environment with
  * dockerimage recipe if the specified {@link WorkspaceConfigImpl} has such.
  *
  * @author Sergii Leshchenko
@@ -59,8 +58,8 @@ public class DockerimageComponentProvisioner implements ComponentProvisioner {
   }
 
   /**
-   * Provision dockerimage component in {@link Devfile} according to the value of environment with
-   * dockerimage recipe if the specified {@link WorkspaceConfigImpl} has such.
+   * Provision dockerimage component in {@link DevfileImpl} according to the value of environment
+   * with dockerimage recipe if the specified {@link WorkspaceConfigImpl} has such.
    *
    * @param devfile devfile to which created dockerimage component should be injected
    * @param workspaceConfig workspace config that may contain environment with dockerimage recipe to
@@ -69,7 +68,7 @@ public class DockerimageComponentProvisioner implements ComponentProvisioner {
    * @throws WorkspaceExportException if workspace config has more than one dockerimage environments
    */
   @Override
-  public void provision(Devfile devfile, WorkspaceConfigImpl workspaceConfig)
+  public void provision(DevfileImpl devfile, WorkspaceConfigImpl workspaceConfig)
       throws WorkspaceExportException {
     checkArgument(devfile != null, "The environment must not be null");
     checkArgument(workspaceConfig != null, "The workspace config must not be null");
@@ -96,7 +95,7 @@ public class DockerimageComponentProvisioner implements ComponentProvisioner {
     EnvironmentImpl environment = dockerimageEnvEntry.getValue();
 
     RecipeImpl recipe = environment.getRecipe();
-    Component dockerimageComponent = new Component();
+    ComponentImpl dockerimageComponent = new ComponentImpl();
     dockerimageComponent.setName(environmentName);
 
     dockerimageComponent.setImage(recipe.getContent());
@@ -121,7 +120,8 @@ public class DockerimageComponentProvisioner implements ComponentProvisioner {
           .add(toEndpoint(serverEntry.getKey(), serverEntry.getValue()));
     }
 
-    for (Entry<String, VolumeImpl> volumeEntry : machineConfig.getVolumes().entrySet()) {
+    for (Entry<String, org.eclipse.che.api.workspace.server.model.impl.VolumeImpl> volumeEntry :
+        machineConfig.getVolumes().entrySet()) {
       if (volumeEntry.getKey().equals(PROJECTS_VOLUME_NAME)) {
         dockerimageComponent.setMountSources(true);
         continue;
@@ -142,7 +142,7 @@ public class DockerimageComponentProvisioner implements ComponentProvisioner {
         .getEnv()
         .entrySet()
         .stream()
-        .map(e -> new Env().withName(e.getKey()).withValue(e.getValue()))
+        .map(e -> new EnvImpl(e.getKey(), e.getValue()))
         .forEach(e -> dockerimageComponent.getEnv().add(e));
 
     devfile.getComponents().add(dockerimageComponent);
@@ -156,11 +156,12 @@ public class DockerimageComponentProvisioner implements ComponentProvisioner {
     }
   }
 
-  private Volume toDevfileVolume(String name, VolumeImpl volume) {
-    return new Volume().withName(name).withContainerPath(volume.getPath());
+  private VolumeImpl toDevfileVolume(
+      String name, org.eclipse.che.api.workspace.server.model.impl.VolumeImpl volume) {
+    return new VolumeImpl(name, volume.getPath());
   }
 
-  private Endpoint toEndpoint(String name, ServerConfigImpl config) {
+  private EndpointImpl toEndpoint(String name, ServerConfigImpl config) {
     String stringPort =
         config.getPort().split("/")[0]; // cut protocol from string port like 8080/TCP
 
@@ -173,10 +174,7 @@ public class DockerimageComponentProvisioner implements ComponentProvisioner {
       attributes.put(PUBLIC_ENDPOINT_ATTRIBUTE, "false");
     }
 
-    return new Endpoint()
-        .withName(name)
-        .withPort(Integer.parseInt(stringPort))
-        .withAttributes(attributes);
+    return new EndpointImpl(name, Integer.parseInt(stringPort), attributes);
   }
 
   private void putIfNotNull(Map<String, String> attributes, String key, String value) {
