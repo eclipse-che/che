@@ -31,6 +31,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.IntOrString;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PodTemplateSpec;
 import io.fabric8.kubernetes.api.model.Quantity;
 import io.fabric8.kubernetes.api.model.Service;
@@ -110,8 +111,16 @@ public class DockerimageComponentToWorkspaceApplierTest {
     assertTrue(objects.get(0) instanceof Deployment);
     Deployment deployment = (Deployment) objects.get(0);
     PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
-    Map<String, String> annotations = podTemplate.getMetadata().getAnnotations();
+    ObjectMeta podMeta = podTemplate.getMetadata();
+    assertEquals(podMeta.getName(), "jdk");
+
+    Map<String, String> deploymentSelector = deployment.getSpec().getSelector().getMatchLabels();
+    assertFalse(deploymentSelector.isEmpty());
+    assertTrue(podMeta.getLabels().entrySet().containsAll(deploymentSelector.entrySet()));
+
+    Map<String, String> annotations = podMeta.getAnnotations();
     assertEquals(annotations.get(String.format(MACHINE_NAME_ANNOTATION_FMT, "jdk")), "jdk");
+
     Container container = podTemplate.getSpec().getContainers().get(0);
     assertEquals(container.getName(), "jdk");
     assertEquals(container.getImage(), "eclipse/ubuntu_jdk8:latest");
