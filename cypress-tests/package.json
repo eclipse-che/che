@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "cypress:open": "cypress open",
-    "cypress:run-hidden": "cypress run",
+    "cypress:run-hidden": "cypress run --browser electron",
     "cypress:run": "cypress run --headed"
   },
   "author": "",
