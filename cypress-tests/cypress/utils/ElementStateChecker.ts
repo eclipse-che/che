@@ -1,5 +1,3 @@
-import { resolve, Promise, reject } from "bluebird";
-
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *

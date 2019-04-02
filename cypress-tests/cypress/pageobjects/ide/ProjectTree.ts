@@ -12,7 +12,6 @@
 
 import { Ide } from "./Ide";
 import { ElementStateChecker } from "../../utils/ElementStateChecker";
-import { Promise, resolve } from "bluebird";
 
 export class ProjectTree {
 

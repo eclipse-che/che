@@ -1,4 +1,3 @@
-import { Promise, resolve, reject } from "bluebird";
 import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
 
 /*********************************************************************
