@@ -148,6 +148,8 @@ public class NewWorkspace {
     ECLIPSE_VERTX("vert.x"),
     GO("go-default"),
     JAVA_CENTOS("java-centos"),
+    JAVA_GRADLE("java-gradle"),
+    JAVA_MAVEN("java-maven"),
     JAVA_THEIA_DOCKER("simple-theia-docker"),
     JAVA_THEIA_ON_KUBERNETES("java-theia-kubernetes"),
     JAVA_MYSQL_THEIA_ON_KUBERNETES("java-mysql-theia-kubernetes"),

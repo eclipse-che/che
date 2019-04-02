@@ -30,6 +30,8 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.E
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_GRADLE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MAVEN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_THEIA_ON_KUBERNETES;
@@ -90,6 +92,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_CHE,
           GO,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           JAVA_THEIA_ON_KUBERNETES,
           JAVA_THEIA_OPENSHIFT,
           NODE,
@@ -109,6 +113,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_CHE,
           GO,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           JAVA_THEIA_ON_KUBERNETES,
           NODE,
           PHP,
@@ -125,6 +131,8 @@ public class NewWorkspacePageTest {
           CPP,
           ECLIPSE_CHE,
           GO,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           NODE,
           PHP,
           PYTHON,
@@ -150,6 +158,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_VERTX,
           GO,
           JAVA_CENTOS,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           KOTLIN,
           NODE,
           PHP,
@@ -176,6 +186,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_VERTX,
           GO,
           JAVA_CENTOS,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           KOTLIN,
           NODE,
           PHP,
@@ -200,6 +212,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_VERTX,
           GO,
           JAVA_CENTOS,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           KOTLIN,
           NODE,
           PHP,
@@ -235,6 +249,8 @@ public class NewWorkspacePageTest {
               NODE,
               JAVA_THEIA_OPENSHIFT,
               JAVA_THEIA_ON_KUBERNETES,
+              JAVA_MAVEN,
+              JAVA_GRADLE,
               JAVA_MYSQL_THEIA_ON_KUBERNETES,
               GO,
               ECLIPSE_CHE,
@@ -253,6 +269,8 @@ public class NewWorkspacePageTest {
           PHP,
           NODE,
           JAVA_THEIA_ON_KUBERNETES,
+          JAVA_MAVEN,
+          JAVA_GRADLE,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
           GO,
           ECLIPSE_CHE,
@@ -272,6 +290,8 @@ public class NewWorkspacePageTest {
           PYTHON,
           PHP,
           NODE,
+          JAVA_MAVEN,
+          JAVA_GRADLE,
           GO,
           ECLIPSE_CHE,
           CPP,
