@@ -11,11 +11,11 @@
  */
 package org.eclipse.che.api.devfile.server.convert.component.kubernetes;
 
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.testng.annotations.BeforeMethod;
@@ -48,7 +48,7 @@ public class KubernetesComponentProvisionerTest {
     workspaceConfig.getEnvironments().put("osEnv", osEnv);
 
     // when
-    kubernetesComponentProvisioner.provision(new Devfile(), workspaceConfig);
+    kubernetesComponentProvisioner.provision(new DevfileImpl(), workspaceConfig);
   }
 
   @Test
@@ -61,7 +61,7 @@ public class KubernetesComponentProvisionerTest {
     workspaceConfig.getEnvironments().put("anotherEnv", anotherEnv);
 
     // when
-    kubernetesComponentProvisioner.provision(new Devfile(), workspaceConfig);
+    kubernetesComponentProvisioner.provision(new DevfileImpl(), workspaceConfig);
   }
 
   @Test(
@@ -76,7 +76,7 @@ public class KubernetesComponentProvisionerTest {
     workspaceConfig.getEnvironments().put("k8sEnv", k8sEnv);
 
     // when
-    kubernetesComponentProvisioner.provision(new Devfile(), workspaceConfig);
+    kubernetesComponentProvisioner.provision(new DevfileImpl(), workspaceConfig);
   }
 
   @Test(
@@ -92,6 +92,6 @@ public class KubernetesComponentProvisionerTest {
     workspaceConfig.getEnvironments().put("osEnv", osEnv);
 
     // when
-    kubernetesComponentProvisioner.provision(new Devfile(), workspaceConfig);
+    kubernetesComponentProvisioner.provision(new DevfileImpl(), workspaceConfig);
   }
 }

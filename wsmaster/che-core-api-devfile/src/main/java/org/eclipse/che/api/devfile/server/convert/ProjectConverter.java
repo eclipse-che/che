@@ -16,11 +16,13 @@ import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.REFS
 import com.google.common.base.Strings;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.eclipse.che.api.devfile.model.Project;
-import org.eclipse.che.api.devfile.model.Source;
+import org.eclipse.che.api.core.model.workspace.devfile.Project;
+import org.eclipse.che.api.core.model.workspace.devfile.Source;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 
 /**
  * Helps to convert {@link ProjectConfigImpl workspace project} to {@link Project devfile project}
@@ -36,13 +38,11 @@ public class ProjectConverter {
    * @param projectConfig source workspace project
    * @return created devfile project based on the specified workspace project
    */
-  public Project toDevfileProject(ProjectConfigImpl projectConfig) {
+  public ProjectImpl toDevfileProject(ProjectConfigImpl projectConfig) {
     String refspec = projectConfig.getSource().getParameters().get(REFSPEC_PARAMETER_NAME);
-    Source source =
-        new Source()
-            .withType(projectConfig.getSource().getType())
-            .withLocation(projectConfig.getSource().getLocation())
-            .withRefspec(refspec);
+    SourceImpl source =
+        new SourceImpl(
+            projectConfig.getSource().getType(), projectConfig.getSource().getLocation(), refspec);
 
     String path = projectConfig.getPath();
     while (path != null && path.startsWith("/")) {
@@ -54,7 +54,7 @@ public class ProjectConverter {
       path = null;
     }
 
-    return new Project().withName(projectConfig.getName()).withSource(source).withClonePath(path);
+    return new ProjectImpl(projectConfig.getName(), source, path);
   }
 
   /**

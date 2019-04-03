@@ -22,9 +22,8 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.List;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.DevfileFactory;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.testng.annotations.Test;
 
 /**
@@ -50,7 +49,7 @@ public class DefaultEditorProvisionerTest {
   public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() {
     // given
     defaultEditorProvisioner = new DefaultEditorProvisioner(null, new String[] {});
-    Devfile devfile = DevfileFactory.newDevfile();
+    DevfileImpl devfile = new DevfileImpl();
 
     // when
     defaultEditorProvisioner.apply(devfile);
@@ -66,32 +65,25 @@ public class DefaultEditorProvisionerTest {
         new DefaultEditorProvisioner(
             DEFAULT_EDITOR_REF,
             new String[] {DEFAULT_TERMINAL_PLUGIN_REF, DEFAULT_COMMAND_PLUGIN_REF});
-    Devfile devfile = DevfileFactory.newDevfile();
+    DevfileImpl devfile = new DevfileImpl();
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 3);
     assertTrue(
         components.contains(
-            new Component()
-                .withId(DEFAULT_EDITOR_REF)
-                .withName(DEFAULT_EDITOR_ID)
-                .withType(EDITOR_COMPONENT_TYPE)));
+            new ComponentImpl(EDITOR_COMPONENT_TYPE, DEFAULT_EDITOR_ID, DEFAULT_EDITOR_REF)));
     assertTrue(
         components.contains(
-            new Component()
-                .withId(DEFAULT_COMMAND_PLUGIN_REF)
-                .withName(DEFAULT_COMMAND_PLUGIN_ID)
-                .withType(PLUGIN_COMPONENT_TYPE)));
+            new ComponentImpl(
+                PLUGIN_COMPONENT_TYPE, DEFAULT_COMMAND_PLUGIN_ID, DEFAULT_COMMAND_PLUGIN_REF)));
     assertTrue(
         components.contains(
-            new Component()
-                .withId(DEFAULT_TERMINAL_PLUGIN_REF)
-                .withName(DEFAULT_TERMINAL_PLUGIN_ID)
-                .withType(PLUGIN_COMPONENT_TYPE)));
+            new ComponentImpl(
+                PLUGIN_COMPONENT_TYPE, DEFAULT_TERMINAL_PLUGIN_ID, DEFAULT_TERMINAL_PLUGIN_REF)));
   }
 
   @Test
@@ -101,29 +93,24 @@ public class DefaultEditorProvisionerTest {
         new DefaultEditorProvisioner(
             DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
 
-    Devfile devfile = DevfileFactory.newDevfile();
-    Component defaultEditorWithDifferentVersion =
-        new Component()
-            .withType(EDITOR_COMPONENT_TYPE)
-            .withName("my-editor")
-            .withId(DEFAULT_EDITOR_ID + ":latest");
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl defaultEditorWithDifferentVersion =
+        new ComponentImpl(EDITOR_COMPONENT_TYPE, "my-editor", DEFAULT_EDITOR_ID + ":latest");
     devfile.getComponents().add(defaultEditorWithDifferentVersion);
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 2);
 
     assertTrue(components.contains(defaultEditorWithDifferentVersion));
 
     assertTrue(
         components.contains(
-            new Component()
-                .withId(DEFAULT_TERMINAL_PLUGIN_REF)
-                .withName(DEFAULT_TERMINAL_PLUGIN_ID)
-                .withType(PLUGIN_COMPONENT_TYPE)));
+            new ComponentImpl(
+                PLUGIN_COMPONENT_TYPE, DEFAULT_TERMINAL_PLUGIN_ID, DEFAULT_TERMINAL_PLUGIN_REF)));
   }
 
   @Test
@@ -133,19 +120,17 @@ public class DefaultEditorProvisionerTest {
         new DefaultEditorProvisioner(
             DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
 
-    Devfile devfile = DevfileFactory.newDevfile();
-    Component editorWithNameSimilarToDefault =
-        new Component()
-            .withType(EDITOR_COMPONENT_TYPE)
-            .withName("my-editor")
-            .withId(DEFAULT_EDITOR_ID + "-dev:dev-version");
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl editorWithNameSimilarToDefault =
+        new ComponentImpl(
+            EDITOR_COMPONENT_TYPE, "my-editor", DEFAULT_EDITOR_ID + "-dev:dev-version");
     devfile.getComponents().add(editorWithNameSimilarToDefault);
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 1);
     assertTrue(components.contains(editorWithNameSimilarToDefault));
     assertNull(findById(components, DEFAULT_EDITOR_ID));
@@ -158,14 +143,14 @@ public class DefaultEditorProvisionerTest {
         new DefaultEditorProvisioner(
             DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
 
-    Devfile devfile = DevfileFactory.newDevfile();
+    DevfileImpl devfile = new DevfileImpl();
     devfile.setAttributes(ImmutableMap.of(EDITOR_FREE_DEVFILE_ATTRIBUTE, "true"));
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertTrue(components.isEmpty());
   }
 
@@ -177,32 +162,25 @@ public class DefaultEditorProvisionerTest {
         new DefaultEditorProvisioner(
             DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
 
-    Devfile devfile = DevfileFactory.newDevfile();
-    Component pluginWithNameSimilarToDefault =
-        new Component()
-            .withType(PLUGIN_COMPONENT_TYPE)
-            .withName("my-plugin")
-            .withId(DEFAULT_TERMINAL_PLUGIN_ID + "-dummy:latest");
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl pluginWithNameSimilarToDefault =
+        new ComponentImpl(
+            PLUGIN_COMPONENT_TYPE, "my-plugin", DEFAULT_TERMINAL_PLUGIN_ID + "-dummy:latest");
     devfile.getComponents().add(pluginWithNameSimilarToDefault);
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 3);
     assertTrue(
         components.contains(
-            new Component()
-                .withId(DEFAULT_EDITOR_REF)
-                .withName(DEFAULT_EDITOR_ID)
-                .withType(EDITOR_COMPONENT_TYPE)));
+            new ComponentImpl(EDITOR_COMPONENT_TYPE, DEFAULT_EDITOR_ID, DEFAULT_EDITOR_REF)));
     assertTrue(
         components.contains(
-            new Component()
-                .withId(DEFAULT_TERMINAL_PLUGIN_REF)
-                .withName(DEFAULT_TERMINAL_PLUGIN_ID)
-                .withType(PLUGIN_COMPONENT_TYPE)));
+            new ComponentImpl(
+                PLUGIN_COMPONENT_TYPE, DEFAULT_TERMINAL_PLUGIN_ID, DEFAULT_TERMINAL_PLUGIN_REF)));
     assertTrue(components.contains(pluginWithNameSimilarToDefault));
   }
 
@@ -210,19 +188,16 @@ public class DefaultEditorProvisionerTest {
   public void shouldNotProvisionDefaultEditorOrDefaultPluginsIfDevfileAlreadyHasNonDefaultEditor() {
     // given
     defaultEditorProvisioner = new DefaultEditorProvisioner(DEFAULT_EDITOR_REF, new String[] {});
-    Devfile devfile = DevfileFactory.newDevfile();
-    Component nonDefaultEditor =
-        new Component()
-            .withType(EDITOR_COMPONENT_TYPE)
-            .withName("editor")
-            .withId("any:v" + DEFAULT_EDITOR_VERSION);
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl nonDefaultEditor =
+        new ComponentImpl(EDITOR_COMPONENT_TYPE, "editor", "any:v" + DEFAULT_EDITOR_VERSION);
     devfile.getComponents().add(nonDefaultEditor);
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 1);
     assertTrue(components.contains(nonDefaultEditor));
   }
@@ -231,19 +206,17 @@ public class DefaultEditorProvisionerTest {
   public void shouldNonProvisionDefaultEditorIfDevfileAlreadyContainsSuchButWithDifferentVersion() {
     // given
     defaultEditorProvisioner = new DefaultEditorProvisioner(DEFAULT_EDITOR_REF, new String[] {});
-    Devfile devfile = DevfileFactory.newDevfile();
-    Component myTheiaEditor =
-        new Component()
-            .withType(EDITOR_COMPONENT_TYPE)
-            .withName("my-custom-theia")
-            .withId(DEFAULT_EDITOR_REF + ":my-custom");
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl myTheiaEditor =
+        new ComponentImpl(
+            EDITOR_COMPONENT_TYPE, "my-custom-theia", DEFAULT_EDITOR_REF + ":my-custom");
     devfile.getComponents().add(myTheiaEditor);
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 1);
     assertTrue(components.contains(myTheiaEditor));
   }
@@ -254,26 +227,21 @@ public class DefaultEditorProvisionerTest {
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(
             DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
-    Devfile devfile = DevfileFactory.newDevfile();
-    Component myTerminal =
-        new Component()
-            .withType(PLUGIN_COMPONENT_TYPE)
-            .withName("my-terminal")
-            .withId(DEFAULT_TERMINAL_PLUGIN_ID + ":my-custom");
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl myTerminal =
+        new ComponentImpl(
+            PLUGIN_COMPONENT_TYPE, "my-terminal", DEFAULT_TERMINAL_PLUGIN_ID + ":my-custom");
     devfile.getComponents().add(myTerminal);
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 2);
     assertTrue(
         components.contains(
-            new Component()
-                .withId(DEFAULT_EDITOR_REF)
-                .withName(DEFAULT_EDITOR_ID)
-                .withType(EDITOR_COMPONENT_TYPE)));
+            new ComponentImpl(EDITOR_COMPONENT_TYPE, DEFAULT_EDITOR_ID, DEFAULT_EDITOR_REF)));
     assertTrue(components.contains(myTerminal));
   }
 
@@ -282,34 +250,28 @@ public class DefaultEditorProvisionerTest {
     // given
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(DEFAULT_EDITOR_REF, new String[] {"my-plugin:v2.0"});
-    Devfile devfile = DevfileFactory.newDevfile();
-    Component myPlugin =
-        new Component()
-            .withType(PLUGIN_COMPONENT_TYPE)
-            .withName("my-plugin")
-            .withId("my-custom-plugin:v0.0.3");
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl myPlugin =
+        new ComponentImpl(PLUGIN_COMPONENT_TYPE, "my-plugin", "my-custom-plugin:v0.0.3");
     devfile.getComponents().add(myPlugin);
 
     // when
     defaultEditorProvisioner.apply(devfile);
 
     // then
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 3);
     assertTrue(
         components.contains(
-            new Component()
-                .withId(DEFAULT_EDITOR_REF)
-                .withName(DEFAULT_EDITOR_ID)
-                .withType(EDITOR_COMPONENT_TYPE)));
+            new ComponentImpl(EDITOR_COMPONENT_TYPE, DEFAULT_EDITOR_ID, DEFAULT_EDITOR_REF)));
     assertTrue(components.contains(myPlugin));
-    Component defaultPlugin = findByRef(components, "my-plugin:v2.0");
+    ComponentImpl defaultPlugin = findByRef(components, "my-plugin:v2.0");
     assertNotNull(defaultPlugin);
     assertNotEquals("my-plugin", defaultPlugin.getName());
     assertTrue(defaultPlugin.getName().startsWith("my-plugin"));
   }
 
-  private Component findById(List<Component> components, String id) {
+  private ComponentImpl findById(List<ComponentImpl> components, String id) {
     return components
         .stream()
         .filter(c -> c.getId() != null && c.getId().startsWith(id + ':'))
@@ -317,7 +279,7 @@ public class DefaultEditorProvisionerTest {
         .orElse(null);
   }
 
-  private Component findByRef(List<Component> components, String ref) {
+  private ComponentImpl findByRef(List<ComponentImpl> components, String ref) {
     return components.stream().filter(c -> ref.equals(c.getId())).findAny().orElse(null);
   }
 }

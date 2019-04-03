@@ -337,13 +337,13 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "title": "The Environment Variable Name",
-                  "description": "The environment variable name"
+                  "title": "The Endpoint Name",
+                  "description": "The Endpoint name"
                 },
                 "port": {
                   "type": "integer",
-                  "title": "The Environment Variable Name",
-                  "description": "The environment variable name"
+                  "title": "The Endpoint Port",
+                  "description": "The container port that should be used as endpoint"
                 },
                 "attributes" : {
                   "type": "object",
