@@ -80,11 +80,5 @@
         <class>org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesServerImpl.ServerId</class>
 
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
-        <properties>
-            <property name="eclipselink.logging.level" value="FINE"/>
-            <property name="eclipselink.logging.level.sql" value="FINE"/>
-            <property name="eclipselink.logging.parameters" value="true"/>
-            <property name="eclipselink.profiler" value="PerformanceMonitor"/>
-        </properties>
     </persistence-unit>
 </persistence>
