@@ -18,7 +18,7 @@
       "name": "build",
       "type": "exec",
       "attributes": {
-        "plugin": "eclipse/maven-jdk8:1.0.0",
+        "plugin": "org.eclipse.chemaven-jdk8:1.0.0",
         "workingDir": "/projects/spring-petclinic"
       }
     },
@@ -27,7 +27,7 @@
       "name": "run",
       "type": "exec",
       "attributes": {
-        "plugin": "eclipse/maven-jdk8:1.0.0",
+        "plugin": "org.eclipse.chemaven-jdk8:1.0.0",
         "runType": "sequential",
         "workingDir": "/projects/spring-petclinic"
       }
@@ -37,7 +37,7 @@
       "name": "other",
       "type": "exec",
       "attributes": {
-        "plugin": "eclipse/theia-jdtls:0.0.3"
+        "plugin": "org.eclipse.chetheia-jdtls:0.0.3"
       }
     }
   ],
@@ -54,8 +54,8 @@
   },
   "name": "petclinic-dev-environment",
   "attributes": {
-    "pluginComponentsAliases": "eclipse/maven-jdk8:1.0.0=mvn-stack,eclipse/theia:0.0.3=theia-ide,eclipse/theia-jdtls:0.0.3=jdt.ls",
-    "editor": "eclipse/theia:0.0.3",
-    "plugins": "eclipse/maven-jdk8:1.0.0,eclipse/theia-jdtls:0.0.3"
+    "pluginComponentsAliases": "org.eclipse.chemaven-jdk8:1.0.0=mvn-stack,org.eclipse.chetheia:0.0.3=theia-ide,org.eclipse.chetheia-jdtls:0.0.3=jdt.ls",
+    "editor": "org.eclipse.chetheia:0.0.3",
+    "plugins": "org.eclipse.chemaven-jdk8:1.0.0,org.eclipse.chetheia-jdtls:0.0.3"
   }
 }
