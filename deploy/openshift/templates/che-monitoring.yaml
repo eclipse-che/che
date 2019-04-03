@@ -5356,7 +5356,6 @@ objects:
         "uid": "sL0Klq_mz",
         "version": 1
       }
-      }
     dashboards.yaml: |-
       apiVersion: 1
       providers:
