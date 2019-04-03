@@ -64,11 +64,9 @@ public class DevfileImpl implements Devfile {
   private List<CommandImpl> commands;
 
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
-      name = "devfile_attributes",
-      joinColumns = @JoinColumn(name = "devfile_id"))
-  @MapKeyColumn(name = "attributes_key")
-  @Column(name = "attributes")
+  @CollectionTable(name = "devfile_attributes", joinColumns = @JoinColumn(name = "devfile_id"))
+  @MapKeyColumn(name = "name")
+  @Column(name = "value", columnDefinition = "TEXT")
   private Map<String, String> attributes;
 
   public DevfileImpl() {}

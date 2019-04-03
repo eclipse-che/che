@@ -20,9 +20,6 @@ public interface Component {
 
   String getType();
 
-  // editor/plugin
-  String getId();
-
   // openshift/kubernetes
   String getReference();
 

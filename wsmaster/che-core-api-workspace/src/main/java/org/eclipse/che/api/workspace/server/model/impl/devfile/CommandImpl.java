@@ -52,10 +52,10 @@ public class CommandImpl implements Command {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-      name = "command_attributes",
-      joinColumns = @JoinColumn(name = "command_id"))
-  @MapKeyColumn(name = "attributes_key")
-  @Column(name = "attributes")
+      name = "devfile_command_attributes",
+      joinColumns = @JoinColumn(name = "devfile_command_id"))
+  @MapKeyColumn(name = "name")
+  @Column(name = "value", columnDefinition = "TEXT")
   private Map<String, String> attributes;
 
   public CommandImpl() {}

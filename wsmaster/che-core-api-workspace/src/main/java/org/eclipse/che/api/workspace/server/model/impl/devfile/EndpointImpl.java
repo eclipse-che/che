@@ -44,10 +44,10 @@ public class EndpointImpl implements Endpoint {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-      name = "environment_attributes",
-      joinColumns = @JoinColumn(name = "environment_id"))
-  @MapKeyColumn(name = "attributes_key")
-  @Column(name = "attributes")
+      name = "devfile_endpoint_attributes",
+      joinColumns = @JoinColumn(name = "endpoint_id"))
+  @MapKeyColumn(name = "name")
+  @Column(name = "value", columnDefinition = "TEXT")
   private Map<String, String> attributes;
 
   public EndpointImpl() {}

@@ -50,18 +50,11 @@ public class ComponentImpl implements Component {
   @Column(name = "type", nullable = false)
   private String type;
 
-  @Column(name = "component_id")
-  private String component_id;
-
   @Column(name = "reference")
   private String reference;
 
   @Column(name = "reference_content")
   private String referenceContent;
-
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_entrypoints_id")
-  private List<EntrypointImpl> entrypoints;
 
   @Column(name = "image")
   private String image;
@@ -75,16 +68,18 @@ public class ComponentImpl implements Component {
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
       name = "component_command",
-      joinColumns = @JoinColumn(name = "component_id"))
+      joinColumns = @JoinColumn(name = "devfile_component_id"))
   @Column(name = "commands")
   private List<String> command;
 
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(
-      name = "component_args",
-      joinColumns = @JoinColumn(name = "component_id"))
+  @CollectionTable(name = "component_arg", joinColumns = @JoinColumn(name = "devfile_component_id"))
   @Column(name = "args")
   private List<String> args;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_entrypoints_id")
+  private List<EntrypointImpl> entrypoints;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   @JoinColumn(name = "devfile_volumes_id")
@@ -95,7 +90,7 @@ public class ComponentImpl implements Component {
   private List<EnvImpl> env;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_endpoints_id")
+  @JoinColumn(name = "devfile_component_endpoints_id")
   private List<EndpointImpl> endpoints;
 
   public ComponentImpl() {}
@@ -103,7 +98,6 @@ public class ComponentImpl implements Component {
   public ComponentImpl(
       String name,
       String type,
-      String component_id,
       String reference,
       String referenceContent,
       List<? extends Entrypoint> entrypoints,
@@ -117,7 +111,6 @@ public class ComponentImpl implements Component {
       List<? extends Endpoint> endpoints) {
     this.name = name;
     this.type = type;
-    this.component_id = component_id;
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (entrypoints != null) {
@@ -145,7 +138,6 @@ public class ComponentImpl implements Component {
     this(
         component.getName(),
         component.getType(),
-        component.getId(),
         component.getReference(),
         component.getReferenceContent(),
         component.getEntrypoints(),
@@ -177,15 +169,6 @@ public class ComponentImpl implements Component {
 
   public void setType(String type) {
     this.type = type;
-  }
-
-  @Override
-  public String getId() {
-    return component_id;
-  }
-
-  public void setId(String id) {
-    this.component_id = id;
   }
 
   @Override
@@ -323,7 +306,6 @@ public class ComponentImpl implements Component {
         && Objects.equals(id, component.id)
         && Objects.equals(name, component.name)
         && Objects.equals(type, component.type)
-        && Objects.equals(getId(), component.getId())
         && Objects.equals(getReference(), component.getReference())
         && Objects.equals(getReferenceContent(), component.getReferenceContent())
         && Objects.equals(getEntrypoints(), component.getEntrypoints())
@@ -341,7 +323,6 @@ public class ComponentImpl implements Component {
     return Objects.hash(
         getName(),
         getType(),
-        getId(),
         getReference(),
         getReferenceContent(),
         getEntrypoints(),
@@ -358,14 +339,14 @@ public class ComponentImpl implements Component {
   @Override
   public String toString() {
     return "ComponentImpl{"
-        + "name='"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
         + name
         + '\''
         + ", type='"
         + type
-        + '\''
-        + ", id='"
-        + component_id
         + '\''
         + ", reference='"
         + reference

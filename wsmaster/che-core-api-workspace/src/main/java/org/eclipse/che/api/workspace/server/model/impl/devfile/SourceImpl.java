@@ -20,8 +20,8 @@ import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
 
 /** @author Sergii Leshchenko */
-@Entity(name = "DevfileSource")
-@Table(name = "devfile_source")
+@Entity(name = "DevfileProjectSource")
+@Table(name = "devfile_project_source")
 public class SourceImpl implements Source {
 
   @Id
