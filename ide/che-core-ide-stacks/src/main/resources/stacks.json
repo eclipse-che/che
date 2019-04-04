@@ -2561,5 +2561,67 @@
       "name": "type-apache-camel.svg",
       "mediaType": "image/svg+xml"
     }
+  },
+  {
+    "id": "che7-python",
+    "name": "Che 7 Python",
+    "creator": "Anatolii Bazko",
+    "tags": [
+      "ws.next",
+      "Theia",
+      "Python",
+      "pip"
+    ],
+    "scope": "general",
+    "description": "Workspace.next sidecars and Theia as IDE",
+    "components": [
+      {
+        "version": "7",
+        "name": "Centos"
+      },
+      {
+        "version": "3.7.2",
+        "name": "Python"
+      },
+      {
+        "version": "19.0.3 ",
+        "name": "PIP"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "contentType": "application/x-yaml",
+            "type": "kubernetes",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n"
+          },
+          "machines": {
+            "ws/dev": {
+              "env": {},
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "attributes": {
+                "memoryLimitBytes": "536870912"
+              }
+            }
+          }
+        }
+      },
+      "commands": [],
+      "projects": [],
+      "defaultEnv": "default",
+      "name": "che7",
+      "attributes": {
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-machine-exec-plugin:0.0.1,ms-python.python:2019.2.5433"
+      },
+      "links": []
+    }
   }
 ]
