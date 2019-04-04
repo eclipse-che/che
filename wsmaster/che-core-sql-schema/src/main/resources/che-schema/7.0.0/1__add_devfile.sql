@@ -49,7 +49,7 @@ CREATE TABLE devfile_project (
     id                   BIGINT       NOT NULL,
     name                 VARCHAR(255) NOT NULL,
     source_id            BIGINT       NOT NULL,
-    devfile_projects_id  BIGINT       NOT NULL,
+    devfile_projects_id  BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -63,7 +63,7 @@ CREATE INDEX index_projects_devfile_id ON devfile_project (devfile_projects_id);
 CREATE TABLE devfile_command (
     id                   BIGINT       NOT NULL,
     name                 VARCHAR(255) NOT NULL,
-    devfile_commands_id  BIGINT       NOT NULL,
+    devfile_commands_id  BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -82,12 +82,12 @@ CREATE INDEX index_command_attributes_command_id ON devfile_command_attributes (
 
 -- devfile command action
 CREATE TABLE devfile_action (
-    id                          BIGINT       NOT NULL,
-    type                        VARCHAR(255) NOT NULL,
-    component                   TEXT,
-    command                     TEXT,
-    workdir                     TEXT,
-    devfile_actions_id  BIGINT       NOT NULL,
+    id                      BIGINT       NOT NULL,
+    type                    VARCHAR(255) NOT NULL,
+    component               TEXT,
+    command                 TEXT,
+    workdir                 TEXT,
+    devfile_actions_id      BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -107,7 +107,7 @@ CREATE TABLE devfile_component (
     image                  TEXT,
     memory_limit           VARCHAR(255),
     mount_sources          BOOLEAN,
-    devfile_components_id  BIGINT       NOT NULL,
+    devfile_components_id  BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -139,10 +139,10 @@ CREATE INDEX index_args_component_id ON component_arg (devfile_component_id);
 
 -- devfile endpoint
 CREATE TABLE devfile_endpoint (
-    id                              BIGINT       NOT NULL,
-    name                            VARCHAR(255) NOT NULL,
-    port                            INTEGER NOT NULL,
-    devfile_endpoints_id  BIGINT       NOT NULL,
+    id                      BIGINT       NOT NULL,
+    name                    VARCHAR(255) NOT NULL,
+    port                    INTEGER NOT NULL,
+    devfile_endpoints_id    BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -164,10 +164,10 @@ CREATE INDEX index_devfile_endpoint_attributes ON devfile_endpoint_attributes (e
 -- devfile component env
 
 CREATE TABLE devfile_env (
-    id                              BIGINT       NOT NULL,
-    name                            VARCHAR(255) NOT NULL,
-    value                           TEXT,
-    devfile_env_id                  BIGINT       NOT NULL,
+    id                  BIGINT       NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    value               TEXT,
+    devfile_env_id      BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -179,10 +179,10 @@ CREATE INDEX index_component_env_id ON devfile_env (devfile_env_id);
 -- devfile component volume
 
 CREATE TABLE devfile_volume (
-    id                              BIGINT       NOT NULL,
-    name                            VARCHAR(255) NOT NULL,
-    container_path                  TEXT,
-    devfile_volumes_id              BIGINT       NOT NULL,
+    id                     BIGINT       NOT NULL,
+    name                   VARCHAR(255) NOT NULL,
+    container_path         TEXT,
+    devfile_volumes_id     BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -194,10 +194,10 @@ CREATE INDEX index_component_volume_id ON devfile_volume (devfile_volumes_id);
 -- devfile component entrypoint
 
 CREATE TABLE devfile_entrypoint (
-    id                              BIGINT       NOT NULL,
-    parent_name                     VARCHAR(255) NOT NULL,
-    container_name                  VARCHAR(255) NOT NULL,
-    devfile_entrypoints_id          BIGINT       NOT NULL,
+    id                         BIGINT       NOT NULL,
+    parent_name                VARCHAR(255) NOT NULL,
+    container_name             VARCHAR(255) NOT NULL,
+    devfile_entrypoints_id     BIGINT,
 
     PRIMARY KEY (id)
 );
@@ -215,8 +215,19 @@ ALTER TABLE entrypoint_arg ADD CONSTRAINT fk_entrypoint_arg_id FOREIGN KEY (entr
 CREATE INDEX index_entrypoint_arg_entrypoint_id ON entrypoint_arg (entrypoint_id);
 
 
+CREATE TABLE entrypoint_commands (
+    entrypoint_id    BIGINT,
+    commands         VARCHAR(255)
+);
+
+--constraints
+ALTER TABLE entrypoint_commands ADD CONSTRAINT fk_entrypoint_commands_id FOREIGN KEY (entrypoint_id) REFERENCES devfile_entrypoint (id);
+CREATE INDEX index_entrypoint_commands_entrypoint_id ON entrypoint_commands (entrypoint_id);
+
+
 CREATE TABLE entrypoint_selector (
     entrypoint_id    BIGINT,
+    selectors_key    VARCHAR(255),
     selectors        VARCHAR(255)
 );
 

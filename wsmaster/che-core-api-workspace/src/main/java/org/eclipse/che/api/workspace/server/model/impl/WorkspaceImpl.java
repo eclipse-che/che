@@ -119,6 +119,10 @@ public class WorkspaceImpl implements Workspace {
     this(id, account, config, null, null, false, null);
   }
 
+  public WorkspaceImpl(String id, Account account, Devfile devfile) {
+    this(id, account, devfile, null, null, false, null);
+  }
+
   public WorkspaceImpl(
       String id,
       Account account,
