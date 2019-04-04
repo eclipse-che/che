@@ -56,7 +56,7 @@
 
   <!-- Machines -->
   <che-label-container ng-if="workspaceEnvironmentsController.machines.length > 0"
-                       che-label-name="Machines"
+                       che-label-name="Containers"
                        class="che-label-container-last">
   </che-label-container>
   <workspace-machine-config ng-repeat="machine in workspaceEnvironmentsController.machines track by machine.name | orderBy:'name'"

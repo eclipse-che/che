@@ -70,14 +70,12 @@ public class WorkspaceDetails {
   public enum WorkspaceDetailsTab {
     OVERVIEW("Overview"),
     PROJECTS("Projects"),
-    MACHINES("Machines"),
-    INSTALLERS("Installers"),
+    MACHINES("Containers"),
     SERVERS("Servers"),
     ENV_VARIABLES("Env Variables"),
     VOLUMES("Volumes"),
     CONFIG("Config"),
     SSH("SSH"),
-    TOOLS("Tools"),
     SHARE("Share");
 
     private final String tabTitle;
