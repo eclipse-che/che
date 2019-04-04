@@ -27,6 +27,8 @@ import { NameGenerator } from "../utils/NameGenerator";
 import { ILoginPage } from "../pageobjects/dashboard/interfaces/ILoginPage";
 import { e2eContainer } from "../inversifyJS/inversify.config";
 import { TYPES } from "../inversifyJS/types";
+import { WorkspaceDetails } from "../pageobjects/dashboard/workspace-details/WorkspaceDetails";
+import { WorkspaceDetailsPlugins } from "../pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
@@ -39,6 +41,8 @@ const newWorkspace: NewWorkspace = new NewWorkspace();
 const ide: Ide = new Ide();
 const projectTree: ProjectTree = new ProjectTree();
 const editor: Editor = new Editor();
+const workspaceDetails: WorkspaceDetails = new WorkspaceDetails();
+const workspaceDetailsPlugins: WorkspaceDetailsPlugins = new WorkspaceDetailsPlugins();
 
 
 describe("E2E test", () => {
@@ -61,8 +65,6 @@ describe("E2E test", () => {
         })
 
         it(`Create a \"${workspaceName}\" workspace`, () => {
-            let javaPluginName: string = "Language Support for Java(TM)";
-
             newWorkspace.typeWorkspaceName(workspaceName);
             newWorkspace.clickOnChe7Stack();
             newWorkspace.waitChe7StackSelected();
@@ -70,13 +72,33 @@ describe("E2E test", () => {
             newWorkspace.enableSampleCheckbox(sampleName);
             newWorkspace.clickOnAddButton();
             newWorkspace.waitProjectAdding(sampleName);
-            newWorkspace.waitPluginListItem(javaPluginName);
-            newWorkspace.waitPluginDisabling(javaPluginName);
-            newWorkspace.clickOnPluginListItemSwitcher(javaPluginName);
-            newWorkspace.waitPluginEnabling(javaPluginName);
 
-            newWorkspace.clickOnCreateAndOpenButton();
+            newWorkspace.selectCreateWorkspaceAndProceedEditing();
         })
+
+        it("Add 'Java Language Support' plugin to workspace", () => {
+            const javaPluginName: string = "Language Support for Java(TM)";
+            const execPlugin: string = "Che machine-exec Service";
+
+
+            workspaceDetails.waitPage(workspaceName);
+            workspaceDetails.waitTabSelected('Overview')
+            workspaceDetails.clickOnTab('Plugins')
+            workspaceDetails.waitTabSelected('Plugins')
+
+
+            workspaceDetailsPlugins.waitPluginEnabling(execPlugin)
+            workspaceDetailsPlugins.waitPluginDisabling(javaPluginName)
+            workspaceDetailsPlugins.clickOnPluginListItemSwitcher(javaPluginName)
+            workspaceDetailsPlugins.waitPluginEnabling(javaPluginName)
+
+            workspaceDetails.waitSaveButton()
+            workspaceDetails.clickOnSaveButton()
+            workspaceDetails.waitSaveButtonDisappearance()
+
+            workspaceDetails.clickOnOpenButton()
+        })
+
 
         it("Wait IDE availability", () => {
             ide.waitWorkspaceAndIdeInIframe(namespace, workspaceName);

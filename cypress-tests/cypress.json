@@ -1,5 +1,11 @@
 {
-    "numTestsKeptInMemory": 10,
+    "numTestsKeptInMemory": 0,
+    "video": false,
+    "videoUploadOnPasses": false,
+    "videoCompression": 45,
+    "trashAssetsBeforeRuns": true,
+    
+
     "defaultCommandTimeout": 20000,
     "viewportWidth": 1920,
     "viewportHeight": 1080,
@@ -11,7 +17,7 @@
 
         "TestWorkspaceUtil.waitRunningStatusAttempts": 15,
         "TestWorkspaceUtil.waitRunningStatusPollingEvery": 60000,
-
+        
         "test_user_name": "admin",
         "test_user_password": "admin",
         "load_page_timeout": 120000,
