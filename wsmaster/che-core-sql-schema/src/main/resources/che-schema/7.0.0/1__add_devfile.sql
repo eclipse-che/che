@@ -38,7 +38,7 @@ CREATE INDEX index_devfile_attributes_devfile_id ON devfile_attributes (devfile_
 CREATE TABLE devfile_project_source (
     id         BIGINT       NOT NULL,
     type       VARCHAR(255) NOT NULL,
-    location   VARCHAR(255) NOT NULL,
+    location   TEXT,
     refspec    VARCHAR(255),
 
     PRIMARY KEY (id)
@@ -84,7 +84,7 @@ CREATE INDEX index_command_attributes_command_id ON devfile_command_attributes (
 CREATE TABLE devfile_action (
     id                      BIGINT       NOT NULL,
     type                    VARCHAR(255) NOT NULL,
-    component               TEXT,
+    component               VARCHAR(255),
     command                 TEXT,
     workdir                 TEXT,
     devfile_actions_id      BIGINT,
