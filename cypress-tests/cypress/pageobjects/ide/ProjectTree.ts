@@ -185,7 +185,7 @@ export class ProjectTree {
                         assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
                     }
 
-                    cy.wait(2000)
+                    cy.wait(5000)
 
                     //If project root folder is not present, reload page, wait IDE and retry again
                     if (body.find(rootItemLocator).length === 0) {
