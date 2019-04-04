@@ -24,7 +24,7 @@ CREATE TABLE devfile (
 
 -- devfile attributes
 CREATE TABLE devfile_attributes (
-    devfile_id     VARCHAR(255),
+    devfile_id     BIGINT,
     value          TEXT,
     name           VARCHAR(255)
 );
@@ -72,7 +72,7 @@ CREATE INDEX index_commands_devfile_id ON devfile_command (devfile_commands_id);
 
 -- devfile command attributes
 CREATE TABLE devfile_command_attributes (
-    command_id     VARCHAR(255),
+    command_id     BIGINT,
     value          TEXT,
     name           VARCHAR(255)
 );
@@ -141,7 +141,7 @@ CREATE INDEX index_args_component_id ON component_arg (devfile_component_id);
 CREATE TABLE devfile_endpoint (
     id                      BIGINT       NOT NULL,
     name                    VARCHAR(255) NOT NULL,
-    port                    INTEGER NOT NULL,
+    port                    INTEGER      NOT NULL,
     devfile_endpoints_id    BIGINT,
 
     PRIMARY KEY (id)
@@ -151,7 +151,7 @@ CREATE INDEX index_devfile_endpoint_id ON devfile_endpoint (devfile_endpoints_id
 
 -- devfile endpoint attributes
 CREATE TABLE devfile_endpoint_attributes (
-    endpoint_id    VARCHAR(255),
+    endpoint_id    BIGINT,
     value          TEXT,
     name           VARCHAR(255)
 );
