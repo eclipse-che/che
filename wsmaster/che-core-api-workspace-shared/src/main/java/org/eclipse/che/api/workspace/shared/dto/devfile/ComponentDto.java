@@ -34,15 +34,6 @@ public interface ComponentDto extends Component {
 
   ComponentDto withType(String type);
 
-  // editor/plugin
-
-  @Override
-  String getId();
-
-  void setId(String id);
-
-  ComponentDto withId(String id);
-
   // k8s/OS
 
   @Override
