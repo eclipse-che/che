@@ -16,24 +16,25 @@ import static com.google.common.base.Preconditions.checkArgument;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
- * Provision kubernetes/openshift component in {@link Devfile} according to the value of environment
- * with kubernetes/openshfit recipe if the specified {@link WorkspaceConfigImpl} has such.
+ * Provision kubernetes/openshift component in {@link DevfileImpl} according to the value of
+ * environment with kubernetes/openshfit recipe if the specified {@link WorkspaceConfigImpl} has
+ * such.
  *
  * @author Sergii Leshchenko
  */
 public class KubernetesComponentProvisioner implements ComponentProvisioner {
 
   /**
-   * Provision kubernetes/openshift component in {@link Devfile} according to the value of
+   * Provision kubernetes/openshift component in {@link DevfileImpl} according to the value of
    * environment with kubernetes/openshift recipe if the specified {@link WorkspaceConfigImpl} has
    * such.
    *
@@ -47,7 +48,7 @@ public class KubernetesComponentProvisioner implements ComponentProvisioner {
    *     Exporting of such workspaces will be implemented soon
    */
   @Override
-  public void provision(Devfile devfile, WorkspaceConfigImpl workspaceConfig)
+  public void provision(DevfileImpl devfile, WorkspaceConfigImpl workspaceConfig)
       throws WorkspaceExportException {
     checkArgument(devfile != null, "The environment must not be null");
     checkArgument(workspaceConfig != null, "The workspace config must not be null");

@@ -16,9 +16,9 @@ import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -40,14 +40,14 @@ public class EditorComponentProvisionerTest {
         .getAttributes()
         .put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "org.eclipse.che.super-editor:0.0.1");
     workspaceConfig.getAttributes().put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, "editor");
-    Devfile devfile = new Devfile();
+    DevfileImpl devfile = new DevfileImpl();
 
     // when
     editorComponentProvisioner.provision(devfile, workspaceConfig);
 
     // then
     assertEquals(devfile.getComponents().size(), 1);
-    Component editorComponent = devfile.getComponents().get(0);
+    ComponentImpl editorComponent = devfile.getComponents().get(0);
     assertEquals(editorComponent.getName(), "editor");
     assertEquals(editorComponent.getType(), EDITOR_COMPONENT_TYPE);
     assertEquals(editorComponent.getId(), "org.eclipse.che.super-editor:0.0.1");
@@ -61,14 +61,14 @@ public class EditorComponentProvisionerTest {
     workspaceConfig
         .getAttributes()
         .put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "org.eclipse.che.super-editor:0.0.1");
-    Devfile devfile = new Devfile();
+    DevfileImpl devfile = new DevfileImpl();
 
     // when
     editorComponentProvisioner.provision(devfile, workspaceConfig);
 
     // then
     assertEquals(devfile.getComponents().size(), 1);
-    Component editorComponent = devfile.getComponents().get(0);
+    ComponentImpl editorComponent = devfile.getComponents().get(0);
     assertEquals(editorComponent.getName(), "org.eclipse.che.super-editor:0.0.1");
   }
 }

@@ -31,5 +31,6 @@ public class WsMasterMetricsModule extends AbstractModule {
     meterMultibinder.addBinding().to(WorkspaceStartTrackerMeterBinder.class);
     meterMultibinder.addBinding().to(WorkspaceSuccessfulStartAttemptsMeterBinder.class);
     meterMultibinder.addBinding().to(WorkspaceStartAttemptsMeterBinder.class);
+    meterMultibinder.addBinding().to(UserMeterBinder.class);
   }
 }

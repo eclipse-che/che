@@ -28,8 +28,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
 
 /**
@@ -58,7 +59,7 @@ public class DefaultEditorProvisioner {
    *
    * @param devfile devfile where editor and plugins should be provisioned
    */
-  public void apply(Devfile devfile) {
+  public void apply(DevfileImpl devfile) {
     if (defaultEditorRef == null) {
       // there is no default editor configured
       return;
@@ -68,20 +69,20 @@ public class DefaultEditorProvisioner {
       return;
     }
 
-    List<Component> components = devfile.getComponents();
+    List<ComponentImpl> components = devfile.getComponents();
     Set<String> componentsNames =
         components.stream().map(Component::getName).collect(Collectors.toCollection(HashSet::new));
 
-    Optional<Component> editorOpt =
+    Optional<ComponentImpl> editorOpt =
         components.stream().filter(t -> EDITOR_COMPONENT_TYPE.equals(t.getType())).findFirst();
 
     boolean isDefaultEditorUsed;
     if (!editorOpt.isPresent()) {
       components.add(
-          new Component()
-              .withName(findAvailableName(componentsNames, defaultEditorRef))
-              .withType(EDITOR_COMPONENT_TYPE)
-              .withId(defaultEditorRef));
+          new ComponentImpl(
+              EDITOR_COMPONENT_TYPE,
+              findAvailableName(componentsNames, defaultEditorRef),
+              defaultEditorRef));
       isDefaultEditorUsed = true;
     } else {
       Component editor = editorOpt.get();
@@ -93,7 +94,8 @@ public class DefaultEditorProvisioner {
     }
   }
 
-  private void provisionDefaultPlugins(List<Component> components, Set<String> componentsNames) {
+  private void provisionDefaultPlugins(
+      List<ComponentImpl> components, Set<String> componentsNames) {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsIdToRef);
 
     components
@@ -106,10 +108,10 @@ public class DefaultEditorProvisioner {
         .forEach(
             pluginRef ->
                 components.add(
-                    new Component()
-                        .withType(PLUGIN_COMPONENT_TYPE)
-                        .withId(pluginRef)
-                        .withName(findAvailableName(componentsNames, pluginRef))));
+                    new ComponentImpl(
+                        PLUGIN_COMPONENT_TYPE,
+                        findAvailableName(componentsNames, pluginRef),
+                        pluginRef)));
   }
 
   /**

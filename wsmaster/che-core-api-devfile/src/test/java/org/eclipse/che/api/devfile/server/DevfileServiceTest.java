@@ -30,11 +30,11 @@ import com.jayway.restassured.response.Response;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.subject.Subject;
@@ -84,13 +84,13 @@ public class DevfileServiceTest {
 
   @Test
   public void shouldAcceptDevFileContentAndCreateWorkspace() throws Exception {
-    ArgumentCaptor<Devfile> captor = ArgumentCaptor.forClass(Devfile.class);
+    ArgumentCaptor<DevfileImpl> captor = ArgumentCaptor.forClass(DevfileImpl.class);
     String yamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-    Devfile devfile = createDevfile(yamlContent);
+    DevfileImpl devfile = createDevfile(yamlContent);
     WorkspaceImpl ws = createWorkspace(WorkspaceStatus.STOPPED);
     when(devfileManager.parse(anyString())).thenReturn(devfile);
-    when(devfileManager.createWorkspace(any(Devfile.class), any())).thenReturn(ws);
+    when(devfileManager.createWorkspace(any(DevfileImpl.class), any())).thenReturn(ws);
     final Response response =
         given()
             .auth()
@@ -105,15 +105,15 @@ public class DevfileServiceTest {
     assertEquals(devfile, captor.getValue());
   }
 
-  private Devfile createDevfile(String yamlContent) throws IOException {
+  private DevfileImpl createDevfile(String yamlContent) throws IOException {
     JsonNode node = mapper.readTree(yamlContent);
-    return mapper.treeToValue(node, Devfile.class);
+    return mapper.treeToValue(node, DevfileImpl.class);
   }
 
   @Test
   public void shouldCreateDevFileFromWorkspace() throws Exception {
     ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
-    when(devfileManager.exportWorkspace(anyString())).thenReturn(new Devfile());
+    when(devfileManager.exportWorkspace(anyString())).thenReturn(new DevfileImpl());
 
     final Response response =
         given()
@@ -123,15 +123,15 @@ public class DevfileServiceTest {
             .get(SECURE_PATH + "/devfile/ws123456");
 
     assertEquals(response.getStatusCode(), 200);
-    Devfile devFile = objectMapper.readValue(response.getBody().asString(), Devfile.class);
+    DevfileImpl devFile = objectMapper.readValue(response.getBody().asString(), DevfileImpl.class);
     assertNotNull(devFile);
   }
 
   private WorkspaceImpl createWorkspace(WorkspaceStatus status)
       throws IOException, JsonParseException {
     return WorkspaceImpl.builder()
-        .setConfig(createConfig())
         .generateId()
+        .setConfig(createConfig())
         .setAccount(new AccountImpl("anyId", SUBJECT.getUserName(), "test"))
         .setStatus(status)
         .build();

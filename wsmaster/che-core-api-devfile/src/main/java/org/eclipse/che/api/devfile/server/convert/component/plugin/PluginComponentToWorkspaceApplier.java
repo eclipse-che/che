@@ -20,7 +20,7 @@ import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_COMPONENTS_AL
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
-import org.eclipse.che.api.devfile.model.Component;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;

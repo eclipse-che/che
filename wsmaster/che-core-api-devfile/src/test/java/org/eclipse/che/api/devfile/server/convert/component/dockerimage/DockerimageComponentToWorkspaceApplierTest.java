@@ -41,15 +41,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Endpoint;
-import org.eclipse.che.api.devfile.model.Env;
-import org.eclipse.che.api.devfile.model.Volume;
 import org.eclipse.che.api.devfile.server.convert.component.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -86,12 +85,11 @@ public class DockerimageComponentToWorkspaceApplierTest {
       shouldProvisionK8sEnvironmentWithMachineConfigAndGeneratedDeploymentForSpecifiedDockerimage()
           throws Exception {
     // given
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G");
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -129,13 +127,12 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionSpecifiedEnvVars() throws Exception {
     // given
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G")
-            .withEnv(singletonList(new Env().withName("envName").withValue("envValue")));
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setEnv(singletonList(new EnvImpl("envName", "envValue")));
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -164,12 +161,11 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionContainerWithMemoryLimitSpecified() throws Exception {
     // given
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G");
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -195,27 +191,25 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionMachineConfigWithConfiguredServers() throws Exception {
     // given
-    Endpoint endpoint =
-        new Endpoint()
-            .withName("jdk-ls")
-            .withPort(4923)
-            .withAttributes(
-                ImmutableMap.of(
-                    "protocol",
-                    "http",
-                    "path",
-                    "/ls",
-                    PUBLIC_ENDPOINT_ATTRIBUTE,
-                    "false",
-                    "secure",
-                    "false"));
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G")
-            .withEndpoints(singletonList(endpoint));
+    EndpointImpl endpoint =
+        new EndpointImpl(
+            "jdk-ls",
+            4923,
+            ImmutableMap.of(
+                "protocol",
+                "http",
+                "path",
+                "/ls",
+                PUBLIC_ENDPOINT_ATTRIBUTE,
+                "false",
+                "secure",
+                "false"));
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setEndpoints(singletonList(endpoint));
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -243,32 +237,30 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionServiceForDiscoverableServer() throws Exception {
     // given
-    Endpoint endpoint =
-        new Endpoint()
-            .withName("jdk-ls")
-            .withPort(4923)
-            .withAttributes(
-                ImmutableMap.of(
-                    "protocol",
-                    "http",
-                    "path",
-                    "/ls",
-                    PUBLIC_ENDPOINT_ATTRIBUTE,
-                    "false",
-                    "secure",
-                    "false",
-                    DISCOVERABLE_ENDPOINT_ATTRIBUTE,
-                    "true"));
-    Component dockerimageTool =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G")
-            .withEndpoints(singletonList(endpoint));
+    EndpointImpl endpoint =
+        new EndpointImpl(
+            "jdk-ls",
+            4923,
+            ImmutableMap.of(
+                "protocol",
+                "http",
+                "path",
+                "/ls",
+                PUBLIC_ENDPOINT_ATTRIBUTE,
+                "false",
+                "secure",
+                "false",
+                DISCOVERABLE_ENDPOINT_ATTRIBUTE,
+                "true"));
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setEndpoints(singletonList(endpoint));
 
     // when
-    dockerimageComponentApplier.apply(workspaceConfig, dockerimageTool, null);
+    dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
 
     // then
     verify(k8sEnvProvisioner)
@@ -300,14 +292,13 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionServersWithHttpPortIsTheCorrespondingAttrIsMissing() throws Exception {
     // given
-    Endpoint endpoint = new Endpoint().withName("jdk-ls").withPort(4923).withAttributes(emptyMap());
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G")
-            .withEndpoints(singletonList(endpoint));
+    EndpointImpl endpoint = new EndpointImpl("jdk-ls", 4923, emptyMap());
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setEndpoints(singletonList(endpoint));
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -329,14 +320,12 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionMachineConfigWithConfiguredVolumes() throws Exception {
     // given
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G")
-            .withVolumes(
-                singletonList(new Volume().withName("data").withContainerPath("/tmp/data/")));
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setVolumes(singletonList(new VolumeImpl("data", "/tmp/data/")));
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -350,7 +339,8 @@ public class DockerimageComponentToWorkspaceApplierTest {
             machinesCaptor.capture());
     MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk");
     assertNotNull(machineConfig);
-    VolumeImpl volume = machineConfig.getVolumes().get("data");
+    org.eclipse.che.api.workspace.server.model.impl.VolumeImpl volume =
+        machineConfig.getVolumes().get("data");
     assertNotNull(volume);
     assertEquals(volume.getPath(), "/tmp/data/");
   }
@@ -358,13 +348,12 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionMachineConfigWithMountSources() throws Exception {
     // given
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G")
-            .withMountSources(true);
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setMountSources(true);
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -378,7 +367,8 @@ public class DockerimageComponentToWorkspaceApplierTest {
             machinesCaptor.capture());
     MachineConfigImpl machineConfig = machinesCaptor.getValue().get("jdk");
     assertNotNull(machineConfig);
-    VolumeImpl projectsVolume = machineConfig.getVolumes().get(PROJECTS_VOLUME_NAME);
+    org.eclipse.che.api.workspace.server.model.impl.VolumeImpl projectsVolume =
+        machineConfig.getVolumes().get(PROJECTS_VOLUME_NAME);
     assertNotNull(projectsVolume);
     assertEquals(projectsVolume.getPath(), PROJECTS_MOUNT_PATH);
   }
@@ -386,12 +376,11 @@ public class DockerimageComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionMachineConfigWithoutSourcesByDefault() throws Exception {
     // given
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G");
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);
@@ -414,14 +403,13 @@ public class DockerimageComponentToWorkspaceApplierTest {
     List<String> command = singletonList("/usr/bin/rf");
     List<String> args = Arrays.asList("-r", "f");
 
-    Component dockerimageComponent =
-        new Component()
-            .withName("jdk")
-            .withType(DOCKERIMAGE_COMPONENT_TYPE)
-            .withImage("eclipse/ubuntu_jdk8:latest")
-            .withMemoryLimit("1G")
-            .withCommand(command)
-            .withArgs(args);
+    ComponentImpl dockerimageComponent = new ComponentImpl();
+    dockerimageComponent.setName("jdk");
+    dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    dockerimageComponent.setImage("eclipse/ubuntu_jdk8:latest");
+    dockerimageComponent.setMemoryLimit("1G");
+    dockerimageComponent.setCommand(command);
+    dockerimageComponent.setArgs(args);
 
     // when
     dockerimageComponentApplier.apply(workspaceConfig, dockerimageComponent, null);

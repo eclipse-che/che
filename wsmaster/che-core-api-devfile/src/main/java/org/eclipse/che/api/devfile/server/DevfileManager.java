@@ -13,7 +13,6 @@ package org.eclipse.che.api.devfile.server;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyMap;
-import static org.eclipse.che.api.devfile.server.DevfileFactory.initializeMaps;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,7 +26,6 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
@@ -37,6 +35,7 @@ import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 /**
@@ -83,24 +82,23 @@ public class DevfileManager {
   }
 
   /**
-   * Creates {@link Devfile} from given devfile content. Performs schema and integrity validation of
-   * input data.
+   * Creates {@link DevfileImpl} from given devfile content. Performs schema and integrity
+   * validation of input data.
    *
    * @param devfileContent raw content of devfile
    * @return Devfile object created from the source content
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws DevfileFormatException when any yaml parsing error occurs
    */
-  public Devfile parse(String devfileContent) throws DevfileFormatException {
+  public DevfileImpl parse(String devfileContent) throws DevfileFormatException {
     JsonNode parsed = schemaValidator.validateBySchema(devfileContent);
 
-    Devfile devfile;
+    DevfileImpl devfile;
     try {
-      devfile = objectMapper.treeToValue(parsed, Devfile.class);
+      devfile = objectMapper.treeToValue(parsed, DevfileImpl.class);
     } catch (JsonProcessingException e) {
       throw new DevfileFormatException(e.getMessage());
     }
-    initializeMaps(devfile);
 
     integrityValidator.validateDevfile(devfile);
     return devfile;
@@ -120,7 +118,7 @@ public class DevfileManager {
    * @throws NotFoundException when user account is not found
    * @throws ServerException when other error occurs
    */
-  public WorkspaceImpl createWorkspace(Devfile devfile, FileContentProvider fileContentProvider)
+  public WorkspaceImpl createWorkspace(DevfileImpl devfile, FileContentProvider fileContentProvider)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           DevfileException {
     checkArgument(devfile != null, "Devfile must not be null");
@@ -143,7 +141,7 @@ public class DevfileManager {
    * @throws DevfileException when any another devfile related error occurs
    */
   public WorkspaceConfigImpl createWorkspaceConfig(
-      Devfile devfile, FileContentProvider fileContentProvider)
+      DevfileImpl devfile, FileContentProvider fileContentProvider)
       throws DevfileFormatException, DevfileRecipeFormatException, DevfileException {
     checkArgument(devfile != null, "Devfile must not be null");
     checkArgument(fileContentProvider != null, "File content provider must not be null");
@@ -165,7 +163,7 @@ public class DevfileManager {
    * @throws ServerException when other error occurs
    * @see WorkspaceManager#getByKey(String)
    */
-  public Devfile exportWorkspace(String key)
+  public DevfileImpl exportWorkspace(String key)
       throws NotFoundException, ServerException, ConflictException {
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
     try {

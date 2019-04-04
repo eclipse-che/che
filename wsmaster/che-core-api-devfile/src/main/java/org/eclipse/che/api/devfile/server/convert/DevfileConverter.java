@@ -21,11 +21,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
-import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.model.Project;
-import org.eclipse.che.api.devfile.server.DevfileFactory;
+import org.eclipse.che.api.core.model.workspace.devfile.Command;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
@@ -36,6 +34,8 @@ import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 
 /**
  * Helps to convert Devfile to workspace config and back.
@@ -66,13 +66,14 @@ public class DevfileConverter {
   }
 
   /**
-   * Exports workspace config into {@link Devfile}
+   * Exports workspace config into {@link DevfileImpl}
    *
    * @param wsConfig initial workspace config
    * @return devfile resulted devfile
    * @throws WorkspaceExportException if export of given workspace config is impossible
    */
-  public Devfile workspaceToDevFile(WorkspaceConfigImpl wsConfig) throws WorkspaceExportException {
+  public DevfileImpl workspaceToDevFile(WorkspaceConfigImpl wsConfig)
+      throws WorkspaceExportException {
     if (wsConfig.getEnvironments().size() > 1) {
       throw new WorkspaceExportException(
           format(
@@ -80,10 +81,9 @@ public class DevfileConverter {
               wsConfig.getName()));
     }
 
-    Devfile devfile =
-        DevfileFactory.newDevfile()
-            .withSpecVersion(CURRENT_SPEC_VERSION)
-            .withName(wsConfig.getName());
+    DevfileImpl devfile = new DevfileImpl();
+    devfile.setSpecVersion(CURRENT_SPEC_VERSION);
+    devfile.setName(wsConfig.getName());
 
     // Manage projects
     devfile.setProjects(
@@ -118,7 +118,7 @@ public class DevfileConverter {
    *     component is empty or its format is invalid
    */
   public WorkspaceConfigImpl devFileToWorkspaceConfig(
-      Devfile devfile, FileContentProvider contentProvider) throws DevfileException {
+      DevfileImpl devfile, FileContentProvider contentProvider) throws DevfileException {
     checkArgument(devfile != null, "Devfile must not be null");
     checkArgument(contentProvider != null, "Content provider must not be null");
 
@@ -147,7 +147,7 @@ public class DevfileConverter {
       applier.apply(config, component, contentProvider);
     }
 
-    for (Project project : devfile.getProjects()) {
+    for (ProjectImpl project : devfile.getProjects()) {
       ProjectConfigImpl projectConfig = projectConverter.toWorkspaceProject(project);
       config.getProjects().add(projectConfig);
     }
