@@ -170,50 +170,75 @@ export class ProjectTree {
     }
 
     private doWaitProjectImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): PromiseLike<void> {
-        return new Cypress.Promise((resolve:any, reject:any) => {
-            let rootItem: string = `/${projectName}`;
+        return new Cypress.Promise((resolve: any, reject: any) => {
+            const rootItem: string = `/${projectName}`;
+            const rootItemLocator: string = this.getTreeItemLocator(`/${projectName} aaaaaaa`);
+            const rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
 
-            this.expandItem(rootItem)
-            this.waitItemExpanded(rootItem)
-
-            cy.get('body')
-                .then(body => {
-                    let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
-                    let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
-
+            cy.log(`**ProjectTree.waitProjectImported the ${currentAttempt} try**`)
+                .then(() => {
                     if (currentAttempt >= attempts) {
                         assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
                     }
+                })
+                .then(() => {
+                    this.elementStateChecker.waitVisibility(rootItemLocator, 5, 2000)
+                        .then((isVisible: boolean) => {
+                            console.log("===>>>  ", isVisible)
+                            return isVisible
+                        })
+                })
+                .then(isRootItemVisible => {
 
-                    cy.wait(5000)
-
-                    //If project root folder is not present, reload page, wait IDE and retry again
-                    if (body.find(rootItemLocator).length === 0) {
-                        cy.log(`**Project '${projectName}' has not benn found. Refreshing page and try again (attempt ${currentAttempt} of ${attempts})**`)
-
+                    if (!isRootItemVisible) {
                         currentAttempt++
 
-                        cy.reload();
+                        cy.reload()
                         this.ide.waitIde()
-                        this.openProjectTreeContainer();
-                        this.waitProjectTreeContainer();
-
-                        cy.wait(pollingEvery)
+                        this.openProjectTreeContainer()
+                        cy.wait(30000)
                         this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                     }
 
-                    if (body.find(rootSubitemLocator).length > 0) {
-                        return;
-                    }
-
-                    //If project root sub item is not present, collapse project folder, open project folder and retry again
-                    cy.log(`**Root sub item '${rootSubitem}' has not benn found (attempt ${currentAttempt} of ${attempts})**`)
-                    currentAttempt++
-                    this.collapseItem(rootItem)
-                    this.waitItemCollapsed(rootItem)
-                    cy.wait(pollingEvery)
-                    this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                 })
+                .then(() => {
+                    this.expandItem(rootItem)
+                    this.waitItemExpanded(rootItem)
+                })
+                .then(() => {
+                    cy.get('body')
+                        .then(body => {
+
+                            cy.wait(5000)
+                            //If project root folder is not present, reload page, wait IDE and retry again
+                            if (body.find(rootItemLocator).length === 0) {
+                                cy.log(`**Project '${projectName}' has not benn found. Refreshing page and try again (attempt ${currentAttempt} of ${attempts})**`)
+
+                                currentAttempt++
+
+                                cy.reload();
+                                this.ide.waitIde()
+                                this.openProjectTreeContainer();
+                                this.waitProjectTreeContainer();
+
+                                cy.wait(pollingEvery)
+                                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                            }
+
+                            if (body.find(rootSubitemLocator).length > 0) {
+                                return;
+                            }
+
+                            //If project root sub item is not present, collapse project folder, open project folder and retry again
+                            cy.log(`**Root sub item '${rootSubitem}' has not benn found (attempt ${currentAttempt} of ${attempts})**`)
+                            currentAttempt++
+                            this.collapseItem(rootItem)
+                            this.waitItemCollapsed(rootItem)
+                            cy.wait(pollingEvery)
+                            this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                        })
+                })
+
         })
     }
 

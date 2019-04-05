@@ -9,14 +9,14 @@
     "defaultCommandTimeout": 20000,
     "viewportWidth": 1920,
     "viewportHeight": 1080,
-    "baseUrl": "http://sample-url",
+    "baseUrl": "http://che-che.192.168.99.100.nip.io",
    
     "env": {
         "ProjectTree.waitProjectImportedAttempts": 4,
         "ProjectTree.waiProjectImportedPollingEvery": 30000,
 
-        "TestWorkspaceUtil.waitRunningStatusAttempts": 15,
-        "TestWorkspaceUtil.waitRunningStatusPollingEvery": 60000,
+        "TestWorkspaceUtil.waitRunningStatusAttempts": 90,
+        "TestWorkspaceUtil.waitRunningStatusPollingEvery": 10000,
         
         "test_user_name": "admin",
         "test_user_password": "admin",
