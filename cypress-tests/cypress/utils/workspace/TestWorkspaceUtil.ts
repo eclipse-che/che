@@ -23,7 +23,7 @@ export class TestWorkspaceUtil {
             cy.request('GET', `/api/workspace/${workspaceNamespace}:${workspaceName}`)
                 .then(response => {
 
-                    if (attempt >= maximumAttempts) {
+                    if (attempt > maximumAttempts) {
                         assert.isOk(false, "Exceeded the maximum number of checking attempts, workspace has not been run")
                     }
 
@@ -51,7 +51,7 @@ export class TestWorkspaceUtil {
 
 
     waitWorkspaceRunning(workspaceNamespace: string, workspaceName: string): PromiseLike<void> {
-        let attempt: number = 0;
+        let attempt: number = 1;
         return this.waitRunningStatus(workspaceNamespace, workspaceName, attempt)
     }
 

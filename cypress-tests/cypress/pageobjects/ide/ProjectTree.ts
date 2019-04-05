@@ -172,7 +172,7 @@ export class ProjectTree {
     private doWaitProjectImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): PromiseLike<void> {
         return new Cypress.Promise((resolve: any, reject: any) => {
             const rootItem: string = `/${projectName}`;
-            const rootItemLocator: string = this.getTreeItemLocator(`/${projectName} aaaaaaa`);
+            const rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
             const rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
 
             cy.log(`**ProjectTree.waitProjectImported the ${currentAttempt} try**`)
@@ -182,16 +182,18 @@ export class ProjectTree {
                     }
                 })
                 .then(() => {
-                    this.elementStateChecker.waitVisibility(rootItemLocator, 5, 2000)
+                    return this.elementStateChecker.waitVisibility(rootItemLocator, 5, 2000)
                         .then((isVisible: boolean) => {
-                            console.log("===>>>  ", isVisible)
+                            console.log("===>>>  isVisible:  ", isVisible)
                             return isVisible
                         })
                 })
                 .then(isRootItemVisible => {
+                    console.log("===>>>  isRootItemVisible:  ", isRootItemVisible)
 
                     if (!isRootItemVisible) {
                         currentAttempt++
+                        console.log("===>>>  reload")
 
                         cy.reload()
                         this.ide.waitIde()
@@ -210,22 +212,9 @@ export class ProjectTree {
                         .then(body => {
 
                             cy.wait(5000)
-                            //If project root folder is not present, reload page, wait IDE and retry again
-                            if (body.find(rootItemLocator).length === 0) {
-                                cy.log(`**Project '${projectName}' has not benn found. Refreshing page and try again (attempt ${currentAttempt} of ${attempts})**`)
-
-                                currentAttempt++
-
-                                cy.reload();
-                                this.ide.waitIde()
-                                this.openProjectTreeContainer();
-                                this.waitProjectTreeContainer();
-
-                                cy.wait(pollingEvery)
-                                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
-                            }
 
                             if (body.find(rootSubitemLocator).length > 0) {
+                                resolve()
                                 return;
                             }
 
@@ -238,7 +227,6 @@ export class ProjectTree {
                             this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                         })
                 })
-
         })
     }
 
