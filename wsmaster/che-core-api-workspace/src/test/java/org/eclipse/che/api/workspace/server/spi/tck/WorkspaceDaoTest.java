@@ -51,6 +51,14 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -104,7 +112,11 @@ public class WorkspaceDaoTest {
     workspaces = new WorkspaceImpl[COUNT_OF_WORKSPACES];
     for (int i = 0; i < COUNT_OF_WORKSPACES; i++) {
       // 2 workspaces share 1 namespace
-      workspaces[i] = createWorkspace("workspace-" + i, accounts[i / 2], "name-" + i);
+      if (i / COUNT_OF_WORKSPACES - 1 == 1) {
+        workspaces[i] = createWorkspaceFromDevfile("workspace-" + i, accounts[i / 2], "name-" + i);
+      } else {
+        workspaces[i] = createWorkspaceFromConfig("workspace-" + i, accounts[i / 2], "name-" + i);
+      }
     }
     accountRepo.createAll(Arrays.asList(accounts));
     workspaceRepo.createAll(Stream.of(workspaces).map(WorkspaceImpl::new).collect(toList()));
@@ -291,7 +303,8 @@ public class WorkspaceDaoTest {
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
   public void shouldCreateWorkspace() throws Exception {
-    final WorkspaceImpl workspace = createWorkspace("new-workspace", accounts[0], "new-name");
+    final WorkspaceImpl workspace =
+        createWorkspaceFromConfig("new-workspace", accounts[0], "new-name");
 
     workspaceDao.create(workspace);
 
@@ -305,7 +318,8 @@ public class WorkspaceDaoTest {
     final WorkspaceImpl workspace = workspaces[0];
 
     final WorkspaceImpl newWorkspace =
-        createWorkspace("new-id", workspace.getAccount(), workspace.getConfig().getName());
+        createWorkspaceFromConfig(
+            "new-id", workspace.getAccount(), workspace.getConfig().getName());
 
     workspaceDao.create(newWorkspace);
   }
@@ -313,10 +327,11 @@ public class WorkspaceDaoTest {
   @Test
   public void shouldCreateWorkspaceWithNameWhichDoesNotExistInGivenNamespace() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
-    final WorkspaceImpl workspace2 = workspaces[4];
+    final WorkspaceImpl workspace2 = workspaces[3];
 
     final WorkspaceImpl newWorkspace =
-        createWorkspace("new-id", workspace.getAccount(), workspace2.getConfig().getName());
+        createWorkspaceFromConfig(
+            "new-id", workspace.getAccount(), workspace2.getConfig().getName());
     final WorkspaceImpl expected = new WorkspaceImpl(newWorkspace, newWorkspace.getAccount());
     expected.setAccount(newWorkspace.getAccount());
     assertEquals(workspaceDao.create(newWorkspace), expected);
@@ -326,7 +341,8 @@ public class WorkspaceDaoTest {
   public void shouldThrowConflictExceptionWhenCreatingWorkspaceWithExistingId() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 
-    final WorkspaceImpl newWorkspace = createWorkspace(workspace.getId(), accounts[0], "new-name");
+    final WorkspaceImpl newWorkspace =
+        createWorkspaceFromConfig(workspace.getId(), accounts[0], "new-name");
 
     workspaceDao.create(newWorkspace);
   }
@@ -486,7 +502,7 @@ public class WorkspaceDaoTest {
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
   public void createsWorkspaceWithAProjectConfigContainingLongAttributeValues() throws Exception {
-    WorkspaceImpl workspace = createWorkspace("new-workspace", accounts[0], "new-name");
+    WorkspaceImpl workspace = createWorkspaceFromConfig("new-workspace", accounts[0], "new-name");
     ProjectConfigImpl project = workspace.getConfig().getProjects().get(0);
 
     // long string
@@ -649,7 +665,8 @@ public class WorkspaceDaoTest {
     return wCfg;
   }
 
-  public static WorkspaceImpl createWorkspace(String id, AccountImpl account, String name) {
+  public static WorkspaceImpl createWorkspaceFromConfig(
+      String id, AccountImpl account, String name) {
     final WorkspaceConfigImpl wCfg = createWorkspaceConfig(name);
     // Workspace
     final WorkspaceImpl workspace = new WorkspaceImpl();
@@ -665,6 +682,113 @@ public class WorkspaceDaoTest {
                 "attr3", "value3")));
     workspace.setConfig(wCfg);
     return workspace;
+  }
+
+  public static WorkspaceImpl createWorkspaceFromDevfile(
+      String id, AccountImpl account, String name) {
+    final DevfileImpl devfile = createDevfile(name);
+    // Workspace
+    final WorkspaceImpl workspace = new WorkspaceImpl();
+    workspace.setId(id);
+    workspace.setAccount(account);
+    workspace.setDevfile(devfile);
+    workspace.setAttributes(
+        new HashMap<>(
+            ImmutableMap.of(
+                "attr1", "value1",
+                "attr2", "value2",
+                "attr3", "value3")));
+    return workspace;
+  }
+
+  private static DevfileImpl createDevfile(String name) {
+
+    SourceImpl source1 = new SourceImpl("type1", "http://location", "refspec1");
+    ProjectImpl project1 = new ProjectImpl("project1", source1);
+
+    SourceImpl source2 = new SourceImpl("type2", "http://location", "refspec2");
+    ProjectImpl project2 = new ProjectImpl("project2", source2);
+
+    ActionImpl action1 = new ActionImpl("exec1", "component1", "run.sh", "/home/user/1");
+    ActionImpl action2 = new ActionImpl("exec2", "component2", "run.sh", "/home/user/2");
+
+    org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command1 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+            name, singletonList(action1), singletonMap("attr1", "value1"));
+    org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command2 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+            name, singletonList(action2), singletonMap("attr2", "value2"));
+
+    EntrypointImpl entrypoint1 =
+        new EntrypointImpl(
+            "parentName",
+            singletonMap("parent1", "selector1"),
+            "containerName1",
+            asList("command1", "command2"),
+            asList("arg1", "arg2"));
+
+    EntrypointImpl entrypoint2 =
+        new EntrypointImpl(
+            "parentName",
+            singletonMap("parent2", "selector2"),
+            "containerName1",
+            asList("command3", "command4"),
+            asList("arg3", "arg4"));
+
+    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume1 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name1", "path1");
+
+    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume2 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name2", "path2");
+
+    EnvImpl env1 = new EnvImpl("name1", "value1");
+    EnvImpl env2 = new EnvImpl("name2", "value2");
+
+    EndpointImpl endpoint1 = new EndpointImpl("name1", 1111, singletonMap("key1", "value1"));
+    EndpointImpl endpoint2 = new EndpointImpl("name2", 2222, singletonMap("key2", "value2"));
+
+    ComponentImpl component1 =
+        new ComponentImpl(
+            "component1",
+            "kubernetes",
+            "/dev.yaml",
+            null,
+            asList(entrypoint1, entrypoint2),
+            "image",
+            "256G",
+            false,
+            singletonList("command"),
+            singletonList("arg"),
+            asList(volume1, volume2),
+            asList(env1, env2),
+            asList(endpoint1, endpoint2));
+
+    ComponentImpl component2 =
+        new ComponentImpl(
+            "component2",
+            "kubernetes",
+            "/dev.yaml",
+            null,
+            asList(entrypoint1, entrypoint2),
+            "image",
+            "256G",
+            false,
+            singletonList("command"),
+            singletonList("arg"),
+            asList(volume1, volume2),
+            asList(env1, env2),
+            asList(endpoint1, endpoint2));
+
+    DevfileImpl devfile =
+        new DevfileImpl(
+            "0.0.1",
+            name,
+            asList(project1, project2),
+            asList(component1, component2),
+            asList(command1, command2),
+            singletonMap("attribute1", "value1"));
+
+    return devfile;
   }
 
   private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {

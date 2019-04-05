@@ -101,7 +101,7 @@ public final class TestObjectsFactory {
 
   public static DevfileImpl createDevfile(String id) {
     return new DevfileImpl(
-        "0.0.q",
+        "0.0.1",
         id + "name",
         asList(createDevfileProject(id + "-project1"), createDevfileProject(id + "-project2")),
         asList(
@@ -129,7 +129,8 @@ public final class TestObjectsFactory {
 
   private static EntrypointImpl createEntrypoint() {
     return new EntrypointImpl(
-        "parentName", singletonMap("parent", "selector"), "containerName", null, null);
+        "parentName", singletonMap("parent", "selector"), "containerName",
+        asList("command1", "command2"), asList("arg1", "arg2"));
   }
 
   private static org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl

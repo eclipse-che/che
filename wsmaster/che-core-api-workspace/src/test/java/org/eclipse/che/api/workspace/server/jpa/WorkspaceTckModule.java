@@ -110,7 +110,9 @@ public class WorkspaceTckModule extends TckModule {
     public void createAll(Collection<? extends WorkspaceImpl> entities)
         throws TckRepositoryException {
       for (WorkspaceImpl entity : entities) {
-        entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        if (entity.getConfig() != null) {
+          entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
       }
       super.createAll(entities);
     }

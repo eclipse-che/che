@@ -90,7 +90,7 @@ public class ComponentImpl implements Component {
   private List<EnvImpl> env;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_component_endpoints_id")
+  @JoinColumn(name = "devfile_endpoints_id")
   private List<EndpointImpl> endpoints;
 
   public ComponentImpl() {}
@@ -306,12 +306,12 @@ public class ComponentImpl implements Component {
         && Objects.equals(id, component.id)
         && Objects.equals(name, component.name)
         && Objects.equals(type, component.type)
-        && Objects.equals(getReference(), component.getReference())
-        && Objects.equals(getReferenceContent(), component.getReferenceContent())
+        && Objects.equals(reference, component.reference)
+        && Objects.equals(referenceContent, component.referenceContent)
         && Objects.equals(getEntrypoints(), component.getEntrypoints())
-        && Objects.equals(getImage(), component.getImage())
-        && Objects.equals(getMemoryLimit(), component.getMemoryLimit())
-        && Objects.equals(getCommand(), component.getCommand())
+        && Objects.equals(image, component.image)
+        && Objects.equals(memoryLimit, component.memoryLimit)
+        && Objects.equals(command, component.command)
         && Objects.equals(getArgs(), component.getArgs())
         && Objects.equals(getVolumes(), component.getVolumes())
         && Objects.equals(getEnv(), component.getEnv())

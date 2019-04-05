@@ -147,9 +147,9 @@ public class EntrypointImpl implements Entrypoint {
       return false;
     }
     EntrypointImpl that = (EntrypointImpl) o;
-    return Objects.equals(getParentName(), that.getParentName())
+    return Objects.equals(parentName, that.parentName)
+        && Objects.equals(containerName, that.containerName)
         && Objects.equals(getParentSelector(), that.getParentSelector())
-        && Objects.equals(getContainerName(), that.getContainerName())
         && Objects.equals(getCommand(), that.getCommand())
         && Objects.equals(getArgs(), that.getArgs());
   }
