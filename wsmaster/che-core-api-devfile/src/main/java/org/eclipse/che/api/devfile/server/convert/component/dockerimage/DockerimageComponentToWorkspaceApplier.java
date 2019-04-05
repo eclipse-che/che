@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Endpoint;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
+import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.devfile.server.Constants;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
@@ -191,6 +191,9 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         .withName(name)
         .endMetadata()
         .withNewSpec()
+        .withNewSelector()
+        .addToMatchLabels(CHE_COMPONENT_NAME_LABEL, name)
+        .endSelector()
         .withNewTemplate()
         .withNewMetadata()
         .withName(name)

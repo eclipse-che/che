@@ -1,5 +1,8 @@
 This module contains tests based on using "Cypress" framework.
 
+### Build project
+For obtaining required dependencies open terminal, go to ```"cypress-tests"``` folder
+and perform ```"npm install"``` command
 
 ### Prerequisites
 Launching requires valid ```"baseUrl"``` which may be configured by next way:

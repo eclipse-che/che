@@ -12,8 +12,9 @@
 package org.eclipse.che.api.core.model.workspace.devfile;
 
 public interface Env {
-
+  /** Returns the environment variable name. It is mandatory. */
   String getName();
 
+  /** Returns the environment variable value. It is mandatory. */
   String getValue();
 }

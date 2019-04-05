@@ -14,12 +14,13 @@ package org.eclipse.che.api.devfile.server.convert;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 
-import org.eclipse.che.api.devfile.model.Action;
-import org.eclipse.che.api.devfile.model.Command;
+import org.eclipse.che.api.core.model.workspace.devfile.Action;
+import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.devfile.server.Constants;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
-import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
 
 /**
  * Helps to convert {@link CommandImpl workspace command} to {@link Command devfile command} and
@@ -37,7 +38,9 @@ public class CommandConverter {
    * @throws WorkspaceExportException if workspace command does not has specified component name
    *     attribute where it should be run
    */
-  public Command toDevfileCommand(CommandImpl command) throws WorkspaceExportException {
+  public CommandImpl toDevfileCommand(
+      org.eclipse.che.api.workspace.server.model.impl.CommandImpl command)
+      throws WorkspaceExportException {
     String componentName =
         command.getAttributes().remove(Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE);
     if (componentName == null) {
@@ -46,8 +49,11 @@ public class CommandConverter {
               "Command `%s` has no specified component where it should be run", command.getName()));
     }
 
-    Command devCommand = new Command().withName(command.getName());
-    Action action = new Action().withCommand(command.getCommandLine()).withType(command.getType());
+    CommandImpl devCommand = new CommandImpl();
+    devCommand.setName(command.getName());
+    ActionImpl action = new ActionImpl();
+    action.setCommand(command.getCommandLine());
+    action.setType(command.getType());
     action.setWorkdir(command.getAttributes().remove(WORKING_DIRECTORY_ATTRIBUTE));
     action.setComponent(componentName);
     action.setType(Constants.EXEC_ACTION_TYPE);
@@ -64,7 +70,8 @@ public class CommandConverter {
    * @throws DevfileFormatException if devfile command does not have any action
    * @throws DevfileFormatException if devfile command has more than one action
    */
-  public CommandImpl toWorkspaceCommand(Command devfileCommand) throws DevfileFormatException {
+  public org.eclipse.che.api.workspace.server.model.impl.CommandImpl toWorkspaceCommand(
+      Command devfileCommand) throws DevfileFormatException {
     if (devfileCommand.getActions().size() != 1) {
       throw new DevfileFormatException(
           format("Command `%s` MUST has one and only one action", devfileCommand.getName()));
@@ -75,8 +82,10 @@ public class CommandConverter {
     return toWorkspaceCommand(devfileCommand, commandAction);
   }
 
-  private CommandImpl toWorkspaceCommand(Command devCommand, Action commandAction) {
-    CommandImpl command = new CommandImpl();
+  private org.eclipse.che.api.workspace.server.model.impl.CommandImpl toWorkspaceCommand(
+      Command devCommand, Action commandAction) {
+    org.eclipse.che.api.workspace.server.model.impl.CommandImpl command =
+        new org.eclipse.che.api.workspace.server.model.impl.CommandImpl();
     command.setName(devCommand.getName());
     command.setType(commandAction.getType());
     command.setCommandLine(commandAction.getCommand());

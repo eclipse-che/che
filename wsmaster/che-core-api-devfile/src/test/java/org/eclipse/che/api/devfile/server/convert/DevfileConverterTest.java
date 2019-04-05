@@ -21,19 +21,18 @@ import static org.testng.Assert.assertSame;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.model.Project;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
-import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -71,7 +70,7 @@ public class DevfileConverterTest {
     wsConfig.setName("petclinic");
 
     // when
-    Devfile devfile = devfileConverter.workspaceToDevFile(wsConfig);
+    DevfileImpl devfile = devfileConverter.workspaceToDevFile(wsConfig);
 
     // then
     assertEquals(devfile.getName(), "petclinic");
@@ -84,7 +83,7 @@ public class DevfileConverterTest {
     WorkspaceConfigImpl wsConfig = new WorkspaceConfigImpl();
 
     // when
-    Devfile devfile = devfileConverter.workspaceToDevFile(wsConfig);
+    DevfileImpl devfile = devfileConverter.workspaceToDevFile(wsConfig);
 
     // then
     assertEquals(devfile.getSpecVersion(), CURRENT_SPEC_VERSION);
@@ -94,14 +93,15 @@ public class DevfileConverterTest {
   public void shouldConvertCommandsDuringConvertingWorkspaceConfigToDevfile() throws Exception {
     // given
     WorkspaceConfigImpl wsConfig = new WorkspaceConfigImpl();
-    CommandImpl workspaceCommand = mock(CommandImpl.class);
+    org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
+        mock(org.eclipse.che.api.workspace.server.model.impl.CommandImpl.class);
     wsConfig.getCommands().add(workspaceCommand);
 
-    Command devfileCommand = mock(Command.class);
+    CommandImpl devfileCommand = mock(CommandImpl.class);
     when(commandConverter.toDevfileCommand(any())).thenReturn(devfileCommand);
 
     // when
-    Devfile devfile = devfileConverter.workspaceToDevFile(wsConfig);
+    DevfileImpl devfile = devfileConverter.workspaceToDevFile(wsConfig);
 
     // then
     assertEquals(devfile.getCommands().size(), 1);
@@ -115,11 +115,11 @@ public class DevfileConverterTest {
     ProjectConfigImpl workspaceProject = mock(ProjectConfigImpl.class);
     wsConfig.getProjects().add(workspaceProject);
 
-    Project devfileProject = mock(Project.class);
+    ProjectImpl devfileProject = mock(ProjectImpl.class);
     when(projectConverter.toDevfileProject(any())).thenReturn(devfileProject);
 
     // when
-    Devfile devfile = devfileConverter.workspaceToDevFile(wsConfig);
+    DevfileImpl devfile = devfileConverter.workspaceToDevFile(wsConfig);
 
     // then
     assertEquals(devfile.getProjects().size(), 1);
@@ -132,7 +132,7 @@ public class DevfileConverterTest {
     WorkspaceConfigImpl wsConfig = new WorkspaceConfigImpl();
 
     // when
-    Devfile devfile = devfileConverter.workspaceToDevFile(wsConfig);
+    DevfileImpl devfile = devfileConverter.workspaceToDevFile(wsConfig);
 
     // then
     verify(componentProvisioner).provision(devfile, wsConfig);
@@ -159,7 +159,7 @@ public class DevfileConverterTest {
       throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-    Devfile devfile = newDevfile("petclinic");
+    DevfileImpl devfile = newDevfile("petclinic");
 
     // when
     WorkspaceConfigImpl workspaceConfig =
@@ -174,7 +174,7 @@ public class DevfileConverterTest {
       throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-    Devfile devfile = newDevfile("petclinic");
+    DevfileImpl devfile = newDevfile("petclinic");
 
     // when
     devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
@@ -187,11 +187,12 @@ public class DevfileConverterTest {
   public void shouldConvertCommandsDuringConvertingDevfileToWorkspaceConfig() throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-    Devfile devfile = newDevfile("petclinic");
-    Command devfileCommand = mock(Command.class);
+    DevfileImpl devfile = newDevfile("petclinic");
+    CommandImpl devfileCommand = mock(CommandImpl.class);
     devfile.getCommands().add(devfileCommand);
 
-    CommandImpl workspaceCommand = mock(CommandImpl.class);
+    org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
+        mock(org.eclipse.che.api.workspace.server.model.impl.CommandImpl.class);
     when(commandConverter.toWorkspaceCommand(any())).thenReturn(workspaceCommand);
 
     // when
@@ -207,8 +208,8 @@ public class DevfileConverterTest {
   public void shouldConvertProjectsDuringConvertingDevfileToWorkspaceConfig() throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-    Devfile devfile = newDevfile("petclinic");
-    Project devfileProject = mock(Project.class);
+    DevfileImpl devfile = newDevfile("petclinic");
+    ProjectImpl devfileProject = mock(ProjectImpl.class);
     devfile.getProjects().add(devfileProject);
 
     ProjectConfigImpl workspaceProject = mock(ProjectConfigImpl.class);
@@ -226,8 +227,8 @@ public class DevfileConverterTest {
   @Test
   public void shouldConvertComponentsDuringConvertingDevfileToWorkspaceConfig() throws Exception {
     // given
-    Devfile devfile = newDevfile("petclinic");
-    Component component = new Component();
+    DevfileImpl devfile = newDevfile("petclinic");
+    ComponentImpl component = new ComponentImpl();
     component.setType(COMPONENT_TYPE);
     devfile.getComponents().add(component);
 
@@ -249,7 +250,7 @@ public class DevfileConverterTest {
           throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-    Devfile devfile = new Devfile();
+    DevfileImpl devfile = new DevfileImpl();
     devfile.setName("petclinic");
 
     // when
@@ -265,7 +266,7 @@ public class DevfileConverterTest {
           throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-    Devfile devfile = new Devfile();
+    DevfileImpl devfile = new DevfileImpl();
     devfile.setSpecVersion("1.0.0-non-supported");
     devfile.setName("petclinic");
 
@@ -273,8 +274,8 @@ public class DevfileConverterTest {
     devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
   }
 
-  private Devfile newDevfile(String name) {
-    Devfile devfile = new Devfile();
+  private DevfileImpl newDevfile(String name) {
+    DevfileImpl devfile = new DevfileImpl();
     devfile.setSpecVersion(CURRENT_SPEC_VERSION);
     devfile.setName(name);
     return devfile;

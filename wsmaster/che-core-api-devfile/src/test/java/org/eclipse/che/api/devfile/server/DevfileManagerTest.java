@@ -30,12 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.devfile.model.Action;
-import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.model.Endpoint;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
@@ -43,6 +39,11 @@ import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
@@ -70,43 +71,43 @@ public class DevfileManagerTest {
   @Mock private ObjectMapper objectMapper;
 
   @Mock private JsonNode devfileJsonNode;
-  private Devfile devfile;
+  private DevfileImpl devfile;
 
   @InjectMocks private DevfileManager devfileManager;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    devfile = new Devfile();
+    devfile = new DevfileImpl();
 
     lenient().when(schemaValidator.validateBySchema(any())).thenReturn(devfileJsonNode);
-    lenient().when(objectMapper.treeToValue(any(), eq(Devfile.class))).thenReturn(devfile);
+    lenient().when(objectMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
   }
 
   @Test
   public void testValidateAndParse() throws Exception {
     // when
-    Devfile parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
+    DevfileImpl parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
 
     // then
     assertEquals(parsed, devfile);
     verify(schemaValidator).validateBySchema(DEVFILE_YAML_CONTENT);
-    verify(objectMapper).treeToValue(devfileJsonNode, Devfile.class);
+    verify(objectMapper).treeToValue(devfileJsonNode, DevfileImpl.class);
     verify(integrityValidator).validateDevfile(devfile);
   }
 
   @Test
   public void testInitializingDevfileMapsAfterParsing() throws Exception {
     // given
-    Command command = new Command();
-    command.getActions().add(new Action());
+    CommandImpl command = new CommandImpl();
+    command.getActions().add(new ActionImpl());
     devfile.getCommands().add(command);
 
-    Component component = new Component();
-    component.getEndpoints().add(new Endpoint());
+    ComponentImpl component = new ComponentImpl();
+    component.getEndpoints().add(new EndpointImpl());
     devfile.getComponents().add(component);
 
     // when
-    Devfile parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
+    DevfileImpl parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
 
     // then
     assertNotNull(parsed.getCommands().get(0).getAttributes());
@@ -147,7 +148,7 @@ public class DevfileManagerTest {
     current.setSubject(TEST_SUBJECT);
     EnvironmentContext.setCurrent(current);
 
-    when(workspaceManager.createWorkspace(any(), anyString(), anyMap()))
+    when(workspaceManager.createWorkspace(any(WorkspaceConfig.class), anyString(), anyMap()))
         .thenReturn(createWorkspace(WorkspaceStatus.STOPPED));
     when(workspaceManager.getWorkspace(anyString(), anyString()))
         .thenAnswer(
@@ -178,8 +179,8 @@ public class DevfileManagerTest {
   private WorkspaceImpl createWorkspace(WorkspaceStatus status)
       throws IOException, JsonParseException {
     return WorkspaceImpl.builder()
-        .setConfig(createConfig())
         .generateId()
+        .setConfig(createConfig())
         .setAccount(new AccountImpl("anyId", TEST_SUBJECT.getUserName(), "test"))
         .setStatus(status)
         .build();

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "cypress:open": "cypress open",
-    "cypress:run-hidden": "cypress run",
+    "cypress:run-hidden": "cypress run --browser electron",
     "cypress:run": "cypress run --headed"
   },
   "author": "",
@@ -18,5 +18,9 @@
     "ts-loader": "^5.3.3",
     "typescript": "^3.3.3",
     "webpack": "^4.29.3"
+  },
+  "dependencies": {
+    "inversify": "^5.0.1",
+    "reflect-metadata": "^0.1.13"
   }
 }

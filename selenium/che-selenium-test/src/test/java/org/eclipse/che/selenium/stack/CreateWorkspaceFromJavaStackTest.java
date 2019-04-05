@@ -19,7 +19,8 @@ import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.BUILD
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_AND_RUN_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.BUILD_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.DEBUG_COMMAND_ITEM;
-import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.MAVEN_BUILD_AND_RUN_COMMAND_ITEM;
+import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.MAVEN_BUILD_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_TOMCAT_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.STOP_TOMCAT_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.BUILD_GOAL;
@@ -100,13 +101,13 @@ public class CreateWorkspaceFromJavaStackTest {
     consoles.executeCommandFromProjectExplorer(
         CONSOLE_JAVA_PROJECT,
         BUILD_GOAL,
-        BUILD_COMMAND_ITEM.getItem(CONSOLE_JAVA_PROJECT),
+        MAVEN_BUILD_COMMAND_ITEM.getItem(CONSOLE_JAVA_PROJECT),
         BUILD_SUCCESS);
 
     consoles.executeCommandFromProjectExplorer(
         CONSOLE_JAVA_PROJECT,
         RUN_GOAL,
-        RUN_COMMAND_ITEM.getItem(CONSOLE_JAVA_PROJECT),
+        MAVEN_BUILD_AND_RUN_COMMAND_ITEM.getItem(CONSOLE_JAVA_PROJECT),
         "Hello World Che!");
   }
 

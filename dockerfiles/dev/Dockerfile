@@ -30,7 +30,7 @@ RUN sudo yum -y install epel-release && \
     cat /opt/rh/rh-nodejs8/enable >> /home/user/.bashrc && \
     sudo ln -s /opt/rh/rh-nodejs8/root/usr/bin/node /usr/local/bin/nodejs
 
-ENV TOMCAT_VERSION=8.5.23
+ENV TOMCAT_VERSION=8.5.23 YARN_VERSION=1.15.2
 
 RUN mkdir $HOME/.m2 && \
    wget -O  /home/user/tomcat8.zip "https://oss.sonatype.org/content/repositories/releases/org/eclipse/che/lib/che-tomcat8-slf4j-logback/6.11.0/che-tomcat8-slf4j-logback-6.11.0.zip" ;\
@@ -40,6 +40,16 @@ RUN mkdir $HOME/.m2 && \
    sed -i -- 's/autoDeploy=\"false\"/autoDeploy=\"true\"/g' /home/user/tomcat8/conf/server.xml; \
    sed -i 's/<Context>/<Context reloadable=\"true\">/g' /home/user/tomcat8/conf/context.xml; \
    echo "export MAVEN_OPTS=\$JAVA_OPTS" >> /home/user/.bashrc
+
+RUN wget -qO- https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --import \
+    && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz" \
+    && curl -fsSLO --compressed "https://yarnpkg.com/downloads/$YARN_VERSION/yarn-v$YARN_VERSION.tar.gz.asc" \
+    && gpg --batch --verify yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz \
+    && sudo mkdir -p /opt \
+    && sudo tar -xzf yarn-v$YARN_VERSION.tar.gz -C /opt/ \
+    && sudo ln -s /opt/yarn-v$YARN_VERSION/bin/yarn /usr/local/bin/yarn \
+    && sudo ln -s /opt/yarn-v$YARN_VERSION/bin/yarnpkg /usr/local/bin/yarnpkg \
+    && rm yarn-v$YARN_VERSION.tar.gz.asc yarn-v$YARN_VERSION.tar.gz
 
 USER user
 

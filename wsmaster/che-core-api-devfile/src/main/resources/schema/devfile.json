@@ -98,6 +98,10 @@
                 "examples": [ "master", "feature-42", "304df5a" ]
               }
             }
+          },
+          "clonePath": {
+            "type": "string",
+            "description": "The path relative to the root of the projects to which this project should be cloned into. This is a unix-style relative path (i.e. uses forward slashes). The path is invalid if it is absolute or tries to escape the project root through the usage of '..'. If not specified, defaults to the project name."
           }
         }
       }
@@ -333,13 +337,13 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "title": "The Environment Variable Name",
-                  "description": "The environment variable name"
+                  "title": "The Endpoint Name",
+                  "description": "The Endpoint name"
                 },
                 "port": {
                   "type": "integer",
-                  "title": "The Environment Variable Name",
-                  "description": "The environment variable name"
+                  "title": "The Endpoint Port",
+                  "description": "The container port that should be used as endpoint"
                 },
                 "attributes" : {
                   "type": "object",

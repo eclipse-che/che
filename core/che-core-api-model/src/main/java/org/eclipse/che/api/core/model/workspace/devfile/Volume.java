@@ -12,8 +12,12 @@
 package org.eclipse.che.api.core.model.workspace.devfile;
 
 public interface Volume {
-
+  /**
+   * Returns the volume name. If several components mount the same volume then they will reuse the
+   * volume and will be able to access to the same files. It is mandatory.
+   */
   String getName();
 
+  /** Returns the path where volume should be mount to container. It is mandatory. */
   String getContainerPath();
 }

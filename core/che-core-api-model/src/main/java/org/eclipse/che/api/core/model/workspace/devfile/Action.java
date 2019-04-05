@@ -12,11 +12,15 @@
 package org.eclipse.che.api.core.model.workspace.devfile;
 
 public interface Action {
+  /** Returns action type. Is is mandatory. */
   String getType();
 
+  /** Returns component to which given action relates. It is mandatory. */
   String getComponent();
 
+  /** Returns the actual action command-line string. It is mandatory. */
   String getCommand();
 
+  /** Returns the working directory where the command should be executed. It is optional. */
   String getWorkdir();
 }

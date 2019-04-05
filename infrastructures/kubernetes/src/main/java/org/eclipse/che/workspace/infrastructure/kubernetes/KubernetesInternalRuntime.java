@@ -853,7 +853,12 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     } catch (InfrastructureException rethrow) {
       throw rethrow;
     } catch (Throwable cause) {
-      throw new InternalInfrastructureException(cause.getMessage(), cause);
+      String message = cause.getMessage();
+      if (message == null) {
+        // set a default message if there is no any
+        message = "An exception occurred.";
+      }
+      throw new InternalInfrastructureException(message, cause);
     }
   }
 

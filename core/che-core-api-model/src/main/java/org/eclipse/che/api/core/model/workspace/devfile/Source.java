@@ -12,10 +12,15 @@
 package org.eclipse.che.api.core.model.workspace.devfile;
 
 public interface Source {
-
+  /** Returns type of source. It is mandatory. */
   String getType();
 
+  /** Returns project's source location address. It is mandatory. */
   String getLocation();
 
+  /**
+   * Returns the name of the refspec to check out after the clone. This can be a branch, tag, commit
+   * id or anything the particular source type understands. It is optional.
+   */
   String getRefspec();
 }

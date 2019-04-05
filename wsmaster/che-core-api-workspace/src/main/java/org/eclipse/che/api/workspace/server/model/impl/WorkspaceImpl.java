@@ -92,9 +92,7 @@ public class WorkspaceImpl implements Workspace {
   @JoinColumn(name = "config_id")
   private WorkspaceConfigImpl config;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "devfile_id")
-  private DevfileImpl devfile;
+  @Transient private DevfileImpl devfile;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "workspace_attributes", joinColumns = @JoinColumn(name = "workspace_id"))

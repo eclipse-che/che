@@ -30,8 +30,8 @@ import java.util.List;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Command;
-import org.eclipse.che.api.devfile.model.Component;
-import org.eclipse.che.api.devfile.model.Entrypoint;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
+import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.devfile.server.Constants;
 import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
@@ -214,7 +214,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     }
   }
 
-  private void applyEntrypoints(List<Entrypoint> entrypoints, List<HasMetadata> list) {
+  private void applyEntrypoints(List<? extends Entrypoint> entrypoints, List<HasMetadata> list) {
     entrypoints.forEach(ep -> applyEntrypoint(ep, list));
   }
 

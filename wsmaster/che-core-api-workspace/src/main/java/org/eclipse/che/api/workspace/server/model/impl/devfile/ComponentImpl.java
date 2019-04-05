@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 import static java.util.stream.Collectors.toCollection;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,6 +57,8 @@ public class ComponentImpl implements Component {
   @Column(name = "reference_content")
   private String referenceContent;
 
+  private Map<String, String> selector;
+
   @Column(name = "image")
   private String image;
 
@@ -95,9 +98,64 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl() {}
 
+  public ComponentImpl(String type, String name) {
+    this.name = name;
+    this.type = type;
+  }
+
   public ComponentImpl(
-      String name,
       String type,
+      String name,
+      String reference,
+      String referenceContent,
+      Map<String, String> selector,
+      List<? extends Entrypoint> entrypoints) {
+    this.name = name;
+    this.type = type;
+    this.reference = reference;
+    this.referenceContent = referenceContent;
+    if (selector != null) {
+      this.selector = new HashMap<>(selector);
+    }
+    if (entrypoints != null) {
+      this.entrypoints =
+          entrypoints.stream().map(EntrypointImpl::new).collect(toCollection(ArrayList::new));
+    }
+  }
+
+  public ComponentImpl(
+      String type,
+      String name,
+      String image,
+      String memoryLimit,
+      boolean mountSources,
+      List<String> command,
+      List<String> args,
+      List<? extends Volume> volumes,
+      List<? extends Env> env,
+      List<? extends Endpoint> endpoints) {
+    this.name = name;
+    this.type = type;
+    this.image = image;
+    this.memoryLimit = memoryLimit;
+    this.mountSources = mountSources;
+    this.command = command;
+    this.args = args;
+    if (volumes != null) {
+      this.volumes = volumes.stream().map(VolumeImpl::new).collect(toCollection(ArrayList::new));
+    }
+    if (env != null) {
+      this.env = env.stream().map(EnvImpl::new).collect(toCollection(ArrayList::new));
+    }
+    if (endpoints != null) {
+      this.endpoints =
+          endpoints.stream().map(EndpointImpl::new).collect(toCollection(ArrayList::new));
+    }
+  }
+
+  public ComponentImpl(
+      String type,
+      String name,
       String reference,
       String referenceContent,
       List<? extends Entrypoint> entrypoints,
@@ -136,8 +194,8 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl(Component component) {
     this(
-        component.getName(),
         component.getType(),
+        component.getName(),
         component.getReference(),
         component.getReferenceContent(),
         component.getEntrypoints(),
@@ -150,8 +208,6 @@ public class ComponentImpl implements Component {
         component.getEnv(),
         component.getEndpoints());
   }
-
-  public ComponentImpl(String name, String type, String component_id) {}
 
   @Override
   public String getName() {
@@ -190,6 +246,18 @@ public class ComponentImpl implements Component {
   }
 
   @Override
+  public Map<String, String> getSelector() {
+    if (selector == null) {
+      selector = new HashMap<>();
+    }
+    return selector;
+  }
+
+  public void setSelector(Map<String, String> selector) {
+    this.selector = selector;
+  }
+
+  @Override
   public List<EntrypointImpl> getEntrypoints() {
     if (entrypoints == null) {
       entrypoints = new ArrayList<>();
@@ -199,11 +267,6 @@ public class ComponentImpl implements Component {
 
   public void setEntrypoints(List<EntrypointImpl> entrypoints) {
     this.entrypoints = entrypoints;
-  }
-
-  @Override
-  public Map<String, String> getSelector() {
-    return null;
   }
 
   @Override
@@ -325,6 +388,7 @@ public class ComponentImpl implements Component {
         getType(),
         getReference(),
         getReferenceContent(),
+        getSelector(),
         getEntrypoints(),
         getImage(),
         getMemoryLimit(),
@@ -354,6 +418,8 @@ public class ComponentImpl implements Component {
         + ", referenceContent='"
         + referenceContent
         + '\''
+        + ", selector="
+        + selector
         + ", entrypoints="
         + entrypoints
         + ", image='"

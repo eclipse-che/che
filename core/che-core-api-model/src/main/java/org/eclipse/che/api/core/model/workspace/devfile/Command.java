@@ -15,10 +15,18 @@ import java.util.List;
 import java.util.Map;
 
 public interface Command {
-
+  /** Returns the name of the command. It is mandatory and unique per commands set. */
   String getName();
 
-  Map<String, String> getAttributes();
-
+  /**
+   * Returns the command actions. Now the only one command must be specified in list but there are
+   * plans to implement supporting multiple actions commands. It is mandatory.
+   */
   List<? extends Action> getActions();
+
+  /**
+   * Returns the command attributes. Empty map is returned when command does not have attributes. It
+   * is optional.
+   */
+  Map<String, String> getAttributes();
 }

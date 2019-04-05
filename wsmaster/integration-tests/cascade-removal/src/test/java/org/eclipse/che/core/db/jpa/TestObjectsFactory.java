@@ -129,8 +129,11 @@ public final class TestObjectsFactory {
 
   private static EntrypointImpl createEntrypoint() {
     return new EntrypointImpl(
-        "parentName", singletonMap("parent", "selector"), "containerName",
-        asList("command1", "command2"), asList("arg1", "arg2"));
+        "parentName",
+        singletonMap("parent", "selector"),
+        "containerName",
+        asList("command1", "command2"),
+        asList("arg1", "arg2"));
   }
 
   private static org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl
@@ -144,7 +147,7 @@ public final class TestObjectsFactory {
   }
 
   private static ProjectImpl createDevfileProject(String name) {
-    return new ProjectImpl(name, createDevfileSource());
+    return new ProjectImpl(name, createDevfileSource(), "path");
   }
 
   private static SourceImpl createDevfileSource() {

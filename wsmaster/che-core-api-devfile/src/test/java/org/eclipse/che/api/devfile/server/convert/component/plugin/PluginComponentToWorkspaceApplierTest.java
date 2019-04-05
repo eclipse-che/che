@@ -19,9 +19,9 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,12 +39,12 @@ public class PluginComponentToWorkspaceApplierTest {
   public void shouldProvisionPluginWorkspaceAttributeDuringCheEditorComponentApplying()
       throws Exception {
     // given
-    Component superPluginComponent = new Component();
+    ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setName("super-plugin");
     superPluginComponent.setId("org.eclipse.che.super-plugin:0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
-    Component customPluginComponent = new Component();
+    ComponentImpl customPluginComponent = new ComponentImpl();
     customPluginComponent.setName("custom");
     customPluginComponent.setId("custom-plugin:v1");
     customPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
@@ -72,7 +72,7 @@ public class PluginComponentToWorkspaceApplierTest {
   public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying()
       throws Exception {
     // given
-    Component superPluginComponent = new Component();
+    ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setName("super-plugin");
     superPluginComponent.setId("org.eclipse.che.super-plugin:0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
@@ -95,7 +95,7 @@ public class PluginComponentToWorkspaceApplierTest {
   public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
       throws Exception {
     // given
-    Component superPluginComponent = new Component();
+    ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setName("super-plugin");
     superPluginComponent.setId(
         "https://custom-plugin.registry/plugins/org.eclipse.che.super-plugin:0.0.1");

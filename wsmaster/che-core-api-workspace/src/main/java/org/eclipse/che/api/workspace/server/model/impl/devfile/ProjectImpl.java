@@ -40,17 +40,21 @@ public class ProjectImpl implements Project {
   @JoinColumn(name = "source_id")
   private SourceImpl source;
 
+  @Column(name = "clone_path", nullable = false)
+  private String clonePath;
+
   public ProjectImpl() {}
 
-  public ProjectImpl(String name, Source source) {
+  public ProjectImpl(String name, Source source, String clonePath) {
     this.name = name;
     if (source != null) {
       this.source = new SourceImpl(source);
     }
+    this.clonePath = clonePath;
   }
 
   public ProjectImpl(Project project) {
-    this(project.getName(), project.getSource());
+    this(project.getName(), project.getSource(), project.getClonePath());
   }
 
   @Override
@@ -72,6 +76,15 @@ public class ProjectImpl implements Project {
   }
 
   @Override
+  public String getClonePath() {
+    return clonePath;
+  }
+
+  public void setClonePath(String clonePath) {
+    this.clonePath = clonePath;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -82,12 +95,13 @@ public class ProjectImpl implements Project {
     ProjectImpl project = (ProjectImpl) o;
     return Objects.equals(id, project.id)
         && Objects.equals(name, project.name)
-        && Objects.equals(source, project.source);
+        && Objects.equals(source, project.source)
+        && Objects.equals(clonePath, project.clonePath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getSource());
+    return Objects.hash(getName(), getSource(), getClonePath());
   }
 
   @Override
@@ -101,6 +115,9 @@ public class ProjectImpl implements Project {
         + '\''
         + ", source="
         + source
+        + ", clonePath='"
+        + clonePath
+        + '\''
         + '}';
   }
 }

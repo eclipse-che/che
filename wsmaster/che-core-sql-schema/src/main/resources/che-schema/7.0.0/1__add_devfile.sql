@@ -49,6 +49,7 @@ CREATE TABLE devfile_project (
     id                   BIGINT       NOT NULL,
     name                 VARCHAR(255) NOT NULL,
     source_id            BIGINT       NOT NULL,
+    clone_path           TEXT,
     devfile_projects_id  BIGINT,
 
     PRIMARY KEY (id)
