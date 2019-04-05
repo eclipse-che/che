@@ -32,6 +32,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.commons.lang.Pair;
 
 /**
  * Provision default editor if there is no any another editor and default plugins for it.
@@ -86,7 +87,7 @@ public class DefaultEditorProvisioner {
       isDefaultEditorUsed = true;
     } else {
       Component editor = editorOpt.get();
-      isDefaultEditorUsed = editor.getId().startsWith(defaultEditorId + ':');
+      isDefaultEditorUsed = defaultEditorId.equals(resolveIdAndVersion(editor.getId()).first);
     }
 
     if (isDefaultEditorUsed) {
@@ -129,6 +130,18 @@ public class DefaultEditorProvisioner {
   }
 
   private String getId(String reference) {
-    return reference.split(":", 2)[0];
+    return resolveIdAndVersion(reference).first;
+  }
+
+  private Pair<String, String> resolveIdAndVersion(String ref) {
+    int lastSlashPosition = ref.lastIndexOf("/");
+    String idVersion;
+    if (lastSlashPosition < 0) {
+      idVersion = ref;
+    } else {
+      idVersion = ref.substring(lastSlashPosition + 1);
+    }
+    String[] splitted = idVersion.split(":", 2);
+    return Pair.of(splitted[0], splitted[1]);
   }
 }
