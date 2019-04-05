@@ -19,11 +19,10 @@ import static org.testng.Assert.assertFalse;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
-import org.eclipse.che.api.devfile.model.Action;
-import org.eclipse.che.api.devfile.model.Command;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
-import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -40,20 +39,22 @@ public class CommandConverterTest {
   @Test
   public void shouldConvertWorkspaceCommandToDevfileCommand() throws Exception {
     // given
-    CommandImpl workspaceCommand = new CommandImpl("build", "mvn clean install", "custom");
+    org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
+        new org.eclipse.che.api.workspace.server.model.impl.CommandImpl(
+            "build", "mvn clean install", "custom");
     workspaceCommand.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, "dockerimageComponent");
     workspaceCommand.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, "/tmp");
     workspaceCommand.getAttributes().put("anotherAttribute", "value");
 
     // when
-    Command devfileCommand = commandConverter.toDevfileCommand(workspaceCommand);
+    CommandImpl devfileCommand = commandConverter.toDevfileCommand(workspaceCommand);
 
     // then
     assertEquals(devfileCommand.getName(), "build");
     assertEquals(devfileCommand.getActions().size(), 1);
     assertEquals(devfileCommand.getAttributes().size(), 1);
     assertEquals(devfileCommand.getAttributes().get("anotherAttribute"), "value");
-    Action action = devfileCommand.getActions().get(0);
+    ActionImpl action = devfileCommand.getActions().get(0);
     assertEquals(action.getComponent(), "dockerimageComponent");
     assertEquals(action.getWorkdir(), "/tmp");
     assertEquals(action.getCommand(), "mvn clean install");
@@ -67,7 +68,9 @@ public class CommandConverterTest {
   public void shouldThrowAnExceptionIfWorkspaceCommandDoesNotHaveComponentNameAttribute()
       throws Exception {
     // given
-    CommandImpl workspaceCommand = new CommandImpl("build", "mvn clean install", "custom");
+    org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
+        new org.eclipse.che.api.workspace.server.model.impl.CommandImpl(
+            "build", "mvn clean install", "custom");
 
     // when
     commandConverter.toDevfileCommand(workspaceCommand);
@@ -76,10 +79,10 @@ public class CommandConverterTest {
   @Test
   public void shouldConvertDevfileCommandToWorkspaceCommands() throws Exception {
     // given
-    Command devfileCommand = new Command();
+    CommandImpl devfileCommand = new CommandImpl();
     devfileCommand.setName("build");
     devfileCommand.setAttributes(ImmutableMap.of("attr", "value"));
-    Action action = new Action();
+    ActionImpl action = new ActionImpl();
     action.setComponent("dockerimageComponent");
     action.setType(EXEC_ACTION_TYPE);
     action.setWorkdir("/tmp");
@@ -87,7 +90,8 @@ public class CommandConverterTest {
     devfileCommand.getActions().add(action);
 
     // when
-    CommandImpl workspaceCommand = commandConverter.toWorkspaceCommand(devfileCommand);
+    org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
+        commandConverter.toWorkspaceCommand(devfileCommand);
 
     // then
     assertEquals(workspaceCommand.getName(), "build");
@@ -106,14 +110,15 @@ public class CommandConverterTest {
       shouldNotSetWorkingDirAttributeIfItIsMissingInDevfileCommandDuringConvertingDevfileCommandToWorkspaceCommands()
           throws Exception {
     // given
-    Command devfileCommand = new Command();
-    Action action = new Action();
+    CommandImpl devfileCommand = new CommandImpl();
+    ActionImpl action = new ActionImpl();
     action.setWorkdir(null);
     devfileCommand.getActions().add(action);
     devfileCommand.setAttributes(new HashMap<>());
 
     // when
-    CommandImpl workspaceCommand = commandConverter.toWorkspaceCommand(devfileCommand);
+    org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
+        commandConverter.toWorkspaceCommand(devfileCommand);
 
     // then
     assertFalse(workspaceCommand.getAttributes().containsKey(WORKING_DIRECTORY_ATTRIBUTE));
@@ -124,11 +129,11 @@ public class CommandConverterTest {
       expectedExceptionsMessageRegExp = "Command `build` MUST has one and only one action")
   public void shouldThrowAnExceptionIfDevfileCommandHasMultipleActions() throws Exception {
     // given
-    Command devfileCommand = new Command();
+    CommandImpl devfileCommand = new CommandImpl();
     devfileCommand.setName("build");
     devfileCommand.setAttributes(ImmutableMap.of("attr", "value"));
-    devfileCommand.getActions().add(new Action());
-    devfileCommand.getActions().add(new Action());
+    devfileCommand.getActions().add(new ActionImpl());
+    devfileCommand.getActions().add(new ActionImpl());
 
     // when
     commandConverter.toWorkspaceCommand(devfileCommand);

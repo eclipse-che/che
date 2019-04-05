@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.pageobject.Ide;
 import org.eclipse.che.selenium.pageobject.Menu;
+import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -25,6 +26,7 @@ import org.testng.annotations.Test;
 /** @author Andrey Chizhikov */
 public class CheckStopStartWsTest {
   @Inject private TestWorkspace testWorkspace;
+  @Inject private NotificationsPopupPanel notificationsPopupPanel;
   @Inject private ToastLoader toastLoader;
   @Inject private Menu menu;
   @Inject private Ide ide;
@@ -37,6 +39,7 @@ public class CheckStopStartWsTest {
   @Test
   public void checkStopStartWorkspaceTest() {
     ide.waitOpenedWorkspaceIsReadyToUse();
+    notificationsPopupPanel.waitPopupPanelsAreClosed();
 
     menu.runCommand(WORKSPACE, STOP_WORKSPACE);
     toastLoader.waitExpectedTextInToastLoader("Workspace is not running");

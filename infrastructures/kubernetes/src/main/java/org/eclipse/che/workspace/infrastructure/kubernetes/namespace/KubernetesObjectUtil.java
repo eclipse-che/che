@@ -15,6 +15,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.LabelSelector;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
@@ -28,6 +29,8 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import io.fabric8.kubernetes.api.model.apps.Deployment;
+import io.fabric8.kubernetes.api.model.apps.DeploymentSpec;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,6 +108,24 @@ public class KubernetesObjectUtil {
     HashMap<String, String> selector = new HashMap<>();
     selector.put(key, value);
     spec.setSelector(selector);
+  }
+
+  /** Sets the specified match labels for a selector into target Kubernetes Deployment. */
+  public static void setSelector(Deployment target, Map<String, String> matchLabels) {
+    DeploymentSpec spec = target.getSpec();
+
+    if (spec == null) {
+      spec = new DeploymentSpec();
+      target.setSpec(spec);
+    }
+
+    LabelSelector selector = spec.getSelector();
+    if (selector == null) {
+      selector = new LabelSelector();
+      spec.setSelector(selector);
+    }
+
+    selector.setMatchLabels(new HashMap<>(matchLabels));
   }
 
   /**

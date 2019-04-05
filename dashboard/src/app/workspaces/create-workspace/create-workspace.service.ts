@@ -249,13 +249,4 @@ export class CreateWorkspaceSvc {
       });
     });
   }
-
-  /**
-   * Returns the location of the plugin registry.
-   *
-   * @returns {string} the location of the plugin registry if exists
-   */
-  getPluginRegistryLocation(): string {
-    return this.cheWorkspace.getWorkspaceSettings() != null ? this.cheWorkspace.getWorkspaceSettings().cheWorkspacePluginRegistryUrl : null;
-  }
 }

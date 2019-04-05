@@ -25,7 +25,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.URLFetcher;
@@ -33,6 +32,7 @@ import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
@@ -104,7 +104,7 @@ public class URLFactoryBuilder {
       return Optional.empty();
     }
     try {
-      Devfile devfile = devfileManager.parse(devfileYamlContent);
+      DevfileImpl devfile = devfileManager.parse(devfileYamlContent);
       WorkspaceConfigImpl wsConfig =
           devfileManager.createWorkspaceConfig(devfile, fileContentProvider);
       FactoryDto factoryDto =

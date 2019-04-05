@@ -15,9 +15,15 @@ import java.util.Map;
 
 public interface Endpoint {
 
+  /** Returns the endpoint name. It is mandatory and unique per endpoints set. */
   String getName();
 
+  /** Returns the container port that should be used for endpoint. It is mandatory. */
   Integer getPort();
 
+  /**
+   * Returns endpoints attributes. Emtpy map is returned is endpoint does not have attributes. It is
+   * optional.
+   */
   Map<String, String> getAttributes();
 }

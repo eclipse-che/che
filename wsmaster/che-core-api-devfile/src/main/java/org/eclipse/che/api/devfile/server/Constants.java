@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.api.devfile.server;
 
-import org.eclipse.che.api.devfile.model.Endpoint;
-
 public class Constants {
 
   private Constants() {}

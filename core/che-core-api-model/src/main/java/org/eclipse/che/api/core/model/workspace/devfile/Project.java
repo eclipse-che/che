@@ -12,8 +12,17 @@
 package org.eclipse.che.api.core.model.workspace.devfile;
 
 public interface Project {
-
+  /** Returns projects name. It is mandatory and unique per projects set. */
   String getName();
 
+  /** Returns source where project should be cloned from. It is mandatory. */
   Source getSource();
+
+  /**
+   * Returns the path relative to the root of the projects to which this project should be cloned
+   * into. This is a unix-style relative path (i.e. uses forward slashes). The path is invalid if it
+   * is absolute or tries to escape the project root through the usage of '..'. If not specified,
+   * defaults to the project name.
+   */
+  String getClonePath();
 }

@@ -18,9 +18,9 @@ import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
-import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -39,7 +39,7 @@ public class EditorComponentToWorkspaceApplierTest {
       throws Exception {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
-    Component editorComponent = new Component();
+    ComponentImpl editorComponent = new ComponentImpl();
     editorComponent.setType(EDITOR_COMPONENT_TYPE);
     editorComponent.setName("editor");
     editorComponent.setId("org.eclipse.che.super-editor:0.0.1");
@@ -59,7 +59,7 @@ public class EditorComponentToWorkspaceApplierTest {
   public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying()
       throws Exception {
     // given
-    Component superPluginComponent = new Component();
+    ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setName("editor");
     superPluginComponent.setId("org.eclipse.che.super-editor:0.0.1");
     superPluginComponent.setType(EDITOR_COMPONENT_TYPE);
@@ -82,7 +82,7 @@ public class EditorComponentToWorkspaceApplierTest {
   public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
       throws Exception {
     // given
-    Component superPluginComponent = new Component();
+    ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setName("editor");
     superPluginComponent.setId(
         "https://custom-plugin.registry/plugins/org.eclipse.che.super-editor:0.0.1");

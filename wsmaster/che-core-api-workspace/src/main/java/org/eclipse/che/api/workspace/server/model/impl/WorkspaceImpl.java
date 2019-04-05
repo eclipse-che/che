@@ -120,7 +120,6 @@ public class WorkspaceImpl implements Workspace {
   public WorkspaceImpl(
       String id,
       Account account,
-      Devfile devfile,
       Runtime runtime,
       Map<String, String> attributes,
       boolean isTemporary,
@@ -128,9 +127,6 @@ public class WorkspaceImpl implements Workspace {
     this.id = id;
     if (account != null) {
       this.account = new AccountImpl(account);
-    }
-    if (devfile != null) {
-      this.devfile = new DevfileImpl(devfile);
     }
     if (runtime != null) {
       this.runtime =

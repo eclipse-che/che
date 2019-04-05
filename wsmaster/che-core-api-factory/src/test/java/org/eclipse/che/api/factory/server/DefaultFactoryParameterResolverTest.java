@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.che.api.devfile.model.Component;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.URLFetcher;
@@ -40,6 +39,7 @@ import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -79,7 +79,7 @@ public class DefaultFactoryParameterResolverTest {
               // in here we mock that the component applier requests the contents of the referenced
               // local file. That's all we need to happen
               FileContentProvider p = i.getArgument(2);
-              Component component = i.getArgument(1);
+              ComponentImpl component = i.getArgument(1);
               p.fetchContent(component.getReference());
               return null;
             })

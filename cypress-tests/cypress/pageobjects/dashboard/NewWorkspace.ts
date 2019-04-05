@@ -13,54 +13,34 @@ import { ElementStateChecker } from "../../utils/ElementStateChecker";
 /// <reference types="Cypress" />
 
 export class NewWorkspace {
-
-    private readonly elementStateChecker: ElementStateChecker = new ElementStateChecker();
-
     private static readonly CHE_7_STACK: string = "div[data-stack-id='che7-preview']";
     private static readonly SELECTED_CHE_7_STACK: string = ".stack-selector-item-selected[data-stack-id='che7-preview']"
     private static readonly CREATE_AND_OPEN_BUTTON: string = "che-button-save-flat[che-button-title='Create & Open']>button"
+    private static readonly CREATE_AND_EDIT_BUTTON: string = "#dropdown-toggle button[name='dropdown-toggle']"
     private static readonly ADD_OR_IMPORT_PROJECT_BUTTON: string = ".add-import-project-toggle-button";
     private static readonly ADD_BUTTON: string = "button[aria-disabled='false'][name='addButton']";
     private static readonly NAME_FIELD: string = "#workspace-name-input";
+    
+    private readonly elementStateChecker: ElementStateChecker = new ElementStateChecker();
 
+    
+    selectCreateWorkspaceAndProceedEditing() {
+        const createAndProceedDropDown: string = "che-button-dropdown.create-workspace-header-button ul.area-dropdown"
 
-    private getPluginListItemLocator(pluginName: string): string {
-        return `.plugin-item div[plugin-item-name='${pluginName}']`
-    }
+        // open drop down list
+        cy.get(NewWorkspace.CREATE_AND_EDIT_BUTTON)
+            .should('be.visible')
+            .click()
 
-    private getPluginListItemSwitcherLocator(pluginName: string): string {
-        return `${this.getPluginListItemLocator(pluginName)} md-switch`
-    }
+        // wait until drop down container is not animated
+        cy.get(createAndProceedDropDown)
+            .should('not.have.class', 'animating')
+            .should('be.visible')
 
-    waitPluginListItem(pluginName: string) {
-        cy.get(this.getPluginListItemLocator(pluginName))
-            .should(element => {
-                expect(this.elementStateChecker.isVisible(element)).to.be.true
-            })
-    }
-
-    clickOnPluginListItemSwitcher(pluginName: string) {
-        cy.get(this.getPluginListItemSwitcherLocator(pluginName))
-            .should(element => {
-                expect(this.elementStateChecker.isVisible(element)).to.be.true
-            })
-            .click({ force: true })
-    }
-
-    waitPluginEnabling(pluginName: string) {
-        cy.get(this.getPluginListItemSwitcherLocator(pluginName))
-            .should(element => {
-                expect(this.elementStateChecker.isVisible(element)).to.be.true
-            })
-            .should('have.attr', 'aria-checked', 'true')
-    }
-
-    waitPluginDisabling(pluginName: string) {
-        cy.get(this.getPluginListItemSwitcherLocator(pluginName))
-            .should(element => {
-                expect(this.elementStateChecker.isVisible(element)).to.be.true
-            })
-            .should('have.attr', 'aria-checked', 'false')
+        // click on "Create & Proceed Editing" item in the drop down list
+        cy.contains('Create & Proceed Editing')
+            .should('be.visible')
+            .click()
     }
 
     typeWorkspaceName(workspaceName: string) {

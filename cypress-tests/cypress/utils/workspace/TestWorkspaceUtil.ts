@@ -1,5 +1,3 @@
-import { Promise, resolve, reject } from "bluebird";
-
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -15,12 +13,12 @@ import { Promise, resolve, reject } from "bluebird";
 
 export class TestWorkspaceUtil {
 
-    private waitRunningStatus(workspaceNamespace: string, workspaceName: string, attempt: number): Promise<void> {
+    private waitRunningStatus(workspaceNamespace: string, workspaceName: string, attempt: number): PromiseLike<void> {
         const maximumAttempts: number = Cypress.env("TestWorkspaceUtil.waitRunningStatusAttempts");
         const delayBetweenAttempts: number = Cypress.env("TestWorkspaceUtil.waitRunningStatusPollingEvery");
         const expectedWorkspaceStatus: string = 'RUNNING';
 
-        return new Promise((resolve, reject) => {
+        return new Cypress.Promise((resolve:any, reject:any) => {
 
             cy.request('GET', `/api/workspace/${workspaceNamespace}:${workspaceName}`)
                 .then(response => {
@@ -50,7 +48,7 @@ export class TestWorkspaceUtil {
     }
 
 
-    waitWorkspaceRunning(workspaceNamespace: string, workspaceName: string): Promise<void> {
+    waitWorkspaceRunning(workspaceNamespace: string, workspaceName: string): PromiseLike<void> {
         let attempt: number = 0;
         return this.waitRunningStatus(workspaceNamespace, workspaceName, attempt)
     }

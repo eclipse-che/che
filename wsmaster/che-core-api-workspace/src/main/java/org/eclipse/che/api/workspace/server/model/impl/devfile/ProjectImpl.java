@@ -20,18 +20,20 @@ public class ProjectImpl implements Project {
 
   private String name;
   private SourceImpl source;
+  private String clonePath;
 
   public ProjectImpl() {}
 
-  public ProjectImpl(String name, Source source) {
+  public ProjectImpl(String name, Source source, String clonePath) {
     this.name = name;
     if (source != null) {
       this.source = new SourceImpl(source);
     }
+    this.clonePath = clonePath;
   }
 
   public ProjectImpl(Project project) {
-    this(project.getName(), project.getSource());
+    this(project.getName(), project.getSource(), project.getClonePath());
   }
 
   @Override
@@ -53,6 +55,15 @@ public class ProjectImpl implements Project {
   }
 
   @Override
+  public String getClonePath() {
+    return clonePath;
+  }
+
+  public void setClonePath(String clonePath) {
+    this.clonePath = clonePath;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -62,16 +73,26 @@ public class ProjectImpl implements Project {
     }
     ProjectImpl project = (ProjectImpl) o;
     return Objects.equals(getName(), project.getName())
-        && Objects.equals(getSource(), project.getSource());
+        && Objects.equals(getSource(), project.getSource())
+        && Objects.equals(getClonePath(), project.getClonePath());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getSource());
+    return Objects.hash(getName(), getSource(), getClonePath());
   }
 
   @Override
   public String toString() {
-    return "ProjectImpl{" + "name='" + name + '\'' + ", source=" + source + '}';
+    return "ProjectImpl{"
+        + "name='"
+        + name
+        + '\''
+        + ", source="
+        + source
+        + ", clonePath='"
+        + clonePath
+        + '\''
+        + '}';
   }
 }

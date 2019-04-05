@@ -23,8 +23,11 @@ public final class TestIntelligentCommandsConstants {
 
   public enum CommandItem {
     RUN_COMMAND_ITEM("%s:run"),
+    GRADLE_RUN_COMMAND_ITEM("%s:gradle run"),
     BUILD_COMMAND_ITEM("%s:build"),
+    MAVEN_BUILD_COMMAND_ITEM("%s:maven build"),
     BUILD_AND_RUN_COMMAND_ITEM("%s:build and run"),
+    MAVEN_BUILD_AND_RUN_COMMAND_ITEM("%s:maven build and run"),
     BUILD_AND_DEPLOY_COMMAND_ITEM("%s:build and deploy"),
     STOP_TOMCAT_COMMAND_ITEM("%s:stop tomcat"),
     RUN_TOMCAT_COMMAND_ITEM("%s:run tomcat"),

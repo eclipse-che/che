@@ -16,37 +16,97 @@ import java.util.Map;
 
 public interface Component {
 
+  /** Returns the name of the component. Is mandator and must be unique per components set. */
   String getName();
 
+  /**
+   * Returns type of the component, e.g. whether it is an plugin or editor or other type. It is
+   * mandatory.
+   */
   String getType();
 
-  // editor/plugin
+  /** Returns the plugin/editor FQN. Is mandatory only for cheEditor/chePlugin components types. */
   String getId();
 
-  // openshift/kubernetes
+  /**
+   * Returns absolute or devfile-relative location of Kubernetes list yaml file. It is mandatory and
+   * applicable only for 'kubernetes' and 'openshift' components types.
+   */
   String getReference();
 
+  /**
+   * Returns inlined content of a file specified in field 'reference'. It is optional and applicable
+   * only for 'kubernetes' and 'openshift' components types.
+   */
   String getReferenceContent();
 
-  List<? extends Entrypoint> getEntrypoints();
-
+  /**
+   * Returns selector that should be used for picking up objects from specified content, if all
+   * objects should be picked up then empty map is returned. It is optional and applicable only for
+   * 'kubernetes' and 'openshift' components types.
+   */
   Map<String, String> getSelector();
 
-  // dockerimage
+  /**
+   * Returns entrypoints that should be overridden for specified objects. If components does not
+   * have overridden entrypoints then empty map is returned. It is optional and applicable only for
+   * 'kubernetes' and 'openshift' components types.
+   */
+  List<? extends Entrypoint> getEntrypoints();
 
+  /**
+   * Returns the docker image that should be used for component. It is mandatory and applicable only
+   * for 'dockerimage' component type.
+   */
   String getImage();
 
+  /**
+   * Returns memory limit for the component. It is mandatory and applicable only for 'dockerimage'
+   * component type.
+   *
+   * <p>You can express memory as a plain integer or as a fixed-point integer using one of these
+   * suffixes: E, P, T, G, M, K. You can also use the power-of-two equivalents: Ei, Pi, Ti, Gi, Mi,
+   * Ki
+   */
   String getMemoryLimit();
 
+  /**
+   * Returns true if projects sources should be mount to the component or false otherwise. It is
+   * optional and applicable only for 'dockerimage' component type. `CHE_PROJECTS_ROOT` environment
+   * variable should contains a path where projects sources are mount.
+   */
   boolean getMountSources();
 
+  /**
+   * Returns the command to run in the dockerimage component instead of the default one provided in
+   * the image. It is optional, if missing then empty list is returned and command which is defined
+   * in the image will be used. Applicable only for 'dockerimage' component type.
+   */
   List<String> getCommand();
 
+  /**
+   * Returns the arguments to supply to the command running the dockerimage component. The arguments
+   * are supplied either to the default command provided in the image or to the overridden command.
+   * It is optional, if missing then empty list is returned and args which are defined in the image
+   * will be used. Applicable only for 'dockerimage' component type.
+   */
   List<String> getArgs();
 
+  /**
+   * Returns volumes which should be mount to component. It is optional and applicable only for
+   * 'dockerimage' component type.
+   */
   List<? extends Volume> getVolumes();
 
+  /**
+   * Returns the environment variables list that should be set to docker container. It is optional
+   * and applicable only for 'dockerimage' component type.
+   */
   List<? extends Env> getEnv();
 
+  /**
+   * Returns endpoints configuration. It is optional and applicable only for 'dockerimage' component
+   * type.
+   */
   List<? extends Endpoint> getEndpoints();
 }
