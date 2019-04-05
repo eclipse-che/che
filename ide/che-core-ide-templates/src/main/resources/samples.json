@@ -1208,7 +1208,7 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} \n python hello-world.py",
+        "commandLine": "cd ${current.project.path} && python hello-world.py",
         "attributes": {
           "goal": "Run"
         }

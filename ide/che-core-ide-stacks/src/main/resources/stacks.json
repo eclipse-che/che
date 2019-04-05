@@ -670,8 +670,8 @@
     ],
     "components": [
       {
-         "name": "Debian",
-         "version": "9.8"
+        "name": "Debian",
+        "version": "9.8"
       },
       {
         "name": "OpenJDK",
@@ -754,8 +754,8 @@
       {
         "name": "Debian",
         "version": "9.8"
-     },
-     {
+      },
+      {
         "name": "OpenJDK",
         "version": "11.0.2"
       },
@@ -1410,7 +1410,7 @@
   {
     "id": "python-default",
     "creator": "ide",
-    "name": "Python",
+    "name": "Python default",
     "description": "Default Python Stack with Python 3.5.1, pip 8.1.1.",
     "scope": "general",
     "tags": [
@@ -2563,24 +2563,24 @@
     }
   },
   {
-    "id": "che7-python",
-    "name": "Che 7 Python",
+    "id": "python",
+    "name": "Python",
     "creator": "Anatolii Bazko",
     "tags": [
-      "ws.next",
       "Theia",
+      "Debian",
       "Python",
       "pip"
     ],
     "scope": "general",
-    "description": "Workspace.next sidecars and Theia as IDE",
+    "description": "Default stack with Python 3.7",
     "components": [
       {
-        "version": "7",
-        "name": "Centos"
+        "version": "9",
+        "name": "Debian"
       },
       {
-        "version": "3.7.2",
+        "version": "3.7.3",
         "name": "Python"
       },
       {
@@ -2592,13 +2592,15 @@
       "environments": {
         "default": {
           "recipe": {
-            "contentType": "application/x-yaml",
-            "type": "kubernetes",
-            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n"
+            "content": "python:3.7.3",
+            "type": "dockerimage"
           },
           "machines": {
-            "ws/dev": {
-              "env": {},
+            "python": {
+              "env": {
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              },
               "servers": {},
               "volumes": {
                 "projects": {
@@ -2607,7 +2609,9 @@
               },
               "installers": [],
               "attributes": {
-                "memoryLimitBytes": "536870912"
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
               }
             }
           }
@@ -2618,10 +2622,14 @@
       "defaultEnv": "default",
       "name": "che7",
       "attributes": {
-        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "editor": "org.eclipse.che.editor.theia:next",
         "plugins": "che-machine-exec-plugin:0.0.1,ms-python.python:2019.2.5433"
       },
       "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
     }
   }
 ]
