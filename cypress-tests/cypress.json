@@ -1,7 +1,7 @@
 {
-    "numTestsKeptInMemory": 0,
-    "video": false,
-    "videoUploadOnPasses": false,
+    "numTestsKeptInMemory": 1,
+    "video": true,
+    "videoUploadOnPasses": true,
     "videoCompression": 45,
     "trashAssetsBeforeRuns": true,
     
