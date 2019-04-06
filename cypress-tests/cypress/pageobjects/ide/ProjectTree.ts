@@ -182,51 +182,52 @@ export class ProjectTree {
                     }
                 })
                 .then(() => {
-                    return this.elementStateChecker.waitVisibility(rootItemLocator, 5, 2000)
-                        .then((isVisible: boolean) => {
-                            console.log("===>>>  isVisible:  ", isVisible)
-                            return isVisible
-                        })
-                })
-                .then(isRootItemVisible => {
-                    console.log("===>>>  isRootItemVisible:  ", isRootItemVisible)
+                    console.log("===>>>>>  wait root item visibility")
+                    this.elementStateChecker.waitVisibility(rootItemLocator, 5, 2000)
+                        .then(isRootItemVisible => {
+                            console.log("===>>>  isVisible:  ", isRootItemVisible)
 
-                    if (!isRootItemVisible) {
-                        currentAttempt++
-                        console.log("===>>>  reload")
+                            if (!isRootItemVisible) {
+                                cy.log(`Root item '${rootItem}' has not been found, reload page and try again`)
+                                cy.log(`Attempt ${currentAttempt} of ${attempts}`)
 
-                        cy.reload()
-                        this.ide.waitIde()
-                        this.openProjectTreeContainer()
-                        cy.wait(30000)
-                        this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
-                    }
-
-                })
-                .then(() => {
-                    this.expandItem(rootItem)
-                    this.waitItemExpanded(rootItem)
-                })
-                .then(() => {
-                    cy.get('body')
-                        .then(body => {
-
-                            cy.wait(5000)
-
-                            if (body.find(rootSubitemLocator).length > 0) {
-                                resolve()
-                                return;
+                                currentAttempt++
+                                cy.reload()
+                                this.ide.waitIde()
+                                this.openProjectTreeContainer()
+                                cy.wait(10000)
+                                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                             }
+                        })
+                        .then(() => {
+                            console.log("===>>>>>  expand root item")
+                            this.expandItem(rootItem)
+                            this.waitItemExpanded(rootItem)
+                        })
+                        .then(async () => {
+                            console.log("===>>>>>  wait root subitem visibility")
+                            this.elementStateChecker.waitVisibility(rootSubitemLocator, 5, 2000)
+                                .then(isRootSubItemVisible => {
+                                    console.log("===>>>  isRootSubItemVisible:  ", isRootSubItemVisible)
 
-                            //If project root sub item is not present, collapse project folder, open project folder and retry again
-                            cy.log(`**Root sub item '${rootSubitem}' has not benn found (attempt ${currentAttempt} of ${attempts})**`)
-                            currentAttempt++
-                            this.collapseItem(rootItem)
-                            this.waitItemCollapsed(rootItem)
-                            cy.wait(pollingEvery)
-                            this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                                    if (!isRootSubItemVisible) {
+                                        cy.log(`Root sub item '${rootSubitem}' has not been found, reload page and try again`)
+                                        cy.log(`Attempt ${currentAttempt} of ${attempts}`)
+
+                                        currentAttempt++
+                                        cy.reload()
+                                        this.ide.waitIde()
+                                        this.openProjectTreeContainer()
+                                        cy.wait(30000)
+                                        this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                                    }
+                                })
                         })
                 })
+
+
+
+
         })
     }
 

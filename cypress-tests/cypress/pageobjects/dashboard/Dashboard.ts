@@ -13,8 +13,8 @@
 export class Dashboard {
     private static readonly PAGE_LOAD_TIMEOUT: number = Cypress.env("load_page_timeout");
 
-    private static readonly DASHBOARD_BUTTON: string = "#dashboard-item";
-    private static readonly WORKSPACES_BUTTON: string = "#workspaces-item";
+    public static readonly DASHBOARD_BUTTON: string = "#dashboard-item";
+    public static readonly WORKSPACES_BUTTON: string = "#workspaces-item";
     private static readonly STACKS_BUTTON: string = "#stacks-item";
     private static readonly FACTORIES_BUTTON: string = "#factories-item";
     private static readonly LOADER_PAGE: string = ".main-page-loader"
