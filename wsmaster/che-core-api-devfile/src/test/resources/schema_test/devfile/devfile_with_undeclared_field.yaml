@@ -17,4 +17,4 @@ unknown: blah-blah
 components:
   - name: maven
     type: chePlugin
-    id: eclipse/maven-jdk8:1.0.0
+    id: org.eclipse.chemaven-jdk8:1.0.0

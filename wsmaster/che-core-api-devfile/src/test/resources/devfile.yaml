@@ -21,13 +21,13 @@ projects:
 components:
   - name: mvn-stack
     type: chePlugin
-    id: eclipse/maven-jdk8:1.0.0
+    id: org.eclipse.chemaven-jdk8:1.0.0
   - name: theia-ide
     type: cheEditor
-    id: eclipse/theia:0.0.3
+    id: org.eclipse.chetheia:0.0.3
   - name: jdt.ls
     type: chePlugin
-    id: eclipse/theia-jdtls:0.0.3
+    id: org.eclipse.chetheia-jdtls:0.0.3
   - name: os-recipe
     type: openshift
     reference: petclinic.yaml
