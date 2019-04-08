@@ -49,6 +49,9 @@ public class ComponentImpl implements Component {
   @Column(name = "name", nullable = false)
   private String name;
 
+  @Column(name = "component_id", nullable = false)
+  private String component_id;
+
   @Column(name = "type", nullable = false)
   private String type;
 
@@ -103,20 +106,23 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl() {}
 
-  public ComponentImpl(String type, String name) {
+  public ComponentImpl(String type, String name, String id) {
     this.name = name;
     this.type = type;
+    this.component_id = id;
   }
 
   public ComponentImpl(
       String type,
       String name,
+      String id,
       String reference,
       String referenceContent,
       Map<String, String> selector,
       List<? extends Entrypoint> entrypoints) {
     this.name = name;
     this.type = type;
+    this.component_id = id;
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (selector != null) {
@@ -131,6 +137,7 @@ public class ComponentImpl implements Component {
   public ComponentImpl(
       String type,
       String name,
+      String id,
       String image,
       String memoryLimit,
       boolean mountSources,
@@ -141,6 +148,7 @@ public class ComponentImpl implements Component {
       List<? extends Endpoint> endpoints) {
     this.name = name;
     this.type = type;
+    this.component_id = id;
     this.image = image;
     this.memoryLimit = memoryLimit;
     this.mountSources = mountSources;
@@ -161,6 +169,7 @@ public class ComponentImpl implements Component {
   public ComponentImpl(
       String type,
       String name,
+      String id,
       String reference,
       String referenceContent,
       List<? extends Entrypoint> entrypoints,
@@ -174,6 +183,7 @@ public class ComponentImpl implements Component {
       List<? extends Endpoint> endpoints) {
     this.name = name;
     this.type = type;
+    this.component_id = id;
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (entrypoints != null) {
@@ -201,6 +211,7 @@ public class ComponentImpl implements Component {
     this(
         component.getType(),
         component.getName(),
+        component.getId(),
         component.getReference(),
         component.getReferenceContent(),
         component.getEntrypoints(),
@@ -212,6 +223,11 @@ public class ComponentImpl implements Component {
         component.getVolumes(),
         component.getEnv(),
         component.getEndpoints());
+  }
+
+  @Override
+  public String getId() {
+    return component_id;
   }
 
   @Override
@@ -374,6 +390,7 @@ public class ComponentImpl implements Component {
         && Objects.equals(id, component.id)
         && Objects.equals(name, component.name)
         && Objects.equals(type, component.type)
+        && Objects.equals(component_id, component.component_id)
         && Objects.equals(reference, component.reference)
         && Objects.equals(referenceContent, component.referenceContent)
         && Objects.equals(getEntrypoints(), component.getEntrypoints())
@@ -391,6 +408,7 @@ public class ComponentImpl implements Component {
     return Objects.hash(
         getName(),
         getType(),
+        getId(),
         getReference(),
         getReferenceContent(),
         getSelector(),
@@ -409,7 +427,7 @@ public class ComponentImpl implements Component {
   public String toString() {
     return "ComponentImpl{"
         + "id='"
-        + id
+        + component_id
         + '\''
         + ", name='"
         + name

@@ -26,6 +26,7 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
@@ -71,7 +72,8 @@ public class JpaWorkerDaoTest {
       throws Exception {
 
     final Account account = new AccountImpl("accountId", "namespace", "test");
-    final WorkspaceImpl workspace = new WorkspaceImpl("workspaceId", account, null);
+    final WorkspaceImpl workspace = new WorkspaceImpl("workspaceId", account,
+        new WorkspaceConfigImpl());
 
     // Persist the account
     manager.getTransaction().begin();

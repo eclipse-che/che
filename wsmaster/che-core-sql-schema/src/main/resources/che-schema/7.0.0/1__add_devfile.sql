@@ -106,6 +106,7 @@ CREATE TABLE devfile_component (
     id                     BIGINT       NOT NULL,
     name                   VARCHAR(255) NOT NULL,
     type                   VARCHAR(255) NOT NULL,
+    component_id           TEXT,
     reference              TEXT,
     reference_content      TEXT,
     image                  TEXT,
