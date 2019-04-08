@@ -16,9 +16,6 @@ import java.util.Map;
 
 public interface Component {
 
-  /** Returns the plugin/editor FQN. Is mandatory only for cheEditor/chePlugin components types. */
-  String getId();
-
   /** Returns the name of the component. Is mandator and must be unique per components set. */
   String getName();
 
@@ -27,6 +24,9 @@ public interface Component {
    * mandatory.
    */
   String getType();
+
+  /** Returns the plugin/editor FQN. Is mandatory only for cheEditor/chePlugin components types. */
+  String getId();
 
   /**
    * Returns absolute or devfile-relative location of Kubernetes list yaml file. It is mandatory and
