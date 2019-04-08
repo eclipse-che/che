@@ -2573,7 +2573,7 @@
       "pip"
     ],
     "scope": "general",
-    "description": "Default stack with Python 3.7 adn Theia IDE",
+    "description": "Default stack with Python 3.7 and Theia IDE",
     "components": [
       {
         "version": "9",
