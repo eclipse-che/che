@@ -230,6 +230,10 @@ public class ComponentImpl implements Component {
     return component_id;
   }
 
+  public void setId(String id) {
+    this.component_id = id;
+  }
+
   @Override
   public String getName() {
     return name;
