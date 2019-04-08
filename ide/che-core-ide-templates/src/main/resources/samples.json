@@ -1201,14 +1201,14 @@
     "problems": [],
     "source": {
       "type": "git",
-      "location": "https://github.com/tolusha/python-hello-world.git",
+      "location": "https://github.com/che-samples/python-hello-world",
       "parameters": {}
     },
     "commands": [
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} && python hello-world.py",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/python-hello-world && python hello-world.py",
         "attributes": {
           "goal": "Run"
         }

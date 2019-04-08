@@ -1410,7 +1410,7 @@
   {
     "id": "python-default",
     "creator": "ide",
-    "name": "Python default",
+    "name": "Python",
     "description": "Default Python Stack with Python 3.5.1, pip 8.1.1.",
     "scope": "general",
     "tags": [
@@ -2564,7 +2564,7 @@
   },
   {
     "id": "python",
-    "name": "Python",
+    "name": "Python with Theia IDE",
     "creator": "Anatolii Bazko",
     "tags": [
       "Theia",
@@ -2573,7 +2573,7 @@
       "pip"
     ],
     "scope": "general",
-    "description": "Default stack with Python 3.7",
+    "description": "Default stack with Python 3.7 adn Theia IDE",
     "components": [
       {
         "version": "9",
@@ -2617,11 +2617,12 @@
           }
         }
       },
-      "commands": [],
-      "projects": [],
+      "name": "default",
       "defaultEnv": "default",
-      "name": "che7",
+      "description": null,
       "attributes": {
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi",
+        "sidecar.ms-python.python.memory_limit": "512Mi",
         "editor": "org.eclipse.che.editor.theia:next",
         "plugins": "che-machine-exec-plugin:0.0.1,ms-python.python:2019.2.5433"
       },
