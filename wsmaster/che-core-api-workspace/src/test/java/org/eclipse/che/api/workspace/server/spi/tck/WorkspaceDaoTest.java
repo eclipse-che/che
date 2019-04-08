@@ -703,10 +703,12 @@ public class WorkspaceDaoTest {
 
   private static DevfileImpl createDevfile(String name) {
 
-    SourceImpl source1 = new SourceImpl("type1", "http://location", "refspec1");
+    SourceImpl source1 =
+        new SourceImpl("type1", "http://location", "branch1", "point1", "tag1", "commit1");
     ProjectImpl project1 = new ProjectImpl("project1", source1, "path1");
 
-    SourceImpl source2 = new SourceImpl("type2", "http://location", "refspec2");
+    SourceImpl source2 =
+        new SourceImpl("type2", "http://location", "branch2", "point2", "tag2", "commit2");
     ProjectImpl project2 = new ProjectImpl("project2", source2, "path2");
 
     ActionImpl action1 = new ActionImpl("exec1", "component1", "run.sh", "/home/user/1");

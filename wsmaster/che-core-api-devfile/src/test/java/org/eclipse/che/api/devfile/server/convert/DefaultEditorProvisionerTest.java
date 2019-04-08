@@ -114,6 +114,37 @@ public class DefaultEditorProvisionerTest {
   }
 
   @Test
+  public void
+      shouldProvisionDefaultPluginsIfTheyAreNotSpecifiedAndDefaultEditorFromCustomRegistryIsConfigured() {
+    // given
+    defaultEditorProvisioner =
+        new DefaultEditorProvisioner(
+            DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
+
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl defaultEditorWithDifferentVersion =
+        new ComponentImpl(
+            EDITOR_COMPONENT_TYPE,
+            "my-editor",
+            "https://my-custom-registry/" + DEFAULT_EDITOR_ID + ":latest");
+    devfile.getComponents().add(defaultEditorWithDifferentVersion);
+
+    // when
+    defaultEditorProvisioner.apply(devfile);
+
+    // then
+    List<ComponentImpl> components = devfile.getComponents();
+    assertEquals(components.size(), 2);
+
+    assertTrue(components.contains(defaultEditorWithDifferentVersion));
+
+    assertTrue(
+        components.contains(
+            new ComponentImpl(
+                PLUGIN_COMPONENT_TYPE, DEFAULT_TERMINAL_PLUGIN_ID, DEFAULT_TERMINAL_PLUGIN_REF)));
+  }
+
+  @Test
   public void shouldNotProvisionDefaultPluginsIfCustomEditorIsConfiguredWhichStartWithDefaultId() {
     // given
     defaultEditorProvisioner =

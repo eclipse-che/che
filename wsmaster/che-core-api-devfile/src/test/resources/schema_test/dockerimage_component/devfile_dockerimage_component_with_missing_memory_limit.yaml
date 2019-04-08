@@ -16,4 +16,4 @@ name: petclinic-dev-environment
 components:
   - name: maven
     type: dockerimage
-    image: eclipse/ubuntu-jdk:latest
+    image: org.eclipse.cheubuntu-jdk:latest

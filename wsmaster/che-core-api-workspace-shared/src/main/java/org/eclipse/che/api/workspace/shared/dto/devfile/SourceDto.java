@@ -33,9 +33,30 @@ public interface SourceDto extends Source {
   SourceDto withLocation(String location);
 
   @Override
-  String getRefspec();
+  String getBranch();
 
-  void setRefspec(String refspec);
+  void setBranch(String branch);
 
-  SourceDto withRefspec(String refspec);
+  SourceDto withBranch(String branch);
+
+  @Override
+  String getStartPoint();
+
+  void setStartPoint(String startPoint);
+
+  SourceDto withStartPoint(String startPoint);
+
+  @Override
+  String getTag();
+
+  void setTag(String tag);
+
+  SourceDto withTag(String tag);
+
+  @Override
+  String getCommitId();
+
+  void setCommitId(String commitId);
+
+  SourceDto withCommitId(String commitId);
 }

@@ -15,6 +15,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.testng.annotations.BeforeClass;
@@ -25,6 +26,9 @@ import org.testng.reporters.Files;
 public class DevfileSchemaValidatorTest {
 
   private DevfileSchemaValidator schemaValidator;
+
+  private static final Pattern TEST =
+      Pattern.compile("https?://[a-zA-Z0-9_\\-\\./]+[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}");
 
   @BeforeClass
   public void setUp() {
@@ -53,7 +57,8 @@ public class DevfileSchemaValidatorTest {
         "kubernetes_openshift_component/devfile_openshift_component_reference_and_content_as_block.yaml"
       },
       {"dockerimage_component/devfile_dockerimage_component.yaml"},
-      {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"}
+      {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"},
+      {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"}
     };
   }
 
@@ -139,12 +144,12 @@ public class DevfileSchemaValidatorTest {
       {
         "editor_plugin_component/devfile_editor_component_without_version.yaml",
         "Devfile schema validation failed. Error: "
-            + "/devfile/components/0/id ECMA 262 regex \"^[a-zA-Z0-9_\\-\\./]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\" does not match input string \"eclipse/theia\""
+            + "/devfile/components/0/id ECMA 262 regex \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\" does not match input string \"org.eclipse.theia\""
       },
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
         "Devfile schema validation failed. Error: "
-            + "/devfile/components/0/id ECMA 262 regex \"^[a-zA-Z0-9_\\-\\./]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\" does not match input string \"eclipse/theia:dev:v1\""
+            + "/devfile/components/0/id ECMA 262 regex \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\" does not match input string \"org.eclipse.theia:dev:v1\""
       },
       // kubernetes/openshift component model testing
       {

@@ -36,10 +36,13 @@ CREATE INDEX index_devfile_attributes_devfile_id ON devfile_attributes (devfile_
 
 -- devfile project source
 CREATE TABLE devfile_project_source (
-    id         BIGINT       NOT NULL,
-    type       VARCHAR(255) NOT NULL,
-    location   TEXT,
-    refspec    VARCHAR(255),
+    id            BIGINT       NOT NULL,
+    type          VARCHAR(255) NOT NULL,
+    location      TEXT,
+    branch        VARCHAR(255),
+    start_point   VARCHAR(255),
+    tag           VARCHAR(255),
+    commit_id     VARCHAR(255),
 
     PRIMARY KEY (id)
 );

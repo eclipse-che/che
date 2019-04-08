@@ -35,19 +35,38 @@ public class SourceImpl implements Source {
   @Column(name = "location", nullable = false)
   private String location;
 
-  @Column(name = "refspec")
-  private String refspec;
+  @Column(name = "branch")
+  private String branch;
+
+  @Column(name = "start_point")
+  private String startPoint;
+
+  @Column(name = "tag")
+  private String tag;
+
+  @Column(name = "commit_id")
+  private String commitId;
 
   public SourceImpl() {}
 
-  public SourceImpl(String type, String location, String refspec) {
+  public SourceImpl(
+      String type, String location, String branch, String startPoint, String tag, String commitId) {
     this.type = type;
     this.location = location;
-    this.refspec = refspec;
+    this.branch = branch;
+    this.startPoint = startPoint;
+    this.tag = tag;
+    this.commitId = commitId;
   }
 
   public SourceImpl(Source source) {
-    this(source.getType(), source.getLocation(), source.getRefspec());
+    this(
+        source.getType(),
+        source.getLocation(),
+        source.getBranch(),
+        source.getStartPoint(),
+        source.getTag(),
+        source.getCommitId());
   }
 
   @Override
@@ -69,12 +88,39 @@ public class SourceImpl implements Source {
   }
 
   @Override
-  public String getRefspec() {
-    return refspec;
+  public String getBranch() {
+    return branch;
   }
 
-  public void setRefspec(String refspec) {
-    this.refspec = refspec;
+  public void setBranch(String branch) {
+    this.branch = branch;
+  }
+
+  @Override
+  public String getStartPoint() {
+    return startPoint;
+  }
+
+  public void setStartPoint(String startPoint) {
+    this.startPoint = startPoint;
+  }
+
+  @Override
+  public String getTag() {
+    return tag;
+  }
+
+  public void setTag(String tag) {
+    this.tag = tag;
+  }
+
+  @Override
+  public String getCommitId() {
+    return commitId;
+  }
+
+  public void setCommitId(String commitId) {
+    this.commitId = commitId;
   }
 
   @Override
@@ -89,12 +135,16 @@ public class SourceImpl implements Source {
     return Objects.equals(id, source.id)
         && Objects.equals(type, source.type)
         && Objects.equals(location, source.location)
-        && Objects.equals(refspec, source.refspec);
+        && Objects.equals(branch, source.branch)
+        && Objects.equals(startPoint, source.startPoint)
+        && Objects.equals(tag, source.tag)
+        && Objects.equals(commitId, source.commitId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getType(), getLocation(), getRefspec());
+    return Objects.hash(
+        getType(), getLocation(), getBranch(), getStartPoint(), getTag(), getCommitId());
   }
 
   @Override
@@ -109,8 +159,17 @@ public class SourceImpl implements Source {
         + ", location='"
         + location
         + '\''
-        + ", refspec='"
-        + refspec
+        + ", branch='"
+        + branch
+        + '\''
+        + ", startPoint='"
+        + startPoint
+        + '\''
+        + ", tag='"
+        + tag
+        + '\''
+        + ", commitId='"
+        + commitId
         + '\''
         + '}';
   }
