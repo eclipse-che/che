@@ -24,7 +24,7 @@ export  interface IInitData {
   workspaceDetails: che.IWorkspace;
 }
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Containers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Plugins'];
+const TAB: Array<string> = ['Overview', 'Projects', 'Containers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Plugins', 'Editors'];
 
 /**
  * @ngdoc controller
