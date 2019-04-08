@@ -21,18 +21,20 @@ import org.eclipse.che.dto.shared.DTO;
 public interface ComponentDto extends Component {
 
   @Override
-  String getId();
-
-  void setId(String id);
-
-  ComponentDto withId(String id);
-
-  @Override
   String getName();
 
   void setName(String name);
 
   ComponentDto withName(String name);
+
+  // editor/plugin
+
+  @Override
+  String getId();
+
+  void setId(String id);
+
+  ComponentDto withId(String id);
 
   @Override
   String getType();
