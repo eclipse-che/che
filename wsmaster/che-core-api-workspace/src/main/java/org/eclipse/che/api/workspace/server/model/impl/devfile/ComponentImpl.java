@@ -27,6 +27,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
@@ -57,6 +58,10 @@ public class ComponentImpl implements Component {
   @Column(name = "reference_content")
   private String referenceContent;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "component_selector", joinColumns = @JoinColumn(name = "component_id"))
+  @MapKeyColumn(name = "selector_key")
+  @Column(name = "selector")
   private Map<String, String> selector;
 
   @Column(name = "image")

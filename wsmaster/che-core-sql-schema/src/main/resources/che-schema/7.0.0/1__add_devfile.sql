@@ -135,6 +135,17 @@ CREATE TABLE component_arg (
 --constraints
 ALTER TABLE component_arg ADD CONSTRAINT fk_component_command_arg_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
 CREATE INDEX index_args_component_id ON component_arg (devfile_component_id);
+---------
+-- component selector
+CREATE TABLE component_selector (
+    component_id    BIGINT,
+    selector_key    VARCHAR(255),
+    selector        VARCHAR(255)
+);
+
+--constraints
+ALTER TABLE component_selector ADD CONSTRAINT fk_component_selector_id FOREIGN KEY (component_id) REFERENCES devfile_component (id);
+CREATE INDEX index_component_selector_entrypoint_id ON component_selector (component_id);
 
 ---------
 

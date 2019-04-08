@@ -762,6 +762,7 @@ public class WorkspaceDaoTest {
             asList(volume1, volume2),
             asList(env1, env2),
             asList(endpoint1, endpoint2));
+    component1.setSelector(singletonMap("key1", "value1"));
 
     ComponentImpl component2 =
         new ComponentImpl(
@@ -778,6 +779,7 @@ public class WorkspaceDaoTest {
             asList(volume1, volume2),
             asList(env1, env2),
             asList(endpoint1, endpoint2));
+    component2.setSelector(singletonMap("key2", "value2"));
 
     DevfileImpl devfile =
         new DevfileImpl(
