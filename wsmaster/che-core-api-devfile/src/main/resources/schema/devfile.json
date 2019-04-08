@@ -92,10 +92,25 @@
                   "git@github.com:spring-projects/spring-petclinic.git"
                 ]
               },
-              "refspec": {
+              "branch": {
                 "type": "string",
-                "description": "The name of the refspec to check out after the clone. This can be a branch, tag, commit id or anything the particular source type understands.",
-                "examples": [ "master", "feature-42", "304df5a" ]
+                "description": "The name of the of the branch to check out after obtaining the source from the location. The branch has to already exist in the source otherwise the default branch is used. In case of git, this is also the name of the remote branch to push to.",
+                "examples": [ "master", "feature-42" ]
+              },
+              "startPoint": {
+                "type": "string",
+                "description": "The tag or commit id to reset the checked out branch to.",
+                "examples": [ "release/4.2", "349d3ad", "v4.2.0" ]
+              },
+              "tag": {
+                "type": "string",
+                "description": "The name of the tag to reset the checked out branch to. Note that this is equivalent to 'startPoint' and provided for convenience.",
+                "examples": [ "v4.2.0" ]
+              },
+              "commitId": {
+                "type": "string",
+                "description": "The id of the commit to reset the checked out branch to. Note that this is equivalent to 'startPoint' and provided for convenience.",
+                "examples": [ "349d3ad" ]
               }
             }
           },
