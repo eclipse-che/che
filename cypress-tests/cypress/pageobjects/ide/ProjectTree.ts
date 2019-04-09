@@ -174,6 +174,7 @@ export class ProjectTree {
             const rootItem: string = `/${projectName}`;
             const rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
             const rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
+            const delayBeforeItemCheck: number = 10000
 
             cy.log(`**ProjectTree.waitProjectImported the ${currentAttempt} try**`)
                 .then(() => {
@@ -182,55 +183,39 @@ export class ProjectTree {
                     }
                 })
                 .then(() => {
-                    console.log("===>>>>>  wait root item visibility")
-                    this.elementStateChecker.waitVisibility(rootItemLocator, 5, 2000)
-                        .then(isRootItemVisible => {
-                            console.log("===>>>  isVisible:  ", isRootItemVisible)
+                    cy.wait(delayBeforeItemCheck)
 
-                            if (!isRootItemVisible) {
-                                cy.log(`Root item '${rootItem}' has not been found, reload page and try again`)
-                                cy.log(`Attempt ${currentAttempt} of ${attempts}`)
+                    if (!this.elementStateChecker.isVisibleByLocator(rootItemLocator)) {
+                        cy.log(`Root item '${rootItem}' has not been found, reload page and try again`)
+                        cy.log(`Attempt ${currentAttempt} of ${attempts}`)
 
-                                currentAttempt++
-                                cy.reload()
-                                this.ide.waitIde()
-                                this.openProjectTreeContainer()
-                                cy.wait(10000)
-                                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
-                            }
-                        })
-                        .then(() => {
-                            console.log("===>>>>>  expand root item")
-                            this.expandItem(rootItem)
-                            this.waitItemExpanded(rootItem)
-                        })
-                        .then(async () => {
-                            console.log("===>>>>>  wait root subitem visibility")
-                            this.elementStateChecker.waitVisibility(rootSubitemLocator, 5, 2000)
-                                .then(isRootSubItemVisible => {
-                                    console.log("===>>>  isRootSubItemVisible:  ", isRootSubItemVisible)
-
-                                    if (!isRootSubItemVisible) {
-                                        cy.log(`Root sub item '${rootSubitem}' has not been found, reload page and try again`)
-                                        cy.log(`Attempt ${currentAttempt} of ${attempts}`)
-
-                                        currentAttempt++
-                                        cy.reload()
-                                        this.ide.waitIde()
-                                        this.openProjectTreeContainer()
-                                        cy.wait(30000)
-                                        this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
-                                    }
-                                })
-                        })
+                        currentAttempt++
+                        cy.reload()
+                        this.ide.waitIde()
+                        this.openProjectTreeContainer()
+                        cy.wait(30000)
+                        this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                    }
                 })
+                .then(() => {
+                    this.expandItem(rootItem)
+                    this.waitItemExpanded(rootItem)
+                })
+                .then(() => {
+                    cy.wait(delayBeforeItemCheck)
 
+                    if (!this.elementStateChecker.isVisibleByLocator(rootSubitemLocator)) {
+                        cy.log(`Root sub item '${rootSubitem}' has not been found, reload page and try again`)
+                        cy.log(`Attempt ${currentAttempt} of ${attempts}`)
 
-
-
+                        currentAttempt++
+                        cy.reload()
+                        this.ide.waitIde()
+                        this.openProjectTreeContainer()
+                        cy.wait(30000)
+                        this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                    }
+                })
         })
     }
-
-
-
 }

@@ -31,45 +31,29 @@ export class ElementStateChecker {
         return this.doWaitVisibility(elementLocator, attempt, maximumAttempts, polling)
     }
 
-private doWaitVisibility(elementLocator: string, attempt: number, maximumAttempts: number, polling: number): PromiseLike<boolean>{
 
-    return new Cypress.Promise<boolean>((resolve: any, reject: any) => {
-        let i: number = 0
-        for(i; i < maximumAttempts; i++){
-            if(this.isVisibleByLocator(elementLocator)){
+    private doWaitVisibility(elementLocator: string, attempt: number, maximumAttempts: number, polling: number): PromiseLike<boolean> {
+        return new Cypress.Promise<boolean>((resolve: any, reject: any) => {
+            let isElementVisible: boolean = this.isVisibleByLocator(elementLocator);
+
+            if (isElementVisible) {
                 resolve(true)
-                break;
+                return
             }
 
-            cy.wait(polling)
-        }
+            if (maximumAttempts >= attempt && !isElementVisible) {
+                cy.log(`The "${elementLocator}" is not visible, wait ${polling} miliseconds and try again`)
+                cy.log(`Attempt ${attempt} of ${maximumAttempts}`)
+                attempt++
+                cy.wait(polling)
+                this.doWaitVisibility(elementLocator, attempt, maximumAttempts, polling)
+            }
 
-        resolve(false)
-    })
-
-
+            if (attempt > maximumAttempts) {
+                cy.log(`Exceeded the maximum number of checking attempts, the "${elementLocator}" is not visible`)
+                resolve(false)
+                return
+            }
+        })
+    }
 }
-    // private doWaitVisibility(elementLocator: string, attempt: number, maximumAttempts: number, polling: number): PromiseLike<boolean> {
-    //     return new Cypress.Promise<boolean>((resolve: any, reject: any) => {
-    //         let isElementVisible: boolean = this.isVisibleByLocator(elementLocator);
-
-    //         if (isElementVisible) {
-    //             resolve(true)
-    //         }
-
-    //         if (maximumAttempts >= attempt && !isElementVisible) {
-    //             cy.log(`The "${elementLocator}" is not visible, wait ${polling} miliseconds and try again`)
-    //             cy.log(`Attempt ${attempt} of ${maximumAttempts}`)
-    //             attempt++
-    //             cy.wait(polling)
-    //             this.doWaitVisibility(elementLocator, attempt, maximumAttempts, polling)
-    //         }
-
-    //         if (attempt > maximumAttempts) {
-    //             cy.log(`Exceeded the maximum number of checking attempts, the "${elementLocator}" is not visible`)
-    //             resolve(false)
-    //         }
-    //     })
-}
-
-
