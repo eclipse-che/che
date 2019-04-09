@@ -99,8 +99,8 @@ public class NewWorkspacePageTest {
           JAVA_THEIA_OPENSHIFT,
           NODE,
           PHP,
-          PYTHON_DEFAULT,
           PYTHON,
+          PYTHON_DEFAULT,
           RAILS);
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
@@ -120,8 +120,8 @@ public class NewWorkspacePageTest {
           JAVA_THEIA_ON_KUBERNETES,
           NODE,
           PHP,
-          PYTHON_DEFAULT,
           PYTHON,
+          PYTHON_DEFAULT,
           RAILS);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
@@ -138,8 +138,8 @@ public class NewWorkspacePageTest {
           JAVA_MAVEN,
           NODE,
           PHP,
-          PYTHON_DEFAULT,
           PYTHON,
+          PYTHON_DEFAULT,
           RAILS,
           JAVA_THEIA_DOCKER);
 
@@ -167,8 +167,8 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
-          PYTHON_DEFAULT,
           PYTHON,
+          PYTHON_DEFAULT,
           RAILS,
           SPRING_BOOT);
 
@@ -196,8 +196,8 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
-          PYTHON_DEFAULT,
           PYTHON,
+          PYTHON_DEFAULT,
           RAILS,
           SPRING_BOOT);
 
@@ -223,8 +223,8 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
-          PYTHON_DEFAULT,
           PYTHON,
+          PYTHON_DEFAULT,
           RAILS,
           SPRING_BOOT);
 
@@ -251,8 +251,8 @@ public class NewWorkspacePageTest {
               JAVA,
               BLANK,
               RAILS,
-              PYTHON_DEFAULT,
               PYTHON,
+              PYTHON_DEFAULT,
               PHP,
               NODE,
               JAVA_THEIA_OPENSHIFT,
@@ -273,8 +273,8 @@ public class NewWorkspacePageTest {
           JAVA,
           BLANK,
           RAILS,
-          PYTHON_DEFAULT,
           PYTHON,
+          PYTHON_DEFAULT,
           PHP,
           NODE,
           JAVA_THEIA_ON_KUBERNETES,
@@ -296,8 +296,8 @@ public class NewWorkspacePageTest {
           BLANK,
           JAVA_THEIA_DOCKER,
           RAILS,
-          PYTHON_DEFAULT,
           PYTHON,
+          PYTHON_DEFAULT,
           PHP,
           NODE,
           JAVA_MAVEN,
