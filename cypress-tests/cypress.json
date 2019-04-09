@@ -9,10 +9,10 @@
     "defaultCommandTimeout": 20000,
     "viewportWidth": 1920,
     "viewportHeight": 1080,
-    "baseUrl": "http://sample-url",
+    "baseUrl": "http://che-che.192.168.99.100.nip.io",
    
     "env": {
-        "ProjectTree.waitProjectImportedAttempts": 4,
+        "ProjectTree.waitProjectImportedAttempts": 5,
         "ProjectTree.delayBetweenAttempts": 30000,
         "ProjectTree.delayBeforeItemCheck": 10000,
 
