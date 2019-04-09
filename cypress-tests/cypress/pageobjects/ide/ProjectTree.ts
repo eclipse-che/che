@@ -193,7 +193,7 @@ export class ProjectTree {
                         cy.reload()
                         this.ide.waitIde()
                         this.openProjectTreeContainer()
-                        cy.wait(30000)
+                        cy.wait(ProjectTree.DELAY_BETWEEN_ATTEMPTS)
                         this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                     }
                 })
@@ -212,7 +212,7 @@ export class ProjectTree {
                         cy.reload()
                         this.ide.waitIde()
                         this.openProjectTreeContainer()
-                        cy.wait(30000)
+                        cy.wait(ProjectTree.DELAY_BETWEEN_ATTEMPTS)
                         this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                     }
                 })
