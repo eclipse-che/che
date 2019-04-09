@@ -99,8 +99,8 @@ public class NewWorkspacePageTest {
           JAVA_THEIA_OPENSHIFT,
           NODE,
           PHP,
-          PYTHON,
           PYTHON_DEFAULT,
+          PYTHON,
           RAILS);
 
   private static List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS =
@@ -120,8 +120,8 @@ public class NewWorkspacePageTest {
           JAVA_THEIA_ON_KUBERNETES,
           NODE,
           PHP,
-          PYTHON,
           PYTHON_DEFAULT,
+          PYTHON,
           RAILS);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS =
@@ -138,8 +138,8 @@ public class NewWorkspacePageTest {
           JAVA_MAVEN,
           NODE,
           PHP,
-          PYTHON,
           PYTHON_DEFAULT,
+          PYTHON,
           RAILS,
           JAVA_THEIA_DOCKER);
 
@@ -167,8 +167,8 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
-          PYTHON,
           PYTHON_DEFAULT,
+          PYTHON,
           RAILS,
           SPRING_BOOT);
 
@@ -196,8 +196,8 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
-          PYTHON,
           PYTHON_DEFAULT,
+          PYTHON,
           RAILS,
           SPRING_BOOT);
 
@@ -223,8 +223,8 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
-          PYTHON,
           PYTHON_DEFAULT,
+          PYTHON,
           RAILS,
           SPRING_BOOT);
 
