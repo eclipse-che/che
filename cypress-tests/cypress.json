@@ -1,5 +1,5 @@
 {
-    "numTestsKeptInMemory": 1,
+    "numTestsKeptInMemory": 0,
     "video": true,
     "videoUploadOnPasses": true,
     "videoCompression": 45,
@@ -9,11 +9,12 @@
     "defaultCommandTimeout": 20000,
     "viewportWidth": 1920,
     "viewportHeight": 1080,
-    "baseUrl": "http://che-che.192.168.99.100.nip.io",
+    "baseUrl": "http://sample-url",
    
     "env": {
         "ProjectTree.waitProjectImportedAttempts": 4,
-        "ProjectTree.waiProjectImportedPollingEvery": 30000,
+        "ProjectTree.delayBetweenAttempts": 30000,
+        "ProjectTree.delayBeforeItemCheck": 10000,
 
         "TestWorkspaceUtil.waitRunningStatusAttempts": 90,
         "TestWorkspaceUtil.waitRunningStatusPollingEvery": 10000,

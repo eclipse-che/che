@@ -18,6 +18,7 @@ export class ProjectTree {
     private readonly ide: Ide = new Ide();
     private readonly elementStateChecker: ElementStateChecker = new ElementStateChecker();
     private static readonly PROJECT_TREE_CONTAINER: string = "#theia-left-side-panel .theia-TreeContainer";
+    private static readonly DELAY_BETWEEN_ATTEMPTS: number = Cypress.env("ProjectTree.delayBetweenAttempts");
 
     private getItemId(itemPath: string): string {
         return `div[id='/projects:/projects/${itemPath}']`;
@@ -162,10 +163,9 @@ export class ProjectTree {
         cy.log("**=> ProjectTree.waitProjectImported**")
             .then(() => {
                 let attempts: number = Cypress.env("ProjectTree.waitProjectImportedAttempts");
-                let pollingEvery: number = Cypress.env("ProjectTree.waiProjectImportedPollingEvery");
                 let currentAttempt: number = 1;
 
-                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, ProjectTree.DELAY_BETWEEN_ATTEMPTS)
             })
     }
 
@@ -173,8 +173,8 @@ export class ProjectTree {
         return new Cypress.Promise((resolve: any, reject: any) => {
             const rootItem: string = `/${projectName}`;
             const rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
-            const rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
-            const delayBeforeItemCheck: number = 10000
+            const rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`);
+            const delayBeforeItemCheck: number = Cypress.env("ProjectTree.delayBeforeItemCheck");
 
             cy.log(`**ProjectTree.waitProjectImported the ${currentAttempt} try**`)
                 .then(() => {

@@ -53,7 +53,7 @@ export class TestWorkspaceUtil {
                         assert.isOk(false, "Workspace starting process is crushed")
                     }
 
-                    cy.log(`**Request attempt has workspace status ${response.body.status} diferent to '${runningWorkspaceStatus}'**`)
+                    cy.log(`**Request attempt has workspace status '${response.body.status}' diferent to '${runningWorkspaceStatus}'**`)
                     cy.log(`**Attempt ${attempt} of ${maximumAttempts}**`)
                     cy.wait(delayBetweenAttempts);
                     attempt++
