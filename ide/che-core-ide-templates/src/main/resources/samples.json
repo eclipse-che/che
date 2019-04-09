@@ -1099,7 +1099,7 @@
           "previewUrl": "",
           "goal": "Run"
         }
-      }      
+      }
     ],
     "links": [],
     "category": "Samples",
@@ -1183,6 +1183,41 @@
     "category": "Samples",
     "tags": [
       "SDK"
+    ]
+  },
+  {
+    "name": "python-hello-world",
+    "displayName": "python-hello-world",
+    "path": "/python-hello-world",
+    "description": "Python Hello World Project.",
+    "projectType": "python",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "python"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/python-hello-world",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/python-hello-world && python hello-world.py",
+        "attributes": {
+          "goal": "Run"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Python"
     ]
   }
 ]
