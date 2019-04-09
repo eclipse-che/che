@@ -18,6 +18,7 @@ export class ProjectTree {
     private readonly ide: Ide = new Ide();
     private readonly elementStateChecker: ElementStateChecker = new ElementStateChecker();
     private static readonly PROJECT_TREE_CONTAINER: string = "#theia-left-side-panel .theia-TreeContainer";
+    private static readonly DELAY_BETWEEN_ATTEMPTS: number = Cypress.env("ProjectTree.delayBetweenAttempts");
 
     private getItemId(itemPath: string): string {
         return `div[id='/projects:/projects/${itemPath}']`;
@@ -162,61 +163,59 @@ export class ProjectTree {
         cy.log("**=> ProjectTree.waitProjectImported**")
             .then(() => {
                 let attempts: number = Cypress.env("ProjectTree.waitProjectImportedAttempts");
-                let pollingEvery: number = Cypress.env("ProjectTree.waiProjectImportedPollingEvery");
                 let currentAttempt: number = 1;
 
-                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
+                this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, ProjectTree.DELAY_BETWEEN_ATTEMPTS)
             })
     }
 
     private doWaitProjectImported(projectName: string, rootSubitem: string, attempts: number, currentAttempt: number, pollingEvery: number): PromiseLike<void> {
-        return new Cypress.Promise((resolve:any, reject:any) => {
-            let rootItem: string = `/${projectName}`;
+        return new Cypress.Promise((resolve: any, reject: any) => {
+            const rootItem: string = `/${projectName}`;
+            const rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
+            const rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`);
+            const delayBeforeItemCheck: number = Cypress.env("ProjectTree.delayBeforeItemCheck");
 
-            this.expandItem(rootItem)
-            this.waitItemExpanded(rootItem)
-
-            cy.get('body')
-                .then(body => {
-                    let rootItemLocator: string = this.getTreeItemLocator(`/${projectName}`);
-                    let rootSubitemLocator: string = this.getTreeItemLocator(`/${projectName}/${rootSubitem}`)
-
+            cy.log(`**ProjectTree.waitProjectImported the ${currentAttempt} try**`)
+                .then(() => {
                     if (currentAttempt >= attempts) {
                         assert.isOk(false, "Exceeded the maximum number of checking attempts, project has not been imported")
                     }
+                })
+                .then(() => {
+                    cy.wait(delayBeforeItemCheck)
 
-                    cy.wait(5000)
-
-                    //If project root folder is not present, reload page, wait IDE and retry again
-                    if (body.find(rootItemLocator).length === 0) {
-                        cy.log(`**Project '${projectName}' has not benn found. Refreshing page and try again (attempt ${currentAttempt} of ${attempts})**`)
+                    if (!this.elementStateChecker.isVisibleByLocator(rootItemLocator)) {
+                        cy.log(`Root item '${rootItem}' has not been found, reload page and try again`)
+                        cy.log(`Attempt ${currentAttempt} of ${attempts}`)
 
                         currentAttempt++
-
-                        cy.reload();
+                        cy.reload()
                         this.ide.waitIde()
-                        this.openProjectTreeContainer();
-                        this.waitProjectTreeContainer();
-
-                        cy.wait(pollingEvery)
+                        this.openProjectTreeContainer()
+                        cy.wait(ProjectTree.DELAY_BETWEEN_ATTEMPTS)
                         this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                     }
+                })
+                .then(() => {
+                    this.expandItem(rootItem)
+                    this.waitItemExpanded(rootItem)
+                })
+                .then(() => {
+                    cy.wait(delayBeforeItemCheck)
 
-                    if (body.find(rootSubitemLocator).length > 0) {
-                        return;
+                    if (!this.elementStateChecker.isVisibleByLocator(rootSubitemLocator)) {
+                        cy.log(`Root sub item '${rootSubitem}' has not been found, reload page and try again`)
+                        cy.log(`Attempt ${currentAttempt} of ${attempts}`)
+
+                        currentAttempt++
+                        cy.reload()
+                        this.ide.waitIde()
+                        this.openProjectTreeContainer()
+                        cy.wait(ProjectTree.DELAY_BETWEEN_ATTEMPTS)
+                        this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                     }
-
-                    //If project root sub item is not present, collapse project folder, open project folder and retry again
-                    cy.log(`**Root sub item '${rootSubitem}' has not benn found (attempt ${currentAttempt} of ${attempts})**`)
-                    currentAttempt++
-                    this.collapseItem(rootItem)
-                    this.waitItemCollapsed(rootItem)
-                    cy.wait(pollingEvery)
-                    this.doWaitProjectImported(projectName, rootSubitem, attempts, currentAttempt, pollingEvery)
                 })
         })
     }
-
-
-
 }
