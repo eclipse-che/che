@@ -16,9 +16,13 @@ export class TestWorkspaceUtil {
     private waitRunningStatus(workspaceNamespace: string, workspaceName: string, attempt: number): PromiseLike<void> {
         const maximumAttempts: number = Cypress.env("TestWorkspaceUtil.waitRunningStatusAttempts");
         const delayBetweenAttempts: number = Cypress.env("TestWorkspaceUtil.waitRunningStatusPollingEvery");
-        const expectedWorkspaceStatus: string = 'RUNNING';
+        const runningWorkspaceStatus: string = 'RUNNING';
+        const stoppedWorkspaceStatus: string = 'STOPPED';
+        const startingWorkspaceStatus: string = 'STARTING';
+
 
         return new Cypress.Promise((resolve:any, reject:any) => {
+            let isWorkspaceStarting: boolean = false;
 
             cy.request('GET', `/api/workspace/${workspaceNamespace}:${workspaceName}`)
                 .then(response => {
@@ -35,11 +39,21 @@ export class TestWorkspaceUtil {
                         this.waitRunningStatus(workspaceNamespace, workspaceName, attempt)
                     }
 
-                    if (response.body.status === expectedWorkspaceStatus) {
+                    let workspaceStatus: string = response.body.status
+
+                    if (workspaceStatus === runningWorkspaceStatus) {
                         return;
                     }
 
-                    cy.log(`**Request attempt has workspace status ${response.body.status} diferent to '${expectedWorkspaceStatus}'**`)
+                    if(workspaceStatus === startingWorkspaceStatus){
+                        isWorkspaceStarting = true;
+                    }
+
+                    if((workspaceStatus === stoppedWorkspaceStatus) && isWorkspaceStarting){
+                        assert.isOk(false, "Workspace starting process is crushed")
+                    }
+
+                    cy.log(`**Request attempt has workspace status ${response.body.status} diferent to '${runningWorkspaceStatus}'**`)
                     cy.log(`**Attempt ${attempt} of ${maximumAttempts}**`)
                     cy.wait(delayBetweenAttempts);
                     attempt++
