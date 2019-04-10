@@ -12,16 +12,39 @@
 package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileProjectSource")
+@Table(name = "devfile_project_source")
 public class SourceImpl implements Source {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "type", nullable = false)
   private String type;
+
+  @Column(name = "location", nullable = false)
   private String location;
+
+  @Column(name = "branch")
   private String branch;
+
+  @Column(name = "start_point")
   private String startPoint;
+
+  @Column(name = "tag")
   private String tag;
+
+  @Column(name = "commit_id")
   private String commitId;
 
   public SourceImpl() {}
@@ -109,12 +132,13 @@ public class SourceImpl implements Source {
       return false;
     }
     SourceImpl source = (SourceImpl) o;
-    return Objects.equals(getType(), source.getType())
-        && Objects.equals(getLocation(), source.getLocation())
-        && Objects.equals(getBranch(), source.getBranch())
-        && Objects.equals(getStartPoint(), source.getStartPoint())
-        && Objects.equals(getTag(), source.getTag())
-        && Objects.equals(getCommitId(), source.getCommitId());
+    return Objects.equals(id, source.id)
+        && Objects.equals(type, source.type)
+        && Objects.equals(location, source.location)
+        && Objects.equals(branch, source.branch)
+        && Objects.equals(startPoint, source.startPoint)
+        && Objects.equals(tag, source.tag)
+        && Objects.equals(commitId, source.commitId);
   }
 
   @Override
@@ -126,7 +150,10 @@ public class SourceImpl implements Source {
   @Override
   public String toString() {
     return "SourceImpl{"
-        + "type='"
+        + "id='"
+        + id
+        + '\''
+        + ", type='"
         + type
         + '\''
         + ", location='"
