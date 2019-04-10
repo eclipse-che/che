@@ -39,7 +39,7 @@ spec:
           value: "pgchepassword"
         - name: "CHE_POSTGRES_DATABASE"
           value: "dbche"
-        {{- if .Values.global.postgresDebug }}
+        {{- if .Values.global.postgresDebugLogs }}
         - name: "POSTGRESQL_LOG_DEBUG"
           value: "true"
         {{- end }}
