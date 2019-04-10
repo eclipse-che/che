@@ -235,6 +235,15 @@ public class WorkspaceImpl implements Workspace {
   }
 
   @Override
+  public DevfileImpl getDevfile() {
+    return devfile;
+  }
+
+  public void setDevfile(DevfileImpl devfile) {
+    this.devfile = devfile;
+  }
+
+  @Override
   public Map<String, String> getAttributes() {
     if (attributes == null) {
       attributes = new HashMap<>();
@@ -327,7 +336,13 @@ public class WorkspaceImpl implements Workspace {
 
   /** Syncs {@link #name} with config name. */
   private void syncName() {
-    name = config == null ? null : config.getName();
+    if (devfile != null) {
+      name = devfile.getName();
+    } else if (config != null) {
+      name = config.getName();
+    } else {
+      name = null;
+    }
   }
 
   /**
