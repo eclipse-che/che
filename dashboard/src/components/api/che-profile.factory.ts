@@ -81,7 +81,7 @@ export class CheProfile {
    * Gets the profile
    * @return profile
    */
-  getProfile() {
+  getProfile(): che.IProfile {
     return this.profile;
   }
 
@@ -89,7 +89,7 @@ export class CheProfile {
    * Gets the profile data
    * @returns {ng.IPromise<che.IProfile>} the promise
    */
-  fetchProfile(): che.IProfile {
+  fetchProfile(): ng.IPromise<che.IProfile> {
     if (this.profile && !this.profile.$resolved) {
       return this.profile;
     }
