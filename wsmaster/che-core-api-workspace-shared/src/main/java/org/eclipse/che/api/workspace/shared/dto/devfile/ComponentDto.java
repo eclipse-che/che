@@ -27,13 +27,6 @@ public interface ComponentDto extends Component {
 
   ComponentDto withName(String name);
 
-  @Override
-  String getType();
-
-  void setType(String type);
-
-  ComponentDto withType(String type);
-
   // editor/plugin
 
   @Override
@@ -42,6 +35,13 @@ public interface ComponentDto extends Component {
   void setId(String id);
 
   ComponentDto withId(String id);
+
+  @Override
+  String getType();
+
+  void setType(String type);
+
+  ComponentDto withType(String type);
 
   // k8s/OS
 

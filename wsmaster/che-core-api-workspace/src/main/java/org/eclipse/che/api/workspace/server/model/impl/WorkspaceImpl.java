@@ -92,7 +92,9 @@ public class WorkspaceImpl implements Workspace {
   @JoinColumn(name = "config_id")
   private WorkspaceConfigImpl config;
 
-  @Transient private DevfileImpl devfile;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "devfile_id")
+  private DevfileImpl devfile;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "workspace_attributes", joinColumns = @JoinColumn(name = "workspace_id"))
@@ -117,9 +119,14 @@ public class WorkspaceImpl implements Workspace {
     this(id, account, config, null, null, false, null);
   }
 
+  public WorkspaceImpl(String id, Account account, Devfile devfile) {
+    this(id, account, devfile, null, null, false, null);
+  }
+
   public WorkspaceImpl(
       String id,
       Account account,
+      Devfile devfile,
       Runtime runtime,
       Map<String, String> attributes,
       boolean isTemporary,
@@ -127,6 +134,9 @@ public class WorkspaceImpl implements Workspace {
     this.id = id;
     if (account != null) {
       this.account = new AccountImpl(account);
+    }
+    if (devfile != null) {
+      this.devfile = new DevfileImpl(devfile);
     }
     if (runtime != null) {
       this.runtime =

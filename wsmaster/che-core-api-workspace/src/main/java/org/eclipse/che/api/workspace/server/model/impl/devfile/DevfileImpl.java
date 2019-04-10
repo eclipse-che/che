@@ -18,19 +18,55 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "Devfile")
+@Table(name = "devfile")
 public class DevfileImpl implements Devfile {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "spec_version", nullable = false)
   private String specVersion;
+
+  @Column(name = "name", nullable = false)
   private String name;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_projects_id")
   private List<ProjectImpl> projects;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_components_id")
   private List<ComponentImpl> components;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_commands_id")
   private List<CommandImpl> commands;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(name = "devfile_attributes", joinColumns = @JoinColumn(name = "devfile_id"))
+  @MapKeyColumn(name = "name")
+  @Column(name = "value", columnDefinition = "TEXT")
   private Map<String, String> attributes;
 
   public DevfileImpl() {}
@@ -144,8 +180,9 @@ public class DevfileImpl implements Devfile {
       return false;
     }
     DevfileImpl devfile = (DevfileImpl) o;
-    return Objects.equals(getSpecVersion(), devfile.getSpecVersion())
-        && Objects.equals(getName(), devfile.getName())
+    return Objects.equals(id, devfile.id)
+        && Objects.equals(specVersion, devfile.specVersion)
+        && Objects.equals(name, devfile.name)
         && Objects.equals(getProjects(), devfile.getProjects())
         && Objects.equals(getComponents(), devfile.getComponents())
         && Objects.equals(getCommands(), devfile.getCommands())
@@ -166,7 +203,10 @@ public class DevfileImpl implements Devfile {
   @Override
   public String toString() {
     return "DevfileImpl{"
-        + "specVersion='"
+        + "id='"
+        + id
+        + '\''
+        + ", specVersion='"
         + specVersion
         + '\''
         + ", name='"
