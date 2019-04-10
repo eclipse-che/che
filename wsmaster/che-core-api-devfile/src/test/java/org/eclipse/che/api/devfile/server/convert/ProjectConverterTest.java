@@ -11,8 +11,12 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
-import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.REFSPEC_PARAMETER_NAME;
+import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.BRANCH_PARAMETER_NAME;
+import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.COMMIT_ID_PARAMETER_NAME;
+import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.START_POINT_PARAMETER_NAME;
+import static org.eclipse.che.api.core.model.workspace.config.SourceStorage.TAG_PARAMETER_NAME;
 import static org.testng.Assert.assertEquals;
+import static org.testng.AssertJUnit.assertFalse;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
@@ -23,6 +27,7 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
@@ -40,7 +45,8 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            new SourceImpl(
+                "git", "https://github.com/eclipse/che.git", "master", "3434d", null, null),
             null);
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
@@ -50,7 +56,8 @@ public class ProjectConverterTest {
     SourceStorageImpl source = workspaceProject.getSource();
     assertEquals(source.getType(), "git");
     assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
-    assertEquals(source.getParameters().get(REFSPEC_PARAMETER_NAME), "master");
+    assertEquals(source.getParameters().get(BRANCH_PARAMETER_NAME), "master");
+    assertEquals(source.getParameters().get(START_POINT_PARAMETER_NAME), "3434d");
   }
 
   @Test
@@ -61,7 +68,8 @@ public class ProjectConverterTest {
     SourceStorageImpl sourceStorage = new SourceStorageImpl();
     sourceStorage.setType("git");
     sourceStorage.setLocation("https://github.com/eclipse/che.git");
-    sourceStorage.setParameters(ImmutableMap.of(REFSPEC_PARAMETER_NAME, "master"));
+    sourceStorage.setParameters(
+        ImmutableMap.of(TAG_PARAMETER_NAME, "v1.0", BRANCH_PARAMETER_NAME, "develop"));
     workspaceProject.setSource(sourceStorage);
 
     Project devfileProject = projectConverter.toDevfileProject(workspaceProject);
@@ -70,7 +78,8 @@ public class ProjectConverterTest {
     Source source = devfileProject.getSource();
     assertEquals(source.getType(), "git");
     assertEquals(source.getLocation(), "https://github.com/eclipse/che.git");
-    assertEquals(source.getRefspec(), "master");
+    assertEquals(source.getBranch(), "develop");
+    assertEquals(source.getTag(), "v1.0");
     assertEquals(devfileProject.getClonePath(), "clone/path");
   }
 
@@ -79,7 +88,7 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
             "down/the/rabbit/hole/myProject");
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
@@ -96,7 +105,7 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
             "cant/hack/../../../usr/bin");
 
     projectConverter.toWorkspaceProject(devfileProject);
@@ -107,7 +116,7 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
             "/usr/bin");
 
     projectConverter.toWorkspaceProject(devfileProject);
@@ -118,7 +127,7 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
             "cant/hack/../../usr/bin");
 
     ProjectConfigImpl workspaceProject = projectConverter.toWorkspaceProject(devfileProject);
@@ -131,9 +140,59 @@ public class ProjectConverterTest {
     ProjectImpl devfileProject =
         new ProjectImpl(
             "myProject",
-            new SourceImpl("git", "https://github.com/eclipse/che.git", "master"),
+            new SourceImpl("git", "https://github.com/eclipse/che.git", "master", null, null, null),
             "not/../in/root/../..");
 
     projectConverter.toWorkspaceProject(devfileProject);
+  }
+
+  @Test(
+      expectedExceptions = DevfileException.class,
+      expectedExceptionsMessageRegExp =
+          "Only one of '"
+              + START_POINT_PARAMETER_NAME
+              + "', '"
+              + TAG_PARAMETER_NAME
+              + "', '"
+              + COMMIT_ID_PARAMETER_NAME
+              + "' can be specified\\.",
+      dataProvider = "invalidStartPointOrTagOrCommitIdCombinations")
+  public void testOnlyOneOfStartPointAttributesAllowed(
+      String startPoint, String tag, String commitId) throws Exception {
+    ProjectImpl devfileProject =
+        new ProjectImpl(
+            "myProject",
+            new SourceImpl(
+                "git", "https://github.com/eclipse/che.git", null, startPoint, tag, commitId),
+            null);
+
+    projectConverter.toWorkspaceProject(devfileProject);
+  }
+
+  @DataProvider
+  public static Object[][] invalidStartPointOrTagOrCommitIdCombinations() {
+    return new Object[][] {
+      new Object[] {"a", "b", null},
+      new Object[] {"a", null, "b"},
+      new Object[] {null, "a", "b"},
+      new Object[] {"a", "b", "c"}
+    };
+  }
+
+  @Test
+  public void testUndefinedCloneParametersNotTransferredToWorkspaceConfig() throws Exception {
+    ProjectImpl devfileProject =
+        new ProjectImpl(
+            "myProject",
+            new SourceImpl("git", "https://github.com/eclipse/che.git", null, null, null, null),
+            null);
+
+    ProjectConfigImpl wsProject = projectConverter.toWorkspaceProject(devfileProject);
+    SourceStorageImpl wsSource = wsProject.getSource();
+
+    assertFalse(wsSource.getParameters().containsKey(BRANCH_PARAMETER_NAME));
+    assertFalse(wsSource.getParameters().containsKey(START_POINT_PARAMETER_NAME));
+    assertFalse(wsSource.getParameters().containsKey(TAG_PARAMETER_NAME));
+    assertFalse(wsSource.getParameters().containsKey(COMMIT_ID_PARAMETER_NAME));
   }
 }

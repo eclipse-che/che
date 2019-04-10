@@ -670,8 +670,8 @@
     ],
     "components": [
       {
-         "name": "Debian",
-         "version": "9.8"
+        "name": "Debian",
+        "version": "9.8"
       },
       {
         "name": "OpenJDK",
@@ -754,8 +754,8 @@
       {
         "name": "Debian",
         "version": "9.8"
-     },
-     {
+      },
+      {
         "name": "OpenJDK",
         "version": "11.0.2"
       },
@@ -2559,6 +2559,77 @@
     ],
     "stackIcon": {
       "name": "type-apache-camel.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "python",
+    "name": "Python with Theia IDE",
+    "creator": "Anatolii Bazko",
+    "tags": [
+      "Theia",
+      "Debian",
+      "Python",
+      "pip"
+    ],
+    "scope": "general",
+    "description": "Default stack with Python 3.7 and Theia IDE",
+    "components": [
+      {
+        "version": "9",
+        "name": "Debian"
+      },
+      {
+        "version": "3.7.3",
+        "name": "Python"
+      },
+      {
+        "version": "19.0.3 ",
+        "name": "PIP"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "content": "python:3.7.3",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "python": {
+              "env": {
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              },
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              }
+            }
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi",
+        "sidecar.ms-python.python.memory_limit": "512Mi",
+        "editor": "org.eclipse.che.editor.theia:next",
+        "plugins": "che-machine-exec-plugin:0.0.1,ms-python.python:2019.2.5433"
+      },
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
   }

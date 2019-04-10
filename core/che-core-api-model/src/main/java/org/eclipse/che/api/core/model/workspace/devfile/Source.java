@@ -19,8 +19,24 @@ public interface Source {
   String getLocation();
 
   /**
-   * Returns the name of the refspec to check out after the clone. This can be a branch, tag, commit
-   * id or anything the particular source type understands. It is optional.
+   * The name of the of the branch to check out after obtaining the source from the location. The
+   * branch has to already exist in the source otherwise the default branch is used. In case of git,
+   * this is also the name of the remote branch to push to.
    */
-  String getRefspec();
+  String getBranch();
+
+  /** The tag or commit id to reset the checked out branch to. */
+  String getStartPoint();
+
+  /**
+   * The name of the tag to reset the checked out branch to. Note that this is equivalent to
+   * 'startPoint' and provided for convenience.
+   */
+  String getTag();
+
+  /**
+   * The id of the commit to reset the checked out branch to. Note that this is equivalent to
+   * 'startPoint' and provided for convenience.
+   */
+  String getCommitId();
 }

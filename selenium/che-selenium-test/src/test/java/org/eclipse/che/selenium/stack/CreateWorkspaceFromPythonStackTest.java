@@ -16,7 +16,7 @@ import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextM
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.ELEMENT_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON_DEFAULT;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
@@ -83,7 +83,7 @@ public class CreateWorkspaceFromPythonStackTest {
     // possible to read logs in case of test failure
     testWorkspace =
         createWorkspaceHelper.createWorkspaceFromStackWithProject(
-            PYTHON, WORKSPACE_NAME, PROJECT_NAME);
+            PYTHON_DEFAULT, WORKSPACE_NAME, PROJECT_NAME);
 
     switchToIdeAndWaitWorkspaceIsReadyToUse();
 

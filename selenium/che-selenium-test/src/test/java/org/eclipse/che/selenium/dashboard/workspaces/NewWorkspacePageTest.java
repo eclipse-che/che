@@ -41,6 +41,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.N
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODEJS_AND_POSTGRES;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON_DEFAULT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
@@ -94,6 +95,7 @@ public class NewWorkspacePageTest {
           JAVA_MAVEN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS);
 
@@ -113,6 +115,7 @@ public class NewWorkspacePageTest {
           JAVA_MAVEN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS);
 
@@ -130,6 +133,7 @@ public class NewWorkspacePageTest {
           JAVA_MAVEN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS,
           JAVA_THEIA_DOCKER);
@@ -158,6 +162,7 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS,
           SPRING_BOOT);
@@ -186,6 +191,7 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS,
           SPRING_BOOT);
@@ -212,6 +218,7 @@ public class NewWorkspacePageTest {
           KOTLIN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS,
           SPRING_BOOT);
@@ -232,6 +239,7 @@ public class NewWorkspacePageTest {
               BLANK,
               RAILS,
               PYTHON,
+              PYTHON_DEFAULT,
               PHP,
               NODE,
               JAVA_MAVEN,
@@ -251,6 +259,7 @@ public class NewWorkspacePageTest {
           BLANK,
           RAILS,
           PYTHON,
+          PYTHON_DEFAULT,
           PHP,
           NODE,
           JAVA_MAVEN,
@@ -272,6 +281,7 @@ public class NewWorkspacePageTest {
           JAVA_THEIA_DOCKER,
           RAILS,
           PYTHON,
+          PYTHON_DEFAULT,
           PHP,
           NODE,
           JAVA_MAVEN,
