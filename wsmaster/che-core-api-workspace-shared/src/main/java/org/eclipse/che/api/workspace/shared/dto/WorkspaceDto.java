@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.shared.dto;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author Yevhenii Voevodin */
@@ -26,6 +27,13 @@ public interface WorkspaceDto extends Workspace {
   void setConfig(WorkspaceConfigDto config);
 
   WorkspaceDto withConfig(WorkspaceConfigDto config);
+
+  @Override
+  DevfileDto getDevfile();
+
+  void setDevfile(DevfileDto devfile);
+
+  WorkspaceDto withDevfile(DevfileDto devfile);
 
   @Override
   RuntimeDto getRuntime();
