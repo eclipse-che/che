@@ -62,6 +62,7 @@ global:
   securityContext:
     runAsUser: 1724
     fsGroup: 1724
+  postgresDebugLogs: false
 
 prometheus:
   alertmanager:
