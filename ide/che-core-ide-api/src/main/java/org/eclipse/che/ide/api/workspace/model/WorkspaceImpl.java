@@ -18,6 +18,7 @@ import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -108,6 +109,11 @@ public class WorkspaceImpl implements Workspace {
   @Override
   public WorkspaceConfigImpl getConfig() {
     return config;
+  }
+
+  @Override
+  public Devfile getDevfile() {
+    throw new UnsupportedOperationException("Devfile is not supported by GWT IDE");
   }
 
   @Override
