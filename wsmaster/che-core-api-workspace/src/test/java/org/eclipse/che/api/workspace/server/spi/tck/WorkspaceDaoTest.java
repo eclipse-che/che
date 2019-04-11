@@ -311,7 +311,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
-  public void shouldCreateWorkspace() throws Exception {
+  public void shouldCreateWorkspaceWithConfig() throws Exception {
     final WorkspaceImpl workspace =
         createWorkspaceFromConfig("new-workspace", accounts[0], "new-name");
 
@@ -321,13 +321,42 @@ public class WorkspaceDaoTest {
         workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
   }
 
-  @Test(expectedExceptions = ConflictException.class)
-  public void shouldNotCreateWorkspaceWithANameWhichAlreadyExistsInGivenNamespace()
+  @Test(dependsOnMethods = "shouldGetWorkspaceById")
+  public void shouldCreateWorkspaceWithDevfile() throws Exception {
+    final WorkspaceImpl workspace =
+        createWorkspaceFromDevfile("new-workspace", accounts[1], "new-name");
+
+    workspaceDao.create(workspace);
+
+    assertEquals(
+        workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with id 'new-id' or name 'name-0' in namespace 'accountName0' already exists")
+  public void shouldNotCreateWorkspaceWithConfigWithANameWhichAlreadyExistsInGivenNamespace()
       throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 
     final WorkspaceImpl newWorkspace =
         createWorkspaceFromConfig(
+            "new-id", workspace.getAccount(), workspace.getConfig().getName());
+
+    workspaceDao.create(newWorkspace);
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with id 'new-id' or name 'name-1' in namespace 'accountName0' already exists")
+  public void shouldNotCreateWorkspaceWithDevfileWithANameWhichAlreadyExistsInGivenNamespace()
+      throws Exception {
+    final WorkspaceImpl workspace = workspaces[1];
+
+    final WorkspaceImpl newWorkspace =
+        createWorkspaceFromDevfile(
             "new-id", workspace.getAccount(), workspace.getConfig().getName());
 
     workspaceDao.create(newWorkspace);
@@ -368,7 +397,7 @@ public class WorkspaceDaoTest {
   }
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
-  public void shouldUpdateWorkspace() throws Exception {
+  public void shouldUpdateWorkspaceWithConfig() throws Exception {
     final WorkspaceImpl workspace = new WorkspaceImpl(workspaces[0], workspaces[0].getAccount());
 
     // Remove an existing project configuration from workspace
@@ -502,6 +531,89 @@ public class WorkspaceDaoTest {
         workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
   }
 
+  @Test(dependsOnMethods = "shouldGetWorkspaceById")
+  public void shouldUpdateWorkspaceWithDevfile() throws Exception {
+    final WorkspaceImpl workspace = new WorkspaceImpl(workspaces[4], workspaces[4].getAccount());
+
+    // Remove an existing project configuration from workspace
+    workspace.getDevfile().getProjects().remove(1);
+
+    final SourceImpl source3 =
+        new SourceImpl("type3", "http://location", "branch3", "point3", "tag3", "commit3");
+    ProjectImpl newProject = new ProjectImpl("project3", source3, "path3");
+    workspace.getDevfile().getProjects().add(newProject);
+
+    // Update an existing project configuration
+    final ProjectImpl projectCfg = workspace.getDevfile().getProjects().get(0);
+    projectCfg.getSource().setLocation("new-location");
+    projectCfg.getSource().setType("new-type");
+    projectCfg.getSource().setBranch("new-branch");
+    projectCfg.getSource().setCommitId(("new-commit"));
+    projectCfg.getSource().setTag(("new-tag"));
+    projectCfg.getSource().setStartPoint(("new-point"));
+
+    // Remove an existing command
+    workspace.getDevfile().getCommands().remove(1);
+
+    ActionImpl action3 = new ActionImpl("exec3", "component3", "run.sh", "/home/user/3");
+    ActionImpl action4 = new ActionImpl("exec4", "component4", "run.sh", "/home/user/4");
+    // Add a new command
+    final org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl newCmd =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+            "command-3", singletonList(action3), singletonMap("attr3", "value3"));
+    workspace.getDevfile().getCommands().add(newCmd);
+
+    // Update an existing command
+    final org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command =
+        workspace.getDevfile().getCommands().get(0);
+    command.setName("new-name");
+    command.setActions(asList(action4));
+    command.getAttributes().clear();
+
+    workspace.getDevfile().getComponents().remove(1);
+
+    EntrypointImpl entrypoint3 =
+        new EntrypointImpl(
+            "parentName",
+            singletonMap("parent3", "selector3"),
+            "containerName3",
+            asList("command3", "command5"),
+            asList("arg3", "arg5"));
+
+    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume3 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name3", "path3");
+
+    EnvImpl env3 = new EnvImpl("name3", "value3");
+    EndpointImpl endpoint3 = new EndpointImpl("name3", 3333, singletonMap("key3", "value3"));
+
+    ComponentImpl component3 = workspace.getDevfile().getComponents().get(0);
+    new ComponentImpl(
+        "component3",
+        "kubernetes",
+        "che-theia:0.0.1",
+        "/dev.yaml",
+        null,
+        asList(entrypoint3),
+        "image",
+        "1256G",
+        false,
+        singletonList("command"),
+        singletonList("arg"),
+        asList(volume3),
+        asList(env3),
+        asList(endpoint3));
+    component3.setSelector(singletonMap("key3", "value3"));
+
+    // Update workspace object
+    workspace.setAccount(new AccountImpl("accId", "new-namespace", "test"));
+    workspace.getAttributes().clear();
+
+    workspaceDao.update(workspace);
+
+    assertEquals(
+        workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
+  }
+
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldNotUpdateWorkspaceWhichDoesNotExist() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
@@ -510,14 +622,31 @@ public class WorkspaceDaoTest {
     workspaceDao.update(workspace);
   }
 
-  @Test(expectedExceptions = ConflictException.class)
-  public void shouldNotUpdateWorkspaceWithReservedName() throws Exception {
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with name 'name-1' in namespace 'accountName0' already exists")
+  public void shouldNotUpdateWorkspaceWithReservedNameFromConfig() throws Exception {
     final WorkspaceImpl workspace1 = workspaces[0];
     final WorkspaceImpl workspace2 = workspaces[1];
 
     workspace1.getConfig().setName(workspace2.getConfig().getName());
 
     workspaceDao.update(workspace1);
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with name 'name-3' in namespace 'accountName1' already exists")
+  public void shouldNotUpdateWorkspaceWithReservedNameFromDevfile() throws Exception {
+    final WorkspaceImpl workspace1 = workspaces[3];
+    final WorkspaceImpl workspace2 = workspaces[4];
+
+    workspace2.getDevfile().setName(workspace1.getConfig().getName());
+    workspace2.setAccount(workspace1.getAccount());
+
+    workspaceDao.update(workspace2);
   }
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
