@@ -14,11 +14,10 @@ package org.eclipse.che.ide.api.workspace.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -112,7 +111,7 @@ public class WorkspaceImpl implements Workspace {
   }
 
   @Override
-  public Devfile getDevfile() {
+  public DevfileImpl getDevfile() {
     throw new UnsupportedOperationException("Devfile is not supported by GWT IDE");
   }
 

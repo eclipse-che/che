@@ -60,10 +60,14 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     try {
       doCreate(workspace);
     } catch (DuplicateKeyException dkEx) {
+      String name =
+          workspace.getConfig() != null
+              ? workspace.getConfig().getName()
+              : workspace.getDevfile().getName();
       throw new ConflictException(
           format(
               "Workspace with id '%s' or name '%s' in namespace '%s' already exists",
-              workspace.getId(), workspace.getConfig().getName(), workspace.getNamespace()));
+              workspace.getId(), name, workspace.getNamespace()));
     } catch (RuntimeException x) {
       throw new ServerException(x.getMessage(), x);
     }

@@ -112,7 +112,7 @@ public class WorkspaceDaoTest {
     workspaces = new WorkspaceImpl[COUNT_OF_WORKSPACES];
     for (int i = 0; i < COUNT_OF_WORKSPACES; i++) {
       // 2 workspaces share 1 namespace
-      if (i / COUNT_OF_WORKSPACES - 1 == 1) {
+      if (i / (COUNT_OF_WORKSPACES - 1) == 1) {
         workspaces[i] = createWorkspaceFromDevfile("workspace-" + i, accounts[i / 2], "name-" + i);
       } else {
         workspaces[i] = createWorkspaceFromConfig("workspace-" + i, accounts[i / 2], "name-" + i);
@@ -164,11 +164,20 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void shouldGetWorkspaceByNameAndNamespace() throws Exception {
+  public void shouldGetWorkspaceByConfigNameAndNamespace() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 
     assertEquals(
         workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()),
+        new WorkspaceImpl(workspace));
+  }
+
+  @Test
+  public void shouldGetWorkspaceByDevfileNameAndNamespace() throws Exception {
+    final WorkspaceImpl workspace = workspaces[4];
+
+    assertEquals(
+        workspaceDao.get(workspace.getDevfile().getName(), workspace.getNamespace()),
         new WorkspaceImpl(workspace));
   }
 
@@ -345,6 +354,17 @@ public class WorkspaceDaoTest {
         createWorkspaceFromConfig(workspace.getId(), accounts[0], "new-name");
 
     workspaceDao.create(newWorkspace);
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with id 'workspaceX2' or name 'name-0' in namespace 'accountName0' already exists")
+  public void shouldThrowExceptionIfWorkspaceNameIsNotUniquePerConfigAndDevfile() throws Exception {
+    final WorkspaceImpl workspace1 = workspaces[0];
+    final WorkspaceImpl workspace2 =
+        createWorkspaceFromDevfile("workspaceX2", accounts[0], workspace1.getConfig().getName());
+    workspaceDao.create(workspace2);
   }
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
