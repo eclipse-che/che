@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+
+    "outDir": "dist",
+    "lib": ["es6", "dom"],
+    "types": ["reflect-metadata"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+    
+  }
+}

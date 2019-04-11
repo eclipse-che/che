@@ -1,0 +1,21 @@
+{
+  "name": "typescript-selenium",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/selenium-webdriver": "^3.0.16",
+    "chromedriver": "^2.46.0",
+    "selenium-webdriver": "^3.6.0",
+    "typescript": "^3.4.3"
+  },
+  "dependencies": {
+    "inversify": "^5.0.1",
+    "reflect-metadata": "^0.1.13"
+  }
+}

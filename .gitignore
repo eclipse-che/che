@@ -93,3 +93,8 @@ requirements.lock
 */.grunt
 */.lock-wscript
 */cypress-tests/dist
+
+
+# typescript-selenium module
+*/typescript-selenium/dist/
+*/typescript-selenium/node_modules/
