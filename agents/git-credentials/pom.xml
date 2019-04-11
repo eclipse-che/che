@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.19.3-SNAPSHOT</version>
+        <version>6.19.3</version>
     </parent>
     <artifactId>git-credentials-agent</artifactId>
     <name>Git Credentials Agent</name>

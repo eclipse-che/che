@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-cpp-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.19.3-SNAPSHOT</version>
+        <version>6.19.3</version>
     </parent>
     <artifactId>che-plugin-cpp-lang-ide</artifactId>
     <packaging>gwt-lib</packaging>

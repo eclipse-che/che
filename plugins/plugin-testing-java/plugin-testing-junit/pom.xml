@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-testing-java-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.19.3-SNAPSHOT</version>
+        <version>6.19.3</version>
     </parent>
     <artifactId>che-plugin-testing-junit</artifactId>
     <packaging>pom</packaging>

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-selenium-parent</artifactId>
         <groupId>org.eclipse.che.selenium</groupId>
-        <version>6.19.3-SNAPSHOT</version>
+        <version>6.19.3</version>
     </parent>
     <artifactId>che-selenium-test</artifactId>
     <packaging>jar</packaging>
