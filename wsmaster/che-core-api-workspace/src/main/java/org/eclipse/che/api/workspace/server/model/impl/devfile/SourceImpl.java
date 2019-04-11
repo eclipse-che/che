@@ -13,21 +13,12 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
 import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.Embeddable;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
 
 /** @author Sergii Leshchenko */
-@Entity(name = "DevfileProjectSource")
-@Table(name = "devfile_project_source")
+@Embeddable
 public class SourceImpl implements Source {
-
-  @Id
-  @GeneratedValue
-  @Column(name = "id")
-  private Long id;
 
   @Column(name = "type", nullable = false)
   private String type;
@@ -132,8 +123,7 @@ public class SourceImpl implements Source {
       return false;
     }
     SourceImpl source = (SourceImpl) o;
-    return Objects.equals(id, source.id)
-        && Objects.equals(type, source.type)
+    return Objects.equals(type, source.type)
         && Objects.equals(location, source.location)
         && Objects.equals(branch, source.branch)
         && Objects.equals(startPoint, source.startPoint)
@@ -150,10 +140,7 @@ public class SourceImpl implements Source {
   @Override
   public String toString() {
     return "SourceImpl{"
-        + "id='"
-        + id
-        + '\''
-        + ", type='"
+        + "type='"
         + type
         + '\''
         + ", location='"

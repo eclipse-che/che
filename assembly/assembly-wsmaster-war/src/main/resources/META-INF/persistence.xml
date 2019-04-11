@@ -48,10 +48,10 @@
         <class>org.eclipse.che.api.factory.server.model.impl.IdeImpl</class>
         <class>org.eclipse.che.api.factory.server.FactoryImage</class>
 
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl</class>
-        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl</class>

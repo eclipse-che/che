@@ -12,13 +12,11 @@
 package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
@@ -36,9 +34,7 @@ public class ProjectImpl implements Project {
   @Column(name = "name", nullable = false)
   private String name;
 
-  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "source_id")
-  private SourceImpl source;
+  @Embedded private SourceImpl source;
 
   @Column(name = "clone_path", nullable = false)
   private String clonePath;

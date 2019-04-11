@@ -50,7 +50,7 @@ public class ComponentImpl implements Component {
   private String name;
 
   @Column(name = "component_id", nullable = false)
-  private String component_id;
+  private String componentId;
 
   @Column(name = "type", nullable = false)
   private String type;
@@ -109,7 +109,7 @@ public class ComponentImpl implements Component {
   public ComponentImpl(String type, String name, String id) {
     this.name = name;
     this.type = type;
-    this.component_id = id;
+    this.componentId = id;
   }
 
   public ComponentImpl(
@@ -122,7 +122,7 @@ public class ComponentImpl implements Component {
       List<? extends Entrypoint> entrypoints) {
     this.name = name;
     this.type = type;
-    this.component_id = id;
+    this.componentId = id;
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (selector != null) {
@@ -148,7 +148,7 @@ public class ComponentImpl implements Component {
       List<? extends Endpoint> endpoints) {
     this.name = name;
     this.type = type;
-    this.component_id = id;
+    this.componentId = id;
     this.image = image;
     this.memoryLimit = memoryLimit;
     this.mountSources = mountSources;
@@ -183,7 +183,7 @@ public class ComponentImpl implements Component {
       List<? extends Endpoint> endpoints) {
     this.name = name;
     this.type = type;
-    this.component_id = id;
+    this.componentId = id;
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (entrypoints != null) {
@@ -227,11 +227,11 @@ public class ComponentImpl implements Component {
 
   @Override
   public String getId() {
-    return component_id;
+    return componentId;
   }
 
   public void setId(String id) {
-    this.component_id = id;
+    this.componentId = id;
   }
 
   @Override
@@ -394,7 +394,7 @@ public class ComponentImpl implements Component {
         && Objects.equals(id, component.id)
         && Objects.equals(name, component.name)
         && Objects.equals(type, component.type)
-        && Objects.equals(component_id, component.component_id)
+        && Objects.equals(componentId, component.componentId)
         && Objects.equals(reference, component.reference)
         && Objects.equals(referenceContent, component.referenceContent)
         && Objects.equals(getEntrypoints(), component.getEntrypoints())
@@ -432,7 +432,7 @@ public class ComponentImpl implements Component {
   public String toString() {
     return "ComponentImpl{"
         + "id='"
-        + component_id
+        + componentId
         + '\''
         + ", name='"
         + name
