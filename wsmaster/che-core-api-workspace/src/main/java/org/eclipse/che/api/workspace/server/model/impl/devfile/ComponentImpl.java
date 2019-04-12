@@ -89,7 +89,7 @@ public class ComponentImpl implements Component {
   private List<String> args;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_entrypoints_id")
+  @JoinColumn(name = "devfile_component_id")
   private List<EntrypointImpl> entrypoints;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

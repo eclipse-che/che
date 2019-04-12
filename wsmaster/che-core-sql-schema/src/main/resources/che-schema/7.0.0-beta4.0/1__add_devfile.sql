@@ -209,13 +209,14 @@ CREATE TABLE devfile_entrypoint (
     id                         BIGINT       NOT NULL,
     parent_name                VARCHAR(255) NOT NULL,
     container_name             VARCHAR(255) NOT NULL,
-    devfile_entrypoints_id     BIGINT,
+    devfile_component_id       BIGINT,
 
     PRIMARY KEY (id)
 );
 -- constraints & indexes
-ALTER TABLE devfile_entrypoint ADD CONSTRAINT fk_devfile_entrypoints_id FOREIGN KEY (devfile_entrypoints_id) REFERENCES devfile_component (id);
-CREATE INDEX index_component_entrypoint_id ON devfile_entrypoint (devfile_entrypoints_id);
+ALTER TABLE devfile_entrypoint ADD CONSTRAINT fk_devfile_entrypoints_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
+CREATE UNIQUE INDEX index_devfile_entrypoint_id_parent_container ON devfile_entrypoint (devfile_component_id, parent_name, container_name);
+CREATE INDEX index_component_entrypoint_id ON devfile_entrypoint (devfile_component_id);
 
 
 CREATE TABLE entrypoint_arg (
@@ -229,13 +230,13 @@ CREATE INDEX index_entrypoint_arg_entrypoint_id ON entrypoint_arg (entrypoint_id
 
 
 CREATE TABLE entrypoint_commands (
-    entrypoint_id    BIGINT,
+    devfile_entrypoint_id    BIGINT,
     commands         VARCHAR(255)
 );
 
 -- constraints & indexes
-ALTER TABLE entrypoint_commands ADD CONSTRAINT fk_entrypoint_commands_id FOREIGN KEY (entrypoint_id) REFERENCES devfile_entrypoint (id);
-CREATE INDEX index_entrypoint_commands_entrypoint_id ON entrypoint_commands (entrypoint_id);
+ALTER TABLE entrypoint_commands ADD CONSTRAINT fk_entrypoint_commands_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
+CREATE INDEX index_entrypoint_commands_entrypoint_id ON entrypoint_commands (devfile_entrypoint_id);
 
 
 CREATE TABLE entrypoint_selector (
@@ -246,6 +247,7 @@ CREATE TABLE entrypoint_selector (
 
 -- constraints & indexes
 ALTER TABLE entrypoint_selector ADD CONSTRAINT fk_entrypoint_selector_id FOREIGN KEY (entrypoint_id) REFERENCES devfile_entrypoint (id);
+CREATE UNIQUE INDEX index_entrypoint_selectors_keys ON entrypoint_selector (entrypoint_id, selectors_key);
 CREATE INDEX index_entrypoint_selector_entrypoint_id ON entrypoint_selector (entrypoint_id);
 
 

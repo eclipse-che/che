@@ -872,7 +872,7 @@ public class WorkspaceDaoTest {
 
     EntrypointImpl entrypoint1 =
         new EntrypointImpl(
-            "parentName",
+            "parentName1",
             singletonMap("parent1", "selector1"),
             "containerName1",
             asList("command1", "command2"),
@@ -880,9 +880,9 @@ public class WorkspaceDaoTest {
 
     EntrypointImpl entrypoint2 =
         new EntrypointImpl(
-            "parentName",
+            "parentName2",
             singletonMap("parent2", "selector2"),
-            "containerName1",
+            "containerName2",
             asList("command3", "command4"),
             asList("arg3", "arg4"));
 

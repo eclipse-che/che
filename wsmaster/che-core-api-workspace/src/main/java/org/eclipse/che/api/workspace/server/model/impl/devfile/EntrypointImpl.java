@@ -45,7 +45,9 @@ public class EntrypointImpl implements Entrypoint {
   private String containerName;
 
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "entrypoint_commands", joinColumns = @JoinColumn(name = "entrypoint_id"))
+  @CollectionTable(
+      name = "entrypoint_commands",
+      joinColumns = @JoinColumn(name = "devfile_entrypoint_id"))
   @Column(name = "commands")
   private List<String> command;
 
