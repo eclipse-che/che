@@ -658,7 +658,7 @@
     "id": "java-maven",
     "creator": "ide",
     "name": "Java Maven",
-    "description": "Default Java Stack with OpenJKD 11 and Maven 3.6",
+    "description": "Default Java Stack with OpenJDK 11 and Maven 3.6",
     "scope": "general",
     "tags": [
       "Java",
