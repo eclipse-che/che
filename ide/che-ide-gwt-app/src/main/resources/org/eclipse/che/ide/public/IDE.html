@@ -85,7 +85,7 @@
                     };
 
                     request.onload = function() {
-                        if (request.status == 200) {
+                        if (request.status === 200) {
                             Loader.injectKeycloakScript(JSON.parse(this.responseText));
                         } else {
                             console.error(msg);
@@ -186,7 +186,13 @@
                         return;
                     }
                     if (this.status !== 200) {
-                        var response = JSON.parse(this.responseText);
+                        var response;
+                        try {
+                            response = JSON.parse(this.responseText);
+                        } catch(e) {
+                            /* Maybe plain text. */
+                            response = this.responseText;
+                        }
                         errorMessage = 'Failed to get the workspace: "' + response.message;
                         return;
                     }
