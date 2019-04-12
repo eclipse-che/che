@@ -15,7 +15,7 @@ import { WebElementPromise, ThenableWebDriver, By, promise } from "selenium-webd
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-@injectable() 
+@injectable()
 export class DriverHelper {
     private readonly driver: ThenableWebDriver;
 
@@ -25,33 +25,39 @@ export class DriverHelper {
         this.driver = driver.get();
     }
 
-    public findElement(locator: By): WebElementPromise{
+    public findElement(locator: By): WebElementPromise {
         return this.driver.findElement(locator);
     }
 
-    public isVisible(locator: By): promise.Promise<boolean>{
-        try{
-        return this.findElement(locator).isDisplayed();
-        }catch(err){
-            return  new promise.Promise(resolve =>{resolve(false)})
-        }
+    public isVisible(locator: By): promise.Promise<boolean> {
+        // try{
+        // return this.findElement(locator).isDisplayed();
+        // }catch(err){
+        //     return  new promise.Promise(resolve =>{resolve(false)})
+        // }
+
+        return this.findElement(locator).isDisplayed().catch(err => { return false})
+
+
+         
+            
+        
     }
 
-    public wait(miliseconds: number): promise.Promise<void>{
-        return new promise.Promise<void>(resolve => {setTimeout(resolve, miliseconds)})
+    public wait(miliseconds: number): promise.Promise<void> {
+        return new promise.Promise<void>(resolve => { setTimeout(resolve, miliseconds) })
     }
 
-    public async waitVisibility(locator: By){
-        for(let i = 0; i < 10; i++){
-            if (await this.isVisible(locator)){
-                console.log("===>>>>  visible")
-                return;
+    public async waitVisibility(locator: By): Promise<boolean> {
+        for (let i = 0; i < 10; i++) {
+            if (await this.isVisible(locator)) {
+                return true;
             }
 
-            console.log("===>>>>  wait")
             await this.wait(5000);
         }
-        
+
+        return false;
     }
 
 

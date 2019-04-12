@@ -7,7 +7,7 @@
 
     "outDir": "dist",
     "lib": ["es6", "dom"],
-    "types": ["reflect-metadata"],
+    "types": ["reflect-metadata", "@types/mocha"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true
     
