@@ -20,7 +20,6 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.List;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
@@ -175,7 +174,7 @@ public class DefaultEditorProvisionerTest {
             DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
 
     DevfileImpl devfile = new DevfileImpl();
-    devfile.setAttributes(ImmutableMap.of(EDITOR_FREE_DEVFILE_ATTRIBUTE, "true"));
+    devfile.getAttributes().put(EDITOR_FREE_DEVFILE_ATTRIBUTE, "true");
 
     // when
     defaultEditorProvisioner.apply(devfile);
