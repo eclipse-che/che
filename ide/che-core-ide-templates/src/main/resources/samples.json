@@ -1219,5 +1219,65 @@
     "tags": [
       "Python"
     ]
+  },
+  {
+    "name": "django-realworld-example-app",
+    "displayName": "django-realworld-example-app",
+    "path": "/django-realworld-example-app",
+    "description": "Django Real World Example.",
+    "projectType": "python",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "python"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/gothinkster/django-realworld-example-app",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "install requirements",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/django-realworld-example-app && pip install -r requirements.txt",
+        "attributes": {
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "migrate",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/django-realworld-example-app && python manage.py migrate",
+        "attributes": {
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "patch resources",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/django-realworld-example-app && sed -i \"s/ALLOWED_HOSTS = \\[\\]/ALLOWED_HOSTS = \\['*'\\]/g\" conduit/settings.py",
+        "attributes": {
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "run server",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/django-realworld-example-app && python manage.py runserver 0.0.0.0:7000",
+        "attributes": {
+          "previewUrl": "${server.django}/admin",
+          "goal": "Run"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Python", "Django"
+    ]
   }
 ]
