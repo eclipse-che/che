@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import { TYPES } from "../types";
 import 'selenium-webdriver';
 import 'reflect-metadata';
-import { WebElementPromise, ThenableWebDriver, By, promise } from "selenium-webdriver";
+import { WebElementPromise, ThenableWebDriver, By, promise, until, WebElement } from "selenium-webdriver";
 
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
@@ -17,6 +17,9 @@ import { WebElementPromise, ThenableWebDriver, By, promise } from "selenium-webd
 
 @injectable()
 export class DriverHelper {
+    public static readonly DEFAULT_TIMEOUT: number = 20000;
+    public static readonly DEFAULT_ATTEMPTS: number = 20;
+    public static readonly DEFAULT_POLLING: number = 1000;
     private readonly driver: ThenableWebDriver;
 
     constructor(
@@ -30,35 +33,77 @@ export class DriverHelper {
     }
 
     public isVisible(locator: By): promise.Promise<boolean> {
-        // try{
-        // return this.findElement(locator).isDisplayed();
-        // }catch(err){
-        //     return  new promise.Promise(resolve =>{resolve(false)})
-        // }
-
-        return this.findElement(locator).isDisplayed().catch(err => { return false})
-
-
-         
-            
-        
+        return this.findElement(locator)
+            .isDisplayed()
+            .catch(err => {
+                return false
+            })
     }
 
     public wait(miliseconds: number): promise.Promise<void> {
         return new promise.Promise<void>(resolve => { setTimeout(resolve, miliseconds) })
     }
 
-    public async waitVisibility(locator: By): Promise<boolean> {
-        for (let i = 0; i < 10; i++) {
+    public async waitVisibilityBoolean(locator: By, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<boolean> {
+        for (let i = 0; i < attempts; i++) {
             if (await this.isVisible(locator)) {
                 return true;
             }
 
-            await this.wait(5000);
+            await this.wait(polling);
         }
 
         return false;
     }
+
+    public async waitDisappearanceBoolean(locator: By, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<boolean> {
+        for (let i = 0; i < attempts; i++) {
+            if (await !this.isVisible(locator)) {
+                return true;
+            }
+
+            await this.wait(polling);
+        }
+
+        return false;
+    }
+
+    public waitVisibility(elementLocator: By, timeout = DriverHelper.DEFAULT_TIMEOUT): promise.Promise<WebElement> {
+        return new promise.Promise<WebElement>((resolve, reject) => {
+            this.driver
+                .wait(until.elementLocated(elementLocator), timeout)
+                .then(webElement => {
+                    resolve(this.driver.wait(until.elementIsVisible(webElement), timeout))
+                })
+        })
+    }
+
+    public async waitAllVisibility(locators: Array<By>, timeout = DriverHelper.DEFAULT_TIMEOUT): Promise<void> {
+        await locators.forEach(async elementLocator => {
+            await this.waitVisibility(elementLocator, timeout)
+        })
+    }
+
+    public async waitDisappearance(elementLocator: By, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<void> {
+        await this.waitDisappearanceBoolean(elementLocator, attempts, polling)
+            .then(isVisible => {
+                if (isVisible) {
+                    throw new Error(`Waiting attempts exceeded, element '${elementLocator}' is still visible`)
+                }
+            })
+    }
+
+    public async waitAllDisappearance(locators: Array<By>, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING ): Promise<void> {
+        await locators.forEach(async elementLocator => {
+            await this.waitDisappearance(elementLocator, attempts, polling)
+        })
+    }
+
+    public click(elementLocator: By, timeout = DriverHelper.DEFAULT_TIMEOUT): promise.Promise<void> {
+        return this.waitVisibility(elementLocator, timeout).then(element => { element.click() })
+    }
+
+
 
 
 

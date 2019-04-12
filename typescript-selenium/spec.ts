@@ -1,15 +1,18 @@
 import { e2eContainer } from "./inversify.config";
 import { Driver } from "./driver/Driver";
-import { TYPES } from "./types";
+import { TYPES, CLASSES } from "./types";
 import { DriverHelper } from "./utils/DriverHelper";
 import { By, WebElementCondition, Condition } from "selenium-webdriver";
-import { describe } from "mocha";
-import { expect } from "chai";
-import { until } from "selenium-webdriver"
+import { describe, after } from "mocha";
+import { LoginPage } from "./pageobjects/login/LoginPage";
+import { Dashboard } from "./pageobjects/dashboard/Dashboard";
+
 
 
 const driver: Driver = e2eContainer.get<Driver>(TYPES.Driver);
-const driverHelper: DriverHelper = e2eContainer.get('DriverHelper');
+const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const loginPage: LoginPage = e2eContainer.get<LoginPage>(TYPES.LoginPage);
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard)
 
 async function doNavigation(): Promise<void> {
     await driver.get()
@@ -18,27 +21,25 @@ async function doNavigation(): Promise<void> {
 }
 
 async function waitDashboardButton(): Promise<void> {
-    await driverHelper.waitVisibility(By.css("#dashboard-item"));
+    await driverHelper.waitVisibilityBoolean(By.css("#dashboard-item"));
 }
 
 
 describe("E2E", async () => {
 
-    it("navigate", async () => {
-        await doNavigation()
-    })
+    loginPage.login()
 
+    dashboard.waitPage(100000)
 
-    it("wait dashboard button", async () => {
-        await waitDashboardButton()
-    })
-
+    dashboard.clickDashboardButton()
 
     it("wait dashboard button by until condition", async () => {
-        await driver.get().wait(until.elementLocated(By.css("#dashboard-item")), 10000)
-        expect(true).to.be.true
+        await driverHelper.click(By.css("#workspaces-item"))
+    })
+
+    after("close browser", async () => {
         await driver.get().quit()
     })
 
-
 })
+

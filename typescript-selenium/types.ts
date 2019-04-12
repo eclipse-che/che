@@ -1,6 +1,11 @@
 const TYPES = {
-    Driver: Symbol.for("Driver")
-
+    Driver: Symbol.for("Driver"),
+    LoginPage: Symbol.for("LoginPage")
 }
 
-export { TYPES };
+const CLASSES = {
+    DriverHelper: "DriverHelper",
+    Dashboard: "Dashboard"
+}
+
+export { TYPES, CLASSES };

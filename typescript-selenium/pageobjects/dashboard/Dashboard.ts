@@ -1,8 +1,9 @@
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import "reflect-metadata";
-import { TYPES } from "../../types";
+import { TYPES, CLASSES } from "../../types";
 import { Driver } from "../../driver/Driver";
-import { WebElementCondition } from "selenium-webdriver";
+import { WebElementCondition, By } from "selenium-webdriver";
+import { DriverHelper } from "../../utils/DriverHelper";
 
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
@@ -14,20 +15,40 @@ import { WebElementCondition } from "selenium-webdriver";
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
- export class Dashboard {
-    private readonly driver: Driver;
+@injectable()
+export class Dashboard {
+    private readonly driverHelper: DriverHelper;
 
-    private static readonly DASHBOARD_BUTTON: string = "#dashboard-item";
-    private static readonly WORKSPACES_BUTTON: string = "#workspaces-item";
-    private static readonly STACKS_BUTTON: string = "#stacks-item";
-    private static readonly FACTORIES_BUTTON: string = "#factories-item";
-    private static readonly LOADER_PAGE: string = ".main-page-loader"
+    private static readonly DASHBOARD_BUTTON_CSS: string = "#dashboard-item";
+    private static readonly WORKSPACES_BUTTON_CSS: string = "#workspaces-item";
+    private static readonly STACKS_BUTTON_CSS: string = "#stacks-item";
+    private static readonly FACTORIES_BUTTON_CSS: string = "#factories-item";
+    private static readonly LOADER_PAGE_CSS: string = ".main-page-loader"
 
     constructor(
-        @inject(TYPES.Driver) driver: Driver 
-    ){
-        this.driver = driver;
+        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper
+    ) {
+        this.driverHelper = driverHelper;
+    }
+
+    waitPage(timeout: number) {
+        it('Wait Dashboard page', async () => {
+            await this.driverHelper
+                .waitAllVisibility([
+                    By.css(Dashboard.DASHBOARD_BUTTON_CSS),
+                    By.css(Dashboard.WORKSPACES_BUTTON_CSS),
+                    By.css(Dashboard.STACKS_BUTTON_CSS),
+                    By.css(Dashboard.FACTORIES_BUTTON_CSS),
+                    By.css(Dashboard.LOADER_PAGE_CSS)
+                ], timeout)
+        })
+    }
+
+    clickDashboardButton(timeout = DriverHelper.DEFAULT_TIMEOUT) {
+        it("click 'Dashboard' button", async () => {
+            await this.driverHelper.click(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
+        })
     }
 
 
- }
+}
