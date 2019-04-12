@@ -52,15 +52,15 @@ public class DevfileImpl implements Devfile {
   private String name;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_projects_id")
+  @JoinColumn(name = "devfile_id")
   private List<ProjectImpl> projects;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_components_id")
+  @JoinColumn(name = "devfile_id")
   private List<ComponentImpl> components;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_commands_id")
+  @JoinColumn(name = "devfile_id")
   private List<CommandImpl> commands;
 
   @ElementCollection(fetch = FetchType.EAGER)

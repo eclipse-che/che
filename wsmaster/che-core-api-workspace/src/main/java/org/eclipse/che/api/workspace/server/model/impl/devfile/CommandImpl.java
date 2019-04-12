@@ -47,13 +47,13 @@ public class CommandImpl implements Command {
   private String name;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "command_id")
+  @JoinColumn(name = "devfile_command_id")
   private List<ActionImpl> actions;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
       name = "devfile_command_attributes",
-      joinColumns = @JoinColumn(name = "command_id"))
+      joinColumns = @JoinColumn(name = "devfile_command_id"))
   @MapKeyColumn(name = "name")
   @Column(name = "value", columnDefinition = "TEXT")
   private Map<String, String> attributes;

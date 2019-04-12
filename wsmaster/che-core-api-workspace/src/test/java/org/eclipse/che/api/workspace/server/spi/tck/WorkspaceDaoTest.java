@@ -865,10 +865,10 @@ public class WorkspaceDaoTest {
 
     org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command1 =
         new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
-            name, singletonList(action1), singletonMap("attr1", "value1"));
+            name + "-1", singletonList(action1), singletonMap("attr1", "value1"));
     org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command2 =
         new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
-            name, singletonList(action2), singletonMap("attr2", "value2"));
+            name + "-2", singletonList(action2), singletonMap("attr2", "value2"));
 
     EntrypointImpl entrypoint1 =
         new EntrypointImpl(
@@ -900,8 +900,8 @@ public class WorkspaceDaoTest {
 
     ComponentImpl component1 =
         new ComponentImpl(
-            "component1",
             "kubernetes",
+            "component1",
             "che-theia:0.0.1",
             "/dev.yaml",
             null,
@@ -918,8 +918,8 @@ public class WorkspaceDaoTest {
 
     ComponentImpl component2 =
         new ComponentImpl(
-            "component2",
             "kubernetes",
+            "component2",
             "che-theia:0.0.1",
             "/dev.yaml",
             null,

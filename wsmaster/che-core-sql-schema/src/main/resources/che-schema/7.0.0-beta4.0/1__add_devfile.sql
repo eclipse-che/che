@@ -43,37 +43,40 @@ CREATE TABLE devfile_project (
     start_point          VARCHAR(255),
     tag                  VARCHAR(255),
     commit_id            VARCHAR(255),
-    devfile_projects_id  BIGINT,
+    devfile_id           BIGINT,
 
     PRIMARY KEY (id)
 );
 -- constraints & indexes
-ALTER TABLE devfile_project ADD CONSTRAINT fk_devfile_projects_id FOREIGN KEY (devfile_projects_id) REFERENCES devfile (id);
-CREATE INDEX index_projects_devfile_id ON devfile_project (devfile_projects_id);
+ALTER TABLE devfile_project ADD CONSTRAINT fk_devfile_projects_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
+CREATE UNIQUE INDEX index_devfile_project_name ON devfile_project (devfile_id, name);
+CREATE INDEX index_projects_devfile_id ON devfile_project (devfile_id);
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
 -- devfile command
 CREATE TABLE devfile_command (
-    id                   BIGINT       NOT NULL,
-    name                 VARCHAR(255) NOT NULL,
-    devfile_commands_id  BIGINT,
+    id                  BIGINT       NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    devfile_id          BIGINT,
 
     PRIMARY KEY (id)
 );
 -- constraints & indexes
-ALTER TABLE devfile_command ADD CONSTRAINT fk_devfile_command_id FOREIGN KEY (devfile_commands_id) REFERENCES devfile (id);
-CREATE INDEX index_commands_devfile_id ON devfile_command (devfile_commands_id);
+ALTER TABLE devfile_command ADD CONSTRAINT fk_devfile_command_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
+CREATE UNIQUE INDEX index_devfile_command_name ON devfile_command (devfile_id, name);
+CREATE INDEX index_commands_devfile_id ON devfile_command (devfile_id);
 
 -- devfile command attributes
 CREATE TABLE devfile_command_attributes (
-    command_id     BIGINT,
-    value          TEXT,
-    name           VARCHAR(255)
+    devfile_command_id     BIGINT,
+    value                  TEXT,
+    name                   VARCHAR(255)
 );
 -- constraints & indexes
-ALTER TABLE devfile_command_attributes ADD CONSTRAINT fk_devfile_command_attributes_command_id FOREIGN KEY (command_id) REFERENCES devfile_command (id);
-CREATE INDEX index_command_attributes_command_id ON devfile_command_attributes (command_id);
+ALTER TABLE devfile_command_attributes ADD CONSTRAINT fk_devfile_command_attributes_command_id FOREIGN KEY (devfile_command_id) REFERENCES devfile_command (id);
+CREATE UNIQUE INDEX index_devfile_command_attributes_name ON devfile_command_attributes (devfile_command_id, name);
+CREATE INDEX index_command_attributes_command_id ON devfile_command_attributes (devfile_command_id);
 
 -- devfile command action
 CREATE TABLE devfile_action (
@@ -82,13 +85,13 @@ CREATE TABLE devfile_action (
     component               VARCHAR(255),
     command                 TEXT,
     workdir                 TEXT,
-    command_id              BIGINT,
+    devfile_command_id      BIGINT,
 
     PRIMARY KEY (id)
 );
 -- constraints & indexes
-ALTER TABLE devfile_action ADD CONSTRAINT fk_devfile_actions_id FOREIGN KEY (command_id) REFERENCES devfile_command (id);
-CREATE INDEX index_action_command_id ON devfile_action (command_id);
+ALTER TABLE devfile_action ADD CONSTRAINT fk_devfile_actions_id FOREIGN KEY (devfile_command_id) REFERENCES devfile_command (id);
+CREATE INDEX index_action_command_id ON devfile_action (devfile_command_id);
 
 
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -104,20 +107,21 @@ CREATE TABLE devfile_component (
     image                  TEXT,
     memory_limit           VARCHAR(255),
     mount_sources          BOOLEAN,
-    devfile_components_id  BIGINT,
+    devfile_id             BIGINT,
 
     PRIMARY KEY (id)
 );
 
 -- constraints & indexes
-ALTER TABLE devfile_component ADD CONSTRAINT fk_devfile_component_id FOREIGN KEY (devfile_components_id) REFERENCES devfile (id);
-CREATE INDEX index_component_devfile_id ON devfile_component (devfile_components_id);
+ALTER TABLE devfile_component ADD CONSTRAINT fk_devfile_component_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
+CREATE UNIQUE INDEX index_devfile_component_name ON devfile_component (devfile_id, name);
+CREATE INDEX index_component_devfile_id ON devfile_component (devfile_id);
 
 ---------
 
 CREATE TABLE component_command (
     devfile_component_id    BIGINT,
-    commands                VARCHAR(255)
+    commands                TEXT
 );
 
 -- constraints & indexes
@@ -126,7 +130,7 @@ CREATE INDEX index_commands_component_id ON component_command (devfile_component
 
 CREATE TABLE component_arg (
     devfile_component_id    BIGINT,
-    args                    VARCHAR(255)
+    args                    TEXT
 );
 
 --constraints
@@ -135,14 +139,15 @@ CREATE INDEX index_args_component_id ON component_arg (devfile_component_id);
 ---------
 -- component selector
 CREATE TABLE component_selector (
-    component_id    BIGINT,
-    selector_key    VARCHAR(255),
-    selector        VARCHAR(255)
+    devfile_component_id    BIGINT,
+    selector_key            VARCHAR(255),
+    selector                VARCHAR(255)
 );
 
 -- constraints & indexes
-ALTER TABLE component_selector ADD CONSTRAINT fk_component_selector_id FOREIGN KEY (component_id) REFERENCES devfile_component (id);
-CREATE INDEX index_component_selector_entrypoint_id ON component_selector (component_id);
+ALTER TABLE component_selector ADD CONSTRAINT fk_component_selector_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
+CREATE UNIQUE INDEX index_devfile_component_selector ON component_selector (devfile_component_id, selector_key);
+CREATE INDEX index_component_selector_entrypoint_id ON component_selector (devfile_component_id);
 
 ---------
 
@@ -163,8 +168,8 @@ CREATE INDEX index_devfile_endpoint_id ON devfile_endpoint (devfile_component_id
 -- devfile endpoint attributes
 CREATE TABLE devfile_endpoint_attributes (
     devfile_endpoint_id    BIGINT,
-    value          TEXT,
-    name           VARCHAR(255)
+    value                  TEXT,
+    name                   VARCHAR(255)
 );
 -- constraints & indexes
 ALTER TABLE devfile_endpoint_attributes ADD CONSTRAINT fk_devfile_endpoint_attributes_id FOREIGN KEY (devfile_endpoint_id) REFERENCES devfile_endpoint (id);

@@ -112,8 +112,8 @@ public final class TestObjectsFactory {
 
   private static ComponentImpl createDevfileComponent(String name) {
     return new ComponentImpl(
-        name,
         "kubernetes",
+        name,
         "che-theia:0.0.1",
         "/dev.yaml",
         null,

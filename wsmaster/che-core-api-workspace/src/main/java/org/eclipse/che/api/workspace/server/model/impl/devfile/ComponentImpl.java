@@ -62,7 +62,9 @@ public class ComponentImpl implements Component {
   private String referenceContent;
 
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "component_selector", joinColumns = @JoinColumn(name = "component_id"))
+  @CollectionTable(
+      name = "component_selector",
+      joinColumns = @JoinColumn(name = "devfile_component_id"))
   @MapKeyColumn(name = "selector_key")
   @Column(name = "selector")
   private Map<String, String> selector;
