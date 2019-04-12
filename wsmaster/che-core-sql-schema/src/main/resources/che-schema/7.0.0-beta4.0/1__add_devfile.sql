@@ -27,6 +27,7 @@ CREATE TABLE devfile_attributes (
 );
 -- constraints & indexes
 ALTER TABLE devfile_attributes ADD CONSTRAINT fk_devfile_attributes_devfile_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
+CREATE UNIQUE INDEX index_devfile_attributes_names ON devfile_attributes (devfile_id, name);
 CREATE INDEX index_devfile_attributes_devfile_id ON devfile_attributes (devfile_id);
 
 -----------------------------------------------------------------------------------------------------------------------------------
@@ -81,13 +82,13 @@ CREATE TABLE devfile_action (
     component               VARCHAR(255),
     command                 TEXT,
     workdir                 TEXT,
-    devfile_actions_id      BIGINT,
+    command_id              BIGINT,
 
     PRIMARY KEY (id)
 );
 -- constraints & indexes
-ALTER TABLE devfile_action ADD CONSTRAINT fk_devfile_actions_id FOREIGN KEY (devfile_actions_id) REFERENCES devfile_command (id);
-CREATE INDEX index_action_command_id ON devfile_action (devfile_actions_id);
+ALTER TABLE devfile_action ADD CONSTRAINT fk_devfile_actions_id FOREIGN KEY (command_id) REFERENCES devfile_command (id);
+CREATE INDEX index_action_command_id ON devfile_action (command_id);
 
 
 -----------------------------------------------------------------------------------------------------------------------------------

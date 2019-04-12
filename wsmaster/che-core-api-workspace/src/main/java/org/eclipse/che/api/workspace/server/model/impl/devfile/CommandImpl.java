@@ -47,7 +47,7 @@ public class CommandImpl implements Command {
   private String name;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_actions_id")
+  @JoinColumn(name = "command_id")
   private List<ActionImpl> actions;
 
   @ElementCollection(fetch = FetchType.EAGER)
