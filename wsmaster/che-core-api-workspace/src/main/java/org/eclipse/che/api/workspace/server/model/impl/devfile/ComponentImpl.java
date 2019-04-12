@@ -93,15 +93,15 @@ public class ComponentImpl implements Component {
   private List<EntrypointImpl> entrypoints;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_volumes_id")
+  @JoinColumn(name = "devfile_component_id")
   private List<VolumeImpl> volumes;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_env_id")
+  @JoinColumn(name = "devfile_component_id")
   private List<EnvImpl> env;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-  @JoinColumn(name = "devfile_endpoints_id")
+  @JoinColumn(name = "devfile_component_id")
   private List<EndpointImpl> endpoints;
 
   public ComponentImpl() {}
