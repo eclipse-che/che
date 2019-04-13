@@ -118,20 +118,27 @@ export class JsonRpcClient {
    * @param params params
    * @returns {IPromise<any>}
    */
-  request(method: string, params?: any): ng.IPromise<any> {
-    let deferred = this.client.getDeferred();
+  request(method: string, params?: any): any /*ng.IPromise<void>*/ {
     let id: string = (this.counter++).toString();
-    this.pendingRequests.set(id, deferred);
-
     let request: IRequest = {
       jsonrpc: JSON_RPC_VERSION,
       id: id,
       method: method,
       params: params
     };
+    try {
+      this.client.send(request);
 
-    this.client.send(request);
-    return deferred.promise;
+      /* Add to pending requests if send is done with success. */
+      let deferred = this.client.getDeferred();
+      this.pendingRequests.set(id, deferred);
+
+      return deferred.promise;
+    } catch(e) {
+      /* Possibly caused by send() */
+      this.client.getDeferred().reject(e);
+      return Promise.reject(e);
+    }
   }
 
   /**

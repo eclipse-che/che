@@ -52,10 +52,14 @@ export class CheJsonRpcApi {
       return this.jsonRpcApiConnection.get(entrypoint);
     } else {
       const websocketClient = new WebsocketClient(this.$websocket, this.$q);
-      const cheJsonRpcMasterApi: CheJsonRpcMasterApi = new CheJsonRpcMasterApi(websocketClient, entrypoint, this.$log, this.$timeout, this.$interval, this.$q);
+      const cheJsonRpcMasterApi: CheJsonRpcMasterApi = new CheJsonRpcMasterApi(websocketClient, entrypoint, this.$log, this.$timeout, this.$interval, this.$q, this);
       this.jsonRpcApiConnection.set(entrypoint, cheJsonRpcMasterApi);
       return cheJsonRpcMasterApi;
     }
+  }
+
+  deleteJsonRpcMasterApi(entrypoint: string): void {
+    this.jsonRpcApiConnection.delete(entrypoint);
   }
 
   getJsonRpcWsagentApi(entrypoint: string): CheJsonRpcWsagentApi {

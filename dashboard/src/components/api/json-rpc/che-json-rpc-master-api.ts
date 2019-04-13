@@ -10,6 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {CheJsonRpcApi} from './che-json-rpc-api.factory';
 import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import {ICommunicationClient} from './json-rpc-client';
 
@@ -41,6 +42,7 @@ export class CheJsonRpcMasterApi {
   private $timeout: ng.ITimeoutService;
   private $interval: ng.IIntervalService;
   private $q: ng.IQService;
+  private $factory: CheJsonRpcApi;
   private cheJsonRpcApi: CheJsonRpcApiClient;
   private clientId: string;
   private checkingInterval: ng.IPromise<any>;
@@ -57,11 +59,13 @@ export class CheJsonRpcMasterApi {
               $log: ng.ILogService,
               $timeout: ng.ITimeoutService,
               $interval: ng.IIntervalService,
-              $q: ng.IQService) {
+	      $q: ng.IQService,
+	      caller: CheJsonRpcApi) {
     this.$log = $log;
     this.$timeout = $timeout;
     this.$interval = $interval;
     this.$q = $q;
+    this.$factory = caller;
 
     client.addListener('open', () => this.onConnectionOpen(entrypoint));
     client.addListener('close', () => this.onConnectionClose(entrypoint));
@@ -137,11 +141,14 @@ export class CheJsonRpcMasterApi {
 
     if (delay) {
       this.$log.warn(`WebSocket will be reconnected in ${delay} ms...`);
+      this.reconnectionAttemptTimeout = this.$timeout(() => {
+        this.$log.warn(`WebSocket is reconnecting, attempt #${this.reconnectionAttemptNumber} out of ${this.maxReconnectionAttempts}...`);
+        this.connect(entrypoint);
+      }, delay);
+    } else {
+      // Avoid resource leaks.
+      this.$factory.deleteJsonRpcMasterApi(entrypoint);
     }
-    this.reconnectionAttemptTimeout = this.$timeout(() => {
-      this.$log.warn(`WebSocket is reconnecting, attempt #${this.reconnectionAttemptNumber} out of ${this.maxReconnectionAttempts}...`);
-      this.connect(entrypoint);
-    }, delay);
   }
 
   /**
