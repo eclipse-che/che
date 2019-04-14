@@ -16,6 +16,7 @@ var ActivityTracker = new function () {
     var maxErrors = 10;
     var errors = 0;
     var active;
+    var useKeycloak = true;
 
     this.init = function (restContext, workspaceId) {
         this.url = restContext + "/activity/" + workspaceId;
@@ -23,6 +24,26 @@ var ActivityTracker = new function () {
         document.addEventListener("keypress", ActivityTracker.setActive);
         setInterval(ActivityTracker.sendRequest, timeoutInterval);
 
+        var checkKeycloakCallback = function(event) {
+            var originHostname = new URL(event.origin).hostname
+            var baseDomainOrigin = originHostname.substring(originHostname.indexOf('.') + 1);
+            var baseDomainHere = window.location.hostname.substring(window.location.hostname.indexOf('.') + 1);
+            if (baseDomainOrigin === baseDomainHere) {
+                if (event.data === 'check-keycloak-available:true') {
+                    try {
+                        var dummy = window.parent.location.href
+                        /* Must be not Multi-host env. */
+                        useKeycloak = true;
+                    } catch(e) {
+                        /* Must be Multi-host env. */
+                        useKeycloak = false;
+                    }
+                }
+            }
+            window.removeEventListener('message', checkKeycloakCallback);
+        }
+        window.addEventListener('message', checkKeycloakCallback);
+        window.top.postMessage('check-keycloak-available', '*');
     };
 
     this.setActive = function() {
@@ -60,7 +81,7 @@ var ActivityTracker = new function () {
         request.open("PUT", ActivityTracker.url, true);
 
         var keycloak = window['_keycloak'];
-        if (keycloak) {
+        if (keycloak && useKeycloak) {
             keycloak.updateToken(5)
                 .success(function (refreshed) {
                     var token = "Bearer " + keycloak.token;

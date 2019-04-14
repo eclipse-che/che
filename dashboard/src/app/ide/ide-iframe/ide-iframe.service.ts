@@ -72,6 +72,10 @@ class IdeIFrameSvc {
       } else if ('hide-navbar' === event.data) {
         $rootScope.hideNavbar = true;
         $mdSidenav('left').close();
+
+      } else if ('check-keycloak-available' === event.data) {
+        event.source.postMessage(event.data + ($window['_keycloak'] ? ':true' : ':false'), event.origin);
+
       }
 
     }, false);

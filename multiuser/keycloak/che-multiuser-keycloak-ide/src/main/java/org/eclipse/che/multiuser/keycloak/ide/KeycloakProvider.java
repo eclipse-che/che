@@ -41,6 +41,9 @@ public class KeycloakProvider {
 
   @Inject
   public KeycloakProvider(AppContext appContext) {
+    if (Keycloak.isMultihostEnvironment()) {
+      return;
+    }
     if (Keycloak.isConfigured()) {
       keycloak = Keycloak.get();
       return;

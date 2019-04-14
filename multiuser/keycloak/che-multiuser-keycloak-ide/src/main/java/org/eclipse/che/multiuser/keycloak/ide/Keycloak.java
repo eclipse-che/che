@@ -21,6 +21,16 @@ public final class Keycloak extends JavaScriptObject {
     super();
   }
 
+  public static native boolean isMultihostEnvironment() /*-{
+    try {
+      var dummy = $wnd.parent['_keycloak'];
+      return false;
+    } catch(e) {
+      // Will blocked by cross domain scripting.
+      return true;
+    }
+  }-*/;
+
   public static native boolean isConfigured() /*-{
     if ($wnd['_keycloak']) {
       return true;

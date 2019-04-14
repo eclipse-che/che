@@ -62,20 +62,46 @@
              * Load keycloak settings
              */
             this.loadKeycloakSettings = function() {
-                var msg = "Cannot load keycloak settings. This is normal for single-user mode.";
+                Loader.copyKeycloakSettings();
+            }
+
+            this.copyKeycloakSettings = function() {
                 try {
                     if (window.parent && window.parent['_keycloak']) {
                         window['_keycloak'] = window.parent['_keycloak'];
+                        /* Must be version 6 or prior. */
                         Loader.startLoading();
-                        return;
                     }
                 } catch (e) {
-                    // access to parent frame can be forbidden from the inner iframe,
-                    // in case if IDE.html would be loaded(for example sidecar)
-                    // from a different domain than parent frame.
-                    console.error(msg, e);
+                    Loader.checkMultiHostEnvironment();
                 }
-                
+            }
+
+            this.checkMultiHostEnvironment = function() {
+                /*
+                 * Get the machine token from the parent window.
+                 */
+                var callback = function (event) {
+                    var originHostname = new URL(event.origin).hostname
+                    var baseDomainOrigin = originHostname.substring(originHostname.indexOf('.') + 1);
+                    var baseDomainHere = window.location.hostname.substring(window.location.hostname.indexOf('.') + 1);
+                    if (baseDomainOrigin === baseDomainHere) {
+                        if (event.data === 'check-keycloak-available:true') {
+                            /* Must be Multi-host. */
+                            Loader.processLoading();
+                        } else if (event.data === 'check-keycloak-available:false') {
+                            console.error("Cannot load keycloak settings. This is normal for single-user mode.");
+                            /* Must be not Multi-host. */
+                            Loader.setupKeycloak();
+                        }
+                    }
+                    window.removeEventListener('message', callback);
+                };
+                window.addEventListener('message', callback);
+                window.top.postMessage('check-keycloak-available', '*');
+            }
+
+            this.setupKeycloak = function() {
                 try {
                     var request = new XMLHttpRequest();
 
@@ -186,14 +212,14 @@
                         return;
                     }
                     if (this.status !== 200) {
-                        var message;
+                        var response;
                         try {
-                            message = JSON.parse(this.responseText).message;
+                            response = JSON.parse(this.responseText);
                         } catch(e) {
                             /* Maybe plain text. */
-                            message = this.responseText;
+                            response = this.responseText;
                         }
-                        errorMessage = 'Failed to get the workspace: "' + message;
+                        errorMessage = 'Failed to get the workspace: "' + response.message;
                         return;
                     }
                     var workspace = JSON.parse(this.responseText);
@@ -214,13 +240,18 @@
                                 // Preconfigured IDE may use dedicated port. In this case Chrome browser fails
                                 // with error net::ERR_CONNECTION_REFUSED. Timer helps to open the URL without errors.
                                 setTimeout(function () {
-                                    window.location.href = url;
+                                    window.location.replace(url);
                                 }, 100);
                                 return;
                             }
                         }
                     }
                 };
+                Loader.processLoading();
+            };
+
+
+            this.processLoading = function() {
                 //GWT IDE Loading
                 setTimeout(() => {
                     document.getElementById("ide-loader").style.opacity = 1;
