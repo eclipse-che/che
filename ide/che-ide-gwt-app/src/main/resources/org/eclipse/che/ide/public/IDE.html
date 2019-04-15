@@ -186,14 +186,14 @@
                         return;
                     }
                     if (this.status !== 200) {
-                        var response;
+                        var message;
                         try {
-                            response = JSON.parse(this.responseText);
+                            message = JSON.parse(this.responseText).message;
                         } catch(e) {
                             /* Maybe plain text. */
-                            response = this.responseText;
+                            message = this.responseText;
                         }
-                        errorMessage = 'Failed to get the workspace: "' + response.message;
+                        errorMessage = 'Failed to get the workspace: "' + message;
                         return;
                     }
                     var workspace = JSON.parse(this.responseText);
