@@ -224,7 +224,7 @@ CREATE INDEX index_entrypoint_arg_entrypoint_id ON entrypoint_arg (entrypoint_id
 -- entrypoint commands
 CREATE TABLE entrypoint_commands (
     devfile_entrypoint_id    BIGINT,
-    commands                 VARCHAR(255) NOT NULL
+    command                  VARCHAR(255) NOT NULL
 );
 
 -- constraints & indexes
