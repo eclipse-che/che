@@ -54,6 +54,48 @@ CREATE INDEX index_projects_devfile_id ON devfile_project (devfile_id);
 
 -----------------------------------------------------------------------------------------------------------------------------------
 
+-- devfile command
+CREATE TABLE devfile_command (
+    id                  BIGINT       NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    devfile_id          BIGINT,
+
+    PRIMARY KEY (id)
+);
+-- constraints & indexes
+ALTER TABLE devfile_command ADD CONSTRAINT fk_devfile_command_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
+CREATE UNIQUE INDEX index_devfile_command_name ON devfile_command (devfile_id, name);
+CREATE INDEX index_commands_devfile_id ON devfile_command (devfile_id);
+
+-- devfile command attributes
+CREATE TABLE devfile_command_attributes (
+    devfile_command_id     BIGINT,
+    value                  TEXT,
+    name                   VARCHAR(255)
+);
+-- constraints & indexes
+ALTER TABLE devfile_command_attributes ADD CONSTRAINT fk_devfile_command_attributes_command_id FOREIGN KEY (devfile_command_id) REFERENCES devfile_command (id);
+CREATE UNIQUE INDEX index_devfile_command_attributes_name ON devfile_command_attributes (devfile_command_id, name);
+CREATE INDEX index_command_attributes_command_id ON devfile_command_attributes (devfile_command_id);
+
+-- devfile command action
+CREATE TABLE devfile_action (
+    id                      BIGINT       NOT NULL,
+    type                    VARCHAR(255) NOT NULL,
+    component               VARCHAR(255) NOT NULL,
+    command                 TEXT NOT NULL,
+    workdir                 TEXT,
+    devfile_command_id      BIGINT,
+
+    PRIMARY KEY (id)
+);
+-- constraints & indexes
+ALTER TABLE devfile_action ADD CONSTRAINT fk_devfile_actions_id FOREIGN KEY (devfile_command_id) REFERENCES devfile_command (id);
+CREATE INDEX index_action_command_id ON devfile_action (devfile_command_id);
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+
 -- devfile component
 CREATE TABLE devfile_component (
     id                     BIGINT       NOT NULL,
@@ -219,50 +261,7 @@ CREATE INDEX index_entrypoint_selector_entrypoint_id ON entrypoint_selector (ent
 
 
 -----------------------------------------------------------------------------------------------------------------------------------
--- devfile command
-CREATE TABLE devfile_command (
-    id                  BIGINT       NOT NULL,
-    name                VARCHAR(255) NOT NULL,
-    devfile_id          BIGINT,
-
-    PRIMARY KEY (id)
-);
--- constraints & indexes
-ALTER TABLE devfile_command ADD CONSTRAINT fk_devfile_command_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
-CREATE UNIQUE INDEX index_devfile_command_name ON devfile_command (devfile_id, name);
-CREATE INDEX index_commands_devfile_id ON devfile_command (devfile_id);
-
--- devfile command attributes
-CREATE TABLE devfile_command_attributes (
-    devfile_command_id     BIGINT,
-    value                  TEXT,
-    name                   VARCHAR(255)
-);
--- constraints & indexes
-ALTER TABLE devfile_command_attributes ADD CONSTRAINT fk_devfile_command_attributes_command_id FOREIGN KEY (devfile_command_id) REFERENCES devfile_command (id);
-CREATE UNIQUE INDEX index_devfile_command_attributes_name ON devfile_command_attributes (devfile_command_id, name);
-CREATE INDEX index_command_attributes_command_id ON devfile_command_attributes (devfile_command_id);
-
--- devfile command action
-CREATE TABLE devfile_action (
-    id                      BIGINT       NOT NULL,
-    type                    VARCHAR(255) NOT NULL,
-    component               VARCHAR(255) NOT NULL,
-    command                 TEXT NOT NULL,
-    workdir                 TEXT,
-    devfile_command_id      BIGINT,
-
-    PRIMARY KEY (id)
-);
--- constraints & indexes
-ALTER TABLE devfile_action ADD CONSTRAINT fk_devfile_actions_id FOREIGN KEY (devfile_command_id) REFERENCES devfile_command (id);
-ALTER TABLE devfile_action ADD CONSTRAINT fk_devfile_component_name FOREIGN KEY (component) REFERENCES devfile_component (name);
-CREATE INDEX index_action_command_id ON devfile_action (devfile_command_id);
-
-
------------------------------------------------------------------------------------------------------------------------------------
 
 -- add devfile into workspace
 ALTER TABLE workspace ADD COLUMN devfile_id BIGINT;
-ALTER TABLE workspace ADD CONSTRAINT fk_workspace_devfile_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
 CREATE INDEX index_workspace_devfile_id ON workspace (devfile_id);
