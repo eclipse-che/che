@@ -86,6 +86,7 @@ public class WorkspaceTckModule extends TckModule {
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
             .setExceptionHandler(H2ExceptionHandler.class)
+            .setLogLevel("FINE")
             .build());
     bind(DBInitializer.class).asEagerSingleton();
     bind(SchemaInitializer.class)

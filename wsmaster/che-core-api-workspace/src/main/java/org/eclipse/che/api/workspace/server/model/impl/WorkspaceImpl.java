@@ -329,6 +329,7 @@ public class WorkspaceImpl implements Workspace {
         && isTemporary == other.isTemporary
         && getAttributes().equals(other.getAttributes())
         && Objects.equals(config, other.config)
+        && Objects.equals(devfile, other.devfile)
         && Objects.equals(runtime, other.runtime);
   }
 
@@ -359,6 +360,8 @@ public class WorkspaceImpl implements Workspace {
         + '\''
         + ", config="
         + config
+        + ", devfile="
+        + devfile
         + ", isTemporary="
         + isTemporary
         + ", status="

@@ -588,8 +588,8 @@ public class WorkspaceDaoTest {
 
     ComponentImpl component3 = workspace.getDevfile().getComponents().get(0);
     new ComponentImpl(
-        "component3",
         "kubernetes",
+        "component3",
         "che-theia:0.0.1",
         "/dev.yaml",
         null,
@@ -904,7 +904,7 @@ public class WorkspaceDaoTest {
             "component1",
             "che-theia:0.0.1",
             "/dev.yaml",
-            null,
+            "refcontent1",
             asList(entrypoint1, entrypoint2),
             "image",
             "256G",
@@ -922,7 +922,7 @@ public class WorkspaceDaoTest {
             "component2",
             "che-theia:0.0.1",
             "/dev.yaml",
-            null,
+            "refcontent2",
             asList(entrypoint1, entrypoint2),
             "image",
             "256G",
