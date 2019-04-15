@@ -20,6 +20,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -112,10 +113,12 @@ public class WorkspaceDaoTest {
     workspaces = new WorkspaceImpl[COUNT_OF_WORKSPACES];
     for (int i = 0; i < COUNT_OF_WORKSPACES; i++) {
       // 2 workspaces share 1 namespace
-      if (i / (COUNT_OF_WORKSPACES - 1) == 1) {
-        workspaces[i] = createWorkspaceFromDevfile("workspace-" + i, accounts[i / 2], "name-" + i);
+      AccountImpl account = accounts[i / 2];
+      // Last one is made from devfile
+      if (i < COUNT_OF_WORKSPACES - 1) {
+        workspaces[i] = createWorkspaceFromConfig("workspace-" + i, account, "name-" + i);
       } else {
-        workspaces[i] = createWorkspaceFromConfig("workspace-" + i, accounts[i / 2], "name-" + i);
+        workspaces[i] = createWorkspaceFromDevfile("workspace-" + i, account, "name-" + i);
       }
     }
     accountRepo.createAll(Arrays.asList(accounts));
@@ -339,7 +342,7 @@ public class WorkspaceDaoTest {
   public void shouldNotCreateWorkspaceWithConfigWithANameWhichAlreadyExistsInGivenNamespace()
       throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
-
+    assertNull(workspace.getDevfile());
     final WorkspaceImpl newWorkspace =
         createWorkspaceFromConfig(
             "new-id", workspace.getAccount(), workspace.getConfig().getName());
@@ -354,7 +357,7 @@ public class WorkspaceDaoTest {
   public void shouldNotCreateWorkspaceWithDevfileWithANameWhichAlreadyExistsInGivenNamespace()
       throws Exception {
     final WorkspaceImpl workspace = workspaces[1];
-
+    assertNull(workspace.getDevfile());
     final WorkspaceImpl newWorkspace =
         createWorkspaceFromDevfile(
             "new-id", workspace.getAccount(), workspace.getConfig().getName());
@@ -383,17 +386,6 @@ public class WorkspaceDaoTest {
         createWorkspaceFromConfig(workspace.getId(), accounts[0], "new-name");
 
     workspaceDao.create(newWorkspace);
-  }
-
-  @Test(
-      expectedExceptions = ConflictException.class,
-      expectedExceptionsMessageRegExp =
-          "Workspace with id 'workspaceX2' or name 'name-0' in namespace 'accountName0' already exists")
-  public void shouldThrowExceptionIfWorkspaceNameIsNotUniquePerConfigAndDevfile() throws Exception {
-    final WorkspaceImpl workspace1 = workspaces[0];
-    final WorkspaceImpl workspace2 =
-        createWorkspaceFromDevfile("workspaceX2", accounts[0], workspace1.getConfig().getName());
-    workspaceDao.create(workspace2);
   }
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")

@@ -109,7 +109,7 @@ public class EndpointImpl implements Endpoint {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getPort(), getAttributes());
+    return Objects.hash(id, name, port, getAttributes());
   }
 
   @Override

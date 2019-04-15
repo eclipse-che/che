@@ -80,7 +80,7 @@ public class EnvImpl implements Env {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getValue());
+    return Objects.hash(id, name, value);
   }
 
   @Override

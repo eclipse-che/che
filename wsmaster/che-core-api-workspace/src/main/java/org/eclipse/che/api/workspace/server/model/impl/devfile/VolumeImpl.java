@@ -80,7 +80,7 @@ public class VolumeImpl implements Volume {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getContainerPath());
+    return Objects.hash(id, name, containerPath);
   }
 
   @Override

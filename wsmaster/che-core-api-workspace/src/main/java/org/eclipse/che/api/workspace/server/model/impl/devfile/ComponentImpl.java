@@ -44,7 +44,7 @@ public class ComponentImpl implements Component {
   @Id
   @GeneratedValue
   @Column(name = "id")
-  private Long id;
+  private Long generatedId;
 
   @Column(name = "name", nullable = false)
   private String name;
@@ -228,15 +228,6 @@ public class ComponentImpl implements Component {
   }
 
   @Override
-  public String getId() {
-    return componentId;
-  }
-
-  public void setId(String id) {
-    this.componentId = id;
-  }
-
-  @Override
   public String getName() {
     return name;
   }
@@ -252,6 +243,15 @@ public class ComponentImpl implements Component {
 
   public void setType(String type) {
     this.type = type;
+  }
+
+  @Override
+  public String getId() {
+    return componentId;
+  }
+
+  public void setId(String id) {
+    this.componentId = id;
   }
 
   @Override
@@ -393,7 +393,7 @@ public class ComponentImpl implements Component {
     }
     ComponentImpl component = (ComponentImpl) o;
     return getMountSources() == component.getMountSources()
-        && Objects.equals(id, component.id)
+        && Objects.equals(generatedId, component.generatedId)
         && Objects.equals(name, component.name)
         && Objects.equals(type, component.type)
         && Objects.equals(componentId, component.componentId)
@@ -402,7 +402,7 @@ public class ComponentImpl implements Component {
         && Objects.equals(getEntrypoints(), component.getEntrypoints())
         && Objects.equals(image, component.image)
         && Objects.equals(memoryLimit, component.memoryLimit)
-        && Objects.equals(command, component.command)
+        && Objects.equals(getCommand(), component.getCommand())
         && Objects.equals(getArgs(), component.getArgs())
         && Objects.equals(getVolumes(), component.getVolumes())
         && Objects.equals(getEnv(), component.getEnv())
@@ -413,6 +413,7 @@ public class ComponentImpl implements Component {
   public int hashCode() {
 
     return Objects.hash(
+        generatedId,
         getName(),
         getType(),
         getId(),

@@ -97,7 +97,7 @@ public class ProjectImpl implements Project {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getSource(), getClonePath());
+    return Objects.hash(id, name, source, clonePath);
   }
 
   @Override

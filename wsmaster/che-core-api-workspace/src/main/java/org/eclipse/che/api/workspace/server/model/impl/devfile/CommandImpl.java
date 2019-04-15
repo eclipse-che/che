@@ -124,7 +124,7 @@ public class CommandImpl implements Command {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getActions(), getAttributes());
+    return Objects.hash(id, name, getActions(), getAttributes());
   }
 
   @Override

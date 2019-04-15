@@ -108,7 +108,7 @@ public class ActionImpl implements Action {
 
   @Override
   public int hashCode() {
-    return Objects.hash(getType(), getComponent(), getCommand(), getWorkdir());
+    return Objects.hash(id, type, component, command, workdir);
   }
 
   @Override

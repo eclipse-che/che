@@ -192,12 +192,7 @@ public class DevfileImpl implements Devfile {
   @Override
   public int hashCode() {
     return Objects.hash(
-        getSpecVersion(),
-        getName(),
-        getProjects(),
-        getComponents(),
-        getCommands(),
-        getAttributes());
+        id, specVersion, name, getProjects(), getComponents(), getCommands(), getAttributes());
   }
 
   @Override

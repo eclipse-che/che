@@ -133,8 +133,7 @@ public class SourceImpl implements Source {
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        getType(), getLocation(), getBranch(), getStartPoint(), getTag(), getCommitId());
+    return Objects.hash(type, location, branch, startPoint, tag, commitId);
   }
 
   @Override

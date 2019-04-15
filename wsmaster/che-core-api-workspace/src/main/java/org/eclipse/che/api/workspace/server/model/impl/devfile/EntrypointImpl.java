@@ -53,13 +53,13 @@ public class EntrypointImpl implements Entrypoint {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "entrypoint_arg", joinColumns = @JoinColumn(name = "entrypoint_id"))
-  @Column(name = "args")
+  @Column(name = "arg")
   private List<String> args;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "entrypoint_selector", joinColumns = @JoinColumn(name = "entrypoint_id"))
-  @MapKeyColumn(name = "selectors_key")
-  @Column(name = "selectors")
+  @MapKeyColumn(name = "selector_key")
+  @Column(name = "selector")
   private Map<String, String> parentSelector;
 
   public EntrypointImpl() {}
@@ -159,6 +159,6 @@ public class EntrypointImpl implements Entrypoint {
   @Override
   public int hashCode() {
     return Objects.hash(
-        getParentName(), getParentSelector(), getContainerName(), getCommand(), getArgs());
+        id, parentName, getParentSelector(), getContainerName(), getCommand(), getArgs());
   }
 }
