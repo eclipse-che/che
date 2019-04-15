@@ -204,11 +204,11 @@
                                 </goals>
                                 <configuration>
                                     <target>
-                                      <!-- install dependencies -->
-                                      <exec dir="${basedir}" executable="yarn" failonerror="true">
-                                        <arg value="install" />
-                                        <arg value="--ignore-optional" />
-                                      </exec>
+                                        <!-- install dependencies -->
+                                        <exec dir="${basedir}" executable="yarn" failonerror="true">
+                                            <arg value="install" />
+                                            <arg value="--ignore-optional" />
+                                        </exec>
                                     </target>
                                 </configuration>
                             </execution>
