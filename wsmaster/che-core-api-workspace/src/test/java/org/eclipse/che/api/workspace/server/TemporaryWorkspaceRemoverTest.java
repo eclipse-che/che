@@ -29,7 +29,6 @@ import java.util.List;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -78,7 +77,7 @@ public class TemporaryWorkspaceRemoverTest {
 
   @Test(dataProvider = "activeWorkspaceStatuses")
   public void shouldNotRemoveActiveWorkspace(WorkspaceStatus status) throws Exception {
-    WorkspaceImpl workspace = new WorkspaceImpl("ws123", null, new DevfileImpl());
+    WorkspaceImpl workspace = WorkspaceImpl.builder().setId("ws123").build();
     when(workspaceDao.getWorkspaces(eq(true), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
     doReturn(status).when(runtimes).getStatus("ws123");
@@ -99,7 +98,7 @@ public class TemporaryWorkspaceRemoverTest {
     List<WorkspaceImpl> wsList = new ArrayList<>();
     for (int i = 0; i < number; i++) {
       String wsId = "id" + i;
-      wsList.add(new WorkspaceImpl(wsId, null, new DevfileImpl()));
+      wsList.add(WorkspaceImpl.builder().setId(wsId).build());
     }
     return wsList;
   }

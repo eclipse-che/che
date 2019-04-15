@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.core.model.workspace;
 
+import com.google.common.annotations.Beta;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -56,15 +57,18 @@ public interface Workspace {
   boolean isTemporary();
 
   /**
-   * Returns a configuration of this workspace instance if it is present or {@code null} if
-   * workspace was created from {@link Devfile}.
+   * Returns a configuration of this workspace instance. The only one format (workspace config or
+   * devfile) may be used for workspace at the same time.
    */
+  @Nullable
   WorkspaceConfig getConfig();
 
   /**
-   * Returns a devfile from this workspace instance it ot is present or {@code null} if workspace
-   * was created from {@link WorkspaceConfig}.
+   * Returns a configuration of this workspace instance in Devfile format. The only one format
+   * (workspace config or devfile) may be used for workspace at the same time.
    */
+  @Beta
+  @Nullable
   Devfile getDevfile();
 
   /**
