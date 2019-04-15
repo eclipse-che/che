@@ -26,7 +26,6 @@ import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
