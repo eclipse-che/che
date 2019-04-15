@@ -73,27 +73,33 @@ export class DriverHelper {
             this.driver
                 .wait(until.elementLocated(elementLocator), timeout)
                 .then(webElement => {
-                    resolve(this.driver.wait(until.elementIsVisible(webElement), timeout))
+                    this.driver.wait(until.elementIsVisible(webElement), timeout)
+                        .then(webElement => { resolve(webElement) })
                 })
         })
     }
 
-    public async waitAllVisibility(locators: Array<By>, timeout = DriverHelper.DEFAULT_TIMEOUT): Promise<void> {
-        await locators.forEach(async elementLocator => {
-            await this.waitVisibility(elementLocator, timeout)
-        })
-    }
+    // public async waitAllVisibility(locators: Array<By>, timeout = DriverHelper.DEFAULT_TIMEOUT): Promise<void> {
+    //     return new Promise<void>(async resolve => {
+    //         resolve(await locators
+    //             .forEach(async elementLocator => {
+    //                 await this.waitVisibility(elementLocator, timeout)
+    //             }))
+    //     })
+    // }
 
     public async waitDisappearance(elementLocator: By, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<void> {
         await this.waitDisappearanceBoolean(elementLocator, attempts, polling)
             .then(isVisible => {
+
+                console.log("===>>>  ", isVisible)
                 if (isVisible) {
                     throw new Error(`Waiting attempts exceeded, element '${elementLocator}' is still visible`)
                 }
             })
     }
 
-    public async waitAllDisappearance(locators: Array<By>, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING ): Promise<void> {
+    public async waitAllDisappearance(locators: Array<By>, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<void> {
         await locators.forEach(async elementLocator => {
             await this.waitDisappearance(elementLocator, attempts, polling)
         })

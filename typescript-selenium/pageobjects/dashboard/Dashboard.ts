@@ -31,23 +31,19 @@ export class Dashboard {
         this.driverHelper = driverHelper;
     }
 
-    waitPage(timeout: number) {
-        it('Wait Dashboard page', async () => {
-            await this.driverHelper
-                .waitAllVisibility([
-                    By.css(Dashboard.DASHBOARD_BUTTON_CSS),
-                    By.css(Dashboard.WORKSPACES_BUTTON_CSS),
-                    By.css(Dashboard.STACKS_BUTTON_CSS),
-                    By.css(Dashboard.FACTORIES_BUTTON_CSS),
-                    By.css(Dashboard.LOADER_PAGE_CSS)
-                ], timeout)
-        })
+    async waitPage(timeout: number) {
+        await this.driverHelper.waitVisibility(By.css(Dashboard.DASHBOARD_BUTTON_CSS))
+        await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS))
+        await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS))
+        await this.driverHelper.waitVisibility(By.css(Dashboard.FACTORIES_BUTTON_CSS))
     }
 
-    clickDashboardButton(timeout = DriverHelper.DEFAULT_TIMEOUT) {
-        it("click 'Dashboard' button", async () => {
-            await this.driverHelper.click(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
-        })
+    async clickDashboardButton(timeout = DriverHelper.DEFAULT_TIMEOUT) {
+        await this.driverHelper.click(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
+    }
+
+    async waitLoaderInvisibility() {
+        await this.driverHelper.waitDisappearance(By.css(Dashboard.STACKS_BUTTON_CSS))
     }
 
 

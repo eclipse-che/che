@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require ts-node/register --timeout 150000 spec.ts"
+    "test": "mocha --require ts-node/register --timeout 150000 -u tdd spec.ts"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
   "license": "ISC",

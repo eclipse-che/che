@@ -14,32 +14,30 @@ const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const loginPage: LoginPage = e2eContainer.get<LoginPage>(TYPES.LoginPage);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard)
 
-async function doNavigation(): Promise<void> {
-    await driver.get()
-        .navigate()
-        .to("http://che-che.192.168.99.100.nip.io/dashboard/#/create-workspace")
-}
-
-async function waitDashboardButton(): Promise<void> {
-    await driverHelper.waitVisibilityBoolean(By.css("#dashboard-item"));
-}
 
 
-describe("E2E", async () => {
+suite("E2E", async () => {
 
-    loginPage.login()
+    test("test", async ()=>{
+        await loginPage.login()
 
-    dashboard.waitPage(100000)
-
-    dashboard.clickDashboardButton()
-
-    it("wait dashboard button by until condition", async () => {
-        await driverHelper.click(By.css("#workspaces-item"))
+        await dashboard.waitPage(100000)
+    
     })
 
-    after("close browser", async () => {
-        await driver.get().quit()
-    })
+
+    suiteTeardown("close browser", async () => {
+    
+        setTimeout(()=>{
+            driver.get().quit()
+        }, 3000)
+
+
+    
+    })    
+
 
 })
+
+
 

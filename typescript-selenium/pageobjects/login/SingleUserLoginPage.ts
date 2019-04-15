@@ -16,12 +16,10 @@ export class SingleUserLoginPage implements LoginPage {
     }
 
 
-    login(){
-        it("Open dashboard", async () => {
-            await this.driver
-                .navigate()
-                .to("http://che-che.192.168.99.100.nip.io/dashboard/#/create-workspace")
-        })
+    async login() {
+        await this.driver
+            .navigate()
+            .to("http://che-che.192.168.99.100.nip.io/dashboard/#/create-workspace")
     }
 
 }
