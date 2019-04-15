@@ -4,6 +4,7 @@ import { TYPES } from "../types";
 import 'selenium-webdriver';
 import 'reflect-metadata';
 import { WebElementPromise, ThenableWebDriver, By, promise, until, WebElement } from "selenium-webdriver";
+import { TestConstants } from "../TestConstants";
 
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
@@ -17,9 +18,6 @@ import { WebElementPromise, ThenableWebDriver, By, promise, until, WebElement } 
 
 @injectable()
 export class DriverHelper {
-    public static readonly DEFAULT_TIMEOUT: number = 20000;
-    public static readonly DEFAULT_ATTEMPTS: number = 20;
-    public static readonly DEFAULT_POLLING: number = 1000;
     private readonly driver: ThenableWebDriver;
 
     constructor(
@@ -44,9 +42,11 @@ export class DriverHelper {
         return new promise.Promise<void>(resolve => { setTimeout(resolve, miliseconds) })
     }
 
-    public async waitVisibilityBoolean(locator: By, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<boolean> {
+    public async waitVisibilityBoolean(locator: By, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING): Promise<boolean> {
         for (let i = 0; i < attempts; i++) {
-            if (await this.isVisible(locator)) {
+            const isVisible: boolean = await this.isVisible(locator);
+
+            if (isVisible) {
                 return true;
             }
 
@@ -56,9 +56,11 @@ export class DriverHelper {
         return false;
     }
 
-    public async waitDisappearanceBoolean(locator: By, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<boolean> {
+    public async waitDisappearanceBoolean(locator: By, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING): Promise<boolean> {
         for (let i = 0; i < attempts; i++) {
-            if (await !this.isVisible(locator)) {
+            const isVisible: boolean = await this.isVisible(locator)
+
+            if (!isVisible) {
                 return true;
             }
 
@@ -68,7 +70,7 @@ export class DriverHelper {
         return false;
     }
 
-    public waitVisibility(elementLocator: By, timeout = DriverHelper.DEFAULT_TIMEOUT): promise.Promise<WebElement> {
+    public waitVisibility(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT): promise.Promise<WebElement> {
         return new promise.Promise<WebElement>((resolve, reject) => {
             this.driver
                 .wait(until.elementLocated(elementLocator), timeout)
@@ -79,36 +81,41 @@ export class DriverHelper {
         })
     }
 
-    // public async waitAllVisibility(locators: Array<By>, timeout = DriverHelper.DEFAULT_TIMEOUT): Promise<void> {
-    //     return new Promise<void>(async resolve => {
-    //         resolve(await locators
-    //             .forEach(async elementLocator => {
-    //                 await this.waitVisibility(elementLocator, timeout)
-    //             }))
-    //     })
-    // }
-
-    public async waitDisappearance(elementLocator: By, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<void> {
-        await this.waitDisappearanceBoolean(elementLocator, attempts, polling)
-            .then(isVisible => {
-
-                console.log("===>>>  ", isVisible)
-                if (isVisible) {
-                    throw new Error(`Waiting attempts exceeded, element '${elementLocator}' is still visible`)
-                }
-            })
+    public async waitAllVisibility(locators: Array<By>, timeout = TestConstants.DEFAULT_TIMEOUT) {
+        for (const elementLocator of locators) {
+            await this.waitVisibility(elementLocator, timeout)
+        }
     }
 
-    public async waitAllDisappearance(locators: Array<By>, attempts = DriverHelper.DEFAULT_ATTEMPTS, polling = DriverHelper.DEFAULT_POLLING): Promise<void> {
-        await locators.forEach(async elementLocator => {
+    public async waitDisappearance(elementLocator: By, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING) {
+        const isDisappeared = await this.waitDisappearanceBoolean(elementLocator, attempts, polling)
+
+        if (!isDisappeared) {
+            throw new Error(`Waiting attempts exceeded, element '${elementLocator}' is still visible`)
+        }
+    }
+
+    public async waitAllDisappearance(locators: Array<By>, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING): Promise<void> {
+        for (const elementLocator of locators) {
             await this.waitDisappearance(elementLocator, attempts, polling)
-        })
+        }
     }
 
-    public click(elementLocator: By, timeout = DriverHelper.DEFAULT_TIMEOUT): promise.Promise<void> {
-        return this.waitVisibility(elementLocator, timeout).then(element => { element.click() })
-    }
+    public async waitAndClick(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT) {
+        for (let i = 0; i < 5; i++) {
+            const element: WebElement = await this.waitVisibility(elementLocator, timeout)
 
+            try {
+                await element.click();
+                return;
+            } catch (err) {
+                continue;
+            }
+        }
+
+        throw new Error(`Exceeded maximum clicking attempts, the '${elementLocator}' element is not clickable`)
+
+    }
 
 
 

@@ -8,15 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-const TYPES = {
-    Driver: Symbol.for("Driver"),
-    LoginPage: Symbol.for("LoginPage")
+export const TestConstants = {
+    START_STOP_WORKSPACE_TIMEOUT: 240000,
+    DEFAULT_TIMEOUT: 20000,
+    DEFAULT_ATTEMPTS: 5,
+    DEFAULT_POLLING: 1000
 }
-
-const CLASSES = {
-    DriverHelper: "DriverHelper",
-    Dashboard: "Dashboard",
-    Workspaces: "Workspaces"
-}
-
-export { TYPES, CLASSES };

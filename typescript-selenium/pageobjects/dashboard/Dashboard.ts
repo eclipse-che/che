@@ -4,6 +4,7 @@ import { TYPES, CLASSES } from "../../types";
 import { Driver } from "../../driver/Driver";
 import { WebElementCondition, By } from "selenium-webdriver";
 import { DriverHelper } from "../../utils/DriverHelper";
+import { TestConstants } from "../../TestConstants";
 
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
@@ -31,20 +32,35 @@ export class Dashboard {
         this.driverHelper = driverHelper;
     }
 
-    async waitPage(timeout: number) {
-        await this.driverHelper.waitVisibility(By.css(Dashboard.DASHBOARD_BUTTON_CSS))
-        await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS))
-        await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS))
-        await this.driverHelper.waitVisibility(By.css(Dashboard.FACTORIES_BUTTON_CSS))
+    async waitPage(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
+        await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout)
+        await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS), timeout)
+        await this.driverHelper.waitVisibility(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout)
     }
 
-    async clickDashboardButton(timeout = DriverHelper.DEFAULT_TIMEOUT) {
-        await this.driverHelper.click(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
+    async clickDashboardButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitAndClick(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
     }
 
-    async waitLoaderInvisibility() {
-        await this.driverHelper.waitDisappearance(By.css(Dashboard.STACKS_BUTTON_CSS))
+    async clickWorkspacesButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitAndClick(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout)
     }
 
+    async clickStacksdButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitAndClick(By.css(Dashboard.STACKS_BUTTON_CSS), timeout)
+    }
+
+    async clickFactoriesButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitAndClick(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout)
+    }
+
+    async waitLoader(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.css(Dashboard.LOADER_PAGE_CSS), timeout)
+    }
+
+    async waitLoaderDisappearance(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitDisappearance(By.css(Dashboard.LOADER_PAGE_CSS), timeout)
+    }
 
 }
