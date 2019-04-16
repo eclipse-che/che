@@ -116,12 +116,12 @@ CREATE UNIQUE INDEX index_devfile_component_name ON devfile_component (devfile_i
 -- component command
 CREATE TABLE component_command (
     devfile_component_id    BIGINT,
-    commands                TEXT NOT NULL
+    command                 TEXT NOT NULL
 );
 
 -- constraints & indexes
 ALTER TABLE component_command ADD CONSTRAINT fk_component_command_component_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
-CREATE INDEX index_commands_component_id ON component_command (devfile_component_id);
+CREATE INDEX index_command_component_id ON component_command (devfile_component_id);
 
 -- component arg
 CREATE TABLE component_arg (
@@ -180,7 +180,6 @@ CREATE TABLE devfile_env (
 -- constraints & indexes
 ALTER TABLE devfile_env ADD CONSTRAINT fk_devfile_env_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
 CREATE UNIQUE INDEX index_devfile_env_component_name ON devfile_env (devfile_component_id, name);
-CREATE INDEX index_component_env_id ON devfile_env (devfile_component_id);
 
 
 -- devfile component volume
@@ -247,4 +246,3 @@ CREATE UNIQUE INDEX index_entrypoint_selectors_keys ON entrypoint_selector (entr
 
 -- add devfile into workspace
 ALTER TABLE workspace ADD COLUMN devfile_id BIGINT;
-CREATE INDEX index_workspace_devfile_id ON workspace (devfile_id);

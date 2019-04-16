@@ -84,6 +84,7 @@ public class WorkspaceDaoTest {
   public static final String SUITE_NAME = "WorkspaceDaoTck";
 
   private static final int COUNT_OF_WORKSPACES = 5;
+  private static final int DEVFILE_WORKSPACE_INDEX = COUNT_OF_WORKSPACES - 1;
   private static final int COUNT_OF_ACCOUNTS = 3;
 
   @Inject private TckRepository<WorkspaceImpl> workspaceRepo;
@@ -115,7 +116,7 @@ public class WorkspaceDaoTest {
       // 2 workspaces share 1 namespace
       AccountImpl account = accounts[i / 2];
       // Last one is made from devfile
-      if (i < COUNT_OF_WORKSPACES - 1) {
+      if (i < DEVFILE_WORKSPACE_INDEX) {
         workspaces[i] = createWorkspaceFromConfig("workspace-" + i, account, "name-" + i);
       } else {
         workspaces[i] = createWorkspaceFromDevfile("workspace-" + i, account, "name-" + i);
@@ -525,7 +526,9 @@ public class WorkspaceDaoTest {
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
   public void shouldUpdateWorkspaceWithDevfile() throws Exception {
-    final WorkspaceImpl workspace = new WorkspaceImpl(workspaces[4], workspaces[4].getAccount());
+    final WorkspaceImpl workspace =
+        new WorkspaceImpl(
+            workspaces[DEVFILE_WORKSPACE_INDEX], workspaces[DEVFILE_WORKSPACE_INDEX].getAccount());
 
     // Remove an existing project configuration from workspace
     workspace.getDevfile().getProjects().remove(1);
@@ -633,7 +636,7 @@ public class WorkspaceDaoTest {
           "Workspace with name 'name-3' in namespace 'accountName1' already exists")
   public void shouldNotUpdateWorkspaceWithReservedNameFromDevfile() throws Exception {
     final WorkspaceImpl workspace1 = workspaces[3];
-    final WorkspaceImpl workspace2 = workspaces[4];
+    final WorkspaceImpl workspace2 = workspaces[DEVFILE_WORKSPACE_INDEX];
 
     workspace2.getDevfile().setName(workspace1.getConfig().getName());
     workspace2.setAccount(workspace1.getAccount());

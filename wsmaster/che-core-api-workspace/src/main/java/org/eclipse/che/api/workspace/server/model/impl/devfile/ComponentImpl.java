@@ -82,7 +82,7 @@ public class ComponentImpl implements Component {
   @CollectionTable(
       name = "component_command",
       joinColumns = @JoinColumn(name = "devfile_component_id"))
-  @Column(name = "commands")
+  @Column(name = "command")
   private List<String> command;
 
   @ElementCollection(fetch = FetchType.EAGER)
@@ -399,9 +399,10 @@ public class ComponentImpl implements Component {
         && Objects.equals(componentId, component.componentId)
         && Objects.equals(reference, component.reference)
         && Objects.equals(referenceContent, component.referenceContent)
-        && Objects.equals(getEntrypoints(), component.getEntrypoints())
         && Objects.equals(image, component.image)
         && Objects.equals(memoryLimit, component.memoryLimit)
+        && Objects.equals(getSelector(), component.getSelector())
+        && Objects.equals(getEntrypoints(), component.getEntrypoints())
         && Objects.equals(getCommand(), component.getCommand())
         && Objects.equals(getArgs(), component.getArgs())
         && Objects.equals(getVolumes(), component.getVolumes())
@@ -414,15 +415,15 @@ public class ComponentImpl implements Component {
 
     return Objects.hash(
         generatedId,
-        getName(),
-        getType(),
-        getId(),
-        getReference(),
-        getReferenceContent(),
+        name,
+        type,
+        componentId,
+        reference,
+        referenceContent,
+        image,
+        memoryLimit,
         getSelector(),
         getEntrypoints(),
-        getImage(),
-        getMemoryLimit(),
         getMountSources(),
         getCommand(),
         getArgs(),
