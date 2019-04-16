@@ -295,6 +295,80 @@
     }
   },
   {
+    "id": "che7-development-che-theia-and-theia-plugins",
+    "creator": "ide",
+    "name": "Che 7 Theia dev",
+    "description": "Development Theia as IDE, che-theia components, Theia plugins or plugin api.",
+    "scope": "general",
+    "tags": [
+      "ws.next",
+      "Theia",
+      "Node.JS",
+      "NPM",
+      "Yeoman",
+      "Yarn"
+    ],
+    "components": [
+      {
+        "name": "Centos",
+        "version": "7"
+      },
+      {
+        "name": "NodeJS",
+        "version": "8.12.0"
+      },
+      {
+        "name": "NPM",
+        "version": "6.4.1"
+      }
+    ],
+    "workspaceConfig": {
+      "name": "che7",
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "ws/dev": {
+              "attributes": {
+                "memoryLimitBytes": "536870912"
+              },
+              "servers": {
+                "ws/dev": {
+                  "attributes": {},
+                  "port": "3130",
+                  "protocol": "tcp"
+                }
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "kubernetes",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "projects": [],
+      "attributes": {
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-machine-exec-plugin:0.0.1"
+      },
+      "commands": [],
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
     "id": "che7-preview-plugin-dev",
     "creator": "ide",
     "name": "Che 7 Dev",
@@ -658,7 +732,7 @@
     "id": "java-maven",
     "creator": "ide",
     "name": "Java Maven",
-    "description": "Default Java Stack with OpenJKD 11 and Maven 3.6",
+    "description": "Default Java Stack with OpenJDK 11 and Maven 3.6",
     "scope": "general",
     "tags": [
       "Java",
@@ -708,8 +782,9 @@
               },
               "env": {
                 "MAVEN_CONFIG": "/home/user/.m2",
-                "MAVEN_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
-                "JAVA_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "MAVEN_OPTS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_OPTS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_TOOL_OPTIONS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
                 "PS1": "$(echo ${0})\\$ ",
                 "HOME": "/home/user"
               }
@@ -790,7 +865,8 @@
               },
               "env": {
                 "GRADLE_USER_HOME": "/home/user/.gradle",
-                "JAVA_OPTS": "-XX:MaxRAM=150m -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_OPTS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_TOOL_OPTIONS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
                 "PS1": "$(echo ${0})\\$ ",
                 "HOME": "/home/user"
               }

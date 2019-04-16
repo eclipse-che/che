@@ -153,6 +153,8 @@ public class DevfileConverter {
       config.getProjects().add(projectConfig);
     }
 
+    config.getAttributes().putAll(devfile.getAttributes());
+
     return config;
   }
 

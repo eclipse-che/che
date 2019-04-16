@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
-import org.eclipse.che.api.workspace.server.wsplugins.PluginMetaRetriever;
-import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.EphemeralWorkspaceUtility;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesBrokerInitContainerApplier;
@@ -46,11 +46,12 @@ import org.testng.annotations.Test;
 public class SidecarToolingProvisionerTest {
 
   private static final String RECIPE_TYPE = "TestingRecipe";
-  private static final String PLUGIN_META_NAME = "TestPluginMeta";
+  private static final String PLUGIN_FQN_ID = "TestPluginId";
+  private static final String PLUGIN_FQN_VERSION = "TestPluginVersion";
 
   @Mock private StartSynchronizer startSynchronizer;
   @Mock private KubernetesBrokerInitContainerApplier<KubernetesEnvironment> brokerApplier;
-  @Mock private PluginMetaRetriever pluginMetaRetriever;
+  @Mock private PluginFQNParser pluginFQNParser;
   @Mock private PluginBrokerManager<KubernetesEnvironment> brokerManager;
   @Mock private KubernetesEnvironment nonEphemeralEnvironment;
   @Mock private KubernetesEnvironment ephemeralEnvironment;
@@ -62,8 +63,8 @@ public class SidecarToolingProvisionerTest {
           "editor", "org.eclipse.che.editor.theia:1.0.0",
           "plugins", "che-machine-exec-plugin:0.0.1");
 
-  private Collection<PluginMeta> pluginsMeta =
-      ImmutableList.of(new PluginMeta().name(PLUGIN_META_NAME));
+  private Collection<PluginFQN> pluginFQNs =
+      ImmutableList.of(new PluginFQN(null, PLUGIN_FQN_ID, PLUGIN_FQN_VERSION));
 
   private SidecarToolingProvisioner<KubernetesEnvironment> provisioner;
 
@@ -83,11 +84,11 @@ public class SidecarToolingProvisionerTest {
         .when(nonEphemeralEnvironment)
         .getAttributes();
     lenient().doReturn(ephemeralEnvironmentAttributes).when(ephemeralEnvironment).getAttributes();
-    doReturn(pluginsMeta).when(pluginMetaRetriever).get(any());
+    doReturn(pluginFQNs).when(pluginFQNParser).parsePlugins(any());
 
     provisioner =
         new SidecarToolingProvisioner<>(
-            workspaceNextAppliers, brokerApplier, pluginMetaRetriever, brokerManager);
+            workspaceNextAppliers, brokerApplier, pluginFQNParser, brokerManager);
   }
 
   @Test

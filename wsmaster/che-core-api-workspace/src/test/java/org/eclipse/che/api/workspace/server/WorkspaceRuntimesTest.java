@@ -193,7 +193,7 @@ public class WorkspaceRuntimesTest {
     // try recover
     runtimes.recoverOne(infrastructure, identity);
 
-    WorkspaceImpl workspace = new WorkspaceImpl(identity.getWorkspaceId(), null, null);
+    WorkspaceImpl workspace = WorkspaceImpl.builder().setId(identity.getWorkspaceId()).build();
     runtimes.injectRuntime(workspace);
     assertNotNull(workspace.getRuntime());
     assertEquals(workspace.getStatus(), WorkspaceStatus.STARTING);
@@ -296,11 +296,11 @@ public class WorkspaceRuntimesTest {
     verify(infrastructure).prepare(identity2, internalEnvironment);
     verify(infrastructure).prepare(identity3, internalEnvironment);
 
-    WorkspaceImpl workspace1 = new WorkspaceImpl(identity1.getWorkspaceId(), null, null);
+    WorkspaceImpl workspace1 = WorkspaceImpl.builder().setId(identity1.getWorkspaceId()).build();
     runtimes.injectRuntime(workspace1);
     assertNotNull(workspace1.getRuntime());
     assertEquals(workspace1.getStatus(), WorkspaceStatus.STARTING);
-    WorkspaceImpl workspace3 = new WorkspaceImpl(identity3.getWorkspaceId(), null, null);
+    WorkspaceImpl workspace3 = WorkspaceImpl.builder().setId(identity3.getWorkspaceId()).build();
     runtimes.injectRuntime(workspace3);
     assertNotNull(workspace3.getRuntime());
     assertEquals(workspace3.getStatus(), WorkspaceStatus.STARTING);
@@ -354,11 +354,11 @@ public class WorkspaceRuntimesTest {
     verify(infrastructure).prepare(identity2, internalEnvironment);
     verify(infrastructure).prepare(identity3, internalEnvironment);
 
-    WorkspaceImpl workspace1 = new WorkspaceImpl(identity1.getWorkspaceId(), null, null);
+    WorkspaceImpl workspace1 = WorkspaceImpl.builder().setId(identity1.getWorkspaceId()).build();
     runtimes.injectRuntime(workspace1);
     assertNotNull(workspace1.getRuntime());
     assertEquals(workspace1.getStatus(), WorkspaceStatus.STARTING);
-    WorkspaceImpl workspace3 = new WorkspaceImpl(identity3.getWorkspaceId(), null, null);
+    WorkspaceImpl workspace3 = WorkspaceImpl.builder().setId(identity3.getWorkspaceId()).build();
     runtimes.injectRuntime(workspace3);
     assertNotNull(workspace3.getRuntime());
     assertEquals(workspace3.getStatus(), WorkspaceStatus.STARTING);
