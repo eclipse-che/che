@@ -16,7 +16,13 @@ const TYPES = {
 const CLASSES = {
     DriverHelper: "DriverHelper",
     Dashboard: "Dashboard",
-    Workspaces: "Workspaces"
+    Workspaces: "Workspaces",
+    NewWorkspace: "NewWorkspace",
+    WorkspaceDetails: "WorkspaceDetails",
+    WorkspaceDetailsPlugins: "WorkspaceDetailsPlugins",
+    Ide: "Ide",
+    TestWorkspaceUtil: "TestWorkspaceUtil",
+    RequestFactory: "RequestFactory"
 }
 
 export { TYPES, CLASSES };

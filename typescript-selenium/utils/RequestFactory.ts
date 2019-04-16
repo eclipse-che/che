@@ -8,10 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-export const TestConstants = {
-    START_STOP_WORKSPACE_TIMEOUT: 240000,
-    LOAD_PAGE_TIMEOUT: 120000,
-    DEFAULT_TIMEOUT: 20000,
-    DEFAULT_ATTEMPTS: 5,
-    DEFAULT_POLLING: 1000
+export class RequestFactory {
+
+    
+
 }

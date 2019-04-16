@@ -4,13 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require ts-node/register --timeout 150000 -u tdd spec.ts"
+    "test": "mocha --require ts-node/register --timeout 150000 -u tdd spec.ts",
+    "units": "mocha --require ts-node/register --timeout 150000 -u tdd driverHelperUnitTests.spec.ts"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
   "license": "ISC",
   "devDependencies": {
     "@types/chai": "^4.1.7",
     "@types/mocha": "^5.2.6",
+    "@types/node": "^11.13.4",
     "@types/selenium-webdriver": "^3.0.16",
     "chai": "^4.2.0",
     "chromedriver": "^2.46.0",

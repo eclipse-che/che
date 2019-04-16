@@ -18,20 +18,31 @@ import { LoginPage } from "./pageobjects/login/LoginPage";
 import { Dashboard } from "./pageobjects/dashboard/Dashboard";
 import { expect, assert } from 'chai'
 import { Workspaces } from "./pageobjects/dashboard/Workspaces";
+import { NameGenerator } from "./utils/NameGenerator";
+import { NewWorkspace } from "./pageobjects/dashboard/NewWorkspace";
+import { WorkspaceDetails } from "./pageobjects/dashboard/workspace-details/WorkspaceDetails";
+import { WorkspaceDetailsPlugins } from "./pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins";
+import { Request, post, get } from "selenium-webdriver/http";
 
-
+const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
+const namespace: string = "che";
+const sampleName: string = "console-java-simple";
 
 const driver: Driver = e2eContainer.get<Driver>(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const loginPage: LoginPage = e2eContainer.get<LoginPage>(TYPES.LoginPage);
-const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard)
-const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces)
+const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
+const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
+const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
+const workspaceDetails: WorkspaceDetails = e2eContainer.get(CLASSES.WorkspaceDetails);
+const workspaceDetailsPlugins: WorkspaceDetailsPlugins = e2eContainer.get(CLASSES.WorkspaceDetailsPlugins)
 
 
 
 suite("E2E", async () => {
 
     suite("Login and wait dashboard", async () => {
+
         test("login", async () => {
             await loginPage.login()
         })
@@ -44,10 +55,52 @@ suite("E2E", async () => {
     })
 
     suite("Create workspace and open IDE", async () => {
+
         test("Go to 'New Workspace' page", async () => {
-            await dashboard.clickWorkspacesButton();
-            await workspaces.clickAddWorkspaceButton();
+            await dashboard.clickWorkspacesButton()
+            await workspaces.clickAddWorkspaceButton()
         })
+
+        test(`Create a '${workspaceName}' workspace`, async () => {
+            await newWorkspace.typeWorkspaceName(workspaceName)
+            await newWorkspace.clickOnChe7Stack()
+            await newWorkspace.waitChe7StackSelected()
+            await newWorkspace.clickOnAddOrImportProjectButton()
+            await newWorkspace.enableSampleCheckbox(sampleName)
+            await newWorkspace.clickOnAddButton()
+            await newWorkspace.waitProjectAdding(sampleName)
+
+            await newWorkspace.selectCreateWorkspaceAndProceedEditing()
+        })
+
+        test("Add 'Java Language Support' plugin to workspace", async () => {
+            const javaPluginName: string = "Language Support for Java(TM)";
+            const execPlugin: string = "Che machine-exec Service";
+
+            await workspaceDetails.waitPage(workspaceName);
+            await workspaceDetails.waitTabSelected('Overview')
+            await workspaceDetails.clickOnTab('Plugins')
+            await workspaceDetails.waitTabSelected('Plugins')
+
+
+            await workspaceDetailsPlugins.waitPluginEnabling(execPlugin)
+            await workspaceDetailsPlugins.waitPluginDisabling(javaPluginName)
+            await workspaceDetailsPlugins.clickOnPluginListItemSwitcher(javaPluginName)
+            await workspaceDetailsPlugins.waitPluginEnabling(javaPluginName)
+
+            await workspaceDetails.waitSaveButton()
+            await workspaceDetails.clickOnSaveButton()
+            await workspaceDetails.waitSaveButtonDisappearance()
+
+            await workspaceDetails.clickOnOpenButton()
+        })
+
+        test("Wait IDE availability", async () => {
+            ide.waitWorkspaceAndIdeInIframe(namespace, workspaceName);
+            ide.openIdeWithoutFrames(workspaceName);
+            ide.waitWorkspaceAndIde(namespace, workspaceName);
+        })
+
 
 
 
@@ -57,81 +110,12 @@ suite("E2E", async () => {
 
 })
 
-suiteTeardown("close browser", async () => {
-    driver.get().quit()
-})
-
-
-
-
-// suite("Test of 'DriverHelper' methods", async () => {
-//     test("login", async () => {
-//         await loginPage.login()
-//     })
-
-//     test("waitAllVisibility", async () => {
-//         await driverHelper.waitAllVisibility([By.css("#dashboard-item"), By.css("#workspaces-item"), By.css("#stacks-item")], 20000)
-//     })
-
-//     test("isVisible", async () => {
-//         const isVisible = await driverHelper.isVisible(By.css("#dashboard-item"))
-//         expect(isVisible).to.be.true
-//     })
-
-//     test("isVisible", async () => {
-//         const isVisible = await driverHelper.isVisible(By.css("#dashboard-item aaaa"))
-//         expect(isVisible).to.be.false
-//     })
-
-//     test("waitVisibilityBoolean", async () => {
-//         const isVisible = await driverHelper.waitVisibilityBoolean(By.css("#dashboard-item"))
-//         expect(isVisible).to.be.true
-//     })
-
-//     test("waitVisibilityBoolean", async () => {
-//         const isVisible = await driverHelper.waitVisibilityBoolean(By.css("#dashboard-item aaaa"))
-//         expect(isVisible).to.be.false
-//     })
-
-//     test("waitDisappearanceBoolean", async () => {
-//         const isDisappeared = await driverHelper.waitDisappearanceBoolean(By.css("#dashboard-item"))
-//         expect(isDisappeared).to.be.false
-//     })
-
-//     test("waitDisappearanceBoolean", async () => {
-//         const isDisappeared = await driverHelper.waitDisappearanceBoolean(By.css("#dashboard-item aaaa"))
-//         expect(isDisappeared).to.be.true
-//     })
-
-//     test("waitDisappearance", async () => {
-//         await driverHelper.waitDisappearance(By.css("#dashboard-item aaaa"))
-//     })
-
-//     test("waitDisappearance", async () => {
-
-//         setTimeout(() => {
-//             driver.get().quit()
-//         }, 3000)
-
-//         test("click dashboard button", async () => {
-//             await driverHelper.click(By.css("#dashboard-item"))
-//         })
-
-//         test("waitAllDisappearance", async () => {
-//             await driverHelper.waitAllDisappearance([By.css("#dashboard-item aaa"), By.css("#workspaces-item aaa"), By.css("#stacks-item aaa")], 5, 1000)
-//         })
-
-//         test("waitAllDisappearance", async () => {
-//             await driverHelper.waitAllDisappearance([By.css("#dashboard-item"), By.css("#workspaces-item"), By.css("#stacks-item")], 5, 1000)
-//         })
-
-//         suiteTeardown("close browser", async () => {
-//             setTimeout(() => {
-//                 driver.get().quit()
-//             }, 3000)
-//         })
-
-//     })
-
+// suiteTeardown("close browser", async () => {
+//     driver.get().quit()
 // })
+
+
+
+
+
 
