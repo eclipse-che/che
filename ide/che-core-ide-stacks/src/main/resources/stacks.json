@@ -2652,15 +2652,15 @@
     "description": "Default stack with Python 3.7 and Theia IDE",
     "components": [
       {
-        "version": "9",
-        "name": "Debian"
+        "version": "7.6",
+        "name": "CentOS"
       },
       {
-        "version": "3.7.3",
+        "version": "3.6.3",
         "name": "Python"
       },
       {
-        "version": "19.0.3 ",
+        "version": "9.0.1",
         "name": "PIP"
       }
     ],
@@ -2668,16 +2668,22 @@
       "environments": {
         "default": {
           "recipe": {
-            "content": "python:3.7.3",
+            "content": "centos/python-36-centos7:1",
             "type": "dockerimage"
           },
           "machines": {
             "python": {
+              "servers": {
+                "django": {
+                  "attributes": {},
+                  "protocol": "http",
+                  "port": "7000"
+                }
+              },
               "env": {
                 "PS1": "$(echo ${0})\\$ ",
                 "HOME": "/home/user"
               },
-              "servers": {},
               "volumes": {
                 "projects": {
                   "path": "/projects"
