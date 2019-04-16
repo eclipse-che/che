@@ -11,6 +11,10 @@ test-output/
 maven-eclipse.xml
 .factorypath
 
+# Theia #
+##################
+.theia/
+
 # Idea #
 ##################
 *.iml
