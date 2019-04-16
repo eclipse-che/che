@@ -38,7 +38,7 @@ function webpackWrapper(watch, test, callback) {
         {
           test: /\.ts$/,
           exclude: /node_modules/,
-          loaders: ['babel-loader', 'awesome-typescript-loader']
+          loaders: ['babel-loader', 'ts-loader']
         },
         {
           test: /\.css$/,
