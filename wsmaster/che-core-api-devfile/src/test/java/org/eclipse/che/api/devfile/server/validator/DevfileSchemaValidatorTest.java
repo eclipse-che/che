@@ -15,7 +15,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.testng.annotations.BeforeClass;
@@ -27,16 +26,13 @@ public class DevfileSchemaValidatorTest {
 
   private DevfileSchemaValidator schemaValidator;
 
-  private static final Pattern TEST =
-      Pattern.compile("https?://[a-zA-Z0-9_\\-\\./]+[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}");
-
   @BeforeClass
   public void setUp() {
     schemaValidator = new DevfileSchemaValidator(new DevfileSchemaProvider());
   }
 
   @Test(dataProvider = "validDevfiles")
-  public void shouldNotThrowExceptionOnValidationValidDevfile(String resourceFilePath)
+  public void shouldNotThrowExceptionOnValidationOfValidDevfile(String resourceFilePath)
       throws Exception {
     schemaValidator.validateBySchema(getResource(resourceFilePath));
   }
@@ -63,7 +59,7 @@ public class DevfileSchemaValidatorTest {
   }
 
   @Test(dataProvider = "invalidDevfiles")
-  public void shouldThrowExceptionOnValidationNonValidDevfile(
+  public void shouldThrowExceptionOnValidationOfNonValidDevfile(
       String resourceFilePath, String expectedMessageRegexp) throws Exception {
     try {
       schemaValidator.validateBySchema(getResource(resourceFilePath));
@@ -94,10 +90,6 @@ public class DevfileSchemaValidatorTest {
         "Devfile schema validation failed. Error: /devfile object instance has properties which are not allowed by the schema: [\"unknown\"]"
       },
       // component model testing
-      {
-        "component/devfile_missing_component_name.yaml",
-        "Devfile schema validation failed. Error: /devfile/components/0 object has missing required properties ([\"name\"])"
-      },
       {
         "component/devfile_missing_component_type.yaml",
         "Devfile schema validation failed. Error: /devfile/components/0 object has missing required properties ([\"type\"])"

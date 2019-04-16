@@ -128,7 +128,6 @@
       "items": {
         "type": "object",
         "required": [
-          "name",
           "type"
         ],
         "dependencies": {
@@ -146,7 +145,7 @@
                   "chePlugin"
                 ]
               },
-              "name": {},
+              "alias": {},
               "id": {}
             },
             "required": [
@@ -162,7 +161,7 @@
                   "openshift"
                 ]
               },
-              "name": {},
+              "alias": {},
               "reference": {},
               "referenceContent": {},
               "selector": {},
@@ -180,7 +179,7 @@
                   "dockerimage"
                 ]
               },
-              "name": {},
+              "alias": {},
               "image": {},
               "memoryLimit": {},
               "mountSources": {},
@@ -198,8 +197,8 @@
           }
         ],
         "properties": {
-          "name": {
-            "description": "Describes the name of the component. Should be unique per components set.",
+          "alias": {
+            "description": "The name using which other places of this devfile (like commands) can refer to this component.",
             "type": "string",
             "examples": [
               "mvn-stack"

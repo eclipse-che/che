@@ -12,7 +12,7 @@
 package org.eclipse.che.api.devfile.server.convert.component.plugin;
 
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
@@ -40,12 +40,12 @@ public class PluginComponentToWorkspaceApplierTest {
       throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
-    superPluginComponent.setName("super-plugin");
+    superPluginComponent.setAlias("super-plugin");
     superPluginComponent.setId("org.eclipse.che.super-plugin:0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     ComponentImpl customPluginComponent = new ComponentImpl();
-    customPluginComponent.setName("custom");
+    customPluginComponent.setAlias("custom");
     customPluginComponent.setId("custom-plugin:v1");
     customPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
@@ -73,13 +73,13 @@ public class PluginComponentToWorkspaceApplierTest {
       throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
-    superPluginComponent.setName("super-plugin");
+    superPluginComponent.setAlias("super-plugin");
     superPluginComponent.setId("org.eclipse.che.super-plugin:0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     CommandImpl command = new CommandImpl();
-    command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, "super-plugin");
+    command.getAttributes().put(COMPONENT_ALIAS_COMMAND_ATTRIBUTE, "super-plugin");
     workspaceConfig.getCommands().add(command);
 
     // when
@@ -96,14 +96,14 @@ public class PluginComponentToWorkspaceApplierTest {
       throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
-    superPluginComponent.setName("super-plugin");
+    superPluginComponent.setAlias("super-plugin");
     superPluginComponent.setId(
         "https://custom-plugin.registry/plugins/org.eclipse.che.super-plugin:0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     CommandImpl command = new CommandImpl();
-    command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, "super-plugin");
+    command.getAttributes().put(COMPONENT_ALIAS_COMMAND_ATTRIBUTE, "super-plugin");
     workspaceConfig.getCommands().add(command);
 
     // when

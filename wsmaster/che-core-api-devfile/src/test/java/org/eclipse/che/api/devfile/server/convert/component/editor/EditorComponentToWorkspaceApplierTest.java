@@ -12,7 +12,7 @@
 package org.eclipse.che.api.devfile.server.convert.component.editor;
 
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
@@ -41,7 +41,7 @@ public class EditorComponentToWorkspaceApplierTest {
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     ComponentImpl editorComponent = new ComponentImpl();
     editorComponent.setType(EDITOR_COMPONENT_TYPE);
-    editorComponent.setName("editor");
+    editorComponent.setAlias("editor");
     editorComponent.setId("org.eclipse.che.super-editor:0.0.1");
 
     // when
@@ -60,13 +60,13 @@ public class EditorComponentToWorkspaceApplierTest {
       throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
-    superPluginComponent.setName("editor");
+    superPluginComponent.setAlias("editor");
     superPluginComponent.setId("org.eclipse.che.super-editor:0.0.1");
     superPluginComponent.setType(EDITOR_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     CommandImpl command = new CommandImpl();
-    command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, "editor");
+    command.getAttributes().put(COMPONENT_ALIAS_COMMAND_ATTRIBUTE, "editor");
     workspaceConfig.getCommands().add(command);
 
     // when
@@ -83,14 +83,14 @@ public class EditorComponentToWorkspaceApplierTest {
       throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
-    superPluginComponent.setName("editor");
+    superPluginComponent.setAlias("editor");
     superPluginComponent.setId(
         "https://custom-plugin.registry/plugins/org.eclipse.che.super-editor:0.0.1");
     superPluginComponent.setType(EDITOR_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     CommandImpl command = new CommandImpl();
-    command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, "editor");
+    command.getAttributes().put(COMPONENT_ALIAS_COMMAND_ATTRIBUTE, "editor");
     workspaceConfig.getCommands().add(command);
 
     // when

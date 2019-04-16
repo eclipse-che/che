@@ -14,7 +14,6 @@
 specVersion: 0.0.1
 name: petclinic-dev-environment
 projects:
-projects:
   - name: petclinic
     source:
       type: git

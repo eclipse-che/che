@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
@@ -65,22 +65,24 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
     String pluginsAliases =
         workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
-    workspaceConfig
-        .getAttributes()
-        .put(
-            PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
-            append(pluginsAliases, pluginComponent.getId() + "=" + pluginComponent.getName()));
+    if (pluginComponent.getAlias() != null) {
+      workspaceConfig
+          .getAttributes()
+          .put(
+              PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
+              append(pluginsAliases, pluginComponent.getId() + "=" + pluginComponent.getAlias()));
+    }
 
     String pluginIdVersion = resolveIdAndVersion(pluginComponent.getId());
     for (CommandImpl command : workspaceConfig.getCommands()) {
-      String commandComponent = command.getAttributes().get(COMPONENT_NAME_COMMAND_ATTRIBUTE);
+      String commandComponent = command.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE);
 
       if (commandComponent == null) {
         // command does not have component information
         continue;
       }
 
-      if (!commandComponent.equals(pluginComponent.getName())) {
+      if (!commandComponent.equals(pluginComponent.getAlias())) {
         continue;
       }
 

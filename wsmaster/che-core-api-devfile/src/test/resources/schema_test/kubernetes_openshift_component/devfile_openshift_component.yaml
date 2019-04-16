@@ -14,7 +14,7 @@
 specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
-  - name: mysql
+  - alias: mysql
     type: openshift
     reference: petclinic.yaml
     selector:

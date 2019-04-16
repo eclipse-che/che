@@ -14,5 +14,5 @@
 specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
-  - name: maven
+  - alias: maven
     id: org.eclipse.chemaven-jdk8:1.0.0

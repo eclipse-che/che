@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
+import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
@@ -66,11 +67,11 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Duplicate component name found:'mvn-stack'")
+      expectedExceptionsMessageRegExp = "Duplicate component alias found:'mvn-stack'")
   public void shouldThrowExceptionOnDuplicateComponentName() throws Exception {
     DevfileImpl broken = new DevfileImpl(initialDevfile);
     ComponentImpl component = new ComponentImpl();
-    component.setName(initialDevfile.getComponents().get(0).getName());
+    component.setAlias(initialDevfile.getComponents().get(0).getAlias());
     broken.getComponents().add(component);
     // when
     integrityValidator.validateDevfile(broken);
@@ -78,11 +79,12 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Multiple editor components found: 'theia-ide', 'editor-2'")
+      expectedExceptionsMessageRegExp =
+          "Multiple editor components found: 'org.eclipse.chetheia:0.0.3', 'editor-2'")
   public void shouldThrowExceptionOnMultipleEditors() throws Exception {
     DevfileImpl broken = new DevfileImpl(initialDevfile);
     ComponentImpl component = new ComponentImpl();
-    component.setName("editor-2");
+    component.setAlias("editor-2");
     component.setType(EDITOR_COMPONENT_TYPE);
     broken.getComponents().add(component);
     // when
@@ -128,7 +130,7 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Command 'build' has action that refers to non-existing components 'no_such_component'")
+          "Command 'build' has action that refers to a component with unknown alias 'no_such_component'")
   public void shouldThrowExceptionOnUnexistingCommandActionComponent() throws Exception {
     DevfileImpl broken = new DevfileImpl(initialDevfile);
     broken.getCommands().get(0).getActions().clear();
@@ -238,5 +240,32 @@ public class DevfileIntegrityValidatorTest {
 
     // then
     // no exception is thrown
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "There are multiple components 'dockerimage:latest' of type 'dockerimage' that cannot be"
+              + " uniquely identified. Please add aliases that would distinguish the components.")
+  public void shouldRequireAliasWhenDockerImageComponentsHaveSameImage() throws Exception {
+    // given
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+
+    ComponentImpl docker1 = new ComponentImpl();
+    docker1.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    docker1.setImage("dockerimage:latest");
+
+    ComponentImpl docker2 = new ComponentImpl();
+    docker2.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    docker2.setImage("dockerimage:latest");
+
+    devfile.getComponents().add(docker1);
+    devfile.getComponents().add(docker2);
+
+    // when
+    integrityValidator.validateDevfile(devfile);
+
+    // then
+    // exception is thrown
   }
 }

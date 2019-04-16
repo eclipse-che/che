@@ -14,7 +14,7 @@ package org.eclipse.che.api.devfile.server.convert.component.editor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
@@ -52,14 +52,16 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         EDITOR_COMPONENT_TYPE.equals(editorComponent.getType()),
         format("Plugin must have `%s` type", EDITOR_COMPONENT_TYPE));
 
-    String editorComponentName = editorComponent.getName();
+    String editorComponentAlias = editorComponent.getAlias();
     String editorId = editorComponent.getId();
 
     workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, editorId);
 
-    workspaceConfig
-        .getAttributes()
-        .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentName);
+    if (editorComponentAlias != null) {
+      workspaceConfig
+          .getAttributes()
+          .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
+    }
 
     String editorIdVersion = resolveIdAndVersion(editorComponent.getId());
     workspaceConfig
@@ -67,7 +69,9 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         .stream()
         .filter(
             c ->
-                c.getAttributes().get(COMPONENT_NAME_COMMAND_ATTRIBUTE).equals(editorComponentName))
+                c.getAttributes()
+                    .get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
+                    .equals(editorComponentAlias))
         .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, editorIdVersion));
   }
 
