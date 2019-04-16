@@ -211,13 +211,13 @@ CREATE UNIQUE INDEX index_devfile_entrypoint_id_parent_container ON devfile_entr
 
 -- entrypoint arg
 CREATE TABLE entrypoint_arg (
-    entrypoint_id    BIGINT,
-    arg              VARCHAR(255) NOT NULL
+    devfile_entrypoint_id    BIGINT,
+    arg                      VARCHAR(255) NOT NULL
 );
 
 -- constraints & indexes
-ALTER TABLE entrypoint_arg ADD CONSTRAINT fk_entrypoint_arg_id FOREIGN KEY (entrypoint_id) REFERENCES devfile_entrypoint (id);
-CREATE INDEX index_entrypoint_arg_entrypoint_id ON entrypoint_arg (entrypoint_id);
+ALTER TABLE entrypoint_arg ADD CONSTRAINT fk_entrypoint_arg_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
+CREATE INDEX index_entrypoint_arg_entrypoint_id ON entrypoint_arg (devfile_entrypoint_id);
 
 
 -- entrypoint commands
@@ -232,14 +232,14 @@ CREATE INDEX index_entrypoint_commands_entrypoint_id ON entrypoint_commands (dev
 
 
 CREATE TABLE entrypoint_selector (
-    entrypoint_id    BIGINT,
-    selector_key     VARCHAR(255) NOT NULL,
-    selector         VARCHAR(255) NOT NULL
+    devfile_entrypoint_id    BIGINT,
+    selector_key             VARCHAR(255) NOT NULL,
+    selector                 VARCHAR(255) NOT NULL
 );
 
 -- constraints & indexes
-ALTER TABLE entrypoint_selector ADD CONSTRAINT fk_entrypoint_selector_id FOREIGN KEY (entrypoint_id) REFERENCES devfile_entrypoint (id);
-CREATE UNIQUE INDEX index_entrypoint_selectors_keys ON entrypoint_selector (entrypoint_id, selector_key);
+ALTER TABLE entrypoint_selector ADD CONSTRAINT fk_entrypoint_selector_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
+CREATE UNIQUE INDEX index_entrypoint_selectors_keys ON entrypoint_selector (devfile_entrypoint_id, selector_key);
 
 
 -----------------------------------------------------------------------------------------------------------------------------------
