@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -57,60 +58,70 @@ public class PluginFQNParser {
 
     List<PluginFQN> metaFQNs = new ArrayList<>();
     if (!isNullOrEmpty(pluginsAttribute)) {
-      String[] plugins = splitAttribute(pluginsAttribute);
-      if (plugins.length != 0) {
-        metaFQNs.addAll(parsePluginFQNs(plugins));
-      }
+      metaFQNs.addAll(parsePluginFQNs(pluginsAttribute));
     }
     if (!isNullOrEmpty(editorAttribute)) {
-      String[] editor = splitAttribute(editorAttribute);
-      if (editor.length > 1) {
+      Collection<PluginFQN> editorsFQNs = parsePluginFQNs(editorAttribute);
+      if (editorsFQNs.size() > 1) {
         throw new InfrastructureException(
             "Multiple editors found in workspace config attributes. "
                 + "Only one editor is supported per workspace.");
       }
-      metaFQNs.addAll(parsePluginFQNs(editor));
+      metaFQNs.addAll(editorsFQNs);
     }
     return metaFQNs;
   }
 
-  private Collection<PluginFQN> parsePluginFQNs(String... plugins) throws InfrastructureException {
+  private Collection<PluginFQN> parsePluginFQNs(String attribute) throws InfrastructureException {
+
+    String[] plugins = splitAttribute(attribute);
+    if (plugins.length == 0) {
+      return Collections.emptyList();
+    }
+
     List<PluginFQN> collectedFQNs = new ArrayList<>();
     for (String plugin : plugins) {
-      URI repo = null;
-      String idVersionString;
-      final int idVersionTagDelimiter = plugin.lastIndexOf("/");
-      idVersionString = plugin.substring(idVersionTagDelimiter + 1);
-      if (idVersionTagDelimiter > -1) {
-        try {
-          repo = new URI(plugin.substring(0, idVersionTagDelimiter));
-        } catch (URISyntaxException e) {
-          throw new InfrastructureException(
-              String.format(
-                  "Plugin registry URL is incorrect. Problematic plugin entry: %s", plugin));
-        }
-      }
-      String[] idAndVersion = idVersionString.split(":");
-      if (idAndVersion.length != 2 || idAndVersion[0].isEmpty() || idAndVersion[1].isEmpty()) {
-        throw new InfrastructureException(
-            String.format("Plugin format is illegal. Problematic plugin entry: %s", plugin));
-      }
+      PluginFQN pFQN = parsePlugin(plugin);
+
       if (collectedFQNs
           .stream()
           .anyMatch(
-              p -> p.getId().equals(idAndVersion[0]) && p.getVersion().equals(idAndVersion[1]))) {
+              p -> p.getId().equals(pFQN.getId()) && p.getVersion().equals(pFQN.getVersion()))) {
         throw new InfrastructureException(
             String.format(
                 "Invalid Che tooling plugins configuration: plugin %s:%s is duplicated",
-                idAndVersion[0], idAndVersion[1])); // even if different repos
+                pFQN.getId(), pFQN.getVersion())); // even if different repos
       }
-      collectedFQNs.add(new PluginFQN(repo, idAndVersion[0], idAndVersion[1]));
+      collectedFQNs.add(pFQN);
     }
     return collectedFQNs;
   }
 
+  private PluginFQN parsePlugin(String plugin) throws InfrastructureException {
+    URI repo = null;
+    String idVersionString;
+    final int idVersionTagDelimiter = plugin.lastIndexOf("/");
+    idVersionString = plugin.substring(idVersionTagDelimiter + 1);
+    if (idVersionTagDelimiter > -1) {
+      try {
+        repo = new URI(plugin.substring(0, idVersionTagDelimiter));
+      } catch (URISyntaxException e) {
+        throw new InfrastructureException(
+            String.format(
+                "Plugin registry URL is incorrect. Problematic plugin entry: %s", plugin));
+      }
+    }
+    String[] idAndVersion = idVersionString.split(":");
+    if (idAndVersion.length != 2 || idAndVersion[0].isEmpty() || idAndVersion[1].isEmpty()) {
+      throw new InfrastructureException(
+          String.format("Plugin format is illegal. Problematic plugin entry: %s", plugin));
+    }
+
+    return new PluginFQN(repo, idAndVersion[0], idAndVersion[1]);
+  }
+
   private String[] splitAttribute(String attribute) {
     String[] plugins = attribute.split(",");
-    return Arrays.stream(plugins).map(s -> s.trim()).toArray(String[]::new);
+    return Arrays.stream(plugins).map(String::trim).toArray(String[]::new);
   }
 }
