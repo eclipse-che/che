@@ -46,21 +46,21 @@ public class EntrypointImpl implements Entrypoint {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-      name = "entrypoint_commands",
+      name = "devfile_entrypoint_commands",
       joinColumns = @JoinColumn(name = "devfile_entrypoint_id"))
   @Column(name = "command")
   private List<String> command;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-      name = "entrypoint_arg",
+      name = "devfile_entrypoint_arg",
       joinColumns = @JoinColumn(name = "devfile_entrypoint_id"))
   @Column(name = "arg")
   private List<String> args;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-      name = "entrypoint_selector",
+      name = "devfile_entrypoint_selector",
       joinColumns = @JoinColumn(name = "devfile_entrypoint_id"))
   @MapKeyColumn(name = "selector_key")
   @Column(name = "selector")

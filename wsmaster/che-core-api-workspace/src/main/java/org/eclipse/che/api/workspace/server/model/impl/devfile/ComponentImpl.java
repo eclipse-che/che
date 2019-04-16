@@ -63,7 +63,7 @@ public class ComponentImpl implements Component {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-      name = "component_selector",
+      name = "devfile_component_selector",
       joinColumns = @JoinColumn(name = "devfile_component_id"))
   @MapKeyColumn(name = "selector_key")
   @Column(name = "selector")
@@ -80,13 +80,15 @@ public class ComponentImpl implements Component {
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
-      name = "component_command",
+      name = "devfile_component_command",
       joinColumns = @JoinColumn(name = "devfile_component_id"))
   @Column(name = "command")
   private List<String> command;
 
   @ElementCollection(fetch = FetchType.EAGER)
-  @CollectionTable(name = "component_arg", joinColumns = @JoinColumn(name = "devfile_component_id"))
+  @CollectionTable(
+      name = "devfile_component_arg",
+      joinColumns = @JoinColumn(name = "devfile_component_id"))
   @Column(name = "args")
   private List<String> args;
 

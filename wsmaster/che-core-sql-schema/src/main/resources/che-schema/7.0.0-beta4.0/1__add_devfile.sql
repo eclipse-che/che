@@ -114,35 +114,35 @@ CREATE UNIQUE INDEX index_devfile_component_name ON devfile_component (devfile_i
 
 
 -- component command
-CREATE TABLE component_command (
+CREATE TABLE devfile_component_command (
     devfile_component_id    BIGINT,
     command                 TEXT NOT NULL
 );
 
 -- constraints & indexes
-ALTER TABLE component_command ADD CONSTRAINT fk_component_command_component_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
-CREATE INDEX index_command_component_id ON component_command (devfile_component_id);
+ALTER TABLE devfile_component_command ADD CONSTRAINT fk_component_command_component_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
+CREATE INDEX index_command_component_id ON devfile_component_command (devfile_component_id);
 
 -- component arg
-CREATE TABLE component_arg (
+CREATE TABLE devfile_component_arg (
     devfile_component_id    BIGINT,
     args                    TEXT
 );
 
 --constraints
-ALTER TABLE component_arg ADD CONSTRAINT fk_component_command_arg_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
-CREATE INDEX index_args_component_id ON component_arg (devfile_component_id);
+ALTER TABLE devfile_component_arg ADD CONSTRAINT fk_component_command_arg_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
+CREATE INDEX index_args_component_id ON devfile_component_arg (devfile_component_id);
 
 -- component selector
-CREATE TABLE component_selector (
+CREATE TABLE devfile_component_selector (
     devfile_component_id    BIGINT,
     selector_key            VARCHAR(255),
     selector                VARCHAR(255)
 );
 
 -- constraints & indexes
-ALTER TABLE component_selector ADD CONSTRAINT fk_component_selector_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
-CREATE UNIQUE INDEX index_devfile_component_selector ON component_selector (devfile_component_id, selector_key);
+ALTER TABLE devfile_component_selector ADD CONSTRAINT fk_component_selector_id FOREIGN KEY (devfile_component_id) REFERENCES devfile_component (id);
+CREATE UNIQUE INDEX index_devfile_component_selector ON devfile_component_selector (devfile_component_id, selector_key);
 
 -- devfile endpoint
 CREATE TABLE devfile_endpoint (
@@ -210,36 +210,36 @@ CREATE UNIQUE INDEX index_devfile_entrypoint_id_parent_container ON devfile_entr
 
 
 -- entrypoint arg
-CREATE TABLE entrypoint_arg (
+CREATE TABLE devfile_entrypoint_arg (
     devfile_entrypoint_id    BIGINT,
     arg                      VARCHAR(255) NOT NULL
 );
 
 -- constraints & indexes
-ALTER TABLE entrypoint_arg ADD CONSTRAINT fk_entrypoint_arg_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
-CREATE INDEX index_entrypoint_arg_entrypoint_id ON entrypoint_arg (devfile_entrypoint_id);
+ALTER TABLE devfile_entrypoint_arg ADD CONSTRAINT fk_entrypoint_arg_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
+CREATE INDEX index_entrypoint_arg_entrypoint_id ON devfile_entrypoint_arg (devfile_entrypoint_id);
 
 
 -- entrypoint commands
-CREATE TABLE entrypoint_commands (
+CREATE TABLE devfile_entrypoint_commands (
     devfile_entrypoint_id    BIGINT,
     command                  VARCHAR(255) NOT NULL
 );
 
 -- constraints & indexes
-ALTER TABLE entrypoint_commands ADD CONSTRAINT fk_entrypoint_commands_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
-CREATE INDEX index_entrypoint_commands_entrypoint_id ON entrypoint_commands (devfile_entrypoint_id);
+ALTER TABLE devfile_entrypoint_commands ADD CONSTRAINT fk_entrypoint_commands_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
+CREATE INDEX index_entrypoint_commands_entrypoint_id ON devfile_entrypoint_commands (devfile_entrypoint_id);
 
 
-CREATE TABLE entrypoint_selector (
+CREATE TABLE devfile_entrypoint_selector (
     devfile_entrypoint_id    BIGINT,
     selector_key             VARCHAR(255) NOT NULL,
     selector                 VARCHAR(255) NOT NULL
 );
 
 -- constraints & indexes
-ALTER TABLE entrypoint_selector ADD CONSTRAINT fk_entrypoint_selector_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
-CREATE UNIQUE INDEX index_entrypoint_selectors_keys ON entrypoint_selector (devfile_entrypoint_id, selector_key);
+ALTER TABLE devfile_entrypoint_selector ADD CONSTRAINT fk_entrypoint_selector_id FOREIGN KEY (devfile_entrypoint_id) REFERENCES devfile_entrypoint (id);
+CREATE UNIQUE INDEX index_entrypoint_selectors_keys ON devfile_entrypoint_selector (devfile_entrypoint_id, selector_key);
 
 
 -----------------------------------------------------------------------------------------------------------------------------------
