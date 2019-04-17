@@ -2745,12 +2745,7 @@
           },
           "machines": {
             "go": {
-              "servers": {
-                "8080/tcp": {
-                  "port": "8080",
-                  "protocol": "http"
-                }
-              },
+              "servers": {},
               "env": {
                 "PS1": "$(echo ${0})\\$ ",
                 "GOPATH": "/go:/projects",
