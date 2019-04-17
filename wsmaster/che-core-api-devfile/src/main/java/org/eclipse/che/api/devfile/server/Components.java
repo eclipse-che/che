@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
@@ -29,9 +30,11 @@ public class Components {
    * alias is used or, if not defined, the identifying attribute corresponding to the component
    * type.
    *
-   * @return
+   * @throws IllegalStateException if the type of the component is not recognized which can be
+   *     classified as an implementation bug
    */
-  public static String getIdentifiableComponentName(Component component) {
+  public static String getIdentifiableComponentName(Component component)
+      throws IllegalStateException {
     if (component.getAlias() != null) {
       return component.getAlias();
     }
@@ -46,7 +49,8 @@ public class Components {
       case OPENSHIFT_COMPONENT_TYPE:
         return component.getReference();
       default:
-        return null;
+        throw new IllegalStateException(
+            format("Unhandled component type: %s", component.getType()));
     }
   }
 }

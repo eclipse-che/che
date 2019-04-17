@@ -101,14 +101,17 @@ public class DevfileIntegrityValidator {
    */
   public void validateContentReferences(Devfile devfile, FileContentProvider provider)
       throws DevfileFormatException {
-    try {
-      for (Component component : devfile.getComponents()) {
+    for (Component component : devfile.getComponents()) {
+      try {
         List<HasMetadata> selectedObjects = validateSelector(component, provider);
         validateEntrypointSelector(component, selectedObjects);
+      } catch (Exception e) {
+        throw new DevfileFormatException(
+            format(
+                "Failed to validate content reference of component '%s' of type '%s': %s",
+                getIdentifiableComponentName(component), component.getType(), e.getMessage()),
+            e);
       }
-    } catch (Exception e) {
-      throw new DevfileFormatException(
-          format("Failed to validate content references: %s", e.getMessage()), e);
     }
   }
 
@@ -157,8 +160,8 @@ public class DevfileIntegrityValidator {
         default:
           throw new DevfileFormatException(
               format(
-                  "Unsupported component '%s' type provided:'%s'",
-                  getIdentifiableComponentName(component), component.getType()));
+                  "One of the components has unsupported component type: '%s'",
+                  component.getType()));
       }
     }
     return definedAliases;
@@ -246,8 +249,9 @@ public class DevfileIntegrityValidator {
     if (content.isEmpty()) {
       throw new DevfileException(
           format(
-              "The selector of the component %s filters out all objects from the list.",
-              component.getAlias()));
+              "The selector of the component '%s' of type '%s' filters out all objects from"
+                  + " the list.",
+              getIdentifiableComponentName(component), component.getType()));
     }
 
     return content;
@@ -269,8 +273,9 @@ public class DevfileIntegrityValidator {
       if (cs.isEmpty()) {
         throw new DevfileFormatException(
             format(
-                "Component %s contains an entry point that doesn't match any container:\n%s",
-                component.getAlias(), toYAML(ep)));
+                "Component '%s' of type '%s' contains an entry point that doesn't match any"
+                    + " container:\n%s",
+                getIdentifiableComponentName(component), component.getType(), toYAML(ep)));
       }
     }
   }
