@@ -1,7 +1,7 @@
 import { Driver } from "../driver/Driver";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../types";
-import 'selenium-webdriver';
+import { error } from 'selenium-webdriver';
 import 'reflect-metadata';
 import { WebElementPromise, ThenableWebDriver, By, promise, until, WebElement, WebElementCondition } from "selenium-webdriver";
 import { TestConstants } from "../TestConstants";
@@ -70,15 +70,29 @@ export class DriverHelper {
         return false;
     }
 
-    public waitVisibility(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT): promise.Promise<WebElement> {
-        return new promise.Promise<WebElement>((resolve, reject) => {
-            this.driver
-                .wait(until.elementLocated(elementLocator), timeout)
-                .then(webElement => {
-                    this.driver.wait(until.elementIsVisible(webElement), timeout)
-                        .then(webElement => { resolve(webElement) })
-                })
-        })
+    public async waitVisibility(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT): Promise<WebElement> {
+        const attempts: number = TestConstants.DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.DEFAULT_POLLING
+
+        for (let i = 0; i < attempts; i++) {
+            const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), timeout)
+
+            try {
+                return await this.driver.wait(until.elementIsVisible(webElement), timeout)
+            } catch (err) {
+                if (err instanceof error.StaleElementReferenceError) {
+                   
+                    console.log("==>>> 'waitVisibility' catched exception")
+                   
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err;
+            }
+        }
+
+        throw new Error(`Exceeded maximum visibility checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`)
     }
 
     public async waitAllVisibility(locators: Array<By>, timeout = TestConstants.DEFAULT_TIMEOUT) {
@@ -121,7 +135,7 @@ export class DriverHelper {
 
     }
 
-    public async getElementAttribute(elementLocator: By, attribute: string, visibilityTimeout = TestConstants.DEFAULT_TIMEOUT): Promise<string> {
+    public async waitAndGetElementAttribute(elementLocator: By, attribute: string, visibilityTimeout = TestConstants.DEFAULT_TIMEOUT): Promise<string> {
         const attempts: number = TestConstants.DEFAULT_ATTEMPTS
         const polling: number = TestConstants.DEFAULT_POLLING
 
@@ -142,7 +156,7 @@ export class DriverHelper {
 
     public async waitAttributeValue(elementLocator: By, attribute: string, expectedValue: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
         await this.driver.wait(async () => {
-            const attributeValue: string = await this.getElementAttribute(elementLocator, attribute, timeout)
+            const attributeValue: string = await this.waitAndGetElementAttribute(elementLocator, attribute, timeout)
 
             return expectedValue === attributeValue
         },
@@ -199,12 +213,38 @@ export class DriverHelper {
         await this.waitAttributeValue(elementLocator, "value", text, timeout)
     }
 
-    public async waitAndSwitchToFrame(iframeLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT){
+    public async waitAndSwitchToFrame(iframeLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT) {
         this.driver.wait(until.ableToSwitchToFrame(iframeLocator), timeout)
     }
 
+    public async waitAndGetText(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT): Promise<string> {
+        const attempts: number = TestConstants.DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.DEFAULT_POLLING
 
 
+        for (let i = 0; i < attempts; i++) {
+            const element: WebElement = await this.waitVisibility(elementLocator, timeout);
+
+            try {
+                const innerText: string = await element.getText()
+                return innerText
+            } catch (err) {
+                await this.wait(polling)
+                continue
+            }
+        }
+
+        throw new Error(`Exceeded maximum text obtaining attempts, from the '${elementLocator}' element`)
+    }
+
+    public async waitAndGetValue(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT): Promise<string> {
+        const elementValue: string = await this.waitAndGetElementAttribute(elementLocator, 'value', timeout)
+        return elementValue
+    }
+
+    public async waitUntilTrue(callback: any, timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driver.wait(callback(), timeout)
+    }
 
 
 

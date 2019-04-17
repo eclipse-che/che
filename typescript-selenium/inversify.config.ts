@@ -12,7 +12,6 @@ import { WorkspaceDetails } from "./pageobjects/dashboard/workspace-details/Work
 import { WorkspaceDetailsPlugins } from "./pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins";
 import { Ide } from "./pageobjects/ide/Ide";
 import { TestWorkspaceUtil } from "./utils/workspace/TestWorkspaceUtil";
-import { RequestFactory } from "./utils/RequestFactory";
 
 const e2eContainer = new Container();
 
@@ -27,7 +26,6 @@ e2eContainer.bind<WorkspaceDetails>(CLASSES.WorkspaceDetails).to(WorkspaceDetail
 e2eContainer.bind<WorkspaceDetailsPlugins>(CLASSES.WorkspaceDetailsPlugins).to(WorkspaceDetailsPlugins).inSingletonScope();
 e2eContainer.bind<Ide>(CLASSES.Ide).to(Ide).inSingletonScope();
 e2eContainer.bind<TestWorkspaceUtil>(CLASSES.TestWorkspaceUtil).to(TestWorkspaceUtil).inSingletonScope();
-e2eContainer.bind<RequestFactory>(CLASSES.RequestFactory).to(RequestFactory).inSingletonScope();
 
 
 

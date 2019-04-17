@@ -23,6 +23,8 @@ import { NewWorkspace } from "./pageobjects/dashboard/NewWorkspace";
 import { WorkspaceDetails } from "./pageobjects/dashboard/workspace-details/WorkspaceDetails";
 import { WorkspaceDetailsPlugins } from "./pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins";
 import { Request, post, get } from "selenium-webdriver/http";
+import { TestWorkspaceUtil } from "./utils/workspace/TestWorkspaceUtil";
+import { Ide } from "./pageobjects/ide/Ide";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
@@ -36,13 +38,15 @@ const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
 const workspaceDetails: WorkspaceDetails = e2eContainer.get(CLASSES.WorkspaceDetails);
 const workspaceDetailsPlugins: WorkspaceDetailsPlugins = e2eContainer.get(CLASSES.WorkspaceDetailsPlugins)
+const testWorkspaceUtil: TestWorkspaceUtil = e2eContainer.get(CLASSES.TestWorkspaceUtil)
+const ide: Ide = e2eContainer.get(CLASSES.Ide)
+
 
 
 
 suite("E2E", async () => {
 
     suite("Login and wait dashboard", async () => {
-
         test("login", async () => {
             await loginPage.login()
         })
@@ -70,35 +74,34 @@ suite("E2E", async () => {
             await newWorkspace.clickOnAddButton()
             await newWorkspace.waitProjectAdding(sampleName)
 
-            await newWorkspace.selectCreateWorkspaceAndProceedEditing()
+            await newWorkspace.clickOnCreateAndOpenButton()
         })
 
-        test("Add 'Java Language Support' plugin to workspace", async () => {
-            const javaPluginName: string = "Language Support for Java(TM)";
-            const execPlugin: string = "Che machine-exec Service";
+        // test("Add 'Java Language Support' plugin to workspace", async () => {
+        //     const javaPluginName: string = "Language Support for Java(TM)";
+        //     const execPlugin: string = "Che machine-exec Service";
 
-            await workspaceDetails.waitPage(workspaceName);
-            await workspaceDetails.waitTabSelected('Overview')
-            await workspaceDetails.clickOnTab('Plugins')
-            await workspaceDetails.waitTabSelected('Plugins')
+        //     await workspaceDetails.waitPage(workspaceName);
+        //     await workspaceDetails.waitTabSelected('Overview')
+        //     await workspaceDetails.clickOnTab('Plugins')
+        //     await workspaceDetails.waitTabSelected('Plugins')
 
 
-            await workspaceDetailsPlugins.waitPluginEnabling(execPlugin)
-            await workspaceDetailsPlugins.waitPluginDisabling(javaPluginName)
-            await workspaceDetailsPlugins.clickOnPluginListItemSwitcher(javaPluginName)
-            await workspaceDetailsPlugins.waitPluginEnabling(javaPluginName)
+        //     await workspaceDetailsPlugins.waitPluginEnabling(execPlugin)
+        //     await workspaceDetailsPlugins.waitPluginDisabling(javaPluginName)
+        //     await workspaceDetailsPlugins.clickOnPluginListItemSwitcher(javaPluginName)
+        //     await workspaceDetailsPlugins.waitPluginEnabling(javaPluginName)
 
-            await workspaceDetails.waitSaveButton()
-            await workspaceDetails.clickOnSaveButton()
-            await workspaceDetails.waitSaveButtonDisappearance()
+        //     await workspaceDetails.waitSaveButton()
+        //     await workspaceDetails.clickOnSaveButton()
+        //     await workspaceDetails.waitSaveButtonDisappearance()
 
-            await workspaceDetails.clickOnOpenButton()
-        })
+        //     await workspaceDetails.clickOnOpenButton()
+        // })
 
         test("Wait IDE availability", async () => {
-            ide.waitWorkspaceAndIdeInIframe(namespace, workspaceName);
-            ide.openIdeWithoutFrames(workspaceName);
-            ide.waitWorkspaceAndIde(namespace, workspaceName);
+            await ide.waitAndSwitchToIdeFrame()
+            await ide.waitWorkspaceAndIde(namespace, workspaceName);
         })
 
 

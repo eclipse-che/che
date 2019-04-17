@@ -21,8 +21,7 @@ const CLASSES = {
     WorkspaceDetails: "WorkspaceDetails",
     WorkspaceDetailsPlugins: "WorkspaceDetailsPlugins",
     Ide: "Ide",
-    TestWorkspaceUtil: "TestWorkspaceUtil",
-    RequestFactory: "RequestFactory"
+    TestWorkspaceUtil: "TestWorkspaceUtil"
 }
 
 export { TYPES, CLASSES };

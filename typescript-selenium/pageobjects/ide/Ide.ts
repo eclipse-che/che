@@ -3,6 +3,7 @@ import { injectable, inject } from "inversify";
 import { CLASSES } from "../../types";
 import { TestConstants } from "../../TestConstants";
 import { By } from "selenium-webdriver";
+import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
 
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
@@ -18,20 +19,23 @@ import { By } from "selenium-webdriver";
 export class Ide {
 
     private readonly driverHelper: DriverHelper;
+    private readonly testWorkspaceUtil: TestWorkspaceUtil;
 
-    private static readonly TOP_MENU_PANEL: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
-    private static readonly LEFT_CONTENT_PANEL: string = "#theia-left-content-panel";
-    public static readonly EXPLORER_BUTTON: string = ".theia-app-left .p-TabBar-content li[title='Explorer']";
-    private static readonly PRELOADER: string = ".theia-preload";
+    private static readonly TOP_MENU_PANEL_CSS: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
+    private static readonly LEFT_CONTENT_PANEL_CSS: string = "#theia-left-content-panel";
+    public static readonly EXPLORER_BUTTON_XPATH: string = "(//*[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']//li[@title='Explorer'])[1]";
+    private static readonly PRELOADER_CSS: string = ".theia-preload";
     private static readonly IDE_IFRAME_CSS: string = "iframe#ide-application-iframe";
 
     constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper
+        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper,
+        @inject(CLASSES.TestWorkspaceUtil) testWorkspaceUtil: TestWorkspaceUtil
     ) {
         this.driverHelper = driverHelper;
+        this.testWorkspaceUtil = testWorkspaceUtil;
     }
 
-    async waitAndSwitchToIdeFrame(timeout = TestConstants.LOAD_PAGE_TIMEOUT){
+    async waitAndSwitchToIdeFrame(timeout = TestConstants.LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout)
     }
 
@@ -47,86 +51,64 @@ export class Ide {
         await this.driverHelper.waitDisappearance(notificationLocator, attempts, polling)
     }
 
-
-    waitWorkspaceAndIde(workspaceNamespace: string, workspaceName: string) {
-        cy.log("**=> Ide.waitWorkspaceAndIde**")
-            .then(() => {
-                this.testWorkspaceUtil.waitWorkspaceRunning(workspaceNamespace, workspaceName)
-            })
-            .then(() => {
-                [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.EXPLORER_BUTTON]
-                    .forEach(idePart => {
-                        cy.get(idePart, { timeout: Ide.LOAD_PAGE_TIMEOUT })
-                            .should('be.visible')
-                    })
-            });
+    async waitWorkspaceAndIde(workspaceNamespace: string, workspaceName: string, timeout = TestConstants.LOAD_PAGE_TIMEOUT) {
+        await this.testWorkspaceUtil.waitRunningStatus(workspaceNamespace, workspaceName)
+        await this.waitIde(timeout)
     }
 
-    waitIde() {
-        [Ide.TOP_MENU_PANEL, Ide.LEFT_CONTENT_PANEL, Ide.EXPLORER_BUTTON]
-            .forEach(idePart => {
-                cy.get(idePart, { timeout: Ide.LOAD_PAGE_TIMEOUT })
-                    .should('be.visible')
-            })
+    async waitIde(timeout = TestConstants.LOAD_PAGE_TIMEOUT) {
+        const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.xpath(Ide.EXPLORER_BUTTON_XPATH)]
+
+        for (const idePartLocator of mainIdeParts) {
+            await this.driverHelper.waitVisibility(idePartLocator, timeout)
+        }
     }
 
-    openIdeWithoutFrames(workspaceName: string) {
-        cy.log("**=> Ide.openIdeWithoutFrames**")
-            .then(() => {
-                let workspaceUrl: string = `/che/${workspaceName}`
-
-                cy.visit(workspaceUrl);
-            })
+    async waitExplorerButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.xpath(Ide.EXPLORER_BUTTON_XPATH), timeout)
     }
 
-    waitExplorerButton() {
-        cy.get(Ide.EXPLORER_BUTTON)
-            .should('be.visible');
+    async clickOnExplorerButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitAndClick(By.xpath(Ide.EXPLORER_BUTTON_XPATH), timeout)
     }
 
-    clickOnExplorerButton() {
-        cy.get(Ide.EXPLORER_BUTTON)
-            .first()
-            .click();
+    async waitTopMenuPanel(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.css(Ide.TOP_MENU_PANEL_CSS), timeout)
     }
 
-    waitTopMenuPanel() {
-        cy.get(Ide.TOP_MENU_PANEL)
-            .should('be.visible');
+    async waitLeftContentPanel(timeout = TestConstants.DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.css(Ide.LEFT_CONTENT_PANEL_CSS))
     }
 
-    waitLeftContentPanel() {
-        cy.get(Ide.LEFT_CONTENT_PANEL)
-            .should('be.visible');
+    async waitPreloaderAbsent(attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING) {
+        await this.driverHelper.waitDisappearance(By.css(Ide.PRELOADER_CSS), attempts, polling)
     }
 
-    waitPreloaderAbsent() {
-        cy.get(Ide.PRELOADER)
-            .should('not.be.visible');
+    async waitStatusBarContains(expectedText: string, timeout = TestConstants.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT) {
+        const statusBarLocator: By = By.css("div[id='theia-statusBar']")
+
+        await this.driverHelper.waitUntilTrue(async () => {
+            const elementText: string = await this.driverHelper.waitAndGetText(statusBarLocator, timeout)
+
+            return elementText.search(expectedText) > 0
+
+        }, timeout)
     }
 
-    waitStatusBarContains(expectedText: string) {
-        cy.get("div[id='theia-statusBar']", { timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT })
-            .should(elem => {
-                let elementText: string = elem[0].innerText.toString();
+    async waitStatusBarTextAbcence(expectedText: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+        const statusBarLocator: By = By.css("div[id='theia-statusBar']")
 
-                expect(elementText).contain(expectedText);
-            })
+        await this.driverHelper.waitUntilTrue(async () => {
+            const elementText: string = await this.driverHelper.waitAndGetText(statusBarLocator, timeout)
+
+            return elementText.search(expectedText) === 0
+
+        }, timeout)
 
     }
 
-    waitStatusBarTextAbcence(expectedText: string) {
-        cy.get("div[id='theia-statusBar']", { timeout: Ide.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT })
-            .should(elem => {
-                let elementText: string = elem[0].innerText.toString();
-
-                expect(elementText).not.contain(expectedText);
-            })
+    async waitIdeFrameAndSwitchOnIt(timeout = TestConstants.LOAD_PAGE_TIMEOUT){
+        await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout) 
     }
-
-
-
-
-
 
 }

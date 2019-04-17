@@ -83,7 +83,7 @@ suite("Test of 'DriverHelper' methods", async () => {
     ////
 
     test("getElementAttribute", async () => {
-        const attributValue: string = await driverHelper.getElementAttribute(By.css("#dashboard-item"), 'id')
+        const attributValue: string = await driverHelper.waitAndGetElementAttribute(By.css("#dashboard-item"), 'id')
         expect(attributValue).to.be.equal('dashboard-item')
     })
 
