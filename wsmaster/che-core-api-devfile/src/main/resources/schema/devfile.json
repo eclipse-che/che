@@ -198,7 +198,7 @@
         ],
         "properties": {
           "alias": {
-            "description": "The name using which other places of this devfile (like commands) can refer to this component.",
+            "description": "The name using which other places of this devfile (like commands) can refer to this component. This attribute is optional but must be unique in the devfile if specified.",
             "type": "string",
             "examples": [
               "mvn-stack"
