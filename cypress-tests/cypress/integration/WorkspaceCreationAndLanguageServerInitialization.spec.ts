@@ -73,10 +73,10 @@ describe("E2E test", () => {
             newWorkspace.clickOnAddButton();
             newWorkspace.waitProjectAdding(sampleName);
 
-            newWorkspace.selectCreateWorkspaceAndProceedEditing();
+            newWorkspace.clickOnCreateAndOpenButton();
         })
 
-        it("Add 'Java Language Support' plugin to workspace", () => {
+        it.skip("Add 'Java Language Support' plugin to workspace", () => {
             const javaPluginName: string = "Language Support for Java(TM)";
             const execPlugin: string = "Che machine-exec Service";
 
