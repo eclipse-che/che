@@ -292,6 +292,3 @@ attributes:
   - [NodeJS Application with Mongo DB example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-with-db-sample/devfile.yaml)
   - [Java Spring-Petclinic example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-java-spring-petclinic/devfile.yaml)
   - [Theia frontend plugin example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/theia-hello-world-frontend-plugin/devfile.yaml)
-
-### Planned features
-There is still a lot of plans to extend Devfile possibilities, such as support multiple dockerimage components etc
