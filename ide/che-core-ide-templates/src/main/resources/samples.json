@@ -1259,58 +1259,6 @@
     ]
   },
   {
-    "name": "go-chat-sample",
-    "displayName": "go-chat-sample",
-    "path": "/go-chat-sample",
-    "description": "Go Chat Sample.",
-    "projectType": "go",
-    "mixins": [],
-    "attributes": {
-      "language": [
-        "go"
-      ]
-    },
-    "modules": [],
-    "problems": [],
-    "source": {
-      "type": "git",
-      "location": "https://github.com/che-samples/go-chat-sample",
-      "parameters": {}
-    },
-    "commands": [
-      {
-        "name": "run",
-        "type": "custom",
-        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-chat-sample && go run main.go",
-        "attributes": {
-          "goal": "Run",
-          "previewUrl": "${server.8080/tcp}"
-        }
-      },
-      {
-        "name": "run",
-        "type": "custom",
-        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-chat-sample && go build",
-        "attributes": {
-          "goal": "Build"
-        }
-      },
-      {
-        "name": "test",
-        "type": "custom",
-        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-chat-sample && go test ./...",
-        "attributes": {
-          "goal": "Test"
-        }
-      }
-    ],
-    "links": [],
-    "category": "Samples",
-    "tags": [
-      "Go"
-    ]
-  },
-  {
     "name": "go-realworld-example-app",
     "displayName": "go-realworld-example-app",
     "path": "/src/github.com/xesina/golang-echo-realworld-example-app",
