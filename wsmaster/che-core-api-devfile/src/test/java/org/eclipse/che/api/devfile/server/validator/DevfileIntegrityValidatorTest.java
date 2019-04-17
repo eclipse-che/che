@@ -68,7 +68,7 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp = "Duplicate component alias found:'mvn-stack'")
-  public void shouldThrowExceptionOnDuplicateComponentName() throws Exception {
+  public void shouldThrowExceptionOnDuplicateComponentAlias() throws Exception {
     DevfileImpl broken = new DevfileImpl(initialDevfile);
     ComponentImpl component = new ComponentImpl();
     component.setAlias(initialDevfile.getComponents().get(0).getAlias());
