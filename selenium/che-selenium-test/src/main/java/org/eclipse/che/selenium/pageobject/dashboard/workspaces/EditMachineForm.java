@@ -50,7 +50,7 @@ public class EditMachineForm {
   }
 
   public interface Locators {
-    String EDIT_MACHINE_FORM_BODY_XPATH = "//md-dialog[@aria-label='Edit the machineName: ...']";
+    String EDIT_MACHINE_FORM_BODY_XPATH = "//che-popup[@title='Edit the container']";
     String NAME_TEXT_FIELD_XPATH = EDIT_MACHINE_FORM_BODY_XPATH + "//input[@name='name']";
     String RECIPE_EDITOR_BODY_XPATH =
         EDIT_MACHINE_FORM_BODY_XPATH + "//div[@class='CodeMirror-scroll']";

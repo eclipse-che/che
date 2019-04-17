@@ -49,14 +49,14 @@ public class WorkspaceMachines {
     String DELETE_MACHINE = "//div[@delete-machine='%s']";
     String NEW_MACHINE_NAME = "//div[@che-form='editMachineForm']//input";
     String SAVE_MACHINE_BUTTON = "save-machine-button";
-    String EDIT_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Edit the machine']";
-    String REMOVE_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Remove machine']";
-    String ADD_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Add a new machine']";
+    String EDIT_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Edit the container']";
+    String REMOVE_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Remove container']";
+    String ADD_MACHINE_DIALOG_NAME = "//md-dialog/che-popup[@title='Add a new container']";
     String RAM_WORKSPACE = "//input[contains(@name, 'memory')]";
     String WARNING_MSG = "//div[@class='workspace-environments-input']//div[text()='%s']";
     String CONFIG_MACHINE_SWITCH =
         "//div[text()='%s']//following::div[@class='config-dev-machine-switch ng-scope'][1]";
-    String ADD_MACHINE_BUTTON = "//che-button-primary[@che-button-title = 'Add machine']/button";
+    String ADD_MACHINE_BUTTON = "//che-button-primary[@che-button-title = 'Add container']/button";
   }
 
   @FindBy(xpath = Locators.RAM_WORKSPACE)

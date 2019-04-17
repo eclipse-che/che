@@ -12,6 +12,7 @@
 package org.eclipse.che.api.devfile.server.convert;
 
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,6 +22,8 @@ import static org.testng.Assert.assertSame;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.HashMap;
+import java.util.Map;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
@@ -181,6 +184,27 @@ public class DevfileConverterTest {
 
     // then
     verify(defaultEditorToolApplier).apply(devfile);
+  }
+
+  @Test
+  public void
+      shouldProvisionDevfileAttributesAsConfigAttributesDuringConvertingDevfileToWorkspaceConfig()
+          throws Exception {
+    // given
+    FileContentProvider fileContentProvider = mock(FileContentProvider.class);
+    Map<String, String> devfileAttributes = new HashMap<>();
+    devfileAttributes.put(PERSIST_VOLUMES_ATTRIBUTE, "false");
+    devfileAttributes.put("anotherAttribute", "value");
+
+    DevfileImpl devfile = newDevfile("petclinic");
+    devfile.getAttributes().putAll(devfileAttributes);
+
+    // when
+    WorkspaceConfigImpl config =
+        devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
+
+    // then
+    assertEquals(config.getAttributes(), devfileAttributes);
   }
 
   @Test
