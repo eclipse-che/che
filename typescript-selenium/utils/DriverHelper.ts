@@ -246,6 +246,10 @@ export class DriverHelper {
         await this.driver.wait(callback(), timeout)
     }
 
+    public async reloadPage(){
+        await this.driver.navigate().refresh();
+    }
+
 
 
 }

@@ -23,7 +23,8 @@ export class Ide {
 
     private static readonly TOP_MENU_PANEL_CSS: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
     private static readonly LEFT_CONTENT_PANEL_CSS: string = "#theia-left-content-panel";
-    public static readonly EXPLORER_BUTTON_XPATH: string = "(//*[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']//li[@title='Explorer'])[1]";
+    public static readonly EXPLORER_BUTTON_XPATH: string = "(//ul[@class='p-TabBar-content']//li[@title='Explorer'])[1]";
+    public static readonly SELECTED_EXPLORER_BUTTON_XPATH: string = "(//ul[@class='p-TabBar-content']//li[@title='Explorer' and contains(@class, 'p-mod-current')])[1]"
     private static readonly PRELOADER_CSS: string = ".theia-preload";
     private static readonly IDE_IFRAME_CSS: string = "iframe#ide-application-iframe";
 

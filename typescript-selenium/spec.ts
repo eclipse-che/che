@@ -25,6 +25,7 @@ import { WorkspaceDetailsPlugins } from "./pageobjects/dashboard/workspace-detai
 import { Request, post, get } from "selenium-webdriver/http";
 import { TestWorkspaceUtil } from "./utils/workspace/TestWorkspaceUtil";
 import { Ide } from "./pageobjects/ide/Ide";
+import { ProjectTree } from "./pageobjects/ide/ProjectTree";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
@@ -40,6 +41,7 @@ const workspaceDetails: WorkspaceDetails = e2eContainer.get(CLASSES.WorkspaceDet
 const workspaceDetailsPlugins: WorkspaceDetailsPlugins = e2eContainer.get(CLASSES.WorkspaceDetailsPlugins)
 const testWorkspaceUtil: TestWorkspaceUtil = e2eContainer.get(CLASSES.TestWorkspaceUtil)
 const ide: Ide = e2eContainer.get(CLASSES.Ide)
+const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree)
 
 
 
@@ -77,35 +79,67 @@ suite("E2E", async () => {
             await newWorkspace.clickOnCreateAndOpenButton()
         })
 
-        // test("Add 'Java Language Support' plugin to workspace", async () => {
-        //     const javaPluginName: string = "Language Support for Java(TM)";
-        //     const execPlugin: string = "Che machine-exec Service";
+        test.skip("Add 'Java Language Support' plugin to workspace", async () => {
+            const javaPluginName: string = "Language Support for Java(TM)";
+            const execPlugin: string = "Che machine-exec Service";
 
-        //     await workspaceDetails.waitPage(workspaceName);
-        //     await workspaceDetails.waitTabSelected('Overview')
-        //     await workspaceDetails.clickOnTab('Plugins')
-        //     await workspaceDetails.waitTabSelected('Plugins')
+            await workspaceDetails.waitPage(workspaceName);
+            await workspaceDetails.waitTabSelected('Overview')
+            await workspaceDetails.clickOnTab('Plugins')
+            await workspaceDetails.waitTabSelected('Plugins')
 
 
-        //     await workspaceDetailsPlugins.waitPluginEnabling(execPlugin)
-        //     await workspaceDetailsPlugins.waitPluginDisabling(javaPluginName)
-        //     await workspaceDetailsPlugins.clickOnPluginListItemSwitcher(javaPluginName)
-        //     await workspaceDetailsPlugins.waitPluginEnabling(javaPluginName)
+            await workspaceDetailsPlugins.waitPluginEnabling(execPlugin)
+            await workspaceDetailsPlugins.waitPluginDisabling(javaPluginName)
+            await workspaceDetailsPlugins.clickOnPluginListItemSwitcher(javaPluginName)
+            await workspaceDetailsPlugins.waitPluginEnabling(javaPluginName)
 
-        //     await workspaceDetails.waitSaveButton()
-        //     await workspaceDetails.clickOnSaveButton()
-        //     await workspaceDetails.waitSaveButtonDisappearance()
+            await workspaceDetails.waitSaveButton()
+            await workspaceDetails.clickOnSaveButton()
+            await workspaceDetails.waitSaveButtonDisappearance()
 
-        //     await workspaceDetails.clickOnOpenButton()
-        // })
+            await workspaceDetails.clickOnOpenButton()
+        })
 
         test("Wait IDE availability", async () => {
             await ide.waitAndSwitchToIdeFrame()
             await ide.waitWorkspaceAndIde(namespace, workspaceName);
         })
+    })
 
+    suite("Work with IDE", async () => {
+        let fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
+        let tabTitle: string = "HelloWorld.java";
+        let filePath: string = `${fileFolderPath}/${tabTitle}`
 
+        test("Open project tree container", async () => {
+            await projectTree.openProjectTreeContainer();
+            await projectTree.waitProjectTreeContainer();
+            await projectTree.waitProjectImported(sampleName, "src")
+        })
 
+        test("Expand project and open file in editor", async () => {
+            projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
+        })
+
+        //unskip after resolving issue https://github.com/eclipse/che/issues/12904
+        test.skip("Check \"Java Language Server\" initialization by statusbar", async () => {
+            ide.waitStatusBarContains("Starting Java Language Server")
+            ide.waitStatusBarContains("100% Starting Java Language Server")
+            ide.waitStatusBarTextAbcence("Starting Java Language Server")
+        })
+
+        //unskip after resolving issue https://github.com/eclipse/che/issues/12904
+        test.skip("Check \"Java Language Server\" initialization by suggestion invoking", async () => {
+            // editor.waitEditorAvailable(filePath, tabTitle);
+            // editor.clickOnTab(filePath);
+            // editor.waitEditorAvailable(filePath, tabTitle);
+
+            // editor.setCursorToLineAndChar(15, 33);
+            // editor.performControlSpaceCombination();
+            // editor.waitSuggestionContainer();
+            // editor.waitSuggestion("getContentType()");
+        })
 
     })
 
@@ -113,9 +147,9 @@ suite("E2E", async () => {
 
 })
 
-// suiteTeardown("close browser", async () => {
-//     driver.get().quit()
-// })
+suiteTeardown("close browser", async () => {
+    driver.get().quit()
+})
 
 
 

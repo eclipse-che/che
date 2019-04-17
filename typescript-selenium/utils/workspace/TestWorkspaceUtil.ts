@@ -7,8 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-// import * as request from 'request'
-import { TestConstants } from '../../TestConstants';
+
+ import { TestConstants } from '../../TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
 import { CLASSES } from '../../types';
@@ -21,9 +21,7 @@ import * as rm from 'typed-rest-client/RestClient'
 export class TestWorkspaceUtil {
     private readonly driverHelper: DriverHelper;
 
-    constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper
-    ) {
+    constructor(@inject(CLASSES.DriverHelper) driverHelper: DriverHelper) {
         this.driverHelper = driverHelper;
     }
 
@@ -39,9 +37,6 @@ export class TestWorkspaceUtil {
 
         for (let i = 0; i < attempts; i++) {
             let isWorkspaceStarting: boolean = false;
-
-            console.log("===>>>  waitRunningStatus: ", i)
-
 
             const response: rm.IRestResponse<any> = await rest.get(workspaceStatusApiUrl)
 
