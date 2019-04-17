@@ -17,7 +17,7 @@
       "type": "git",
       "location": "https://github.com/che-samples/web-java-spring-petclinic.git",
       "parameters": {
-        "branch":"mysql"
+        "branch": "mysql"
       }
     },
     "commands": [
@@ -71,8 +71,7 @@
     "description": "A blank project example.",
     "projectType": "blank",
     "mixins": [],
-    "attributes": {
-    },
+    "attributes": {},
     "modules": [],
     "problems": [],
     "source": {
@@ -210,78 +209,6 @@
     ]
   },
   {
-    "name": "web-go-simple",
-    "displayName": "web-go-simple",
-    "path": "/web-go-simple",
-    "description": "Simple Go Hello World.",
-    "projectType": "golang",
-    "mixins": [],
-    "attributes": {
-      "language": [
-        "go"
-      ]
-    },
-    "modules": [],
-    "problems": [],
-    "source": {
-      "type": "git",
-      "location": "https://github.com/che-samples/web-go-simple.git",
-      "parameters": {}
-    },
-    "commands": [
-      {
-        "name": "run",
-        "type": "custom",
-        "commandLine": "cd ${current.project.path} \ngo get -d \ngo run main.go",
-        "attributes": {
-          "previewUrl": "${server.8080/tcp}",
-          "goal": "Run"
-        }
-      }
-    ],
-    "links": [],
-    "category": "Samples",
-    "tags": [
-      "Go"
-    ]
-  },
-  {
-    "name": "desktop-go-simple",
-    "displayName": "desktop-go-simple",
-    "path": "/desktop-go-simple",
-    "description": "Simple Go Hello World.",
-    "projectType": "blank",
-    "mixins": [],
-    "attributes": {
-      "language": [
-        "go"
-      ]
-    },
-    "modules": [],
-    "problems": [],
-    "source": {
-      "type": "git",
-      "location": "https://github.com/che-samples/desktop-go-simple.git",
-      "parameters": {}
-    },
-    "commands": [
-      {
-        "name": "run",
-        "type": "custom",
-        "commandLine": "cd ${current.project.path} \ngo get -d \ngo run main.go",
-        "attributes": {
-          "previewUrl": "",
-          "goal": "Run"
-        }
-      }
-    ],
-    "links": [],
-    "category": "Samples",
-    "tags": [
-      "Go"
-    ]
-  },
-  {
     "name": "console-python3-simple",
     "displayName": "console-python3.5-simple",
     "path": "/console-python3-simple",
@@ -400,7 +327,6 @@
       "rails"
     ]
   },
-
   {
     "name": "nodejs-hello-world",
     "displayName": "nodejs-hello-world",
@@ -867,7 +793,7 @@
       "type": "git",
       "location": "https://github.com/Microsoft/TypeScriptSamples.git",
       "parameters": {
-        "keepDir":"greeter",
+        "keepDir": "greeter",
         "keepVcs": "false",
         "convertToTopLevelProject": "true"
       }
@@ -876,7 +802,8 @@
     "links": [],
     "category": "Samples",
     "tags": [
-      "TypeScript","ts"
+      "TypeScript",
+      "ts"
     ]
   },
   {
@@ -886,8 +813,7 @@
     "description": "A Ceylon 'Hello World' project example that runs on all supported backends.",
     "projectType": "blank",
     "mixins": [],
-    "attributes": {
-    },
+    "attributes": {},
     "modules": [],
     "problems": [],
     "source": {
@@ -1278,6 +1204,193 @@
     "category": "Samples",
     "tags": [
       "Python", "Django"
+    ]
+  },
+  {
+    "name": "go-web-sample",
+    "displayName": "go-web-sample",
+    "path": "/go-web-sample",
+    "description": "Go Web Sample.",
+    "projectType": "go",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "go"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/go-web-sample",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-web-sample && go run main.go",
+        "attributes": {
+          "goal": "Run",
+          "previewUrl": "${server.8080/tcp}"
+        }
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-web-sample && go build",
+        "attributes": {
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "test",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-web-sample && go test ./...",
+        "attributes": {
+          "goal": "Test"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Go"
+    ]
+  },
+  {
+    "name": "go-chat-sample",
+    "displayName": "go-chat-sample",
+    "path": "/go-chat-sample",
+    "description": "Go Chat Sample.",
+    "projectType": "go",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "go"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/che-samples/go-chat-sample",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-chat-sample && go run main.go",
+        "attributes": {
+          "goal": "Run",
+          "previewUrl": "${server.8080/tcp}"
+        }
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-chat-sample && go build",
+        "attributes": {
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "test",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-chat-sample && go test ./...",
+        "attributes": {
+          "goal": "Test"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Go"
+    ]
+  },
+  {
+    "name": "go-realworld-example-app",
+    "displayName": "go-realworld-example-app",
+    "path": "/src/github.com/xesina/golang-echo-realworld-example-app",
+    "description": "Go Real World Sample.",
+    "projectType": "go",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "go"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/xesina/golang-echo-realworld-example-app",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "install dependency management tool",
+        "type": "custom",
+        "commandLine": "curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh",
+        "attributes": {
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "install dependencies",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/src/github.com/xesina/golang-echo-realworld-example-app && dep ensure -v",
+        "attributes": {
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "go run",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/src/github.com/xesina/golang-echo-realworld-example-app && go run main.go",
+        "attributes": {
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "go build",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/src/github.com/xesina/golang-echo-realworld-example-app && go build",
+        "attributes": {
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "go test",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/src/github.com/xesina/golang-echo-realworld-example-app && go test ./...",
+        "attributes": {
+          "goal": "Test"
+        }
+      },
+      {
+        "name": "user create",
+        "type": "custom",
+        "commandLine": "curl --header \"Content-Type: application/json\" --request POST   --data '{\"user\": {\"Username\":\"user\", \"Email\":\"user@email\", \"Password\": \"password\"}}'  localhost:1323/api/users",
+        "attributes": {
+          "goal": "Test"
+        }
+      },
+      {
+        "name": "user login",
+        "type": "custom",
+        "commandLine": "curl --header \"Content-Type: application/json\" --request POST   --data '{\"user\": {\"Email\":\"user@email\", \"Password\": \"password\"}}'  localhost:1323/api/users/login",
+        "attributes": {
+          "goal": "Test"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Go"
     ]
   }
 ]
