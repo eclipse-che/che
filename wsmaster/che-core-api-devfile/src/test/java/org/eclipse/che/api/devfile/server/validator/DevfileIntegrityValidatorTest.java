@@ -268,4 +268,58 @@ public class DevfileIntegrityValidatorTest {
     // then
     // exception is thrown
   }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "There are multiple components 'list.yaml' of type 'kubernetes' that cannot be"
+              + " uniquely identified. Please add aliases that would distinguish the components.")
+  public void shouldRequireAliasWhenKubernetesComponentsHaveSameReference() throws Exception {
+    // given
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+
+    ComponentImpl k8s1 = new ComponentImpl();
+    k8s1.setType(KUBERNETES_COMPONENT_TYPE);
+    k8s1.setReference("list.yaml");
+
+    ComponentImpl k8s2 = new ComponentImpl();
+    k8s2.setType(KUBERNETES_COMPONENT_TYPE);
+    k8s2.setReference("list.yaml");
+
+    devfile.getComponents().add(k8s1);
+    devfile.getComponents().add(k8s2);
+
+    // when
+    integrityValidator.validateDevfile(devfile);
+
+    // then
+    // exception is thrown
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "There are multiple components 'list.yaml' of type 'openshift' that cannot be"
+              + " uniquely identified. Please add aliases that would distinguish the components.")
+  public void shouldRequireAliasWhenOpenshiftComponentsHaveSameReference() throws Exception {
+    // given
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+
+    ComponentImpl k8s1 = new ComponentImpl();
+    k8s1.setType(OPENSHIFT_COMPONENT_TYPE);
+    k8s1.setReference("list.yaml");
+
+    ComponentImpl k8s2 = new ComponentImpl();
+    k8s2.setType(OPENSHIFT_COMPONENT_TYPE);
+    k8s2.setReference("list.yaml");
+
+    devfile.getComponents().add(k8s1);
+    devfile.getComponents().add(k8s2);
+
+    // when
+    integrityValidator.validateDevfile(devfile);
+
+    // then
+    // exception is thrown
+  }
 }
