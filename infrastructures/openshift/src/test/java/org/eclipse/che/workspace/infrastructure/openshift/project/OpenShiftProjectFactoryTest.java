@@ -39,7 +39,7 @@ public class OpenShiftProjectFactoryTest {
   @Test
   public void shouldCreateAndPrepareProjectWithPredefinedValueIfItIsNotEmpty() throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("projectName", "", clientFactory));
+    projectFactory = spy(new OpenShiftProjectFactory("projectName", "", "", clientFactory));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -56,7 +56,7 @@ public class OpenShiftProjectFactoryTest {
   public void shouldCreateAndPrepareProjectWithWorkspaceIdAsNameIfConfiguredValueIsEmtpy()
       throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("", "", clientFactory));
+    projectFactory = spy(new OpenShiftProjectFactory("", "", "", clientFactory));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -73,7 +73,7 @@ public class OpenShiftProjectFactoryTest {
   public void shouldPrepareWorkspaceServiceAccountIfItIsConfiguredAndProjectIsNotPredefined()
       throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("", "serviceAccount", clientFactory));
+    projectFactory = spy(new OpenShiftProjectFactory("", "serviceAccount", "", clientFactory));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -92,7 +92,10 @@ public class OpenShiftProjectFactoryTest {
   public void shouldNotPrepareWorkspaceServiceAccountIfItIsConfiguredAndProjectIsPredefined()
       throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("namespace", "serviceAccount", clientFactory));
+    projectFactory =
+        spy(
+            new OpenShiftProjectFactory(
+                "namespace", "serviceAccount", "clusterRole", clientFactory));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -107,7 +110,7 @@ public class OpenShiftProjectFactoryTest {
   public void shouldNotPrepareWorkspaceServiceAccountIfItIsNotConfiguredAndProjectIsNotPredefined()
       throws Exception {
     // given
-    projectFactory = spy(new OpenShiftProjectFactory("", "", clientFactory));
+    projectFactory = spy(new OpenShiftProjectFactory("", "", "", clientFactory));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 
@@ -124,7 +127,9 @@ public class OpenShiftProjectFactoryTest {
           throws Exception {
     // given
     projectFactory =
-        spy(new OpenShiftProjectFactory("projectName", "serviceAccountName", clientFactory));
+        spy(
+            new OpenShiftProjectFactory(
+                "projectName", "serviceAccountName", "clusterRole", clientFactory));
     OpenShiftProject toReturnProject = mock(OpenShiftProject.class);
     doReturn(toReturnProject).when(projectFactory).doCreateProject(any(), any());
 

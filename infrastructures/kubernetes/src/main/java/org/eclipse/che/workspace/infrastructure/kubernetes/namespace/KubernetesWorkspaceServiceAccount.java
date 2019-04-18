@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import io.fabric8.kubernetes.api.model.rbac.KubernetesPolicyRuleBuilder;
 import io.fabric8.kubernetes.api.model.rbac.KubernetesRole;
 import io.fabric8.kubernetes.api.model.rbac.KubernetesRoleBinding;
@@ -34,15 +36,18 @@ public class KubernetesWorkspaceServiceAccount {
   private final String serviceAccountName;
   private final KubernetesClientFactory clientFactory;
   private final String workspaceId;
+  private final String clusterRoleName;
 
   public KubernetesWorkspaceServiceAccount(
       String workspaceId,
       String namespace,
       String serviceAccountName,
+      String clusterRoleName,
       KubernetesClientFactory clientFactory) {
     this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.serviceAccountName = serviceAccountName;
+    this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
   }
 
@@ -85,13 +90,12 @@ public class KubernetesWorkspaceServiceAccount {
 
     // If the user specified an additional cluster role for the workspace,
     // create a role binding for it too
-    String customClusterRoleName = System.getenv("CHE_WORKSPACE_CLUSTER_ROLE");
-    if (!"".equals(customClusterRoleName)) {
+    if (!isNullOrEmpty(this.clusterRoleName)) {
       k8sClient
           .rbac()
           .kubernetesRoleBindings()
           .inNamespace(namespace)
-          .createOrReplace(createCustomRoleBinding(customClusterRoleName));
+          .createOrReplace(createCustomRoleBinding(this.clusterRoleName));
     }
   }
 

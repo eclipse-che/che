@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift.project;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import io.fabric8.kubernetes.api.model.ObjectReferenceBuilder;
 import io.fabric8.openshift.api.model.PolicyRuleBuilder;
 import io.fabric8.openshift.api.model.Role;
@@ -36,15 +38,18 @@ class OpenShiftWorkspaceServiceAccount {
   private final String serviceAccountName;
   private final OpenShiftClientFactory clientFactory;
   private final String workspaceId;
+  private final String clusterRoleName;
 
   OpenShiftWorkspaceServiceAccount(
       String workspaceId,
       String projectName,
       String serviceAccountName,
+      String clusterRoleName,
       OpenShiftClientFactory clientFactory) {
     this.workspaceId = workspaceId;
     this.projectName = projectName;
     this.serviceAccountName = serviceAccountName;
+    this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
   }
 
@@ -77,12 +82,11 @@ class OpenShiftWorkspaceServiceAccount {
 
     // If the user specified an additional cluster role for the workspace,
     // create a role binding for it too
-    String customClusterRoleName = System.getenv("CHE_WORKSPACE_CLUSTER_ROLE");
-    if (!"".equals(customClusterRoleName)) {
+    if (!isNullOrEmpty(this.clusterRoleName)) {
       osClient
           .roleBindings()
           .inNamespace(projectName)
-          .createOrReplace(createCustomRoleBinding(customClusterRoleName));
+          .createOrReplace(createCustomRoleBinding(this.clusterRoleName));
     }
   }
 
