@@ -82,6 +82,17 @@ public class KubernetesWorkspaceServiceAccount {
         .kubernetesRoleBindings()
         .inNamespace(namespace)
         .createOrReplace(createViewRoleBinding());
+
+    // If the user specified an additional cluster role for the workspace,
+    // create a role binding for it too
+    String customClusterRoleName = System.getenv("CHE_WORKSPACE_CLUSTER_ROLE");
+    if (customClusterRoleName != "") {
+      k8sClient
+          .rbac()
+          .kubernetesRoleBindings()
+          .inNamespace(namespace)
+          .createOrReplace(createCustomRoleBinding(customClusterRoleName));
+    }
   }
 
   private void createWorkspaceServiceAccount(KubernetesClient k8sClient) {
@@ -156,6 +167,25 @@ public class KubernetesWorkspaceServiceAccount {
         .withNewRoleRef()
         .withKind("Role")
         .withName("exec")
+        .endRoleRef()
+        .withSubjects(
+            new KubernetesSubjectBuilder()
+                .withKind("ServiceAccount")
+                .withName(serviceAccountName)
+                .withNamespace(namespace)
+                .build())
+        .build();
+  }
+
+  private KubernetesRoleBinding createCustomRoleBinding(String clusterRoleName) {
+    return new KubernetesRoleBindingBuilder()
+        .withNewMetadata()
+        .withName(serviceAccountName + "-custom")
+        .withNamespace(namespace)
+        .endMetadata()
+        .withNewRoleRef()
+        .withKind("ClusterRole")
+        .withName(clusterRoleName)
         .endRoleRef()
         .withSubjects(
             new KubernetesSubjectBuilder()

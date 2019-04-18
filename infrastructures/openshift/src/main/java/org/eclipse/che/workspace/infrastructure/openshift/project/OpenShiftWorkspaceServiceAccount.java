@@ -74,6 +74,16 @@ class OpenShiftWorkspaceServiceAccount {
 
     osClient.roleBindings().inNamespace(projectName).createOrReplace(createExecRoleBinding());
     osClient.roleBindings().inNamespace(projectName).createOrReplace(createViewRoleBinding());
+
+    // If the user specified an additional cluster role for the workspace,
+    // create a role binding for it too
+    String customClusterRoleName = System.getenv("CHE_WORKSPACE_CLUSTER_ROLE");
+    if (customClusterRoleName != "") {
+      osClient
+          .roleBindings()
+          .inNamespace(projectName)
+          .createOrReplace(createCustomRoleBinding(customClusterRoleName));
+    }
   }
 
   private void createWorkspaceServiceAccount(OpenShiftClient osClient) {
@@ -139,6 +149,23 @@ class OpenShiftWorkspaceServiceAccount {
         .withNewRoleRef()
         .withName("exec")
         .withNamespace(projectName)
+        .endRoleRef()
+        .withSubjects(
+            new ObjectReferenceBuilder()
+                .withKind("ServiceAccount")
+                .withName(serviceAccountName)
+                .build())
+        .build();
+  }
+
+  private RoleBinding createCustomRoleBinding(String clusterRoleName) {
+    return new RoleBindingBuilder()
+        .withNewMetadata()
+        .withName(serviceAccountName + "-custom")
+        .withNamespace(projectName)
+        .endMetadata()
+        .withNewRoleRef()
+        .withName(clusterRoleName)
         .endRoleRef()
         .withSubjects(
             new ObjectReferenceBuilder()
