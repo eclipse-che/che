@@ -18,6 +18,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
@@ -25,38 +37,93 @@ import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Volume;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileComponent")
+@Table(name = "devfile_component")
 public class ComponentImpl implements Component {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long generatedId;
+
+  @Column(name = "component_id", nullable = false)
+  private String componentId;
+
+  @Column(name = "alias")
   private String alias;
+
+  @Column(name = "type", nullable = false)
   private String type;
-  private String id;
+
+  @Column(name = "reference")
   private String reference;
+
+  @Column(name = "reference_content")
   private String referenceContent;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "devfile_component_selector",
+      joinColumns = @JoinColumn(name = "devfile_component_id"))
+  @MapKeyColumn(name = "selector_key")
+  @Column(name = "selector")
   private Map<String, String> selector;
-  private List<EntrypointImpl> entrypoints;
+
+  @Column(name = "image")
   private String image;
+
+  @Column(name = "memory_limit")
   private String memoryLimit;
+
+  @Column(name = "mount_sources")
   private boolean mountSources;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "devfile_component_command",
+      joinColumns = @JoinColumn(name = "devfile_component_id"))
+  @Column(name = "command")
   private List<String> command;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "devfile_component_arg",
+      joinColumns = @JoinColumn(name = "devfile_component_id"))
+  @Column(name = "args")
   private List<String> args;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_component_id")
+  private List<EntrypointImpl> entrypoints;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_component_id")
   private List<VolumeImpl> volumes;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_component_id")
   private List<EnvImpl> env;
+
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+  @JoinColumn(name = "devfile_component_id")
   private List<EndpointImpl> endpoints;
 
   public ComponentImpl() {}
 
   public ComponentImpl(String type, String id) {
     this.type = type;
-    this.id = id;
+    this.componentId = id;
   }
 
   public ComponentImpl(
       String type,
+      String id,
       String reference,
       String referenceContent,
       Map<String, String> selector,
       List<? extends Entrypoint> entrypoints) {
     this.type = type;
+    this.componentId = id;
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (selector != null) {
@@ -70,6 +137,7 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl(
       String type,
+      String id,
       String alias,
       String image,
       String memoryLimit,
@@ -81,6 +149,7 @@ public class ComponentImpl implements Component {
       List<? extends Endpoint> endpoints) {
     this.alias = alias;
     this.type = type;
+    this.componentId = id;
     this.image = image;
     this.memoryLimit = memoryLimit;
     this.mountSources = mountSources;
@@ -115,7 +184,7 @@ public class ComponentImpl implements Component {
       List<? extends Endpoint> endpoints) {
     this.alias = alias;
     this.type = type;
-    this.id = id;
+    this.componentId = id;
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (entrypoints != null) {
@@ -177,11 +246,11 @@ public class ComponentImpl implements Component {
 
   @Override
   public String getId() {
-    return id;
+    return componentId;
   }
 
   public void setId(String id) {
-    this.id = id;
+    this.componentId = id;
   }
 
   @Override
@@ -323,15 +392,16 @@ public class ComponentImpl implements Component {
     }
     ComponentImpl component = (ComponentImpl) o;
     return getMountSources() == component.getMountSources()
-        && Objects.equals(getAlias(), component.getAlias())
-        && Objects.equals(getType(), component.getType())
-        && Objects.equals(getId(), component.getId())
-        && Objects.equals(getReference(), component.getReference())
-        && Objects.equals(getReferenceContent(), component.getReferenceContent())
+        && Objects.equals(generatedId, component.generatedId)
+        && Objects.equals(alias, component.alias)
+        && Objects.equals(type, component.type)
+        && Objects.equals(componentId, component.componentId)
+        && Objects.equals(reference, component.reference)
+        && Objects.equals(referenceContent, component.referenceContent)
+        && Objects.equals(image, component.image)
+        && Objects.equals(memoryLimit, component.memoryLimit)
         && Objects.equals(getSelector(), component.getSelector())
         && Objects.equals(getEntrypoints(), component.getEntrypoints())
-        && Objects.equals(getImage(), component.getImage())
-        && Objects.equals(getMemoryLimit(), component.getMemoryLimit())
         && Objects.equals(getCommand(), component.getCommand())
         && Objects.equals(getArgs(), component.getArgs())
         && Objects.equals(getVolumes(), component.getVolumes())
@@ -343,15 +413,16 @@ public class ComponentImpl implements Component {
   public int hashCode() {
 
     return Objects.hash(
-        getAlias(),
-        getType(),
-        getId(),
-        getReference(),
-        getReferenceContent(),
+        generatedId,
+        alias,
+        type,
+        componentId,
+        reference,
+        referenceContent,
+        image,
+        memoryLimit,
         getSelector(),
         getEntrypoints(),
-        getImage(),
-        getMemoryLimit(),
         getMountSources(),
         getCommand(),
         getArgs(),
@@ -363,14 +434,14 @@ public class ComponentImpl implements Component {
   @Override
   public String toString() {
     return "ComponentImpl{"
+        + "id='"
+        + componentId
+        + '\''
         + "alias='"
         + alias
         + '\''
         + ", type='"
         + type
-        + '\''
-        + ", id='"
-        + id
         + '\''
         + ", reference='"
         + reference

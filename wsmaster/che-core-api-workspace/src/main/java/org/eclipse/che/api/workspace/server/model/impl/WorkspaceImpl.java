@@ -93,7 +93,9 @@ public class WorkspaceImpl implements Workspace {
   @JoinColumn(name = "config_id")
   private WorkspaceConfigImpl config;
 
-  @Transient private DevfileImpl devfile;
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "devfile_id")
+  private DevfileImpl devfile;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(name = "workspace_attributes", joinColumns = @JoinColumn(name = "workspace_id"))
@@ -119,7 +121,7 @@ public class WorkspaceImpl implements Workspace {
   }
 
   public WorkspaceImpl(String id, Account account, Devfile devfile) {
-    this(id, account, null, devfile, null, null, false, null);
+    this(id, account, devfile, null, null, false, null);
   }
 
   public WorkspaceImpl(
@@ -341,7 +343,13 @@ public class WorkspaceImpl implements Workspace {
 
   /** Syncs {@link #name} with config name. */
   private void syncName() {
-    name = config == null ? null : config.getName();
+    if (devfile != null) {
+      name = devfile.getName();
+    } else if (config != null) {
+      name = config.getName();
+    } else {
+      name = null;
+    }
   }
 
   /**
