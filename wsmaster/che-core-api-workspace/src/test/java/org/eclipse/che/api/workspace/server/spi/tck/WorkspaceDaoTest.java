@@ -172,7 +172,7 @@ public class WorkspaceDaoTest {
     final WorkspaceImpl workspace = workspaces[0];
 
     assertEquals(
-        workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()),
+        workspaceDao.get(workspace.getName(), workspace.getNamespace()),
         new WorkspaceImpl(workspace));
   }
 
@@ -197,7 +197,7 @@ public class WorkspaceDaoTest {
       throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 
-    workspaceDao.get(workspace.getConfig().getName(), "non-existing-namespace");
+    workspaceDao.get(workspace.getName(), "non-existing-namespace");
   }
 
   @Test(expectedExceptions = NotFoundException.class)
@@ -206,7 +206,7 @@ public class WorkspaceDaoTest {
     final WorkspaceImpl workspace1 = workspaces[0];
     final WorkspaceImpl workspace2 = workspaces[2];
 
-    workspaceDao.get(workspace1.getConfig().getName(), workspace2.getNamespace());
+    workspaceDao.get(workspace1.getName(), workspace2.getNamespace());
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -218,7 +218,7 @@ public class WorkspaceDaoTest {
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowNpeWhenGettingWorkspaceByNameAndNamespaceWhereNamespaceIsNull()
       throws Exception {
-    workspaceDao.get(workspaces[0].getConfig().getName(), null);
+    workspaceDao.get(workspaces[0].getName(), null);
   }
 
   @Test(
@@ -625,7 +625,7 @@ public class WorkspaceDaoTest {
     final WorkspaceImpl workspace1 = workspaces[0];
     final WorkspaceImpl workspace2 = workspaces[1];
 
-    workspace1.getConfig().setName(workspace2.getConfig().getName());
+    workspace1.getConfig().setName(workspace2.getName());
 
     workspaceDao.update(workspace1);
   }

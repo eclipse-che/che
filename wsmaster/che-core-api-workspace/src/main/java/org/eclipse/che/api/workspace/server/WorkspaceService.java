@@ -32,6 +32,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Example;
 import io.swagger.annotations.ExampleProperty;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -265,12 +266,11 @@ public class WorkspaceService extends Service {
       @ApiParam("Workspace status") @QueryParam("status") String status,
       @ApiParam("The namespace") @PathParam("namespace") String namespace)
       throws ServerException, BadRequestException {
-    return withLinks(
+    return asDtosWithLinks(
         Pages.stream(
                 (maxItems, skipCount) ->
                     workspaceManager.getByNamespace(namespace, false, maxItems, skipCount))
             .filter(ws -> status == null || status.equalsIgnoreCase(ws.getStatus().toString()))
-            .map(DtoConverter::asDto)
             .collect(toList()));
   }
 
@@ -390,7 +390,7 @@ public class WorkspaceService extends Service {
     }
 
     try {
-      Workspace workspace =
+      WorkspaceImpl workspace =
           workspaceManager.startWorkspace(config, namespace, isTemporary, new HashMap<>());
       return asDtoWithLinksAndToken(workspace);
     } catch (ValidationException x) {
@@ -759,7 +759,7 @@ public class WorkspaceService extends Service {
     }
   }
 
-  private Workspace doUpdate(String id, Workspace update)
+  private WorkspaceImpl doUpdate(String id, Workspace update)
       throws BadRequestException, ConflictException, NotFoundException, ServerException {
     try {
       return workspaceManager.updateWorkspace(id, update);
@@ -768,14 +768,17 @@ public class WorkspaceService extends Service {
     }
   }
 
-  private List<WorkspaceDto> withLinks(List<WorkspaceDto> workspaces) throws ServerException {
-    for (WorkspaceDto workspace : workspaces) {
-      workspace.setLinks(linksGenerator.genLinks(workspace, getServiceContext()));
+  private List<WorkspaceDto> asDtosWithLinks(List<WorkspaceImpl> workspaces)
+      throws ServerException {
+    List<WorkspaceDto> result = new ArrayList<>();
+    for (WorkspaceImpl workspace : workspaces) {
+      result.add(
+          asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext())));
     }
-    return workspaces;
+    return result;
   }
 
-  private WorkspaceDto asDtoWithLinksAndToken(Workspace workspace) throws ServerException {
+  private WorkspaceDto asDtoWithLinksAndToken(WorkspaceImpl workspace) throws ServerException {
     WorkspaceDto workspaceDto =
         asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext()));
 

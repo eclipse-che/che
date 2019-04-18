@@ -217,6 +217,17 @@ public class WorkspaceImpl implements Workspace {
     return null;
   }
 
+  /** Returns the name of workspace. It can be stored by workspace config or devfile. */
+  public String getName() {
+    if (devfile != null) {
+      return devfile.getName();
+    } else if (config != null) {
+      return config.getName();
+    } else {
+      return null;
+    }
+  }
+
   public void setAccount(AccountImpl account) {
     this.account = account;
   }
@@ -341,15 +352,9 @@ public class WorkspaceImpl implements Workspace {
         + '}';
   }
 
-  /** Syncs {@link #name} with config name. */
+  /** Syncs {@link #name} with config name or devfile name. */
   private void syncName() {
-    if (devfile != null) {
-      name = devfile.getName();
-    } else if (config != null) {
-      name = config.getName();
-    } else {
-      name = null;
-    }
+    name = getName();
   }
 
   /**

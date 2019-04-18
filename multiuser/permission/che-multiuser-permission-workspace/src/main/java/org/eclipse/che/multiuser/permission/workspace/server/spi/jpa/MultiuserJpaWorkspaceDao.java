@@ -74,7 +74,7 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
       throw new ConflictException(
           format(
               "Workspace with id '%s' or name '%s' in namespace '%s' already exists",
-              workspace.getId(), workspace.getConfig().getName(), workspace.getNamespace()));
+              workspace.getId(), workspace.getName(), workspace.getNamespace()));
     } catch (RuntimeException x) {
       throw new ServerException(x.getMessage(), x);
     }
@@ -91,7 +91,7 @@ public class MultiuserJpaWorkspaceDao implements WorkspaceDao {
       throw new ConflictException(
           format(
               "Workspace with name '%s' in namespace '%s' already exists",
-              update.getConfig().getName(), update.getNamespace()));
+              update.getName(), update.getNamespace()));
     } catch (RuntimeException x) {
       throw new ServerException(x.getMessage(), x);
     }
