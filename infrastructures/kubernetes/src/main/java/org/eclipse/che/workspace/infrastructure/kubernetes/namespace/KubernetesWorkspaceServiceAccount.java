@@ -86,7 +86,7 @@ public class KubernetesWorkspaceServiceAccount {
     // If the user specified an additional cluster role for the workspace,
     // create a role binding for it too
     String customClusterRoleName = System.getenv("CHE_WORKSPACE_CLUSTER_ROLE");
-    if (customClusterRoleName != "") {
+    if (!customClusterRoleName.equals("")) {
       k8sClient
           .rbac()
           .kubernetesRoleBindings()
