@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
- import { TestConstants } from '../../TestConstants';
+import { TestConstants } from '../../TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
 import { CLASSES } from '../../types';
@@ -26,9 +26,9 @@ export class TestWorkspaceUtil {
     }
 
     public async waitRunningStatus(workspaceNamespace: string, workspaceName: string) {
-        const workspaceStatusApiUrl: string = `${TestConstants.BASE_URL}/api/workspace/${workspaceNamespace}:${workspaceName}`;
-        const attempts: number = TestConstants.WORKSPACE_STATUS_ATTEMPTS;
-        const polling: number = TestConstants.WORKSPACE_STATUS_POLLING;
+        const workspaceStatusApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace/${workspaceNamespace}:${workspaceName}`;
+        const attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
+        const polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
         const runningWorkspaceStatus: string = 'RUNNING';
         const stoppedWorkspaceStatus: string = 'STOPPED';
         const startingWorkspaceStatus: string = 'STARTING';
@@ -37,7 +37,7 @@ export class TestWorkspaceUtil {
 
         for (let i = 0; i < attempts; i++) {
             let isWorkspaceStarting: boolean = false;
-            
+
             const response: rm.IRestResponse<any> = await rest.get(workspaceStatusApiUrl)
 
             if (response.statusCode !== 200) {

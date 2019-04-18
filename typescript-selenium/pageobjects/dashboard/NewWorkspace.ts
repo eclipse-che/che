@@ -35,7 +35,7 @@ export class NewWorkspace {
         this.driverHelper = driverHelper;
     }
 
-    async selectCreateWorkspaceAndProceedEditing(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async selectCreateWorkspaceAndProceedEditing(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const createAndProceedEditingButtonLocator: By = By.xpath("//span[text()='Create & Proceed Editing']")
 
         // open drop down list
@@ -45,25 +45,25 @@ export class NewWorkspace {
         await this.driverHelper.waitAndClick(createAndProceedEditingButtonLocator, timeout)
     }
 
-    async typeWorkspaceName(workspaceName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async typeWorkspaceName(workspaceName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const workspaceNameFieldLocator: By = By.css(NewWorkspace.NAME_FIELD_CSS)
 
         await this.driverHelper.enterValue(workspaceNameFieldLocator, workspaceName, timeout)
     }
 
-    async clickOnChe7Stack(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickOnChe7Stack(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const che7StackLocator: By = By.css(NewWorkspace.CHE_7_STACK_CSS)
 
         await this.driverHelper.waitAndClick(che7StackLocator)
     }
 
-    async waitChe7StackSelected(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitChe7StackSelected(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const che7SelectedStackLocator: By = By.css(NewWorkspace.SELECTED_CHE_7_STACK_CSS)
 
         await this.driverHelper.waitVisibility(che7SelectedStackLocator, timeout)
     }
 
-    async clickOnCreateAndOpenButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickOnCreateAndOpenButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const ideFrameLocator: By = By.xpath("//ide-iframe[@id='ide-iframe-window' and @aria-hidden='false']")
 
         await this.driverHelper.waitAndClick(By.xpath(NewWorkspace.CREATE_AND_OPEN_BUTTON_XPATH), timeout)
@@ -72,38 +72,38 @@ export class NewWorkspace {
         await this.driverHelper.waitVisibility(ideFrameLocator, timeout)
     }
 
-    async clickOnAddOrImportProjectButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickOnAddOrImportProjectButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const addOrImportProjectButtonLocator: By = By.css(NewWorkspace.ADD_OR_IMPORT_PROJECT_BUTTON_CSS)
 
         await this.driverHelper.waitAndClick(addOrImportProjectButtonLocator, timeout)
     }
 
-    async waitSampleCheckboxEnabling(sampleName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitSampleCheckboxEnabling(sampleName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const enabledSampleCheckboxLocator: By = By.css(`#sample-${sampleName}>md-checkbox[aria-checked='true']`)
 
         await this.driverHelper.waitVisibility(enabledSampleCheckboxLocator, timeout)
     }
 
-    async enableSampleCheckbox(sampleName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async enableSampleCheckbox(sampleName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const sampleCheckboxLocator: By = By.xpath(`(//*[@id='sample-${sampleName}']//md-checkbox//div)[1]`)
 
         await this.driverHelper.waitAndClick(sampleCheckboxLocator, timeout)
         await this.waitSampleCheckboxEnabling(sampleName, timeout)
     }
 
-    async waitProjectAdding(projectName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitProjectAdding(projectName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const addedProjectLocator: By = By.css(`#project-source-selector toggle-single-button#${projectName}`)
 
         await this.driverHelper.waitVisibility(addedProjectLocator, timeout)
     }
 
-    async waitProjectAbsence(projectName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitProjectAbsence(projectName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const addedProjectLocator: By = By.css(`#project-source-selector toggle-single-button#${projectName}`)
 
         await this.driverHelper.waitDisappearance(addedProjectLocator, timeout)
     }
 
-    async clickOnAddButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickOnAddButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.css(NewWorkspace.ADD_BUTTON_CSS), timeout)
     }
 

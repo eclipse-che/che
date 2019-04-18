@@ -52,7 +52,7 @@ export class ProjectTree {
 
 
 
-    async openProjectTreeContainer(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async openProjectTreeContainer(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const selectedExplorerButtonLocator: By = By.xpath(Ide.SELECTED_EXPLORER_BUTTON_XPATH)
 
         await this.ide.waitExplorerButton(timeout)
@@ -66,42 +66,42 @@ export class ProjectTree {
         await this.waitProjectTreeContainer();
     }
 
-    async waitItemExpanded(itemPath: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitItemExpanded(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const expandedItemLocator: By = By.css(this.getExpandedItemCssLocator(itemPath))
 
         await this.driverHelper.waitVisibility(expandedItemLocator, timeout)
     }
 
-    async waitItemCollapsed(itemPath: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitItemCollapsed(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const collapsedItemLocator: By = By.css(this.getCollapsedItemCssLocator(itemPath))
 
         await this.driverHelper.waitVisibility(collapsedItemLocator, timeout)
     }
 
-    async waitProjectTreeContainer(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitProjectTreeContainer(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), timeout)
     }
 
-    async waitProjectTreeContainerClosed(attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING) {
+    async waitProjectTreeContainerClosed(attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         await this.driverHelper.waitDisappearance(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), attempts, polling)
     }
 
-    async waitItemDisappearance(itemPath: string, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING) {
+    async waitItemDisappearance(itemPath: string, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         await this.driverHelper.waitDisappearance(By.css(this.getItemCss(itemPath)), attempts, polling)
     }
 
-    async clickOnItem(itemPath: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickOnItem(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.css(this.getItemCss(itemPath)), timeout)
         await this.waitItemSelected(itemPath, timeout);
     }
 
-    async waitItemSelected(itemPath: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitItemSelected(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const selectedItemLocator: By = By.css(`div[title='/projects/${itemPath}'].theia-mod-selected.theia-mod-focus`);
 
         await this.driverHelper.waitVisibility(selectedItemLocator, timeout)
     }
 
-    async expandItem(itemPath: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async expandItem(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const expandIconLocator: By = By.css(this.getExpandIconCssLocator(itemPath))
         const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath))
 
@@ -116,7 +116,7 @@ export class ProjectTree {
         await this.waitItemExpanded(itemPath, timeout);
     }
 
-    async collapseItem(itemPath: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async collapseItem(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const expandIconLocator: By = By.css(this.getExpandIconCssLocator(itemPath))
         const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath))
 
@@ -130,7 +130,7 @@ export class ProjectTree {
         await this.waitItemCollapsed(itemPath, timeout);
     }
 
-    async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         let currentPath: string = "";
         let paths: Array<string> = new Array();
 
@@ -150,15 +150,15 @@ export class ProjectTree {
         await this.clickOnItem(`${pathToItem}/${fileName}`, timeout)
     }
 
-    async waitProjectImported(projectName: string, rootSubItem: string, attempts = TestConstants.DEFAULT_ATTEMPTS,
-        visibilityItemPolling = TestConstants.DEFAULT_POLLING * 5, triesPolling = TestConstants.DEFAULT_POLLING * 30) {
+    async waitProjectImported(projectName: string, rootSubItem: string, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+        visibilityItemPolling = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5, triesPolling = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
 
         const rootItem: string = `/${projectName}`;
         const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}`));
         const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}/${rootSubItem}`));
 
 
-        
+
         for (let i = 0; i < attempts; i++) {
 
             const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, attempts, visibilityItemPolling)

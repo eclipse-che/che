@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-function readAndSetEnv(envProperty: any, defaultValue: string | number): any{
+function readEnvAndSetValue(envProperty: any, defaultValue: string | number): any{
     const propertyValue = envProperty
     if(propertyValue === undefined || propertyValue === null){
         return defaultValue;
@@ -20,16 +20,16 @@ function readAndSetEnv(envProperty: any, defaultValue: string | number): any{
 
 
 export const TestConstants = {
-    START_STOP_WORKSPACE_TIMEOUT: 240000,
-    LOAD_PAGE_TIMEOUT: 120000,
-    LANGUAGE_SERVER_INITIALIZATION_TIMEOUT: 180000,
+    TS_SELENIUM_START_WORKSPACE_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT, 240000),
+    TS_SELENIUM_LOAD_PAGE_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT, 120000),
+    TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT, 180000),
 
-    DEFAULT_TIMEOUT: 20000,
-    DEFAULT_ATTEMPTS: 5,
-    DEFAULT_POLLING: 1000,
+    TS_SELENIUM_DEFAULT_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_DEFAULT_TIMEOUT, 20000),
+    TS_SELENIUM_DEFAULT_ATTEMPTS: readEnvAndSetValue(process.env.TS_SELENIUM_DEFAULT_ATTEMPTS, 5),
+    TS_SELENIUM_DEFAULT_POLLING: readEnvAndSetValue(process.env.TS_SELENIUM_DEFAULT_POLLING, 1000),
 
-    WORKSPACE_STATUS_ATTEMPTS: 90,
-    WORKSPACE_STATUS_POLLING: 10000,
+    TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS: readEnvAndSetValue(process.env.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS, 90),
+    TS_SELENIUM_WORKSPACE_STATUS_POLLING: readEnvAndSetValue(process.env.TS_SELENIUM_WORKSPACE_STATUS_POLLING, 10000),
 
-    BASE_URL: "http://che-che.192.168.99.100.nip.io"
+    TS_SELENIUM_BASE_URL: readEnvAndSetValue(process.env.TS_SELENIUM_BASE_URL, "http://che-che.192.168.99.100.nip.io")
 }

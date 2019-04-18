@@ -33,25 +33,25 @@ export class WorkspaceDetailsPlugins {
         return `${this.getPluginListItemCssLocator(pluginName)} md-switch`
     }
 
-    async waitPluginListItem(pluginName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitPluginListItem(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const pluginListItemLocator: By = By.css(this.getPluginListItemCssLocator(pluginName))
-        
+
         await this.driverHelper.waitVisibility(pluginListItemLocator, timeout)
     }
 
-    async clickOnPluginListItemSwitcher(pluginName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickOnPluginListItemSwitcher(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const pluginListItemSwitcherLocator = By.css(this.getPluginListItemSwitcherCssLocator(pluginName))
 
         await this.driverHelper.waitAndClick(pluginListItemSwitcherLocator, timeout)
     }
 
-    async waitPluginEnabling(pluginName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitPluginEnabling(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const enabledPluginSwitcherLocator: By = By.css(`${this.getPluginListItemCssLocator(pluginName)} md-switch[aria-checked='true']`)
-        
+
         await this.driverHelper.waitVisibility(enabledPluginSwitcherLocator, timeout)
     }
 
-    async waitPluginDisabling(pluginName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitPluginDisabling(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const disabledPluginSwitcherLocator: By = By.css(`${this.getPluginListItemCssLocator(pluginName)} md-switch[aria-checked='false']`)
 
         await this.driverHelper.waitVisibility(disabledPluginSwitcherLocator, timeout)

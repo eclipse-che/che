@@ -36,28 +36,28 @@ export class Ide {
         this.testWorkspaceUtil = testWorkspaceUtil;
     }
 
-    async waitAndSwitchToIdeFrame(timeout = TestConstants.LOAD_PAGE_TIMEOUT) {
+    async waitAndSwitchToIdeFrame(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout)
     }
 
-    async waitNotification(notificationMessage: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitNotification(notificationMessage: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const notificationLocator: By = By.css(`div[id='notification-container-3-${notificationMessage}-|']`)
 
         await this.driverHelper.waitVisibility(notificationLocator, timeout)
     }
 
-    async waitNotificationDisappearance(notificationMessage: string, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING) {
+    async waitNotificationDisappearance(notificationMessage: string, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         const notificationLocator: By = By.css(`div[id='notification-container-3-${notificationMessage}-|']`)
 
         await this.driverHelper.waitDisappearance(notificationLocator, attempts, polling)
     }
 
-    async waitWorkspaceAndIde(workspaceNamespace: string, workspaceName: string, timeout = TestConstants.LOAD_PAGE_TIMEOUT) {
+    async waitWorkspaceAndIde(workspaceNamespace: string, workspaceName: string, timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.testWorkspaceUtil.waitRunningStatus(workspaceNamespace, workspaceName)
         await this.waitIde(timeout)
     }
 
-    async waitIde(timeout = TestConstants.LOAD_PAGE_TIMEOUT) {
+    async waitIde(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.xpath(Ide.EXPLORER_BUTTON_XPATH)]
 
         for (const idePartLocator of mainIdeParts) {
@@ -65,27 +65,27 @@ export class Ide {
         }
     }
 
-    async waitExplorerButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitExplorerButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.xpath(Ide.EXPLORER_BUTTON_XPATH), timeout)
     }
 
-    async clickOnExplorerButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickOnExplorerButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.xpath(Ide.EXPLORER_BUTTON_XPATH), timeout)
     }
 
-    async waitTopMenuPanel(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitTopMenuPanel(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.css(Ide.TOP_MENU_PANEL_CSS), timeout)
     }
 
-    async waitLeftContentPanel(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitLeftContentPanel(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.css(Ide.LEFT_CONTENT_PANEL_CSS))
     }
 
-    async waitPreloaderAbsent(attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING) {
+    async waitPreloaderAbsent(attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         await this.driverHelper.waitDisappearance(By.css(Ide.PRELOADER_CSS), attempts, polling)
     }
 
-    async waitStatusBarContains(expectedText: string, timeout = TestConstants.LANGUAGE_SERVER_INITIALIZATION_TIMEOUT) {
+    async waitStatusBarContains(expectedText: string, timeout = TestConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) {
         const statusBarLocator: By = By.css("div[id='theia-statusBar']")
 
         await this.driverHelper.waitUntilTrue(async () => {
@@ -96,7 +96,7 @@ export class Ide {
         }, timeout)
     }
 
-    async waitStatusBarTextAbcence(expectedText: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitStatusBarTextAbcence(expectedText: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const statusBarLocator: By = By.css("div[id='theia-statusBar']")
 
         await this.driverHelper.waitUntilTrue(async () => {
@@ -108,8 +108,8 @@ export class Ide {
 
     }
 
-    async waitIdeFrameAndSwitchOnIt(timeout = TestConstants.LOAD_PAGE_TIMEOUT){
-        await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout) 
+    async waitIdeFrameAndSwitchOnIt(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout)
     }
 
 }

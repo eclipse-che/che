@@ -32,39 +32,39 @@ export class Dashboard {
         this.driverHelper = driverHelper;
     }
 
-    async openDashboard(timeout = TestConstants.LOAD_PAGE_TIMEOUT){
-        await this.driverHelper.navigateTo(TestConstants.BASE_URL)
+    async openDashboard(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        await this.driverHelper.navigateTo(TestConstants.TS_SELENIUM_BASE_URL)
         await this.waitPage(timeout)
     }
 
-    async waitPage(timeout = TestConstants.LOAD_PAGE_TIMEOUT) {
+    async waitPage(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
         await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout)
         await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS), timeout)
         await this.driverHelper.waitVisibility(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout)
     }
 
-    async clickDashboardButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickDashboardButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
     }
 
-    async clickWorkspacesButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickWorkspacesButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout)
     }
 
-    async clickStacksdButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickStacksdButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.css(Dashboard.STACKS_BUTTON_CSS), timeout)
     }
 
-    async clickFactoriesButton(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async clickFactoriesButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.css(Dashboard.FACTORIES_BUTTON_CSS), timeout)
     }
 
-    async waitLoader(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitLoader(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.css(Dashboard.LOADER_PAGE_CSS), timeout)
     }
 
-    async waitLoaderDisappearance(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async waitLoaderDisappearance(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitDisappearance(By.css(Dashboard.LOADER_PAGE_CSS), timeout)
     }
 

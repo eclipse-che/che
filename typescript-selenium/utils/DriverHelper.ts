@@ -40,7 +40,7 @@ export class DriverHelper {
         await this.driver.sleep(miliseconds)
     }
 
-    public async waitVisibilityBoolean(locator: By, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING): Promise<boolean> {
+    public async waitVisibilityBoolean(locator: By, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<boolean> {
         for (let i = 0; i < attempts; i++) {
             const isVisible: boolean = await this.isVisible(locator);
 
@@ -54,7 +54,7 @@ export class DriverHelper {
         return false;
     }
 
-    public async waitDisappearanceBoolean(locator: By, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING): Promise<boolean> {
+    public async waitDisappearanceBoolean(locator: By, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<boolean> {
         for (let i = 0; i < attempts; i++) {
             const isVisible: boolean = await this.isVisible(locator)
 
@@ -68,9 +68,9 @@ export class DriverHelper {
         return false;
     }
 
-    public async waitVisibility(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT): Promise<WebElement> {
-        const attempts: number = TestConstants.DEFAULT_ATTEMPTS
-        const polling: number = TestConstants.DEFAULT_POLLING
+    public async waitVisibility(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<WebElement> {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
 
         for (let i = 0; i < attempts; i++) {
             const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), timeout)
@@ -93,13 +93,13 @@ export class DriverHelper {
         throw new Error(`Exceeded maximum visibility checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`)
     }
 
-    public async waitAllVisibility(locators: Array<By>, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    public async waitAllVisibility(locators: Array<By>, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         for (const elementLocator of locators) {
             await this.waitVisibility(elementLocator, timeout)
         }
     }
 
-    public async waitDisappearance(elementLocator: By, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING) {
+    public async waitDisappearance(elementLocator: By, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         const isDisappeared = await this.waitDisappearanceBoolean(elementLocator, attempts, polling)
 
         if (!isDisappeared) {
@@ -107,15 +107,15 @@ export class DriverHelper {
         }
     }
 
-    public async waitAllDisappearance(locators: Array<By>, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING): Promise<void> {
+    public async waitAllDisappearance(locators: Array<By>, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
         for (const elementLocator of locators) {
             await this.waitDisappearance(elementLocator, attempts, polling)
         }
     }
 
-    public async waitAndClick(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.DEFAULT_ATTEMPTS
-        const polling: number = TestConstants.DEFAULT_POLLING
+    public async waitAndClick(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
 
         for (let i = 0; i < attempts; i++) {
             const element: WebElement = await this.waitVisibility(elementLocator, timeout)
@@ -133,9 +133,9 @@ export class DriverHelper {
 
     }
 
-    public async waitAndGetElementAttribute(elementLocator: By, attribute: string, visibilityTimeout = TestConstants.DEFAULT_TIMEOUT): Promise<string> {
-        const attempts: number = TestConstants.DEFAULT_ATTEMPTS
-        const polling: number = TestConstants.DEFAULT_POLLING
+    public async waitAndGetElementAttribute(elementLocator: By, attribute: string, visibilityTimeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
 
 
         for (let i = 0; i < attempts; i++) {
@@ -152,7 +152,7 @@ export class DriverHelper {
         throw new Error(`Exceeded maximum gettin of the '${attribute}' attribute attempts, from the '${elementLocator}' element`)
     }
 
-    public async waitAttributeValue(elementLocator: By, attribute: string, expectedValue: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    public async waitAttributeValue(elementLocator: By, attribute: string, expectedValue: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driver.wait(async () => {
             const attributeValue: string = await this.waitAndGetElementAttribute(elementLocator, attribute, timeout)
 
@@ -163,9 +163,9 @@ export class DriverHelper {
 
     }
 
-    public async type(elementLocator: By, text: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.DEFAULT_ATTEMPTS
-        const polling: number = TestConstants.DEFAULT_POLLING
+    public async type(elementLocator: By, text: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
 
 
         for (let i = 0; i < attempts; i++) {
@@ -183,9 +183,9 @@ export class DriverHelper {
         throw new Error(`Exceeded maximum typing attempts, to the '${elementLocator}' element`)
     }
 
-    public async clear(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT) {
-        const attempts: number = TestConstants.DEFAULT_ATTEMPTS
-        const polling: number = TestConstants.DEFAULT_POLLING
+    public async clear(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
 
 
         for (let i = 0; i < attempts; i++) {
@@ -203,7 +203,7 @@ export class DriverHelper {
         throw new Error(`Exceeded maximum clearing attempts, to the '${elementLocator}' element`)
     }
 
-    public async enterValue(elementLocator: By, text: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    public async enterValue(elementLocator: By, text: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.waitVisibility(elementLocator, timeout)
         await this.clear(elementLocator, timeout)
         await this.waitAttributeValue(elementLocator, "value", "", timeout)
@@ -211,13 +211,13 @@ export class DriverHelper {
         await this.waitAttributeValue(elementLocator, "value", text, timeout)
     }
 
-    public async waitAndSwitchToFrame(iframeLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    public async waitAndSwitchToFrame(iframeLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         this.driver.wait(until.ableToSwitchToFrame(iframeLocator), timeout)
     }
 
-    public async waitAndGetText(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT): Promise<string> {
-        const attempts: number = TestConstants.DEFAULT_ATTEMPTS
-        const polling: number = TestConstants.DEFAULT_POLLING
+    public async waitAndGetText(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
 
 
         for (let i = 0; i < attempts; i++) {
@@ -235,12 +235,12 @@ export class DriverHelper {
         throw new Error(`Exceeded maximum text obtaining attempts, from the '${elementLocator}' element`)
     }
 
-    public async waitAndGetValue(elementLocator: By, timeout = TestConstants.DEFAULT_TIMEOUT): Promise<string> {
+    public async waitAndGetValue(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
         const elementValue: string = await this.waitAndGetElementAttribute(elementLocator, 'value', timeout)
         return elementValue
     }
 
-    public async waitUntilTrue(callback: any, timeout = TestConstants.DEFAULT_TIMEOUT) {
+    public async waitUntilTrue(callback: any, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driver.wait(callback(), timeout)
     }
 
