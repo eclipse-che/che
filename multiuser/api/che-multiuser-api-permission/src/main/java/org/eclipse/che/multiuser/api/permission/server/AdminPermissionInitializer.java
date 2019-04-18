@@ -63,7 +63,11 @@ public class AdminPermissionInitializer implements EventSubscriber<PostUserPersi
   @PostConstruct
   public void init() throws ServerException {
     try {
-      User adminUser = userManager.getByName(name);
+      if (name.contains("@")) {
+        User adminUser = userManager.getByEmail(name);
+      } else {
+        User adminUser = userManager.getByName(name);
+      }
       grantSystemPermissions(adminUser.getId());
     } catch (NotFoundException ex) {
       LOG.warn("Admin {} not found yet.", name);
@@ -79,7 +83,7 @@ public class AdminPermissionInitializer implements EventSubscriber<PostUserPersi
 
   @Override
   public void onEvent(PostUserPersistedEvent event) {
-    if (event.getUser().getName().equals(name)) {
+    if (event.getUser().getName().equals(name) || event.getUser().getEmail().equals(name)) {
       grantSystemPermissions(event.getUser().getId());
     }
   }

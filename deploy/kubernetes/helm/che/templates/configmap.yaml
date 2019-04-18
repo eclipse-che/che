@@ -31,6 +31,7 @@ data:
   CHE_INFRA_KUBERNETES_INGRESS_DOMAIN: {{ .Values.global.ingressDomain }}
   CHE_INFRA_KUBERNETES_MACHINE__START__TIMEOUT__MIN: "5"
   CHE_INFRA_KUBERNETES_MASTER__URL: ""
+  CHE_SYSTEM_ADMIN__NAME: {{ .Values.global.cheSystemAdmin }}
 {{- if and .Values.global.tls .Values.global.tls.enabled }}
   CHE_INFRA_KUBERNETES_TLS__ENABLED: {{ .Values.global.tls.enabled | quote}}
   CHE_INFRA_KUBERNETES_TLS__SECRET: {{ .Values.global.tls.secretName }}
