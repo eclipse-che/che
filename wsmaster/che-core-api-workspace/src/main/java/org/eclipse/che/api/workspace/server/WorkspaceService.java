@@ -438,6 +438,10 @@ public class WorkspaceService extends Service {
           ForbiddenException {
     requiredNotNull(newCommand, "Command");
     WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     workspace.getConfig().getCommands().add(new CommandImpl(newCommand));
     return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
@@ -465,6 +469,10 @@ public class WorkspaceService extends Service {
           ForbiddenException {
     requiredNotNull(update, "Command update");
     WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     List<CommandImpl> commands = workspace.getConfig().getCommands();
     if (!commands.removeIf(cmd -> cmd.getName().equals(cmdName))) {
       throw new NotFoundException(
@@ -491,6 +499,10 @@ public class WorkspaceService extends Service {
       throws ServerException, BadRequestException, NotFoundException, ConflictException,
           ForbiddenException {
     WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     if (workspace
         .getConfig()
         .getCommands()
@@ -525,6 +537,10 @@ public class WorkspaceService extends Service {
     requiredNotNull(envName, "New environment name");
     relativizeRecipeLinks(newEnvironment);
     WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(newEnvironment));
     return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
@@ -552,6 +568,10 @@ public class WorkspaceService extends Service {
     requiredNotNull(update, "Environment description");
     relativizeRecipeLinks(update);
     final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     EnvironmentImpl previous =
         workspace.getConfig().getEnvironments().put(envName, new EnvironmentImpl(update));
     if (previous == null) {
@@ -578,6 +598,10 @@ public class WorkspaceService extends Service {
       throws ServerException, BadRequestException, NotFoundException, ConflictException,
           ForbiddenException {
     final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     if (workspace.getConfig().getEnvironments().remove(envName) != null) {
       doUpdate(id, workspace);
     }
@@ -605,6 +629,10 @@ public class WorkspaceService extends Service {
           ForbiddenException {
     requiredNotNull(newProject, "New project config");
     final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     workspace.getConfig().getProjects().add(new ProjectConfigImpl(newProject));
     return asDtoWithLinksAndToken(doUpdate(id, workspace));
   }
@@ -631,6 +659,10 @@ public class WorkspaceService extends Service {
           ForbiddenException {
     requiredNotNull(update, "Project config");
     final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     final List<ProjectConfigImpl> projects = workspace.getConfig().getProjects();
     final String normalizedPath = path.startsWith("/") ? path : '/' + path;
     if (!projects.removeIf(project -> project.getPath().equals(normalizedPath))) {
@@ -658,6 +690,10 @@ public class WorkspaceService extends Service {
       throws ServerException, BadRequestException, NotFoundException, ConflictException,
           ForbiddenException {
     final WorkspaceImpl workspace = workspaceManager.getWorkspace(id);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException(
+          "This method can not be invoked for workspace created from Devfile. Use update workspace method instead.");
+    }
     final String normalizedPath = path.startsWith("/") ? path : '/' + path;
     if (workspace
         .getConfig()
