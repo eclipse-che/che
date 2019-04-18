@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
@@ -21,6 +22,7 @@ import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validat
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
@@ -77,6 +79,7 @@ import org.eclipse.che.api.workspace.shared.dto.RuntimeDto;
 import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
@@ -121,6 +124,8 @@ public class WorkspaceService extends Service {
       notes =
           "This operation can be performed only by authorized user,"
               + "this user will be the owner of the created workspace",
+      consumes = APPLICATION_JSON,
+      produces = APPLICATION_JSON,
       response = WorkspaceConfigDto.class)
   @ApiResponses({
     @ApiResponse(code = 201, message = "The workspace successfully created"),
@@ -167,6 +172,76 @@ public class WorkspaceService extends Service {
     WorkspaceImpl workspace;
     try {
       workspace = workspaceManager.createWorkspace(config, namespace, attributes);
+    } catch (ValidationException x) {
+      throw new BadRequestException(x.getMessage());
+    }
+
+    if (startAfterCreate) {
+      workspaceManager.startWorkspace(workspace.getId(), null, new HashMap<>());
+    }
+    return Response.status(201).entity(asDtoWithLinksAndToken(workspace)).build();
+  }
+
+  @Beta
+  @Path("/devfile")
+  @POST
+  @Consumes(APPLICATION_JSON)
+  @Produces(APPLICATION_JSON)
+  @ApiOperation(
+      value = "Creates a new workspace based on the Devfile.",
+      notes =
+          "This method is in beta phase. It's strongly recommended to use `POST /devfile` instead"
+              + " to get a workspace from Devfile. Workspaces created with this method are not stable yet.",
+      consumes = APPLICATION_JSON,
+      produces = APPLICATION_JSON,
+      nickname = "createFromDevfile",
+      response = WorkspaceConfigDto.class)
+  @ApiResponses({
+    @ApiResponse(code = 201, message = "The workspace successfully created"),
+    @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
+    @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
+    @ApiResponse(
+        code = 409,
+        message =
+            "Conflict error occurred during the workspace creation"
+                + "(e.g. The workspace with such name already exists)"),
+    @ApiResponse(code = 500, message = "Internal server error occurred")
+  })
+  public Response create(
+      @ApiParam(value = "The configuration to create the new workspace", required = true)
+          DevfileDto devfile,
+      @ApiParam(
+              value =
+                  "Workspace attribute defined in 'attrName:attrValue' format. "
+                      + "The first ':' is considered as attribute name and value separator",
+              examples =
+                  @Example({
+                    @ExampleProperty("stackId:stack123"),
+                    @ExampleProperty("attrName:value-with:colon")
+                  }))
+          @QueryParam("attribute")
+          List<String> attrsList,
+      @ApiParam(
+              "If true then the workspace will be immediately "
+                  + "started after it is successfully created")
+          @QueryParam("start-after-create")
+          @DefaultValue("false")
+          Boolean startAfterCreate,
+      @ApiParam("Namespace where workspace should be created") @QueryParam("namespace")
+          String namespace)
+      throws ConflictException, BadRequestException, ForbiddenException, NotFoundException,
+          ServerException {
+    requiredNotNull(devfile, "Devfile");
+
+    final Map<String, String> attributes = parseAttrs(attrsList);
+
+    if (namespace == null) {
+      namespace = EnvironmentContext.getCurrent().getSubject().getUserName();
+    }
+
+    WorkspaceImpl workspace;
+    try {
+      workspace = workspaceManager.createWorkspace(devfile, namespace, attributes);
     } catch (ValidationException x) {
       throw new BadRequestException(x.getMessage());
     }
@@ -297,7 +372,9 @@ public class WorkspaceService extends Service {
       @ApiParam(value = "The workspace update", required = true) WorkspaceDto update)
       throws BadRequestException, ServerException, ForbiddenException, NotFoundException,
           ConflictException {
-    requiredNotNull(update, "Workspace configuration");
+    checkArgument(
+        update.getConfig() != null ^ update.getDevfile() != null,
+        "Required non-null workspace configuration or devfile update but not both");
     relativizeRecipeLinks(update.getConfig());
     return asDtoWithLinksAndToken(doUpdate(id, update));
   }
@@ -767,6 +844,19 @@ public class WorkspaceService extends Service {
   private void requiredNotNull(Object object, String subject) throws BadRequestException {
     if (object == null) {
       throw new BadRequestException(subject + " required");
+    }
+  }
+
+  /**
+   * Checks the specified expression.
+   *
+   * @param expression the expression to check
+   * @param errorMessage error message that should be used if expression is false
+   * @throws BadRequestException when the expression is false
+   */
+  private void checkArgument(boolean expression, String errorMessage) throws BadRequestException {
+    if (!expression) {
+      throw new BadRequestException(String.valueOf(errorMessage));
     }
   }
 
