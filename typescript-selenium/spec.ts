@@ -26,6 +26,8 @@ import { Request, post, get } from "selenium-webdriver/http";
 import { TestWorkspaceUtil } from "./utils/workspace/TestWorkspaceUtil";
 import { Ide } from "./pageobjects/ide/Ide";
 import { ProjectTree } from "./pageobjects/ide/ProjectTree";
+import { Editor } from "./pageobjects/ide/Editor";
+import { TestConstants } from "./TestConstants";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
@@ -39,9 +41,9 @@ const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
 const workspaceDetails: WorkspaceDetails = e2eContainer.get(CLASSES.WorkspaceDetails);
 const workspaceDetailsPlugins: WorkspaceDetailsPlugins = e2eContainer.get(CLASSES.WorkspaceDetailsPlugins)
-const testWorkspaceUtil: TestWorkspaceUtil = e2eContainer.get(CLASSES.TestWorkspaceUtil)
 const ide: Ide = e2eContainer.get(CLASSES.Ide)
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree)
+const editor: Editor = e2eContainer.get(CLASSES.Editor)
 
 
 
@@ -119,40 +121,49 @@ suite("E2E", async () => {
         })
 
         test("Expand project and open file in editor", async () => {
-            projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
+            await projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
         })
 
         //unskip after resolving issue https://github.com/eclipse/che/issues/12904
         test.skip("Check \"Java Language Server\" initialization by statusbar", async () => {
-            ide.waitStatusBarContains("Starting Java Language Server")
-            ide.waitStatusBarContains("100% Starting Java Language Server")
-            ide.waitStatusBarTextAbcence("Starting Java Language Server")
+            await ide.waitStatusBarContains("Starting Java Language Server")
+            await ide.waitStatusBarContains("100% Starting Java Language Server")
+            await ide.waitStatusBarTextAbcence("Starting Java Language Server")
         })
 
         //unskip after resolving issue https://github.com/eclipse/che/issues/12904
         test.skip("Check \"Java Language Server\" initialization by suggestion invoking", async () => {
-            // editor.waitEditorAvailable(filePath, tabTitle);
-            // editor.clickOnTab(filePath);
-            // editor.waitEditorAvailable(filePath, tabTitle);
-
-            // editor.setCursorToLineAndChar(15, 33);
-            // editor.performControlSpaceCombination();
-            // editor.waitSuggestionContainer();
-            // editor.waitSuggestion("getContentType()");
+            await editor.waitEditorAvailable(tabTitle);
+            await editor.clickOnTab(tabTitle);
+            await editor.waitEditorAvailable(tabTitle);
         })
 
     })
 
+    suite("Stop and remove workspace", async () => {
+        test("Stop workspace", async () => {
+            await dashboard.openDashboard()
+            await dashboard.clickWorkspacesButton()
+            await workspaces.waitPage()
+            await workspaces.waitWorkspaceListItem(workspaceName)
+            await workspaces.waitWorkspaceWithRunningStatus(workspaceName)
+            await workspaces.clickOnStopWorkspaceButton(workspaceName)
+            await workspaces.waitWorkspaceWithStoppedStatus(workspaceName)
+        })
 
+        test("Delete workspace", async () => {
+            await workspaces.waitPage()
+            await workspaces.waitWorkspaceListItem(workspaceName)
+            await workspaces.clickWorkspaceListItem(workspaceName);
+            await workspaces.clickDeleteButtonOnWorkspaceDetails();
+            await workspaces.clickConfirmDeletionButton();
+            await workspaces.waitPage()
+            await workspaces.waitWorkspaceListItemAbcence(workspaceName);
+        })
+    })
 
 })
 
 suiteTeardown("close browser", async () => {
     driver.get().quit()
 })
-
-
-
-
-
-

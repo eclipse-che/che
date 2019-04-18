@@ -32,7 +32,12 @@ export class Dashboard {
         this.driverHelper = driverHelper;
     }
 
-    async waitPage(timeout = TestConstants.DEFAULT_TIMEOUT) {
+    async openDashboard(timeout = TestConstants.LOAD_PAGE_TIMEOUT){
+        await this.driverHelper.navigateTo(TestConstants.BASE_URL)
+        await this.waitPage(timeout)
+    }
+
+    async waitPage(timeout = TestConstants.LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.css(Dashboard.DASHBOARD_BUTTON_CSS), timeout)
         await this.driverHelper.waitVisibility(By.css(Dashboard.WORKSPACES_BUTTON_CSS), timeout)
         await this.driverHelper.waitVisibility(By.css(Dashboard.STACKS_BUTTON_CSS), timeout)

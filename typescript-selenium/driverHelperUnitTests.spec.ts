@@ -91,9 +91,6 @@ suite("Test of 'DriverHelper' methods", async () => {
         await driverHelper.waitAttributeValue(By.css("#dashboard-item"), 'id', 'dashboard-item')
     })
 
-
-
-
 })
 
 suiteTeardown("close browser", async () => {

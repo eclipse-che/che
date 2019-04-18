@@ -8,6 +8,17 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
+function readAndSetEnv(envProperty: any, defaultValue: string | number): any{
+    const propertyValue = envProperty
+    if(propertyValue === undefined || propertyValue === null){
+        return defaultValue;
+    }
+
+    return propertyValue
+}
+
+
+
 export const TestConstants = {
     START_STOP_WORKSPACE_TIMEOUT: 240000,
     LOAD_PAGE_TIMEOUT: 120000,
@@ -19,7 +30,6 @@ export const TestConstants = {
 
     WORKSPACE_STATUS_ATTEMPTS: 90,
     WORKSPACE_STATUS_POLLING: 10000,
-
 
     BASE_URL: "http://che-che.192.168.99.100.nip.io"
 }

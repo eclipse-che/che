@@ -34,7 +34,7 @@ export class Workspaces {
         return `#ws-name-${workspaceName}`
     }
 
-    private getWorkspaceStatusLocator(workspaceName: string, workspaceStatus: string){
+    private getWorkspaceStatusCssLocator(workspaceName: string, workspaceStatus: string): string{
         return `#ws-name-${workspaceName}[data-ws-status='${workspaceStatus}']`
     }
 
@@ -47,7 +47,7 @@ export class Workspaces {
     }
 
     async waitWorkspaceListItem(workspaceName: string, timeout = TestConstants.DEFAULT_TIMEOUT) {
-        const workspaceListItemLocator: By =  await By.css(this.getWorkspaceListItemLocator(workspaceName));
+        const workspaceListItemLocator: By =  By.css(this.getWorkspaceListItemLocator(workspaceName));
 
         await this.driverHelper.waitVisibility(workspaceListItemLocator, timeout)
     }
@@ -59,13 +59,13 @@ export class Workspaces {
     }
 
     async waitWorkspaceWithRunningStatus(workspaceName: string, timeout = TestConstants.START_STOP_WORKSPACE_TIMEOUT) {
-        const runningStatusLocator: By = await this.getWorkspaceStatusLocator(workspaceName, 'RUNNING')
+        const runningStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, 'RUNNING'))
         
         await this.driverHelper.waitVisibility(runningStatusLocator, timeout)
     }
 
     async waitWorkspaceWithStoppedStatus(workspaceName: string, timeout = TestConstants.START_STOP_WORKSPACE_TIMEOUT) {
-        const stoppedStatusLocator: By = await this.getWorkspaceStatusLocator(workspaceName, 'STOPPED')
+        const stoppedStatusLocator: By = By.css(this.getWorkspaceStatusCssLocator(workspaceName, 'STOPPED'))
         
         await this.driverHelper.waitVisibility(stoppedStatusLocator, timeout)
     }

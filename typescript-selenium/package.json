@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --require ts-node/register --timeout 150000 -u tdd spec.ts",
-    "units": "mocha --require ts-node/register --timeout 150000 -u tdd driverHelperUnitTests.spec.ts"
+    "test": "mocha --require ts-node/register --timeout 1200000 -u tdd spec.ts",
+    "units": "mocha --require ts-node/register --timeout 1200000 -u tdd driverHelperUnitTests.spec.ts"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
   "license": "ISC",

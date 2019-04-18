@@ -26,20 +26,18 @@ export class DriverHelper {
         this.driver = driver.get();
     }
 
-    public findElement(locator: By): WebElementPromise {
-        return this.driver.findElement(locator);
+    public async isVisible(locator: By): Promise<boolean> {
+        try {
+            const element: WebElement = await this.driver.findElement(locator)
+            const isVisible: boolean = await element.isDisplayed()
+            return isVisible
+        } catch{
+            return false
+        }
     }
 
-    public isVisible(locator: By): promise.Promise<boolean> {
-        return this.findElement(locator)
-            .isDisplayed()
-            .catch(err => {
-                return false
-            })
-    }
-
-    public wait(miliseconds: number): promise.Promise<void> {
-        return new promise.Promise<void>(resolve => { setTimeout(resolve, miliseconds) })
+    public async wait(miliseconds: number): Promise<void> {
+        await this.driver.sleep(miliseconds)
     }
 
     public async waitVisibilityBoolean(locator: By, attempts = TestConstants.DEFAULT_ATTEMPTS, polling = TestConstants.DEFAULT_POLLING): Promise<boolean> {
@@ -81,9 +79,9 @@ export class DriverHelper {
                 return await this.driver.wait(until.elementIsVisible(webElement), timeout)
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
-                   
+
                     console.log("==>>> 'waitVisibility' catched exception")
-                   
+
                     await this.wait(polling)
                     continue;
                 }
@@ -246,8 +244,12 @@ export class DriverHelper {
         await this.driver.wait(callback(), timeout)
     }
 
-    public async reloadPage(){
+    public async reloadPage() {
         await this.driver.navigate().refresh();
+    }
+
+    public async navigateTo(url: string) {
+        await this.driver.navigate().to(url)
     }
 
 

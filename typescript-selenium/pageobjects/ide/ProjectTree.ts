@@ -157,8 +157,8 @@ export class ProjectTree {
         const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}`));
         const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}/${rootSubItem}`));
 
-        // const delayBeforeItemCheck: number = Cypress.env("ProjectTree.delayBeforeItemCheck");
 
+        
         for (let i = 0; i < attempts; i++) {
 
             const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, attempts, visibilityItemPolling)

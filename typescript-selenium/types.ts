@@ -22,7 +22,8 @@ const CLASSES = {
     WorkspaceDetailsPlugins: "WorkspaceDetailsPlugins",
     Ide: "Ide",
     TestWorkspaceUtil: "TestWorkspaceUtil",
-    ProjectTree: "ProjectTree"
+    ProjectTree: "ProjectTree",
+    Editor: "Editor"
 }
 
 export { TYPES, CLASSES };

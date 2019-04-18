@@ -37,7 +37,7 @@ export class TestWorkspaceUtil {
 
         for (let i = 0; i < attempts; i++) {
             let isWorkspaceStarting: boolean = false;
-
+            
             const response: rm.IRestResponse<any> = await rest.get(workspaceStatusApiUrl)
 
             if (response.statusCode !== 200) {
