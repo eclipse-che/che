@@ -96,7 +96,7 @@ public class DockerimageComponentProvisioner implements ComponentProvisioner {
 
     RecipeImpl recipe = environment.getRecipe();
     ComponentImpl dockerimageComponent = new ComponentImpl();
-    dockerimageComponent.setName(environmentName);
+    dockerimageComponent.setAlias(environmentName);
 
     dockerimageComponent.setImage(recipe.getContent());
     dockerimageComponent.setType(DOCKERIMAGE_COMPONENT_TYPE);

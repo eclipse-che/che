@@ -46,10 +46,10 @@ public class Constants {
       "pluginComponentsAliases";
 
   /** Workspace config attribute which contains cheEditor component name. */
-  public static final String EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE = "editorComponentName";
+  public static final String EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE = "editorComponentAlias";
 
   /** Workspace command attributes that indicates with which component it is associated. */
-  public static final String COMPONENT_NAME_COMMAND_ATTRIBUTE = "componentName";
+  public static final String COMPONENT_ALIAS_COMMAND_ATTRIBUTE = "componentAlias";
 
   /**
    * {@link Endpoint} attribute name which can identify endpoint as public or internal. Attribute

@@ -17,6 +17,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Components.getIdentifiableComponentName;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
 
@@ -122,20 +123,24 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
           format(
               "Fetching content of file `%s` specified in `reference` field of component `%s` is not supported. "
                   + "Please provide its content in `referenceContent` field. Cause: %s",
-              recipeComponent.getReference(), recipeComponent.getName(), e.getMessage()),
+              recipeComponent.getReference(),
+              getIdentifiableComponentName(recipeComponent),
+              e.getMessage()),
           e);
     } catch (IOException e) {
       throw new DevfileException(
           format(
               "Error during recipe content retrieval for component '%s' with type '%s': %s",
-              recipeComponent.getName(), recipeComponent.getType(), e.getMessage()),
+              getIdentifiableComponentName(recipeComponent),
+              recipeComponent.getType(),
+              e.getMessage()),
           e);
     }
     if (isNullOrEmpty(recipeFileContent)) {
       throw new DevfileException(
           format(
               "The reference file '%s' defined in component '%s' is empty.",
-              recipeComponent.getReference(), recipeComponent.getName()));
+              recipeComponent.getReference(), getIdentifiableComponentName(recipeComponent)));
     }
     return recipeFileContent;
   }
@@ -154,9 +159,9 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
             .stream()
             .filter(
                 c ->
-                    component
-                        .getName()
-                        .equals(c.getAttributes().get(Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE)))
+                    c.getAttributes()
+                        .get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
+                        .equals(component.getAlias()))
             .collect(toList());
     if (componentCommands.isEmpty()) {
       return;
@@ -201,7 +206,9 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       throw new DevfileRecipeFormatException(
           format(
               "Error occurred during parsing list from file %s for component '%s': %s",
-              k8sComponent.getReference(), k8sComponent.getName(), e.getMessage()),
+              k8sComponent.getReference(),
+              getIdentifiableComponentName(k8sComponent),
+              e.getMessage()),
           e);
     }
   }

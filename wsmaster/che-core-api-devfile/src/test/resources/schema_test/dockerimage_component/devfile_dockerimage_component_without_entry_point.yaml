@@ -14,8 +14,7 @@
 specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
-  - name: maven
-    type: dockerimage
+  - type: dockerimage
     image: eclipe/maven-jdk8:latest
     volumes:
       - name: maven-repo

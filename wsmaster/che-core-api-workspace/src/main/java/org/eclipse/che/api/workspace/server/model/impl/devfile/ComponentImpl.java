@@ -27,7 +27,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Volume;
 /** @author Sergii Leshchenko */
 public class ComponentImpl implements Component {
 
-  private String name;
+  private String alias;
   private String type;
   private String id;
   private String reference;
@@ -45,20 +45,17 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl() {}
 
-  public ComponentImpl(String type, String name, String id) {
-    this.name = name;
+  public ComponentImpl(String type, String id) {
     this.type = type;
     this.id = id;
   }
 
   public ComponentImpl(
       String type,
-      String name,
       String reference,
       String referenceContent,
       Map<String, String> selector,
       List<? extends Entrypoint> entrypoints) {
-    this.name = name;
     this.type = type;
     this.reference = reference;
     this.referenceContent = referenceContent;
@@ -73,7 +70,7 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl(
       String type,
-      String name,
+      String alias,
       String image,
       String memoryLimit,
       boolean mountSources,
@@ -82,7 +79,7 @@ public class ComponentImpl implements Component {
       List<? extends Volume> volumes,
       List<? extends Env> env,
       List<? extends Endpoint> endpoints) {
-    this.name = name;
+    this.alias = alias;
     this.type = type;
     this.image = image;
     this.memoryLimit = memoryLimit;
@@ -103,7 +100,7 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl(
       String type,
-      String name,
+      String alias,
       String id,
       String reference,
       String referenceContent,
@@ -116,7 +113,7 @@ public class ComponentImpl implements Component {
       List<? extends Volume> volumes,
       List<? extends Env> env,
       List<? extends Endpoint> endpoints) {
-    this.name = name;
+    this.alias = alias;
     this.type = type;
     this.id = id;
     this.reference = reference;
@@ -145,7 +142,7 @@ public class ComponentImpl implements Component {
   public ComponentImpl(Component component) {
     this(
         component.getType(),
-        component.getName(),
+        component.getAlias(),
         component.getId(),
         component.getReference(),
         component.getReferenceContent(),
@@ -161,12 +158,12 @@ public class ComponentImpl implements Component {
   }
 
   @Override
-  public String getName() {
-    return name;
+  public String getAlias() {
+    return alias;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setAlias(String alias) {
+    this.alias = alias;
   }
 
   @Override
@@ -326,7 +323,7 @@ public class ComponentImpl implements Component {
     }
     ComponentImpl component = (ComponentImpl) o;
     return getMountSources() == component.getMountSources()
-        && Objects.equals(getName(), component.getName())
+        && Objects.equals(getAlias(), component.getAlias())
         && Objects.equals(getType(), component.getType())
         && Objects.equals(getId(), component.getId())
         && Objects.equals(getReference(), component.getReference())
@@ -346,7 +343,7 @@ public class ComponentImpl implements Component {
   public int hashCode() {
 
     return Objects.hash(
-        getName(),
+        getAlias(),
         getType(),
         getId(),
         getReference(),
@@ -366,8 +363,8 @@ public class ComponentImpl implements Component {
   @Override
   public String toString() {
     return "ComponentImpl{"
-        + "name='"
-        + name
+        + "alias='"
+        + alias
         + '\''
         + ", type='"
         + type

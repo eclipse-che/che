@@ -48,7 +48,7 @@ public class EditorComponentProvisionerTest {
     // then
     assertEquals(devfile.getComponents().size(), 1);
     ComponentImpl editorComponent = devfile.getComponents().get(0);
-    assertEquals(editorComponent.getName(), "editor");
+    assertEquals(editorComponent.getAlias(), "editor");
     assertEquals(editorComponent.getType(), EDITOR_COMPONENT_TYPE);
     assertEquals(editorComponent.getId(), "org.eclipse.che.super-editor:0.0.1");
   }
@@ -69,6 +69,6 @@ public class EditorComponentProvisionerTest {
     // then
     assertEquals(devfile.getComponents().size(), 1);
     ComponentImpl editorComponent = devfile.getComponents().get(0);
-    assertEquals(editorComponent.getName(), "org.eclipse.che.super-editor:0.0.1");
+    assertEquals(editorComponent.getAlias(), "org.eclipse.che.super-editor:0.0.1");
   }
 }
