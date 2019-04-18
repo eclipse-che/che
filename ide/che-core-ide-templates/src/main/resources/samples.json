@@ -1231,8 +1231,7 @@
         "type": "custom",
         "commandLine": "cd ${CHE_PROJECTS_ROOT}/go-web-sample && go run main.go",
         "attributes": {
-          "goal": "Run",
-          "previewUrl": "${server.8080/tcp}"
+          "goal": "Run"
         }
       },
       {
@@ -1321,7 +1320,7 @@
       {
         "name": "user create",
         "type": "custom",
-        "commandLine": "curl --header \"Content-Type: application/json\" --request POST   --data '{\"user\": {\"Username\":\"user\", \"Email\":\"user@email\", \"Password\": \"password\"}}'  localhost:1323/api/users",
+        "commandLine": "curl --header \"Content-Type: application/json\" --request POST   --data '{\"user\": {\"Username\":\"user\", \"Email\":\"user@user.user\", \"Password\": \"password\"}}'  localhost:1323/api/users",
         "attributes": {
           "goal": "Test"
         }
@@ -1329,7 +1328,7 @@
       {
         "name": "user login",
         "type": "custom",
-        "commandLine": "curl --header \"Content-Type: application/json\" --request POST   --data '{\"user\": {\"Email\":\"user@email\", \"Password\": \"password\"}}'  localhost:1323/api/users/login",
+        "commandLine": "curl --header \"Content-Type: application/json\" --request POST   --data '{\"user\": {\"Email\":\"user@user.user\", \"Password\": \"password\"}}'  localhost:1323/api/users/login",
         "attributes": {
           "goal": "Test"
         }
