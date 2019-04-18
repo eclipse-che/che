@@ -30,6 +30,10 @@ public class Components {
    * alias is used or, if not defined, the identifying attribute corresponding to the component
    * type.
    *
+   * <p>The alias is unique in the devfile but the identifying attributes are only unique per
+   * component type. Hence, it is required to use both type and the returned name to uniquely
+   * identify a component in all cases.
+   *
    * @throws IllegalStateException if the type of the component is not recognized which can be
    *     classified as an implementation bug
    */
