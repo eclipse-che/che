@@ -147,7 +147,8 @@
                 ]
               },
               "name": {},
-              "id": {}
+              "id": {},
+              "memoryLimit": {}
             },
             "required": [
               "id"
