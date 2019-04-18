@@ -31,10 +31,10 @@ projects:
       type: git
       location: 'https://github.com/che-samples/web-java-spring-petclinic.git'
 components:
-  - name: theia-editor
+  - alias: theia-editor
     type: cheEditor
     id: org.eclipse.che.editor.theia:1.0.0
-  - name: exec-plugin
+  - alias: exec-plugin
     type: chePlugin
     id: che-machine-exec-plugin:0.0.1
 ```
@@ -106,7 +106,7 @@ Devfile can only contain one component with `cheEditor` type.
 ```
 ...
 components:
-  - name: theia-editor
+  - alias: theia-editor
     type: cheEditor
     id: org.eclipse.che.editor.theia:1.0.0
 ```
@@ -123,7 +123,7 @@ It is allowed to have several `chePlugin` components.
 ```
 ...
   components:
-   - name: exec-plugin
+   - alias: exec-plugin
      type: chePlugin
      id: che-machine-exec-plugin:0.0.1
 ```
@@ -138,7 +138,7 @@ More complex component type, which allows to apply configuration from kubernetes
 ```
 ...
   components:
-    - name: mysql
+    - alias: mysql
       type: kubernetes
       reference: petclinic.yaml
       selector:
@@ -151,7 +151,7 @@ Alternatively, if you need to post devfile with such components to REST API, con
 ```
 ...
   components:
-    - name: mysql
+    - alias: mysql
       type: kubernetes
       reference: petclinic.yaml
       referenceContent: |
@@ -179,7 +179,7 @@ The entrypoints can be defined for example like this:
 ```yaml
 ...
   components:
-    - name: appDeployment
+    - alias: appDeployment
       type: kubernetes
       reference: app-deployment.yaml
       entrypoints:
@@ -213,7 +213,7 @@ Devfile can only contain one component with `dockerimage` type.
 ```
  ...
  components:
-   - name: maven
+   - alias: maven
      type: dockerimage
      image: eclipe/maven-jdk8:latest
      volumes:
@@ -250,12 +250,45 @@ Devfile allows to specify commands set to be available for execution in workspac
          workdir: /projects/spring-petclinic
 ```
 
+### Devfile attributes
+
+Devfile attributes may be used to configure some features.
+
+#### Editor free
+If editor is not specified Devfile then default one will be provided. In case when no editor is needed `editorFree` attribute should be used.
+Default value is `false` and means that Devfile needs default editor to be provisioned if no one is defined.
+Example of Devfile without editor
+```yaml
+specVersion: 0.0.1
+name: petclinic-dev-environment
+components:
+  - alias: myApp
+    type: kubernetes
+    local: my-app.yaml
+attributes:
+  editorFree: true
+```
+
+#### Ephemeral mode
+By default volumes and PVCs specified in Devfile are bound to host folder to persist data even after container restart.
+Sometimes it may be needed to disable data persistence for some reasons, like when volume backend is incredibly slow and it is needed to make workspace faster.
+To achieve it the `persistVolumes` devfile attribute should be used. Default value is `true`, and in case of `false` `emptyDir` volumes will be used for configured volumes and PVC.
+Example of Devfile with ephemeral mode enabled
+```yaml
+specVersion: 0.0.1
+name: petclinic-dev-environment
+projects:
+  - name: petclinic
+    source:
+      type: git
+      location: 'https://github.com/che-samples/web-java-spring-petclinic.git'
+attributes:
+  persistVolumes: false
+```
+
 ### Live working examples
 
   - [NodeJS simple "Hello World" example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-sample/devfile.yaml)
   - [NodeJS Application with Mongo DB example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-with-db-sample/devfile.yaml)
   - [Java Spring-Petclinic example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-java-spring-petclinic/devfile.yaml)
   - [Theia frontend plugin example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/theia-hello-world-frontend-plugin/devfile.yaml)
-
-### Planned features
-There is still a lot of plans to extend Devfile possibilities, such as support multiple dockerimage components etc

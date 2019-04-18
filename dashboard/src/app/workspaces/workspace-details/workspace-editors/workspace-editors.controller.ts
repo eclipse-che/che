@@ -20,11 +20,11 @@ const EDITOR_TYPE = 'Che Editor';
 
 /**
  * @ngdoc controller
- * @name workspaces.details.plugins.controller:WorkspacePluginsController
- * @description This class is handling the controller for details of workspace : section plugin
+ * @name workspaces.details.editors.controller:WorkspaceEditorsController
+ * @description This class is handling the controller for details of workspace : section editors
  * @author Ann Shumilova
  */
-export class WorkspacePluginsController {
+export class WorkspaceEditorsController {
   static $inject = ['pluginRegistry', 'cheListHelperFactory', '$scope', 'cheNotification'];
 
   workspaceConfig: IWorkspaceConfig;
@@ -35,11 +35,10 @@ export class WorkspacePluginsController {
   onChange: Function;
   isLoading: boolean;
 
-  pluginOrderBy = 'name';
-  plugins: Array<IPlugin> = [];
-  selectedPlugins: Array<string> = [];
-
-  pluginFilter: any;
+  editorOrderBy = 'name';
+  editors: Array<IPlugin> = [];
+  selectedEditor: string = '';
+  editorFilter: any;
 
   private cheListHelper: che.widget.ICheListHelper;
 
@@ -51,14 +50,14 @@ export class WorkspacePluginsController {
     this.pluginRegistry = pluginRegistry;
     this.cheNotification = cheNotification;
 
-    const helperId = 'workspace-plugins';
+    const helperId = 'workspace-editors';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
 
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    this.pluginFilter = {name: ''};
+    this.editorFilter = {name: ''};
 
     const deRegistrationFn = $scope.$watch(() => {
       return this.workspaceConfig;
@@ -66,7 +65,7 @@ export class WorkspacePluginsController {
       if (!workspaceConfig) {
         return;
       }
-      this.updatePlugins();
+      this.updateEditors();
     }, true);
 
     $scope.$on('$destroy', () => {
@@ -80,17 +79,17 @@ export class WorkspacePluginsController {
    * Loads the list of plugins from registry.
    */
   loadPlugins(): void {
-    this.plugins = [];
+    this.editors = [];
     this.isLoading = true;
     this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPlugin>) => {
       this.isLoading = false;
       result.forEach((item: IPlugin) => {
-        if (item.type !== EDITOR_TYPE) {
-          this.plugins.push(item);
-        }
+        if (item.type === EDITOR_TYPE) {
+          this.editors.push(item);
+        };
       });  
 
-      this.updatePlugins();
+      this.updateEditors();
     }, (error: any) => {
       this.isLoading = false;
       this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Failed to load plugins.');
@@ -103,8 +102,8 @@ export class WorkspacePluginsController {
    * @param str {string} a string to filter projects names
    */
   onSearchChanged(str: string): void {
-    this.pluginFilter.name = str;
-    this.cheListHelper.applyFilter('name', this.pluginFilter);
+    this.editorFilter.name = str;
+    this.cheListHelper.applyFilter('name', this.editorFilter);
   }
 
   /**
@@ -112,18 +111,14 @@ export class WorkspacePluginsController {
    *
    * @param {IPlugin} plugin
    */
-  updatePlugin(plugin: IPlugin): void {
+  updateEditor(plugin: IPlugin): void {
     let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
 
-    if (plugin.type !== EDITOR_TYPE) {
-      if (plugin.isEnabled) {
-        this.selectedPlugins.push(name);
-      } else {
-        this.selectedPlugins.splice(this.selectedPlugins.indexOf(name), 1);
-      }
-      this.workspaceConfig.attributes.plugins = this.selectedPlugins.join(PLUGIN_SEPARATOR);
+    if (plugin.type === EDITOR_TYPE) {
+      this.selectedEditor = plugin.isEnabled ? name : '';
+      this.workspaceConfig.attributes.editor = this.selectedEditor;
     }
-
+    
     this.cleanupInstallers();
     this.onChange();
   }
@@ -143,25 +138,27 @@ export class WorkspacePluginsController {
   /**
    * Update the state of plugins.
    */
-  private updatePlugins(): void {
-    // get selected plugins from workspace configuration attribute - "plugins" (coma separated values):
-    this.selectedPlugins = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes.plugins ?
-      this.workspaceConfig.attributes.plugins.split(PLUGIN_SEPARATOR) : [];
-    // check each plugin's enabled state:
-    this.plugins.forEach((plugin: IPlugin) => {
-      plugin.isEnabled = this.isPluginEnabled(plugin);
+  private updateEditors(): void {
+    // get selected plugins from workspace configuration attribute - "editor":
+    this.selectedEditor = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes.editor ?
+     this.workspaceConfig.attributes.editor : '';
+
+     // check each editor's enabled state:
+    this.editors.forEach((editor: IPlugin) => {
+      editor.isEnabled = this.isEditorEnabled(editor);
     });
-    this.cheListHelper.setList(this.plugins, 'name');
+
+    this.cheListHelper.setList(this.editors, 'name');
   }
 
   /**
    *
    * @param {IPlugin} plugin
-   * @returns {boolean} the plugin's enabled state
+   * @returns {boolean} the editor's enabled state
    */
-  private isPluginEnabled(plugin: IPlugin): boolean {
+  private isEditorEnabled(editor: IPlugin): boolean {
     // name in the format: id:version
-    let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
-    return this.selectedPlugins.indexOf(name) >= 0;
+    let name = editor.id + PLUGIN_VERSION_SEPARATOR + editor.version;
+    return name === this.selectedEditor;
   }
 }

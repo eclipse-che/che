@@ -219,9 +219,6 @@ describe(`WorkspaceDetailsController >`, () => {
       .directive('cheMachineServers', function () {
         return { priority: 100000, terminal: true, restrict: 'E' };
       })
-      .directive('cheMachineAgents', function () {
-        return { priority: 100000, terminal: true, restrict: 'E' };
-      })
       .directive('cheMachineSelector', function () {
         return { priority: 100000, terminal: true, restrict: 'E' };
       })
@@ -233,10 +230,7 @@ describe(`WorkspaceDetailsController >`, () => {
       })
       .directive('workspaceDetailsSsh', function () {
         return { priority: 100000, terminal: true, restrict: 'E' };
-      })
-      .directive('workspaceDetailsTools', function () {
-      return { priority: 100000, terminal: true, restrict: 'E' };
-    });
+      });
 
     angular.mock.module('workspaceDetailsMock');
   });

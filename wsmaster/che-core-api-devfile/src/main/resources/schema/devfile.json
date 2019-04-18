@@ -128,7 +128,6 @@
       "items": {
         "type": "object",
         "required": [
-          "name",
           "type"
         ],
         "dependencies": {
@@ -146,7 +145,7 @@
                   "chePlugin"
                 ]
               },
-              "name": {},
+              "alias": {},
               "id": {}
             },
             "required": [
@@ -162,7 +161,7 @@
                   "openshift"
                 ]
               },
-              "name": {},
+              "alias": {},
               "reference": {},
               "referenceContent": {},
               "selector": {},
@@ -180,7 +179,7 @@
                   "dockerimage"
                 ]
               },
-              "name": {},
+              "alias": {},
               "image": {},
               "memoryLimit": {},
               "mountSources": {},
@@ -198,8 +197,8 @@
           }
         ],
         "properties": {
-          "name": {
-            "description": "Describes the name of the component. Should be unique per components set.",
+          "alias": {
+            "description": "The name using which other places of this devfile (like commands) can refer to this component. This attribute is optional but must be unique in the devfile if specified.",
             "type": "string",
             "examples": [
               "mvn-stack"
@@ -509,8 +508,13 @@
       "type": "object",
       "editorFree": {
         "type": "boolean",
-        "description": "Defines that no editor is needed and default one should not be provisioned.",
+        "description": "Defines that no editor is needed and default one should not be provisioned. Defaults to `false`.",
         "default": "false"
+      },
+      "persistVolumes": {
+        "type": "boolean",
+        "description": "Defines whether volumes should be stored or not. Defaults to `true`. In case of `false` workspace volumes will be created as `emptyDir`. The data in the `emptyDir` volume is deleted forever when a workspace Pod is removed for any reason(pod is crashed, workspace is restarted).",
+        "default": "true"
       },
       "additionalProperties": {
         "type": "string"

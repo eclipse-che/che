@@ -19,17 +19,15 @@ projects:
       type: git
       location: 'git@github.com:spring-projects/spring-petclinic.git'
 components:
-  - name: mvn-stack
+  - alias: mvn-stack
     type: chePlugin
     id: org.eclipse.chemaven-jdk8:1.0.0
-  - name: theia-ide
-    type: cheEditor
+  - type: cheEditor
     id: org.eclipse.chetheia:0.0.3
-  - name: jdt.ls
+  - alias: jdt.ls
     type: chePlugin
     id: org.eclipse.chetheia-jdtls:0.0.3
-  - name: os-recipe
-    type: openshift
+  - type: openshift
     reference: petclinic.yaml
     selector:
       app.kubernetes.io/name: mysql

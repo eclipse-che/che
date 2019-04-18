@@ -14,7 +14,7 @@
 specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
-  - name: mysql
+  - alias: mysql
     type: kubernetes
     reference: https://github.com/redhat-developer/devfile/blob/master/samples/web-nodejs-with-db-sample/mongo-db.yaml
     selector:

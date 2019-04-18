@@ -106,6 +106,7 @@
                         <include>*.json</include>
                         <include>*.js</include>
                         <include>.*</include>
+                        <include>yarn.lock</include>
                     </includes>
                 </configuration>
             </plugin>

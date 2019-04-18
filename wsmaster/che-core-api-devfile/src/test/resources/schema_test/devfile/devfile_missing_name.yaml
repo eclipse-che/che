@@ -13,5 +13,4 @@
 ---
 specVersion: 0.0.1
 components:
-  - name: maven
-    id: org.eclipse.chemaven-jdk8:1.0.0
+  - id: org.eclipse.chemaven-jdk8:1.0.0

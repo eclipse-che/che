@@ -1,5 +1,14 @@
-.packages-page
-  margin-top 0
+md-tab-content .plugins-page
+  margin 0 25px
+
+md-tab-content .plugins-page:first-of-type
+  margin-top 25px  
+
+md-tab-content .plugin-page-separator
+  margin-left 25px
+  margin-right 25px
+
+.plugins-page
   .che-list-header-additional-parts
       padding-left 0
       padding-right 0
@@ -24,12 +33,12 @@
     .header-sort-direction
       position absolute
 
-  .packages-list
+  .plugins-list
     margin-left 0
     margin-right 0
     margin-bottom 1px
     che-box-shadow()
-  .packages-list .package-item
+  .plugins-list .plugin-item
     position relative
     background-color $che-white-color
     border 1px solid $very-light-grey-color
@@ -51,3 +60,5 @@
         .che-list-item-checkbox
           min-width 50px
           height inherit
+          
+

@@ -17,7 +17,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
@@ -90,7 +90,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
 
     // when
     applier.apply(
@@ -115,7 +115,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
 
     // when
     applier.apply(workspaceConfig, component, s -> "some_non_yaml_content");
@@ -130,7 +130,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
 
     // when
     applier.apply(
@@ -150,7 +150,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
 
     // when
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
@@ -172,7 +172,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
     component.setReferenceContent(yamlRecipeContent);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
 
     applier.apply(workspaceConfig, component, new URLFileContentProvider(null, null));
 
@@ -193,7 +193,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(OPENSHIFT_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
 
     // when
     applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
@@ -216,7 +216,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(OPENSHIFT_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
     component.setSelector(selector);
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
@@ -248,10 +248,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(OPENSHIFT_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
     component.setSelector(selector);
     CommandImpl command = new CommandImpl();
-    command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, COMPONENT_NAME);
+    command.getAttributes().put(COMPONENT_ALIAS_COMMAND_ATTRIBUTE, COMPONENT_NAME);
     workspaceConfig.getCommands().add(command);
 
     // when
@@ -273,10 +273,10 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(OPENSHIFT_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
 
     CommandImpl command = new CommandImpl();
-    command.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, COMPONENT_NAME);
+    command.getAttributes().put(COMPONENT_ALIAS_COMMAND_ATTRIBUTE, COMPONENT_NAME);
     workspaceConfig.getCommands().add(command);
 
     // when
@@ -297,7 +297,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReference(REFERENCE_FILENAME);
-    component.setName(COMPONENT_NAME);
+    component.setAlias(COMPONENT_NAME);
 
     EntrypointImpl entrypoint = new EntrypointImpl();
     entrypoint.setParentName("petclinic");

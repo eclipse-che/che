@@ -13,17 +13,21 @@
 
 /**
  * @ngdoc directive
- * @name workspaces.details.tools.directive:workspaceToolsIde
+ * @name workspaces.details.tools.directive:workspaceEditors
  * @restrict E
+ * @element
+ *
+ * @description
+ * <workspace-editors></workspace-editors>` for displaying workspace editors.
  *
  * @author Ann Shumilova
  */
-export class WorkspaceToolsIde implements ng.IDirective {
+export class WorkspaceEditors implements ng.IDirective {
   restrict = 'E';
-  templateUrl = 'app/workspaces/workspace-details/workspace-tools/workspace-tools-ide/workspace-tools-ide.html';
+  templateUrl = 'app/workspaces/workspace-details/workspace-editors/workspace-editors.html';
 
-  controller = 'WorkspaceToolsIdeController';
-  controllerAs = 'workspaceToolsIdeController';
+  controller = 'WorkspaceEditorsController';
+  controllerAs = 'workspaceEditorsController';
 
   bindToController = true;
 
@@ -37,8 +41,8 @@ export class WorkspaceToolsIde implements ng.IDirective {
   constructor() {
     this.scope = {
       onChange: '&',
-      machine: '=',
-      environmentManager: '='
+      workspaceConfig: '=',
+      pluginRegistryLocation: '='
     };
   }
 }

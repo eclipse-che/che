@@ -14,8 +14,7 @@
 specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
-  - name: mysql
-    type: openshift
+  - type: openshift
     referenceContent: |
       kind: List
       items:

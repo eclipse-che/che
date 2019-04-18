@@ -95,8 +95,8 @@ CREATE INDEX index_action_command_id ON devfile_action (devfile_command_id);
 -- devfile component
 CREATE TABLE devfile_component (
     id                     BIGINT       NOT NULL,
-    name                   VARCHAR(255) NOT NULL,
     type                   VARCHAR(255) NOT NULL,
+    alias                  VARCHAR(255),
     component_id           TEXT,
     reference              TEXT,
     reference_content      TEXT,
@@ -110,7 +110,6 @@ CREATE TABLE devfile_component (
 
 -- constraints & indexes
 ALTER TABLE devfile_component ADD CONSTRAINT fk_devfile_component_id FOREIGN KEY (devfile_id) REFERENCES devfile (id);
-CREATE UNIQUE INDEX index_devfile_component_name ON devfile_component (devfile_id, name);
 
 
 -- component command

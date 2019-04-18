@@ -46,11 +46,11 @@ public class ComponentImpl implements Component {
   @Column(name = "id")
   private Long generatedId;
 
-  @Column(name = "name", nullable = false)
-  private String name;
-
   @Column(name = "component_id", nullable = false)
   private String componentId;
+
+  @Column(name = "alias")
+  private String alias;
 
   @Column(name = "type", nullable = false)
   private String type;
@@ -110,21 +110,18 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl() {}
 
-  public ComponentImpl(String type, String name, String id) {
-    this.name = name;
+  public ComponentImpl(String type, String id) {
     this.type = type;
     this.componentId = id;
   }
 
   public ComponentImpl(
       String type,
-      String name,
       String id,
       String reference,
       String referenceContent,
       Map<String, String> selector,
       List<? extends Entrypoint> entrypoints) {
-    this.name = name;
     this.type = type;
     this.componentId = id;
     this.reference = reference;
@@ -140,8 +137,8 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl(
       String type,
-      String name,
       String id,
+      String alias,
       String image,
       String memoryLimit,
       boolean mountSources,
@@ -150,7 +147,7 @@ public class ComponentImpl implements Component {
       List<? extends Volume> volumes,
       List<? extends Env> env,
       List<? extends Endpoint> endpoints) {
-    this.name = name;
+    this.alias = alias;
     this.type = type;
     this.componentId = id;
     this.image = image;
@@ -172,7 +169,7 @@ public class ComponentImpl implements Component {
 
   public ComponentImpl(
       String type,
-      String name,
+      String alias,
       String id,
       String reference,
       String referenceContent,
@@ -185,7 +182,7 @@ public class ComponentImpl implements Component {
       List<? extends Volume> volumes,
       List<? extends Env> env,
       List<? extends Endpoint> endpoints) {
-    this.name = name;
+    this.alias = alias;
     this.type = type;
     this.componentId = id;
     this.reference = reference;
@@ -214,7 +211,7 @@ public class ComponentImpl implements Component {
   public ComponentImpl(Component component) {
     this(
         component.getType(),
-        component.getName(),
+        component.getAlias(),
         component.getId(),
         component.getReference(),
         component.getReferenceContent(),
@@ -230,12 +227,12 @@ public class ComponentImpl implements Component {
   }
 
   @Override
-  public String getName() {
-    return name;
+  public String getAlias() {
+    return alias;
   }
 
-  public void setName(String name) {
-    this.name = name;
+  public void setAlias(String alias) {
+    this.alias = alias;
   }
 
   @Override
@@ -396,7 +393,7 @@ public class ComponentImpl implements Component {
     ComponentImpl component = (ComponentImpl) o;
     return getMountSources() == component.getMountSources()
         && Objects.equals(generatedId, component.generatedId)
-        && Objects.equals(name, component.name)
+        && Objects.equals(alias, component.alias)
         && Objects.equals(type, component.type)
         && Objects.equals(componentId, component.componentId)
         && Objects.equals(reference, component.reference)
@@ -417,7 +414,7 @@ public class ComponentImpl implements Component {
 
     return Objects.hash(
         generatedId,
-        name,
+        alias,
         type,
         componentId,
         reference,
@@ -440,8 +437,8 @@ public class ComponentImpl implements Component {
         + "id='"
         + componentId
         + '\''
-        + ", name='"
-        + name
+        + "alias='"
+        + alias
         + '\''
         + ", type='"
         + type

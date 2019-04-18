@@ -18,7 +18,7 @@
   <div class="warning-message" ng-hide="workspaceMachinesController.isScalable() || workspaceMachinesController.machines.length === 0">
     <span>Add another machine by changing the environment type to <b>compose</b>, <b>kubernetes</b> or <b>openshift</b></span>
   </div>
-  <che-list-header che-add-button-title="Add machine"
+  <che-list-header che-add-button-title="Add container"
                    che-hide-add="!workspaceMachinesController.isScalable()"
                    che-on-add="workspaceMachinesController.editMachine()"
                    che-delete-button-title="Delete"

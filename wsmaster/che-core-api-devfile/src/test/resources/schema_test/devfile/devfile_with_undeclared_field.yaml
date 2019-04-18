@@ -15,6 +15,5 @@ specVersion: 0.0.1
 name: petclinic-dev-environment
 unknown: blah-blah
 components:
-  - name: maven
-    type: chePlugin
+  - type: chePlugin
     id: org.eclipse.chemaven-jdk8:1.0.0

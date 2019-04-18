@@ -6,12 +6,12 @@
 </a>
 
 
-https://www.eclipse.org/che/. Next-generation Eclipse platform, developer workspace server and cloud IDE. Che is focused on container-native development. It defines workspaces that include their dependencies including embedded containerized runtimes, a web IDE, and project code. This makes workspaces distributed, collaborative, and portable to run anywhere on a desktop or a server ... [Read More](https://www.eclipse.org/che/features/)
+https://www.eclipse.org/che/. Next-generation container development platform, developer workspace server and cloud IDE. Che is Kubernetes-native and places everything the developer needs into containers in Kube pods including dependencies, embedded containerized runtimes, a web IDE, and project code. This makes workspaces distributed, collaborative, and portable to run anywhere Kubernetes runs ... [Read More](https://www.eclipse.org/che/features/)
 
 ![Eclipse Che](https://www.eclipse.org/che/images/hero-technology-v2@2x.png "Eclipse Che")
 
 ### Getting Started
-You can run Che in the public cloud, a private cloud, or install it on any OS. Che has been tested on Ubuntu, Linux, MacOS and Windows. The [step by step guide](https://eclipse.org/che/getting-started/) will get you going along with [our docs](https://www.eclipse.org/che/docs/).
+You can run Che wherever Kubernetes runs - in the public cloud, a private cloud, or install it locally. The [step by step guide](https://eclipse.org/che/getting-started/) will get you going along with [our docs](https://www.eclipse.org/che/docs/).
 
 The `che` repository is where we do development and there are many ways you can participate, for example:
 
