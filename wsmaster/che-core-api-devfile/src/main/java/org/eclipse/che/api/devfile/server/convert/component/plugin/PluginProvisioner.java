@@ -13,9 +13,11 @@ package org.eclipse.che.api.devfile.server.convert.component.plugin;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
 import java.util.Arrays;
@@ -61,7 +63,10 @@ public class PluginProvisioner implements ComponentProvisioner {
           new ComponentImpl(
               PLUGIN_COMPONENT_TYPE,
               pluginIdToComponentName.getOrDefault(pluginId, pluginId),
-              pluginId);
+              pluginId,
+              workspaceConfig
+                  .getAttributes()
+                  .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginId)));
       devfile.getComponents().add(pluginComponent);
     }
   }

@@ -46,9 +46,16 @@ public class ComponentImpl implements Component {
   public ComponentImpl() {}
 
   public ComponentImpl(String type, String name, String id) {
+    this(type, name, id, null);
+  }
+
+  public ComponentImpl(String type, String name, String id, String memoryLimit) {
     this.name = name;
     this.type = type;
     this.id = id;
+    if (memoryLimit != null) {
+      this.memoryLimit = memoryLimit;
+    }
   }
 
   public ComponentImpl(

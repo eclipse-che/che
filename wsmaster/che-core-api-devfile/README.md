@@ -130,7 +130,16 @@ It is allowed to have several `chePlugin` components.
 
 Both types above using composite id, which is colon-separated id and version of plugin from Che Plugin registry.  
 List of available Che plugins and more information about registry can be found on https://github.com/eclipse/che-plugin-registry 
-
+For each of those types it is also possible to specify container(s) memory limit as follows: 
+```
+...
+  components:
+   - name: exec-plugin
+     type: chePlugin
+     id: che-machine-exec-plugin:0.0.1
+     memoryLimit: 256M
+```
+This limit will be apllied to each container of given plugin. 
 
 
 #### kubernetes/openshift
