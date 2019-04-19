@@ -76,12 +76,10 @@ export class DriverHelper {
             const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), timeout)
 
             try {
-                return await this.driver.wait(until.elementIsVisible(webElement), timeout)
+                const visibleWebElement = await this.driver.wait(until.elementIsVisible(webElement), timeout)
+                return visibleWebElement
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
-
-                    console.log("==>>> 'waitVisibility' catched exception")
-
                     await this.wait(polling)
                     continue;
                 }
@@ -124,8 +122,12 @@ export class DriverHelper {
                 await element.click();
                 return;
             } catch (err) {
-                await this.wait(polling)
-                continue;
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err
             }
         }
 
@@ -142,10 +144,15 @@ export class DriverHelper {
             const element: WebElement = await this.waitVisibility(elementLocator, visibilityTimeout);
 
             try {
-                return await element.getAttribute(attribute)
+                const attributeValue = await element.getAttribute(attribute)
+                return attributeValue
             } catch (err) {
-                await this.wait(polling)
-                continue
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err
             }
         }
 
@@ -175,8 +182,12 @@ export class DriverHelper {
                 await element.sendKeys(text)
                 return
             } catch (err) {
-                await this.wait(polling)
-                continue
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err
             }
         }
 
@@ -195,8 +206,12 @@ export class DriverHelper {
                 await element.clear()
                 return
             } catch (err) {
-                await this.wait(polling)
-                continue
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err
             }
         }
 
@@ -212,7 +227,7 @@ export class DriverHelper {
     }
 
     public async waitAndSwitchToFrame(iframeLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        this.driver.wait(until.ableToSwitchToFrame(iframeLocator), timeout)
+        await this.driver.wait(until.ableToSwitchToFrame(iframeLocator), timeout)
     }
 
     public async waitAndGetText(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
@@ -227,8 +242,12 @@ export class DriverHelper {
                 const innerText: string = await element.getText()
                 return innerText
             } catch (err) {
-                await this.wait(polling)
-                continue
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err
             }
         }
 
@@ -251,7 +270,5 @@ export class DriverHelper {
     public async navigateTo(url: string) {
         await this.driver.navigate().to(url)
     }
-
-
 
 }
