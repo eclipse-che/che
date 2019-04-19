@@ -34,14 +34,14 @@ import org.slf4j.LoggerFactory;
  */
 public class KubernetesWorkspaceServiceAccount {
 
+  private static final Logger LOG =
+      LoggerFactory.getLogger(KubernetesWorkspaceServiceAccount.class);
+
   private final String namespace;
   private final String serviceAccountName;
   private final KubernetesClientFactory clientFactory;
   private final String workspaceId;
   private final String clusterRoleName;
-
-  private static final Logger LOG =
-      LoggerFactory.getLogger(KubernetesWorkspaceServiceAccount.class);
 
   public KubernetesWorkspaceServiceAccount(
       String workspaceId,

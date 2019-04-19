@@ -36,13 +36,13 @@ import org.slf4j.LoggerFactory;
  */
 class OpenShiftWorkspaceServiceAccount {
 
+  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftWorkspaceServiceAccount.class);
+
   private final String projectName;
   private final String serviceAccountName;
   private final OpenShiftClientFactory clientFactory;
   private final String workspaceId;
   private final String clusterRoleName;
-
-  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftWorkspaceServiceAccount.class);
 
   OpenShiftWorkspaceServiceAccount(
       String workspaceId,
