@@ -23,6 +23,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CEYLON_WITH_JAVA_JAVASCRIPT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW_DEV;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_THEIA_DEV;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
@@ -89,6 +90,7 @@ public class NewWorkspacePageTest {
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
           GO_DEFAULT,
           GO,
@@ -110,6 +112,7 @@ public class NewWorkspacePageTest {
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
           GO_DEFAULT,
           GO,
@@ -157,6 +160,7 @@ public class NewWorkspacePageTest {
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO_DEFAULT,
@@ -187,6 +191,7 @@ public class NewWorkspacePageTest {
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
           GO_DEFAULT,
@@ -255,6 +260,7 @@ public class NewWorkspacePageTest {
               GO,
               GO_DEFAULT,
               ECLIPSE_CHE,
+              CHE_7_THEIA_DEV,
               CHE_7_PREVIEW_DEV,
               CHE_7_PREVIEW,
               CPP,
@@ -276,6 +282,7 @@ public class NewWorkspacePageTest {
           GO,
           GO_DEFAULT,
           ECLIPSE_CHE,
+          CHE_7_THEIA_DEV,
           CHE_7_PREVIEW_DEV,
           CHE_7_PREVIEW,
           CPP,

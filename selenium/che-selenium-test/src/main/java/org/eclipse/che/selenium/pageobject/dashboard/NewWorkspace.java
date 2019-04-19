@@ -142,6 +142,7 @@ public class NewWorkspace {
     CEYLON_WITH_JAVA_JAVASCRIPT("ceylon-java-javascript-dart-centos"),
     CHE_7_PREVIEW("che7-preview"),
     CHE_7_PREVIEW_DEV("che7-preview-plugin-dev"),
+    CHE_7_THEIA_DEV("che7-development-che-theia-and-theia-plugins"),
     DEBIAN("debian"),
     DEBIAN_LSP("debianlsp"),
     ECLIPSE_CHE("che-in-che"),
