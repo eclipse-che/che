@@ -22,6 +22,8 @@ import io.fabric8.openshift.api.model.RoleBuilder;
 import io.fabric8.openshift.client.OpenShiftClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.openshift.OpenShiftClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds logic for preparing workspace service account.
@@ -39,6 +41,8 @@ class OpenShiftWorkspaceServiceAccount {
   private final OpenShiftClientFactory clientFactory;
   private final String workspaceId;
   private final String clusterRoleName;
+
+  private static final Logger LOG = LoggerFactory.getLogger(OpenShiftWorkspaceServiceAccount.class);
 
   OpenShiftWorkspaceServiceAccount(
       String workspaceId,
@@ -83,10 +87,16 @@ class OpenShiftWorkspaceServiceAccount {
     // If the user specified an additional cluster role for the workspace,
     // create a role binding for it too
     if (!isNullOrEmpty(this.clusterRoleName)) {
-      osClient
-          .roleBindings()
-          .inNamespace(projectName)
-          .createOrReplace(createCustomRoleBinding(this.clusterRoleName));
+      if (osClient.rbac().kubernetesClusterRoles().withName(this.clusterRoleName).get() != null) {
+        osClient
+            .roleBindings()
+            .inNamespace(projectName)
+            .createOrReplace(createCustomRoleBinding(this.clusterRoleName));
+      } else {
+        LOG.warn(
+            "Unable to find the cluster role {}. Skip creating custom role binding.",
+            this.clusterRoleName);
+      }
     }
   }
 

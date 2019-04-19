@@ -22,6 +22,8 @@ import io.fabric8.kubernetes.api.model.rbac.KubernetesSubjectBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds logic for preparing workspace service account.
@@ -37,6 +39,9 @@ public class KubernetesWorkspaceServiceAccount {
   private final KubernetesClientFactory clientFactory;
   private final String workspaceId;
   private final String clusterRoleName;
+
+  private static final Logger LOG =
+      LoggerFactory.getLogger(KubernetesWorkspaceServiceAccount.class);
 
   public KubernetesWorkspaceServiceAccount(
       String workspaceId,
@@ -91,11 +96,17 @@ public class KubernetesWorkspaceServiceAccount {
     // If the user specified an additional cluster role for the workspace,
     // create a role binding for it too
     if (!isNullOrEmpty(this.clusterRoleName)) {
-      k8sClient
-          .rbac()
-          .kubernetesRoleBindings()
-          .inNamespace(namespace)
-          .createOrReplace(createCustomRoleBinding(this.clusterRoleName));
+      if (k8sClient.rbac().kubernetesClusterRoles().withName(this.clusterRoleName).get() != null) {
+        k8sClient
+            .rbac()
+            .kubernetesRoleBindings()
+            .inNamespace(namespace)
+            .createOrReplace(createCustomRoleBinding(this.clusterRoleName));
+      } else {
+        LOG.warn(
+            "Unable to find the cluster role {}. Skip creating custom role binding.",
+            this.clusterRoleName);
+      }
     }
   }
 
