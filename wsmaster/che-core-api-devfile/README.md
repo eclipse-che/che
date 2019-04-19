@@ -31,10 +31,10 @@ projects:
       type: git
       location: 'https://github.com/che-samples/web-java-spring-petclinic.git'
 components:
-  - name: theia-editor
+  - alias: theia-editor
     type: cheEditor
     id: org.eclipse.che.editor.theia:1.0.0
-  - name: exec-plugin
+  - alias: exec-plugin
     type: chePlugin
     id: che-machine-exec-plugin:0.0.1
 ```
@@ -106,7 +106,7 @@ Devfile can only contain one component with `cheEditor` type.
 ```
 ...
 components:
-  - name: theia-editor
+  - alias: theia-editor
     type: cheEditor
     id: org.eclipse.che.editor.theia:1.0.0
 ```
@@ -123,7 +123,7 @@ It is allowed to have several `chePlugin` components.
 ```
 ...
   components:
-   - name: exec-plugin
+   - alias: exec-plugin
      type: chePlugin
      id: che-machine-exec-plugin:0.0.1
 ```
@@ -147,7 +147,7 @@ More complex component type, which allows to apply configuration from kubernetes
 ```
 ...
   components:
-    - name: mysql
+    - alias: mysql
       type: kubernetes
       reference: petclinic.yaml
       selector:
@@ -160,7 +160,7 @@ Alternatively, if you need to post devfile with such components to REST API, con
 ```
 ...
   components:
-    - name: mysql
+    - alias: mysql
       type: kubernetes
       reference: petclinic.yaml
       referenceContent: |
@@ -188,7 +188,7 @@ The entrypoints can be defined for example like this:
 ```yaml
 ...
   components:
-    - name: appDeployment
+    - alias: appDeployment
       type: kubernetes
       reference: app-deployment.yaml
       entrypoints:
@@ -222,7 +222,7 @@ Devfile can only contain one component with `dockerimage` type.
 ```
  ...
  components:
-   - name: maven
+   - alias: maven
      type: dockerimage
      image: eclipe/maven-jdk8:latest
      volumes:
@@ -271,7 +271,7 @@ Example of Devfile without editor
 specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
-  - name: myApp
+  - alias: myApp
     type: kubernetes
     local: my-app.yaml
 attributes:

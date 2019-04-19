@@ -18,6 +18,7 @@ import io.fabric8.openshift.api.model.Route;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
@@ -97,7 +98,7 @@ public class OpenShiftExternalServerExposer
       Map<String, ServerConfig> externalServers) {
     Route route =
         new RouteBuilder()
-            .withName(serviceName + '-' + servicePort.getName())
+            .withName(Names.generateName("route"))
             .withMachineName(machineName)
             .withTargetPort(servicePort.getName())
             .withServers(externalServers)

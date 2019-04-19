@@ -20,6 +20,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -51,6 +52,14 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -75,6 +84,7 @@ public class WorkspaceDaoTest {
   public static final String SUITE_NAME = "WorkspaceDaoTck";
 
   private static final int COUNT_OF_WORKSPACES = 5;
+  private static final int DEVFILE_WORKSPACE_INDEX = COUNT_OF_WORKSPACES - 1;
   private static final int COUNT_OF_ACCOUNTS = 3;
 
   @Inject private TckRepository<WorkspaceImpl> workspaceRepo;
@@ -104,7 +114,13 @@ public class WorkspaceDaoTest {
     workspaces = new WorkspaceImpl[COUNT_OF_WORKSPACES];
     for (int i = 0; i < COUNT_OF_WORKSPACES; i++) {
       // 2 workspaces share 1 namespace
-      workspaces[i] = createWorkspace("workspace-" + i, accounts[i / 2], "name-" + i);
+      AccountImpl account = accounts[i / 2];
+      // Last one is made from devfile
+      if (i < DEVFILE_WORKSPACE_INDEX) {
+        workspaces[i] = createWorkspaceFromConfig("workspace-" + i, account, "name-" + i);
+      } else {
+        workspaces[i] = createWorkspaceFromDevfile("workspace-" + i, account, "name-" + i);
+      }
     }
     accountRepo.createAll(Arrays.asList(accounts));
     workspaceRepo.createAll(Stream.of(workspaces).map(WorkspaceImpl::new).collect(toList()));
@@ -152,11 +168,20 @@ public class WorkspaceDaoTest {
   }
 
   @Test
-  public void shouldGetWorkspaceByNameAndNamespace() throws Exception {
+  public void shouldGetWorkspaceByConfigNameAndNamespace() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 
     assertEquals(
         workspaceDao.get(workspace.getConfig().getName(), workspace.getNamespace()),
+        new WorkspaceImpl(workspace));
+  }
+
+  @Test
+  public void shouldGetWorkspaceByDevfileNameAndNamespace() throws Exception {
+    final WorkspaceImpl workspace = workspaces[4];
+
+    assertEquals(
+        workspaceDao.get(workspace.getDevfile().getName(), workspace.getNamespace()),
         new WorkspaceImpl(workspace));
   }
 
@@ -290,8 +315,9 @@ public class WorkspaceDaoTest {
   }
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
-  public void shouldCreateWorkspace() throws Exception {
-    final WorkspaceImpl workspace = createWorkspace("new-workspace", accounts[0], "new-name");
+  public void shouldCreateWorkspaceWithConfig() throws Exception {
+    final WorkspaceImpl workspace =
+        createWorkspaceFromConfig("new-workspace", accounts[0], "new-name");
 
     workspaceDao.create(workspace);
 
@@ -299,13 +325,43 @@ public class WorkspaceDaoTest {
         workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
   }
 
-  @Test(expectedExceptions = ConflictException.class)
-  public void shouldNotCreateWorkspaceWithANameWhichAlreadyExistsInGivenNamespace()
+  @Test(dependsOnMethods = "shouldGetWorkspaceById")
+  public void shouldCreateWorkspaceWithDevfile() throws Exception {
+    final WorkspaceImpl workspace =
+        createWorkspaceFromDevfile("new-workspace", accounts[1], "new-name");
+
+    workspaceDao.create(workspace);
+
+    assertEquals(
+        workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with id 'new-id' or name 'name-0' in namespace 'accountName0' already exists")
+  public void shouldNotCreateWorkspaceWithConfigWithANameWhichAlreadyExistsInGivenNamespace()
       throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
-
+    assertNull(workspace.getDevfile());
     final WorkspaceImpl newWorkspace =
-        createWorkspace("new-id", workspace.getAccount(), workspace.getConfig().getName());
+        createWorkspaceFromConfig(
+            "new-id", workspace.getAccount(), workspace.getConfig().getName());
+
+    workspaceDao.create(newWorkspace);
+  }
+
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with id 'new-id' or name 'name-1' in namespace 'accountName0' already exists")
+  public void shouldNotCreateWorkspaceWithDevfileWithANameWhichAlreadyExistsInGivenNamespace()
+      throws Exception {
+    final WorkspaceImpl workspace = workspaces[1];
+    assertNull(workspace.getDevfile());
+    final WorkspaceImpl newWorkspace =
+        createWorkspaceFromDevfile(
+            "new-id", workspace.getAccount(), workspace.getConfig().getName());
 
     workspaceDao.create(newWorkspace);
   }
@@ -313,10 +369,11 @@ public class WorkspaceDaoTest {
   @Test
   public void shouldCreateWorkspaceWithNameWhichDoesNotExistInGivenNamespace() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
-    final WorkspaceImpl workspace2 = workspaces[4];
+    final WorkspaceImpl workspace2 = workspaces[3];
 
     final WorkspaceImpl newWorkspace =
-        createWorkspace("new-id", workspace.getAccount(), workspace2.getConfig().getName());
+        createWorkspaceFromConfig(
+            "new-id", workspace.getAccount(), workspace2.getConfig().getName());
     final WorkspaceImpl expected = new WorkspaceImpl(newWorkspace, newWorkspace.getAccount());
     expected.setAccount(newWorkspace.getAccount());
     assertEquals(workspaceDao.create(newWorkspace), expected);
@@ -326,13 +383,14 @@ public class WorkspaceDaoTest {
   public void shouldThrowConflictExceptionWhenCreatingWorkspaceWithExistingId() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
 
-    final WorkspaceImpl newWorkspace = createWorkspace(workspace.getId(), accounts[0], "new-name");
+    final WorkspaceImpl newWorkspace =
+        createWorkspaceFromConfig(workspace.getId(), accounts[0], "new-name");
 
     workspaceDao.create(newWorkspace);
   }
 
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
-  public void shouldUpdateWorkspace() throws Exception {
+  public void shouldUpdateWorkspaceWithConfig() throws Exception {
     final WorkspaceImpl workspace = new WorkspaceImpl(workspaces[0], workspaces[0].getAccount());
 
     // Remove an existing project configuration from workspace
@@ -466,6 +524,91 @@ public class WorkspaceDaoTest {
         workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
   }
 
+  @Test(dependsOnMethods = "shouldGetWorkspaceById")
+  public void shouldUpdateWorkspaceWithDevfile() throws Exception {
+    final WorkspaceImpl workspace =
+        new WorkspaceImpl(
+            workspaces[DEVFILE_WORKSPACE_INDEX], workspaces[DEVFILE_WORKSPACE_INDEX].getAccount());
+
+    // Remove an existing project configuration from workspace
+    workspace.getDevfile().getProjects().remove(1);
+
+    final SourceImpl source3 =
+        new SourceImpl("type3", "http://location", "branch3", "point3", "tag3", "commit3");
+    ProjectImpl newProject = new ProjectImpl("project3", source3, "path3");
+    workspace.getDevfile().getProjects().add(newProject);
+
+    // Update an existing project configuration
+    final ProjectImpl projectCfg = workspace.getDevfile().getProjects().get(0);
+    projectCfg.getSource().setLocation("new-location");
+    projectCfg.getSource().setType("new-type");
+    projectCfg.getSource().setBranch("new-branch");
+    projectCfg.getSource().setCommitId(("new-commit"));
+    projectCfg.getSource().setTag(("new-tag"));
+    projectCfg.getSource().setStartPoint(("new-point"));
+
+    // Remove an existing command
+    workspace.getDevfile().getCommands().remove(1);
+
+    ActionImpl action3 = new ActionImpl("exec3", "component3", "run.sh", "/home/user/3");
+    ActionImpl action4 = new ActionImpl("exec4", "component4", "run.sh", "/home/user/4");
+    // Add a new command
+    final org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl newCmd =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+            "command-3", singletonList(action3), singletonMap("attr3", "value3"));
+    workspace.getDevfile().getCommands().add(newCmd);
+
+    // Update an existing command
+    final org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command =
+        workspace.getDevfile().getCommands().get(0);
+    command.setName("new-name");
+    command.setActions(asList(action4));
+    command.getAttributes().clear();
+
+    workspace.getDevfile().getComponents().remove(1);
+
+    EntrypointImpl entrypoint3 =
+        new EntrypointImpl(
+            "parentName",
+            singletonMap("parent3", "selector3"),
+            "containerName3",
+            asList("command3", "command5"),
+            asList("arg3", "arg5"));
+
+    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume3 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name3", "path3");
+
+    EnvImpl env3 = new EnvImpl("name3", "value3");
+    EndpointImpl endpoint3 = new EndpointImpl("name3", 3333, singletonMap("key3", "value3"));
+
+    ComponentImpl component3 = workspace.getDevfile().getComponents().get(0);
+    new ComponentImpl(
+        "kubernetes",
+        "component3",
+        "che-theia:0.0.1",
+        "/dev.yaml",
+        null,
+        asList(entrypoint3),
+        "image",
+        "1256G",
+        false,
+        singletonList("command"),
+        singletonList("arg"),
+        asList(volume3),
+        asList(env3),
+        asList(endpoint3));
+    component3.setSelector(singletonMap("key3", "value3"));
+
+    // Update workspace object
+    workspace.setAccount(new AccountImpl("accId", "new-namespace", "test"));
+    workspace.getAttributes().clear();
+
+    workspaceDao.update(workspace);
+
+    assertEquals(
+        workspaceDao.get(workspace.getId()), new WorkspaceImpl(workspace, workspace.getAccount()));
+  }
+
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldNotUpdateWorkspaceWhichDoesNotExist() throws Exception {
     final WorkspaceImpl workspace = workspaces[0];
@@ -474,8 +617,11 @@ public class WorkspaceDaoTest {
     workspaceDao.update(workspace);
   }
 
-  @Test(expectedExceptions = ConflictException.class)
-  public void shouldNotUpdateWorkspaceWithReservedName() throws Exception {
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with name 'name-1' in namespace 'accountName0' already exists")
+  public void shouldNotUpdateWorkspaceWithReservedNameFromConfig() throws Exception {
     final WorkspaceImpl workspace1 = workspaces[0];
     final WorkspaceImpl workspace2 = workspaces[1];
 
@@ -484,9 +630,23 @@ public class WorkspaceDaoTest {
     workspaceDao.update(workspace1);
   }
 
+  @Test(
+      expectedExceptions = ConflictException.class,
+      expectedExceptionsMessageRegExp =
+          "Workspace with name 'name-3' in namespace 'accountName1' already exists")
+  public void shouldNotUpdateWorkspaceWithReservedNameFromDevfile() throws Exception {
+    final WorkspaceImpl workspace1 = workspaces[3];
+    final WorkspaceImpl workspace2 = workspaces[DEVFILE_WORKSPACE_INDEX];
+
+    workspace2.getDevfile().setName(workspace1.getConfig().getName());
+    workspace2.setAccount(workspace1.getAccount());
+
+    workspaceDao.update(workspace2);
+  }
+
   @Test(dependsOnMethods = "shouldGetWorkspaceById")
   public void createsWorkspaceWithAProjectConfigContainingLongAttributeValues() throws Exception {
-    WorkspaceImpl workspace = createWorkspace("new-workspace", accounts[0], "new-name");
+    WorkspaceImpl workspace = createWorkspaceFromConfig("new-workspace", accounts[0], "new-name");
     ProjectConfigImpl project = workspace.getConfig().getProjects().get(0);
 
     // long string
@@ -649,7 +809,8 @@ public class WorkspaceDaoTest {
     return wCfg;
   }
 
-  public static WorkspaceImpl createWorkspace(String id, AccountImpl account, String name) {
+  public static WorkspaceImpl createWorkspaceFromConfig(
+      String id, AccountImpl account, String name) {
     final WorkspaceConfigImpl wCfg = createWorkspaceConfig(name);
     // Workspace
     final WorkspaceImpl workspace = new WorkspaceImpl();
@@ -665,6 +826,119 @@ public class WorkspaceDaoTest {
                 "attr3", "value3")));
     workspace.setConfig(wCfg);
     return workspace;
+  }
+
+  public static WorkspaceImpl createWorkspaceFromDevfile(
+      String id, AccountImpl account, String name) {
+    final DevfileImpl devfile = createDevfile(name);
+    // Workspace
+    final WorkspaceImpl workspace = new WorkspaceImpl();
+    workspace.setId(id);
+    workspace.setAccount(account);
+    workspace.setDevfile(devfile);
+    workspace.setAttributes(
+        new HashMap<>(
+            ImmutableMap.of(
+                "attr1", "value1",
+                "attr2", "value2",
+                "attr3", "value3")));
+    return workspace;
+  }
+
+  private static DevfileImpl createDevfile(String name) {
+
+    SourceImpl source1 =
+        new SourceImpl("type1", "http://location", "branch1", "point1", "tag1", "commit1");
+    ProjectImpl project1 = new ProjectImpl("project1", source1, "path1");
+
+    SourceImpl source2 =
+        new SourceImpl("type2", "http://location", "branch2", "point2", "tag2", "commit2");
+    ProjectImpl project2 = new ProjectImpl("project2", source2, "path2");
+
+    ActionImpl action1 = new ActionImpl("exec1", "component1", "run.sh", "/home/user/1");
+    ActionImpl action2 = new ActionImpl("exec2", "component2", "run.sh", "/home/user/2");
+
+    org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command1 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+            name + "-1", singletonList(action1), singletonMap("attr1", "value1"));
+    org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command2 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+            name + "-2", singletonList(action2), singletonMap("attr2", "value2"));
+
+    EntrypointImpl entrypoint1 =
+        new EntrypointImpl(
+            "parentName1",
+            singletonMap("parent1", "selector1"),
+            "containerName1",
+            asList("command1", "command2"),
+            asList("arg1", "arg2"));
+
+    EntrypointImpl entrypoint2 =
+        new EntrypointImpl(
+            "parentName2",
+            singletonMap("parent2", "selector2"),
+            "containerName2",
+            asList("command3", "command4"),
+            asList("arg3", "arg4"));
+
+    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume1 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name1", "path1");
+
+    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume2 =
+        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name2", "path2");
+
+    EnvImpl env1 = new EnvImpl("name1", "value1");
+    EnvImpl env2 = new EnvImpl("name2", "value2");
+
+    EndpointImpl endpoint1 = new EndpointImpl("name1", 1111, singletonMap("key1", "value1"));
+    EndpointImpl endpoint2 = new EndpointImpl("name2", 2222, singletonMap("key2", "value2"));
+
+    ComponentImpl component1 =
+        new ComponentImpl(
+            "kubernetes",
+            "component1",
+            "che-theia:0.0.1",
+            "/dev.yaml",
+            "refcontent1",
+            asList(entrypoint1, entrypoint2),
+            "image",
+            "256G",
+            false,
+            singletonList("command"),
+            singletonList("arg"),
+            asList(volume1, volume2),
+            asList(env1, env2),
+            asList(endpoint1, endpoint2));
+    component1.setSelector(singletonMap("key1", "value1"));
+
+    ComponentImpl component2 =
+        new ComponentImpl(
+            "kubernetes",
+            "component2",
+            "che-theia:0.0.1",
+            "/dev.yaml",
+            "refcontent2",
+            asList(entrypoint1, entrypoint2),
+            "image",
+            "256G",
+            false,
+            singletonList("command"),
+            singletonList("arg"),
+            asList(volume1, volume2),
+            asList(env1, env2),
+            asList(endpoint1, endpoint2));
+    component2.setSelector(singletonMap("key2", "value2"));
+
+    DevfileImpl devfile =
+        new DevfileImpl(
+            "0.0.1",
+            name,
+            asList(project1, project2),
+            asList(component1, component2),
+            asList(command1, command2),
+            singletonMap("attribute1", "value1"));
+
+    return devfile;
   }
 
   private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {

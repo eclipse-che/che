@@ -12,7 +12,8 @@
 package org.eclipse.che.api.workspace.server.jpa;
 
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspace;
+import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspaceFromConfig;
+import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspaceFromDevfile;
 import static org.testng.Assert.assertEquals;
 
 import com.google.inject.Guice;
@@ -65,7 +66,7 @@ public class JpaWorkspaceDaoTest {
   @Test
   public void shouldCascadeRemoveObjectsWhenTheyRemovedFromEntity() {
     final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
-    final WorkspaceImpl workspace = createWorkspace("id", account, "name");
+    final WorkspaceImpl workspace = createWorkspaceFromConfig("id", account, "name");
 
     // Persist the account
     manager.getTransaction().begin();
@@ -99,8 +100,8 @@ public class JpaWorkspaceDaoTest {
   @Test(expectedExceptions = DuplicateKeyException.class)
   public void shouldSynchronizeWorkspaceNameWithConfigNameWhenConfigIsUpdated() throws Exception {
     final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
-    final WorkspaceImpl workspace1 = createWorkspace("id", account, "name1");
-    final WorkspaceImpl workspace2 = createWorkspace("id2", account, "name2");
+    final WorkspaceImpl workspace1 = createWorkspaceFromConfig("id", account, "name1");
+    final WorkspaceImpl workspace2 = createWorkspaceFromConfig("id2", account, "name2");
 
     // persist prepared data
     manager.getTransaction().begin();
@@ -116,10 +117,30 @@ public class JpaWorkspaceDaoTest {
     manager.getTransaction().commit();
   }
 
+  @Test(expectedExceptions = DuplicateKeyException.class)
+  public void shouldSynchronizeWorkspaceNameWithDevfileNameWhenDevfileIsUpdated() throws Exception {
+    final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+    final WorkspaceImpl workspace1 = createWorkspaceFromDevfile("id", account, "name1");
+    final WorkspaceImpl workspace2 = createWorkspaceFromDevfile("id2", account, "name2");
+
+    // persist prepared data
+    manager.getTransaction().begin();
+    manager.persist(account);
+    manager.persist(workspace1);
+    manager.persist(workspace2);
+    manager.getTransaction().commit();
+
+    // make conflict update
+    workspace2.getDevfile().setName(workspace1.getDevfile().getName());
+    manager.getTransaction().begin();
+    manager.merge(workspace2);
+    manager.getTransaction().commit();
+  }
+
   @Test
   public void shouldSyncDbAttributesWhileUpdatingWorkspace() throws Exception {
     final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
-    final WorkspaceImpl workspace = createWorkspace("id", account, "name");
+    final WorkspaceImpl workspace = createWorkspaceFromConfig("id", account, "name");
     if (workspace.getConfig() != null) {
       workspace.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
     }

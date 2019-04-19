@@ -12,7 +12,7 @@
 package org.eclipse.che.api.devfile.server.convert;
 
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EXEC_ACTION_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -42,7 +42,7 @@ public class CommandConverterTest {
     org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
         new org.eclipse.che.api.workspace.server.model.impl.CommandImpl(
             "build", "mvn clean install", "custom");
-    workspaceCommand.getAttributes().put(COMPONENT_NAME_COMMAND_ATTRIBUTE, "dockerimageComponent");
+    workspaceCommand.getAttributes().put(COMPONENT_ALIAS_COMMAND_ATTRIBUTE, "dockerimageComponent");
     workspaceCommand.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, "/tmp");
     workspaceCommand.getAttributes().put("anotherAttribute", "value");
 
@@ -100,7 +100,7 @@ public class CommandConverterTest {
     assertEquals(workspaceCommand.getAttributes().get("attr"), "value");
     assertEquals(workspaceCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), "/tmp");
     assertEquals(
-        workspaceCommand.getAttributes().get(COMPONENT_NAME_COMMAND_ATTRIBUTE),
+        workspaceCommand.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE),
         "dockerimageComponent");
     assertEquals(workspaceCommand.getCommandLine(), "mvn clean install");
   }

@@ -14,6 +14,7 @@ package org.eclipse.che.api.devfile.server.convert;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toCollection;
+import static org.eclipse.che.api.devfile.server.Components.getIdentifiableComponentName;
 import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
 
 import com.google.common.base.Strings;
@@ -142,7 +143,7 @@ public class DevfileConverter {
         throw new DevfileException(
             String.format(
                 "Devfile contains component `%s` with type `%s` that can not be converted to workspace",
-                component.getName(), component.getType()));
+                getIdentifiableComponentName(component), component.getType()));
       }
       applier.apply(config, component, contentProvider);
     }

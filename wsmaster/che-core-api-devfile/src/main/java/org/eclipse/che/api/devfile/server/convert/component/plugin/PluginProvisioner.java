@@ -56,22 +56,21 @@ public class PluginProvisioner implements ComponentProvisioner {
       return;
     }
 
-    Map<String, String> pluginIdToComponentName = extractPluginIdToComponentName(workspaceConfig);
+    Map<String, String> pluginIdToComponentAlias = extractPluginIdToComponentAlias(workspaceConfig);
 
     for (String pluginId : pluginsAttribute.split(",")) {
-      ComponentImpl pluginComponent =
-          new ComponentImpl(
-              PLUGIN_COMPONENT_TYPE,
-              pluginIdToComponentName.getOrDefault(pluginId, pluginId),
-              pluginId,
-              workspaceConfig
-                  .getAttributes()
-                  .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginId)));
+      ComponentImpl pluginComponent = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginId);
+
+      pluginComponent.setAlias(pluginIdToComponentAlias.get(pluginId));
+      pluginComponent.setMemoryLimit(
+          workspaceConfig
+              .getAttributes()
+              .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginId)));
       devfile.getComponents().add(pluginComponent);
     }
   }
 
-  private Map<String, String> extractPluginIdToComponentName(WorkspaceConfigImpl wsConfig) {
+  private Map<String, String> extractPluginIdToComponentAlias(WorkspaceConfigImpl wsConfig) {
     String aliasesAttribute =
         wsConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
     if (isNullOrEmpty(aliasesAttribute)) {

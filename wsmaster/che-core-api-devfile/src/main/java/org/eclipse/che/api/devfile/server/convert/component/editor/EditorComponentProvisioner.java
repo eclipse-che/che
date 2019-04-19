@@ -46,16 +46,16 @@ public class EditorComponentProvisioner implements ComponentProvisioner {
       return;
     }
 
-    ComponentImpl editorComponent =
-        new ComponentImpl(
-            EDITOR_COMPONENT_TYPE,
-            workspaceConfig
-                .getAttributes()
-                .getOrDefault(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorAttribute),
-            editorAttribute,
-            workspaceConfig
-                .getAttributes()
-                .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorAttribute)));
+    ComponentImpl editorComponent = new ComponentImpl(EDITOR_COMPONENT_TYPE, editorAttribute);
+
+    editorComponent.setAlias(
+        workspaceConfig
+            .getAttributes()
+            .getOrDefault(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorAttribute));
+    editorComponent.setMemoryLimit(
+        workspaceConfig
+            .getAttributes()
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorAttribute)));
     devfile.getComponents().add(editorComponent);
   }
 }

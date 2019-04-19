@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -76,7 +77,7 @@ public class DefaultHostIngressExternalServerExposer
       Map<String, ServerConfig> ingressesServers) {
     return new ExternalServerIngressBuilder()
         .withPath(generateExternalServerIngressPath(serviceName, servicePort))
-        .withName(generateExternalServerIngressName(serviceName, servicePort))
+        .withName(generateExternalServerIngressName())
         .withMachineName(machineName)
         .withServiceName(serviceName)
         .withAnnotations(ingressAnnotations)
@@ -85,8 +86,8 @@ public class DefaultHostIngressExternalServerExposer
         .build();
   }
 
-  private String generateExternalServerIngressName(String serviceName, ServicePort servicePort) {
-    return serviceName + '-' + servicePort.getName();
+  private String generateExternalServerIngressName() {
+    return Names.generateName("ingress");
   }
 
   private String generateExternalServerIngressPath(String serviceName, ServicePort servicePort) {

@@ -13,7 +13,6 @@
 specVersion: 0.0.1
 name: terminal-sample
 components:
-  - name: terminal-sample-plugin
-    type: chePlugin
+  - type: chePlugin
     id: terminal-sample:0.0.1
     memoryLimit: 0

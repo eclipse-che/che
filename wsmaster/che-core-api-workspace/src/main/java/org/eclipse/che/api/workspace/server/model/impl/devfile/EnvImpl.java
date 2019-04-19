@@ -12,12 +12,27 @@
 package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Env;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileEnv")
+@Table(name = "devfile_env")
 public class EnvImpl implements Env {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "name", nullable = false)
   private String name;
+
+  @Column(name = "value", nullable = false)
   private String value;
 
   public EnvImpl() {}
@@ -58,16 +73,28 @@ public class EnvImpl implements Env {
       return false;
     }
     EnvImpl env = (EnvImpl) o;
-    return Objects.equals(getName(), env.getName()) && Objects.equals(getValue(), env.getValue());
+    return Objects.equals(id, env.id)
+        && Objects.equals(name, env.name)
+        && Objects.equals(value, env.value);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getValue());
+    return Objects.hash(id, name, value);
   }
 
   @Override
   public String toString() {
-    return "EnvImpl{" + "name='" + name + '\'' + ", value='" + value + '\'' + '}';
+    return "EnvImpl{"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", value='"
+        + value
+        + '\''
+        + '}';
   }
 }

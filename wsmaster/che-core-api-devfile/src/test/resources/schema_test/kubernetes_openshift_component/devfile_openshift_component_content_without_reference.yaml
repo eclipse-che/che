@@ -14,7 +14,7 @@
 specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
-  - name: mysql
+  - alias: mysql
     type: openshift
     referenceContent: this is content of file that is supposed to be in local field but it is missing
     selector:
