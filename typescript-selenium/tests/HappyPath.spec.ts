@@ -8,26 +8,26 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { e2eContainer } from "./inversify.config";
-import { Driver } from "./driver/Driver";
-import { TYPES, CLASSES } from "./types";
-import { DriverHelper } from "./utils/DriverHelper";
+import { e2eContainer } from "../inversify.config";
+import { Driver } from "../driver/Driver";
+import { TYPES, CLASSES } from "../types";
+import { DriverHelper } from "../utils/DriverHelper";
 import { By, WebElementCondition, Condition } from "selenium-webdriver";
 import { describe, after } from "mocha";
-import { LoginPage } from "./pageobjects/login/LoginPage";
-import { Dashboard } from "./pageobjects/dashboard/Dashboard";
+import { LoginPage } from "../pageobjects/login/LoginPage";
+import { Dashboard } from "../pageobjects/dashboard/Dashboard";
 import { expect, assert } from 'chai'
-import { Workspaces } from "./pageobjects/dashboard/Workspaces";
-import { NameGenerator } from "./utils/NameGenerator";
-import { NewWorkspace } from "./pageobjects/dashboard/NewWorkspace";
-import { WorkspaceDetails } from "./pageobjects/dashboard/workspace-details/WorkspaceDetails";
-import { WorkspaceDetailsPlugins } from "./pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins";
+import { Workspaces } from "../pageobjects/dashboard/Workspaces";
+import { NameGenerator } from "../utils/NameGenerator";
+import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";
+import { WorkspaceDetails } from "../pageobjects/dashboard/workspace-details/WorkspaceDetails";
+import { WorkspaceDetailsPlugins } from "../pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins";
 import { Request, post, get } from "selenium-webdriver/http";
-import { TestWorkspaceUtil } from "./utils/workspace/TestWorkspaceUtil";
-import { Ide } from "./pageobjects/ide/Ide";
-import { ProjectTree } from "./pageobjects/ide/ProjectTree";
-import { Editor } from "./pageobjects/ide/Editor";
-import { TestConstants } from "./TestConstants";
+import { TestWorkspaceUtil } from "../utils/workspace/TestWorkspaceUtil";
+import { Ide } from "../pageobjects/ide/Ide";
+import { ProjectTree } from "../pageobjects/ide/ProjectTree";
+import { Editor } from "../pageobjects/ide/Editor";
+import { TestConstants } from "../TestConstants";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
@@ -78,10 +78,10 @@ suite("E2E", async () => {
             await newWorkspace.clickOnAddButton()
             await newWorkspace.waitProjectAdding(sampleName)
 
-            await newWorkspace.clickOnCreateAndOpenButton()
+            await newWorkspace.selectCreateWorkspaceAndProceedEditing()
         })
 
-        test.skip("Add 'Java Language Support' plugin to workspace", async () => {
+        test("Add 'Java Language Support' plugin to workspace", async () => {
             const javaPluginName: string = "Language Support for Java(TM)";
             const execPlugin: string = "Che machine-exec Service";
 

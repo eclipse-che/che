@@ -96,7 +96,7 @@ export class WorkspaceDetails {
 
     async waitTabsPresence(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         const workspaceDetailsTabs: Array<string> = ["Overview", "Projects", "Containers", "Servers",
-            "Env Variables", "Volumes", "Config", "SSH", "Tools", "Plugins"];
+            "Env Variables", "Volumes", "Config", "SSH", "Plugins", "Editors"];
 
         for (const tabTitle of workspaceDetailsTabs) {
             const workspaceDetailsTabLocator: By = By.xpath(this.getTabXpathLocator(tabTitle))
