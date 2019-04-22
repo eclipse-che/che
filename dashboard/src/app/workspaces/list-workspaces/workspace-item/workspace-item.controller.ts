@@ -29,6 +29,7 @@ export class WorkspaceItemCtrl {
   workspacesService: WorkspacesService;
 
   workspace: che.IWorkspace;
+  workspaceName: string;
 
   /**
    * Default constructor that is using resource
@@ -41,6 +42,7 @@ export class WorkspaceItemCtrl {
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
     this.workspacesService = workspacesService;
+    this.workspaceName = this.cheWorkspace.getWorkspaceDataManager().getName(this.workspace);            
   }
 
   /**
@@ -57,7 +59,7 @@ export class WorkspaceItemCtrl {
    * @param tab {string}
    */
   redirectToWorkspaceDetails(tab?: string): void {
-    this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name).search({tab: tab ? tab : 'Overview'});
+    this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspaceName).search({tab: tab ? tab : 'Overview'});
   }
 
   getDefaultEnvironment(workspace: che.IWorkspace): che.IWorkspaceEnvironment {
@@ -68,6 +70,10 @@ export class WorkspaceItemCtrl {
   }
 
   getMemoryLimit(workspace: che.IWorkspace): string {
+    if (!workspace.config && workspace.devfile) {
+      return '-';
+    }
+
     let environment = this.getDefaultEnvironment(workspace);
     if (environment) {
       let limits = this.lodash.pluck(environment.machines, 'attributes.memoryLimitBytes');

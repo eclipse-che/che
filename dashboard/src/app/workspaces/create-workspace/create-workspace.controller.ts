@@ -358,7 +358,7 @@ export class CreateWorkspaceController {
     }
     let attributes = {stackId: this.stack.id};
 
-    return this.createWorkspaceSvc.createWorkspace(this.workspaceConfig, attributes);
+    return this.createWorkspaceSvc.createWorkspaceFromConfig(this.workspaceConfig, attributes);
   }
 
   /**

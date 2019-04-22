@@ -95,9 +95,12 @@ export class ExportWorkspaceDialogController {
    * @returns {*}
    */
   getCopyOfConfig() {
-    let copyOfConfig = angular.copy(this.workspaceDetails.config);
-
-    return this.removeLinks(copyOfConfig);
+    if (this.workspaceDetails.config) {
+      let copyOfConfig = angular.copy(this.workspaceDetails.config);
+      return this.removeLinks(copyOfConfig);
+    } else if (this.workspaceDetails.devfile) {
+      return this.workspaceDetails.devfile;
+    }
   }
 
   /**

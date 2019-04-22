@@ -18,6 +18,7 @@ import {WorkspaceDetailsProjectsService} from './workspace-details-projects.serv
 import {WorkspaceDetailsService} from '../workspace-details.service';
 import {CreateWorkspaceSvc} from '../../create-workspace/create-workspace.service';
 import {WorkspaceStatus} from '../../../../components/api/workspace/che-workspace.factory';
+import {WorkspaceDataManager} from '../../../../components/api/workspace/workspace-data-manager';
 
 /**
  * @ngdoc controller
@@ -63,7 +64,8 @@ export class WorkspaceDetailsProjectsCtrl {
    * Workspace details service.
    */
   private workspaceDetailsService: WorkspaceDetailsService;
-
+  private workspaceDataManager: WorkspaceDataManager;
+  private projects: Array <any>;
   private projectFilter: any;
   private profileCreationDate: any;
   /**
@@ -104,6 +106,7 @@ export class WorkspaceDetailsProjectsCtrl {
     });
 
     const preferences = cheAPI.getPreferences().getPreferences();
+    this.workspaceDataManager = cheAPI.getWorkspace().getWorkspaceDataManager();
     this.profileCreationDate = preferences['che:created'];
 
     this.projectFilter = {name: ''};
@@ -149,7 +152,8 @@ export class WorkspaceDetailsProjectsCtrl {
     }
     this.workspaceDetails = workspaceDetails;
     this.stackSelectorSvc.setStackId(this.workspaceDetails.attributes.stackId);
-    this.cheListHelper.setList(this.workspaceDetails.config.projects, 'name');
+    this.projects = this.workspaceDataManager.getProjects(this.workspaceDetails);
+    this.cheListHelper.setList(this.projects, 'name');
   }
 
   /**
@@ -188,10 +192,9 @@ export class WorkspaceDetailsProjectsCtrl {
       }
 
       this.workspaceDetailsProjectsService.addProjectTemplate(projectTemplate);
-      this.workspaceDetails.config.projects.push(projectTemplate);
+      this.workspaceDataManager.addProject(this.workspaceDetails, projectTemplate);
     });
-
-    this.createWorkspaceSvc.addProjectCommands(this.workspaceDetails.config, projectTemplates);
+    this.createWorkspaceSvc.addProjectCommands(this.workspaceDetails, projectTemplates);
     this.projectsOnChange();
   }
 
@@ -202,7 +205,7 @@ export class WorkspaceDetailsProjectsCtrl {
    * @return {boolean}
    */
   isProjectNameUnique(name: string): boolean {
-    return this.workspaceDetails.config.projects.every((project: che.IProject) => {
+    return this.projects.every((project: che.IProject) => {
       return project.name !== name;
     });
   }
@@ -234,10 +237,10 @@ export class WorkspaceDetailsProjectsCtrl {
           });
 
     this.showDeleteProjectsConfirmation(selectedProjects.length).then(() => {
-      this.workspaceDetails.config.projects = this.workspaceDetails.config.projects.filter((project: che.IProject) => {
+      this.projects = this.projects.filter((project: che.IProject) => {
         return selectedProjectsNames.indexOf(project.name) === -1;
       });
-
+      this.workspaceDataManager.setProjects(this.workspaceDetails, this.projects);
       this.workspaceDetailsProjectsService.addProjectNamesToDelete(selectedProjectsNames);
 
       this.projectsOnChange();

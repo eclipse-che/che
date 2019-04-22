@@ -294,7 +294,8 @@ declare namespace che {
     status?: string;
     namespace?: string;
     attributes?: IWorkspaceAttributes;
-    config: IWorkspaceConfig;
+    config?: IWorkspaceConfig;
+    devfile?: IWorkspaceDevfile;
     runtime?: IWorkspaceRuntime;
     isLocked?: boolean;
     usedResources?: string;
@@ -323,6 +324,15 @@ declare namespace che {
     persistVolumes?: string;
     editor?: string;
     plugins?: string;
+  }
+
+  export interface IWorkspaceDevfile {
+    specVersion: string;
+    name: string;
+    components: Array<any>;
+    projects?: Array <any>;
+    commands?: Array <any>;
+    attributes?: che.IWorkspaceConfigAttributes;
   }
 
   export interface IWorkspaceEnvironment {
