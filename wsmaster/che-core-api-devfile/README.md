@@ -130,7 +130,7 @@ It is allowed to have several `chePlugin` components.
 
 Both types above using composite id, which is colon-separated id and version of plugin from Che Plugin registry.  
 List of available Che plugins and more information about registry can be found on https://github.com/eclipse/che-plugin-registry 
-For each of those types it is also possible to specify container(s) memory limit as follows: 
+For each of types above it is also possible to specify container(s) memory limit as follows: 
 ```
 ...
   components:
