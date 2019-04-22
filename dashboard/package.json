@@ -21,6 +21,7 @@
     "copy-webpack-plugin": "^4.4.1",
     "css-loader": "^0.28.9",
     "del": "~2.0.1",
+    "eslint": "1.9.0",
     "eslint-loader": "~1.0.0",
     "eslint-plugin-angular": "~0.11.0",
     "file-loader": "^1.1.6",
