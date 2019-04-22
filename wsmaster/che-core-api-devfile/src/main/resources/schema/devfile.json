@@ -130,11 +130,6 @@
         "required": [
           "type"
         ],
-        "dependencies": {
-          "referenceContent": [
-            "reference"
-          ]
-        },
         "additionalProperties": false,
         "oneOf" : [
           {
@@ -167,8 +162,15 @@
               "selector": {},
               "entrypoints": {}
             },
-            "required": [
-              "reference"
+            "anyOf": [
+              {
+                "required": ["reference"],
+                "additionalProperties": true
+              },
+              {
+                "required": ["referenceContent"],
+                "additionalProperties": true
+              }
             ],
             "additionalProperties": false
           },

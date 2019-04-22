@@ -51,7 +51,8 @@ public class Components {
         return component.getImage();
       case KUBERNETES_COMPONENT_TYPE:
       case OPENSHIFT_COMPONENT_TYPE:
-        return component.getReference();
+        String reference = component.getReference();
+        return reference == null ? component.getType() : reference;
       default:
         throw new IllegalStateException(
             format("Unhandled component type: %s", component.getType()));
