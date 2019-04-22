@@ -1,11 +1,3 @@
-import { injectable, inject } from "inversify";
-import { DriverHelper } from "../../utils/DriverHelper";
-import { CLASSES } from "../../types";
-import { TestConstants } from "../../TestConstants";
-import { By } from "selenium-webdriver";
-import 'reflect-metadata';
-
-
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -15,6 +7,13 @@ import 'reflect-metadata';
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { injectable, inject } from "inversify";
+import { DriverHelper } from "../../utils/DriverHelper";
+import { CLASSES } from "../../types";
+import { TestConstants } from "../../TestConstants";
+import { By } from "selenium-webdriver";
+import 'reflect-metadata';
+
 
 @injectable()
 export class NewWorkspace {

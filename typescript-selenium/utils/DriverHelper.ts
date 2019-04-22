@@ -1,11 +1,3 @@
-import { Driver } from "../driver/Driver";
-import { inject, injectable } from "inversify";
-import { TYPES } from "../types";
-import { error } from 'selenium-webdriver';
-import 'reflect-metadata';
-import { WebElementPromise, ThenableWebDriver, By, promise, until, WebElement, WebElementCondition } from "selenium-webdriver";
-import { TestConstants } from "../TestConstants";
-
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -15,6 +7,14 @@ import { TestConstants } from "../TestConstants";
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { Driver } from "../driver/Driver";
+import { inject, injectable } from "inversify";
+import { TYPES } from "../types";
+import { error } from 'selenium-webdriver';
+import 'reflect-metadata';
+import { WebElementPromise, ThenableWebDriver, By, promise, until, WebElement, WebElementCondition } from "selenium-webdriver";
+import { TestConstants } from "../TestConstants";
+
 
 @injectable()
 export class DriverHelper {

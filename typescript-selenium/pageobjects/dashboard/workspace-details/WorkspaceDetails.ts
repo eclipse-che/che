@@ -1,11 +1,3 @@
-import { DriverHelper } from "../../../utils/DriverHelper";
-import { injectable, inject } from "inversify";
-import { CLASSES } from "../../../types";
-import 'reflect-metadata';
-import { TestConstants } from "../../../TestConstants";
-import { By } from "selenium-webdriver";
-
-
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -15,6 +7,12 @@ import { By } from "selenium-webdriver";
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { DriverHelper } from "../../../utils/DriverHelper";
+import { injectable, inject } from "inversify";
+import { CLASSES } from "../../../types";
+import 'reflect-metadata';
+import { TestConstants } from "../../../TestConstants";
+import { By } from "selenium-webdriver";
 
 
 @injectable()

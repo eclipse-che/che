@@ -1,10 +1,3 @@
-import { DriverHelper } from "../../utils/DriverHelper";
-import { injectable, inject } from "inversify";
-import { CLASSES } from "../../types";
-import { TestConstants } from "../../TestConstants";
-import { By } from "selenium-webdriver";
-import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
-
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -14,6 +7,13 @@ import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { DriverHelper } from "../../utils/DriverHelper";
+import { injectable, inject } from "inversify";
+import { CLASSES } from "../../types";
+import { TestConstants } from "../../TestConstants";
+import { By } from "selenium-webdriver";
+import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
+
 
 @injectable()
 export class Ide {

@@ -1,11 +1,3 @@
-import { inject, injectable } from "inversify";
-import "reflect-metadata";
-import { TYPES, CLASSES } from "../../types";
-import { Driver } from "../../driver/Driver";
-import { WebElementCondition, By } from "selenium-webdriver";
-import { DriverHelper } from "../../utils/DriverHelper";
-import { TestConstants } from "../../TestConstants";
-
 /*********************************************************************
  * Copyright (c) 2018 Red Hat, Inc.
  *
@@ -15,6 +7,13 @@ import { TestConstants } from "../../TestConstants";
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { inject, injectable } from "inversify";
+import "reflect-metadata";
+import { TYPES, CLASSES } from "../../types";
+import { Driver } from "../../driver/Driver";
+import { WebElementCondition, By } from "selenium-webdriver";
+import { DriverHelper } from "../../utils/DriverHelper";
+import { TestConstants } from "../../TestConstants";
 
 @injectable()
 export class Dashboard {
