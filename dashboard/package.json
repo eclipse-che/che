@@ -82,7 +82,7 @@
     "typescript": "^1.8.10",
     "typings": "^1.4.0",
     "uglify-save-license": "~0.4.1",
-    "webpack": "^1.12.11",
+    "webpack": "3.8.1",
     "webpack-stream": "~2.1.0",
     "wrench": "~1.5.8"
   },
