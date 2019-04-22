@@ -134,7 +134,7 @@ For each of those types it is also possible to specify container(s) memory limit
 ```
 ...
   components:
-   - name: exec-plugin
+   - alias: exec-plugin
      type: chePlugin
      id: che-machine-exec-plugin:0.0.1
      memoryLimit: 256M
