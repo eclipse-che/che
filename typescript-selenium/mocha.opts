@@ -1,0 +1,5 @@
+# mocha.opts
+    --require ts-node/register 
+    --timeout 1200000 
+    -u tdd 
+    --spec tests/*.spec.ts
