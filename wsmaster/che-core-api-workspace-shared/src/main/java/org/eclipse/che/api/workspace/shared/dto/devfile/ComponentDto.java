@@ -21,11 +21,11 @@ import org.eclipse.che.dto.shared.DTO;
 public interface ComponentDto extends Component {
 
   @Override
-  String getName();
+  String getAlias();
 
-  void setName(String name);
+  void setAlias(String alias);
 
-  ComponentDto withName(String name);
+  ComponentDto withAlias(String alias);
 
   @Override
   String getType();

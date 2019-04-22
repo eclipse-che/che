@@ -12,14 +12,31 @@
 package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileProject")
+@Table(name = "devfile_project")
 public class ProjectImpl implements Project {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "name", nullable = false)
   private String name;
-  private SourceImpl source;
+
+  @Embedded private SourceImpl source;
+
+  @Column(name = "clone_path", nullable = false)
   private String clonePath;
 
   public ProjectImpl() {}
@@ -72,20 +89,24 @@ public class ProjectImpl implements Project {
       return false;
     }
     ProjectImpl project = (ProjectImpl) o;
-    return Objects.equals(getName(), project.getName())
-        && Objects.equals(getSource(), project.getSource())
-        && Objects.equals(getClonePath(), project.getClonePath());
+    return Objects.equals(id, project.id)
+        && Objects.equals(name, project.name)
+        && Objects.equals(source, project.source)
+        && Objects.equals(clonePath, project.clonePath);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), getSource(), getClonePath());
+    return Objects.hash(id, name, source, clonePath);
   }
 
   @Override
   public String toString() {
     return "ProjectImpl{"
-        + "name='"
+        + "id='"
+        + id
+        + '\''
+        + ", name='"
         + name
         + '\''
         + ", source="

@@ -16,16 +16,55 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapKeyColumn;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileEntrypoint")
+@Table(name = "devfile_entrypoint")
 public class EntrypointImpl implements Entrypoint {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "parent_name", nullable = false)
   private String parentName;
-  private Map<String, String> parentSelector;
+
+  @Column(name = "container_name", nullable = false)
   private String containerName;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "devfile_entrypoint_commands",
+      joinColumns = @JoinColumn(name = "devfile_entrypoint_id"))
+  @Column(name = "command")
   private List<String> command;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "devfile_entrypoint_arg",
+      joinColumns = @JoinColumn(name = "devfile_entrypoint_id"))
+  @Column(name = "arg")
   private List<String> args;
+
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "devfile_entrypoint_selector",
+      joinColumns = @JoinColumn(name = "devfile_entrypoint_id"))
+  @MapKeyColumn(name = "selector_key")
+  @Column(name = "selector")
+  private Map<String, String> parentSelector;
 
   public EntrypointImpl() {}
 
@@ -114,9 +153,9 @@ public class EntrypointImpl implements Entrypoint {
       return false;
     }
     EntrypointImpl that = (EntrypointImpl) o;
-    return Objects.equals(getParentName(), that.getParentName())
+    return Objects.equals(parentName, that.parentName)
+        && Objects.equals(containerName, that.containerName)
         && Objects.equals(getParentSelector(), that.getParentSelector())
-        && Objects.equals(getContainerName(), that.getContainerName())
         && Objects.equals(getCommand(), that.getCommand())
         && Objects.equals(getArgs(), that.getArgs());
   }
@@ -124,6 +163,6 @@ public class EntrypointImpl implements Entrypoint {
   @Override
   public int hashCode() {
     return Objects.hash(
-        getParentName(), getParentSelector(), getContainerName(), getCommand(), getArgs());
+        id, parentName, getParentSelector(), getContainerName(), getCommand(), getArgs());
   }
 }

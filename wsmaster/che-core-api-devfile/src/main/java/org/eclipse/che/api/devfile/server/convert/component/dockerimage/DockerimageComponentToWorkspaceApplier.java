@@ -109,7 +109,9 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         DOCKERIMAGE_COMPONENT_TYPE.equals(dockerimageComponent.getType()),
         format("Plugin must have `%s` type", DOCKERIMAGE_COMPONENT_TYPE));
 
-    String machineName = dockerimageComponent.getName();
+    String componentAlias = dockerimageComponent.getAlias();
+    String machineName =
+        componentAlias == null ? toObjectName(dockerimageComponent.getImage()) : componentAlias;
 
     MachineConfigImpl machineConfig = new MachineConfigImpl();
     dockerimageComponent
@@ -162,9 +164,9 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         .stream()
         .filter(
             c ->
-                dockerimageComponent
-                    .getName()
-                    .equals(c.getAttributes().get(Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE)))
+                c.getAttributes()
+                    .get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
+                    .equals(componentAlias))
         .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
   }
 
@@ -245,5 +247,9 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         .withPorts(singletonList(servicePort))
         .endSpec()
         .build();
+  }
+
+  public static String toObjectName(String imageName) {
+    return imageName.replaceAll("/", "-").replaceAll(":", "-");
   }
 }
