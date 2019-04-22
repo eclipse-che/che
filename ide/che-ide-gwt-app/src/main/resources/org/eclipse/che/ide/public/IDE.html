@@ -197,6 +197,11 @@
                         for (var serverId in servers) {
                             var attributes = servers[serverId].attributes;
                             if (attributes['type'] === 'ide') {
+
+                                if(servers[serverId].contains("gwt/ide/sidecar/entrypoint")){
+                                    return;
+                                }
+
                                 var url = servers[serverId].url + location.search;
                                 // Preconfigured IDE may use dedicated port. In this case Chrome browser fails
                                 // with error net::ERR_CONNECTION_REFUSED. Timer helps to open the URL without errors.
