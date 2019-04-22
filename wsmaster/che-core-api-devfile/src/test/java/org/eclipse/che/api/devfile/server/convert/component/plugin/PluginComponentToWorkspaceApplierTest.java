@@ -74,7 +74,7 @@ public class PluginComponentToWorkspaceApplierTest {
     assertEquals(
         workspaceConfig
             .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, superPluginId)),
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, superPluginId.split(":")[0])),
         "1234M");
   }
 

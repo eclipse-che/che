@@ -77,9 +77,10 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     String pluginIdVersion = resolveIdAndVersion(pluginComponent.getId());
     String memoryLimit = pluginComponent.getMemoryLimit();
     if (memoryLimit != null) {
+      String pluginIdPart = pluginIdVersion.split(":")[0];
       workspaceConfig
           .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginIdVersion), memoryLimit);
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginIdPart), memoryLimit);
     }
 
     for (CommandImpl command : workspaceConfig.getCommands()) {

@@ -67,9 +67,10 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
     String editorIdVersion = resolveIdAndVersion(editorComponent.getId());
     if (memoryLimit != null) {
+      String editorIdPart = editorIdVersion.split(":")[0];
       workspaceConfig
           .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorIdVersion), memoryLimit);
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorIdPart), memoryLimit);
     }
     workspaceConfig
         .getCommands()

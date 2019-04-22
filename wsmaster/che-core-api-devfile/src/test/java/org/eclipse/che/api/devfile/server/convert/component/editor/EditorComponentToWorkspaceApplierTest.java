@@ -56,7 +56,9 @@ public class EditorComponentToWorkspaceApplierTest {
     assertEquals(
         workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE), "editor");
     assertEquals(
-        workspaceConfig.getAttributes().get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorId)),
+        workspaceConfig
+            .getAttributes()
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorId.split(":")[0])),
         "12345M");
   }
 
