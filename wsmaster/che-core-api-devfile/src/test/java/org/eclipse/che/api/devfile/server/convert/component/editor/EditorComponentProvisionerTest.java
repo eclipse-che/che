@@ -42,7 +42,7 @@ public class EditorComponentProvisionerTest {
     workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, editorId);
     workspaceConfig
         .getAttributes()
-        .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorId), "245G");
+        .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorId.split(":")[0]), "245G");
     workspaceConfig.getAttributes().put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, "editor");
     DevfileImpl devfile = new DevfileImpl();
 

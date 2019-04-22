@@ -51,7 +51,7 @@ public class PluginProvisionerTest {
             "org.eclipse.che.super-plugin:0.0.1=super-plugin,custom-plugin:v1=custom");
     workspaceConfig
         .getAttributes()
-        .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "custom-plugin:v1"), "1024M");
+        .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "custom-plugin"), "1024M");
     DevfileImpl devfile = new DevfileImpl();
 
     // when

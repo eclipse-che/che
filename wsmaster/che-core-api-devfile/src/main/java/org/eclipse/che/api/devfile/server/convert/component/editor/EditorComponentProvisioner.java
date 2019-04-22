@@ -55,7 +55,7 @@ public class EditorComponentProvisioner implements ComponentProvisioner {
     editorComponent.setMemoryLimit(
         workspaceConfig
             .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorAttribute)));
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorAttribute.split(":")[0])));
     devfile.getComponents().add(editorComponent);
   }
 }
