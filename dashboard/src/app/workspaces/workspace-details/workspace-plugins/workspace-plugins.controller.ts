@@ -10,9 +10,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import { IPlugin, PluginRegistry } from '../../../../components/api/plugin-registry.factory';
-import IWorkspaceConfig = che.IWorkspaceConfig;
-import { CheNotification } from '../../../../components/notification/che-notification.factory';
+import {IPlugin, PluginRegistry} from '../../../../components/api/plugin-registry.factory';
+import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 
 const PLUGIN_SEPARATOR = ',';
 const PLUGIN_VERSION_SEPARATOR = ':';
@@ -25,13 +25,14 @@ const EDITOR_TYPE = 'Che Editor';
  * @author Ann Shumilova
  */
 export class WorkspacePluginsController {
-  static $inject = ['pluginRegistry', 'cheListHelperFactory', '$scope', 'cheNotification'];
+  static $inject = ['pluginRegistry', 'cheListHelperFactory', '$scope', 'cheNotification', 'cheWorkspace'];
 
-  workspaceConfig: IWorkspaceConfig;
+  workspace: che.IWorkspace;
   pluginRegistryLocation: string;
 
   pluginRegistry: PluginRegistry;
   cheNotification: CheNotification;
+  cheWorkspace: CheWorkspace;
   onChange: Function;
   isLoading: boolean;
 
@@ -47,9 +48,10 @@ export class WorkspacePluginsController {
    * Default constructor that is using resource
    */
   constructor(pluginRegistry: PluginRegistry, cheListHelperFactory: che.widget.ICheListHelperFactory, $scope: ng.IScope,
-    cheNotification: CheNotification) {
+              cheNotification: CheNotification, cheWorkspace: CheWorkspace) {
     this.pluginRegistry = pluginRegistry;
     this.cheNotification = cheNotification;
+    this.cheWorkspace = cheWorkspace;
 
     const helperId = 'workspace-plugins';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
@@ -61,9 +63,9 @@ export class WorkspacePluginsController {
     this.pluginFilter = { displayName: '' };
 
     const deRegistrationFn = $scope.$watch(() => {
-      return this.workspaceConfig;
-    }, (workspaceConfig: IWorkspaceConfig) => {
-      if (!workspaceConfig) {
+      return this.workspace;
+    }, (workspace: che.IWorkspace) => {
+      if (!workspace) {
         return;
       }
       this.updatePlugins();
@@ -119,32 +121,17 @@ export class WorkspacePluginsController {
       } else {
         this.selectedPlugins.splice(this.selectedPlugins.indexOf(plugin.id), 1);
       }
-      this.workspaceConfig.attributes.plugins = this.selectedPlugins.join(PLUGIN_SEPARATOR);
+      this.cheWorkspace.getWorkspaceDataManager().setPlugins(this.workspace, this.selectedPlugins);
     }
 
-    this.cleanupInstallers();
     this.onChange();
-  }
-
-  /**
-   * Clean up all the installers in all machines, when plugin is selected.
-   */
-  cleanupInstallers(): void {
-    let defaultEnv: string = this.workspaceConfig.defaultEnv;
-    let machines: any = this.workspaceConfig.environments[defaultEnv].machines;
-    let machineNames: Array<string> = Object.keys(machines);
-    machineNames.forEach((machineName: string) => {
-      machines[machineName].installers = [];
-    });
   }
 
   /**
    * Update the state of plugins.
    */
   private updatePlugins(): void {
-    // get selected plugins from workspace configuration attribute - "plugins" (coma separated values):
-    this.selectedPlugins = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes.plugins ?
-      this.workspaceConfig.attributes.plugins.split(PLUGIN_SEPARATOR) : [];
+    this.selectedPlugins = this.cheWorkspace.getWorkspaceDataManager().getPlugins(this.workspace);
     // check each plugin's enabled state:
     this.plugins.forEach((plugin: IPlugin) => {
       plugin.isEnabled = this.isPluginEnabled(plugin);

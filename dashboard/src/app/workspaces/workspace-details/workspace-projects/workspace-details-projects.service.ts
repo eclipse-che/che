@@ -168,7 +168,7 @@ export class WorkspaceDetailsProjectsService {
     const workspaceAgent = this.cheWorkspace.getWorkspaceAgent(workspaceId);
 
     if (!workspaceAgent) {
-      return this.$q.reject({message: 'Workspace isn\'t run. Cannot delete any project.'});
+      return this.$q.all(deleteProjectPromises);
     }
     const projectService = workspaceAgent.getProject();
 

@@ -41,7 +41,7 @@ export class WorkspaceEditors implements ng.IDirective {
   constructor() {
     this.scope = {
       onChange: '&',
-      workspaceConfig: '=',
+      workspace: '=',
       pluginRegistryLocation: '='
     };
   }

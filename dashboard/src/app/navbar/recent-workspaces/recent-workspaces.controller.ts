@@ -226,7 +226,7 @@ export class NavbarRecentWorkspacesController {
    */
   getWorkspaceName(workspaceId: string): string {
     let workspace = this.cheWorkspace.getWorkspaceById(workspaceId);
-    return workspace ? workspace.config.name : 'unknown';
+    return workspace ? this.cheWorkspace.getWorkspaceDataManager().getName(workspace) : 'unknown';
   }
 
   /**
@@ -256,7 +256,7 @@ export class NavbarRecentWorkspacesController {
    * @returns {string}
    */
   getIdeLink(workspace: che.IWorkspace): string {
-    return '#/ide/' + (workspace ? (workspace.namespace + '/' + workspace.config.name) : 'unknown');
+    return '#/ide/' + (workspace ? (workspace.namespace + '/' + this.cheWorkspace.getWorkspaceDataManager().getName(workspace)) : 'unknown');
   }
 
   /**
@@ -265,7 +265,7 @@ export class NavbarRecentWorkspacesController {
    * @returns {string}
    */
   getWorkspaceDetailsLink(workspace: che.IWorkspace): string {
-    return '#/workspace/' + workspace.namespace + '/' + workspace.config.name;
+    return '#/workspace/' + workspace.namespace + '/' + this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
   }
 
   /**

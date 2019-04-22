@@ -43,12 +43,13 @@ export class WorkspacesService {
    * @returns {boolean}
    */
   isSupported(workspace: che.IWorkspace, envName?: string): boolean {
-    envName = envName || workspace.config.defaultEnv;
-
-    const supportedRecipeTypes = this.cheWorkspace.getSupportedRecipeTypes(),
-      envRecipeType = envName ? workspace.config.environments[envName].recipe.type : 'no-environment';
-
-    return supportedRecipeTypes.indexOf(envRecipeType) !== -1;
+    if (workspace.config) {
+      envName = envName || workspace.config.defaultEnv;
+      const supportedRecipeTypes = this.cheWorkspace.getSupportedRecipeTypes(),
+        envRecipeType = envName ? workspace.config.environments[envName].recipe.type : 'no-environment';
+      return supportedRecipeTypes.indexOf(envRecipeType) !== -1;
+    } else if (workspace.devfile) {
+      return true;
+    }
   }
-
 }

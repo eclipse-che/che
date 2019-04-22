@@ -28,6 +28,8 @@ import {WorkspaceRecipeAuthoringController} from './select-stack/recipe-authorin
 import {WorkspaceRecipeAuthoring} from './select-stack/recipe-authoring/workspace-recipe-authoring.directive';
 import {WorkspaceConfigImportController} from './config-import/workspace-config-import.controller';
 import {WorkspaceConfigImport} from './config-import/workspace-config-import.directive';
+import {WorkspaceDevfileEditorController} from './devfile/workspace-devfile-editor.controller';
+import {WorkspaceDevfileEditor} from './devfile/workspace-devfile-editor.directive';
 import {ReadyToGoStacksController} from './select-stack/ready-to-go-stacks/ready-to-go-stacks.controller';
 import {ReadyToGoStacks} from './select-stack/ready-to-go-stacks/ready-to-go-stacks.directive';
 import {CreateProjectStackLibraryController} from './select-stack/stack-library/create-project-stack-library.controller';
@@ -115,6 +117,8 @@ export class WorkspaceDetailsConfig {
     register.directive('cheWorkspaceRecipeAuthoring', WorkspaceRecipeAuthoring);
     register.controller('WorkspaceConfigImportController', WorkspaceConfigImportController);
     register.directive('cheWorkspaceConfigImport', WorkspaceConfigImport);
+    register.controller('WorkspaceDevfileEditorController', WorkspaceDevfileEditorController);
+    register.directive('workspaceDevfileEditor', WorkspaceDevfileEditor);
     register.controller('ReadyToGoStacksController', ReadyToGoStacksController);
     register.directive('readyToGoStacks', ReadyToGoStacks);
     register.controller('CreateProjectStackLibraryController', CreateProjectStackLibraryController);

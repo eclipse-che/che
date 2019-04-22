@@ -201,6 +201,14 @@ describe(`WorkspaceDetailsController >`, () => {
         this.getWorkspaceSettings = () => {
           return {};
         };
+
+        this.getWorkspaceDataManager = () => {
+          return {
+            getName(data: che.IWorkspace): string {
+              return 'name';
+            }
+          };
+        };
       })
       // terminal directives which prevent to execute an original ones
       .directive('mdTab', function () {
