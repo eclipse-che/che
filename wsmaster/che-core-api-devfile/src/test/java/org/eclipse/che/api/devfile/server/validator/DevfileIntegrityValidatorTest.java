@@ -322,4 +322,29 @@ public class DevfileIntegrityValidatorTest {
     // then
     // exception is thrown
   }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "There are multiple components 'openshift' of type 'openshift' that cannot be"
+              + " uniquely identified. Please add aliases that would distinguish the components.")
+  public void shouldRequireAliasWhenOpenshiftComponentsHaveNoReference() throws Exception {
+    // given
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+
+    ComponentImpl k8s1 = new ComponentImpl();
+    k8s1.setType(OPENSHIFT_COMPONENT_TYPE);
+
+    ComponentImpl k8s2 = new ComponentImpl();
+    k8s2.setType(OPENSHIFT_COMPONENT_TYPE);
+
+    devfile.getComponents().add(k8s1);
+    devfile.getComponents().add(k8s2);
+
+    // when
+    integrityValidator.validateDevfile(devfile);
+
+    // then
+    // exception is thrown
+  }
 }

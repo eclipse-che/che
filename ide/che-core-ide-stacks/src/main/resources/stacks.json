@@ -2714,5 +2714,72 @@
       "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
+  },
+  {
+    "id": "go",
+    "name": "Go with Theia IDE",
+    "creator": "Anatolii Bazko",
+    "tags": [
+      "Theia",
+      "Debian",
+      "Go"
+    ],
+    "scope": "general",
+    "description": "Default stack with Go 1.12.4 and Theia IDE",
+    "components": [
+      {
+        "version": "9",
+        "name": "Debian"
+      },
+      {
+        "version": "1.12.4",
+        "name": "Go"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "content": "golang:1.12.4-stretch",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "go": {
+              "servers": {},
+              "env": {
+                "PS1": "$(echo ${0})\\$ ",
+                "GOPATH": "/go:/projects",
+                "GOCACHE": "/tmp/.cache"
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              }
+            }
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi",
+        "sidecar.ms-vscode.go.memory_limit": "512Mi",
+        "editor": "org.eclipse.che.editor.theia:next",
+        "plugins": "che-machine-exec-plugin:0.0.1,ms-vscode.go:0.9.2"
+      },
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]
