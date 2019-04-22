@@ -19,14 +19,12 @@ projects:
       type: git
       location: 'git@github.com:spring-projects/spring-petclinic.git'
 components:
-  - name: theia-ide
-    type: cheEditor
+  - type: cheEditor
     id: org.eclipse.chetheia:0.0.3
-  - name: mvn-stack
+  - alias: mvn-stack
     type: chePlugin
     id: org.eclipse.chemaven-jdk8:1.0.0
-  - name: jdt.ls
-    type: chePlugin
+  - type: chePlugin
     id: org.eclipse.chetheia-jdtls:0.0.3
 commands:
   - name: build

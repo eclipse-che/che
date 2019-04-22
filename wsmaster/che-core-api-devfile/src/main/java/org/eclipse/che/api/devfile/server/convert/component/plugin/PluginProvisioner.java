@@ -54,19 +54,17 @@ public class PluginProvisioner implements ComponentProvisioner {
       return;
     }
 
-    Map<String, String> pluginIdToComponentName = extractPluginIdToComponentName(workspaceConfig);
+    Map<String, String> pluginIdToComponentAlias = extractPluginIdToComponentAlias(workspaceConfig);
 
     for (String pluginId : pluginsAttribute.split(",")) {
-      ComponentImpl pluginComponent =
-          new ComponentImpl(
-              PLUGIN_COMPONENT_TYPE,
-              pluginIdToComponentName.getOrDefault(pluginId, pluginId),
-              pluginId);
+      ComponentImpl pluginComponent = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginId);
+
+      pluginComponent.setAlias(pluginIdToComponentAlias.get(pluginId));
       devfile.getComponents().add(pluginComponent);
     }
   }
 
-  private Map<String, String> extractPluginIdToComponentName(WorkspaceConfigImpl wsConfig) {
+  private Map<String, String> extractPluginIdToComponentAlias(WorkspaceConfigImpl wsConfig) {
     String aliasesAttribute =
         wsConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
     if (isNullOrEmpty(aliasesAttribute)) {

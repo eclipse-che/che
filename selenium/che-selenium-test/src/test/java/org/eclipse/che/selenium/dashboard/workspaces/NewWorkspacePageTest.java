@@ -23,11 +23,13 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CEYLON_WITH_JAVA_JAVASCRIPT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW_DEV;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_THEIA_DEV;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_VERTX;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO_DEFAULT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_GRADLE;
@@ -88,7 +90,9 @@ public class NewWorkspacePageTest {
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
+          GO_DEFAULT,
           GO,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
           JAVA_GRADLE,
@@ -108,7 +112,9 @@ public class NewWorkspacePageTest {
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
+          GO_DEFAULT,
           GO,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
           JAVA_GRADLE,
@@ -128,6 +134,7 @@ public class NewWorkspacePageTest {
           ANDROID,
           CPP,
           ECLIPSE_CHE,
+          GO_DEFAULT,
           GO,
           JAVA_GRADLE,
           JAVA_MAVEN,
@@ -153,8 +160,10 @@ public class NewWorkspacePageTest {
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
+          GO_DEFAULT,
           GO,
           JAVA_CENTOS,
           JAVA_GRADLE,
@@ -182,8 +191,10 @@ public class NewWorkspacePageTest {
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
+          GO_DEFAULT,
           GO,
           JAVA_CENTOS,
           JAVA_GRADLE,
@@ -211,6 +222,7 @@ public class NewWorkspacePageTest {
           CEYLON_WITH_JAVA_JAVASCRIPT,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
+          GO_DEFAULT,
           GO,
           JAVA_CENTOS,
           JAVA_GRADLE,
@@ -246,7 +258,9 @@ public class NewWorkspacePageTest {
               JAVA_GRADLE,
               JAVA_MYSQL_THEIA_ON_KUBERNETES,
               GO,
+              GO_DEFAULT,
               ECLIPSE_CHE,
+              CHE_7_THEIA_DEV,
               CHE_7_PREVIEW_DEV,
               CHE_7_PREVIEW,
               CPP,
@@ -266,7 +280,9 @@ public class NewWorkspacePageTest {
           JAVA_GRADLE,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
           GO,
+          GO_DEFAULT,
           ECLIPSE_CHE,
+          CHE_7_THEIA_DEV,
           CHE_7_PREVIEW_DEV,
           CHE_7_PREVIEW,
           CPP,
@@ -287,6 +303,7 @@ public class NewWorkspacePageTest {
           JAVA_MAVEN,
           JAVA_GRADLE,
           GO,
+          GO_DEFAULT,
           ECLIPSE_CHE,
           CPP,
           ANDROID,
