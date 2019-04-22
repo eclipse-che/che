@@ -8,9 +8,9 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-function readEnvAndSetValue(envProperty: any, defaultValue: string | number): any{
+function readEnvAndSetValue(envProperty: any, defaultValue: string | number | boolean): any {
     const propertyValue = envProperty
-    if(propertyValue === undefined || propertyValue === null){
+    if (propertyValue === undefined || propertyValue === null) {
         return defaultValue;
     }
 
@@ -20,6 +20,8 @@ function readEnvAndSetValue(envProperty: any, defaultValue: string | number): an
 
 
 export const TestConstants = {
+    TS_SELENIUM_HEADLESS: readEnvAndSetValue(process.env.TS_SELENIUM_HEADLESS, false),
+
     TS_SELENIUM_START_WORKSPACE_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT, 240000),
     TS_SELENIUM_LOAD_PAGE_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT, 120000),
     TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT, 180000),
