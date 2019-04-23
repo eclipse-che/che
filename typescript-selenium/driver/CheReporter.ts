@@ -10,7 +10,7 @@
 import * as mocha from 'mocha';
 import { Driver } from './Driver';
 import { e2eContainer } from '../inversify.config';
-import { TYPES } from '../types';
+import { TYPES } from '../inversify.types';
 import * as fs from 'fs';
 import { TestConstants } from '../TestConstants';
 

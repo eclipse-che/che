@@ -11,7 +11,7 @@
 import { TestConstants } from "../../TestConstants";
 import { injectable, inject } from "inversify";
 import { DriverHelper } from "../../utils/DriverHelper";
-import { CLASSES } from "../../types";
+import { CLASSES } from "../../inversify.types";
 import { By } from "selenium-webdriver";
 
 

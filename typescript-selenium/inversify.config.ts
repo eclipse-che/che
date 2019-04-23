@@ -9,7 +9,7 @@
  **********************************************************************/
 import { Container } from "inversify";
 import { Driver } from "./driver/Driver";
-import { TYPES, CLASSES } from "./types";
+import { TYPES, CLASSES } from "./inversify.types";
 import { ChromeDriver } from "./driver/ChromeDriver";
 import { DriverHelper } from "./utils/DriverHelper";
 import { LoginPage } from "./pageobjects/login/LoginPage";

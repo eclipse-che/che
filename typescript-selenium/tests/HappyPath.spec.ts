@@ -10,7 +10,7 @@
 
 import { e2eContainer } from "../inversify.config";
 import { Driver } from "../driver/Driver";
-import { TYPES, CLASSES } from "../types";
+import { TYPES, CLASSES } from "../inversify.types";
 import { DriverHelper } from "../utils/DriverHelper";
 import { By, WebElementCondition, Condition } from "selenium-webdriver";
 import { describe, after, test } from "mocha";

@@ -11,7 +11,7 @@
 import { TestConstants } from '../../TestConstants';
 import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
-import { CLASSES } from '../../types';
+import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import * as rm from 'typed-rest-client/RestClient'
 

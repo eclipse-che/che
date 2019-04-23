@@ -9,7 +9,7 @@
  **********************************************************************/
 import { DriverHelper } from "../../utils/DriverHelper";
 import { injectable, inject } from "inversify";
-import { CLASSES } from "../../types";
+import { CLASSES } from "../../inversify.types";
 import { TestConstants } from "../../TestConstants";
 import { By } from "selenium-webdriver";
 import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";

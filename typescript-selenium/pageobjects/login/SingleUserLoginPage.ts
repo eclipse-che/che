@@ -11,7 +11,7 @@ import "reflect-metadata";
 import { LoginPage } from "./LoginPage";
 import { injectable, inject } from "inversify";
 import { ThenableWebDriver } from "selenium-webdriver";
-import { TYPES } from "../../types";
+import { TYPES } from "../../inversify.types";
 import { Driver } from "../../driver/Driver";
 import { TestConstants } from "../../TestConstants";
 

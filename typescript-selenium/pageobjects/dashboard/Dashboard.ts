@@ -9,7 +9,7 @@
  **********************************************************************/
 import { inject, injectable } from "inversify";
 import "reflect-metadata";
-import { TYPES, CLASSES } from "../../types";
+import { TYPES, CLASSES } from "../../inversify.types";
 import { Driver } from "../../driver/Driver";
 import { WebElementCondition, By } from "selenium-webdriver";
 import { DriverHelper } from "../../utils/DriverHelper";
