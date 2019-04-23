@@ -112,7 +112,7 @@ public class DockerimageComponentProvisionerTest {
     // then
     assertEquals(devfile.getComponents().size(), 1);
     ComponentImpl dockerimageComponent = devfile.getComponents().get(0);
-    assertEquals(dockerimageComponent.getName(), "dockerEnv");
+    assertEquals(dockerimageComponent.getAlias(), "dockerEnv");
     assertEquals(dockerimageComponent.getImage(), "eclipse/ubuntu_jdk8:latest");
   }
 
@@ -147,7 +147,7 @@ public class DockerimageComponentProvisionerTest {
     // then
     assertEquals(devfile.getComponents().size(), 1);
     ComponentImpl dockerimageComponent = devfile.getComponents().get(0);
-    assertEquals(dockerimageComponent.getName(), "dockerEnv");
+    assertEquals(dockerimageComponent.getAlias(), "dockerEnv");
     assertEquals(dockerimageComponent.getId(), "eclipse/ubuntu_jdk8:latest");
   }
 

@@ -86,7 +86,6 @@ public class DefaultHostIngressExternalServerExposerTest {
         MACHINE_NAME,
         SERVICE_NAME,
         "http-server",
-        8080,
         servicePort,
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
@@ -121,14 +120,12 @@ public class DefaultHostIngressExternalServerExposerTest {
         MACHINE_NAME,
         SERVICE_NAME,
         "http-server",
-        8080,
         servicePort,
         new ServerConfigImpl(httpServerConfig).withAttributes(ATTRIBUTES_MAP));
     assertThatExternalServerIsExposed(
         MACHINE_NAME,
         SERVICE_NAME,
         "ws-server",
-        8080,
         servicePort,
         new ServerConfigImpl(wsServerConfig).withAttributes(ATTRIBUTES_MAP));
   }
@@ -138,12 +135,11 @@ public class DefaultHostIngressExternalServerExposerTest {
       String machineName,
       String serviceName,
       String serverNameRegex,
-      Integer port,
       ServicePort servicePort,
       ServerConfigImpl expected) {
 
     // ensure that required ingress is created
-    Ingress ingress = kubernetesEnvironment.getIngresses().get(serviceName + "-server-" + port);
+    Ingress ingress = kubernetesEnvironment.getIngresses().values().iterator().next();
     IngressRule ingressRule = ingress.getSpec().getRules().get(0);
     IngressBackend backend = ingressRule.getHttp().getPaths().get(0).getBackend();
     assertEquals(backend.getServiceName(), serviceName);

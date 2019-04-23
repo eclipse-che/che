@@ -16,7 +16,7 @@ import {CheNotification} from '../../../../components/notification/che-notificat
 
 const PLUGIN_SEPARATOR = ',';
 const PLUGIN_VERSION_SEPARATOR = ':';
-const PLUGIN_TYPE = 'Che Plugin';
+const EDITOR_TYPE = 'Che Editor';
 
 /**
  * @ngdoc controller
@@ -85,7 +85,7 @@ export class WorkspacePluginsController {
     this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPlugin>) => {
       this.isLoading = false;
       result.forEach((item: IPlugin) => {
-        if (item.type === PLUGIN_TYPE) {
+        if (item.type !== EDITOR_TYPE) {
           this.plugins.push(item);
         }
       });  
@@ -115,7 +115,7 @@ export class WorkspacePluginsController {
   updatePlugin(plugin: IPlugin): void {
     let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
 
-    if (plugin.type === PLUGIN_TYPE) {
+    if (plugin.type !== EDITOR_TYPE) {
       if (plugin.isEnabled) {
         this.selectedPlugins.push(name);
       } else {

@@ -42,7 +42,7 @@ public class CommandConverter {
       org.eclipse.che.api.workspace.server.model.impl.CommandImpl command)
       throws WorkspaceExportException {
     String componentName =
-        command.getAttributes().remove(Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE);
+        command.getAttributes().remove(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE);
     if (componentName == null) {
       throw new WorkspaceExportException(
           format(
@@ -96,7 +96,7 @@ public class CommandConverter {
 
     command
         .getAttributes()
-        .put(Constants.COMPONENT_NAME_COMMAND_ATTRIBUTE, commandAction.getComponent());
+        .put(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE, commandAction.getComponent());
 
     command.getAttributes().putAll(devCommand.getAttributes());
 

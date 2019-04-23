@@ -12,6 +12,7 @@
 package org.eclipse.che.api.devfile.server.validator;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.devfile.server.Components.getIdentifiableComponentName;
 import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
@@ -23,6 +24,7 @@ import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -85,8 +87,8 @@ public class DevfileIntegrityValidator {
    */
   public void validateDevfile(Devfile devfile) throws DevfileFormatException {
     validateProjects(devfile);
-    Set<String> componentNames = validateComponents(devfile);
-    validateCommands(devfile, componentNames);
+    Set<String> knownAliases = validateComponents(devfile);
+    validateCommands(devfile, knownAliases);
   }
 
   /**
@@ -99,32 +101,51 @@ public class DevfileIntegrityValidator {
    */
   public void validateContentReferences(Devfile devfile, FileContentProvider provider)
       throws DevfileFormatException {
-    try {
-      for (Component component : devfile.getComponents()) {
+    for (Component component : devfile.getComponents()) {
+      try {
         List<HasMetadata> selectedObjects = validateSelector(component, provider);
         validateEntrypointSelector(component, selectedObjects);
+      } catch (Exception e) {
+        throw new DevfileFormatException(
+            format(
+                "Failed to validate content reference of component '%s' of type '%s': %s",
+                getIdentifiableComponentName(component), component.getType(), e.getMessage()),
+            e);
       }
-    } catch (Exception e) {
-      throw new DevfileFormatException(
-          format("Failed to validate content references: %s", e.getMessage()), e);
     }
   }
 
   private Set<String> validateComponents(Devfile devfile) throws DevfileFormatException {
-    Set<String> existingNames = new HashSet<>();
+    Set<String> definedAliases = new HashSet<>();
     Component editorComponent = null;
+
+    Map<String, Set<String>> idsPerComponentType = new HashMap<>();
+
     for (Component component : devfile.getComponents()) {
-      if (!existingNames.add(component.getName())) {
+      if (component.getAlias() != null && !definedAliases.add(component.getAlias())) {
         throw new DevfileFormatException(
-            format("Duplicate component name found:'%s'", component.getName()));
+            format("Duplicate component alias found:'%s'", component.getAlias()));
       }
+
+      if (!idsPerComponentType
+          .computeIfAbsent(component.getType(), __ -> new HashSet<>())
+          .add(getIdentifiableComponentName(component))) {
+
+        throw new DevfileFormatException(
+            format(
+                "There are multiple components '%s' of type '%s' that cannot be uniquely"
+                    + " identified. Please add aliases that would distinguish the components.",
+                getIdentifiableComponentName(component), component.getType()));
+      }
+
       switch (component.getType()) {
         case EDITOR_COMPONENT_TYPE:
           if (editorComponent != null) {
             throw new DevfileFormatException(
                 format(
                     "Multiple editor components found: '%s', '%s'",
-                    editorComponent.getName(), component.getName()));
+                    getIdentifiableComponentName(editorComponent),
+                    getIdentifiableComponentName(component)));
           }
           editorComponent = component;
           break;
@@ -139,14 +160,14 @@ public class DevfileIntegrityValidator {
         default:
           throw new DevfileFormatException(
               format(
-                  "Unsupported component '%s' type provided:'%s'",
-                  component.getName(), component.getType()));
+                  "One of the components has unsupported component type: '%s'",
+                  component.getType()));
       }
     }
-    return existingNames;
+    return definedAliases;
   }
 
-  private void validateCommands(Devfile devfile, Set<String> componentNames)
+  private void validateCommands(Devfile devfile, Set<String> knownAliases)
       throws DevfileFormatException {
     Set<String> existingNames = new HashSet<>();
     for (Command command : devfile.getCommands()) {
@@ -169,10 +190,10 @@ public class DevfileIntegrityValidator {
       }
       Action action = command.getActions().get(0);
 
-      if (!componentNames.contains(action.getComponent())) {
+      if (!knownAliases.contains(action.getComponent())) {
         throw new DevfileFormatException(
             format(
-                "Command '%s' has action that refers to non-existing components '%s'",
+                "Command '%s' has action that refers to a component with unknown alias '%s'",
                 command.getName(), action.getComponent()));
       }
     }
@@ -228,8 +249,9 @@ public class DevfileIntegrityValidator {
     if (content.isEmpty()) {
       throw new DevfileException(
           format(
-              "The selector of the component %s filters out all objects from the list.",
-              component.getName()));
+              "The selector of the component '%s' of type '%s' filters out all objects from"
+                  + " the list.",
+              getIdentifiableComponentName(component), component.getType()));
     }
 
     return content;
@@ -251,8 +273,9 @@ public class DevfileIntegrityValidator {
       if (cs.isEmpty()) {
         throw new DevfileFormatException(
             format(
-                "Component %s contains an entry point that doesn't match any container:\n%s",
-                component.getName(), toYAML(ep)));
+                "Component '%s' of type '%s' contains an entry point that doesn't match any"
+                    + " container:\n%s",
+                getIdentifiableComponentName(component), component.getType(), toYAML(ep)));
       }
     }
   }

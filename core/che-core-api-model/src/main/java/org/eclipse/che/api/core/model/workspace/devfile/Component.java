@@ -16,8 +16,8 @@ import java.util.Map;
 
 public interface Component {
 
-  /** Returns the name of the component. Is mandator and must be unique per components set. */
-  String getName();
+  /** Returns the alias of the component. Is optional and must be unique per components set. */
+  String getAlias();
 
   /**
    * Returns type of the component, e.g. whether it is an plugin or editor or other type. It is

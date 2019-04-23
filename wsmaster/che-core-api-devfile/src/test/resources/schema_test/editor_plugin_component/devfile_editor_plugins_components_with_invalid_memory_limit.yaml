@@ -10,9 +10,9 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
----
 specVersion: 0.0.1
-name: petclinic-dev-environment
+name: terminal-sample
 components:
-  - name: mysql
-    type: openshift
+  - type: chePlugin
+    id: terminal-sample:0.0.1
+    memoryLimit: 0

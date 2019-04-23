@@ -10,9 +10,16 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
----
 specVersion: 0.0.1
-name: petclinic-dev-environment
+name: terminal-sample
 components:
-  - type: dockerimage
-    image: org.eclipse.cheubuntu-jdk:latest
+  - type: chePlugin
+    id: terminal-sample:0.0.1
+    memoryLimit: 256G
+  - type: chePlugin
+    id: org.eclipse.chemaven-jdk8:1.0.0
+    memoryLimit: 108M
+  - alias: theia
+    type: cheEditor
+    id: org.eclipse.theia:0.0.3
+    memoryLimit: 1048M

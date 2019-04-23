@@ -56,6 +56,14 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -131,6 +139,17 @@ public class PostgreSqlTckModule extends TckModule {
                 InstallerServerConfigImpl.class,
                 WorkspaceActivity.class,
                 VolumeImpl.class,
+                // devfile
+                ActionImpl.class,
+                org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl.class,
+                ComponentImpl.class,
+                DevfileImpl.class,
+                EndpointImpl.class,
+                EntrypointImpl.class,
+                EnvImpl.class,
+                ProjectImpl.class,
+                SourceImpl.class,
+                org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl.class,
                 // k8s-runtimes
                 KubernetesRuntimeState.class,
                 KubernetesRuntimeCommandImpl.class,
@@ -293,7 +312,9 @@ public class PostgreSqlTckModule extends TckModule {
     public void createAll(Collection<? extends WorkspaceImpl> entities)
         throws TckRepositoryException {
       for (WorkspaceImpl entity : entities) {
-        entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        if (entity.getConfig() != null) {
+          entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
+        }
       }
       super.createAll(entities);
     }

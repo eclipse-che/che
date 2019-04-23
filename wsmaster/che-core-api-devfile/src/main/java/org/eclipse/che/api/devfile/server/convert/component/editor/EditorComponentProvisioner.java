@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.api.devfile.server.convert.component.editor;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
@@ -44,13 +46,16 @@ public class EditorComponentProvisioner implements ComponentProvisioner {
       return;
     }
 
-    ComponentImpl editorComponent =
-        new ComponentImpl(
-            EDITOR_COMPONENT_TYPE,
-            workspaceConfig
-                .getAttributes()
-                .getOrDefault(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorAttribute),
-            editorAttribute);
+    ComponentImpl editorComponent = new ComponentImpl(EDITOR_COMPONENT_TYPE, editorAttribute);
+
+    editorComponent.setAlias(
+        workspaceConfig
+            .getAttributes()
+            .getOrDefault(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorAttribute));
+    editorComponent.setMemoryLimit(
+        workspaceConfig
+            .getAttributes()
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorAttribute.split(":")[0])));
     devfile.getComponents().add(editorComponent);
   }
 }

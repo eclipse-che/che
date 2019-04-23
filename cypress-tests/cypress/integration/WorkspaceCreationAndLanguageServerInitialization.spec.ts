@@ -80,12 +80,10 @@ describe("E2E test", () => {
             const javaPluginName: string = "Language Support for Java(TM)";
             const execPlugin: string = "Che machine-exec Service";
 
-
             workspaceDetails.waitPage(workspaceName);
             workspaceDetails.waitTabSelected('Overview')
             workspaceDetails.clickOnTab('Plugins')
             workspaceDetails.waitTabSelected('Plugins')
-
 
             workspaceDetailsPlugins.waitPluginEnabling(execPlugin)
             workspaceDetailsPlugins.waitPluginDisabling(javaPluginName)

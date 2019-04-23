@@ -12,14 +12,33 @@
 package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import java.util.Objects;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Action;
 
 /** @author Sergii Leshchenko */
+@Entity(name = "DevfileAction")
+@Table(name = "devfile_action")
 public class ActionImpl implements Action {
 
+  @Id
+  @GeneratedValue
+  @Column(name = "id")
+  private Long id;
+
+  @Column(name = "type", nullable = false)
   private String type;
+
+  @Column(name = "component", nullable = false)
   private String component;
+
+  @Column(name = "command", nullable = false)
   private String command;
+
+  @Column(name = "workdir")
   private String workdir;
 
   public ActionImpl() {}
@@ -80,21 +99,25 @@ public class ActionImpl implements Action {
       return false;
     }
     ActionImpl action = (ActionImpl) o;
-    return Objects.equals(getType(), action.getType())
-        && Objects.equals(getComponent(), action.getComponent())
-        && Objects.equals(getCommand(), action.getCommand())
-        && Objects.equals(getWorkdir(), action.getWorkdir());
+    return Objects.equals(id, action.id)
+        && Objects.equals(type, action.type)
+        && Objects.equals(component, action.component)
+        && Objects.equals(command, action.command)
+        && Objects.equals(workdir, action.workdir);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getType(), getComponent(), getCommand(), getWorkdir());
+    return Objects.hash(id, type, component, command, workdir);
   }
 
   @Override
   public String toString() {
     return "ActionImpl{"
-        + "type='"
+        + "id='"
+        + id
+        + '\''
+        + ", type='"
         + type
         + '\''
         + ", component='"

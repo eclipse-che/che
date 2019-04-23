@@ -85,7 +85,7 @@ export class WorkspaceDetails {
     }
 
     waitTabsPresence() {
-        ["Overview", "Projects", "Machines", "Installers", "Servers", "Env Variables", "Volumes", "Config", "SSH", "Tools", "Plugins"]
+        ["Overview", "Projects", "Containers", "Servers", "Env Variables", "Volumes", "Config", "SSH", "Plugins", "Editors"]
             .forEach(tabTitle => {
                 cy.get(WorkspaceDetails.TAB_BUTTONS, { timeout: WorkspaceDetails.LOAD_PAGE_TIMEOUT })
                     .contains(tabTitle)
