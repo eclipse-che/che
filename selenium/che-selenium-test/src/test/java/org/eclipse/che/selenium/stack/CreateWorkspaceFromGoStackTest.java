@@ -15,7 +15,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.constant.TestCommandsConstants.RUN_COMMAND;
 import static org.eclipse.che.selenium.core.constant.TestIntelligentCommandsConstants.CommandItem.RUN_COMMAND_ITEM;
 import static org.eclipse.che.selenium.core.constant.TestProjectExplorerContextMenuConstants.ContextMenuCommandGoals.RUN_GOAL;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO_DEFAULT;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
@@ -69,7 +69,8 @@ public class CreateWorkspaceFromGoStackTest {
     // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()
     // possible to read logs in case of test failure
     testWorkspace =
-        createWorkspaceHelper.createWorkspaceFromStackWithProjects(GO, WORKSPACE_NAME, projects);
+        createWorkspaceHelper.createWorkspaceFromStackWithProjects(
+            GO_DEFAULT, WORKSPACE_NAME, projects);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 
