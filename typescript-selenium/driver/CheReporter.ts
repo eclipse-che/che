@@ -12,6 +12,7 @@ import { Driver } from './Driver';
 import { e2eContainer } from '../inversify.config';
 import { TYPES } from '../types';
 import * as fs from 'fs';
+import { TestConstants } from '../TestConstants';
 
 const driver: Driver = e2eContainer.get(TYPES.Driver);
 
@@ -20,7 +21,31 @@ class CheReporter extends mocha.reporters.Spec {
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
 
+    runner.on('start', async (test: mocha.Test) => {
+      const launchInformation: string =
+`################## Launch Information ##################
+
+      TS_SELENIUM_BASE_URL: ${TestConstants.TS_SELENIUM_BASE_URL}
+      TS_SELENIUM_HEADLESS: ${TestConstants.TS_SELENIUM_HEADLESS}
+
+      TS_SELENIUM_DEFAULT_ATTEMPTS: ${TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS}
+      TS_SELENIUM_DEFAULT_POLLING: ${TestConstants.TS_SELENIUM_DEFAULT_POLLING}
+      TS_SELENIUM_DEFAULT_TIMEOUT: ${TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT}
+
+      TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: ${TestConstants.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT}
+      TS_SELENIUM_LOAD_PAGE_TIMEOUT: ${TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT}
+      TS_SELENIUM_START_WORKSPACE_TIMEOUT: ${TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT}
+      TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS: ${TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS}
+      TS_SELENIUM_WORKSPACE_STATUS_POLLING: ${TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING}
+
+########################################################
+      `
+
+      console.log(launchInformation)
+    })
+
     runner.on('end', async function (test: mocha.Test) {
+      //close driver
       await driver.get().quit().catch(err => { throw err })
     })
 
