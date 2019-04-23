@@ -28,14 +28,15 @@ class CheReporter extends mocha.reporters.Spec {
 
 
     runner.on('fail', async function (test: mocha.Test) {
-      
+
       const reportDirPath: string = './report'
       const testFullTitle: string = test.fullTitle().replace(/\s/g, '_')
       const testTitle: string = test.title.replace(/\s/g, '_')
 
       const testReportDirPath: string = `${reportDirPath}/${testFullTitle}`
-      const fileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`
+      const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`
 
+      //create reporter dir if not exist
       await fs.exists(reportDirPath, async isDirExist => {
         if (!isDirExist) {
           await fs.mkdir(reportDirPath, err => {
@@ -46,6 +47,7 @@ class CheReporter extends mocha.reporters.Spec {
         }
       })
 
+      //create dir for collected data if not exist
       await fs.exists(testReportDirPath, async isDirExist => {
         if (!isDirExist) {
           await fs.mkdir(testReportDirPath, err => {
@@ -56,14 +58,11 @@ class CheReporter extends mocha.reporters.Spec {
         }
       })
 
-      let screenshot = await driver.get().takeScreenshot().catch(err => {
-        throw err
-      });
-
-      let stream = fs.createWriteStream(fileName)
-
-      stream.write(new Buffer(screenshot, 'base64'))
-      stream.end()
+      //take screenshot and write to file
+      const screenshot = await driver.get().takeScreenshot().catch(err => { throw err });
+      const screenshotStream = fs.createWriteStream(screenshotFileName)
+      screenshotStream.write(new Buffer(screenshot, 'base64'))
+      screenshotStream.end()
     })
   }
 }
