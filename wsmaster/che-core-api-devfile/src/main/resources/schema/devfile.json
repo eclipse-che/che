@@ -141,7 +141,8 @@
                 ]
               },
               "alias": {},
-              "id": {}
+              "id": {},
+              "memoryLimit": {}
             },
             "required": [
               "id"

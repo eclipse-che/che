@@ -18,6 +18,7 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATT
 import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
@@ -74,6 +75,14 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     }
 
     String pluginIdVersion = resolveIdAndVersion(pluginComponent.getId());
+    String memoryLimit = pluginComponent.getMemoryLimit();
+    if (memoryLimit != null) {
+      String pluginIdPart = pluginIdVersion.split(":")[0];
+      workspaceConfig
+          .getAttributes()
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginIdPart), memoryLimit);
+    }
+
     for (CommandImpl command : workspaceConfig.getCommands()) {
       String commandComponent = command.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE);
 

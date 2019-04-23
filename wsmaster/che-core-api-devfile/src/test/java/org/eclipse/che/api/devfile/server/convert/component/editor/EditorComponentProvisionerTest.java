@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.api.devfile.server.convert.component.editor;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
@@ -36,9 +38,11 @@ public class EditorComponentProvisionerTest {
   public void shouldProvisionCheEditorComponent() throws Exception {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    String editorId = "org.eclipse.che.super-editor:0.0.1";
+    workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, editorId);
     workspaceConfig
         .getAttributes()
-        .put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "org.eclipse.che.super-editor:0.0.1");
+        .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorId.split(":")[0]), "245G");
     workspaceConfig.getAttributes().put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, "editor");
     DevfileImpl devfile = new DevfileImpl();
 
@@ -50,7 +54,8 @@ public class EditorComponentProvisionerTest {
     ComponentImpl editorComponent = devfile.getComponents().get(0);
     assertEquals(editorComponent.getAlias(), "editor");
     assertEquals(editorComponent.getType(), EDITOR_COMPONENT_TYPE);
-    assertEquals(editorComponent.getId(), "org.eclipse.che.super-editor:0.0.1");
+    assertEquals(editorComponent.getId(), editorId);
+    assertEquals(editorComponent.getMemoryLimit(), "245G");
   }
 
   @Test
