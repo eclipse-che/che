@@ -10,7 +10,7 @@
 
 function readEnvAndSetValue(envProperty: any, defaultValue: string | number | boolean): any {
     const propertyValue = envProperty
-    if (propertyValue === undefined || propertyValue === null) {
+    if (!propertyValue) {
         return defaultValue;
     }
 
