@@ -21,6 +21,7 @@ import io.fabric8.kubernetes.api.model.Pod;
 import java.util.Map;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil;
 
 /**
  * Helps to work with Kubernetes objects names.
@@ -49,6 +50,12 @@ public class Names {
    */
   public static String machineName(PodData podData, Container container) {
     return machineName(podData.getMetadata(), container);
+  }
+
+  public static void putMachineName(
+      ObjectMeta objectMeta, String containerName, String machineName) {
+    KubernetesObjectUtil.putAnnotation(
+        objectMeta, format(MACHINE_NAME_ANNOTATION_FMT, containerName), machineName);
   }
 
   /**
