@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.dto.server.DtoFactoryVisitor;
@@ -289,7 +290,8 @@ public class DtoTemplate {
             .append("            return new ")
             .append(dto.getImplClassName())
             .append("(origin);\n");
-        builder.append("        }\n");
+        builder.append("        }\n\n");
+        generateCloneFrom(dto, builder);
         builder.append("    });\n");
       }
       builder.append("  }\n\n");
@@ -336,5 +338,88 @@ public class DtoTemplate {
       }
       builder.append("  }\n\n");
     }
+  }
+
+  private static void generateCloneFrom(DtoImpl dto, StringBuilder sb) {
+    sb.append("        public ")
+        .append(dto.getDtoInterface().getCanonicalName())
+        .append(" cloneFrom(java.lang.Object")
+        .append(" origin) {\n");
+
+    String i = "          ";
+
+    sb.append(i)
+        .append(
+            "if (origin == null) throw new NullPointerException(\"Cannot clone a null object.\");\n");
+
+    List<Class<?>> copyCtorArgs = dto.getAllCopyConstructorParameterTypes();
+    Map<Class<?>, Set<Class<?>>> typeHierarchy = new HashMap<>();
+    for (Class<?> cls : copyCtorArgs) {
+      addAllSuperTypes(cls, typeHierarchy);
+    }
+
+    copyCtorArgs = genericLast(typeHierarchy);
+
+    for (Class<?> copyCtorArgumentType : copyCtorArgs) {
+      sb.append(i)
+          .append("if (origin instanceof ")
+          .append(copyCtorArgumentType.getCanonicalName())
+          .append(") {\n");
+      sb.append(i)
+          .append("  return new ")
+          .append(dto.getImplClassName())
+          .append("(")
+          .append("(")
+          .append(copyCtorArgumentType.getCanonicalName())
+          .append(") origin);\n");
+      sb.append(i).append("}\n");
+    }
+
+    sb.append(i)
+        .append("throw new IllegalArgumentException(String.format(\"DTO generated for ")
+        .append(dto.getDtoInterface().getCanonicalName())
+        .append(
+            " doesn't have a copy constructor accepting instance of %s.\", origin.getClass()));\n");
+
+    sb.append("        }\n");
+  }
+
+  private static void addAllSuperTypes(Class<?> cls, Map<Class<?>, Set<Class<?>>> typeHierarchy) {
+    Set<Class<?>> superTypes = typeHierarchy.computeIfAbsent(cls, __ -> new HashSet<>());
+    if (cls.getSuperclass() != null) {
+      addAllSuperTypes(cls.getSuperclass(), typeHierarchy);
+
+      superTypes.add(cls.getSuperclass());
+      superTypes.addAll(typeHierarchy.get(cls.getSuperclass()));
+    }
+    for (Class<?> iface : cls.getInterfaces()) {
+      addAllSuperTypes(iface, typeHierarchy);
+      superTypes.add(iface);
+      superTypes.addAll(typeHierarchy.get(iface));
+    }
+  }
+
+  private static List<Class<?>> genericLast(Map<Class<?>, Set<Class<?>>> hierarchy) {
+    List<Class<?>> ret = new ArrayList<>();
+    ListIterator<Class<?>> it = ret.listIterator();
+
+    for (Class<?> cls : hierarchy.keySet()) {
+      while (it.hasPrevious()) {
+        if (hierarchy.get(it.previous()).contains(cls)) {
+          break;
+        }
+      }
+
+      while (it.hasNext()) {
+        if (!hierarchy.get(it.next()).contains(cls)) {
+          it.previous();
+          break;
+        }
+      }
+
+      it.add(cls);
+    }
+
+    return ret;
   }
 }

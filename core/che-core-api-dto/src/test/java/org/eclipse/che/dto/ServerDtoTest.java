@@ -32,6 +32,7 @@ import org.eclipse.che.dto.definitions.DtoWithAny;
 import org.eclipse.che.dto.definitions.DtoWithDelegate;
 import org.eclipse.che.dto.definitions.DtoWithFieldNames;
 import org.eclipse.che.dto.definitions.SimpleDto;
+import org.eclipse.che.dto.definitions.model.CustomModelImpl;
 import org.eclipse.che.dto.definitions.model.Model;
 import org.eclipse.che.dto.definitions.model.ModelComponentDto;
 import org.eclipse.che.dto.definitions.model.ModelDto;
@@ -446,5 +447,19 @@ public class ServerDtoTest {
           "interface org.eclipse.che.dto.definitions.DTOHierarchy\\$GrandchildWithoutDto is not a DTO type")
   public void shouldThrowExceptionWhenInterfaceIsNotAnnotatedAsDto() {
     DtoFactory.newDto(DTOHierarchy.GrandchildWithoutDto.class);
+  }
+
+  @Test
+  public void shouldContainCopyConstructorFromNonDtoSuperClassWithAllGetters() {
+    ModelDto dto = DtoFactory.getInstance().cloneFrom(new CustomModelImpl(), ModelDto.class);
+
+    assertEquals(
+        new CustomModelImpl().getComponents().get(0).getName(),
+        dto.getComponents().get(0).getName());
+  }
+
+  @Test(expectedExceptions = IllegalArgumentException.class)
+  public void shouldFailToCopyFromInstanceWithNoMatchingGetters() {
+    DtoFactory.getInstance().cloneFrom(new Object(), ModelDto.class);
   }
 }

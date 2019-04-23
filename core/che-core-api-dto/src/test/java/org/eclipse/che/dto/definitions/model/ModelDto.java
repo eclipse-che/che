@@ -12,6 +12,7 @@
 package org.eclipse.che.dto.definitions.model;
 
 import java.util.List;
+import java.util.Map;
 import org.eclipse.che.dto.shared.DTO;
 
 /**
@@ -28,6 +29,13 @@ public interface ModelDto extends Model {
   void setComponents(List<ModelComponentDto> components);
 
   ModelDto withComponents(List<ModelComponentDto> components);
+
+  @Override
+  Map<String, ModelComponentDto> getComponentMap();
+
+  void setComponentMap(Map<String, ModelComponentDto> componentMap);
+
+  ModelDto withComponentMap(Map<String, ModelComponentDto> componentMap);
 
   @Override
   ModelComponentDto getPrimary();

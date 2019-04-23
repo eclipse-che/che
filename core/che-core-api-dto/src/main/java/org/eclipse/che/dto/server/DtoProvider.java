@@ -28,4 +28,8 @@ public interface DtoProvider<DTO> {
   DTO newInstance();
 
   DTO clone(DTO origin);
+
+  default DTO cloneFrom(Object other) throws IllegalArgumentException {
+    throw new IllegalArgumentException("cloneFrom() not implemented by default.");
+  }
 }

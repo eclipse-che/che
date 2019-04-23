@@ -19,7 +19,9 @@ import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -353,8 +355,20 @@ abstract class DtoImpl {
   }
 
   public static Class<?> getRawClass(Type type) {
-    return (Class<?>)
-        ((type instanceof ParameterizedType) ? ((ParameterizedType) type).getRawType() : type);
+    if (type instanceof Class) {
+      return (Class<?>) type;
+    } else if (type instanceof ParameterizedType) {
+      return getRawClass(((ParameterizedType) type).getRawType());
+    } else if (type instanceof WildcardType) {
+      WildcardType wType = (WildcardType) type;
+      if (wType.getLowerBounds().length > 0) {
+        return Object.class;
+      } else {
+        return getRawClass(wType.getUpperBounds()[0]);
+      }
+    } else {
+      return (Class<?>) type;
+    }
   }
 
   /**
@@ -436,4 +450,8 @@ abstract class DtoImpl {
 
   /** @return String representing the source definition for the DTO impl as an inner class. */
   abstract String serialize();
+
+  List<Class<?>> getAllCopyConstructorParameterTypes() {
+    return Collections.singletonList(dtoInterface);
+  }
 }

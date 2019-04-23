@@ -11,19 +11,27 @@
  */
 package org.eclipse.che.dto.generator;
 
+import static java.util.function.Function.identity;
+
 import com.google.common.primitives.Primitives;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.dto.server.JsonArrayImpl;
 import org.eclipse.che.dto.server.JsonSerializable;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
+import org.eclipse.che.dto.shared.DTO;
 import org.eclipse.che.dto.shared.DTOImpl;
 import org.eclipse.che.dto.shared.DelegateRule;
 import org.eclipse.che.dto.shared.DelegateTo;
@@ -39,6 +47,11 @@ public class DtoImplServerTemplate extends DtoImpl {
 
   DtoImplServerTemplate(DtoTemplate template, Class<?> superInterface) {
     super(template, superInterface);
+  }
+
+  List<Class<?>> getAllCopyConstructorParameterTypes() {
+    List<Method> getters = getDtoGetters(getDtoInterface());
+    return new ArrayList<>(getCopyConstructorAndActualGetterMethods(getters).keySet());
   }
 
   @Override
@@ -105,7 +118,7 @@ public class DtoImplServerTemplate extends DtoImpl {
             && !getterNames.contains("is" + noPrefixName)) {
           String fieldName =
               Character.toLowerCase(noPrefixName.charAt(0)) + noPrefixName.substring(1);
-          String parameterFqn = getFqParameterizedName(method.getGenericParameterTypes()[0]);
+          String parameterFqn = getFqParameterizedName(method.getGenericParameterTypes()[0], false);
           emitWithMethod(method.getName(), fieldName, parameterFqn, dtoInterfaceName, builder);
         }
       }
@@ -260,7 +273,7 @@ public class DtoImplServerTemplate extends DtoImpl {
         continue;
       }
       Class<?> returnTypeClass = getter.getReturnType();
-      String returnType = getFqParameterizedName(getter.getGenericReturnType());
+      String returnType = getFqParameterizedName(getter.getGenericReturnType(), false);
       // Getter.
       emitGetter(getter, fieldName, returnType, builder);
       // Setter.
@@ -296,7 +309,7 @@ public class DtoImplServerTemplate extends DtoImpl {
       if (i > 0) {
         builder.append(", ");
       }
-      builder.append(getFqParameterizedName(parameterTypes[i]));
+      builder.append(getFqParameterizedName(parameterTypes[i], false));
       String parameter = "$p" + i;
       builder.append(" ").append(parameter);
       parameters[i] = parameter;
@@ -325,7 +338,7 @@ public class DtoImplServerTemplate extends DtoImpl {
       DelegateTo delegateTo = method.getAnnotation(DelegateTo.class);
       if (delegateTo != null) {
         DelegateRule serverRule = delegateTo.server();
-        String returnType = getFqParameterizedName(method.getGenericReturnType());
+        String returnType = getFqParameterizedName(method.getGenericReturnType(), false);
         emitDelegateMethod(returnType, method, serverRule.type(), serverRule.method(), builder);
       }
     }
@@ -464,7 +477,7 @@ public class DtoImplServerTemplate extends DtoImpl {
       emitWithMethod(
           getWithName(fieldName),
           fieldName,
-          getFqParameterizedName(getter.getGenericReturnType()),
+          getFqParameterizedName(getter.getGenericReturnType(), false),
           dtoInterfaceName,
           builder);
     }
@@ -540,24 +553,95 @@ public class DtoImplServerTemplate extends DtoImpl {
     builder.append("    }\n\n");
   }
 
-  private void emitCopyConstructor(List<Method> getters, StringBuilder builder) {
-    String dtoInterface = getDtoInterface().getCanonicalName();
-    String implClassName = getImplClassName();
-    builder
-        .append("    public ")
-        .append(implClassName)
-        .append("(")
-        .append(dtoInterface)
-        .append(" origin) {\n");
-    for (Method method : getters) {
-      emitDeepCopyForGetters(
-          expandType(method.getGenericReturnType()), 0, builder, "origin", method, "      ");
+  private Map<Class<?>, Map<Method, Method>> getCopyConstructorAndActualGetterMethods(
+      List<Method> getters) {
+    Map<Class<?>, Map<Method, Method>> origins = new LinkedHashMap<>();
+    origins.put(
+        getDtoInterface(), getters.stream().collect(Collectors.toMap(identity(), identity())));
+
+    if (!getters.isEmpty()) {
+      // also create copy constructors for all super types that declare all the getter methods
+      Set<Class<?>> allSuperTypes = getAllSuperTypes(getDtoInterface());
+
+      Iterator<Class<?>> it = allSuperTypes.iterator();
+      while (it.hasNext()) {
+        Class<?> superType = it.next();
+        Map<Method, Method> superTypeMethods = new HashMap<>();
+        for (Method getter : getters) {
+          Method superGetter = getSameMethod(superType, getter);
+          if (superGetter != null) {
+            superTypeMethods.put(getter, superGetter);
+          }
+        }
+
+        origins.put(superType, superTypeMethods);
+      }
     }
-    builder.append("    }\n\n");
+
+    return origins;
+  }
+
+  private void emitCopyConstructor(List<Method> getters, StringBuilder builder) {
+    Map<Class<?>, Map<Method, Method>> origins = getCopyConstructorAndActualGetterMethods(getters);
+    String implClassName = getImplClassName();
+
+    for (Map.Entry<Class<?>, Map<Method, Method>> e : origins.entrySet()) {
+      String originType = e.getKey().getCanonicalName();
+      Map<Method, Method> getterMapping = e.getValue();
+
+      builder
+          .append("    public ")
+          .append(implClassName)
+          .append("(")
+          .append(originType)
+          .append(" origin) {\n");
+
+      getterMapping.forEach(
+          (getter, actualMethod) ->
+              emitDeepCopyForGetters(
+                  expandType(getter.getGenericReturnType()),
+                  expandType(actualMethod.getGenericReturnType()),
+                  0,
+                  builder,
+                  "origin",
+                  actualMethod,
+                  "      "));
+      builder.append("    }\n\n");
+    }
+  }
+
+  private Set<Class<?>> getAllSuperTypes(Class<?> cls) {
+    Set<Class<?>> ret = new HashSet<>();
+    addAllSuperTypes(cls, ret);
+    return ret;
+  }
+
+  private void addAllSuperTypes(Class<?> cls, Set<Class<?>> result) {
+    result.add(cls);
+
+    Class<?> superClass = cls.getSuperclass();
+    if (superClass != null) {
+      result.add(superClass);
+      addAllSuperTypes(cls, result);
+    }
+
+    for (Class<?> iface : cls.getInterfaces()) {
+      result.add(iface);
+      addAllSuperTypes(iface, result);
+    }
+  }
+
+  private Method getSameMethod(Class<?> type, Method method) {
+    try {
+      return type.getMethod(method.getName(), method.getParameterTypes());
+    } catch (NoSuchMethodException e) {
+      return null;
+    }
   }
 
   private void emitDeepCopyForGetters(
-      List<Type> expandedTypes,
+      List<Type> expandedOutTypes,
+      List<Type> expandedInTypes,
       int depth,
       StringBuilder builder,
       String origin,
@@ -567,14 +651,17 @@ public class DtoImplServerTemplate extends DtoImpl {
     String fieldName = getJavaFieldName(getterName);
     String fieldNameIn = fieldName + "In";
     String fieldNameOut = fieldName + "Out";
-    Type type = expandedTypes.get(depth);
-    Class<?> rawClass = getRawClass(type);
-    String rawTypeName = getImplName(type, false);
+    Type outType = expandedOutTypes.get(depth);
+
+    String inTypeName = getImplName(expandedInTypes.get(depth), false, false);
+
+    Class<?> rawClass = getRawClass(outType);
+    String rawTypeName = getImplName(outType, false, true);
 
     if (isList(rawClass) || isMap(rawClass)) {
       builder
           .append(i)
-          .append(rawTypeName)
+          .append(inTypeName)
           .append(" ")
           .append(fieldNameIn)
           .append(" = ")
@@ -590,9 +677,10 @@ public class DtoImplServerTemplate extends DtoImpl {
           .append(" ")
           .append(fieldNameOut)
           .append(" = new ")
-          .append(getImplName(type, true))
+          .append(getImplName(outType, true, true))
           .append("();\n");
-      emitDeepCopyCollections(expandedTypes, depth, builder, fieldNameIn, fieldNameOut, i);
+      emitDeepCopyCollections(
+          expandedOutTypes, expandedInTypes, depth, builder, fieldNameIn, fieldNameOut, i);
       builder
           .append(i)
           .append("  ")
@@ -608,7 +696,7 @@ public class DtoImplServerTemplate extends DtoImpl {
     } else if (getEnclosingTemplate().isDtoInterface(rawClass)) {
       builder
           .append(i)
-          .append(rawTypeName)
+          .append(inTypeName)
           .append(" ")
           .append(fieldNameIn)
           .append(" = ")
@@ -618,6 +706,20 @@ public class DtoImplServerTemplate extends DtoImpl {
           .append("();\n");
       builder.append(i).append("this.").append(fieldName).append(" = ");
       emitCheckNullAndCopyDto(rawClass, fieldNameIn, builder);
+      builder.append(";\n");
+    } else if (isDtoAnnotated(rawClass)) {
+      builder
+          .append(i)
+          .append(inTypeName)
+          .append(" ")
+          .append(fieldNameIn)
+          .append(" = ")
+          .append(origin)
+          .append(".")
+          .append(getterName)
+          .append("();\n");
+      builder.append(i).append("this.").append(fieldName).append(" = ");
+      emitCheckNullAndCopyDtoUsingFactory(rawClass, fieldNameIn, builder);
       builder.append(";\n");
     } else {
       builder
@@ -633,24 +735,26 @@ public class DtoImplServerTemplate extends DtoImpl {
   }
 
   private void emitDeepCopyCollections(
-      List<Type> expandedTypes,
+      List<Type> expandedOutTypes,
+      List<Type> expandedInTypes,
       int depth,
       StringBuilder builder,
       String varIn,
       String varOut,
       String i) {
-    Type type = expandedTypes.get(depth);
+    Type outType = expandedOutTypes.get(depth);
     String childVarIn = varIn + "_";
     String childVarOut = varOut + "_";
     String entryVar = "entry" + depth;
-    Class<?> rawClass = getRawClass(type);
-    Class<?> childRawType = getRawClass(expandedTypes.get(depth + 1));
-    final String childTypeName = getImplName(expandedTypes.get(depth + 1), false);
+    Class<?> rawClass = getRawClass(outType);
+    Class<?> childRawType = getRawClass(expandedOutTypes.get(depth + 1));
+    final String childOutTypeName = getImplName(expandedOutTypes.get(depth + 1), false, true);
+    final String childInTypeName = getImplName(expandedInTypes.get(depth + 1), false, true);
     if (isList(rawClass)) {
       builder
           .append(i)
           .append("  for (")
-          .append(childTypeName)
+          .append(childInTypeName)
           .append(" ")
           .append(childVarIn)
           .append(" : ")
@@ -660,7 +764,7 @@ public class DtoImplServerTemplate extends DtoImpl {
       builder
           .append(i)
           .append("  for (java.util.Map.Entry<String, ")
-          .append(childTypeName)
+          .append(getImplName(expandedInTypes.get(depth + 1), false, false))
           .append("> ")
           .append(entryVar)
           .append(" : ")
@@ -669,7 +773,7 @@ public class DtoImplServerTemplate extends DtoImpl {
       builder
           .append(i)
           .append("    ")
-          .append(childTypeName)
+          .append(childInTypeName)
           .append(" ")
           .append(childVarIn)
           .append(" = ")
@@ -681,14 +785,20 @@ public class DtoImplServerTemplate extends DtoImpl {
       builder
           .append(i)
           .append("      ")
-          .append(childTypeName)
+          .append(childOutTypeName)
           .append(" ")
           .append(childVarOut)
           .append(" = new ")
-          .append(getImplName(expandedTypes.get(depth + 1), true))
+          .append(getImplName(expandedOutTypes.get(depth + 1), true, true))
           .append("();\n");
       emitDeepCopyCollections(
-          expandedTypes, depth + 1, builder, childVarIn, childVarOut, i + "    ");
+          expandedOutTypes,
+          expandedInTypes,
+          depth + 1,
+          builder,
+          childVarIn,
+          childVarOut,
+          i + "    ");
       builder.append(i).append("      ").append(varOut);
       if (isList(rawClass)) {
         builder.append(".add(");
@@ -707,12 +817,18 @@ public class DtoImplServerTemplate extends DtoImpl {
       }
       if (getEnclosingTemplate().isDtoInterface(childRawType)) {
         emitCheckNullAndCopyDto(childRawType, childVarIn, builder);
+      } else if (isDtoAnnotated(childRawType)) {
+        emitCheckNullAndCopyDtoUsingFactory(childRawType, childVarIn, builder);
       } else {
         builder.append(childVarIn);
       }
       builder.append(");\n");
     }
     builder.append(i).append("  }\n");
+  }
+
+  private boolean isDtoAnnotated(Class<?> cls) {
+    return cls.getAnnotation(DTO.class) != null;
   }
 
   private void emitCheckNullAndCopyDto(Class<?> dto, String fieldName, StringBuilder builder) {
@@ -727,6 +843,19 @@ public class DtoImplServerTemplate extends DtoImpl {
         .append(")");
   }
 
+  private void emitCheckNullAndCopyDtoUsingFactory(
+      Class<?> dto, String fieldName, StringBuilder builder) {
+    builder
+        .append(fieldName)
+        .append(" == null ? null : ")
+        .append(DtoFactory.class.getCanonicalName())
+        .append(".getInstance().cloneFrom(")
+        .append(fieldName)
+        .append(", ")
+        .append(dto.getCanonicalName())
+        .append(".class)");
+  }
+
   /** Emit a method that ensures a collection is initialized. */
   private void emitEnsureCollection(Method method, String fieldName, StringBuilder builder) {
     builder.append("    protected void ");
@@ -737,7 +866,7 @@ public class DtoImplServerTemplate extends DtoImpl {
     builder.append(" == null) {\n        ");
     builder.append(fieldName);
     builder.append(" = new ");
-    builder.append(getImplName(method.getGenericReturnType(), true));
+    builder.append(getImplName(method.getGenericReturnType(), true, true));
     builder.append("();\n");
     builder.append("      }\n");
     builder.append("    }\n");
@@ -750,8 +879,8 @@ public class DtoImplServerTemplate extends DtoImpl {
    *
    * @param genericType the type as returned by e.g. method.getGenericReturnType()
    */
-  private void appendType(Type genericType, final StringBuilder builder) {
-    builder.append(getImplName(genericType, false));
+  private void appendFieldType(Type genericType, final StringBuilder builder) {
+    builder.append(getImplName(genericType, false, true));
   }
 
   /**
@@ -766,7 +895,7 @@ public class DtoImplServerTemplate extends DtoImpl {
   private String getFieldTypeAndAssignment(Method method, String fieldName) {
     StringBuilder builder = new StringBuilder();
     builder.append("protected ");
-    appendType(method.getGenericReturnType(), builder);
+    appendFieldType(method.getGenericReturnType(), builder);
     builder.append(" ");
     builder.append(fieldName);
     builder.append(";\n");
@@ -779,9 +908,10 @@ public class DtoImplServerTemplate extends DtoImpl {
    * <p>For example, for JsonArray&lt;JsonStringMap&lt;Dto&gt;&gt;, this would return
    * "ArrayList&lt;Map&lt;String, DtoImpl&gt;&gt;".
    */
-  private String getImplName(Type type, boolean allowJreCollectionInterface) {
+  private String getImplName(
+      Type type, boolean allowJreCollectionInterface, boolean flattenWildcard) {
     Class<?> rawClass = getRawClass(type);
-    String fqName = getFqParameterizedName(type);
+    String fqName = getFqParameterizedName(type, flattenWildcard);
     fqName =
         fqName.replaceAll(JsonArray.class.getCanonicalName(), ArrayList.class.getCanonicalName());
     fqName =
@@ -803,7 +933,7 @@ public class DtoImplServerTemplate extends DtoImpl {
   }
 
   /** Returns the fully-qualified type name including parameters. */
-  private String getFqParameterizedName(Type type) {
+  private String getFqParameterizedName(Type type, boolean flattenWildcard) {
     if (type instanceof Class<?>) {
       return ((Class<?>) type).getCanonicalName();
       // return getImplNameForDto((Class<?>)type);
@@ -817,12 +947,41 @@ public class DtoImplServerTemplate extends DtoImpl {
         if (i > 0) {
           sb.append(", ");
         }
-        sb.append(getFqParameterizedName(pType.getActualTypeArguments()[i]));
+        sb.append(getFqParameterizedName(pType.getActualTypeArguments()[i], flattenWildcard));
       }
       sb.append('>');
 
       return sb.toString();
+    } else if (type instanceof WildcardType) {
+      WildcardType wType = (WildcardType) type;
 
+      StringBuilder sb = new StringBuilder();
+      if (!flattenWildcard) {
+        sb.append("? ");
+      }
+
+      Type[] lowerBounds = wType.getLowerBounds();
+      Type[] upperBounds = wType.getUpperBounds();
+      if (lowerBounds.length == 0) {
+        if (!flattenWildcard) {
+          sb.append("extends ");
+        }
+
+        sb.append(getFqParameterizedName(upperBounds[0], flattenWildcard));
+
+        if (!flattenWildcard) {
+          for (int i = 1; i < upperBounds.length; ++i) {
+            sb.append(" & ").append(getFqParameterizedName(upperBounds[i], false));
+          }
+        }
+      } else {
+        throw new IllegalArgumentException(
+            "Can't build implementation of "
+                + getDtoInterface().getSimpleName()
+                + ". DtoGenerator does not handle super bounds of wildcards.");
+      }
+
+      return sb.toString();
     } else {
       throw new IllegalArgumentException(
           "Can't build implementation of "
@@ -844,7 +1003,7 @@ public class DtoImplServerTemplate extends DtoImpl {
     if (typeArgs.length == 0) {
       return "Object";
     }
-    return getImplName(typeArgs[index], false);
+    return getImplName(typeArgs[index], false, false);
   }
 
   private String getImplNameForDto(Class<?> dtoInterface) {

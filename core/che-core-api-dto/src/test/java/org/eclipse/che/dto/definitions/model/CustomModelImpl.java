@@ -11,19 +11,24 @@
  */
 package org.eclipse.che.dto.definitions.model;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Test interface serves as base model, should be extended with dto interface
- *
- * @author Eugene Voevodin
- */
-public interface Model {
+public class CustomModelImpl implements Model {
 
-  List<? extends ModelComponent> getComponents();
+  @Override
+  public List<? extends ModelComponent> getComponents() {
+    return Collections.singletonList(() -> "custom");
+  }
 
-  Map<String, ? extends ModelComponent> getComponentMap();
+  @Override
+  public Map<String, ? extends ModelComponent> getComponentMap() {
+    return Collections.emptyMap();
+  }
 
-  ModelComponent getPrimary();
+  @Override
+  public ModelComponent getPrimary() {
+    return null;
+  }
 }

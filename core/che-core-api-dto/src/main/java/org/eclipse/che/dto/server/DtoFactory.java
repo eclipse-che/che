@@ -154,6 +154,35 @@ public final class DtoFactory {
   }
 
   /**
+   * Creates a deep copy of the DTO from an instance of some class with which the DTO shares a super
+   * type. It is assumed that the common super type declares at least some getters needed to
+   * initialize the DTO instance. Typically, the DTO interface will inherit all its getters from
+   * this super type that the instance also implements.
+   *
+   * <p>Note that not all fields of the DTO will be initialized from the instance.
+   *
+   * @param instance the instance to copy the DTO from
+   * @param dtoInterface the intended type of the DTO
+   * @param <D> the DTO interface type
+   * @return an initialized instance
+   * @throws IllegalArgumentException if the provided instance is not of a type using which the DTO
+   *     can be constructed.
+   */
+  public <D> D cloneFrom(Object instance, Class<D> dtoInterface) {
+    DtoProvider<D> provider = getDtoProvider(dtoInterface);
+    return provider.cloneFrom(instance);
+  }
+
+  /**
+   * Shortcut for {@code DtoFactory.getInstance().cloneFrom(instance, dtoInterface}.
+   *
+   * @see #cloneFrom(Object, Class)
+   */
+  public static <D> D newDtoFrom(Object instance, Class<D> dtoInterface) {
+    return getInstance().cloneFrom(instance, dtoInterface);
+  }
+
+  /**
    * Shortcut for {@code DtoFactory.getInstance().clone(T dtoObject)}
    *
    * @see #clone(Object)
