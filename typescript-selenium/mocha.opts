@@ -1,0 +1,5 @@
+--require ts-node/register
+--timeout 1200000
+--reporter 'reporter/CheReporter.ts'
+-u tdd 
+--spec tests/*.spec.ts

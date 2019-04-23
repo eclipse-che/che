@@ -13,20 +13,19 @@ import { Driver } from "../driver/Driver";
 import { TYPES, CLASSES } from "../types";
 import { DriverHelper } from "../utils/DriverHelper";
 import { By, WebElementCondition, Condition } from "selenium-webdriver";
-import { describe, after } from "mocha";
+import { describe, after, Test } from "mocha";
 import { LoginPage } from "../pageobjects/login/LoginPage";
 import { Dashboard } from "../pageobjects/dashboard/Dashboard";
 import { expect, assert } from 'chai'
 import { Workspaces } from "../pageobjects/dashboard/Workspaces";
 
-
+Test
 
 const driver: Driver = e2eContainer.get<Driver>(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const loginPage: LoginPage = e2eContainer.get<LoginPage>(TYPES.LoginPage);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard)
 const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces)
-
 
 suite("Test of 'DriverHelper' methods", async () => {
     test("login", async () => {
@@ -79,8 +78,6 @@ suite("Test of 'DriverHelper' methods", async () => {
     test("waitAllDisappearance", async () => {
         await driverHelper.waitAllDisappearance([By.css("#dashboard-item aaa"), By.css("#workspaces-item aaa"), By.css("#stacks-item aaa")], 5, 1000)
     })
-
-    ////
 
     test("getElementAttribute", async () => {
         const attributValue: string = await driverHelper.waitAndGetElementAttribute(By.css("#dashboard-item"), 'id')

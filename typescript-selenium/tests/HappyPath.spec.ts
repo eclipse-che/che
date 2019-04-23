@@ -13,7 +13,7 @@ import { Driver } from "../driver/Driver";
 import { TYPES, CLASSES } from "../types";
 import { DriverHelper } from "../utils/DriverHelper";
 import { By, WebElementCondition, Condition } from "selenium-webdriver";
-import { describe, after } from "mocha";
+import { describe, after, test } from "mocha";
 import { LoginPage } from "../pageobjects/login/LoginPage";
 import { Dashboard } from "../pageobjects/dashboard/Dashboard";
 import { expect, assert } from 'chai'
@@ -28,6 +28,7 @@ import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
 import { TestConstants } from "../TestConstants";
+import * as mocha from 'mocha'
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
@@ -46,8 +47,6 @@ const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree)
 const editor: Editor = e2eContainer.get(CLASSES.Editor)
 
 
-
-
 suite("E2E", async () => {
 
     suite("Login and wait dashboard", async () => {
@@ -59,10 +58,11 @@ suite("E2E", async () => {
             await dashboard.waitLoader()
             await dashboard.waitLoaderDisappearance()
             await dashboard.waitPage()
+            expect(false).to.be.true
         })
     })
 
-    suite("Create workspace and open IDE", async () => {
+    suite.skip("Create workspace and open IDE", async () => {
 
         test("Go to 'New Workspace' page", async () => {
             await dashboard.clickWorkspacesButton()
@@ -109,7 +109,7 @@ suite("E2E", async () => {
         })
     })
 
-    suite("Work with IDE", async () => {
+    suite.skip("Work with IDE", async () => {
         let fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
         let tabTitle: string = "HelloWorld.java";
         let filePath: string = `${fileFolderPath}/${tabTitle}`
@@ -140,7 +140,7 @@ suite("E2E", async () => {
 
     })
 
-    suite("Stop and remove workspace", async () => {
+    suite.skip("Stop and remove workspace", async () => {
         test("Stop workspace", async () => {
             await dashboard.openDashboard()
             await dashboard.clickWorkspacesButton()
@@ -160,6 +160,7 @@ suite("E2E", async () => {
             await workspaces.waitPage()
             await workspaces.waitWorkspaceListItemAbcence(workspaceName);
         })
+
     })
 
 })
