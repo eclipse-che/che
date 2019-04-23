@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import * as mocha from 'mocha';
-import { Driver } from '../driver/Driver';
+import { Driver } from './Driver';
 import { e2eContainer } from '../inversify.config';
 import { TYPES } from '../types';
 import * as fs from 'fs';
@@ -24,7 +24,9 @@ class CheReporter extends mocha.reporters.Spec {
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
 
-
+    runner.on('end', async function (test: mocha.Test) {
+      await driver.get().quit().catch(err => { throw err })
+    })
 
 
     runner.on('fail', async function (test: mocha.Test) {

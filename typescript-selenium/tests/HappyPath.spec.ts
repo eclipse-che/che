@@ -165,6 +165,6 @@ suite("E2E", async () => {
 
 })
 
-suiteTeardown("close browser", async () => {
-    driver.get().quit()
-})
+// suiteTeardown("close browser", async () => {
+//     driver.get().quit()
+// })
