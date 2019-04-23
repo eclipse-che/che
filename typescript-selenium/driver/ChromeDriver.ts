@@ -21,19 +21,16 @@ export class ChromeDriver implements Driver {
 
     constructor() {
         const isHeadless: boolean = TestConstants.TS_SELENIUM_HEADLESS;
-
+        let options: Options = new Options().addArguments('--no-sandbox')
 
         if (isHeadless) {
-            this.driver = new Builder()
-                .forBrowser('chrome')
-                .setChromeOptions(new Options().addArguments('--no-sandbox').addArguments('headless'))
-                .build();
-        } else {
-            this.driver = new Builder()
-                .forBrowser('chrome')
-                .setChromeOptions(new Options().addArguments('--no-sandbox'))
-                .build();
+            options = options.addArguments('headless')
         }
+
+        this.driver = new Builder()
+            .forBrowser('chrome')
+            .setChromeOptions(options)
+            .build();
 
         this.driver
             .manage()
