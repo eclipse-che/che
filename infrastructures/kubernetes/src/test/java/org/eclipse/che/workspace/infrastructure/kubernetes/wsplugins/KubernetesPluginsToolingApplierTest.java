@@ -263,7 +263,7 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   @Test
-  public void shouldUsePluginNameAndContainerNameForForMachinesNames() throws Exception {
+  public void shouldUsePluginNameAndContainerNameForMachinesNames() throws Exception {
     // given
     internalEnvironment.getMachines().clear();
 
