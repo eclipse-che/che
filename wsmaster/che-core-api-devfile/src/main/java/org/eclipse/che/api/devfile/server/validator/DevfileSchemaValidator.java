@@ -38,23 +38,23 @@ public class DevfileSchemaValidator {
   private static final JsonValidationService service = JsonValidationService.newInstance();
   private ObjectMapper yamlReader;
   private ObjectMapper jsonWriter;
-  private DevfileSchemaProvider schemaProvider;
+  private JsonSchema schema;
 
   @Inject
   public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
-    this.schemaProvider = schemaProvider;
     this.yamlReader = new ObjectMapper(new YAMLFactory());
     this.jsonWriter = new ObjectMapper();
+    try {
+      this.schema = service.readSchema(schemaProvider.getAsReader());
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to read devfile json schema for validation.", e);
+    }
   }
 
   public JsonNode validateBySchema(String yamlContent) throws DevfileFormatException {
-    JsonSchema schema;
     JsonNode contentNode;
     try {
-      schema = service.readSchema(schemaProvider.getAsReader());
       contentNode = yamlReader.readTree(yamlContent);
-
-      // Problem handler
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);
       try (JsonReader reader =
@@ -62,20 +62,18 @@ public class DevfileSchemaValidator {
               new StringReader(jsonWriter.writeValueAsString(contentNode)), schema, handler)) {
         reader.read();
       }
-      if (!validationErrors.isEmpty()) {
-        //        System.out.println(validationErrors);
-        String error = extractMessages(validationErrors, new StringBuilder());
-        throw new DevfileFormatException(
-            format("Devfile schema validation failed. Errors: %s", error));
+      if (validationErrors.isEmpty()) {
+        return contentNode;
       }
+      String error = extractMessages(validationErrors, new StringBuilder());
+      throw new DevfileFormatException(
+          format("Devfile schema validation failed. Error: %s", error));
     } catch (IOException e) {
       throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }
-    return contentNode;
   }
 
   private String extractMessages(List<Problem> validationErrors, StringBuilder messageBuilder) {
-
     for (Problem problem : validationErrors) {
       int branchCount = problem.countBranches();
       if (branchCount == 0) {
@@ -94,7 +92,9 @@ public class DevfileSchemaValidator {
   private String getMessage(Problem problem) {
     StringBuilder messageBuilder = new StringBuilder();
     if (!isNullOrEmpty(problem.getPointer())) {
-      messageBuilder.append("(").append(problem.getPointer()).append("):");
+      messageBuilder.append("(")
+                    .append(problem.getPointer())
+                    .append("):");
     }
     messageBuilder.append(problem.getMessage());
     return messageBuilder.toString();

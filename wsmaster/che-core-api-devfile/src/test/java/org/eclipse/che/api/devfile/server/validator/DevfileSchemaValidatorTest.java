@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
+import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -71,7 +72,7 @@ public class DevfileSchemaValidatorTest {
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),
-          expectedMessageRegexp,
+          format("Devfile schema validation failed. Error: %s", expectedMessageRegexp),
           "DevfileFormatException thrown with message that doesn't match expected pattern:");
       return;
     }
@@ -84,85 +85,84 @@ public class DevfileSchemaValidatorTest {
       // Devfile model testing
       {
         "devfile/devfile_missing_name.yaml",
-        "Devfile schema validation failed. Errors: The object must have a property whose name is \"name\"."
+        "The object must have a property whose name is \"name\"."
       },
       {
         "devfile/devfile_missing_spec_version.yaml",
-        "Devfile schema validation failed. Errors: The object must have a property whose name is \"specVersion\"."
+        "The object must have a property whose name is \"specVersion\"."
       },
       {
         "devfile/devfile_with_undeclared_field.yaml",
-        "Devfile schema validation failed. Errors: (/unknown):The object must not have a property whose name is \"unknown\"."
+        "(/unknown):The object must not have a property whose name is \"unknown\"."
       },
       // component model testing
       {
         "component/devfile_missing_component_type.yaml",
-        "Devfile schema validation failed. Errors: (/components/0):The object must have a property whose name is \"type\"."
-            + "(/components/0/id):The object must not have a property whose name is \"id\"."
-            + "At least one of the following sets of problems must be resolved.: [(/components/0):The object must have a property whose name is \"reference\"."
-            + "(/components/0):The object must have a property whose name is \"referenceContent\".]"
-            + "(/components/0/id):The object must not have a property whose name is \"id\".(/components/0):"
-            + "The object must have a property whose name is \"image\".(/components/0):The object must have a property whose name is \"memoryLimit\"."
+        "(/components/0):The object must have a property whose name is \"type\"."
+      },
+      {
+        "component/devfile_unknown_component_type.yaml",
+        "(/components/0/type):The value must be one of [\"cheEditor\", \"chePlugin\", \"kubernetes\", \"openshift\", \"dockerimage\"]."
       },
       {
         "component/devfile_component_with_undeclared_field.yaml",
-        "Devfile schema validation failed. Errors: (/components/0/unknown):The object must not have a property whose name is \"unknown\"."
+        "(/components/0/unknown):The object must not have a property whose name is \"unknown\"."
       },
       // Command model testing
       {
         "command/devfile_missing_command_name.yaml",
-        "Devfile schema validation failed. Errors: (/commands/0):The object must have a property whose name is \"name\"."
+        "(/commands/0):The object must have a property whose name is \"name\"."
       },
       {
         "command/devfile_missing_command_actions.yaml",
-        "Devfile schema validation failed. Errors: (/commands/0):The object must have a property whose name is \"actions\"."
+        "(/commands/0):The object must have a property whose name is \"actions\"."
       },
       {
         "command/devfile_multiple_commands_actions.yaml",
-        "Devfile schema validation failed. Errors: (/commands/0/actions):The array must have at most 1 element(s), but actual number is 2."
+        "(/commands/0/actions):The array must have at most 1 element(s), but actual number is 2."
       },
       // cheEditor/chePlugin component model testing
       {
         "editor_plugin_component/devfile_editor_component_with_missing_id.yaml",
-        "Devfile schema validation failed. Errors: (/components/0):The object must have a property whose name is \"id\"."
+        "(/components/0):The object must have a property whose name is \"id\"."
       },
       {
         "editor_plugin_component/devfile_editor_component_with_indistinctive_field_reference.yaml",
-        "Devfile schema validation failed. Errors: (/components/0/reference):The object must not have a property whose name is \"reference\"."
+        "(/components/0/reference):The object must not have a property whose name is \"reference\"."
       },
       {
         "editor_plugin_component/devfile_editor_component_without_version.yaml",
-        "Devfile schema validation failed. Errors: (/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\"."
+        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\"."
       },
       {
         "editor_plugin_component/devfile_editor_plugins_components_with_invalid_memory_limit.yaml",
-        "Devfile schema validation failed. Errors: (/components/0/memoryLimit):The value must be of string type, but actual type is integer."
+        "(/components/0/memoryLimit):The value must be of string type, but actual type is integer."
       },
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
-        "Devfile schema validation failed. Errors: (/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\"."
+        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\"."
       },
       // kubernetes/openshift component model testing
       {
         "kubernetes_openshift_component/devfile_openshift_component_with_missing_reference_and_referenceContent.yaml",
-        "Devfile schema validation failed. Errors: At least one of the following sets of problems must be resolved.: [(/components/0):The object must have a property whose name is \"reference\".(/components/0):The object must have a property whose name is \"referenceContent\".]"
+        "At least one of the following sets of problems must be resolved.: [(/components/0):The object must have a property whose name is \"reference\".(/components/0):The object must have a property whose name is \"referenceContent\".]"
       },
       {
         "kubernetes_openshift_component/devfile_openshift_component_with_indistinctive_field_id.yaml",
-        "Devfile schema validation failed. Errors: (/components/0/id):The object must not have a property whose name is \"id\"."
+        "(/components/0/id):The object must not have a property whose name is \"id\"."
       },
       // Dockerimage component model testing
       {
         "dockerimage_component/devfile_dockerimage_component_with_missing_image.yaml",
-        "Devfile schema validation failed. Errors: (/components/0):The object must have a property whose name is \"image\"."
+        "(/components/0):The object must have a property whose name is \"image\"."
       },
       {
         "dockerimage_component/devfile_dockerimage_component_with_missing_memory_limit.yaml",
-        "Devfile schema validation failed. Errors: (/components/0):The object must have a property whose name is \"memoryLimit\"."
+        "(/components/0):The object must have a property whose name is \"memoryLimit\"."
       },
       {
         "dockerimage_component/devfile_dockerimage_component_with_indistinctive_field_selector.yaml",
-        "Devfile schema validation failed. Errors: (/components/0/selector):The object must not have a property whose name is \"selector\"."
+        "(/components/0/selector):The object must not have a property whose name is \"selector\"."
       },
     };
   }
