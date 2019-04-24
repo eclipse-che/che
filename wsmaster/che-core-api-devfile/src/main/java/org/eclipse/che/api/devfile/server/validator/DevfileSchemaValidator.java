@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -39,11 +38,13 @@ public class DevfileSchemaValidator {
   private ObjectMapper yamlReader;
   private ObjectMapper jsonWriter;
   private JsonSchema schema;
+  private ErrorMessageComposer errorMessageComposer;
 
   @Inject
   public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
     this.yamlReader = new ObjectMapper(new YAMLFactory());
     this.jsonWriter = new ObjectMapper();
+    this.errorMessageComposer = new ErrorMessageComposer();
     try {
       this.schema = service.readSchema(schemaProvider.getAsReader());
     } catch (IOException e) {
@@ -65,38 +66,11 @@ public class DevfileSchemaValidator {
       if (validationErrors.isEmpty()) {
         return contentNode;
       }
-      String error = extractMessages(validationErrors, new StringBuilder());
+      String error = errorMessageComposer.extractMessages(validationErrors, new StringBuilder());
       throw new DevfileFormatException(
           format("Devfile schema validation failed. Error: %s", error));
     } catch (IOException e) {
       throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }
-  }
-
-  private String extractMessages(List<Problem> validationErrors, StringBuilder messageBuilder) {
-    for (Problem problem : validationErrors) {
-      int branchCount = problem.countBranches();
-      if (branchCount == 0) {
-        messageBuilder.append(getMessage(problem));
-      } else {
-        messageBuilder.append(problem.getMessage()).append(": [");
-        for (int i = 0; i < branchCount; i++) {
-          extractMessages(problem.getBranch(i), messageBuilder);
-        }
-        messageBuilder.append("]");
-      }
-    }
-    return messageBuilder.toString();
-  }
-
-  private String getMessage(Problem problem) {
-    StringBuilder messageBuilder = new StringBuilder();
-    if (!isNullOrEmpty(problem.getPointer())) {
-      messageBuilder.append("(")
-                    .append(problem.getPointer())
-                    .append("):");
-    }
-    messageBuilder.append(problem.getMessage());
-    return messageBuilder.toString();
   }
 }

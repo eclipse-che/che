@@ -30,7 +30,6 @@
     "specVersion",
     "name"
   ],
-  "additionalProperties": false,
   "properties": {
     "specVersion": {
       "type": "string",
@@ -127,7 +126,8 @@
             "type": "string",
             "description": "The path relative to the root of the projects to which this project should be cloned into. This is a unix-style relative path (i.e. uses forward slashes). The path is invalid if it is absolute or tries to escape the project root through the usage of '..'. If not specified, defaults to the project name."
           }
-        }
+        },
+        "additionalProperties": false
       }
     },
     "components": {
@@ -185,10 +185,10 @@
                     ]
                   }
                 },
+                "additionalProperties": false,
                 "required": [
                   "id"
-                ],
-                "additionalProperties": false
+                ]
               }
             },
             {
@@ -203,7 +203,6 @@
                 }
               },
               "then": {
-                "additionalProperties": false,
                 "properties": {
                   "type": {},
                   "alias": {},
@@ -271,6 +270,7 @@
                     }
                   }
                 },
+                "additionalProperties": false,
                 "anyOf": [
                   {
                     "required": [
@@ -302,7 +302,6 @@
                   "image",
                   "memoryLimit"
                 ],
-                "additionalProperties": false,
                 "properties": {
                   "type": {},
                   "alias": {},
@@ -453,7 +452,8 @@
                       }
                     }
                   }
-                }
+                },
+                "additionalProperties": false
               }
             }
           ]
@@ -573,5 +573,6 @@
       },
       "javaType": "java.util.Map<String, String>"
     }
-  }
+  },
+  "additionalProperties": false
 }
