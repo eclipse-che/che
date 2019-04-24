@@ -72,7 +72,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   @Test
   public void factoryWithDirectUrlWithSpecificBranch() {
     String repositoryName = testAuxiliaryRepo.getName();
-    final String wsTheiaIdeTerminalTitle = "che-workspace-pod/theia-ide terminal 0";
+    final String wsTheiaIdeTerminalTitle = "theia-ide terminal 0";
     List<String> expectedItemsAfterCloning = Arrays.asList("my-lib", "my-webapp", "src", "pom.xml");
 
     testFactoryWithSpecificBranch.authenticateAndOpen();
@@ -98,7 +98,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
         });
 
     // check specific branch
-    openTerminalByProposal("che-workspace-pod/theia-ide");
+    openTerminalByProposal("theia-ide");
     theiaTerminal.waitTab(wsTheiaIdeTerminalTitle);
     theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
     theiaTerminal.performCommand("cd " + repositoryName);

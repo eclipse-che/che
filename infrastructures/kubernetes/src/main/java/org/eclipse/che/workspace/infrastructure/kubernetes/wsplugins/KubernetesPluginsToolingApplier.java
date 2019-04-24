@@ -200,7 +200,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
     Container k8sContainer = k8sContainerResolver.resolve();
 
-    String machineName = Names.machineName(pod, k8sContainer);
+    String machineName = k8sContainer.getName();
+    Names.putMachineName(pod.getMetadata(), k8sContainer.getName(), machineName);
     pod.getSpec().getContainers().add(k8sContainer);
 
     MachineResolver machineResolver =

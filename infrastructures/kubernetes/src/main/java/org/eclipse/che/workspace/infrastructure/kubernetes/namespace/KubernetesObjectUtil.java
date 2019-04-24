@@ -72,6 +72,11 @@ public class KubernetesObjectUtil {
       target.setMetadata(metadata = new ObjectMeta());
     }
 
+    putAnnotation(metadata, key, value);
+  }
+
+  /** Adds annotation to target ObjectMeta object. */
+  public static void putAnnotation(ObjectMeta metadata, String key, String value) {
     Map<String, String> annotations = metadata.getAnnotations();
     if (annotations == null) {
       metadata.setAnnotations(annotations = new HashMap<>());
