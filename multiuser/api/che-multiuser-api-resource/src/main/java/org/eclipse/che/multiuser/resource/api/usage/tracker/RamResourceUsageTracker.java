@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Pages;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.workspace.server.SidecarToolingWorkspaceUtil;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -33,6 +34,8 @@ import org.eclipse.che.multiuser.resource.api.ResourceUsageTracker;
 import org.eclipse.che.multiuser.resource.api.type.RamResourceType;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Tracks usage of {@link RamResourceType} resource.
@@ -42,6 +45,8 @@ import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
  */
 @Singleton
 public class RamResourceUsageTracker implements ResourceUsageTracker {
+  private static final Logger LOG = LoggerFactory.getLogger(RamResourceUsageTracker.class);
+
   private final Provider<WorkspaceManager> workspaceManagerProvider;
   private final AccountManager accountManager;
   private final EnvironmentRamCalculator environmentRamCalculator;
@@ -81,9 +86,18 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
           if (startingEnvironment != null) {
             currentlyUsedRamMB += environmentRamCalculator.calculate(startingEnvironment);
           }
+          if (SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(config.getAttributes())) {
+            LOG.warn(
+                "Sidecar based workspace `{}` is starting, memory of its plugins is not taken in "
+                    + "account while workspace is starting. Set memory resources limits may work incorrectly");
+          }
+        } else {
+          // Estimation of memory for starting workspace with Devfile is not implemented yet
+          // just ignore such
+          LOG.warn(
+              "Devfile based workspace `{}` is starting, its memory is not taken in account "
+                  + "while workspace is starting. Set memory resources limits may work incorrectly");
         }
-        // Estimation of memory for starting workspace with Devfile is not implemented yet
-        // just ignore such
       } else {
         currentlyUsedRamMB += environmentRamCalculator.calculate(activeWorkspace.getRuntime());
       }

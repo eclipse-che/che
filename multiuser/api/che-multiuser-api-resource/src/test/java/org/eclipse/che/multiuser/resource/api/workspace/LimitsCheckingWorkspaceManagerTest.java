@@ -70,7 +70,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     String envToStart = config.getDefaultEnv();
 
     // when
-    manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, envToStart);
+    manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, "ws123", config, envToStart);
 
     // then
     verify(environmentRamCalculator).calculate(config.getEnvironments().get(envToStart));
@@ -95,7 +95,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     WorkspaceConfig config = createConfig("3gb");
 
     // when
-    manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, null);
+    manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, "ws123", config, null);
 
     // then
     verify(environmentRamCalculator)
@@ -137,7 +137,7 @@ public class LimitsCheckingWorkspaceManagerTest {
     WorkspaceConfig config = createConfig("3gb");
 
     // when
-    manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, config, null);
+    manager.checkRamResourcesAvailability(ACCOUNT_ID, NAMESPACE, "ws123", config, null);
   }
 
   @Test
@@ -227,7 +227,7 @@ public class LimitsCheckingWorkspaceManagerTest {
             .setEnvironmentRamCalculator(environmentRamCalculator)
             .build();
 
-    manager.checkMaxEnvironmentRam(config);
+    manager.checkMaxEnvironmentRam("ws123", config);
   }
 
   @Test
@@ -239,7 +239,7 @@ public class LimitsCheckingWorkspaceManagerTest {
             .setEnvironmentRamCalculator(environmentRamCalculator)
             .build();
 
-    manager.checkMaxEnvironmentRam(config);
+    manager.checkMaxEnvironmentRam("ws123", config);
 
     verify(environmentRamCalculator, never()).calculate(any(Environment.class));
   }

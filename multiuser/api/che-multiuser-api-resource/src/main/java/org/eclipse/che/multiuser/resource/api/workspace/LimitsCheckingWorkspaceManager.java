@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
+import org.eclipse.che.api.workspace.server.SidecarToolingWorkspaceUtil;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
@@ -50,8 +51,11 @@ import org.eclipse.che.multiuser.resource.api.type.WorkspaceResourceType;
 import org.eclipse.che.multiuser.resource.api.usage.ResourceManager;
 import org.eclipse.che.multiuser.resource.api.usage.ResourcesLocks;
 import org.eclipse.che.multiuser.resource.api.usage.tracker.EnvironmentRamCalculator;
+import org.eclipse.che.multiuser.resource.api.usage.tracker.RamResourceUsageTracker;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manager that checks limits and delegates all its operations to the {@link WorkspaceManager}.
@@ -64,6 +68,8 @@ import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
  */
 @Singleton
 public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
+
+  private static final Logger LOG = LoggerFactory.getLogger(RamResourceUsageTracker.class);
 
   private final EnvironmentRamCalculator environmentRamCalculator;
   private final ResourceManager resourceManager;
@@ -99,7 +105,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   public WorkspaceImpl createWorkspace(
       WorkspaceConfig config, String namespace, @Nullable Map<String, String> attributes)
       throws ServerException, ConflictException, NotFoundException, ValidationException {
-    checkMaxEnvironmentRam(config);
+    // workspace is not created yet, id is null
+    checkMaxEnvironmentRam(null, config);
     String accountId = accountManager.getByName(namespace).getId();
     try (@SuppressWarnings("unused")
         Unlocker u = resourcesLocks.lock(accountId)) {
@@ -121,7 +128,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         Unlocker u = resourcesLocks.lock(accountId)) {
       checkRuntimeResourceAvailability(accountId);
       if (config != null) {
-        checkRamResourcesAvailability(accountId, workspace.getNamespace(), config, envName);
+        checkRamResourcesAvailability(accountId, workspace.getNamespace(), workspace, envName);
       }
 
       return super.startWorkspace(workspaceId, envName, options);
@@ -132,16 +139,15 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   public WorkspaceImpl startWorkspace(
       WorkspaceConfig config, String namespace, boolean isTemporary, Map<String, String> options)
       throws ServerException, NotFoundException, ConflictException, ValidationException {
-    checkMaxEnvironmentRam(config);
-
     String accountId = accountManager.getByName(namespace).getId();
+    WorkspaceImpl workspace = getWorkspace(config.getName(), namespace);
+
+    checkMaxEnvironmentRam(workspace);
     try (@SuppressWarnings("unused")
         Unlocker u = resourcesLocks.lock(accountId)) {
       checkWorkspaceResourceAvailability(accountId);
       checkRuntimeResourceAvailability(accountId);
-      if (config != null) {
-        checkRamResourcesAvailability(accountId, namespace, config, null);
-      }
+      checkRamResourcesAvailability(accountId, namespace, workspace.getId(), config, null);
 
       return super.startWorkspace(config, namespace, isTemporary, options);
     }
@@ -150,9 +156,7 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   @Override
   public WorkspaceImpl updateWorkspace(String id, Workspace update)
       throws ConflictException, ServerException, NotFoundException, ValidationException {
-    if (update.getConfig() != null) {
-      checkMaxEnvironmentRam(update.getConfig());
-    }
+    checkMaxEnvironmentRam(update);
 
     WorkspaceImpl workspace = this.getWorkspace(id);
     String accountId = workspace.getAccount().getId();
@@ -165,13 +169,32 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   }
 
   @VisibleForTesting
-  void checkMaxEnvironmentRam(WorkspaceConfig config) throws ServerException {
+  void checkMaxEnvironmentRam(Workspace workspace) throws ServerException {
+    if (workspace.getConfig() != null) {
+      checkMaxEnvironmentRam(workspace.getId(), workspace.getConfig());
+    } else {
+      LOG.warn(
+          "Can not estimate memory needed for devfile based workspace {}. Set environment memory limits may work incorrectly",
+          workspace.getId());
+    }
+  }
+
+  @VisibleForTesting
+  void checkMaxEnvironmentRam(@Nullable String workspaceId, WorkspaceConfig config)
+      throws ServerException {
     if (maxRamPerEnvMB < 0) {
       return;
     }
     if (config.getEnvironments().isEmpty()) {
       return;
     }
+
+    if (SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(config.getAttributes())) {
+      LOG.warn(
+          "Can not estimate memory needed for sidecar based workspace{}. Set environment memory limits may work incorrectly",
+          workspaceId == null ? "" : ' ' + workspaceId);
+    }
+
     for (Map.Entry<String, ? extends Environment> envEntry : config.getEnvironments().entrySet()) {
       Environment env = envEntry.getValue();
       final long workspaceRam = environmentRamCalculator.calculate(env);
@@ -193,11 +216,37 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
   @VisibleForTesting
   void checkRamResourcesAvailability(
-      String accountId, String namespace, WorkspaceConfig config, @Nullable String envName)
+      String accountId, String namespace, Workspace workspace, @Nullable String envName)
+      throws NotFoundException, ServerException, ConflictException {
+    if (workspace.getConfig() != null) {
+      checkRamResourcesAvailability(
+          accountId, namespace, workspace.getId(), workspace.getConfig(), envName);
+    } else {
+      LOG.warn(
+          "Can not estimate memory needed for devfile based workspace {}. Set memory resources limits may work incorrectly",
+          workspace.getId());
+    }
+  }
+
+  @VisibleForTesting
+  void checkRamResourcesAvailability(
+      String accountId,
+      String namespace,
+      String workspaceId,
+      WorkspaceConfig config,
+      @Nullable String envName)
       throws NotFoundException, ServerException, ConflictException {
     if (config.getEnvironments().isEmpty()) {
       return;
     }
+
+    if (SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(config.getAttributes())) {
+      LOG.warn(
+          "Sidecar memory of plugins of workspace `{}` is not taken in account. "
+              + "Set memory resources limits may work incorrectly",
+          workspaceId);
+    }
+
     final Environment environment =
         config.getEnvironments().get(firstNonNull(envName, config.getDefaultEnv()));
     final ResourceImpl ramToUse =

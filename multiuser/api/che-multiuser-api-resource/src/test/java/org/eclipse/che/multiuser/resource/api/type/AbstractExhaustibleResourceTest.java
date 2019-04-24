@@ -141,7 +141,7 @@ public class AbstractExhaustibleResourceTest {
     resourceType.aggregate(resourceA, resourceB);
   }
 
-  @DataProvider(name = "resources")
+  @DataProvider(name = "getResources")
   public Object[][] getResources() {
     return new Object[][] {
       {
