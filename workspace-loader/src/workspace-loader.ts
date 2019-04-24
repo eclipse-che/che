@@ -215,7 +215,7 @@ export class WorkspaceLoader {
                         this.checkWorkspaceRuntime().then(resolve, reject);
                     } else if (message.status === 'STOPPED') {
                         if (message.prevStatus == 'STARTING') {
-                            this.loader.error('Workspace unexpected stopped during starting phase.');
+                            this.loader.error('Workspace stopped.');
                             this.loader.hideLoader();
                             this.loader.showReload();
                         }

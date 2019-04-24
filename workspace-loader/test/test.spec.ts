@@ -518,7 +518,7 @@ describe('Workspace Loader', () => {
             });
 
             it('should log error', () => {
-                expect(loader.error).toBeCalledWith("Workspace unexpected stopped during starting phase.");
+                expect(loader.error).toBeCalledWith("Workspace stopped.");
             });
 
             it('should hide loader', () => {
