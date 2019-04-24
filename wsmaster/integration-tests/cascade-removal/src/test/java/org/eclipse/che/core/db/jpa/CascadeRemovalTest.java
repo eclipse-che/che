@@ -67,6 +67,7 @@ import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
+import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
@@ -239,6 +240,14 @@ public class CascadeRemovalTest {
                 install(new WorkspaceActivityModule());
                 install(new JpaKubernetesRuntimeCacheModule());
                 bind(WorkspaceManager.class);
+
+                // is not used in a scope of integration tests
+                // but instance is needed for setting WorkspaceManager up
+                bind(DevfileToWorkspaceConfigConverter.class)
+                    .toInstance(
+                        devfile -> {
+                          throw new UnsupportedOperationException("Operation is not implemented");
+                        });
 
                 RuntimeInfrastructure infra = mock(RuntimeInfrastructure.class);
                 doReturn(emptySet()).when(infra).getRecipeTypes();

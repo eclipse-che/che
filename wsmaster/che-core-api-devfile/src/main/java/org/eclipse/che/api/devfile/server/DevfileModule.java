@@ -22,6 +22,7 @@ import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
+import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.devfile.server.convert.component.dockerimage.DockerimageComponentProvisioner;
@@ -33,6 +34,7 @@ import org.eclipse.che.api.devfile.server.convert.component.kubernetes.Kubernete
 import org.eclipse.che.api.devfile.server.convert.component.plugin.PluginComponentToWorkspaceApplier;
 import org.eclipse.che.api.devfile.server.convert.component.plugin.PluginProvisioner;
 import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
+import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
 
 /** @author Sergii Leshchenko */
 public class DevfileModule extends AbstractModule {
@@ -66,5 +68,7 @@ public class DevfileModule extends AbstractModule {
     componentToWorkspaceApplier
         .addBinding(DOCKERIMAGE_COMPONENT_TYPE)
         .to(DockerimageComponentToWorkspaceApplier.class);
+
+    bind(DevfileToWorkspaceConfigConverter.class).to(DevfileConverter.class);
   }
 }

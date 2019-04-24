@@ -156,8 +156,7 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommand.getType(), "custom");
     assertEquals(
         envCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), pluginCommand.getWorkingDir());
-    assertEquals(
-        envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), POD_NAME + "/plugin-container");
+    assertEquals(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "plugin-container");
   }
 
   @Test
@@ -181,8 +180,7 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommand.getType(), pluginCommand.getType());
     assertEquals(envCommand.getCommandLine(), pluginCommand.getCommandLine());
     assertEquals(envCommand.getAttributes().get("plugin"), pluginRef);
-    assertEquals(
-        envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), POD_NAME + "/plugin-container");
+    assertEquals(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "plugin-container");
   }
 
   @Test
@@ -262,6 +260,24 @@ public class KubernetesPluginsToolingApplierTest {
 
     // then
     assertTrue(internalEnvironment.getWarnings().isEmpty());
+  }
+
+  @Test
+  public void shouldUsePluginNameAndContainerNameForMachinesNames() throws Exception {
+    // given
+    internalEnvironment.getMachines().clear();
+
+    ChePlugin chePlugin1 = createChePlugin("plugin1", createContainer("container1"));
+    ChePlugin chePlugin2 = createChePlugin("plugin2", createContainer("container2"));
+
+    // when
+    applier.apply(runtimeIdentity, internalEnvironment, asList(chePlugin1, chePlugin2));
+
+    // then
+    Map<String, InternalMachineConfig> machines = internalEnvironment.getMachines();
+    assertEquals(machines.size(), 2);
+    assertTrue(machines.containsKey("plugin1-container1"));
+    assertTrue(machines.containsKey("plugin2-container2"));
   }
 
   @Test(
