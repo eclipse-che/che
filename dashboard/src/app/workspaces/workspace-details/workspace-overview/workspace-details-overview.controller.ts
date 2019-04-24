@@ -49,7 +49,7 @@ export class WorkspaceDetailsOverviewController {
   private inputmodel: ng.INgModelController;
   private isLoading: boolean;
   private isEphemeralMode: boolean;
-  private attributesCopy: {[attrName: string]: string};
+  private attributesCopy: che.IWorkspaceConfigAttributes;
 
   /**
    * Default constructor that is using resource
@@ -71,7 +71,7 @@ export class WorkspaceDetailsOverviewController {
     this.namespaceId = routeParams.namespace;
     this.workspaceName = routeParams.workspaceName;
 
-    this.isEphemeralMode = this.workspaceDetails && this.workspaceDetails.config && this.workspaceDetails.config.attributes && this.workspaceDetails.config.attributes.persistVolumes ? JSON.parse(this.workspaceDetails.config.attributes.persistVolumes) : false;
+    this.isEphemeralMode = this.workspaceDetails && this.workspaceDetails.config && this.workspaceDetails.config.attributes && this.workspaceDetails.config.attributes.persistVolumes ? !JSON.parse(this.workspaceDetails.config.attributes.persistVolumes) : false;
     this.attributesCopy = angular.copy(this.workspaceDetails.config.attributes);
 
     this.fillInListOfUsedNames();
@@ -267,10 +267,10 @@ export class WorkspaceDetailsOverviewController {
    */
   onEphemeralModeChange(): void {
     if (this.isEphemeralMode) {
-      this.workspaceDetails.config.attributes.persistVolumes = 'true';
+      this.workspaceDetails.config.attributes.persistVolumes = 'false';
     } else {
       if (this.attributesCopy.persistVolumes) {
-        this.workspaceDetails.config.attributes.persistVolumes = 'false';
+        this.workspaceDetails.config.attributes.persistVolumes = 'true';
       } else {
         delete this.workspaceDetails.config.attributes.persistVolumes;
       }

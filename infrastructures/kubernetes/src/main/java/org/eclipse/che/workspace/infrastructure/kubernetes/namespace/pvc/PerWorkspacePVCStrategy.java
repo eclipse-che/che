@@ -46,6 +46,7 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
   private final String pvcNamePrefix;
   private final String pvcAccessMode;
   private final String pvcQuantity;
+  private final String pvcStorageClassName;
 
   @Inject
   public PerWorkspacePVCStrategy(
@@ -53,6 +54,7 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
       @Named("che.infra.kubernetes.pvc.quantity") String pvcQuantity,
       @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
       @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
+      @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       PVCSubPathHelper pvcSubPathHelper,
       KubernetesNamespaceFactory factory,
       EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
@@ -64,6 +66,7 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
         pvcQuantity,
         pvcAccessMode,
         preCreateDirs,
+        pvcStorageClassName,
         pvcSubPathHelper,
         factory,
         ephemeralWorkspaceAdapter,
@@ -74,13 +77,15 @@ public class PerWorkspacePVCStrategy extends CommonPVCStrategy {
     this.factory = factory;
     this.pvcAccessMode = pvcAccessMode;
     this.pvcQuantity = pvcQuantity;
+    this.pvcStorageClassName = pvcStorageClassName;
   }
 
   @Override
   protected PersistentVolumeClaim createCommonPVC(String workspaceId) {
     String pvcName = pvcNamePrefix + '-' + workspaceId;
 
-    PersistentVolumeClaim perWorkspacePVC = newPVC(pvcName, pvcAccessMode, pvcQuantity);
+    PersistentVolumeClaim perWorkspacePVC =
+        newPVC(pvcName, pvcAccessMode, pvcQuantity, pvcStorageClassName);
     perWorkspacePVC.getMetadata().getLabels().put(CHE_WORKSPACE_ID_LABEL, workspaceId);
     return perWorkspacePVC;
   }

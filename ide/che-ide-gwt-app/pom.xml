@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.19.0-SNAPSHOT</version>
+        <version>7.0.0-beta-4.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>che-ide-gwt-app</artifactId>
@@ -198,7 +198,7 @@
                             <tasks>
                                 <echo append="false" file="${project.build.directory}/classes/org/eclipse/che/ide/ext/help/client/BuildInfo.properties">revision = ${revision}
                                     buildTime = ${timestamp}
-                                    version = ${project.version}</echo>
+                                    version = ${build.info}</echo>
                             </tasks>
                         </configuration>
                     </execution>

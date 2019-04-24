@@ -30,12 +30,13 @@ import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
 import org.eclipse.che.api.core.rest.MessageBodyAdapterInterceptor;
-import org.eclipse.che.api.devfile.server.DevfileService;
-import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
+import org.eclipse.che.api.deploy.jsonrpc.CheJsonRpcWebSocketConfigurationModule;
+import org.eclipse.che.api.devfile.server.DevfileModule;
 import org.eclipse.che.api.factory.server.FactoryAcceptValidator;
 import org.eclipse.che.api.factory.server.FactoryCreateValidator;
 import org.eclipse.che.api.factory.server.FactoryEditValidator;
 import org.eclipse.che.api.factory.server.FactoryParametersResolver;
+import org.eclipse.che.api.factory.server.github.GithubFactoryParametersResolver;
 import org.eclipse.che.api.installer.server.InstallerModule;
 import org.eclipse.che.api.installer.server.impl.InstallersProvider;
 import org.eclipse.che.api.installer.shared.model.Installer;
@@ -78,6 +79,7 @@ import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
 import org.eclipse.che.commons.auth.token.RequestTokenExtractor;
 import org.eclipse.che.core.db.DBTermination;
 import org.eclipse.che.core.db.schema.SchemaInitializer;
+import org.eclipse.che.core.tracing.metrics.TracingMetricsModule;
 import org.eclipse.che.inject.DynaModule;
 import org.eclipse.che.mail.template.ST.STTemplateProcessorImpl;
 import org.eclipse.che.mail.template.TemplateProcessor;
@@ -91,7 +93,6 @@ import org.eclipse.che.multiuser.organization.api.OrganizationApiModule;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
 import org.eclipse.che.multiuser.permission.user.UserServicePermissionsFilter;
 import org.eclipse.che.multiuser.resource.api.ResourceModule;
-import org.eclipse.che.plugin.github.factory.resolver.GithubFactoryParametersResolver;
 import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
@@ -158,8 +159,7 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.user.server.PreferencesService.class);
     bind(org.eclipse.che.security.oauth.OAuthAuthenticationService.class);
 
-    bind(DevfileSchemaValidator.class);
-    bind(DevfileService.class);
+    install(new DevfileModule());
 
     MapBinder<String, String> stacks =
         MapBinder.newMapBinder(
@@ -281,16 +281,24 @@ public class WsMasterModule extends AbstractModule {
       install(new LocalDockerModule());
       install(new DockerInfraModule());
     }
+    install(new CheJsonRpcWebSocketConfigurationModule());
 
     bind(org.eclipse.che.api.user.server.AppStatesPreferenceCleaner.class);
     MapBinder.newMapBinder(binder(), String.class, ChePluginsApplier.class);
 
     if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))) {
       install(new org.eclipse.che.core.tracing.TracingModule());
+    } else {
+      install(new org.eclipse.che.core.tracing.NopTracingModule());
     }
     if (Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
       install(new org.eclipse.che.core.metrics.MetricsModule());
       install(new WsMasterMetricsModule());
+      install(new MetricsOverrideBinding());
+    }
+    if (Boolean.valueOf(System.getenv("CHE_TRACING_ENABLED"))
+        && Boolean.valueOf(System.getenv("CHE_METRICS_ENABLED"))) {
+      install(new TracingMetricsModule());
     }
   }
 

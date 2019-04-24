@@ -13,10 +13,10 @@
 ---
 specVersion: 0.0.1
 name: petclinic-dev-environment
-tools:
-  - name: mysql
+components:
+  - alias: mysql
     type: openshift
-    local: petclinic.yaml
+    reference: petclinic.yaml
     selector:
       app.kubernetes.io/name: mysql
       app.kubernetes.io/component: database
@@ -25,10 +25,10 @@ commands:
   - name: build
     actions:
       - type: exec
-        tool: mysql
+        component: mysql
         command: mvn clean
         workdir: /projects/spring-petclinic
       - type: exec
-        tool: mysql
+        component: mysql
         command: mvn package
         workdir: /projects/spring-petclinic

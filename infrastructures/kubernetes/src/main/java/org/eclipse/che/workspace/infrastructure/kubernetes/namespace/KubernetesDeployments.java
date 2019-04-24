@@ -19,6 +19,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_RUNNING;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.POD_STATUS_PHASE_SUCCEEDED;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.putLabel;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.setSelector;
 
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.DoneablePod;
@@ -159,7 +160,7 @@ public class KubernetesDeployments {
     putLabel(podMeta, CHE_DEPLOYMENT_NAME_LABEL, deployment.getMetadata().getName());
     putLabel(deployment.getMetadata(), CHE_WORKSPACE_ID_LABEL, workspaceId);
     // Match condition for a deployment is an AND of all labels
-    deployment.getSpec().getSelector().setMatchLabels(podMeta.getLabels());
+    setSelector(deployment, podMeta.getLabels());
     // Avoid accidental setting of multiple replicas
     deployment.getSpec().setReplicas(1);
 
@@ -461,7 +462,9 @@ public class KubernetesDeployments {
   }
 
   /**
-   * Registers a specified handler for handling events about changes in pods containers.
+   * Registers a specified handler for handling events about changes in pods containers. Registering
+   * several handlers doesn't create multiple websocket connections, so it is efficient to call this
+   * method several times instead of using composite handler to combine other handlers.
    *
    * @param handler pod container events handler
    * @throws InfrastructureException if any error occurs while watcher starting

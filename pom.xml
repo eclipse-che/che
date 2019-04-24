@@ -17,11 +17,11 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>6.19.0-SNAPSHOT</version>
+        <version>7.0.0-beta-4.0-SNAPSHOT</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>6.19.0-SNAPSHOT</version>
+    <version>7.0.0-beta-4.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -48,11 +48,12 @@
         <url>https://github.com/eclipse/che</url>
     </scm>
     <properties>
-        <che.dashboard.version>6.19.0-SNAPSHOT</che.dashboard.version>
-        <che.docs.version>6.19.0-SNAPSHOT</che.docs.version>
-        <che.lib.version>6.19.0-SNAPSHOT</che.lib.version>
+        <build.info>${project.version}</build.info>
+        <che.dashboard.version>7.0.0-beta-4.0-SNAPSHOT</che.dashboard.version>
+        <che.docs.version>7.0.0-beta-4.0-SNAPSHOT</che.docs.version>
+        <che.lib.version>7.0.0-beta-4.0-SNAPSHOT</che.lib.version>
         <che.ls.jdt.version>0.0.3</che.ls.jdt.version>
-        <che.version>6.19.0-SNAPSHOT</che.version>
+        <che.version>7.0.0-beta-4.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -293,6 +294,11 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-auth-github</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-api-auth-shared</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -354,6 +360,11 @@
                 <artifactId>che-core-api-factory</artifactId>
                 <version>${che.version}</version>
                 <classifier>tests</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-api-factory-github</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
@@ -781,6 +792,11 @@
             <dependency>
                 <groupId>org.eclipse.che.core</groupId>
                 <artifactId>che-core-tracing-core</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.che.core</groupId>
+                <artifactId>che-core-tracing-metrics</artifactId>
                 <version>${che.version}</version>
             </dependency>
             <dependency>
@@ -1337,11 +1353,6 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-github-factory-resolver</artifactId>
-                <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
                 <artifactId>che-plugin-github-ide</artifactId>
                 <version>${che.version}</version>
             </dependency>
@@ -1350,11 +1361,6 @@
                 <artifactId>che-plugin-github-ide</artifactId>
                 <version>${che.version}</version>
                 <type>gwt-lib</type>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.che.plugin</groupId>
-                <artifactId>che-plugin-github-oauth2</artifactId>
-                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.plugin</groupId>

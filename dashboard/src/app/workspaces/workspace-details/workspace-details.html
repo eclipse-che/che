@@ -58,31 +58,13 @@
     </md-tab>
 
     <!-- Machines tab -->
-    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Machines);">
+    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Containers);">
       <md-tab-label>
-        <span class="che-tab-label-title">Machines</span>
+        <span class="che-tab-label-title">Containers</span>
       </md-tab-label>
       <md-tab-body>
         <workspace-machines workspace-details="workspaceDetailsController.workspaceDetails"
                             on-change="workspaceDetailsController.checkEditMode(true)"></workspace-machines>
-      </md-tab-body>
-    </md-tab>
-
-    <!-- Installers tab -->
-    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Installers);">
-      <md-tab-label>
-        <i ng-show="workspaceDetailsController.isSwitchToPlugins()"
-          class="warning-state fa fa-exclamation-triangle" aria-hidden="true"></i>
-        <span class="che-tab-label-title">Installers</span>
-      </md-tab-label>
-      <md-tab-body>
-        <che-machine-selector content-title="Workspace Installers"
-                              workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode(true)">
-          <che-machine-agents selected-machine="machine"
-                              is-plugins-enabled="workspaceDetailsController.isPluginsEnabled()"
-                              on-change="onChange()"></che-machine-agents>
-        </che-machine-selector>
       </md-tab-body>
     </md-tab>
 
@@ -165,24 +147,6 @@
       </md-tab-body>
     </md-tab>
 
-    <!-- Tools Tab -->
-    <md-tab md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Tools);">
-      <md-tab-label>
-        <span class="che-tab-label-title">Tools</span>
-      </md-tab-label>
-      <md-tab-body>
-        <che-machine-selector content-title="Configuration"
-                              workspace-details="workspaceDetailsController.workspaceDetails"
-                              on-change="workspaceDetailsController.checkEditMode(true)"
-                              filter="workspaceDetailsController.toolsFilter">
-          <workspace-details-tools selected-machine="machine"
-                                   on-change="onChange()"
-                                   environment-manager="environmentManager">
-          </workspace-details-tools>
-        </che-machine-selector>
-      </md-tab-body>
-    </md-tab>
-
     <!-- Plugins tab -->
     <md-tab ng-if="workspaceDetailsController.pluginRegistry"
       md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Plugins);">
@@ -194,6 +158,20 @@
                            plugin-registry-location="workspaceDetailsController.pluginRegistry"
                            on-change="workspaceDetailsController.checkEditMode(true)">
         </workspace-plugins>
+      </md-tab-body>
+    </md-tab>
+
+    <!-- Editors tab -->
+    <md-tab ng-if="workspaceDetailsController.pluginRegistry"
+      md-on-select="workspaceDetailsController.onSelectTab(workspaceDetailsController.tab.Editors);">
+      <md-tab-label>
+        <span class="che-tab-label-title">Editors</span>
+      </md-tab-label>
+      <md-tab-body>
+        <workspace-editors workspace-config="workspaceDetailsController.workspaceDetails.config"
+                           plugin-registry-location="workspaceDetailsController.pluginRegistry"
+                           on-change="workspaceDetailsController.checkEditMode(true)">
+        </workspace-editors>
       </md-tab-body>
     </md-tab>
 

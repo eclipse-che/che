@@ -42,6 +42,7 @@ global:
     useCertManager: true
     useStaging: true
     secretName: che-tls
+    useSelfSignedCerts: false
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"
@@ -57,6 +58,11 @@ global:
     appenderName: "plaintext"
   tracingEnabled: false
   metricsEnabled: false
+  # Run Che and Che workspaces as the same non-root user
+  securityContext:
+    runAsUser: 1724
+    fsGroup: 1724
+  postgresDebugLogs: false
 
 prometheus:
   alertmanager:

@@ -11,6 +11,9 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -21,7 +24,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.json.JsonReader;
-import org.eclipse.che.api.devfile.server.DevfileFormatException;
+import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.leadpony.justify.api.JsonSchema;
 import org.leadpony.justify.api.JsonValidationService;
@@ -42,7 +45,6 @@ public class DevfileSchemaValidator {
     this.schemaProvider = schemaProvider;
     this.yamlReader = new ObjectMapper(new YAMLFactory());
     this.jsonWriter = new ObjectMapper();
-
   }
 
   public JsonNode validateBySchema(String yamlContent) throws DevfileFormatException {
@@ -55,20 +57,46 @@ public class DevfileSchemaValidator {
       // Problem handler
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);
-      try (JsonReader reader = service
-          .createReader(new StringReader(jsonWriter.writeValueAsString(contentNode)), schema,
-              handler)) {
+      try (JsonReader reader =
+          service.createReader(
+              new StringReader(jsonWriter.writeValueAsString(contentNode)), schema, handler)) {
         reader.read();
       }
       if (!validationErrors.isEmpty()) {
-        System.out.println(validationErrors);
-//        String error = validationErrors.stream().collect(Collectors.joining(", ", "[", "]"));
-//        throw new DevfileFormatException(
-//            format("Devfile schema validation failed. Errors: %s", error));
+        //        System.out.println(validationErrors);
+        String error = extractMessages(validationErrors, new StringBuilder());
+        throw new DevfileFormatException(
+            format("Devfile schema validation failed. Errors: %s", error));
       }
-    }catch (IOException e) {
+    } catch (IOException e) {
       throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }
     return contentNode;
+  }
+
+  private String extractMessages(List<Problem> validationErrors, StringBuilder messageBuilder) {
+
+    for (Problem problem : validationErrors) {
+      int branchCount = problem.countBranches();
+      if (branchCount == 0) {
+        messageBuilder.append(getMessage(problem));
+      } else {
+        messageBuilder.append(problem.getMessage()).append(": [");
+        for (int i = 0; i < branchCount; i++) {
+          extractMessages(problem.getBranch(i), messageBuilder);
+        }
+        messageBuilder.append("]");
+      }
+    }
+    return messageBuilder.toString();
+  }
+
+  private String getMessage(Problem problem) {
+    StringBuilder messageBuilder = new StringBuilder();
+    if (!isNullOrEmpty(problem.getPointer())) {
+      messageBuilder.append("(").append(problem.getPointer()).append("):");
+    }
+    messageBuilder.append(problem.getMessage());
+    return messageBuilder.toString();
   }
 }

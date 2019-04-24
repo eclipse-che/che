@@ -167,6 +167,7 @@ unset TS_NPMS
 command -v tsserver >/dev/null 2>&1 || { TS_NPMS=${TS_NPMS}" typescript"; }
 command -v typescript-language-server >/dev/null 2>&1 || { TS_NPMS=${TS_NPMS}" typescript-language-server"; }
 
+npm ping
 test "${TS_NPMS}" = "" || {
        ${SUDO} npm install -g ${TS_NPMS};
    }

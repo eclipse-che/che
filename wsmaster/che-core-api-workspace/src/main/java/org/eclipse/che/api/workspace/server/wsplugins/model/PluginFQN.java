@@ -11,13 +11,17 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.net.URI;
+import java.util.Objects;
 
 /**
  * Represents full information about plugin, including registry address, id and version.
  *
  * @author Max Shaposhnyk
  */
+@JsonInclude(Include.NON_NULL)
 public class PluginFQN {
 
   private URI registry;
@@ -52,5 +56,29 @@ public class PluginFQN {
 
   public void setVersion(String version) {
     this.version = version;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getRegistry(), getId(), getVersion());
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null || getClass() != obj.getClass()) {
+      return false;
+    }
+    PluginFQN other = (PluginFQN) obj;
+    return Objects.equals(id, other.id)
+        && Objects.equals(version, other.version)
+        && Objects.equals(registry, other.registry);
+  }
+
+  @Override
+  public String toString() {
+    return String.format("{id:%s, version:%s, registry:%s}", this.id, this.version, this.registry);
   }
 }

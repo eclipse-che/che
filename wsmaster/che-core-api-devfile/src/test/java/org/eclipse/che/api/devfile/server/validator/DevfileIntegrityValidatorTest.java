@@ -11,42 +11,52 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_TOOL_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import java.util.ArrayList;
+import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.Collections;
-import java.util.List;
-import org.eclipse.che.api.devfile.model.Action;
-import org.eclipse.che.api.devfile.model.Command;
-import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.model.Project;
-import org.eclipse.che.api.devfile.model.Source;
-import org.eclipse.che.api.devfile.model.Tool;
-import org.eclipse.che.api.devfile.server.DevfileFormatException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 import org.testng.reporters.Files;
 
+@Listeners(MockitoTestNGListener.class)
 public class DevfileIntegrityValidatorTest {
 
   private ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
 
-  private Devfile initialDevfile;
+  private DevfileImpl initialDevfile;
 
   private DevfileIntegrityValidator integrityValidator;
 
+  @Mock private KubernetesRecipeParser kubernetesRecipeParser;
+
   @BeforeClass
   public void setUp() throws Exception {
-    integrityValidator = new DevfileIntegrityValidator();
+    integrityValidator = new DevfileIntegrityValidator(kubernetesRecipeParser);
     String devFileYamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-    initialDevfile = objectMapper.readValue(devFileYamlContent, Devfile.class);
+    initialDevfile = objectMapper.readValue(devFileYamlContent, DevfileImpl.class);
   }
 
   @Test
@@ -57,10 +67,12 @@ public class DevfileIntegrityValidatorTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Duplicate tool name found:'mvn-stack'")
-  public void shouldThrowExceptionOnDuplicateToolName() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getTools().add(new Tool().withName(initialDevfile.getTools().get(0).getName()));
+      expectedExceptionsMessageRegExp = "Duplicate component alias found:'mvn-stack'")
+  public void shouldThrowExceptionOnDuplicateComponentAlias() throws Exception {
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
+    ComponentImpl component = new ComponentImpl();
+    component.setAlias(initialDevfile.getComponents().get(0).getAlias());
+    broken.getComponents().add(component);
     // when
     integrityValidator.validateDevfile(broken);
   }
@@ -68,145 +80,13 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Tool of type '"
-              + KUBERNETES_TOOL_TYPE
-              + "' cannot contain 'id' field, please check 'k8s' tool")
-  public void shouldThrowExceptionOnUnsupportedKubernetesToolIdField() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getTools().clear();
-    broken
-        .getTools()
-        .add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE).withId("anyId"));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Tool of type '"
-              + EDITOR_TOOL_TYPE
-              + "' cannot contain 'selector' field, please check 'editor1' tool")
-  public void shouldThrowExceptionOnUnsupportedEditorToolSelectorField() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getTools().clear();
-    broken
-        .getTools()
-        .add(
-            new Tool()
-                .withName("editor1")
-                .withType(EDITOR_TOOL_TYPE)
-                .withId("anyId")
-                .withSelector(Collections.singletonMap("key", "value")));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Tool of type '"
-              + PLUGIN_TOOL_TYPE
-              + "' cannot contain 'selector' field, please check 'plugin1' tool")
-  public void shouldThrowExceptionOnUnsupportedPluginToolSelectorField() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getTools().clear();
-    broken
-        .getTools()
-        .add(
-            new Tool()
-                .withName("plugin1")
-                .withType(PLUGIN_TOOL_TYPE)
-                .withId("anyId")
-                .withSelector(Collections.singletonMap("key", "value")));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Multiple non plugin or editor type tools found: 'k8s', 'os'")
-  public void shouldThrowExceptionOnMultipleNonPluginTools() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getTools().clear();
-    broken
-        .getTools()
-        .add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE).withLocal("foo.yaml"));
-    broken
-        .getTools()
-        .add(new Tool().withName("os").withType(OPENSHIFT_TOOL_TYPE).withLocal("bar.yaml"));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Multiple non plugin or editor type tools found: 'k8s', 'dockerimage'")
-  public void shouldThrowExceptionOnKubernetesAndDockerimagesTools() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getCommands().clear();
-    broken.getTools().clear();
-    broken
-        .getTools()
-        .add(new Tool().withName("k8s").withType(KUBERNETES_TOOL_TYPE).withLocal("foo.yaml"));
-    broken.getTools().add(new Tool().withName("dockerimage").withType(DOCKERIMAGE_TOOL_TYPE));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Tool of type '"
-              + OPENSHIFT_TOOL_TYPE
-              + "' cannot contain 'id' field, please check 'os' tool")
-  public void shouldThrowExceptionOnUnsupportedOpenshiftToolIdField() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getTools().clear();
-    broken.getTools().add(new Tool().withName("os").withType(OPENSHIFT_TOOL_TYPE).withId("anyId"));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Tool of type '"
-              + EDITOR_TOOL_TYPE
-              + "' cannot contain 'local' field, please check 'foo' tool")
-  public void shouldThrowExceptionOnUnsupportedEditorToolLocalField() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getTools().clear();
-    broken
-        .getTools()
-        .add(new Tool().withName("foo").withType(EDITOR_TOOL_TYPE).withLocal("k8x.yaml"));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp =
-          "Tool of type '"
-              + PLUGIN_TOOL_TYPE
-              + "' cannot contain 'local' field, please check 'foo' tool")
-  public void shouldThrowExceptionOnUnsupportedPluginToolField() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken
-        .getTools()
-        .add(new Tool().withName("foo").withType(PLUGIN_TOOL_TYPE).withLocal("k8x.yaml"));
-    // when
-    integrityValidator.validateDevfile(broken);
-  }
-
-  @Test(
-      expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Multiple editor tools found: 'theia-ide', 'editor-2'")
+          "Multiple editor components found: 'org.eclipse.chetheia:0.0.3', 'editor-2'")
   public void shouldThrowExceptionOnMultipleEditors() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getTools().add(new Tool().withName("editor-2").withType(EDITOR_TOOL_TYPE));
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
+    ComponentImpl component = new ComponentImpl();
+    component.setAlias("editor-2");
+    component.setType(EDITOR_COMPONENT_TYPE);
+    broken.getComponents().add(component);
     // when
     integrityValidator.validateDevfile(broken);
   }
@@ -215,8 +95,11 @@ public class DevfileIntegrityValidatorTest {
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp = "Duplicate command name found:'build'")
   public void shouldThrowExceptionOnDuplicateCommandName() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getCommands().add(new Command().withName(initialDevfile.getCommands().get(0).getName()));
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
+
+    CommandImpl command = new CommandImpl();
+    command.setName(initialDevfile.getCommands().get(0).getName());
+    broken.getCommands().add(command);
     // when
     integrityValidator.validateDevfile(broken);
   }
@@ -225,7 +108,7 @@ public class DevfileIntegrityValidatorTest {
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp = "Command 'build' does not have actions.")
   public void shouldThrowExceptionWhenCommandDoesNotHaveActions() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
     broken.getCommands().get(0).getActions().clear();
 
     // when
@@ -237,9 +120,8 @@ public class DevfileIntegrityValidatorTest {
       expectedExceptionsMessageRegExp =
           "Multiple actions in command 'build' are not supported yet.")
   public void shouldThrowExceptionWhenCommandHasMultipleActions() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getCommands().get(0).getActions().add(new Action());
-    ;
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
+    broken.getCommands().get(0).getActions().add(new ActionImpl());
 
     // when
     integrityValidator.validateDevfile(broken);
@@ -248,11 +130,13 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Command 'build' has action that refers to non-existing tools 'no_such_tool'")
-  public void shouldThrowExceptionOnUnexistingCommandActionTool() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
+          "Command 'build' has action that refers to a component with unknown alias 'no_such_component'")
+  public void shouldThrowExceptionOnUnexistingCommandActionComponent() throws Exception {
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
     broken.getCommands().get(0).getActions().clear();
-    broken.getCommands().get(0).getActions().add(new Action().withTool("no_such_tool"));
+    ActionImpl action = new ActionImpl();
+    action.setComponent("no_such_component");
+    broken.getCommands().get(0).getActions().add(action);
 
     // when
     integrityValidator.validateDevfile(broken);
@@ -262,8 +146,10 @@ public class DevfileIntegrityValidatorTest {
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp = "Duplicate project name found:'petclinic'")
   public void shouldThrowExceptionOnDuplicateProjectName() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
-    broken.getProjects().add(new Project().withName(initialDevfile.getProjects().get(0).getName()));
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
+    ProjectImpl project = new ProjectImpl();
+    project.setName(initialDevfile.getProjects().get(0).getName());
+    broken.getProjects().add(project);
     // when
     integrityValidator.validateDevfile(broken);
   }
@@ -274,50 +160,191 @@ public class DevfileIntegrityValidatorTest {
           "Invalid project name found:'.*'. Name must contain only Latin letters,"
               + "digits or these following special characters ._-")
   public void shouldThrowExceptionOnInvalidProjectName() throws Exception {
-    Devfile broken = copyOf(initialDevfile);
+    DevfileImpl broken = new DevfileImpl(initialDevfile);
     broken.getProjects().get(0).setName("./" + initialDevfile.getProjects().get(0).getName());
     // when
     integrityValidator.validateDevfile(broken);
   }
 
-  private Devfile copyOf(Devfile source) {
-    Devfile result = new Devfile();
-    result.setName(source.getName());
-    result.setSpecVersion(source.getSpecVersion());
-    List<Project> projects = new ArrayList<>();
-    for (Project project : source.getProjects()) {
-      projects.add(
-          new Project()
-              .withName(project.getName())
-              .withSource(
-                  new Source()
-                      .withType(project.getSource().getType())
-                      .withLocation(project.getSource().getType())));
-    }
-    result.setProjects(projects);
-    List<Tool> tools = new ArrayList<>();
-    for (Tool tool : source.getTools()) {
-      tools.add(new Tool().withId(tool.getId()).withName(tool.getName()).withType(tool.getType()));
-    }
-    result.setTools(tools);
-    List<Command> commands = new ArrayList<>();
-    for (Command command : source.getCommands()) {
-      List<Action> actions = new ArrayList<>();
-      for (Action action : command.getActions()) {
-        actions.add(
-            new Action()
-                .withCommand(action.getCommand())
-                .withTool(action.getTool())
-                .withType(action.getType())
-                .withWorkdir(action.getWorkdir()));
+  @Test(expectedExceptions = DevfileFormatException.class)
+  public void shouldThrowExceptionOnSelectorFilteringOutEverything() throws Exception {
+    // given
+    when(kubernetesRecipeParser.parse(any(String.class)))
+        .thenReturn(
+            Collections.singletonList(
+                new PodBuilder()
+                    .withNewMetadata()
+                    .addToLabels("app", "test")
+                    .endMetadata()
+                    .build()));
+
+    Map<String, String> selector = new HashMap<>();
+    selector.put("app", "a different value");
+
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+    // this is the openshift component which is the only one sensitive to the selector in our
+    // example
+    // devfile
+    devfile.getComponents().get(3).setReferenceContent("content");
+    devfile.getComponents().get(3).setSelector(selector);
+
+    // when
+    integrityValidator.validateContentReferences(devfile, __ -> "");
+
+    // then exception is thrown
+  }
+
+  @Test(expectedExceptions = DevfileFormatException.class)
+  public void shouldThrowExceptionOnEntrypointNotMatchingAnyContainer() throws Exception {
+    // given
+    when(kubernetesRecipeParser.parse(any(String.class)))
+        .thenReturn(
+            Collections.singletonList(
+                new PodBuilder()
+                    .withNewSpec()
+                    .addNewContainer()
+                    .withName("container")
+                    .endContainer()
+                    .endSpec()
+                    .build()));
+
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+    devfile.getComponents().get(0).setReferenceContent("content");
+    EntrypointImpl entrypoint = new EntrypointImpl();
+    entrypoint.setContainerName("not that container");
+    devfile.getComponents().get(0).setEntrypoints(Collections.singletonList(entrypoint));
+
+    // when
+    integrityValidator.validateContentReferences(devfile, __ -> "");
+
+    // then exception is thrown
+  }
+
+  @Test
+  public void shouldNotValidateContentReferencesOnNonKuberenetesComponents() throws Exception {
+    // given
+
+    // just remove all the content-referencing components and check that all still works
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+    Iterator<ComponentImpl> it = devfile.getComponents().iterator();
+    while (it.hasNext()) {
+      String componentType = it.next().getType();
+      if (componentType.equals(KUBERNETES_COMPONENT_TYPE)
+          || componentType.equals(OPENSHIFT_COMPONENT_TYPE)) {
+        it.remove();
       }
-      commands.add(
-          new Command()
-              .withName(command.getName())
-              .withAttributes(command.getAttributes())
-              .withActions(actions));
     }
-    result.setCommands(commands);
-    return result;
+
+    // when
+    integrityValidator.validateContentReferences(devfile, __ -> "");
+
+    // then
+    // no exception is thrown
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "There are multiple components 'dockerimage:latest' of type 'dockerimage' that cannot be"
+              + " uniquely identified. Please add aliases that would distinguish the components.")
+  public void shouldRequireAliasWhenDockerImageComponentsHaveSameImage() throws Exception {
+    // given
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+
+    ComponentImpl docker1 = new ComponentImpl();
+    docker1.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    docker1.setImage("dockerimage:latest");
+
+    ComponentImpl docker2 = new ComponentImpl();
+    docker2.setType(DOCKERIMAGE_COMPONENT_TYPE);
+    docker2.setImage("dockerimage:latest");
+
+    devfile.getComponents().add(docker1);
+    devfile.getComponents().add(docker2);
+
+    // when
+    integrityValidator.validateDevfile(devfile);
+
+    // then
+    // exception is thrown
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "There are multiple components 'list.yaml' of type 'kubernetes' that cannot be"
+              + " uniquely identified. Please add aliases that would distinguish the components.")
+  public void shouldRequireAliasWhenKubernetesComponentsHaveSameReference() throws Exception {
+    // given
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+
+    ComponentImpl k8s1 = new ComponentImpl();
+    k8s1.setType(KUBERNETES_COMPONENT_TYPE);
+    k8s1.setReference("list.yaml");
+
+    ComponentImpl k8s2 = new ComponentImpl();
+    k8s2.setType(KUBERNETES_COMPONENT_TYPE);
+    k8s2.setReference("list.yaml");
+
+    devfile.getComponents().add(k8s1);
+    devfile.getComponents().add(k8s2);
+
+    // when
+    integrityValidator.validateDevfile(devfile);
+
+    // then
+    // exception is thrown
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "There are multiple components 'list.yaml' of type 'openshift' that cannot be"
+              + " uniquely identified. Please add aliases that would distinguish the components.")
+  public void shouldRequireAliasWhenOpenshiftComponentsHaveSameReference() throws Exception {
+    // given
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+
+    ComponentImpl k8s1 = new ComponentImpl();
+    k8s1.setType(OPENSHIFT_COMPONENT_TYPE);
+    k8s1.setReference("list.yaml");
+
+    ComponentImpl k8s2 = new ComponentImpl();
+    k8s2.setType(OPENSHIFT_COMPONENT_TYPE);
+    k8s2.setReference("list.yaml");
+
+    devfile.getComponents().add(k8s1);
+    devfile.getComponents().add(k8s2);
+
+    // when
+    integrityValidator.validateDevfile(devfile);
+
+    // then
+    // exception is thrown
+  }
+
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "There are multiple components 'openshift' of type 'openshift' that cannot be"
+              + " uniquely identified. Please add aliases that would distinguish the components.")
+  public void shouldRequireAliasWhenOpenshiftComponentsHaveNoReference() throws Exception {
+    // given
+    DevfileImpl devfile = new DevfileImpl(initialDevfile);
+
+    ComponentImpl k8s1 = new ComponentImpl();
+    k8s1.setType(OPENSHIFT_COMPONENT_TYPE);
+
+    ComponentImpl k8s2 = new ComponentImpl();
+    k8s2.setType(OPENSHIFT_COMPONENT_TYPE);
+
+    devfile.getComponents().add(k8s1);
+    devfile.getComponents().add(k8s2);
+
+    // when
+    integrityValidator.validateDevfile(devfile);
+
+    // then
+    // exception is thrown
   }
 }

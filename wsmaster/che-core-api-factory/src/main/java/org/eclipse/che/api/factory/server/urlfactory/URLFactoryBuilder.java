@@ -17,24 +17,23 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.DevfileException;
 import org.eclipse.che.api.devfile.server.DevfileManager;
+import org.eclipse.che.api.devfile.server.FileContentProvider;
+import org.eclipse.che.api.devfile.server.URLFetcher;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -67,16 +66,20 @@ public class URLFactoryBuilder {
   /**
    * Build a factory using the provided json file or create default one
    *
-   * @param jsonFileLocation location of factory json file
+   * @param remoteFactoryUrl parsed factory URL object
    * @return a factory or null if factory json in not found
    */
-  public Optional<FactoryDto> createFactoryFromJson(String jsonFileLocation) {
+  public Optional<FactoryDto> createFactoryFromJson(RemoteFactoryUrl remoteFactoryUrl) {
     // Check if there is factory json file inside the repository
-    if (jsonFileLocation != null) {
-      final String factoryJsonContent = urlFetcher.fetchSafely(jsonFileLocation);
+    if (remoteFactoryUrl.factoryFileLocation() != null) {
+      final String factoryJsonContent =
+          urlFetcher.fetchSafely(remoteFactoryUrl.factoryFileLocation());
       if (!isNullOrEmpty(factoryJsonContent)) {
-        return Optional.of(
-            DtoFactory.getInstance().createDtoFromJson(factoryJsonContent, FactoryDto.class));
+        FactoryDto factoryDto =
+            DtoFactory.getInstance()
+                .createDtoFromJson(factoryJsonContent, FactoryDto.class)
+                .withSource(remoteFactoryUrl.getFactoryFilename());
+        return Optional.of(factoryDto);
       }
     }
     return Optional.empty();
@@ -85,37 +88,37 @@ public class URLFactoryBuilder {
   /**
    * Build a factory using the provided devfile
    *
-   * @param devfileLocation location of devfile
-   * @param fileUrlProvider optional service-specific provider of URL's to the file raw content
+   * @param remoteFactoryUrl parsed factory URL object
+   * @param fileContentProvider service-specific devfile related file content provider
    * @return a factory or null if devfile is not found
    */
   public Optional<FactoryDto> createFactoryFromDevfile(
-      String devfileLocation, @Nullable Function<String, String> fileUrlProvider)
+      RemoteFactoryUrl remoteFactoryUrl, FileContentProvider fileContentProvider)
       throws BadRequestException, ServerException {
-    if (devfileLocation == null) {
+    if (remoteFactoryUrl.devfileFileLocation() == null) {
       return Optional.empty();
     }
-    final String devfileYamlContent = urlFetcher.fetchSafely(devfileLocation);
+    final String devfileYamlContent =
+        urlFetcher.fetchSafely(remoteFactoryUrl.devfileFileLocation());
     if (isNullOrEmpty(devfileYamlContent)) {
       return Optional.empty();
     }
     try {
-      Devfile devfile = devfileManager.parse(devfileYamlContent, false);
+      DevfileImpl devfile = devfileManager.parse(devfileYamlContent);
       WorkspaceConfigImpl wsConfig =
-          devfileManager.createWorkspaceConfig(
-              devfile,
-              filename ->
-                  fileUrlProvider != null
-                      ? urlFetcher.fetch(fileUrlProvider.apply(filename))
-                      : null);
-      return Optional.of(
+          devfileManager.createWorkspaceConfig(devfile, fileContentProvider);
+      FactoryDto factoryDto =
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
-              .withWorkspace(DtoConverter.asDto(wsConfig)));
+              .withWorkspace(DtoConverter.asDto(wsConfig))
+              .withSource(remoteFactoryUrl.getDevfileFilename());
+      return Optional.of(factoryDto);
     } catch (DevfileException e) {
-      throw new BadRequestException(e.getMessage());
-    } catch (IOException x) {
-      throw new ServerException(x.getLocalizedMessage(), x);
+      throw new BadRequestException(
+          "Error occurred during creation a workspace from devfile located at `"
+              + remoteFactoryUrl.devfileFileLocation()
+              + "`. Cause: "
+              + e.getMessage());
     }
   }
 

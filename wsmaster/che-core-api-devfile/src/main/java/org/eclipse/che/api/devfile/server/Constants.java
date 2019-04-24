@@ -13,27 +13,63 @@ package org.eclipse.che.api.devfile.server;
 
 public class Constants {
 
+  private Constants() {}
+
   public static final String SCHEMA_LOCATION = "schema/devfile.json";
 
   public static final String CURRENT_SPEC_VERSION = "0.0.1";
 
-  public static final String EDITOR_TOOL_TYPE = "cheEditor";
+  public static final String EDITOR_COMPONENT_TYPE = "cheEditor";
 
-  public static final String PLUGIN_TOOL_TYPE = "chePlugin";
+  public static final String PLUGIN_COMPONENT_TYPE = "chePlugin";
 
-  public static final String KUBERNETES_TOOL_TYPE = "kubernetes";
+  public static final String KUBERNETES_COMPONENT_TYPE = "kubernetes";
 
-  public static final String OPENSHIFT_TOOL_TYPE = "openshift";
+  public static final String OPENSHIFT_COMPONENT_TYPE = "openshift";
 
-  public static final String DOCKERIMAGE_TOOL_TYPE = "dockerimage";
+  public static final String DOCKERIMAGE_COMPONENT_TYPE = "dockerimage";
+
+  /** Action type that should be used for commands execution. */
+  public static final String EXEC_ACTION_TYPE = "exec";
 
   /**
-   * Workspace attribute which contains comma-separated list of mappings of tool id to its name
-   * Example value:
+   * Workspace config attribute which contains comma-separated list of mappings of chePlugin
+   * component id to its name.
+   *
+   * <p>Example value:
    *
    * <pre>
-   * eclipse/maven-jdk8:1.0.0=mvn-stack,eclipse/theia:0.0.3=theia-ide,eclipse/theia-jdtls:0.0.3=jdt.ls
+   * eclipse/maven-jdk8:1.0.0=mvn-stack,eclipse/theia-jdtls:0.0.3=jdt.ls
    * </pre>
    */
-  public static final String ALIASES_WORKSPACE_ATTRIBUTE_NAME = "toolsAliases";
+  public static final String PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE =
+      "pluginComponentsAliases";
+
+  /** Workspace config attribute which contains cheEditor component name. */
+  public static final String EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE = "editorComponentAlias";
+
+  /** Workspace command attributes that indicates with which component it is associated. */
+  public static final String COMPONENT_ALIAS_COMMAND_ATTRIBUTE = "componentAlias";
+
+  /**
+   * {@link Endpoint} attribute name which can identify endpoint as public or internal. Attribute
+   * value {@code false} makes a endpoint internal, any other value or lack of the attribute makes
+   * the endpoint public.
+   */
+  public static final String PUBLIC_ENDPOINT_ATTRIBUTE = "public";
+
+  /**
+   * {@link Endpoint} attribute name which can identify endpoint as discoverable(means that it is
+   * accessible by its name from workspace's containers). Attribute value {@code true} makes a
+   * endpoint discoverable, any other value or lack of the attribute makes the endpoint
+   * non-discoverable.
+   */
+  public static final String DISCOVERABLE_ENDPOINT_ATTRIBUTE = "discoverable";
+
+  /**
+   * The attribute of Devfile that should be devfile when no editor is needed and default one should
+   * not be provisioned. Attributes value {@code true} deactivates provisioning of default editor,
+   * any other value of lack of the attributes activates provisioning of default editor
+   */
+  public static final String EDITOR_FREE_DEVFILE_ATTRIBUTE = "editorFree";
 }

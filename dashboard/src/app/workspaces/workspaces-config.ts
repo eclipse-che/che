@@ -83,6 +83,7 @@ import {WorkspaceWarnings} from './workspace-details/warnings/workspace-warnings
 import {WorkspaceWarningsController} from './workspace-details/warnings/workspace-warnings.controller';
 import {WorkspacesService} from './workspaces.service';
 import {WorkspacePluginsConfig} from './workspace-details/workspace-plugins/workspace-plugins-config';
+import {WorkspaceEditorsConfig} from './workspace-details/workspace-editors/workspace-editors-config';
 
 /**
  * @ngdoc controller
@@ -100,6 +101,7 @@ export class WorkspacesConfig {
     new StackSelectorTagsFilter(register);
     new WorkspaceDetailsConfig(register);
     new WorkspacePluginsConfig(register);
+    new WorkspaceEditorsConfig(register);
     /* tslint:enable */
 
     register.controller('ListWorkspacesCtrl', ListWorkspacesCtrl);

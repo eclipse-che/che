@@ -33,6 +33,17 @@
         <class>org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.VolumeImpl</class>
 
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl</class>
+        <class>org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl</class>
+
         <class>org.eclipse.che.api.workspace.server.model.impl.CommandImpl</class>
         <class>org.eclipse.che.workspace.infrastructure.docker.snapshot.MachineSourceImpl</class>
         <class>org.eclipse.che.workspace.infrastructure.docker.snapshot.SnapshotImpl</class>

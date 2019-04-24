@@ -12,6 +12,3 @@
 
 ---
 name: petclinic-dev-environment
-tools:
-  - name: maven
-    id: eclipse/maven-jdk8:1.0.0

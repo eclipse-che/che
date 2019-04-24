@@ -66,8 +66,19 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        {{- if .Values.global.tls.useSelfSignedCerts }}
+        - name: CHE_SELF__SIGNED__CERT
+          valueFrom:
+            secretKeyRef:
+              key: ca.crt
+              name: self-signed-certificate
+              optional: false
+        {{- end }}
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
+        securityContext:
+          runAsUser: {{ .Values.global.securityContext.runAsUser }}
+          fsGroup: {{ .Values.global.securityContext.fsGroup }}
         livenessProbe:
           httpGet:
             path: /api/system/state

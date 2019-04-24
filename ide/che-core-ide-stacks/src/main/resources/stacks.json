@@ -76,182 +76,6 @@
     }
   },
   {
-    "id": "java-theia-openshift",
-    "creator": "ide",
-    "name": "Java Theia on OpenShift",
-    "description": "Che development + Theia in a sidecar container (openshift)",
-    "scope": "general",
-    "tags": [
-      "Java 1.8",
-      "Theia",
-      "Alpine",
-      "CentOS"
-    ],
-    "workspaceConfig": {
-      "environments": {
-        "default": {
-          "machines": {
-            "ws/theia": {
-              "attributes": {},
-              "servers": {
-                "theia": {
-                  "protocol": "http",
-                  "port": "3100",
-                  "path": "/",
-                  "attributes": {
-                    "type": "ide",
-                    "cookiesAuthEnabled": "true",
-                    "secure": "true"
-                  }
-                },
-                "theia-dev": {
-                  "protocol": "http",
-                  "port": "3130",
-                  "attributes": {
-                    "type": "ide-dev"
-                  }
-                }
-              },
-              "volumes": {
-                "projects": {
-                  "path": "/projects"
-                }
-              },
-              "installers": [],
-              "env": {
-                "HOSTED_PLUGIN_HOSTNAME": "0.0.0.0"
-              }
-            },
-            "ws/dev": {
-              "attributes": {},
-              "servers": {},
-              "volumes": {
-                "projects": {
-                  "path": "/projects"
-                }
-              },
-              "installers": [],
-              "env": {}
-            },
-            "ws/machine-exec": {
-              "servers": {
-                "machine-exec": {
-                  "attributes": {
-                    "type": "terminal"
-                  },
-                  "protocol": "ws",
-                  "port": "4444"
-                }
-              },
-              "installers": []
-            }
-          },
-          "recipe": {
-            "type": "openshift",
-            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:plugin-id-nightly'\n     name: theia\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     mem_limit: 1073741824\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     mem_limit: 536870912\n     resources:\n      limits:\n       memory: 512Mi\n",
-            "contentType": "application/x-yaml"
-          }
-        }
-      },
-      "defaultEnv": "default",
-      "name": "theia",
-      "projects": [],
-      "commands": []
-    },
-    "stackIcon": {
-      "name": "type-theia.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
-    "id": "java-theia-kubernetes",
-    "creator": "ide",
-    "name": "Java Theia on Kubernetes",
-    "description": "Che development + Theia in a sidecar container (kubernetes)",
-    "scope": "general",
-    "tags": [
-      "Java 1.8",
-      "Theia",
-      "Alpine",
-      "CentOS"
-    ],
-    "workspaceConfig": {
-      "environments": {
-        "default": {
-          "machines": {
-            "ws/theia": {
-              "attributes": {},
-              "servers": {
-                "theia": {
-                  "protocol": "http",
-                  "port": "3100",
-                  "path": "/",
-                  "attributes": {
-                    "type": "ide",
-                    "cookiesAuthEnabled": "true",
-                    "secure": "true"
-                  }
-                },
-                "theia-dev": {
-                  "protocol": "http",
-                  "port": "3130",
-                  "attributes": {
-                    "type": "ide-dev"
-                  }
-                }
-              },
-              "volumes": {
-                "projects": {
-                  "path": "/projects"
-                }
-              },
-              "installers": [],
-              "env": {
-                "HOSTED_PLUGIN_HOSTNAME": "0.0.0.0"
-              }
-            },
-            "ws/dev": {
-              "attributes": {},
-              "servers": {},
-              "volumes": {
-                "projects": {
-                  "path": "/projects"
-                }
-              },
-              "installers": [],
-              "env": {}
-            },
-            "ws/machine-exec": {
-              "servers": {
-                "machine-exec": {
-                  "attributes": {
-                    "type": "terminal"
-                  },
-                  "protocol": "ws",
-                  "port": "4444"
-                }
-              },
-              "installers": []
-            }
-          },
-          "recipe": {
-            "type": "kubernetes",
-            "content": "---\nkind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia:plugin-id-nightly'\n     name: theia\n     resources:\n      limits:\n       memory: 1024Mi\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 1536Mi\n    - \n     image: 'wsskeleton/che-machine-exec:latest'\n     name: machine-exec\n     resources:\n      limits:\n       memory: 512Mi\n",
-            "contentType": "application/x-yaml"
-          }
-        }
-      },
-      "defaultEnv": "default",
-      "name": "theia",
-      "projects": [],
-      "commands": []
-    },
-    "stackIcon": {
-      "name": "type-theia.svg",
-      "mediaType": "image/svg+xml"
-    }
-  },
-  {
     "id": "java-mysql-theia-kubernetes",
     "creator": "ide",
     "name": "Java and MySQL with Theia IDE on Kubernetes",
@@ -453,6 +277,80 @@
           "recipe": {
             "type": "kubernetes",
             "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
+            "contentType": "application/x-yaml"
+          }
+        }
+      },
+      "projects": [],
+      "attributes": {
+        "editor": "org.eclipse.che.editor.theia:1.0.0",
+        "plugins": "che-machine-exec-plugin:0.0.1"
+      },
+      "commands": [],
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "che7-development-che-theia-and-theia-plugins",
+    "creator": "ide",
+    "name": "Che 7 Theia dev",
+    "description": "Development Theia as IDE, che-theia components, Theia plugins or plugin api.",
+    "scope": "general",
+    "tags": [
+      "ws.next",
+      "Theia",
+      "Node.JS",
+      "NPM",
+      "Yeoman",
+      "Yarn"
+    ],
+    "components": [
+      {
+        "name": "Centos",
+        "version": "7"
+      },
+      {
+        "name": "NodeJS",
+        "version": "8.12.0"
+      },
+      {
+        "name": "NPM",
+        "version": "6.4.1"
+      }
+    ],
+    "workspaceConfig": {
+      "name": "che7",
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "ws/dev": {
+              "attributes": {
+                "memoryLimitBytes": "536870912"
+              },
+              "servers": {
+                "ws/dev": {
+                  "attributes": {},
+                  "port": "3130",
+                  "protocol": "tcp"
+                }
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "env": {}
+            }
+          },
+          "recipe": {
+            "type": "kubernetes",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
             "contentType": "application/x-yaml"
           }
         }
@@ -827,6 +725,172 @@
     },
     "stackIcon": {
       "name": "type-java.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "java-maven",
+    "creator": "ide",
+    "name": "Java Maven",
+    "description": "Default Java Stack with OpenJDK 11 and Maven 3.6",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "OpenJDK",
+      "Maven",
+      "Spring Boot v2",
+      "Vert.x",
+      "Debian"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "9.8"
+      },
+      {
+        "name": "OpenJDK",
+        "version": "11.0.2"
+      },
+      {
+        "name": "Maven",
+        "version": "3.6.0"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "maven-container": {
+              "servers": {
+                "8080/tcp": {
+                  "port": "8080",
+                  "protocol": "http"
+                }
+              },
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              },
+              "volumes": {
+                "m2": {
+                  "path": "/home/user/.m2"
+                },
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "env": {
+                "MAVEN_CONFIG": "/home/user/.m2",
+                "MAVEN_OPTS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_OPTS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_TOOL_OPTIONS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              }
+            }
+          },
+          "recipe": {
+            "content": "maven:3.6.0-jdk-11",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "plugins": "che-machine-exec-plugin:0.0.1,org.eclipse.che.vscode-redhat.java:0.38.0",
+        "editor": "org.eclipse.che.editor.theia:next",
+        "sidecar.org.eclipse.che.vscode-redhat.java.memory_limit": "1500Mi",
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi"
+      },
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "java-gradle",
+    "creator": "ide",
+    "name": "Java Gradle",
+    "description": "Java Stack with OpenJDK 11 and Gradle 5.2.1",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "OpenJDK",
+      "Gradle",
+      "Spring Boot v2",
+      "Debian"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "9.8"
+      },
+      {
+        "name": "OpenJDK",
+        "version": "11.0.2"
+      },
+      {
+        "name": "Gradle",
+        "version": "5.2.1"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "machines": {
+            "gradle-container": {
+              "servers": {
+                "8080/tcp": {
+                  "port": "8080",
+                  "protocol": "http"
+                }
+              },
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              },
+              "volumes": {
+                "gradle": {
+                  "path": "/home/user/.gradle"
+                },
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "env": {
+                "GRADLE_USER_HOME": "/home/user/.gradle",
+                "JAVA_OPTS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_TOOL_OPTIONS": "-XX:MaxRAMPercentage=50 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              }
+            }
+          },
+          "recipe": {
+            "content": "gradle:5.2.1-jdk11",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "plugins": "che-machine-exec-plugin:0.0.1,org.eclipse.che.vscode-redhat.java:0.38.0",
+        "editor": "org.eclipse.che.editor.theia:next",
+        "sidecar.org.eclipse.che.vscode-redhat.java.memory_limit": "1500Mi",
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi"
+      },
+      "commands": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
   },
@@ -2571,6 +2635,150 @@
     ],
     "stackIcon": {
       "name": "type-apache-camel.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "python",
+    "name": "Python with Theia IDE",
+    "creator": "Anatolii Bazko",
+    "tags": [
+      "Theia",
+      "Debian",
+      "Python",
+      "pip"
+    ],
+    "scope": "general",
+    "description": "Default stack with Python 3.7 and Theia IDE",
+    "components": [
+      {
+        "version": "7.6",
+        "name": "CentOS"
+      },
+      {
+        "version": "3.6.3",
+        "name": "Python"
+      },
+      {
+        "version": "9.0.1",
+        "name": "PIP"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "content": "centos/python-36-centos7:1",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "python": {
+              "servers": {
+                "django": {
+                  "attributes": {},
+                  "protocol": "http",
+                  "port": "7000"
+                }
+              },
+              "env": {
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              }
+            }
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi",
+        "sidecar.ms-python.python.memory_limit": "512Mi",
+        "editor": "org.eclipse.che.editor.theia:next",
+        "plugins": "che-machine-exec-plugin:0.0.1,ms-python.python:2019.2.5433"
+      },
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "go",
+    "name": "Go with Theia IDE",
+    "creator": "Anatolii Bazko",
+    "tags": [
+      "Theia",
+      "Debian",
+      "Go"
+    ],
+    "scope": "general",
+    "description": "Default stack with Go 1.12.4 and Theia IDE",
+    "components": [
+      {
+        "version": "9",
+        "name": "Debian"
+      },
+      {
+        "version": "1.12.4",
+        "name": "Go"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "content": "golang:1.12.4-stretch",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "go": {
+              "servers": {},
+              "env": {
+                "PS1": "$(echo ${0})\\$ ",
+                "GOPATH": "/go:/projects",
+                "GOCACHE": "/tmp/.cache"
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "installers": [],
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              }
+            }
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "sidecar.org.eclipse.che.editor.theia.memory_limit": "512Mi",
+        "sidecar.ms-vscode.go.memory_limit": "512Mi",
+        "editor": "org.eclipse.che.editor.theia:next",
+        "plugins": "che-machine-exec-plugin:0.0.1,ms-vscode.go:0.9.2"
+      },
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
   }

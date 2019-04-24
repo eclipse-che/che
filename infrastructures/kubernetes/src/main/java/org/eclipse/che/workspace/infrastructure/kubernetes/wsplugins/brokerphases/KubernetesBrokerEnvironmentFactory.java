@@ -14,11 +14,11 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphas
 import static java.util.Collections.singletonMap;
 
 import com.google.common.annotations.Beta;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 /**
@@ -39,14 +39,16 @@ public class KubernetesBrokerEnvironmentFactory
       AgentAuthEnableEnvVarProvider authEnableEnvVarProvider,
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
       @Named("che.workspace.plugin_broker.init.image") String initBrokerImage,
-      @Named("che.workspace.plugin_broker.images") Map<String, String> pluginTypeToImage) {
+      @Named("che.workspace.plugin_broker.unified.image") String unifiedBrokerImage,
+      @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl) {
     super(
         cheWebsocketEndpoint,
         brokerPullPolicy,
         authEnableEnvVarProvider,
         machineTokenEnvVarProvider,
-        pluginTypeToImage,
-        initBrokerImage);
+        unifiedBrokerImage,
+        initBrokerImage,
+        pluginRegistryUrl);
   }
 
   @Override

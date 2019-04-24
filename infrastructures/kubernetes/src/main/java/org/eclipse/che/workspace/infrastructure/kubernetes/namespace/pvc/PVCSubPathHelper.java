@@ -65,7 +65,7 @@ public class PVCSubPathHelper {
   static final int WAIT_POD_TIMEOUT_MIN = 5;
 
   static final String[] RM_COMMAND_BASE = new String[] {"rm", "-rf"};
-  static final String[] MKDIR_COMMAND_BASE = new String[] {"mkdir", "-p"};
+  static final String[] MKDIR_COMMAND_BASE = new String[] {"mkdir", "-m", "777", "-p"};
 
   static final String IMAGE_PULL_POLICY = "IfNotPresent";
   static final String POD_RESTART_POLICY = "Never";

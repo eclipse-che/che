@@ -11,6 +11,10 @@ test-output/
 maven-eclipse.xml
 .factorypath
 
+# Theia #
+##################
+.theia/
+
 # Idea #
 ##################
 *.iml
@@ -79,3 +83,17 @@ docs/assets/imgs
 plugins/plugin-terminal-ui/node_modules/
 plugins/plugin-terminal-ui/build/
 requirements.lock
+
+# Cypress modules #
+##################
+*/cypress/screenshots
+*/cypress/videos
+*/node_modules
+*/pids
+*/.pid
+*/.seed
+*/lib-cov
+*/coverage
+*/.grunt
+*/.lock-wscript
+*/cypress-tests/dist

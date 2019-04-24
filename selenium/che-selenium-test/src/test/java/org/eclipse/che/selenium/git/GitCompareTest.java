@@ -254,7 +254,9 @@ public class GitCompareTest {
   }
 
   private void deleteJavaFile() {
+    projectExplorer.clickOnRefreshTreeButton();
     projectExplorer.waitAndSelectItem(PATH_TO_ACLASS);
+    projectExplorer.waitItemIsSelected(PATH_TO_ACLASS);
     menu.runCommand(EDIT, DELETE);
     askDialog.waitFormToOpen();
     askDialog.containsText("Delete file \"Aclass.java\"?");

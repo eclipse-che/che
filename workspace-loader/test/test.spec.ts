@@ -14,7 +14,7 @@
 
 'use strict';
 
-import { WorkspaceLoader } from '../src/index';
+import { WorkspaceLoader } from '../src/workspace-loader';
 import { Loader } from '../src/loader/loader';
 
 describe('Workspace Loader', () => {

@@ -230,7 +230,7 @@ export class WorkspaceMachineConfigController {
   deleteMachine($event: MouseEvent): void {
     let promise;
     if (!this.machineConfig.isDev) {
-      promise = this.confirmDialogService.showConfirmDialog('Remove machine', 'Would you like to delete this machine?', 'Delete');
+      promise = this.confirmDialogService.showConfirmDialog('Remove container', 'Would you like to delete this container?', 'Delete');
     } else {
       promise = this.showDeleteDevMachineDialog($event);
     }

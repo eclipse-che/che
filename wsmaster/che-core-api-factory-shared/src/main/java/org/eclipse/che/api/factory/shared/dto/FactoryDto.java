@@ -86,6 +86,18 @@ public interface FactoryDto extends Factory, Hyperlinks {
 
   FactoryDto withId(String id);
 
+  /**
+   * Indicates filename in repository from which the factory was created (for example, .devfile or
+   * .factory.json) or just contains 'repo' value if factory was created from bare GitHub
+   * repository. For custom raw URL's (pastebin, gist etc) value is {@code null}
+   */
+  @FactoryParameter(obligation = OPTIONAL, setByServer = true)
+  String getSource();
+
+  void setSource(String source);
+
+  FactoryDto withSource(String source);
+
   @Override
   @FactoryParameter(obligation = OPTIONAL)
   String getName();

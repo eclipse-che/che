@@ -1,4 +1,4 @@
-# Copyright (c) 2012-2017 Red Hat, Inc.
+# Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
 # available under the terms of the Eclipse Public License 2.0
 # which is available at https://www.eclipse.org/legal/epl-2.0/
@@ -36,12 +36,11 @@
 #
 # INTERNAL SYNC SCRIPT
 #   /bin/synch.sh <ip> <ws-port>
-FROM alpine:3.4
+FROM alpine:3.5
 
 ENV UNISON_VERSION=2.51.2
 
-RUN apk add --update build-base curl bash sshfs && \
-    apk add ocaml --update-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community/ --allow-untrusted && \
+RUN apk add --update build-base curl bash sshfs ocaml && \
     curl -L https://www.seas.upenn.edu/~bcpierce/unison/download/releases/unison-$UNISON_VERSION/unison-$UNISON_VERSION.tar.gz | tar xzv -C /tmp && \
     cd /tmp/src && \
     sed -i -e 's/GLIBC_SUPPORT_INOTIFY 0/GLIBC_SUPPORT_INOTIFY 1/' fsmonitor/linux/inotify_stubs.c && \

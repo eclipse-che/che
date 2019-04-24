@@ -417,8 +417,8 @@ if [ "${CHE_DEBUG_SERVER}" == "true" ]; then
   ${OC_BINARY}  expose service che-debug
   NodePort=$(oc get service che-debug -o jsonpath='{.spec.ports[0].nodePort}')
   printInfo "Remote wsmaster debugging URL: ${CLUSTER_IP}:${NodePort}"
-  printInfo "Removing liveness and readiness probes from Che deployment"
-  oc set probe dc/che --remove --readiness --liveness
+  printInfo "Increasing failure threshold for probes of Che deployment"
+  oc set probe dc/che --readiness --liveness --failure-threshold=99999
 fi
 }
 

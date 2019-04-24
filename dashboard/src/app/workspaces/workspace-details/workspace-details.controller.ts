@@ -24,7 +24,7 @@ export  interface IInitData {
   workspaceDetails: che.IWorkspace;
 }
 
-const TAB: Array<string> = ['Overview', 'Projects', 'Machines', 'Installers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Tools', 'Plugins'];
+const TAB: Array<string> = ['Overview', 'Projects', 'Containers', 'Servers', 'Env_Variables', 'Volumes', 'Config', 'SSH', 'Plugins', 'Editors'];
 
 /**
  * @ngdoc controller
@@ -65,7 +65,6 @@ export class WorkspaceDetailsController {
   private tab: { [key: string]: string } = {};
   private errorMessage: string = '';
   private tabsValidationTimeout: ng.IPromise<any>;
-  private toolsFilter: Function;
   private pluginRegistry: string;
   /**
    * There are unsaved changes to apply (with restart) when is't <code>true</code>.
@@ -166,12 +165,6 @@ export class WorkspaceDetailsController {
           this.cancelConfigChanges();
         }
       }
-    };
-
-    this.toolsFilter = (machine: IEnvironmentManagerMachine) => {
-      let serverAttributes = this.lodash.pluck(machine.servers, 'attributes');
-      let types = this.lodash.pluck(serverAttributes, 'type');
-      return types.indexOf('ide') >= 0;
     };
   }
 
@@ -559,8 +552,8 @@ export class WorkspaceDetailsController {
    * Checks whether "plugins" were disabled in origin workspace config and are enabled now.
    */
   isSwitchToPlugins(): boolean {
-    let originEditor = this.originWorkspaceDetails.config.attributes['editor'] || '';
-    let originPlugins = this.originWorkspaceDetails.config.attributes['plugins'] || '';
+    let originEditor = this.originWorkspaceDetails.config.attributes.editor || '';
+    let originPlugins = this.originWorkspaceDetails.config.attributes.plugins || '';
     return this.isPluginsEnabled() && (originEditor.length === 0 && originPlugins.length === 0);
   }
 
@@ -568,8 +561,8 @@ export class WorkspaceDetailsController {
    * Checks whether "plugins" are enabled in workspace config.
    */
   isPluginsEnabled(): boolean {
-    let editor = this.workspaceDetails.config.attributes['editor'] || '';
-    let plugins = this.workspaceDetails.config.attributes['plugins'] || '';
+    let editor = this.workspaceDetails.config.attributes.editor || '';
+    let plugins = this.workspaceDetails.config.attributes.plugins || '';
     return (editor.length > 0 || plugins.length > 0);
   }
 }

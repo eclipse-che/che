@@ -13,26 +13,26 @@ package org.eclipse.che.api.factory.server.urlfactory;
 
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
-import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_TOOL_TYPE;
+import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.devfile.model.Devfile;
 import org.eclipse.che.api.devfile.server.DevfileManager;
+import org.eclipse.che.api.devfile.server.URLFetcher;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
@@ -95,32 +95,45 @@ public class URLFactoryBuilderTest {
     String myLocation = "http://foo-location";
     when(urlFetcher.fetchSafely(myLocation)).thenReturn(jsonFactory);
 
-    FactoryDto factory = urlFactoryBuilder.createFactoryFromJson(myLocation).get();
+    FactoryDto factory =
+        urlFactoryBuilder
+            .createFactoryFromJson(
+                new DefaultFactoryUrl()
+                    .withFactoryFileLocation(myLocation)
+                    .withFactoryFilename(".factory.json"))
+            .get();
 
-    assertEquals(templateFactory, factory);
+    assertEquals(templateFactory.withSource(".factory.json"), factory);
   }
 
   @Test
   public void checkWithCustomDevfileAndRecipe() throws Exception {
 
-    Devfile devfile = new Devfile();
+    DevfileImpl devfile = new DevfileImpl();
     WorkspaceConfigImpl workspaceConfigImpl = new WorkspaceConfigImpl();
     String myLocation = "http://foo-location/";
     RecipeImpl expectedRecipe =
-        new RecipeImpl(KUBERNETES_TOOL_TYPE, "application/x-yaml", "content", "");
+        new RecipeImpl(KUBERNETES_COMPONENT_TYPE, "application/x-yaml", "content", "");
     EnvironmentImpl expectedEnv = new EnvironmentImpl(expectedRecipe, emptyMap());
     workspaceConfigImpl.setEnvironments(singletonMap("name", expectedEnv));
     workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
-    when(devfileManager.parse(anyString(), anyBoolean())).thenReturn(devfile);
-    when(devfileManager.createWorkspaceConfig(any(Devfile.class), any()))
+    when(devfileManager.parse(anyString())).thenReturn(devfile);
+    when(devfileManager.createWorkspaceConfig(any(DevfileImpl.class), any()))
         .thenReturn(workspaceConfigImpl);
 
     FactoryDto factory =
-        urlFactoryBuilder.createFactoryFromDevfile(myLocation, s -> myLocation + ".list").get();
+        urlFactoryBuilder
+            .createFactoryFromDevfile(
+                new DefaultFactoryUrl()
+                    .withDevfileFileLocation(myLocation)
+                    .withDevfileFilename("devfile.yml"),
+                s -> myLocation + ".list")
+            .get();
 
     WorkspaceConfigDto expectedWorkspaceConfig = asDto(workspaceConfigImpl);
     assertEquals(factory.getWorkspace(), expectedWorkspaceConfig);
+    assertEquals(factory.getSource(), "devfile.yml");
   }
 }

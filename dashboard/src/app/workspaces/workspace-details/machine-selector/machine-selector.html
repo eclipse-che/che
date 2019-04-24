@@ -2,7 +2,7 @@
      ng-show="machineSelectorController.machinesList.length > 0">
   <!-- Machine selector -->
   <div class="machines-list">
-    <div class="machine-selector-label">Machines</div>
+    <div class="machine-selector-label">Containers</div>
     <div ng-repeat="machine in machineSelectorController.machinesList">
       <toggle-single-button id="workspace-machine-{{machine.name}}"
                             che-title="{{machine.name}}"

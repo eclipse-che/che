@@ -16,6 +16,30 @@ import java.util.Map;
 /** @author gazarenkov */
 public interface SourceStorage {
 
+  /**
+   * The key with this name in the parameters designates the branch that should be initially checked
+   * out from the source location.
+   */
+  String BRANCH_PARAMETER_NAME = "branch";
+
+  /**
+   * The key with this name in the parameters designates the tag that the initially checked out
+   * branch should be reset to.
+   */
+  String TAG_PARAMETER_NAME = "tag";
+
+  /**
+   * The key with this name in the parameters designates the commit id that the initially checked
+   * out branch should be reset to.
+   */
+  String COMMIT_ID_PARAMETER_NAME = "commitId";
+
+  /**
+   * The key with this name in the parameters designates the revision (of any kind) that the
+   * initially checked out branch should be reset to.
+   */
+  String START_POINT_PARAMETER_NAME = "startPoint";
+
   String getType();
 
   String getLocation();

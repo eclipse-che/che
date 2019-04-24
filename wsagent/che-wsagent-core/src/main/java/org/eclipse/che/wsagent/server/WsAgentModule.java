@@ -12,9 +12,15 @@
 package org.eclipse.che.wsagent.server;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
+import java.util.concurrent.ExecutorService;
+import org.eclipse.che.api.core.jsonrpc.commons.RequestProcessorConfigurationProvider;
 import org.eclipse.che.api.core.rest.ApiInfoService;
 import org.eclipse.che.api.core.rest.LivenessProbeService;
 import org.eclipse.che.inject.DynaModule;
+import org.eclipse.che.wsagent.server.jsonrpc.WsAgentWebSocketEndpointConfiguration;
+import org.eclipse.che.wsagent.server.jsonrpc.WsAgentWebSocketEndpointExecutorServiceProvider;
 
 /**
  * Mandatory modules of workspace agent
@@ -28,6 +34,13 @@ public class WsAgentModule extends AbstractModule {
   protected void configure() {
     bind(ApiInfoService.class);
     bind(LivenessProbeService.class);
+    bind(ExecutorService.class)
+        .annotatedWith(Names.named(WsAgentWebSocketEndpointConfiguration.EXECUTOR_NAME))
+        .toProvider(WsAgentWebSocketEndpointExecutorServiceProvider.class);
+    Multibinder<RequestProcessorConfigurationProvider.Configuration> configurationMultibinder =
+        Multibinder.newSetBinder(
+            binder(), RequestProcessorConfigurationProvider.Configuration.class);
+    configurationMultibinder.addBinding().to(WsAgentWebSocketEndpointConfiguration.class);
     install(new org.eclipse.che.security.oauth.OAuthAgentModule());
     install(new org.eclipse.che.api.core.rest.CoreRestModule());
     install(new org.eclipse.che.api.core.util.FileCleaner.FileCleanerModule());

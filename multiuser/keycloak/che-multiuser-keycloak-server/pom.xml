@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-keycloak</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.19.0-SNAPSHOT</version>
+        <version>7.0.0-beta-4.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-multiuser-keycloak-server</artifactId>
     <packaging>jar</packaging>
@@ -61,6 +61,10 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing</groupId>
+            <artifactId>opentracing-api</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
@@ -121,6 +125,10 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-commons-logback</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-commons-tracing</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>

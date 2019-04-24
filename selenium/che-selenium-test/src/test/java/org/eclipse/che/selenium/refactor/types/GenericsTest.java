@@ -78,11 +78,11 @@ public class GenericsTest {
   public void testGenerics2() throws Exception {
     projectExplorer.waitProjectExplorer();
     projectExplorer.waitItem(PROJECT_NAME);
-    projectExplorer.quickExpandWithJavaScript();
-
     setFieldsForTest("testGenerics2");
-    projectExplorer.scrollAndSelectItem(pathToCurrentPackage + "/A.java");
+
+    projectExplorer.quickRevealToItemWithJavaScript(pathToCurrentPackage + "/A.java");
     projectExplorer.openItemByPath(pathToCurrentPackage + "/A.java");
+    editor.waitActive();
     assertEquals(editor.getVisibleTextFromEditor(), contentFromInA);
     editor.waitTextIntoEditor(contentFromInA);
     projectExplorer.waitAndSelectItem(pathToCurrentPackage + "/A.java");

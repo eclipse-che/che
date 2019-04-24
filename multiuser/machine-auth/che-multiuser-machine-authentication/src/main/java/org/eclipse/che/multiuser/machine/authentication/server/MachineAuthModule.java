@@ -52,7 +52,14 @@ public class MachineAuthModule extends AbstractModule {
         .addBinding()
         .toInstance(
             new MachineAuthenticatedResource(
-                "/workspace", "getByKey", "addProject", "updateProject", "deleteProject"));
+                "/workspace",
+                "getByKey",
+                "addProject",
+                "updateProject",
+                "deleteProject",
+                "getSettings",
+                "update",
+                "stop"));
     machineAuthenticatedResources
         .addBinding()
         .toInstance(new MachineAuthenticatedResource("/ssh", "getPair", "generatePair"));

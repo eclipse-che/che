@@ -28,13 +28,11 @@ import io.swagger.annotations.ExampleProperty;
 import java.io.IOException;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -42,10 +40,11 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.devfile.model.Devfile;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 
 @Api(value = "/devfile", description = "Devfile REST API")
@@ -56,16 +55,19 @@ public class DevfileService extends Service {
   private DevfileSchemaProvider schemaCachedProvider;
   private ObjectMapper objectMapper;
   private DevfileManager devfileManager;
+  private URLFileContentProvider urlFileContentProvider;
 
   @Inject
   public DevfileService(
       WorkspaceLinksGenerator linksGenerator,
       DevfileSchemaProvider schemaCachedProvider,
-      DevfileManager devfileManager) {
+      DevfileManager devfileManager,
+      URLFetcher urlFetcher) {
     this.linksGenerator = linksGenerator;
     this.schemaCachedProvider = schemaCachedProvider;
     this.devfileManager = devfileManager;
     this.objectMapper = new ObjectMapper(new YAMLFactory());
+    this.urlFileContentProvider = new URLFileContentProvider(null, urlFetcher);
   }
 
   /**
@@ -92,7 +94,6 @@ public class DevfileService extends Service {
    * Creates workspace from provided devfile
    *
    * @param data devfile content
-   * @param verbose rYeturn more explained validation error messages if any
    * @return created workspace configuration
    */
   @POST
@@ -119,12 +120,10 @@ public class DevfileService extends Service {
 
     WorkspaceImpl workspace;
     try {
-      Devfile devfile = devfileManager.parse(data);
-      workspace = devfileManager.createWorkspace(devfile, null);
+      DevfileImpl devfile = devfileManager.parse(data);
+      workspace = devfileManager.createWorkspace(devfile, urlFileContentProvider);
     } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());
-    } catch (JsonProcessingException e) {
-      throw new ServerException(e.getMessage(), e);
     }
     return Response.status(201)
         .entity(asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext())))

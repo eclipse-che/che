@@ -15,30 +15,42 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertNotNull;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.NotFoundException;
+import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.devfile.model.Devfile;
-import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
+import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
+import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -50,55 +62,93 @@ import org.testng.reporters.Files;
 public class DevfileManagerTest {
 
   private static final Subject TEST_SUBJECT = new SubjectImpl("name", "id", "token", false);
+  private static final String DEVFILE_YAML_CONTENT = "devfile yaml stub";
 
-  private DevfileSchemaValidator schemaValidator;
-  private DevfileIntegrityValidator integrityValidator;
-  private DevfileConverter devfileConverter;
+  @Mock private DevfileSchemaValidator schemaValidator;
+  @Mock private DevfileIntegrityValidator integrityValidator;
+  @Mock private DevfileConverter devfileConverter;
   @Mock private WorkspaceManager workspaceManager;
-  @Mock private KubernetesToolApplier kubernetesToolApplier;
-  @Mock private DockerimageToolApplier dockerimageToolApplier;
+  @Mock private ObjectMapper objectMapper;
 
-  private DevfileManager devfileManager;
+  @Mock private JsonNode devfileJsonNode;
+  private DevfileImpl devfile;
+
+  @InjectMocks private DevfileManager devfileManager;
 
   @BeforeMethod
   public void setUp() throws Exception {
-    schemaValidator = spy(new DevfileSchemaValidator(new DevfileSchemaProvider()));
-    integrityValidator = spy(new DevfileIntegrityValidator());
-    devfileConverter = spy(new DevfileConverter(kubernetesToolApplier, dockerimageToolApplier));
-    devfileManager =
-        new DevfileManager(schemaValidator, integrityValidator, devfileConverter, workspaceManager);
+    devfile = new DevfileImpl();
+
+    lenient().when(schemaValidator.validateBySchema(any())).thenReturn(devfileJsonNode);
+    lenient().when(objectMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
   }
 
   @Test
-  public void testValidateAndConvert() throws Exception {
-    String yamlContent = getTestResource("devfile.yaml");
+  public void testValidateAndParse() throws Exception {
+    // when
+    DevfileImpl parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
 
-    devfileManager.parse(yamlContent);
+    // then
+    assertEquals(parsed, devfile);
+    verify(schemaValidator).validateBySchema(DEVFILE_YAML_CONTENT);
+    verify(objectMapper).treeToValue(devfileJsonNode, DevfileImpl.class);
+    verify(integrityValidator).validateDevfile(devfile);
+  }
 
-    verify(schemaValidator).validateBySchema(eq(yamlContent));
-    verify(integrityValidator).validateDevfile(any(Devfile.class));
+  @Test
+  public void testInitializingDevfileMapsAfterParsing() throws Exception {
+    // given
+    CommandImpl command = new CommandImpl();
+    command.getActions().add(new ActionImpl());
+    devfile.getCommands().add(command);
+
+    ComponentImpl component = new ComponentImpl();
+    component.getEndpoints().add(new EndpointImpl());
+    devfile.getComponents().add(component);
+
+    // when
+    DevfileImpl parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
+
+    // then
+    assertNotNull(parsed.getCommands().get(0).getAttributes());
+    assertNotNull(parsed.getComponents().get(0).getSelector());
+    assertNotNull(parsed.getComponents().get(0).getEndpoints().get(0).getAttributes());
   }
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Devfile schema validation failed. Errors: [\\w\\W]+")
-  public void shouldThrowExceptionWhenUnconvertableContentProvided() throws Exception {
-    String yamlContent = getTestResource("devfile.yaml").concat("foos:");
+      expectedExceptionsMessageRegExp = "non valid")
+  public void shouldThrowExceptionWhenExceptionOccurredDuringSchemaValidation() throws Exception {
+    // given
+    doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validateBySchema(any());
 
-    devfileManager.parse(yamlContent);
+    // when
+    devfileManager.parse(DEVFILE_YAML_CONTENT);
+  }
 
-    verify(schemaValidator).validateBySchema(eq(yamlContent));
-    verifyNoMoreInteractions(integrityValidator);
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp = "non valid")
+  public void shouldThrowExceptionWhenErrorOccurredDuringDevfileParsing() throws Exception {
+    // given
+    JsonProcessingException jsonException = mock(JsonProcessingException.class);
+    when(jsonException.getMessage()).thenReturn("non valid");
+    doThrow(jsonException).when(objectMapper).treeToValue(any(), any());
+
+    // when
+    devfileManager.parse(DEVFILE_YAML_CONTENT);
   }
 
   @Test
   public void shouldFindAvailableNameAndCreateWorkspace() throws Exception {
+    // given
     ArgumentCaptor<WorkspaceConfigImpl> captor = ArgumentCaptor.forClass(WorkspaceConfigImpl.class);
+
     EnvironmentContext current = new EnvironmentContext();
     current.setSubject(TEST_SUBJECT);
     EnvironmentContext.setCurrent(current);
-    WorkspaceImpl ws = mock(WorkspaceImpl.class);
-    when(workspaceManager.createWorkspace(any(), anyString(), anyMap()))
+
+    when(workspaceManager.createWorkspace(any(WorkspaceConfig.class), anyString(), anyMap()))
         .thenReturn(createWorkspace(WorkspaceStatus.STOPPED));
     when(workspaceManager.getWorkspace(anyString(), anyString()))
         .thenAnswer(
@@ -106,29 +156,31 @@ public class DevfileManagerTest {
               String wsname = invocation.getArgument(0);
               if ("petclinic-dev-environment".equals(wsname)
                   || "petclinic-dev-environment_1".equals(wsname)) {
-                return ws;
+                return mock(WorkspaceImpl.class);
               }
               throw new NotFoundException("ws not found");
             });
-    String yamlContent =
-        Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
-    Devfile devfile = devfileManager.parse(yamlContent);
+    WorkspaceConfigImpl wsConfig = mock(WorkspaceConfigImpl.class);
+    when(wsConfig.getName()).thenReturn("petclinic-dev-environment");
+    doReturn(new WorkspaceConfigImpl(wsConfig))
+        .when(devfileConverter)
+        .devFileToWorkspaceConfig(any(), any());
+    FileContentProvider fileContentProvider = mock(FileContentProvider.class);
+
     // when
-    devfileManager.createWorkspace(devfile, null);
+    devfileManager.createWorkspace(devfile, fileContentProvider);
+
     // then
     verify(workspaceManager).createWorkspace(captor.capture(), anyString(), anyMap());
     assertEquals("petclinic-dev-environment_2", captor.getValue().getName());
-  }
-
-  private String getTestResource(String resource) throws IOException {
-    return Files.readFile(getClass().getClassLoader().getResourceAsStream(resource));
+    verify(devfileConverter).devFileToWorkspaceConfig(eq(devfile), any());
   }
 
   private WorkspaceImpl createWorkspace(WorkspaceStatus status)
       throws IOException, JsonParseException {
     return WorkspaceImpl.builder()
-        .setConfig(createConfig())
         .generateId()
+        .setConfig(createConfig())
         .setAccount(new AccountImpl("anyId", TEST_SUBJECT.getUserName(), "test"))
         .setStatus(status)
         .build();

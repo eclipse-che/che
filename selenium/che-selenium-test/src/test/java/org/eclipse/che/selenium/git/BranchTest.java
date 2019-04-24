@@ -206,6 +206,7 @@ public class BranchTest {
     menu.runCommand(TestMenuCommandsConstants.Git.GIT, TestMenuCommandsConstants.Git.STATUS);
     git.waitGitStatusBarWithMess(STATUS_MASTER_BRANCH);
     loader.waitOnClosed();
+    projectExplorer.clickOnRefreshTreeButton();
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);
     projectExplorer.waitDisappearItemByPath(PROJECT_NAME + SCRIPT_FILE_PATH);
 
@@ -216,6 +217,7 @@ public class BranchTest {
     editor.waitTextIntoEditor("//some change");
     editor.selectTabByName(JSP_TAB_NAME);
     editor.waitTextIntoEditor(CHANGE_CONTENT_1);
+    projectExplorer.clickOnRefreshTreeButton();
     projectExplorer.quickRevealToItemWithJavaScript(PROJECT_NAME + HELLO_JAVA_PATH);
     loader.waitOnClosed();
     projectExplorer.openItemByPath(PROJECT_NAME + HELLO_JAVA_PATH);

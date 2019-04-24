@@ -114,17 +114,6 @@ export class CreateWorkspaceController {
    * Hide progress loader if <code>true</code>.
    */
   private hideLoader: boolean;
-
-  /**
-   * Plugin registry location if defined.
-   */
-  private pluginRegistry: string;
-
-  /**
-   * Property for displaying or hidding the plugins list.
-   */
-  private displayPlugins: boolean;
-
   /**
    * Default constructor that is using resource injection
    */
@@ -152,8 +141,6 @@ export class CreateWorkspaceController {
     this.memoryByMachine = {};
     this.forms = new Map();
 
-    this.pluginRegistry = this.createWorkspaceSvc.getPluginRegistryLocation();
-
     this.namespaceId = this.namespaceSelectorSvc.getNamespaceId();
     this.buildListOfUsedNames().then(() => {
       this.workspaceName = this.randomSvc.getRandString({prefix: 'wksp-', list: this.usedNamesList});
@@ -164,7 +151,6 @@ export class CreateWorkspaceController {
     // when stacks selector is rendered
     // and default stack is selected
     this.hideLoader = false;
-    this.displayPlugins = false;
 
     // header toolbar
     // dropdown button config
@@ -204,7 +190,6 @@ export class CreateWorkspaceController {
 
     this.stack = this.stackSelectorSvc.getStackById(stackId);
     this.workspaceConfig = angular.copy(this.stack.workspaceConfig);
-    this.displayPlugins = this.isPluginDefined();
 
     if (!this.stack.workspaceConfig || !this.stack.workspaceConfig.defaultEnv) {
       this.memoryByMachine = {};
@@ -409,13 +394,4 @@ export class CreateWorkspaceController {
       this.createWorkspaceSvc.redirectToIDE(workspace);
     });
   }
-
-  isPluginDefined(): boolean {
-    if (this.workspaceConfig && this.workspaceConfig.attributes) {
-      return Object.keys(this.workspaceConfig.attributes).indexOf('editor') >= 0 || Object.keys(this.workspaceConfig.attributes).indexOf('plugins') >= 0;
-    }
-
-    return false;
-  }
-
 }

@@ -39,6 +39,12 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
@@ -93,6 +99,62 @@ public final class TestObjectsFactory {
         ImmutableMap.of("attr1", "value1", "attr2", "value2"));
   }
 
+  public static DevfileImpl createDevfile(String id) {
+    return new DevfileImpl(
+        "0.0.1",
+        id + "name",
+        asList(createDevfileProject(id + "-project1"), createDevfileProject(id + "-project2")),
+        asList(
+            createDevfileComponent(id + "-component1"), createDevfileComponent(id + "-component2")),
+        asList(createDevfileCommand(id + "-command1"), createDevfileCommand(id + "-command2")),
+        singletonMap("attribute1", "value1"));
+  }
+
+  private static ComponentImpl createDevfileComponent(String name) {
+    return new ComponentImpl(
+        "kubernetes",
+        name,
+        "che-theia:0.0.1",
+        "/dev.yaml",
+        null,
+        singletonList(createEntrypoint()),
+        "image",
+        "256G",
+        false,
+        singletonList("command"),
+        singletonList("arg"),
+        null,
+        null,
+        null);
+  }
+
+  private static EntrypointImpl createEntrypoint() {
+    return new EntrypointImpl(
+        "parentName",
+        singletonMap("parent", "selector"),
+        "containerName",
+        asList("command1", "command2"),
+        asList("arg1", "arg2"));
+  }
+
+  private static org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl
+      createDevfileCommand(String name) {
+    return new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+        name, asList(createAction()), singletonMap("attr1", "value1"));
+  }
+
+  private static ActionImpl createAction() {
+    return new ActionImpl("exec", "component", "run.sh", "/home/user");
+  }
+
+  private static ProjectImpl createDevfileProject(String name) {
+    return new ProjectImpl(name, createDevfileSource(), "path");
+  }
+
+  private static SourceImpl createDevfileSource() {
+    return new SourceImpl("type", "http://location", "branch1", "point1", "tag1", "commit1");
+  }
+
   public static CommandImpl createCommand() {
     CommandImpl cmd =
         new CommandImpl(generate("command", 5), "echo " + generate("command", 5), "CUSTOM");
@@ -144,8 +206,12 @@ public final class TestObjectsFactory {
     return newEnv;
   }
 
-  public static WorkspaceImpl createWorkspace(String id, Account account) {
+  public static WorkspaceImpl createWorkspaceWithConfig(String id, Account account) {
     return new WorkspaceImpl(id, account, createWorkspaceConfig(id));
+  }
+
+  public static WorkspaceImpl createWorkspaceWithDevfile(String id, Account account) {
+    return new WorkspaceImpl(id, account, createDevfile(id));
   }
 
   public static SshPairImpl createSshPair(String owner, String service, String name) {

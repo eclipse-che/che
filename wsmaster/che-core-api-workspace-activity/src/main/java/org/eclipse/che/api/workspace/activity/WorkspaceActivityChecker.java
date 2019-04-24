@@ -276,7 +276,7 @@ public class WorkspaceActivityChecker {
 
     // we don't need any rectifications if there already is an expiration time set or if expiration
     // is not configured
-    if (activity.getExpiration() != null || idleTimeout == 0) {
+    if (activity.getExpiration() != null || idleTimeout <= 0) {
       return;
     }
 

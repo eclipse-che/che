@@ -62,7 +62,7 @@
     "karma-ng-html2js-preprocessor": "~0.1.2",
     "karma-phantomjs-launcher": "~1.0.4",
     "karma-webpack": "^2.0.9",
-    "lodash": "4.17.10",
+    "lodash": "4.17.11",
     "merge-stream": "^1.0.1",
     "minimist": "^1.2.0",
     "ng-annotate-loader": "^0.6.1",
@@ -83,15 +83,14 @@
     "uglify-save-license": "~0.4.1",
     "webpack": "^1.12.11",
     "webpack-stream": "~2.1.0",
-    "wrench": "~1.5.8",
-    "yarn": ">=1.2.1"
+    "wrench": "~1.5.8"
   },
   "engines": {
-    "yarn": ">=1.2.1",
+    "yarn": "^1.13.0",
     "node": ">=0.10.0"
   },
   "scripts": {
-    "postinstall": "yarn run typings && yarn run build",
+    "postinstall": "yarn run typings",
     "typings": "typings install",
     "build": "gulp build",
     "test": "gulp test"

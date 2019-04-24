@@ -23,24 +23,27 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CEYLON_WITH_JAVA_JAVASCRIPT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_PREVIEW_DEV;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_THEIA_DEV;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_VERTX;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO_DEFAULT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_GRADLE;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MAVEN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_CENTOS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_MYSQL_THEIA_ON_KUBERNETES;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_DOCKER;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_ON_KUBERNETES;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_THEIA_OPENSHIFT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.KOTLIN;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.NODEJS_AND_POSTGRES;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PHP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.PYTHON_DEFAULT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.RAILS;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.SPRING_BOOT;
 import static org.openqa.selenium.Keys.ARROW_DOWN;
@@ -87,13 +90,16 @@ public class NewWorkspacePageTest {
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
+          GO_DEFAULT,
           GO,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_OPENSHIFT,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS);
 
@@ -106,12 +112,16 @@ public class NewWorkspacePageTest {
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
+          GO_DEFAULT,
           GO,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_ON_KUBERNETES,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS);
 
@@ -124,9 +134,13 @@ public class NewWorkspacePageTest {
           ANDROID,
           CPP,
           ECLIPSE_CHE,
+          GO_DEFAULT,
           GO,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS,
           JAVA_THEIA_DOCKER);
@@ -146,13 +160,18 @@ public class NewWorkspacePageTest {
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
+          GO_DEFAULT,
           GO,
           JAVA_CENTOS,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           KOTLIN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS,
           SPRING_BOOT);
@@ -172,13 +191,18 @@ public class NewWorkspacePageTest {
           CEYLON_WITH_JAVA_JAVASCRIPT,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
+          CHE_7_THEIA_DEV,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
+          GO_DEFAULT,
           GO,
           JAVA_CENTOS,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           KOTLIN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS,
           SPRING_BOOT);
@@ -198,28 +222,24 @@ public class NewWorkspacePageTest {
           CEYLON_WITH_JAVA_JAVASCRIPT,
           ECLIPSE_CHE,
           ECLIPSE_VERTX,
+          GO_DEFAULT,
           GO,
           JAVA_CENTOS,
+          JAVA_GRADLE,
+          JAVA_MAVEN,
           KOTLIN,
           NODE,
           PHP,
+          PYTHON_DEFAULT,
           PYTHON,
           RAILS,
           SPRING_BOOT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_MULTI_MACHINE_STACKS =
-      asList(
-          JAVA_MYSQL_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_OPENSHIFT,
-          NODEJS_AND_POSTGRES);
+      asList(JAVA_MYSQL_THEIA_ON_KUBERNETES, NODEJS_AND_POSTGRES);
 
   private static final List<NewWorkspace.Stack> EXPECTED_K8S_MULTI_MACHINE_STACKS =
-      asList(
-          JAVA_MYSQL_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_ON_KUBERNETES,
-          JAVA_THEIA_OPENSHIFT,
-          NODEJS_AND_POSTGRES);
+      asList(JAVA_MYSQL_THEIA_ON_KUBERNETES, NODEJS_AND_POSTGRES);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_MULTI_MACHINE_STACKS =
       asList(JAVA_MYSQL, JAVA_MYSQL_CENTOS, JAVA_THEIA_DOCKER);
@@ -231,13 +251,16 @@ public class NewWorkspacePageTest {
               BLANK,
               RAILS,
               PYTHON,
+              PYTHON_DEFAULT,
               PHP,
               NODE,
-              JAVA_THEIA_OPENSHIFT,
-              JAVA_THEIA_ON_KUBERNETES,
+              JAVA_MAVEN,
+              JAVA_GRADLE,
               JAVA_MYSQL_THEIA_ON_KUBERNETES,
               GO,
+              GO_DEFAULT,
               ECLIPSE_CHE,
+              CHE_7_THEIA_DEV,
               CHE_7_PREVIEW_DEV,
               CHE_7_PREVIEW,
               CPP,
@@ -250,12 +273,16 @@ public class NewWorkspacePageTest {
           BLANK,
           RAILS,
           PYTHON,
+          PYTHON_DEFAULT,
           PHP,
           NODE,
-          JAVA_THEIA_ON_KUBERNETES,
+          JAVA_MAVEN,
+          JAVA_GRADLE,
           JAVA_MYSQL_THEIA_ON_KUBERNETES,
           GO,
+          GO_DEFAULT,
           ECLIPSE_CHE,
+          CHE_7_THEIA_DEV,
           CHE_7_PREVIEW_DEV,
           CHE_7_PREVIEW,
           CPP,
@@ -270,16 +297,20 @@ public class NewWorkspacePageTest {
           JAVA_THEIA_DOCKER,
           RAILS,
           PYTHON,
+          PYTHON_DEFAULT,
           PHP,
           NODE,
+          JAVA_MAVEN,
+          JAVA_GRADLE,
           GO,
+          GO_DEFAULT,
           ECLIPSE_CHE,
           CPP,
           ANDROID,
           DOT_NET);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_JAVA_STACKS =
-      asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_THEIA_OPENSHIFT);
+      asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_MYSQL_THEIA_ON_KUBERNETES);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_JAVA_STACKS =
       asList(JAVA, JAVA_MYSQL, ECLIPSE_CHE, ANDROID);
