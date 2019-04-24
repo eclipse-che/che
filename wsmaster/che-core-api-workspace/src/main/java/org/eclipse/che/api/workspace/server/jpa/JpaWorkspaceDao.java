@@ -60,14 +60,10 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     try {
       doCreate(workspace);
     } catch (DuplicateKeyException dkEx) {
-      String name =
-          workspace.getConfig() != null
-              ? workspace.getConfig().getName()
-              : workspace.getDevfile().getName();
       throw new ConflictException(
           format(
               "Workspace with id '%s' or name '%s' in namespace '%s' already exists",
-              workspace.getId(), name, workspace.getNamespace()));
+              workspace.getId(), workspace.getName(), workspace.getNamespace()));
     } catch (RuntimeException x) {
       throw new ServerException(x.getMessage(), x);
     }
@@ -81,12 +77,10 @@ public class JpaWorkspaceDao implements WorkspaceDao {
     try {
       return new WorkspaceImpl(doUpdate(update));
     } catch (DuplicateKeyException dkEx) {
-      String name =
-          update.getConfig() != null ? update.getConfig().getName() : update.getDevfile().getName();
       throw new ConflictException(
           format(
               "Workspace with name '%s' in namespace '%s' already exists",
-              name, update.getNamespace()));
+              update.getName(), update.getNamespace()));
     } catch (RuntimeException x) {
       throw new ServerException(x.getMessage(), x);
     }

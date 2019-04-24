@@ -19,6 +19,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.RUNNING;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -53,6 +54,7 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.config.ProjectConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
@@ -78,6 +80,9 @@ import org.eclipse.che.api.workspace.shared.dto.ServerDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -133,10 +138,11 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void shouldCreateWorkspace() throws Exception {
+  public void shouldCreateWorkspaceFromConfig() throws Exception {
     final WorkspaceConfigDto configDto = createConfigDto();
     final WorkspaceImpl workspace = createWorkspace(configDto);
-    when(wsManager.createWorkspace(any(), anyString(), any())).thenReturn(workspace);
+    when(wsManager.createWorkspace(any(WorkspaceConfig.class), anyString(), any()))
+        .thenReturn(workspace);
 
     final Response response =
         given()
@@ -158,7 +164,7 @@ public class WorkspaceServiceTest {
         new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
     verify(wsManager)
         .createWorkspace(
-            any(),
+            any(WorkspaceConfig.class),
             eq("test"),
             eq(
                 ImmutableMap.of(
@@ -168,7 +174,42 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void shouldUseUsernameAsNamespaceWhenCreatingWorkspaceWithoutSpecifiedNamespace()
+  public void shouldCreateWorkspaceFromDevfile() throws Exception {
+    final DevfileDto devfileDto = createDevfileDto();
+    final WorkspaceImpl workspace = createWorkspace(devfileDto);
+    when(wsManager.createWorkspace(any(Devfile.class), anyString(), any())).thenReturn(workspace);
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(devfileDto)
+            .when()
+            .post(
+                SECURE_PATH
+                    + "/workspace/devfile"
+                    + "?namespace=test"
+                    + "&attribute=stackId:stack123"
+                    + "&attribute=factoryId:factory123"
+                    + "&attribute=custom:custom:value");
+
+    assertEquals(response.getStatusCode(), 201);
+    assertEquals(
+        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+    verify(wsManager)
+        .createWorkspace(
+            any(Devfile.class),
+            eq("test"),
+            eq(
+                ImmutableMap.of(
+                    "stackId", "stack123",
+                    "factoryId", "factory123",
+                    "custom", "custom:value")));
+  }
+
+  @Test
+  public void shouldUseUsernameAsNamespaceWhenCreatingWorkspaceFromConfigWithoutSpecifiedNamespace()
       throws Exception {
     final WorkspaceConfigDto configDto = createConfigDto();
     final WorkspaceImpl workspace = createWorkspace(configDto);
@@ -194,7 +235,7 @@ public class WorkspaceServiceTest {
         new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
     verify(wsManager)
         .createWorkspace(
-            any(),
+            any(WorkspaceConfig.class),
             eq(NAMESPACE),
             eq(
                 ImmutableMap.of(
@@ -204,11 +245,11 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void shouldStartTheWorkspaceAfterItIsCreatedWhenStartAfterCreateParamIsTrue()
+  public void shouldStartTheWorkspaceAfterItIsCreatedFromConfigWhenStartAfterCreateParamIsTrue()
       throws Exception {
     final WorkspaceConfigDto configDto = createConfigDto();
     final WorkspaceImpl workspace = createWorkspace(configDto);
-    when(wsManager.createWorkspace(any(), any(), any())).thenReturn(workspace);
+    when(wsManager.createWorkspace(any(WorkspaceConfig.class), any(), any())).thenReturn(workspace);
 
     given()
         .auth()
@@ -227,7 +268,7 @@ public class WorkspaceServiceTest {
     verify(wsManager).startWorkspace(workspace.getId(), null, emptyMap());
     verify(wsManager)
         .createWorkspace(
-            any(),
+            any(WorkspaceConfig.class),
             anyString(),
             eq(
                 ImmutableMap.of(
@@ -703,6 +744,48 @@ public class WorkspaceServiceTest {
   }
 
   @Test
+  public void shouldNotUpdateTheWorkspaceWithConfigAndDevfileAtTheSameTime() throws Exception {
+    final WorkspaceDto workspaceDto =
+        newDto(WorkspaceDto.class)
+            .withId("workspace123")
+            .withConfig(newDto(WorkspaceConfigDto.class))
+            .withDevfile(newDto(DevfileDto.class));
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(workspaceDto)
+            .when()
+            .put(SECURE_PATH + "/workspace/" + workspaceDto.getId());
+
+    assertEquals(response.getStatusCode(), 400);
+    assertEquals(
+        unwrapError(response),
+        "Required non-null workspace configuration or devfile update but not both");
+  }
+
+  @Test
+  public void shouldNotUpdateTheWorkspaceWithoutConfigAndDevfile() throws Exception {
+    final WorkspaceDto workspaceDto = newDto(WorkspaceDto.class).withId("workspace123");
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(workspaceDto)
+            .when()
+            .put(SECURE_PATH + "/workspace/" + workspaceDto.getId());
+
+    assertEquals(response.getStatusCode(), 400);
+    assertEquals(
+        unwrapError(response),
+        "Required non-null workspace configuration or devfile update but not both");
+  }
+
+  @Test
   public void shouldDeleteWorkspace() throws Exception {
     final WorkspaceImpl workspace = createWorkspace(createConfigDto());
 
@@ -1167,6 +1250,28 @@ public class WorkspaceServiceTest {
         .setAccount(TEST_ACCOUNT)
         .setStatus(status)
         .build();
+  }
+
+  private WorkspaceImpl createWorkspace(DevfileDto devfileDto) {
+    return WorkspaceImpl.builder()
+        .generateId()
+        .setDevfile(devfileDto)
+        .setAccount(TEST_ACCOUNT)
+        .setStatus(STOPPED)
+        .build();
+  }
+
+  private DevfileDto createDevfileDto() {
+    return newDto(DevfileDto.class)
+        .withSpecVersion("0.0.1")
+        .withName("ws")
+        .withProjects(
+            singletonList(
+                newDto(ProjectDto.class)
+                    .withName("project")
+                    .withSource(
+                        newDto(SourceDto.class)
+                            .withLocation("https://github.com/eclipse/che.git"))));
   }
 
   private static WorkspaceImpl createWorkspace(WorkspaceConfig configDto) {

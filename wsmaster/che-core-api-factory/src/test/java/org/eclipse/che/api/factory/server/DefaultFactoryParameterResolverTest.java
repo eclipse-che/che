@@ -92,7 +92,8 @@ public class DefaultFactoryParameterResolverTest {
             new CommandConverter(),
             componentProvisioners,
             appliers,
-            new DefaultEditorProvisioner(null, new String[] {}));
+            new DefaultEditorProvisioner(null, new String[] {}),
+            new URLFetcher());
 
     WorkspaceManager workspaceManager = mock(WorkspaceManager.class);
 
