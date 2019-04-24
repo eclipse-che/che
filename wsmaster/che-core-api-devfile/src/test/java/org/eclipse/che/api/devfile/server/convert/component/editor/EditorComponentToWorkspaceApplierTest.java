@@ -11,10 +11,12 @@
  */
 package org.eclipse.che.api.devfile.server.convert.component.editor;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
@@ -37,22 +39,27 @@ public class EditorComponentToWorkspaceApplierTest {
   @Test
   public void shouldProvisionWorkspaceEditorAttributeDuringCheEditorComponentApplying()
       throws Exception {
+    String editorId = "org.eclipse.che.super-editor:0.0.1";
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     ComponentImpl editorComponent = new ComponentImpl();
     editorComponent.setType(EDITOR_COMPONENT_TYPE);
     editorComponent.setAlias("editor");
-    editorComponent.setId("org.eclipse.che.super-editor:0.0.1");
+    editorComponent.setId(editorId);
+    editorComponent.setMemoryLimit("12345M");
 
     // when
     editorComponentApplier.apply(workspaceConfig, editorComponent, null);
 
     // then
-    assertEquals(
-        workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE),
-        "org.eclipse.che.super-editor:0.0.1");
+    assertEquals(workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE), editorId);
     assertEquals(
         workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE), "editor");
+    assertEquals(
+        workspaceConfig
+            .getAttributes()
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorId.split(":")[0])),
+        "12345M");
   }
 
   @Test

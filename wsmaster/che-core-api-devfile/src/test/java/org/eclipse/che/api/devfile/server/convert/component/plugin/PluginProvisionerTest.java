@@ -11,8 +11,10 @@
  */
 package org.eclipse.che.api.devfile.server.convert.component.plugin;
 
+import static java.lang.String.format;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -47,6 +49,9 @@ public class PluginProvisionerTest {
         .put(
             PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
             "org.eclipse.che.super-plugin:0.0.1=super-plugin,custom-plugin:v1=custom");
+    workspaceConfig
+        .getAttributes()
+        .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "custom-plugin"), "1024M");
     DevfileImpl devfile = new DevfileImpl();
 
     // when
@@ -63,6 +68,7 @@ public class PluginProvisionerTest {
     assertEquals(customPluginComponent.getAlias(), "custom");
     assertEquals(customPluginComponent.getId(), "custom-plugin:v1");
     assertEquals(customPluginComponent.getType(), PLUGIN_COMPONENT_TYPE);
+    assertEquals(customPluginComponent.getMemoryLimit(), "1024M");
   }
 
   @Test

@@ -17,6 +17,7 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATT
 import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
@@ -54,6 +55,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
     String editorComponentAlias = editorComponent.getAlias();
     String editorId = editorComponent.getId();
+    String memoryLimit = editorComponent.getMemoryLimit();
 
     workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, editorId);
 
@@ -64,6 +66,12 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     }
 
     String editorIdVersion = resolveIdAndVersion(editorComponent.getId());
+    if (memoryLimit != null) {
+      String editorIdPart = editorIdVersion.split(":")[0];
+      workspaceConfig
+          .getAttributes()
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorIdPart), memoryLimit);
+    }
     workspaceConfig
         .getCommands()
         .stream()
