@@ -22,6 +22,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.QueryHint;
 import javax.persistence.Table;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
@@ -54,7 +55,8 @@ import org.eclipse.che.multiuser.permission.workspace.server.model.Worker;
           "SELECT worker "
               + "FROM Worker worker "
               + "WHERE worker.userId = :userId "
-              + "AND worker.workspaceId = :workspaceId ")
+              + "AND worker.workspaceId = :workspaceId ",
+      hints = {@QueryHint(name = "eclipselink.query-results-cache", value = "true")})
 })
 @Table(name = "che_worker")
 public class WorkerImpl extends AbstractPermissions implements Worker {
