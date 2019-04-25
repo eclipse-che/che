@@ -31,22 +31,26 @@ import org.testng.annotations.Test;
  */
 public class DefaultEditorProvisionerTest {
 
-  private static final String DEFAULT_EDITOR_ID = "org.eclipse.che.theia";
+  private static final String DEFAULT_EDITOR_NAME = "theia";
   private static final String DEFAULT_EDITOR_VERSION = "1.0.0";
-  private static final String DEFAULT_EDITOR_REF = DEFAULT_EDITOR_ID + ":" + DEFAULT_EDITOR_VERSION;
+  private static final String DEFAULT_EDITOR_PUBLISHER = "eclipse";
+  private static final String DEFAULT_EDITOR_REF =
+      DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_EDITOR_NAME + "/" + DEFAULT_EDITOR_VERSION;
 
-  private static final String DEFAULT_TERMINAL_PLUGIN_ID = "org.eclipse.che.theia-terminal";
-  private static final String DEFAULT_TERMINAL_PLUGIN_REF = DEFAULT_TERMINAL_PLUGIN_ID + ":0.0.4";
+  private static final String DEFAULT_TERMINAL_PLUGIN_NAME = "theia-terminal";
+  private static final String DEFAULT_TERMINAL_PLUGIN_REF =
+      DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_TERMINAL_PLUGIN_NAME + "/0.0.4";
 
-  private static final String DEFAULT_COMMAND_PLUGIN_ID = "org.eclipse.che.theia-command";
-  private static final String DEFAULT_COMMAND_PLUGIN_REF = DEFAULT_COMMAND_PLUGIN_ID + ":v1.0.0";
+  private static final String DEFAULT_COMMAND_PLUGIN_NAME = "theia-command";
+  private static final String DEFAULT_COMMAND_PLUGIN_REF =
+      DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_COMMAND_PLUGIN_NAME + "/v1.0.0";
 
   private DefaultEditorProvisioner defaultEditorProvisioner;
 
   @Test
   public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() {
     // given
-    defaultEditorProvisioner = new DefaultEditorProvisioner(null, new String[] {});
+    defaultEditorProvisioner = new DefaultEditorProvisioner(null, new String[]{});
     DevfileImpl devfile = new DevfileImpl();
 
     // when
@@ -62,7 +66,7 @@ public class DefaultEditorProvisionerTest {
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(
             DEFAULT_EDITOR_REF,
-            new String[] {DEFAULT_TERMINAL_PLUGIN_REF, DEFAULT_COMMAND_PLUGIN_REF});
+            new String[]{DEFAULT_TERMINAL_PLUGIN_REF, DEFAULT_COMMAND_PLUGIN_REF});
     DevfileImpl devfile = new DevfileImpl();
 
     // when
@@ -83,11 +87,12 @@ public class DefaultEditorProvisionerTest {
     // given
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(
-            DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
+            DEFAULT_EDITOR_REF, new String[]{DEFAULT_TERMINAL_PLUGIN_REF});
 
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl defaultEditorWithDifferentVersion =
-        new ComponentImpl(EDITOR_COMPONENT_TYPE, DEFAULT_EDITOR_ID + ":latest");
+        new ComponentImpl(EDITOR_COMPONENT_TYPE,
+            DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_EDITOR_NAME + "/latest");
     devfile.getComponents().add(defaultEditorWithDifferentVersion);
 
     // when
@@ -105,16 +110,18 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void
-      shouldProvisionDefaultPluginsIfTheyAreNotSpecifiedAndDefaultEditorFromCustomRegistryIsConfigured() {
+  shouldProvisionDefaultPluginsIfTheyAreNotSpecifiedAndDefaultEditorFromCustomRegistryIsConfigured() {
     // given
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(
-            DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
+            DEFAULT_EDITOR_REF, new String[]{DEFAULT_TERMINAL_PLUGIN_REF});
 
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl defaultEditorWithDifferentVersion =
         new ComponentImpl(
-            EDITOR_COMPONENT_TYPE, "https://my-custom-registry/" + DEFAULT_EDITOR_ID + ":latest");
+            EDITOR_COMPONENT_TYPE,
+            "https://my-custom-registry/" + DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_EDITOR_NAME
+                + "/latest");
     devfile.getComponents().add(defaultEditorWithDifferentVersion);
 
     // when
@@ -135,11 +142,12 @@ public class DefaultEditorProvisionerTest {
     // given
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(
-            DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
+            DEFAULT_EDITOR_REF, new String[]{DEFAULT_TERMINAL_PLUGIN_REF});
 
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl editorWithNameSimilarToDefault =
-        new ComponentImpl(EDITOR_COMPONENT_TYPE, DEFAULT_EDITOR_ID + "-dev:dev-version");
+        new ComponentImpl(EDITOR_COMPONENT_TYPE,
+            DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_EDITOR_NAME + "-dev/dev-version");
     devfile.getComponents().add(editorWithNameSimilarToDefault);
 
     // when
@@ -149,7 +157,7 @@ public class DefaultEditorProvisionerTest {
     List<ComponentImpl> components = devfile.getComponents();
     assertEquals(components.size(), 1);
     assertTrue(components.contains(editorWithNameSimilarToDefault));
-    assertNull(findById(components, DEFAULT_EDITOR_ID));
+    assertNull(findById(components, DEFAULT_EDITOR_NAME));
   }
 
   @Test
@@ -157,7 +165,7 @@ public class DefaultEditorProvisionerTest {
     // given
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(
-            DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
+            DEFAULT_EDITOR_REF, new String[]{DEFAULT_TERMINAL_PLUGIN_REF});
 
     DevfileImpl devfile = new DevfileImpl();
     devfile.getAttributes().put(EDITOR_FREE_DEVFILE_ATTRIBUTE, "true");
@@ -172,15 +180,16 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void
-      shouldProvisionDefaultPluginIfDevfileAlreadyContainPluginWithNameWhichStartWithDefaultOne() {
+  shouldProvisionDefaultPluginIfDevfileAlreadyContainPluginWithNameWhichStartWithDefaultOne() {
     // given
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(
-            DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
+            DEFAULT_EDITOR_REF, new String[]{DEFAULT_TERMINAL_PLUGIN_REF});
 
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl pluginWithNameSimilarToDefault =
-        new ComponentImpl(PLUGIN_COMPONENT_TYPE, DEFAULT_TERMINAL_PLUGIN_ID + "-dummy:latest");
+        new ComponentImpl(PLUGIN_COMPONENT_TYPE,
+            DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_TERMINAL_PLUGIN_NAME + "-dummy/latest");
     devfile.getComponents().add(pluginWithNameSimilarToDefault);
 
     // when
@@ -198,10 +207,10 @@ public class DefaultEditorProvisionerTest {
   @Test
   public void shouldNotProvisionDefaultEditorOrDefaultPluginsIfDevfileAlreadyHasNonDefaultEditor() {
     // given
-    defaultEditorProvisioner = new DefaultEditorProvisioner(DEFAULT_EDITOR_REF, new String[] {});
+    defaultEditorProvisioner = new DefaultEditorProvisioner(DEFAULT_EDITOR_REF, new String[]{});
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl nonDefaultEditor =
-        new ComponentImpl(EDITOR_COMPONENT_TYPE, "any:v" + DEFAULT_EDITOR_VERSION);
+        new ComponentImpl(EDITOR_COMPONENT_TYPE, "anypublisher/anyname/v" + DEFAULT_EDITOR_VERSION);
     devfile.getComponents().add(nonDefaultEditor);
 
     // when
@@ -216,10 +225,11 @@ public class DefaultEditorProvisionerTest {
   @Test
   public void shouldNonProvisionDefaultEditorIfDevfileAlreadyContainsSuchButWithDifferentVersion() {
     // given
-    defaultEditorProvisioner = new DefaultEditorProvisioner(DEFAULT_EDITOR_REF, new String[] {});
+    defaultEditorProvisioner = new DefaultEditorProvisioner(DEFAULT_EDITOR_REF, new String[]{});
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl myTheiaEditor =
-        new ComponentImpl(EDITOR_COMPONENT_TYPE, DEFAULT_EDITOR_REF + ":my-custom");
+        new ComponentImpl(EDITOR_COMPONENT_TYPE,
+            DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_EDITOR_NAME + "/my-custom");
     devfile.getComponents().add(myTheiaEditor);
 
     // when
@@ -236,10 +246,11 @@ public class DefaultEditorProvisionerTest {
     // given
     defaultEditorProvisioner =
         new DefaultEditorProvisioner(
-            DEFAULT_EDITOR_REF, new String[] {DEFAULT_TERMINAL_PLUGIN_REF});
+            DEFAULT_EDITOR_REF, new String[]{DEFAULT_TERMINAL_PLUGIN_REF});
     DevfileImpl devfile = new DevfileImpl();
     ComponentImpl myTerminal =
-        new ComponentImpl(PLUGIN_COMPONENT_TYPE, DEFAULT_TERMINAL_PLUGIN_ID + ":my-custom");
+        new ComponentImpl(PLUGIN_COMPONENT_TYPE,
+            DEFAULT_EDITOR_PUBLISHER + "/" + DEFAULT_TERMINAL_PLUGIN_NAME + "/my-custom");
     devfile.getComponents().add(myTerminal);
 
     // when
@@ -256,9 +267,11 @@ public class DefaultEditorProvisionerTest {
   public void shouldGenerateDefaultPluginNameIfIdIsNotUnique() {
     // given
     defaultEditorProvisioner =
-        new DefaultEditorProvisioner(DEFAULT_EDITOR_REF, new String[] {"my-plugin:v2.0"});
+        new DefaultEditorProvisioner(DEFAULT_EDITOR_REF,
+            new String[]{DEFAULT_EDITOR_PUBLISHER + "/" + "my-plugin/v2.0"});
     DevfileImpl devfile = new DevfileImpl();
-    ComponentImpl myPlugin = new ComponentImpl(PLUGIN_COMPONENT_TYPE, "my-custom-plugin:v0.0.3");
+    ComponentImpl myPlugin = new ComponentImpl(PLUGIN_COMPONENT_TYPE,
+        DEFAULT_EDITOR_PUBLISHER + "/" + "my-custom-plugin/v0.0.3");
     devfile.getComponents().add(myPlugin);
 
     // when
@@ -269,7 +282,8 @@ public class DefaultEditorProvisionerTest {
     assertEquals(components.size(), 3);
     assertTrue(components.contains(new ComponentImpl(EDITOR_COMPONENT_TYPE, DEFAULT_EDITOR_REF)));
     assertTrue(components.contains(myPlugin));
-    ComponentImpl defaultPlugin = findByRef(components, "my-plugin:v2.0");
+    ComponentImpl defaultPlugin = findByRef(components,
+        DEFAULT_EDITOR_PUBLISHER + "/" + "my-plugin/v2.0");
     assertNotNull(defaultPlugin);
     assertNull(defaultPlugin.getAlias());
   }

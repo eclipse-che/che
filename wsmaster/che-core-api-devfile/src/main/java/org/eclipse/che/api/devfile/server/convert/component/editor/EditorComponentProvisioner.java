@@ -18,9 +18,11 @@ import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMI
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
+import org.eclipse.che.api.devfile.server.convert.component.plugin.PluginReferenceParser;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
@@ -46,16 +48,19 @@ public class EditorComponentProvisioner implements ComponentProvisioner {
       return;
     }
 
-    ComponentImpl editorComponent = new ComponentImpl(EDITOR_COMPONENT_TYPE, editorAttribute);
+    PluginMeta meta = PluginReferenceParser.resolveMeta(editorAttribute);
+
+    ComponentImpl editorComponent = new ComponentImpl(EDITOR_COMPONENT_TYPE, meta.getId());
 
     editorComponent.setAlias(
         workspaceConfig
             .getAttributes()
-            .getOrDefault(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorAttribute));
+            .getOrDefault(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, meta.getId()));
     editorComponent.setMemoryLimit(
         workspaceConfig
             .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorAttribute.split(":")[0])));
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
+                meta.getPublisher() + "/" + meta.getName())));
     devfile.getComponents().add(editorComponent);
   }
 }

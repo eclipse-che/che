@@ -23,13 +23,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
+import org.eclipse.che.api.devfile.server.convert.component.plugin.PluginReferenceParser;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.commons.lang.Pair;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 
 /**
  * Provision default editor if there is no any another editor and default plugins for it.
@@ -41,15 +41,14 @@ public class DefaultEditorProvisioner {
   private final String defaultEditorRef;
   private final String defaultEditor;
   private final Map<String, String> defaultPluginsToRefs;
-  private final Pattern PLUGIN_PATTERN =
-      Pattern.compile("(.*/)?(?<publisher>[^/]+)/(?<name>[^/]+)/(?<version>[^/]+)");
 
   @Inject
   public DefaultEditorProvisioner(
       @Named("che.workspace.devfile.default_editor") String defaultEditorRef,
       @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs) {
     this.defaultEditorRef = Strings.isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
-    this.defaultEditor = this.defaultEditorRef == null ? null : getId(this.defaultEditorRef);
+    this.defaultEditor =
+        this.defaultEditorRef == null ? null : getPluginPublisherAndName(this.defaultEditorRef);
     this.defaultPluginsToRefs =
         Arrays.stream(defaultPluginsRefs)
             .collect(toMap(this::getPluginPublisherAndName, identity()));
@@ -82,7 +81,7 @@ public class DefaultEditorProvisioner {
       isDefaultEditorUsed = true;
     } else {
       Component editor = editorOpt.get();
-      isDefaultEditorUsed = defaultEditor.equals(resolveIdAndVersion(editor.getId()).first);
+      isDefaultEditorUsed = defaultEditor.equals(getPluginPublisherAndName(editor.getId()));
     }
 
     if (isDefaultEditorUsed) {
@@ -93,35 +92,18 @@ public class DefaultEditorProvisioner {
   private void provisionDefaultPlugins(List<ComponentImpl> components) {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
 
-    // TODO
     components
         .stream()
         .filter(t -> PLUGIN_COMPONENT_TYPE.equals(t.getType()))
-        .forEach(t -> missingPluginsIdToRef.remove(getId(t.getId())));
+        .forEach(t -> missingPluginsIdToRef.remove(getPluginPublisherAndName(t.getId())));
 
     missingPluginsIdToRef
         .values()
         .forEach(pluginRef -> components.add(new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef)));
   }
 
-  private String getId(String reference) {
-    return resolveIdAndVersion(reference).first;
-  }
-
   private String getPluginPublisherAndName(String reference) {
-    return resolveIdAndVersion(reference).first;
-  }
-
-  // todo
-  private Pair<String, String> resolveIdAndVersion(String ref) {
-    int lastSlashPosition = ref.lastIndexOf("/");
-    String idVersion;
-    if (lastSlashPosition < 0) {
-      idVersion = ref;
-    } else {
-      idVersion = ref.substring(lastSlashPosition + 1);
-    }
-    String[] splitted = idVersion.split(":", 2);
-    return Pair.of(splitted[0], splitted[1]);
+    PluginMeta meta = PluginReferenceParser.resolveMeta(reference);
+    return meta.getPublisher() + "/" + meta.getName();
   }
 }

@@ -35,14 +35,14 @@ public class EditorComponentProvisionerTest {
   }
 
   @Test
-  public void shouldProvisionCheEditorComponent() throws Exception {
+  public void shouldProvisionCheEditorComponent() {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
-    String editorId = "org.eclipse.che.super-editor:0.0.1";
+    String editorId = "eclipse/super-editor/0.0.1";
     workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, editorId);
     workspaceConfig
         .getAttributes()
-        .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorId.split(":")[0]), "245G");
+        .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor"), "245G");
     workspaceConfig.getAttributes().put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, "editor");
     DevfileImpl devfile = new DevfileImpl();
 
@@ -59,13 +59,12 @@ public class EditorComponentProvisionerTest {
   }
 
   @Test
-  public void shouldUseEditorIdAsComponentNameIfAliasIsMissingDuringEditorComponentProvisioning()
-      throws Exception {
+  public void shouldUseEditorIdAsComponentNameIfAliasIsMissingDuringEditorComponentProvisioning() {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     workspaceConfig
         .getAttributes()
-        .put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "org.eclipse.che.super-editor:0.0.1");
+        .put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, "eclipse/super-editor/0.0.1");
     DevfileImpl devfile = new DevfileImpl();
 
     // when
@@ -74,6 +73,6 @@ public class EditorComponentProvisionerTest {
     // then
     assertEquals(devfile.getComponents().size(), 1);
     ComponentImpl editorComponent = devfile.getComponents().get(0);
-    assertEquals(editorComponent.getAlias(), "org.eclipse.che.super-editor:0.0.1");
+    assertEquals(editorComponent.getAlias(), "eclipse/super-editor/0.0.1");
   }
 }
