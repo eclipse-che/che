@@ -139,7 +139,6 @@
         "required": [
           "type"
         ],
-        "additionalProperties": true,
         "if": {
           "properties": {
             "type": {
@@ -483,7 +482,8 @@
               "dockerimage"
             ]
           }
-        }
+        },
+        "additionalProperties": true
       }
     },
     "commands": {
