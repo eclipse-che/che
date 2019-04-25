@@ -39,7 +39,7 @@ public class Constants {
    * <p>Example value:
    *
    * <pre>
-   * eclipse/maven-jdk8:1.0.0=mvn-stack,eclipse/theia-jdtls:0.0.3=jdt.ls
+   * eclipse/maven-jdk8/1.0.0=mvn-stack,eclipse/theia-jdtls/0.0.3=jdt.ls
    * </pre>
    */
   public static final String PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE =

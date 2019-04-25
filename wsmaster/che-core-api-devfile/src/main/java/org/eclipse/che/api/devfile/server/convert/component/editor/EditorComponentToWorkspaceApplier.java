@@ -23,7 +23,9 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
+import org.eclipse.che.api.devfile.server.convert.component.plugin.PluginReferenceParser;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 
 /**
  * Applies changes on workspace config according to the specified editor component.
@@ -38,7 +40,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
    * @param workspaceConfig workspace config on which changes should be applied
    * @param editorComponent plugin component that should be applied
    * @param contentProvider optional content provider that may be used for external component
-   *     resource fetching
+   * resource fetching
    * @throws IllegalArgumentException if specified workspace config or plugin component is null
    * @throws IllegalArgumentException if specified component has type different from cheEditor
    */
@@ -65,14 +67,12 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
     }
 
-    // TODO how to properly parse this and separate publisher/name/version
-    String editorIdVersion = resolveIdAndVersion(editorId);
+    PluginMeta meta = PluginReferenceParser.resolveMeta(editorId);
     if (memoryLimit != null) {
-      String editorIdPart = editorIdVersion.split(":")[0];
-      // TODO
       workspaceConfig
           .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorIdPart), memoryLimit);
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
+              meta.getPublisher() + "/" + meta.getName()), memoryLimit);
     }
     workspaceConfig
         .getCommands()
@@ -82,15 +82,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
                 c.getAttributes()
                     .get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
                     .equals(editorComponentAlias))
-        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, editorIdVersion));
+        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, meta.getId()));
   }
 
-  private String resolveIdAndVersion(String ref) {
-    int lastSlashPosition = ref.lastIndexOf("/");
-    if (lastSlashPosition < 0) {
-      return ref;
-    } else {
-      return ref.substring(lastSlashPosition + 1);
-    }
-  }
 }

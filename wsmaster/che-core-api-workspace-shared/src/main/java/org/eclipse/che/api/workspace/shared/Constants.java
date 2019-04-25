@@ -34,7 +34,7 @@ public final class Constants {
   public static final String LINK_REL_CREATE_STACK = "create stack";
   public static final String LINK_REL_UPDATE_STACK = "update stack";
   public static final String LINK_REL_REMOVE_STACK = "remove stack";
-  public static final String LINK_REL_GET_STACK_BY_ID = "get stack by id";;
+  public static final String LINK_REL_GET_STACK_BY_ID = "get stack by id";
   public static final String LINK_REL_SEARCH_STACKS = "search stacks";
 
   public static final String LINK_REL_GET_ICON = "get icon link";
@@ -81,11 +81,11 @@ public final class Constants {
    * Contains an identifier of an editor that should be used in a workspace. Should be set/read from
    * {@link WorkspaceConfig#getAttributes}.
    *
-   * <p>Value is colon separated id, version.
+   * <p>Value is plugin id.
    *
    * <p>This is beta constant that is subject to change or removal.
    *
-   * <p>Example of the attribute value: 'org.eclipse.che.super-editor:0.0.1'
+   * <p>Example of the attribute value: 'eclipse/super-editor/0.0.1'
    */
   public static final String WORKSPACE_TOOLING_EDITOR_ATTRIBUTE = "editor";
 
@@ -108,13 +108,12 @@ public final class Constants {
    * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
    * set/read from {@link WorkspaceConfig#getAttributes}.
    *
-   * <p>Value is comma separated list of plugins in a format: '< plugin1ID >:< plugin1Version >,<
-   * plugin2ID >/< plugin2Version >'<br>
+   * <p>Value is comma separated list of plugins in a format: '< plugin1ID >,<plugin2ID >'<br>
    * Spaces around commas are trimmed. <br>
    *
    * <p>This is beta constant that is subject to change or removal.
    *
-   * <p>Example of the attribute value: 'org.eclipse.che.plugin1:0.0.1, com.redhat.plugin2:1.0.0'
+   * <p>Example of the attribute value: 'eclipse/plugin1/0.0.1, redhat/plugin2/1.0.0'
    */
   public static final String WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE = "plugins";
 
@@ -170,7 +169,7 @@ public final class Constants {
   /**
    * Attribute of {@link Machine} that indicates by which plugin this machines is provisioned
    *
-   * <p>It contains plugin id, like "plugin": "org.eclipse.che.editor.theia"
+   * <p>It contains plugin id, like "plugin": "eclipse/che-theia/master"
    */
   public static final String PLUGIN_MACHINE_ATTRIBUTE = "plugin";
 

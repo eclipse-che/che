@@ -26,6 +26,7 @@ import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -58,7 +59,6 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
     String workspacePluginsAttribute =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
-    // TODO
     workspaceConfig
         .getAttributes()
         .put(
@@ -68,7 +68,6 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     String pluginsAliases =
         workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
     if (pluginComponent.getAlias() != null) {
-      // TODO
       workspaceConfig
           .getAttributes()
           .put(
@@ -76,14 +75,13 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
               append(pluginsAliases, pluginComponent.getId() + "=" + pluginComponent.getAlias()));
     }
 
-    // TODO
-    String pluginIdVersion = resolveIdAndVersion(pluginComponent.getId());
+    PluginMeta meta = PluginReferenceParser.resolveMeta(pluginComponent.getId());
     String memoryLimit = pluginComponent.getMemoryLimit();
     if (memoryLimit != null) {
-      String pluginIdPart = pluginIdVersion.split(":")[0];
       workspaceConfig
           .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginIdPart), memoryLimit);
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
+              meta.getPublisher() + "/" + meta.getName()), memoryLimit);
     }
 
     for (CommandImpl command : workspaceConfig.getCommands()) {
@@ -98,16 +96,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         continue;
       }
 
-      command.getAttributes().put(PLUGIN_ATTRIBUTE, pluginIdVersion);
-    }
-  }
-
-  private String resolveIdAndVersion(String ref) {
-    int lastSlashPosition = ref.lastIndexOf("/");
-    if (lastSlashPosition < 0) {
-      return ref;
-    } else {
-      return ref.substring(lastSlashPosition + 1);
+      command.getAttributes().put(PLUGIN_ATTRIBUTE, meta.getId());
     }
   }
 

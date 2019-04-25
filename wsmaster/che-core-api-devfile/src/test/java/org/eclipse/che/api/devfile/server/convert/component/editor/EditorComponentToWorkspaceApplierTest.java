@@ -37,9 +37,8 @@ public class EditorComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionWorkspaceEditorAttributeDuringCheEditorComponentApplying()
-      throws Exception {
-    String editorId = "org.eclipse.che.super-editor:0.0.1";
+  public void shouldProvisionWorkspaceEditorAttributeDuringCheEditorComponentApplying() {
+    String editorId = "eclipse/super-editor/0.0.1";
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     ComponentImpl editorComponent = new ComponentImpl();
@@ -58,17 +57,16 @@ public class EditorComponentToWorkspaceApplierTest {
     assertEquals(
         workspaceConfig
             .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorId.split(":")[0])),
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor")),
         "12345M");
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying()
-      throws Exception {
+  public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying() {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("editor");
-    superPluginComponent.setId("org.eclipse.che.super-editor:0.0.1");
+    superPluginComponent.setId("eclipse/super-editor/0.0.1");
     superPluginComponent.setType(EDITOR_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -82,17 +80,16 @@ public class EditorComponentToWorkspaceApplierTest {
     // then
     assertEquals(
         workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
-        "org.eclipse.che.super-editor:0.0.1");
+        "eclipse/super-editor/0.0.1");
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
-      throws Exception {
+  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry() {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("editor");
     superPluginComponent.setId(
-        "https://custom-plugin.registry/plugins/org.eclipse.che.super-editor:0.0.1");
+        "https://custom-plugin.registry/plugins/eclipse/super-editor/0.0.1");
     superPluginComponent.setType(EDITOR_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -106,6 +103,6 @@ public class EditorComponentToWorkspaceApplierTest {
     // then
     assertEquals(
         workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
-        "org.eclipse.che.super-editor:0.0.1");
+        "eclipse/super-editor/0.0.1");
   }
 }

@@ -27,6 +27,7 @@ import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
 import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
@@ -59,13 +60,16 @@ public class PluginProvisioner implements ComponentProvisioner {
     Map<String, String> pluginIdToComponentAlias = extractPluginIdToComponentAlias(workspaceConfig);
 
     for (String pluginId : pluginsAttribute.split(",")) {
-      ComponentImpl pluginComponent = new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginId);
+      PluginMeta meta = PluginReferenceParser.resolveMeta(pluginId);
 
-      pluginComponent.setAlias(pluginIdToComponentAlias.get(pluginId));
+      ComponentImpl pluginComponent = new ComponentImpl(PLUGIN_COMPONENT_TYPE, meta.getId());
+
+      pluginComponent.setAlias(pluginIdToComponentAlias.get(meta.getId()));
       pluginComponent.setMemoryLimit(
           workspaceConfig
               .getAttributes()
-              .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginId.split(":")[0])));
+              .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
+                  meta.getPublisher() + "/" + meta.getName())));
       devfile.getComponents().add(pluginComponent);
     }
   }

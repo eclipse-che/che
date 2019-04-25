@@ -38,10 +38,9 @@ public class PluginComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionPluginWorkspaceAttributeDuringChePluginComponentApplying()
-      throws Exception {
+  public void shouldProvisionPluginWorkspaceAttributeDuringChePluginComponentApplying() {
 
-    String superPluginId = "org.eclipse.che.super-plugin:0.0.1";
+    String superPluginId = "eclipse/super-plugin/0.0.1";
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
@@ -51,7 +50,7 @@ public class PluginComponentToWorkspaceApplierTest {
 
     ComponentImpl customPluginComponent = new ComponentImpl();
     customPluginComponent.setAlias("custom");
-    customPluginComponent.setId("custom-plugin:v1");
+    customPluginComponent.setId("publisher1/custom-plugin/v1");
     customPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -63,28 +62,27 @@ public class PluginComponentToWorkspaceApplierTest {
     // then
     String workspaceTooling =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
-    assertTrue(workspaceTooling.matches("(.+:.+),(.+:.+)"));
+    assertTrue(workspaceTooling.matches("(.+/.+/.+),(.+/.+/.+)"));
     assertTrue(workspaceTooling.contains(superPluginId));
-    assertTrue(workspaceTooling.contains("custom-plugin:v1"));
+    assertTrue(workspaceTooling.contains("publisher1/custom-plugin/v1"));
     String toolingAliases =
         workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
-    assertTrue(toolingAliases.matches("(.+:.+=.+),(.+:.+=.+)"));
+    assertTrue(toolingAliases.matches("(.+/.+/.+=.+),(.+/.+/.+=.+)"));
     assertTrue(toolingAliases.contains(superPluginId + "=super-plugin"));
-    assertTrue(toolingAliases.contains("custom-plugin:v1=custom"));
+    assertTrue(toolingAliases.contains("publisher1/custom-plugin/v1=custom"));
     assertEquals(
         workspaceConfig
             .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, superPluginId.split(":")[0])),
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
         "1234M");
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributesDuringChePluginComponentApplying()
-      throws Exception {
+  public void shouldProvisionPluginCommandAttributesDuringChePluginComponentApplying() {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
-    superPluginComponent.setId("org.eclipse.che.super-plugin:0.0.1");
+    superPluginComponent.setId("eclipse/super-plugin/0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -98,17 +96,16 @@ public class PluginComponentToWorkspaceApplierTest {
     // then
     assertEquals(
         workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
-        "org.eclipse.che.super-plugin:0.0.1");
+        "eclipse/super-plugin/0.0.1");
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
-      throws Exception {
+  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry() {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
     superPluginComponent.setId(
-        "https://custom-plugin.registry/plugins/org.eclipse.che.super-plugin:0.0.1");
+        "https://custom-plugin.registry/plugins/eclipse/super-plugin/0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -122,6 +119,6 @@ public class PluginComponentToWorkspaceApplierTest {
     // then
     assertEquals(
         workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
-        "org.eclipse.che.super-plugin:0.0.1");
+        "eclipse/super-plugin/0.0.1");
   }
 }
