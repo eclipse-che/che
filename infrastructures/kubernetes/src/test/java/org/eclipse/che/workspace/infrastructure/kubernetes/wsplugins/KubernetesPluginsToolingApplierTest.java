@@ -126,7 +126,7 @@ public class KubernetesPluginsToolingApplierTest {
     internalEnvironment.addPod(pod);
     internalEnvironment.getMachines().putAll(machines);
 
-    when(projectsRootEnvVariableProvider.get(any()))
+    lenient().when(projectsRootEnvVariableProvider.get(any()))
         .thenReturn(new Pair<>("projects_root", "/somewhere/over/the/rainbow"));
   }
 
@@ -150,13 +150,11 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommands.size(), 1);
     CommandImpl envCommand = envCommands.get(0);
     assertEquals(envCommand.getName(), pluginCommand.getName());
-    assertEquals(
-        envCommand.getCommandLine(),
-        String.join(" ", pluginCommand.getCommand()));
+    assertEquals(envCommand.getCommandLine(), String.join(" ", pluginCommand.getCommand()));
     assertEquals(envCommand.getType(), "custom");
     assertEquals(
         envCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), pluginCommand.getWorkingDir());
-    assertEquals(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "plugin-container");
+    assertEquals(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "some-name-container");
   }
 
   @Test
@@ -180,14 +178,14 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommand.getType(), pluginCommand.getType());
     assertEquals(envCommand.getCommandLine(), pluginCommand.getCommandLine());
     assertEquals(envCommand.getAttributes().get("plugin"), pluginRef);
-    assertEquals(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "plugin-container");
+    assertEquals(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "some-name-container");
   }
 
   @Test
   public void shouldFillInWarningIfChePluginDoesNotHaveAnyContainersButThereAreRelatedCommands()
       throws Exception {
     // given
-    ChePlugin chePlugin = createChePlugin();
+    ChePlugin chePlugin = createChePlugin("custom-name");
     String pluginRef = chePlugin.getId();
 
     CommandImpl pluginCommand = new CommandImpl("test-command", "echo Hello World!", "custom");
@@ -206,7 +204,7 @@ public class KubernetesPluginsToolingApplierTest {
         Warnings.COMMAND_IS_CONFIGURED_IN_PLUGIN_WITHOUT_CONTAINERS_WARNING_CODE);
     assertEquals(
         warning.getMessage(),
-        "There are configured commands for plugin 'some-id' that doesn't have any containers");
+        "There are configured commands for plugin 'somePublisher/custom-name/0.0.3' that doesn't have any containers");
   }
 
   @Test
@@ -246,7 +244,9 @@ public class KubernetesPluginsToolingApplierTest {
         Warnings.COMMAND_IS_CONFIGURED_IN_PLUGIN_WITH_MULTIPLY_CONTAINERS_WARNING_CODE);
     assertEquals(
         warning.getMessage(),
-        "There are configured commands for plugin '" + pluginRef + "' that has multiply containers. Commands will be configured to be run in first container");
+        "There are configured commands for plugin '"
+            + pluginRef
+            + "' that has multiply containers. Commands will be configured to be run in first container");
   }
 
   @Test
@@ -896,8 +896,6 @@ public class KubernetesPluginsToolingApplierTest {
       String path) {
     Map<String, String> serverAttributes = new HashMap<>(attributes);
     serverAttributes.put("internal", Boolean.toString(!isExternal));
-    servers.put(
-        portName,
-        new ServerConfigImpl(port + "/tcp", protocol, path, serverAttributes));
+    servers.put(portName, new ServerConfigImpl(port + "/tcp", protocol, path, serverAttributes));
   }
 }

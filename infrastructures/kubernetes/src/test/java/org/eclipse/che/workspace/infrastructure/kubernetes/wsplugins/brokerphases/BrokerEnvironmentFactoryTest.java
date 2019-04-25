@@ -153,8 +153,8 @@ public class BrokerEnvironmentFactoryTest {
     // given
     Collection<PluginFQN> pluginFQNs =
         ImmutableList.of(
-            new PluginFQN(null, "testPlugin1"),
-            new PluginFQN(new URI("testregistry"), "testPlugin2"));
+            new PluginFQN(null, "testPublisher/testPlugin1/testver1"),
+            new PluginFQN(new URI("testregistry"), "testPublisher/testPlugin2/testver2"));
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
@@ -169,11 +169,9 @@ public class BrokerEnvironmentFactoryTest {
     assertFalse(config.contains("\"registry\":null"), "Should not serialize null registry");
     List<String> expected =
         ImmutableList.of(
-            "\"id\":\"testPlugin1\"",
-            "\"version\":\"testver2\"",
+            "\"id\":\"testPublisher/testPlugin1/testver1\"",
             "\"registry\":\"testregistry\"",
-            "\"id\":\"testPlugin2\"",
-            "\"version\":\"testver2\"");
+            "\"id\":\"testPublisher/testPlugin2/testver2\"");
     for (String expect : expected) {
       assertTrue(
           config.contains(expect),

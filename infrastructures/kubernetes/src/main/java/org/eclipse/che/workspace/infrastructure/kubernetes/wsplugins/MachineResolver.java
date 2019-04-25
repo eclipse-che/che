@@ -82,8 +82,8 @@ public class MachineResolver {
       machineConfig.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemoryLimitBytes);
     }
     // Use plugin_publisher/plugin_name to find overriding of memory limit.
-    String overriddenSidecarMemLimit = wsAttributes
-        .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginPublisherName));
+    String overriddenSidecarMemLimit =
+        wsAttributes.get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginPublisherName));
     if (!isNullOrEmpty(overriddenSidecarMemLimit)) {
       machineConfig
           .getAttributes()

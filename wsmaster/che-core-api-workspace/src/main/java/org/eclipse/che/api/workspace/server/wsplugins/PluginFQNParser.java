@@ -42,12 +42,10 @@ import org.eclipse.che.api.workspace.shared.Constants;
 public class PluginFQNParser {
 
   private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
-      "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'registryURL/name/version' or 'name:version' or 'registryURL/name:version'";
-  private static final Pattern PLUGIN_PATTERN_V1 =
-      Pattern.compile("(?<registry>(https?://)[-./\\w]+/)?(?<name>\\w+):(?<version>[-\\w.]+)");
-  private static final Pattern PLUGIN_PATTERN_V2 =
+      "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'registryURL/name/version'";
+  private static final Pattern PLUGIN_PATTERN =
       Pattern.compile(
-          "(?<registry>(https?://)[-./\\w]+/)?(?<id>[-a-z0-9]+/[-a-z0-9]+/[-.a-z0-9]+)");
+          "((?<registry>(https?://)[-./\\w]+(:[0-9]+)?)/)?(?<id>[-a-z0-9]+/[-a-z0-9]+/[-.a-z0-9]+)");
 
   /**
    * Parses a workspace attributes map into a collection of {@link PluginFQN}.
@@ -109,18 +107,12 @@ public class PluginFQNParser {
     String registry;
     String id;
     URI registryURI = null;
-    Matcher matcher = PLUGIN_PATTERN_V1.matcher(plugin);
+    Matcher matcher = PLUGIN_PATTERN.matcher(plugin);
     if (matcher.matches()) {
       registry = matcher.group("registry");
-      id = matcher.group("name") + "/" + matcher.group("version");
+      id = matcher.group("id");
     } else {
-      matcher = PLUGIN_PATTERN_V2.matcher(plugin);
-      if (matcher.matches()) {
-        registry = matcher.group("registry");
-        id = matcher.group("id");
-      } else {
-        throw new InfrastructureException(format(INCORRECT_PLUGIN_FORMAT_TEMPLATE, plugin));
-      }
+      throw new InfrastructureException(format(INCORRECT_PLUGIN_FORMAT_TEMPLATE, plugin));
     }
     if (!isNullOrEmpty(registry)) {
       try {
