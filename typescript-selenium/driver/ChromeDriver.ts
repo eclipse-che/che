@@ -35,7 +35,7 @@ export class ChromeDriver implements Driver {
         this.driver
             .manage()
             .window()
-            .setSize(1920, 1080)
+            .setSize(TestConstants.TS_SELENIUM_RESOLUTION_WIDTH, TestConstants.TS_SELENIUM_RESOLUTION_HEIGHT)
     }
 
     get(): ThenableWebDriver {

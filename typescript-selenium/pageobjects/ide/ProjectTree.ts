@@ -141,12 +141,12 @@ export class ProjectTree {
                 paths.push(currentPath);
             })
 
-        //expand each project tree item
+        // expand each project tree item
         for (const path of paths) {
             await this.expandItem(path, timeout)
         }
 
-        //open file  
+        // open file  
         await this.clickOnItem(`${pathToItem}/${fileName}`, timeout)
     }
 

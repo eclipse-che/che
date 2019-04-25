@@ -40,7 +40,7 @@ export class DriverHelper {
         }
     }
 
-    public async wait(miliseconds: number): Promise<void> {
+    public async wait(miliseconds: number) {
         await this.driver.sleep(miliseconds)
     }
 
@@ -151,7 +151,7 @@ export class DriverHelper {
         }
     }
 
-    public async waitAllDisappearance(locators: Array<By>, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING): Promise<void> {
+    public async waitAllDisappearance(locators: Array<By>, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         for (const elementLocator of locators) {
             await this.waitDisappearance(elementLocator, attempts, polling)
         }

@@ -15,7 +15,6 @@ import { TYPES } from "../../inversify.types";
 import { Driver } from "../../driver/Driver";
 import { TestConstants } from "../../TestConstants";
 
-
 @injectable()
 export class SingleUserLoginPage implements LoginPage {
     private readonly driver: ThenableWebDriver;
@@ -25,7 +24,6 @@ export class SingleUserLoginPage implements LoginPage {
     ) {
         this.driver = driver.get();
     }
-
 
     async login() {
         await this.driver

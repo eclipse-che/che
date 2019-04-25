@@ -17,8 +17,6 @@ function readEnvAndSetValue(envProperty: any, defaultValue: string | number | bo
     return propertyValue
 }
 
-
-
 export const TestConstants = {
     TS_SELENIUM_HEADLESS: readEnvAndSetValue(process.env.TS_SELENIUM_HEADLESS, false),
 
@@ -33,5 +31,8 @@ export const TestConstants = {
     TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS: readEnvAndSetValue(process.env.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS, 90),
     TS_SELENIUM_WORKSPACE_STATUS_POLLING: readEnvAndSetValue(process.env.TS_SELENIUM_WORKSPACE_STATUS_POLLING, 10000),
 
-    TS_SELENIUM_BASE_URL: readEnvAndSetValue(process.env.TS_SELENIUM_BASE_URL, "http://che-che.192.168.99.100.nip.io")
+    TS_SELENIUM_BASE_URL: readEnvAndSetValue(process.env.TS_SELENIUM_BASE_URL, "http://che-che.192.168.99.100.nip.io"),
+
+    TS_SELENIUM_RESOLUTION_WIDTH: readEnvAndSetValue(process.env.TS_SELENIUM_BASE_URL, 1920),
+    TS_SELENIUM_RESOLUTION_HEIGHT: readEnvAndSetValue(process.env.TS_SELENIUM_BASE_URL, 1080)
 }

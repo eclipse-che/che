@@ -1,6 +1,6 @@
 ## Requirements
-- node
-- "Chrome browser"
+- node 8.x
+- "Chrome" browser 69.x or later
 
 ## Default launch
 - npm install && npm test

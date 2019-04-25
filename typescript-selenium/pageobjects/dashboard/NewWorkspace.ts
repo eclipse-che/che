@@ -67,7 +67,7 @@ export class NewWorkspace {
 
         await this.driverHelper.waitAndClick(By.xpath(NewWorkspace.CREATE_AND_OPEN_BUTTON_XPATH), timeout)
 
-        //check that the workspace has started to boot
+        // check that the workspace has started to boot
         await this.driverHelper.waitVisibility(ideFrameLocator, timeout)
     }
 

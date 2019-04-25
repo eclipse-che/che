@@ -123,14 +123,14 @@ suite("E2E", async () => {
             await projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
         })
 
-        //unskip after resolving issue https://github.com/eclipse/che/issues/12904
+        // unskip after resolving issue https://github.com/eclipse/che/issues/12904
         test.skip("Check \"Java Language Server\" initialization by statusbar", async () => {
             await ide.waitStatusBarContains("Starting Java Language Server")
             await ide.waitStatusBarContains("100% Starting Java Language Server")
             await ide.waitStatusBarTextAbcence("Starting Java Language Server")
         })
 
-        //unskip after resolving issue https://github.com/eclipse/che/issues/12904
+        // unskip after resolving issue https://github.com/eclipse/che/issues/12904
         test.skip("Check \"Java Language Server\" initialization by suggestion invoking", async () => {
             await editor.waitEditorAvailable(tabTitle);
             await editor.clickOnTab(tabTitle);

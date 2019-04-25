@@ -15,7 +15,11 @@ import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import * as rm from 'typed-rest-client/RestClient'
 
-
+export enum WorkspaceStatus {
+    RUNNING = 'RUNNING',
+    STOPPED = 'STOPPED',
+    STARTING = 'STARTING'
+}
 
 @injectable()
 export class TestWorkspaceUtil {
@@ -29,9 +33,6 @@ export class TestWorkspaceUtil {
         const workspaceStatusApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace/${workspaceNamespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
-        const runningWorkspaceStatus: string = 'RUNNING';
-        const stoppedWorkspaceStatus: string = 'STOPPED';
-        const startingWorkspaceStatus: string = 'STARTING';
 
         const rest: rm.RestClient = new rm.RestClient('rest-samples')
 
@@ -47,15 +48,15 @@ export class TestWorkspaceUtil {
 
             const workspaceStatus: string = await response.result.status
 
-            if (workspaceStatus === runningWorkspaceStatus) {
+            if (workspaceStatus === WorkspaceStatus.RUNNING) {
                 return;
             }
 
-            if (workspaceStatus === startingWorkspaceStatus) {
+            if (workspaceStatus === WorkspaceStatus.STARTING) {
                 isWorkspaceStarting = true;
             }
 
-            if ((workspaceStatus === stoppedWorkspaceStatus) && isWorkspaceStarting) {
+            if ((workspaceStatus === WorkspaceStatus.STOPPED) && isWorkspaceStarting) {
                 throw new Error("Workspace starting process is crushed")
             }
 

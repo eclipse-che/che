@@ -63,7 +63,7 @@ class CheReporter extends mocha.reporters.Spec {
       const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`
       const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`
 
-      //create reporter dir if not exist
+      // create reporter dir if not exist
       await fs.exists(reportDirPath, async isDirExist => {
         if (!isDirExist) {
           await fs.mkdir(reportDirPath, err => {
@@ -74,7 +74,7 @@ class CheReporter extends mocha.reporters.Spec {
         }
       })
 
-      //create dir for collected data if not exist
+      // create dir for collected data if not exist
       await fs.exists(testReportDirPath, async isDirExist => {
         if (!isDirExist) {
           await fs.mkdir(testReportDirPath, err => {
@@ -85,13 +85,13 @@ class CheReporter extends mocha.reporters.Spec {
         }
       })
 
-      //take screenshot and write to file
+      // take screenshot and write to file
       const screenshot: string = await driver.get().takeScreenshot().catch(err => { throw err });
       const screenshotStream = fs.createWriteStream(screenshotFileName)
       screenshotStream.write(new Buffer(screenshot, 'base64'))
       screenshotStream.end()
 
-      //take pagesource and write to file
+      // take pagesource and write to file
       const pageSource: string = await driver.get().getPageSource().catch(err => { throw err })
       const pageSourceStream = fs.createWriteStream(pageSourceFileName)
       pageSourceStream.write(new Buffer(pageSource))

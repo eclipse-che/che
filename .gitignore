@@ -99,7 +99,8 @@ requirements.lock
 */cypress-tests/dist
 
 
-# typescript-selenium module
+# typescript-selenium module #
+##############################
 */typescript-selenium/dist/
 */typescript-selenium/node_modules/
 */typescript-selenium/report/
