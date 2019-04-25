@@ -17,19 +17,13 @@ import { TestConstants } from "../../TestConstants";
 
 @injectable()
 export class Dashboard {
-    private readonly driverHelper: DriverHelper;
-
     private static readonly DASHBOARD_BUTTON_CSS: string = "#dashboard-item";
     private static readonly WORKSPACES_BUTTON_CSS: string = "#workspaces-item";
     private static readonly STACKS_BUTTON_CSS: string = "#stacks-item";
     private static readonly FACTORIES_BUTTON_CSS: string = "#factories-item";
     private static readonly LOADER_PAGE_CSS: string = ".main-page-loader"
 
-    constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper
-    ) {
-        this.driverHelper = driverHelper;
-    }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async openDashboard(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.navigateTo(TestConstants.TS_SELENIUM_BASE_URL)

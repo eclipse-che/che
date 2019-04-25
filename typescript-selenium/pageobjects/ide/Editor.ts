@@ -16,11 +16,7 @@ import { By, WebElement, Key } from 'selenium-webdriver';
 
 @injectable()
 export class Editor {
-    private readonly driverHelper: DriverHelper;
-
-    constructor(@inject(CLASSES.DriverHelper) driverHelper: DriverHelper) {
-        this.driverHelper = driverHelper
-    }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     private static readonly EDITOR_BODY_CSS: string = "#theia-main-content-panel .lines-content";
     private static readonly EDITOR_LINES_XPATH: string = "//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line']";

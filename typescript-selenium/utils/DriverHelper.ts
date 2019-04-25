@@ -20,9 +20,7 @@ import { TestConstants } from "../TestConstants";
 export class DriverHelper {
     private readonly driver: ThenableWebDriver;
 
-    constructor(
-        @inject(TYPES.Driver) driver: Driver
-    ) {
+    constructor(@inject(TYPES.Driver) driver: Driver) {
         this.driver = driver.get();
     }
 

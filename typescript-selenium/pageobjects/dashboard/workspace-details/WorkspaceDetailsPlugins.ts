@@ -17,13 +17,7 @@ import { By } from "selenium-webdriver";
 
 @injectable()
 export class WorkspaceDetailsPlugins {
-    private readonly driverHelper: DriverHelper;
-
-    constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper
-    ) {
-        this.driverHelper = driverHelper;
-    }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     private getPluginListItemCssLocator(pluginName: string): string {
         return `.plugin-item div[plugin-item-name='${pluginName}']`

@@ -17,10 +17,6 @@ import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
 
 @injectable()
 export class Ide {
-
-    private readonly driverHelper: DriverHelper;
-    private readonly testWorkspaceUtil: TestWorkspaceUtil;
-
     private static readonly TOP_MENU_PANEL_CSS: string = "#theia-app-shell #theia-top-panel .p-MenuBar-content";
     private static readonly LEFT_CONTENT_PANEL_CSS: string = "#theia-left-content-panel";
     public static readonly EXPLORER_BUTTON_XPATH: string = "(//ul[@class='p-TabBar-content']//li[@title='Explorer'])[1]";
@@ -29,12 +25,8 @@ export class Ide {
     private static readonly IDE_IFRAME_CSS: string = "iframe#ide-application-iframe";
 
     constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper,
-        @inject(CLASSES.TestWorkspaceUtil) testWorkspaceUtil: TestWorkspaceUtil
-    ) {
-        this.driverHelper = driverHelper;
-        this.testWorkspaceUtil = testWorkspaceUtil;
-    }
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
 
     async waitAndSwitchToIdeFrame(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout)

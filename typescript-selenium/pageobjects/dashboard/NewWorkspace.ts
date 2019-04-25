@@ -17,8 +17,6 @@ import 'reflect-metadata';
 
 @injectable()
 export class NewWorkspace {
-    private readonly driverHelper: DriverHelper;
-
     private static readonly CHE_7_STACK_CSS: string = "div[data-stack-id='che7-preview']";
     private static readonly SELECTED_CHE_7_STACK_CSS: string = ".stack-selector-item-selected[data-stack-id='che7-preview']"
     private static readonly CREATE_AND_OPEN_BUTTON_XPATH: string = "(//che-button-save-flat[@che-button-title='Create & Open']/button)[1]"
@@ -28,11 +26,7 @@ export class NewWorkspace {
     private static readonly NAME_FIELD_CSS: string = "#workspace-name-input";
 
 
-    constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper
-    ) {
-        this.driverHelper = driverHelper;
-    }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async selectCreateWorkspaceAndProceedEditing(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const createAndProceedEditingButtonLocator: By = By.xpath("//span[text()='Create & Proceed Editing']")

@@ -23,11 +23,7 @@ export enum WorkspaceStatus {
 
 @injectable()
 export class TestWorkspaceUtil {
-    private readonly driverHelper: DriverHelper;
-
-    constructor(@inject(CLASSES.DriverHelper) driverHelper: DriverHelper) {
-        this.driverHelper = driverHelper;
-    }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     public async waitRunningStatus(workspaceNamespace: string, workspaceName: string) {
         const workspaceStatusApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace/${workspaceNamespace}:${workspaceName}`;

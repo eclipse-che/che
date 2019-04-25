@@ -17,18 +17,11 @@ import { By } from "selenium-webdriver";
 
 @injectable()
 export class Workspaces {
-    private readonly driverHelper: DriverHelper;
     private static readonly TITLE: string = ".che-toolbar-title-label";
     private static readonly ADD_WORKSPACE_BUTTON_CSS: string = "#add-item-button";
     private static readonly START_STOP_WORKSPACE_TIMEOUT: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT
 
-    constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper
-    ) {
-        this.driverHelper = driverHelper;
-    }
-
-
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     private getWorkspaceListItemLocator(workspaceName: string): string {
         return `#ws-name-${workspaceName}`

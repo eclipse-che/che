@@ -17,9 +17,6 @@ import { By } from "selenium-webdriver";
 
 @injectable()
 export class WorkspaceDetails {
-
-    private readonly driverHelper: DriverHelper;
-
     private static readonly RUN_BUTTON_CSS: string = "#run-workspace-button[che-button-title='Run']";
     private static readonly OPEN_BUTTON_CSS: string = "#open-in-ide-button[che-button-title='Open']";
     private static readonly SELECTED_TAB_BUTTON_XPATH: string = "md-tabs-canvas[role='tablist'] md-tab-item[aria-selected='true']";
@@ -27,12 +24,7 @@ export class WorkspaceDetails {
     private static readonly ENABLED_SAVE_BUTTON_CSS: string = "button[name='save-button'][aria-disabled='false']";
     private static readonly WORKSPACE_DETAILS_LOADER_CSS: string = "workspace-details-overview md-progress-linear";
 
-    constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper
-    ) {
-        this.driverHelper = driverHelper;
-    }
-
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     private getWorkspaceTitleCssLocator(workspaceName: string): string {
         return `che-row-toolbar[che-title='${workspaceName}']`

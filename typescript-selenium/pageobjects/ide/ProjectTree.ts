@@ -17,16 +17,9 @@ import { By } from 'selenium-webdriver';
 
 @injectable()
 export class ProjectTree {
-    private readonly driverHelper: DriverHelper;
-    private readonly ide: Ide;
-
     constructor(
-        @inject(CLASSES.DriverHelper) driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) ide: Ide
-    ) {
-        this.driverHelper = driverHelper
-        this.ide = ide
-    }
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     private static readonly PROJECT_TREE_CONTAINER_CSS: string = "#theia-left-side-panel .theia-TreeContainer";
 

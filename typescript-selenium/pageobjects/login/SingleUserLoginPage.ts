@@ -17,18 +17,12 @@ import { TestConstants } from "../../TestConstants";
 
 @injectable()
 export class SingleUserLoginPage implements LoginPage {
-    private readonly driver: ThenableWebDriver;
-
     constructor(
-        @inject(TYPES.Driver) driver: Driver
-    ) {
-        this.driver = driver.get();
-    }
+        @inject(TYPES.Driver) private readonly driver: Driver) { }
 
     async login() {
-        await this.driver
-            .navigate()
-            .to(TestConstants.TS_SELENIUM_BASE_URL)
+        const webDriver: ThenableWebDriver = this.driver.get()
+        await webDriver.navigate().to(TestConstants.TS_SELENIUM_BASE_URL)
     }
 
 }
