@@ -23,6 +23,13 @@ enum MasterChannels {
 const SUBSCRIBE: string = 'subscribe';
 const UNSUBSCRIBE: string = 'unsubscribe';
 
+export interface WorkspaceStatusChangedEvent {
+  status: string;
+  prevStatus: string;
+  workspaceId: string;
+  error: string;
+}
+
 /**
  * Client API for workspace master interactions.
  *

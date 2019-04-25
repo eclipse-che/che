@@ -12,7 +12,7 @@
 'use strict';
 
 import { WebsocketClient } from './json-rpc/websocket-client';
-import { CheJsonRpcMasterApi } from './json-rpc/che-json-rpc-master-api';
+import { CheJsonRpcMasterApi, WorkspaceStatusChangedEvent } from './json-rpc/che-json-rpc-master-api';
 import { Loader } from './loader/loader';
 
 const WEBSOCKET_CONTEXT = '/api/websocket';
@@ -208,12 +208,17 @@ export class WorkspaceLoader {
             masterApi.subscribeInstallerOutput(this.workspace.id,
                  (message: any) => this.onEnvironmentOutput(message.text));
             masterApi.subscribeWorkspaceStatus(this.workspace.id,
-                (message: any) => {
+                (message: WorkspaceStatusChangedEvent) => {
                     if (message.error) {
                         reject(new Error(`Failed to run the workspace: "${message.error}"`));
                     } else if (message.status === 'RUNNING') {
                         this.checkWorkspaceRuntime().then(resolve, reject);
                     } else if (message.status === 'STOPPED') {
+                        if (message.prevStatus == 'STARTING') {
+                            this.loader.error('Workspace stopped.');
+                            this.loader.hideLoader();
+                            this.loader.showReload();
+                        }
                         if (this.startAfterStopping) {
                             this.startWorkspace().catch((error: any) => reject(error));
                         }

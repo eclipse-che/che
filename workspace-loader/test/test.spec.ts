@@ -371,9 +371,7 @@ describe('Workspace Loader', () => {
 
     describe('if workspace is STOPPED and then fails to start', () => {
         let workspaceLoader: WorkspaceLoader;
-        let startPromiseReject: Function;
         let workspaceLoadPromise: Promise<void>;
-        let statusChangeCallback: Function;
 
         beforeEach((done) => {
             const loader = new Loader();
@@ -390,7 +388,7 @@ describe('Workspace Loader', () => {
 
             spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
                 return Promise.resolve({
-                    addListener: () => { },
+                    addListener: () => {},
                     subscribeEnvironmentOutput: () => {},
                     subscribeInstallerOutput: () => {},
                     subscribeWorkspaceStatus: () => {}
@@ -438,6 +436,99 @@ describe('Workspace Loader', () => {
             testPromptIsShown();
         });
 
+    });
+
+    describe('show error if workspace became stopped on starting', () => {
+        let workspaceLoader: WorkspaceLoader;
+        const loader = {
+            log: () => { return undefined; },
+            hideLoader: () => {},
+            showReload: () => {},
+            error: () => {},
+            onclickConsole: () => {},
+            onclickReload: () => { return true }
+        };
+        let statusChangeCallback: Function;
+
+        beforeEach((done) => {
+            spyOn(loader, "error").and.callThrough();
+            spyOn(loader, "log").and.callThrough();
+            spyOn(loader, "hideLoader").and.callThrough();
+            spyOn(loader, "showReload").and.callThrough();
+
+            workspaceLoader = new WorkspaceLoader(loader);
+
+            spyOn(workspaceLoader, "getWorkspaceKey").and.returnValue("foo/bar");
+
+            spyOn(workspaceLoader, "getWorkspace").and.callFake(() => {
+                return new Promise((resolve) => {
+                    fakeWorkspaceConfig.status = 'STARTING';
+                    resolve(fakeWorkspaceConfig);
+                });
+            });
+
+            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callThrough();
+
+            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
+                return Promise.resolve();
+            });
+
+            spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
+                done();
+                return Promise.resolve({
+                    addListener: () => {},
+                    subscribeEnvironmentOutput: () => {},
+                    subscribeInstallerOutput: () => {},
+                    subscribeWorkspaceStatus: (workspaceId, callback) => {
+                        statusChangeCallback = callback;
+                    }
+                });
+            });
+
+            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
+                return Promise.resolve();
+            });
+
+            workspaceLoader.load();
+        });
+
+        it('should not open IDE', () => {
+            expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+        });
+
+        it('should subscribe to workspace events', () => {
+            expect(workspaceLoader.subscribeWorkspaceEvents).toHaveBeenCalled();
+        });
+
+        it('should not start the workspace', () => {
+            expect(workspaceLoader.startWorkspace).not.toHaveBeenCalled();
+        });
+
+        it('should not log something', () => {
+            expect(loader.log).not.toHaveBeenCalled();
+        });
+
+        describe('then receives workspace stopped event on websocket, when workspace starting', () => {
+            beforeEach(() => {
+                statusChangeCallback({ status: 'STOPPED', prevStatus: "STARTING", workspaceId: "someID-bla-bla" });
+            });
+
+            it('should not open an IDE', () => {
+                expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
+            });
+
+            it('should log error', () => {
+                expect(loader.error).toBeCalledWith("Workspace stopped.");
+            });
+
+            it('should hide loader', () => {
+                expect(loader.hideLoader).toHaveBeenCalled();
+            });
+
+            it('should show reload', () => {
+                expect(loader.showReload).toHaveBeenCalled();
+            });
+        });
     });
 
     describe('if workspace is STOPPING', () => {
