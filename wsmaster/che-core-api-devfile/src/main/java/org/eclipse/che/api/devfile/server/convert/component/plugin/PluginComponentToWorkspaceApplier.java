@@ -80,8 +80,10 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     if (memoryLimit != null) {
       workspaceConfig
           .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
-              meta.getPublisher() + "/" + meta.getName()), memoryLimit);
+          .put(
+              format(
+                  SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, meta.getPublisher() + "/" + meta.getName()),
+              memoryLimit);
     }
 
     for (CommandImpl command : workspaceConfig.getCommands()) {

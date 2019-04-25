@@ -81,7 +81,8 @@ public class PluginFQNParserTest {
       expectedExceptions = InfrastructureException.class,
       expectedExceptionsMessageRegExp = "Multiple editors.*")
   public void shouldThrowExceptionWhenMultipleEditorsDefined() throws Exception {
-    Map<String, String> attributes = createAttributes("publisher1/editor1/version1,publisher1/editor2/version1", "");
+    Map<String, String> attributes =
+        createAttributes("publisher1/editor1/version1,publisher1/editor2/version1", "");
 
     parser.parsePlugins(attributes);
   }
@@ -130,11 +131,14 @@ public class PluginFQNParserTest {
   //   (String description, List<PluginFQN> expectedPlugins, Map<String, String> attributes)
   @DataProvider(name = "validAttributesProvider")
   public static Object[][] validAttributesProvider() {
-    PluginFQN basicEditor = new PluginFQN(URI.create("http://registry:8080"), "publisher/editor/ver");
-    PluginFQN withRegistry = new PluginFQN(URI.create("http://registry:8080"), "publisher/plugin/1.0");
+    PluginFQN basicEditor =
+        new PluginFQN(URI.create("http://registry:8080"), "publisher/editor/ver");
+    PluginFQN withRegistry =
+        new PluginFQN(URI.create("http://registry:8080"), "publisher/plugin/1.0");
     PluginFQN noRegistry = new PluginFQN(null, "publisher/pluginnoregistry/2.0");
     PluginFQN pathRegistry =
-        new PluginFQN(URI.create("http://registry/multiple/path/"), "publisher/pluginpathregistry/3.0");
+        new PluginFQN(
+            URI.create("http://registry/multiple/path/"), "publisher/pluginpathregistry/3.0");
     return new Object[][] {
       {
         "Test plugin with registry",

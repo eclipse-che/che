@@ -88,8 +88,7 @@ public class EditorComponentToWorkspaceApplierTest {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("editor");
-    superPluginComponent.setId(
-        "https://custom-plugin.registry/plugins/eclipse/super-editor/0.0.1");
+    superPluginComponent.setId("https://custom-plugin.registry/plugins/eclipse/super-editor/0.0.1");
     superPluginComponent.setType(EDITOR_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();

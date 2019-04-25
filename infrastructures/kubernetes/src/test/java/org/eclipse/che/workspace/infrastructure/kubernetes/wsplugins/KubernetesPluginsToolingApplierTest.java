@@ -126,7 +126,8 @@ public class KubernetesPluginsToolingApplierTest {
     internalEnvironment.addPod(pod);
     internalEnvironment.getMachines().putAll(machines);
 
-    lenient().when(projectsRootEnvVariableProvider.get(any()))
+    lenient()
+        .when(projectsRootEnvVariableProvider.get(any()))
         .thenReturn(new Pair<>("projects_root", "/somewhere/over/the/rainbow"));
   }
 

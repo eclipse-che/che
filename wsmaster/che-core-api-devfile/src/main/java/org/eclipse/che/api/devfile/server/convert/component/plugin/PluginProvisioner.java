@@ -68,8 +68,10 @@ public class PluginProvisioner implements ComponentProvisioner {
       pluginComponent.setMemoryLimit(
           workspaceConfig
               .getAttributes()
-              .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
-                  meta.getPublisher() + "/" + meta.getName())));
+              .get(
+                  format(
+                      SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
+                      meta.getPublisher() + "/" + meta.getName())));
       devfile.getComponents().add(pluginComponent);
     }
   }

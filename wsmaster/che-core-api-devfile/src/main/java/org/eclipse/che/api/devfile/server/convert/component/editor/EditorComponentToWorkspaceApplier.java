@@ -40,7 +40,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
    * @param workspaceConfig workspace config on which changes should be applied
    * @param editorComponent plugin component that should be applied
    * @param contentProvider optional content provider that may be used for external component
-   * resource fetching
+   *     resource fetching
    * @throws IllegalArgumentException if specified workspace config or plugin component is null
    * @throws IllegalArgumentException if specified component has type different from cheEditor
    */
@@ -71,8 +71,10 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     if (memoryLimit != null) {
       workspaceConfig
           .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
-              meta.getPublisher() + "/" + meta.getName()), memoryLimit);
+          .put(
+              format(
+                  SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, meta.getPublisher() + "/" + meta.getName()),
+              memoryLimit);
     }
     workspaceConfig
         .getCommands()
@@ -84,5 +86,4 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
                     .equals(editorComponentAlias))
         .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, meta.getId()));
   }
-
 }

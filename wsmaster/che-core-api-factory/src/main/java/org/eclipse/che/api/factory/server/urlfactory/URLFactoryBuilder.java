@@ -132,7 +132,7 @@ public class URLFactoryBuilder {
 
     Map<String, String> attributes = new HashMap<>();
     attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, defaultCheEditor);
-    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultChePlugins);
+    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultChePlugins); // TODO
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class).withName(name).withAttributes(attributes);
