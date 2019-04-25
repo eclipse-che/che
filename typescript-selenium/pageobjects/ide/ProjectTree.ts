@@ -165,9 +165,10 @@ export class ProjectTree {
 
             if (!isProjectFolderVisible) {
                 await this.driverHelper.reloadPage()
+                await this.driverHelper.wait(triesPolling)
+                await this.ide.waitAndSwitchToIdeFrame()
                 await this.ide.waitIde()
                 await this.openProjectTreeContainer()
-                await this.driverHelper.wait(triesPolling)
                 continue;
             }
 
@@ -178,9 +179,10 @@ export class ProjectTree {
 
             if (!isProjectFolderVisible) {
                 await this.driverHelper.reloadPage()
+                await this.driverHelper.wait(triesPolling)
+                await this.ide.waitAndSwitchToIdeFrame()
                 await this.ide.waitIde()
                 await this.openProjectTreeContainer()
-                await this.driverHelper.wait(triesPolling)
                 continue;
             }
 
