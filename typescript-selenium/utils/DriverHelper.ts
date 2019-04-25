@@ -10,7 +10,7 @@
 import { Driver } from "../driver/Driver";
 import { inject, injectable } from "inversify";
 import { TYPES } from "../inversify.types";
-import { error } from 'selenium-webdriver';
+import { error, ActionSequence } from 'selenium-webdriver';
 import 'reflect-metadata';
 import { WebElementPromise, ThenableWebDriver, By, promise, until, WebElement, WebElementCondition } from "selenium-webdriver";
 import { TestConstants } from "../TestConstants";
@@ -19,11 +19,13 @@ import { TestConstants } from "../TestConstants";
 @injectable()
 export class DriverHelper {
     private readonly driver: ThenableWebDriver;
+    private readonly action: ActionSequence;
 
     constructor(
         @inject(TYPES.Driver) driver: Driver
     ) {
         this.driver = driver.get();
+        this.action = new ActionSequence(this.driver);
     }
 
     public async isVisible(locator: By): Promise<boolean> {
@@ -89,6 +91,48 @@ export class DriverHelper {
         }
 
         throw new Error(`Exceeded maximum visibility checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`)
+    }
+
+    public async waitPresence(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<WebElement> {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
+
+        for (let i = 0; i < attempts; i++) {
+            try {
+                const webElement: WebElement = await this.driver.wait(until.elementLocated(elementLocator), timeout)
+                return webElement
+            } catch (err) {
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err;
+            }
+        }
+
+        throw new Error(`Exceeded maximum presence checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`)
+    }
+
+    public async waitAllPresence(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<Array<WebElement>> {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
+
+        for (let i = 0; i < attempts; i++) {
+            try {
+                const webElements: Array<WebElement> = await this.driver.wait(until.elementsLocated(elementLocator), timeout)
+                return webElements
+            } catch (err) {
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err;
+            }
+        }
+
+        throw new Error(`Exceeded maximum presence checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`)
     }
 
     public async waitAllVisibility(locators: Array<By>, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -270,5 +314,28 @@ export class DriverHelper {
     public async navigateTo(url: string) {
         await this.driver.navigate().to(url)
     }
+
+    public async scrollTo(elementLocator: By, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING
+
+        for (let i = 0; i < attempts; i++) {
+            const element: WebElement = await this.waitPresence(elementLocator, timeout);
+
+            try {
+                this.action.mouseMove(element).perform()
+            } catch (err) {
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling)
+                    continue;
+                }
+
+                throw err
+            }
+        }
+
+        throw new Error(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`)
+    }
+
 
 }

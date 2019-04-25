@@ -46,10 +46,10 @@ class CheReporter extends mocha.reporters.Spec {
 
     runner.on('end', async function (test: mocha.Test) {
       //ensure that fired events done
-      await driver.get().sleep(5000).catch(err => {throw err})
+      // await driver.get().sleep(5000).catch(err => {throw err})
 
       //close driver
-      await driver.get().quit().catch(err => { throw err })
+      // await driver.get().quit().catch(err => { throw err })
     })
 
 

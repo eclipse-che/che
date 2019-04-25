@@ -12,7 +12,7 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By } from 'selenium-webdriver';
+import { By, WebElement } from 'selenium-webdriver';
 
 @injectable()
 export class Editor {
@@ -24,11 +24,19 @@ export class Editor {
 
     private static readonly EDITOR_LINES_CSS: string = ".lines-content .view-line";
     private static readonly EDITOR_BODY_CSS: string = "#theia-main-content-panel .lines-content";
-    private static readonly SUGGESTION_WIDGET_BODY_CSS: string = "div[widgetId='editor.widget.suggestWidget']"
-    private static readonly SUGGESTION_WIDGET_ROW_CSS: string = "div[widgetId='editor.widget.suggestWidget'] .monaco-list-row";
+    private static readonly EDITOR_LINES_XPATH: string = "//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line']";
+    private static readonly SUGGESTION_WIDGET_BODY_CSS: string = "div[widgetId='editor.widget.suggestWidget']";
 
     private getEditorLineXpathLocator(lineNumber: number): string {
         return `(//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line'])[${lineNumber}]`
+    }
+
+    private getSuggestionLineXpathLocator(suggestionText: string): string {
+        return `//div[@widgetId='editor.widget.suggestWidget']//*[@class='monaco-list-row' and text()='${suggestionText}']`
+    }
+
+    private getTabXpathLocator(tabTitle: string): string {
+        return `//li[contains(@class, 'p-TabBar-tab')]//div[text()='${tabTitle}']`;
     }
 
     async waitSuggestionContainer(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -39,8 +47,12 @@ export class Editor {
         await this.driverHelper.waitDisappearance(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), attempts, polling)
     }
 
-    private getTabXpathLocator(tabTitle: string): string {
-        return `//li[contains(@class, 'p-TabBar-tab')]//div[text()='${tabTitle}']`;
+    async waitSuggestion(suggestionText: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.xpath(this.getSuggestionLineXpathLocator(suggestionText)), timeout)
+    }
+
+    async clickOnSuggestion(suggestionText: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitAndClick(By.xpath(this.getSuggestionLineXpathLocator(suggestionText)), timeout)
     }
 
     async waitTab(tabTitle: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -80,6 +92,28 @@ export class Editor {
     async waitEditorAvailable(tabTitle: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.waitTab(tabTitle, timeout);
         await this.waitEditorOpened(timeout);
+    }
+
+    async getLineText(lineNumber: number, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string>{
+        const lineXpathLocator: By = By.xpath(this.getEditorLineXpathLocator(lineNumber))
+
+        const lineText = await this.driverHelper.waitAndGetText(lineXpathLocator, timeout)
+        return lineText
+    }
+
+    async getEditorText(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string>{
+        const lines: Array<WebElement> = await this.driverHelper.waitAllPresence(By.xpath(Editor.EDITOR_LINES_XPATH), timeout)
+        const linesCapacity: number = lines.length
+
+        let editorText = "";
+
+        for(let i = 1 ; i <= linesCapacity ; i++){
+            await this.driverHelper.scrollTo(By.xpath(this.getEditorLineXpathLocator(i)), timeout)
+            const lineText: string = await this.getLineText(i, timeout)
+            editorText = editorText + lineText + "\n"
+        }
+
+        return editorText;
     }
 
 }
