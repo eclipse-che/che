@@ -53,7 +53,7 @@ public class URLFactoryBuilder {
 
   @Inject
   public URLFactoryBuilder(
-      @Named("che.factory.default_editor") String defaultCheEditor, // TODO
+      @Named("che.factory.default_editor") String defaultCheEditor,
       @Named("che.factory.default_plugins") String defaultChePlugins,
       URLFetcher urlFetcher,
       DevfileManager devfileManager) {
@@ -132,7 +132,7 @@ public class URLFactoryBuilder {
 
     Map<String, String> attributes = new HashMap<>();
     attributes.put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, defaultCheEditor);
-    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultChePlugins); // TODO
+    attributes.put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, defaultChePlugins);
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class).withName(name).withAttributes(attributes);
