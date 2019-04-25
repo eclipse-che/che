@@ -17,7 +17,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_IDE_URL;
 import static org.eclipse.che.api.workspace.shared.Constants.LINK_REL_SELF;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
@@ -27,10 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import javax.ws.rs.core.UriBuilder;
-import org.eclipse.che.api.core.model.workspace.Workspace;
-import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.rest.ServiceContext;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.everrest.core.impl.uri.UriBuilderImpl;
 import org.mockito.Mock;
@@ -48,7 +46,7 @@ public class WorkspaceLinksGeneratorTest {
 
   @Mock private WorkspaceRuntimes runtimes;
 
-  @Mock private Workspace workspace;
+  @Mock private WorkspaceImpl workspace;
 
   @Mock private RuntimeContext runtimeCtx;
 
@@ -60,8 +58,7 @@ public class WorkspaceLinksGeneratorTest {
   public void setUp() throws Exception {
     when(workspace.getId()).thenReturn("wside-123877234580");
     when(workspace.getNamespace()).thenReturn("my-namespace");
-    when(workspace.getConfig()).thenReturn(mock(WorkspaceConfig.class));
-    when(workspace.getConfig().getName()).thenReturn("my-name");
+    when(workspace.getName()).thenReturn("my-name");
 
     when(runtimeCtx.getOutputChannel()).thenReturn(URI.create("ws://localhost/output/websocket"));
     when(runtimes.getRuntimeContext(workspace.getId())).thenReturn(Optional.of(runtimeCtx));

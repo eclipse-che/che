@@ -32,9 +32,11 @@ import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -81,8 +83,10 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       @Named("che.limits.workspace.env.ram") String maxRamPerEnv,
       EnvironmentRamCalculator environmentRamCalculator,
       ResourceManager resourceManager,
-      ResourcesLocks resourcesLocks) {
-    super(workspaceDao, runtimes, eventService, accountManager, workspaceValidator);
+      ResourcesLocks resourcesLocks,
+      DevfileToWorkspaceConfigConverter devfileConverter) {
+    super(
+        workspaceDao, runtimes, eventService, accountManager, workspaceValidator, devfileConverter);
     this.environmentRamCalculator = environmentRamCalculator;
     this.maxRamPerEnvMB = "-1".equals(maxRamPerEnv) ? -1 : Size.parseSizeToMegabytes(maxRamPerEnv);
     this.resourceManager = resourceManager;
@@ -111,12 +115,14 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       throws NotFoundException, ServerException, ConflictException {
     WorkspaceImpl workspace = this.getWorkspace(workspaceId);
     String accountId = workspace.getAccount().getId();
+    WorkspaceConfigImpl config = workspace.getConfig();
 
     try (@SuppressWarnings("unused")
         Unlocker u = resourcesLocks.lock(accountId)) {
       checkRuntimeResourceAvailability(accountId);
-      checkRamResourcesAvailability(
-          accountId, workspace.getNamespace(), workspace.getConfig(), envName);
+      if (config != null) {
+        checkRamResourcesAvailability(accountId, workspace.getNamespace(), config, envName);
+      }
 
       return super.startWorkspace(workspaceId, envName, options);
     }
@@ -133,7 +139,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
         Unlocker u = resourcesLocks.lock(accountId)) {
       checkWorkspaceResourceAvailability(accountId);
       checkRuntimeResourceAvailability(accountId);
-      checkRamResourcesAvailability(accountId, namespace, config, null);
+      if (config != null) {
+        checkRamResourcesAvailability(accountId, namespace, config, null);
+      }
 
       return super.startWorkspace(config, namespace, isTemporary, options);
     }
@@ -142,7 +150,9 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   @Override
   public WorkspaceImpl updateWorkspace(String id, Workspace update)
       throws ConflictException, ServerException, NotFoundException, ValidationException {
-    checkMaxEnvironmentRam(update.getConfig());
+    if (update.getConfig() != null) {
+      checkMaxEnvironmentRam(update.getConfig());
+    }
 
     WorkspaceImpl workspace = this.getWorkspace(id);
     String accountId = workspace.getAccount().getId();
@@ -185,7 +195,6 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
   void checkRamResourcesAvailability(
       String accountId, String namespace, WorkspaceConfig config, @Nullable String envName)
       throws NotFoundException, ServerException, ConflictException {
-
     if (config.getEnvironments().isEmpty()) {
       return;
     }

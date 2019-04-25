@@ -111,7 +111,7 @@ public class JpaWorkspaceDaoTest {
     manager.getTransaction().commit();
 
     // make conflict update
-    workspace2.getConfig().setName(workspace1.getConfig().getName());
+    workspace2.getConfig().setName(workspace1.getName());
     manager.getTransaction().begin();
     manager.merge(workspace2);
     manager.getTransaction().commit();

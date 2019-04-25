@@ -83,7 +83,7 @@ public class LocalProjectsMigrator {
       for (WorkspaceImpl workspace :
           iterate(
               (maxItems, skipCount) -> workspaceDao.getWorkspaces(false, maxItems, skipCount))) {
-        result.put(workspace.getId(), workspace.getConfig().getName());
+        result.put(workspace.getId(), workspace.getName());
       }
       return result;
     } catch (ServerException e) {
