@@ -12,7 +12,7 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, WebElement } from 'selenium-webdriver';
+import { By, WebElement, Key } from 'selenium-webdriver';
 
 @injectable()
 export class Editor {
@@ -22,7 +22,6 @@ export class Editor {
         this.driverHelper = driverHelper
     }
 
-    private static readonly EDITOR_LINES_CSS: string = ".lines-content .view-line";
     private static readonly EDITOR_BODY_CSS: string = "#theia-main-content-panel .lines-content";
     private static readonly EDITOR_LINES_XPATH: string = "//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line']";
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = "div[widgetId='editor.widget.suggestWidget']";
@@ -94,20 +93,20 @@ export class Editor {
         await this.waitEditorOpened(timeout);
     }
 
-    async getLineText(lineNumber: number, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string>{
+    async getLineText(lineNumber: number, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
         const lineXpathLocator: By = By.xpath(this.getEditorLineXpathLocator(lineNumber))
 
         const lineText = await this.driverHelper.waitAndGetText(lineXpathLocator, timeout)
         return lineText
     }
 
-    async getEditorText(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string>{
+    async getEditorText(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
         const lines: Array<WebElement> = await this.driverHelper.waitAllPresence(By.xpath(Editor.EDITOR_LINES_XPATH), timeout)
         const linesCapacity: number = lines.length
 
         let editorText = "";
 
-        for(let i = 1 ; i <= linesCapacity ; i++){
+        for (let i = 1; i <= linesCapacity; i++) {
             await this.driverHelper.scrollTo(By.xpath(this.getEditorLineXpathLocator(i)), timeout)
             const lineText: string = await this.getLineText(i, timeout)
             editorText = editorText + lineText + "\n"

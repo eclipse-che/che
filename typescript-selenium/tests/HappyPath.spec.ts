@@ -51,36 +51,17 @@ suite("E2E", async () => {
 
     suite("Login and wait dashboard", async () => {
         test("login", async () => {
-            // await loginPage.login()
-
-            let fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
-            let tabTitle: string = "HelloWorld.java";
-            let filePath: string = `${fileFolderPath}/${tabTitle}`
-
-            await driverHelper.navigateTo("http://che-che.192.168.99.100.nip.io/dashboard/#/ide/che/wksp-x91g");
-            await ide.waitAndSwitchToIdeFrame()
-            await ide.waitIde()
-
-            await projectTree.openProjectTreeContainer();
-            await projectTree.waitProjectTreeContainer();
-            await projectTree.waitProjectImported(sampleName, "src")
-
-            await projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
-            await editor.waitEditorAvailable(tabTitle);
-            await editor.clickOnTab(tabTitle);
-            await editor.waitEditorAvailable(tabTitle);
-
-
+            await loginPage.login()
         })
 
-        test.skip("wait dashboard", async () => {
+        test("wait dashboard", async () => {
             await dashboard.waitLoader()
             await dashboard.waitLoaderDisappearance()
             await dashboard.waitPage()
         })
     })
 
-    suite.skip("Create workspace and open IDE", async () => {
+    suite("Create workspace and open IDE", async () => {
 
         test("Go to 'New Workspace' page", async () => {
             await dashboard.clickWorkspacesButton()
@@ -127,7 +108,7 @@ suite("E2E", async () => {
         })
     })
 
-    suite.skip("Work with IDE", async () => {
+    suite("Work with IDE", async () => {
         let fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
         let tabTitle: string = "HelloWorld.java";
         let filePath: string = `${fileFolderPath}/${tabTitle}`
@@ -158,7 +139,7 @@ suite("E2E", async () => {
 
     })
 
-    suite.skip("Stop and remove workspace", async () => {
+    suite("Stop and remove workspace", async () => {
         test("Stop workspace", async () => {
             await dashboard.openDashboard()
             await dashboard.clickWorkspacesButton()

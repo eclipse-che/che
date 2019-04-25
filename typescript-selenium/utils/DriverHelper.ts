@@ -19,13 +19,15 @@ import { TestConstants } from "../TestConstants";
 @injectable()
 export class DriverHelper {
     private readonly driver: ThenableWebDriver;
-    private readonly action: ActionSequence;
 
     constructor(
         @inject(TYPES.Driver) driver: Driver
     ) {
         this.driver = driver.get();
-        this.action = new ActionSequence(this.driver);
+    }
+
+    public getAction(): ActionSequence {
+        return this.driver.actions()
     }
 
     public async isVisible(locator: By): Promise<boolean> {
@@ -323,7 +325,8 @@ export class DriverHelper {
             const element: WebElement = await this.waitPresence(elementLocator, timeout);
 
             try {
-                this.action.mouseMove(element).perform()
+                await this.getAction().mouseMove(element).perform()
+                return
             } catch (err) {
                 if (err instanceof error.StaleElementReferenceError) {
                     await this.wait(polling)
@@ -336,6 +339,5 @@ export class DriverHelper {
 
         throw new Error(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`)
     }
-
 
 }
