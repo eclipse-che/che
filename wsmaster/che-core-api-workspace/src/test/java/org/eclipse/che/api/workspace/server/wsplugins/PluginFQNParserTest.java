@@ -35,9 +35,6 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class PluginFQNParserTest {
 
-  private static final String PLUGIN_FORMAT = "%s/%s:%s";
-  private static final String PLUGIN_FORMAT_WITHOUT_REGISTRY = "%s:%s";
-
   private PluginFQNParser parser;
 
   @BeforeClass
@@ -97,8 +94,8 @@ public class PluginFQNParserTest {
     Map<String, String> attributes =
         createAttributes(
             "",
-            formatPlugin("http://testregistry1:8080", "testplugin", "1.0"),
-            formatPlugin("http://testregistry2:8080", "testplugin", "1.0"));
+            formatPlugin("http://testregistry1:8080", "testplugin/1.0"),
+            formatPlugin("http://testregistry2:8080", "testplugin/1.0"));
 
     parser.parsePlugins(attributes);
   }
@@ -112,8 +109,8 @@ public class PluginFQNParserTest {
     Map<String, String> attributes =
         createAttributes(
             "",
-            " " + formatPlugin("http://testregistry1:8080", "testplugin", "1.0"),
-            formatPlugin("http://testregistry2:8080", "testplugin", "1.0") + " ");
+            " " + formatPlugin("http://testregistry1:8080", "testplugin/1.0"),
+            formatPlugin("http://testregistry2:8080", "testplugin/1.0") + " ");
 
     parser.parsePlugins(attributes);
   }
@@ -121,10 +118,11 @@ public class PluginFQNParserTest {
   @DataProvider(name = "invalidAttributeStringProvider")
   public static Object[][] invalidAttributeStringProvider() {
     return new Object[][] {
-      {formatPlugin("http://bad registry url", "testplugin", "1.0")},
-      {formatPlugin("http://testregistry:8080", "bad:pluginname", "1.0")},
-      {formatPlugin("http://testregistry:8080", "", "emptyID")},
-      {formatPlugin("http://testregistry:8080", "emptyVersion", "")}
+      {formatPlugin("http://bad registry url", "testplugin/1.0")},
+      {formatPlugin("http://testregistry:8080", "bad:pluginname/1.0")},
+      {formatPlugin("http://testregistry:8080", "/version")},
+      {formatPlugin("http://testregistry:8080", "id/")},
+      {formatPlugin("http://testregistry:8080", "")}
     };
   }
 
@@ -132,11 +130,11 @@ public class PluginFQNParserTest {
   //   (String description, List<PluginFQN> expectedPlugins, Map<String, String> attributes)
   @DataProvider(name = "validAttributesProvider")
   public static Object[][] validAttributesProvider() {
-    PluginFQN basicEditor = new PluginFQN(URI.create("http://registry:8080"), "editor", "ver");
-    PluginFQN withRegistry = new PluginFQN(URI.create("http://registry:8080"), "plugin", "1.0");
-    PluginFQN noRegistry = new PluginFQN(null, "pluginNoRegistry", "2.0");
+    PluginFQN basicEditor = new PluginFQN(URI.create("http://registry:8080"), "editor/ver");
+    PluginFQN withRegistry = new PluginFQN(URI.create("http://registry:8080"), "plugin/1.0");
+    PluginFQN noRegistry = new PluginFQN(null, "pluginNoRegistry/2.0");
     PluginFQN pathRegistry =
-        new PluginFQN(URI.create("http://registry/multiple/path/"), "pluginPathRegistry", "3.0");
+        new PluginFQN(URI.create("http://registry/multiple/path/"), "pluginPathRegistry/3.0");
     return new Object[][] {
       {
         "Test plugin with registry",
@@ -193,19 +191,19 @@ public class PluginFQNParserTest {
   }
 
   private static String[] formatPlugins(PluginFQN... plugins) {
-    return Arrays.stream(plugins).map(p -> formatPlugin(p)).toArray(String[]::new);
+    return Arrays.stream(plugins).map(PluginFQNParserTest::formatPlugin).toArray(String[]::new);
   }
 
   private static String formatPlugin(PluginFQN plugin) {
     String registry = plugin.getRegistry() == null ? null : plugin.getRegistry().toString();
-    return formatPlugin(registry, plugin.getId(), plugin.getVersion());
+    return formatPlugin(registry, plugin.getId());
   }
 
-  private static String formatPlugin(String registry, String id, String version) {
+  private static String formatPlugin(String registry, String id) {
     if (registry == null) {
-      return String.format(PLUGIN_FORMAT_WITHOUT_REGISTRY, id, version);
+      return id;
     } else {
-      return String.format(PLUGIN_FORMAT, registry, id, version);
+      return registry + "/" + id;
     }
   }
 

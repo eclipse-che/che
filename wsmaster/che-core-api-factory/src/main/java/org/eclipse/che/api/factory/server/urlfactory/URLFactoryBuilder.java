@@ -53,7 +53,7 @@ public class URLFactoryBuilder {
 
   @Inject
   public URLFactoryBuilder(
-      @Named("che.factory.default_editor") String defaultCheEditor,
+      @Named("che.factory.default_editor") String defaultCheEditor, // TODO
       @Named("che.factory.default_plugins") String defaultChePlugins,
       URLFetcher urlFetcher,
       DevfileManager devfileManager) {

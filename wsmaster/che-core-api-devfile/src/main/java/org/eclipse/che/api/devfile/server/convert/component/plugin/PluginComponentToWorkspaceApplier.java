@@ -58,6 +58,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
     String workspacePluginsAttribute =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
+    // TODO
     workspaceConfig
         .getAttributes()
         .put(
@@ -67,6 +68,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     String pluginsAliases =
         workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
     if (pluginComponent.getAlias() != null) {
+      // TODO
       workspaceConfig
           .getAttributes()
           .put(
@@ -74,6 +76,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
               append(pluginsAliases, pluginComponent.getId() + "=" + pluginComponent.getAlias()));
     }
 
+    // TODO
     String pluginIdVersion = resolveIdAndVersion(pluginComponent.getId());
     String memoryLimit = pluginComponent.getMemoryLimit();
     if (memoryLimit != null) {

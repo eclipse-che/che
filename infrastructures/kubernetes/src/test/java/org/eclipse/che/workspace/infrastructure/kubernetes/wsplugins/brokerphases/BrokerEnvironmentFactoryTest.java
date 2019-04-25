@@ -90,7 +90,7 @@ public class BrokerEnvironmentFactoryTest {
   @Test
   public void testInitBrokerContainer() throws Exception {
     // given
-    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id", "version"));
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
@@ -128,7 +128,7 @@ public class BrokerEnvironmentFactoryTest {
   @Test
   public void shouldNameContainersAfterPluginBrokerImage() throws Exception {
     // given
-    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id", "version"));
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
@@ -153,8 +153,8 @@ public class BrokerEnvironmentFactoryTest {
     // given
     Collection<PluginFQN> pluginFQNs =
         ImmutableList.of(
-            new PluginFQN(null, "testPlugin1", "testver1"),
-            new PluginFQN(new URI("testregistry"), "testPlugin2", "testver2"));
+            new PluginFQN(null, "testPlugin1"),
+            new PluginFQN(new URI("testregistry"), "testPlugin2"));
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when

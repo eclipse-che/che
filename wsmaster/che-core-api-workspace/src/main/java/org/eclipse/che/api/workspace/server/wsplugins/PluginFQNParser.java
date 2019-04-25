@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.wsplugins;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 import com.google.common.annotations.Beta;
@@ -23,6 +24,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.api.workspace.shared.Constants;
@@ -37,6 +40,14 @@ import org.eclipse.che.api.workspace.shared.Constants;
  */
 @Beta
 public class PluginFQNParser {
+
+  private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
+      "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'registryURL/name/version' or 'name:version' or 'registryURL/name:version'";
+  private static final Pattern PLUGIN_PATTERN_V1 =
+      Pattern.compile("(?<registry>(https?://)[-./\\w]+/)?(?<name>\\w+):(?<version>[-\\w.]+)");
+  private static final Pattern PLUGIN_PATTERN_V2 =
+      Pattern.compile(
+          "(?<registry>(https?://)[-./\\w]+/)?(?<id>[-a-z0-9]+/[-a-z0-9]+/[-.a-z0-9]+)");
 
   /**
    * Parses a workspace attributes map into a collection of {@link PluginFQN}.
@@ -81,43 +92,48 @@ public class PluginFQNParser {
 
     List<PluginFQN> collectedFQNs = new ArrayList<>();
     for (String plugin : plugins) {
-      PluginFQN pFQN = parsePlugin(plugin);
+      PluginFQN pFQN = parsePluginFQN(plugin);
 
-      if (collectedFQNs
-          .stream()
-          .anyMatch(
-              p -> p.getId().equals(pFQN.getId()) && p.getVersion().equals(pFQN.getVersion()))) {
+      if (collectedFQNs.stream().anyMatch(p -> p.getId().equals(pFQN.getId()))) {
         throw new InfrastructureException(
-            String.format(
-                "Invalid Che tooling plugins configuration: plugin %s:%s is duplicated",
-                pFQN.getId(), pFQN.getVersion())); // even if different repos
+            format(
+                "Invalid Che tooling plugins configuration: plugin %s is duplicated",
+                pFQN.getId())); // even if different registries
       }
       collectedFQNs.add(pFQN);
     }
     return collectedFQNs;
   }
 
-  private PluginFQN parsePlugin(String plugin) throws InfrastructureException {
-    URI repo = null;
-    String idVersionString;
-    final int idVersionTagDelimiter = plugin.lastIndexOf("/");
-    idVersionString = plugin.substring(idVersionTagDelimiter + 1);
-    if (idVersionTagDelimiter > -1) {
-      try {
-        repo = new URI(plugin.substring(0, idVersionTagDelimiter));
-      } catch (URISyntaxException e) {
-        throw new InfrastructureException(
-            String.format(
-                "Plugin registry URL is incorrect. Problematic plugin entry: %s", plugin));
+  private PluginFQN parsePluginFQN(String plugin) throws InfrastructureException {
+    String registry;
+    String id;
+    URI registryURI = null;
+    Matcher matcher = PLUGIN_PATTERN_V1.matcher(plugin);
+    if (matcher.matches()) {
+      registry = matcher.group("registry");
+      id = matcher.group("name") + "/" + matcher.group("version");
+    } else {
+      matcher = PLUGIN_PATTERN_V2.matcher(plugin);
+      if (matcher.matches()) {
+        registry = matcher.group("registry");
+        id = matcher.group("id");
+      } else {
+        throw new InfrastructureException(format(INCORRECT_PLUGIN_FORMAT_TEMPLATE, plugin));
       }
     }
-    String[] idAndVersion = idVersionString.split(":");
-    if (idAndVersion.length != 2 || idAndVersion[0].isEmpty() || idAndVersion[1].isEmpty()) {
-      throw new InfrastructureException(
-          String.format("Plugin format is illegal. Problematic plugin entry: %s", plugin));
+    if (!isNullOrEmpty(registry)) {
+      try {
+        registryURI = new URI(registry);
+      } catch (URISyntaxException e) {
+        throw new InfrastructureException(
+            format(
+                "Plugin registry URL '%s' is incorrect. Problematic plugin entry: '%s'",
+                registry, plugin));
+      }
     }
 
-    return new PluginFQN(repo, idAndVersion[0], idAndVersion[1]);
+    return new PluginFQN(registryURI, id);
   }
 
   private String[] splitAttribute(String attribute) {

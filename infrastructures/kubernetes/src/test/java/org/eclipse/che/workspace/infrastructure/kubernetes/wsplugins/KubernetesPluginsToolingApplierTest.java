@@ -84,7 +84,7 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesPluginsToolingApplierTest {
-  private static final String TEST_IMAGE = "testImage/test:test";
+  private static final String TEST_IMAGE = "testImage/test/test";
   private static final String TEST_IMAGE_POLICY = "IfNotPresent";
   private static final String ENV_VAR = "PLUGINS_ENV_VAR";
   private static final String ENV_VAR_VALUE = "PLUGINS_ENV_VAR_VALUE";
@@ -143,7 +143,7 @@ public class KubernetesPluginsToolingApplierTest {
     applier.apply(
         runtimeIdentity,
         internalEnvironment,
-        singletonList(createChePlugin("plugin", createContainer("container", pluginCommand))));
+        singletonList(createChePlugin(createContainer("container", pluginCommand))));
 
     // then
     List<CommandImpl> envCommands = internalEnvironment.getCommands();
@@ -152,7 +152,7 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommand.getName(), pluginCommand.getName());
     assertEquals(
         envCommand.getCommandLine(),
-        pluginCommand.getCommand().stream().collect(Collectors.joining(" ")));
+        String.join(" ", pluginCommand.getCommand()));
     assertEquals(envCommand.getType(), "custom");
     assertEquals(
         envCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), pluginCommand.getWorkingDir());
@@ -162,8 +162,8 @@ public class KubernetesPluginsToolingApplierTest {
   @Test
   public void shouldResolveMachineNameForCommandsInEnvironment() throws Exception {
     // given
-    ChePlugin chePlugin = createChePlugin("plugin", createContainer("container"));
-    String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+    ChePlugin chePlugin = createChePlugin(createContainer("container"));
+    String pluginRef = chePlugin.getId();
 
     CommandImpl pluginCommand = new CommandImpl("test-command", "echo Hello World!", "custom");
     pluginCommand.getAttributes().put("plugin", pluginRef);
@@ -187,8 +187,8 @@ public class KubernetesPluginsToolingApplierTest {
   public void shouldFillInWarningIfChePluginDoesNotHaveAnyContainersButThereAreRelatedCommands()
       throws Exception {
     // given
-    ChePlugin chePlugin = createChePlugin("plugin");
-    String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+    ChePlugin chePlugin = createChePlugin();
+    String pluginRef = chePlugin.getId();
 
     CommandImpl pluginCommand = new CommandImpl("test-command", "echo Hello World!", "custom");
     pluginCommand.getAttributes().put("plugin", pluginRef);
@@ -206,7 +206,7 @@ public class KubernetesPluginsToolingApplierTest {
         Warnings.COMMAND_IS_CONFIGURED_IN_PLUGIN_WITHOUT_CONTAINERS_WARNING_CODE);
     assertEquals(
         warning.getMessage(),
-        "There are configured commands for plugin 'some-id:0.0.3' that doesn't have any containers");
+        "There are configured commands for plugin 'some-id' that doesn't have any containers");
   }
 
   @Test
@@ -214,7 +214,7 @@ public class KubernetesPluginsToolingApplierTest {
       shouldNotFillInWarningIfChePluginDoesNotHaveAnyContainersAndThereAreNotRelatedCommands()
           throws Exception {
     // given
-    ChePlugin chePlugin = createChePlugin("plugin");
+    ChePlugin chePlugin = createChePlugin();
 
     // when
     applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
@@ -227,8 +227,8 @@ public class KubernetesPluginsToolingApplierTest {
   public void shouldFillInWarningIfChePluginHasMultiplyContainersButThereAreRelatedCommands()
       throws Exception {
     // given
-    ChePlugin chePlugin = createChePlugin("plugin", createContainer(), createContainer());
-    String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+    ChePlugin chePlugin = createChePlugin(createContainer(), createContainer());
+    String pluginRef = chePlugin.getId();
 
     CommandImpl pluginCommand = new CommandImpl("test-command", "echo Hello World!", "custom");
     pluginCommand.getAttributes().put("plugin", pluginRef);
@@ -246,14 +246,14 @@ public class KubernetesPluginsToolingApplierTest {
         Warnings.COMMAND_IS_CONFIGURED_IN_PLUGIN_WITH_MULTIPLY_CONTAINERS_WARNING_CODE);
     assertEquals(
         warning.getMessage(),
-        "There are configured commands for plugin 'some-id:0.0.3' that has multiply containers. Commands will be configured to be run in first container");
+        "There are configured commands for plugin '" + pluginRef + "' that has multiply containers. Commands will be configured to be run in first container");
   }
 
   @Test
   public void shouldNotFillInWarningIfChePluginHasMultiplyContainersAndThereAreNotRelatedCommands()
       throws Exception {
     // given
-    ChePlugin chePlugin = createChePlugin("plugin", createContainer(), createContainer());
+    ChePlugin chePlugin = createChePlugin(createContainer(), createContainer());
 
     // when
     applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
@@ -672,10 +672,13 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   private ChePlugin createChePlugin(String name, CheContainer... containers) {
+    String version = "0.0.3";
+    String publisher = "somePublisher";
     ChePlugin plugin = new ChePlugin();
     plugin.setName(name);
-    plugin.setId("some-id");
-    plugin.setVersion("0.0.3");
+    plugin.setPublisher(publisher);
+    plugin.setId(publisher + "/" + name + "/" + version);
+    plugin.setVersion(version);
     plugin.setContainers(Arrays.asList(containers));
     return plugin;
   }
@@ -895,6 +898,6 @@ public class KubernetesPluginsToolingApplierTest {
     serverAttributes.put("internal", Boolean.toString(!isExternal));
     servers.put(
         portName,
-        new ServerConfigImpl(Integer.toString(port) + "/tcp", protocol, path, serverAttributes));
+        new ServerConfigImpl(port + "/tcp", protocol, path, serverAttributes));
   }
 }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
@@ -38,21 +39,25 @@ import org.eclipse.che.commons.lang.Pair;
 public class DefaultEditorProvisioner {
 
   private final String defaultEditorRef;
-  private final String defaultEditorId;
-  private final Map<String, String> defaultPluginsIdToRef;
+  private final String defaultEditor;
+  private final Map<String, String> defaultPluginsToRefs;
+  private final Pattern PLUGIN_PATTERN =
+      Pattern.compile("(.*/)?(?<publisher>[^/]+)/(?<name>[^/]+)/(?<version>[^/]+)");
 
   @Inject
   public DefaultEditorProvisioner(
       @Named("che.workspace.devfile.default_editor") String defaultEditorRef,
       @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs) {
     this.defaultEditorRef = Strings.isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
-    this.defaultEditorId = this.defaultEditorRef == null ? null : getId(this.defaultEditorRef);
-    this.defaultPluginsIdToRef =
-        Arrays.stream(defaultPluginsRefs).collect(toMap(this::getId, identity()));
+    this.defaultEditor = this.defaultEditorRef == null ? null : getId(this.defaultEditorRef);
+    this.defaultPluginsToRefs =
+        Arrays.stream(defaultPluginsRefs)
+            .collect(toMap(this::getPluginPublisherAndName, identity()));
   }
 
   /**
-   * Provision default editor if there is no any another editor and default plugins for it.
+   * Provision default editor if there is no editor. Also provisions default plugins for default
+   * editor regardless whether it is provisioned or set by user.
    *
    * @param devfile devfile where editor and plugins should be provisioned
    */
@@ -77,7 +82,7 @@ public class DefaultEditorProvisioner {
       isDefaultEditorUsed = true;
     } else {
       Component editor = editorOpt.get();
-      isDefaultEditorUsed = defaultEditorId.equals(resolveIdAndVersion(editor.getId()).first);
+      isDefaultEditorUsed = defaultEditor.equals(resolveIdAndVersion(editor.getId()).first);
     }
 
     if (isDefaultEditorUsed) {
@@ -86,8 +91,9 @@ public class DefaultEditorProvisioner {
   }
 
   private void provisionDefaultPlugins(List<ComponentImpl> components) {
-    Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsIdToRef);
+    Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
 
+    // TODO
     components
         .stream()
         .filter(t -> PLUGIN_COMPONENT_TYPE.equals(t.getType()))
@@ -102,6 +108,11 @@ public class DefaultEditorProvisioner {
     return resolveIdAndVersion(reference).first;
   }
 
+  private String getPluginPublisherAndName(String reference) {
+    return resolveIdAndVersion(reference).first;
+  }
+
+  // todo
   private Pair<String, String> resolveIdAndVersion(String ref) {
     int lastSlashPosition = ref.lastIndexOf("/");
     String idVersion;

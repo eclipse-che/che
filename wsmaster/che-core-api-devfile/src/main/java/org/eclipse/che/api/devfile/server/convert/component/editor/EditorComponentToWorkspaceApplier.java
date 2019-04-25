@@ -65,9 +65,11 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
     }
 
-    String editorIdVersion = resolveIdAndVersion(editorComponent.getId());
+    // TODO how to properly parse this and separate publisher/name/version
+    String editorIdVersion = resolveIdAndVersion(editorId);
     if (memoryLimit != null) {
       String editorIdPart = editorIdVersion.split(":")[0];
+      // TODO
       workspaceConfig
           .getAttributes()
           .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorIdPart), memoryLimit);
