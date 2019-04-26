@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import io.fabric8.kubernetes.api.model.rbac.KubernetesPolicyRuleBuilder;
 import io.fabric8.kubernetes.api.model.rbac.KubernetesRole;
 import io.fabric8.kubernetes.api.model.rbac.KubernetesRoleBinding;
@@ -20,6 +22,8 @@ import io.fabric8.kubernetes.api.model.rbac.KubernetesSubjectBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Holds logic for preparing workspace service account.
@@ -30,19 +34,25 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
  */
 public class KubernetesWorkspaceServiceAccount {
 
+  private static final Logger LOG =
+      LoggerFactory.getLogger(KubernetesWorkspaceServiceAccount.class);
+
   private final String namespace;
   private final String serviceAccountName;
   private final KubernetesClientFactory clientFactory;
   private final String workspaceId;
+  private final String clusterRoleName;
 
   public KubernetesWorkspaceServiceAccount(
       String workspaceId,
       String namespace,
       String serviceAccountName,
+      String clusterRoleName,
       KubernetesClientFactory clientFactory) {
     this.workspaceId = workspaceId;
     this.namespace = namespace;
     this.serviceAccountName = serviceAccountName;
+    this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
   }
 
@@ -82,6 +92,22 @@ public class KubernetesWorkspaceServiceAccount {
         .kubernetesRoleBindings()
         .inNamespace(namespace)
         .createOrReplace(createViewRoleBinding());
+
+    // If the user specified an additional cluster role for the workspace,
+    // create a role binding for it too
+    if (!isNullOrEmpty(this.clusterRoleName)) {
+      if (k8sClient.rbac().kubernetesClusterRoles().withName(this.clusterRoleName).get() != null) {
+        k8sClient
+            .rbac()
+            .kubernetesRoleBindings()
+            .inNamespace(namespace)
+            .createOrReplace(createCustomRoleBinding(this.clusterRoleName));
+      } else {
+        LOG.warn(
+            "Unable to find the cluster role {}. Skip creating custom role binding.",
+            this.clusterRoleName);
+      }
+    }
   }
 
   private void createWorkspaceServiceAccount(KubernetesClient k8sClient) {
@@ -156,6 +182,25 @@ public class KubernetesWorkspaceServiceAccount {
         .withNewRoleRef()
         .withKind("Role")
         .withName("exec")
+        .endRoleRef()
+        .withSubjects(
+            new KubernetesSubjectBuilder()
+                .withKind("ServiceAccount")
+                .withName(serviceAccountName)
+                .withNamespace(namespace)
+                .build())
+        .build();
+  }
+
+  private KubernetesRoleBinding createCustomRoleBinding(String clusterRoleName) {
+    return new KubernetesRoleBindingBuilder()
+        .withNewMetadata()
+        .withName(serviceAccountName + "-custom")
+        .withNamespace(namespace)
+        .endMetadata()
+        .withNewRoleRef()
+        .withKind("ClusterRole")
+        .withName(clusterRoleName)
         .endRoleRef()
         .withSubjects(
             new KubernetesSubjectBuilder()

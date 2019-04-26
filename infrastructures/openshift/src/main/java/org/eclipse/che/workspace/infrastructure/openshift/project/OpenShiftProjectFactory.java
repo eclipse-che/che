@@ -32,16 +32,19 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
 
   private final String projectName;
   private final String serviceAccountName;
+  private final String clusterRoleName;
   private final OpenShiftClientFactory clientFactory;
 
   @Inject
   public OpenShiftProjectFactory(
       @Nullable @Named("che.infra.openshift.project") String projectName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
+      @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
       OpenShiftClientFactory clientFactory) {
-    super(projectName, serviceAccountName, clientFactory);
+    super(projectName, serviceAccountName, clusterRoleName, clientFactory);
     this.projectName = projectName;
     this.serviceAccountName = serviceAccountName;
+    this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
   }
 
@@ -92,6 +95,6 @@ public class OpenShiftProjectFactory extends KubernetesNamespaceFactory {
   @VisibleForTesting
   OpenShiftWorkspaceServiceAccount doCreateServiceAccount(String workspaceId, String projectName) {
     return new OpenShiftWorkspaceServiceAccount(
-        workspaceId, projectName, serviceAccountName, clientFactory);
+        workspaceId, projectName, serviceAccountName, clusterRoleName, clientFactory);
   }
 }
