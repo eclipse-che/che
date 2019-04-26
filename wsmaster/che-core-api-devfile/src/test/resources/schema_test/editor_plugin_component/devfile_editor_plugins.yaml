@@ -20,12 +20,12 @@ projects:
       location: 'git@github.com:spring-projects/spring-petclinic.git'
 components:
   - type: cheEditor
-    id: org.eclipse.chetheia:0.0.3
+    id: eclipse/chetheia/0.0.3
   - alias: mvn-stack
     type: chePlugin
-    id: org.eclipse.chemaven-jdk8:1.0.0
+    id: eclipse/chemaven-jdk8/1.0.0
   - type: chePlugin
-    id: org.eclipse.chetheia-jdtls:0.0.3
+    id: eclipse/chetheia-jdtls/0.0.3
 commands:
   - name: build
     actions:
