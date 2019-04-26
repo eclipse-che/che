@@ -36,6 +36,12 @@ public class ChePlugin extends PluginBase {
   }
 
   @Override
+  public ChePlugin workspaceEnv(List<EnvVar> workspaceEnv) {
+    setWorkspaceEnv(workspaceEnv);
+    return this;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;

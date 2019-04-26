@@ -28,7 +28,6 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider.SECURE_EXPOSER_IMPL_PROPERTY;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -53,6 +52,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -84,6 +84,7 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesPluginsToolingApplierTest {
+
   private static final String TEST_IMAGE = "testImage/test/test";
   private static final String TEST_IMAGE_POLICY = "IfNotPresent";
   private static final String ENV_VAR = "PLUGINS_ENV_VAR";
@@ -104,7 +105,6 @@ public class KubernetesPluginsToolingApplierTest {
   @Mock private ProjectsRootEnvVariableProvider projectsRootEnvVariableProvider;
 
   private KubernetesEnvironment internalEnvironment;
-  private List<Container> containers;
   private KubernetesPluginsToolingApplier applier;
 
   @BeforeMethod
@@ -115,7 +115,7 @@ public class KubernetesPluginsToolingApplierTest {
             TEST_IMAGE_POLICY, MEMORY_LIMIT_MB, false, projectsRootEnvVariableProvider);
 
     Map<String, InternalMachineConfig> machines = new HashMap<>();
-    containers = new ArrayList<>();
+    List<Container> containers = new ArrayList<>();
     containers.add(userContainer);
     machines.put(USER_MACHINE_NAME, userMachineConfig);
 
@@ -155,7 +155,7 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommand.getType(), "custom");
     assertEquals(
         envCommand.getAttributes().get(WORKING_DIRECTORY_ATTRIBUTE), pluginCommand.getWorkingDir());
-    assertEquals(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "container");
+    validateContainerNameName(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "container");
   }
 
   @Test
@@ -179,7 +179,7 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(envCommand.getType(), pluginCommand.getType());
     assertEquals(envCommand.getCommandLine(), pluginCommand.getCommandLine());
     assertEquals(envCommand.getAttributes().get("plugin"), pluginRef);
-    assertEquals(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "container");
+    validateContainerNameName(envCommand.getAttributes().get(MACHINE_NAME_ATTRIBUTE), "container");
   }
 
   @Test
@@ -264,21 +264,19 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   @Test
-  public void shouldUsePluginNameAndContainerNameForMachinesNames() throws Exception {
+  public void shouldUseContainerNameForMachinesName() throws Exception {
     // given
     internalEnvironment.getMachines().clear();
 
-    ChePlugin chePlugin1 = createChePlugin("plugin1", createContainer("container1"));
-    ChePlugin chePlugin2 = createChePlugin("plugin2", createContainer("container2"));
+    ChePlugin chePlugin = createChePlugin("plugin1", createContainer("container1"));
 
     // when
-    applier.apply(runtimeIdentity, internalEnvironment, asList(chePlugin1, chePlugin2));
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
 
     // then
     Map<String, InternalMachineConfig> machines = internalEnvironment.getMachines();
-    assertEquals(machines.size(), 2);
-    assertTrue(machines.containsKey("container1"));
-    assertTrue(machines.containsKey("container2"));
+    assertEquals(machines.size(), 1);
+    validateContainerNameName(machines.keySet().iterator().next(), "container1");
   }
 
   @Test(
@@ -542,31 +540,6 @@ public class KubernetesPluginsToolingApplierTest {
 
     // then
     verifyK8sServices(internalEnvironment, endpoint1, endpoint2);
-  }
-
-  @Test
-  public void shouldPopulateWorkspaceWideEnvVarsToAllTheContainers() throws Exception {
-    // when
-    Container container = mock(Container.class);
-    containers.add(container);
-    List<io.fabric8.kubernetes.api.model.EnvVar> workspaceWideEnvVars = new ArrayList<>();
-    //    workspaceWideEnvVars.add();
-    //    workspaceWideEnvVars.add();
-
-    // when
-    applier.apply(
-        runtimeIdentity,
-        internalEnvironment,
-        ImmutableList.of(createChePlugin(), createChePlugin(createContainer(), createContainer())));
-
-    // then
-    assertEquals(internalEnvironment.getPodsCopy().size(), 1);
-    Pod pod = internalEnvironment.getPodsCopy().values().iterator().next();
-    List<Container> actualContainers = pod.getSpec().getContainers();
-    assertEquals(actualContainers.size(), 5);
-    for (Container actualContainer : actualContainers) {
-      assertTrue(actualContainer.getEnv().containsAll(workspaceWideEnvVars));
-    }
   }
 
   @Test(
@@ -898,5 +871,10 @@ public class KubernetesPluginsToolingApplierTest {
     Map<String, String> serverAttributes = new HashMap<>(attributes);
     serverAttributes.put("internal", Boolean.toString(!isExternal));
     servers.put(portName, new ServerConfigImpl(port + "/tcp", protocol, path, serverAttributes));
+  }
+
+  private void validateContainerNameName(String actual, String prefixExpected) {
+    Pattern pattern = Pattern.compile(prefixExpected + "\\w{3}");
+    assertTrue(pattern.matcher(actual).matches());
   }
 }
