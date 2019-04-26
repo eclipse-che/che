@@ -83,9 +83,9 @@ public final class Constants {
    *
    * <p>Value is plugin id.
    *
-   * <p>This is beta constant that is subject to change or removal.
-   *
    * <p>Example of the attribute value: 'eclipse/super-editor/0.0.1'
+   *
+   * <p>This is beta constant that is subject to change or removal.
    */
   public static final String WORKSPACE_TOOLING_EDITOR_ATTRIBUTE = "editor";
 

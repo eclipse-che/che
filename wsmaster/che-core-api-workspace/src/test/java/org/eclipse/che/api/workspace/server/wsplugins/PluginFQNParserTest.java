@@ -123,6 +123,10 @@ public class PluginFQNParserTest {
       {formatPlugin("http://testregistry:8080", "bad:pluginname/1.0")},
       {formatPlugin("http://testregistry:8080", "/version")},
       {formatPlugin("http://testregistry:8080", "id/")},
+      {formatPlugin("http://testregistry:8080", "name/version")},
+      {formatPlugin("http://testregistry:8080", "id:version")},
+      {formatPlugin("http://testregistry:8080", "publisher/name:version")},
+      {formatPlugin("http://testregistry:8080", "publisher/name/version/odd")},
       {formatPlugin("http://testregistry:8080", "")}
     };
   }
@@ -145,6 +149,8 @@ public class PluginFQNParserTest {
         ImmutableList.of(basicEditor, withRegistry),
         createAttributes(formatPlugin(basicEditor), formatPlugins(withRegistry))
       },
+      // https
+      // with path v3
       {
         "Test plugin without registry",
         ImmutableList.of(basicEditor, noRegistry),

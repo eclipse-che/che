@@ -39,8 +39,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 /** @author Oleksandr Garagatyi */
 public class MachineResolver {
 
-  private final String pluginName;
-  private final String pluginPublisherName;
+  private final String pluginPublisherAndName;
   private final Container container;
   private final CheContainer cheContainer;
   private final String defaultSidecarMemoryLimitBytes;
@@ -57,8 +56,7 @@ public class MachineResolver {
       String defaultSidecarMemoryLimitBytes,
       List<ChePluginEndpoint> containerEndpoints,
       Map<String, String> wsAttributes) {
-    this.pluginName = pluginName;
-    this.pluginPublisherName = pluginPublisher + "/" + pluginName;
+    this.pluginPublisherAndName = pluginPublisher + "/" + pluginName;
     this.container = container;
     this.cheContainer = cheContainer;
     this.defaultSidecarMemoryLimitBytes = defaultSidecarMemoryLimitBytes;
@@ -83,7 +81,7 @@ public class MachineResolver {
     }
     // Use plugin_publisher/plugin_name to find overriding of memory limit.
     String overriddenSidecarMemLimit =
-        wsAttributes.get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginPublisherName));
+        wsAttributes.get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginPublisherAndName));
     if (!isNullOrEmpty(overriddenSidecarMemLimit)) {
       machineConfig
           .getAttributes()
@@ -112,7 +110,7 @@ public class MachineResolver {
                     + " the mountSources attribute to true instead and remove the manual volume"
                     + " mount in the plugin. After that the mount path of the sources will be"
                     + " available automatically in the '%s' environment variable.",
-                pluginPublisherName,
+                pluginPublisherAndName,
                 PROJECTS_VOLUME_NAME,
                 container.getName(),
                 volume.getMountPath(),

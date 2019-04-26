@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -42,7 +41,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 public class PluginFQNParser {
 
   private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
-      "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'registryURL/name/version'";
+      "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'publisher/name/version'";
   private static final Pattern PLUGIN_PATTERN =
       Pattern.compile(
           "((?<registry>(https?://)[-./\\w]+(:[0-9]+)?)/)?(?<id>[-a-z0-9]+/[-a-z0-9]+/[-.a-z0-9]+)");
@@ -85,7 +84,7 @@ public class PluginFQNParser {
 
     String[] plugins = splitAttribute(attribute);
     if (plugins.length == 0) {
-      return Collections.emptyList();
+      return emptyList();
     }
 
     List<PluginFQN> collectedFQNs = new ArrayList<>();
@@ -120,7 +119,7 @@ public class PluginFQNParser {
       } catch (URISyntaxException e) {
         throw new InfrastructureException(
             format(
-                "Plugin registry URL '%s' is incorrect. Problematic plugin entry: '%s'",
+                "Plugin registry URL '%s' is invalid. Problematic plugin entry: '%s'",
                 registry, plugin));
       }
     }
