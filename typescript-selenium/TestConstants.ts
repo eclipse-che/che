@@ -8,31 +8,65 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-function readEnvAndSetValue(envProperty: any, defaultValue: string | number | boolean): any {
-    const propertyValue = envProperty
-    if (!propertyValue) {
-        return defaultValue;
-    }
-
-    return propertyValue
-}
-
 export const TestConstants = {
-    TS_SELENIUM_HEADLESS: readEnvAndSetValue(process.env.TS_SELENIUM_HEADLESS, false),
+    /**
+     * Base URL of the application which should be checked
+     */
+    TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || "http://che-che.192.168.99.100.nip.io",
 
-    TS_SELENIUM_START_WORKSPACE_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT, 240000),
-    TS_SELENIUM_LOAD_PAGE_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT, 120000),
-    TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT, 180000),
+    /**
+     * Run browser in "Headless" (hiden) mode, "false" by default.  
+     */
+    TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
 
-    TS_SELENIUM_DEFAULT_TIMEOUT: readEnvAndSetValue(process.env.TS_SELENIUM_DEFAULT_TIMEOUT, 20000),
-    TS_SELENIUM_DEFAULT_ATTEMPTS: readEnvAndSetValue(process.env.TS_SELENIUM_DEFAULT_ATTEMPTS, 5),
-    TS_SELENIUM_DEFAULT_POLLING: readEnvAndSetValue(process.env.TS_SELENIUM_DEFAULT_POLLING, 1000),
+    /**
+     * Browser width resolution, "1920" by default.
+     */
+    TS_SELENIUM_RESOLUTION_WIDTH: Number(process.env.TS_SELENIUM_BASE_URL) || 1920,
 
-    TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS: readEnvAndSetValue(process.env.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS, 90),
-    TS_SELENIUM_WORKSPACE_STATUS_POLLING: readEnvAndSetValue(process.env.TS_SELENIUM_WORKSPACE_STATUS_POLLING, 10000),
+    /**
+     * Browser height resolution, "1080" by default.
+     */
+    TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_BASE_URL) || 1080,
 
-    TS_SELENIUM_BASE_URL: readEnvAndSetValue(process.env.TS_SELENIUM_BASE_URL, "http://che-che.192.168.99.100.nip.io"),
+    /**
+     * Timeout in milliseconds waiting for workspace start, "240 000" by default.
+     */
+    TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 240000,
 
-    TS_SELENIUM_RESOLUTION_WIDTH: readEnvAndSetValue(process.env.TS_SELENIUM_BASE_URL, 1920),
-    TS_SELENIUM_RESOLUTION_HEIGHT: readEnvAndSetValue(process.env.TS_SELENIUM_BASE_URL, 1080)
+    /**
+     * Timeout in milliseconds waiting for page load, "120 000" by default.
+     */
+    TS_SELENIUM_LOAD_PAGE_TIMEOUT: Number(process.env.TS_SELENIUM_LOAD_PAGE_TIMEOUT) || 120000,
+
+    /**
+     * Timeout in milliseconds waiting for language server initialization, "180 000" by default.
+     */
+    TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT: Number(process.env.TS_SELENIUM_LANGUAGE_SERVER_START_TIMEOUT) || 180000,
+
+    /**
+     * Default timeout for most of the waitings, "20 000" by default.
+     */
+    TS_SELENIUM_DEFAULT_TIMEOUT: Number(process.env.TS_SELENIUM_DEFAULT_TIMEOUT) || 20000,
+
+    /**
+     * Default ammount of tries, "5" by default.
+     */
+    TS_SELENIUM_DEFAULT_ATTEMPTS: Number(process.env.TS_SELENIUM_DEFAULT_ATTEMPTS) || 5,
+
+    /**
+     * Default delay in milliseconds between tries, "1000" by default.
+     */
+    TS_SELENIUM_DEFAULT_POLLING: Number(process.env.TS_SELENIUM_DEFAULT_POLLING) || 1000,
+
+    /**
+     * Amount of tries for checking workspace status.
+     */
+    TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS: Number(process.env.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS) || 90,
+
+    /**
+     * Delay in milliseconds between checking workspace status tries.
+     */
+    TS_SELENIUM_WORKSPACE_STATUS_POLLING: Number(process.env.TS_SELENIUM_WORKSPACE_STATUS_POLLING) || 10000
+
 }
