@@ -2,4 +2,5 @@
 --timeout 1200000
 --reporter 'driver/CheReporter.ts'
 -u tdd 
+--bail
 --spec tests/*.spec.ts
