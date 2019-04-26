@@ -101,4 +101,4 @@ class CheReporter extends mocha.reporters.Spec {
   }
 }
 
-module.exports = CheReporter;
+export = CheReporter;
