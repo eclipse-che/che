@@ -23,19 +23,18 @@ export enum WorkspaceStatus {
 
 @injectable()
 export class TestWorkspaceUtil {
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        private readonly rest: rm.RestClient = new rm.RestClient('rest-samples')) { }
 
-    public async waitRunningStatus(workspaceNamespace: string, workspaceName: string) {
-        const workspaceStatusApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace/${workspaceNamespace}:${workspaceName}`;
+    public async waitRunningStatus(namespace: string, workspaceName: string) {
+        const workspaceStatusApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace/${namespace}:${workspaceName}`;
         const attempts: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
-
-        const rest: rm.RestClient = new rm.RestClient('rest-samples')
 
         for (let i = 0; i < attempts; i++) {
             let isWorkspaceStarting: boolean = false;
 
-            const response: rm.IRestResponse<any> = await rest.get(workspaceStatusApiUrl)
+            const response: rm.IRestResponse<any> = await this.rest.get(workspaceStatusApiUrl)
 
             if (response.statusCode !== 200) {
                 await this.driverHelper.wait(polling)

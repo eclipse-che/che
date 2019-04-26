@@ -47,7 +47,8 @@ export class NewWorkspace {
     async clickOnChe7Stack(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const che7StackLocator: By = By.css(NewWorkspace.CHE_7_STACK_CSS)
 
-        await this.driverHelper.waitAndClick(che7StackLocator)
+        await this.driverHelper.waitAndClick(che7StackLocator, timeout)
+        await this.waitChe7StackSelected(timeout)
     }
 
     async waitChe7StackSelected(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

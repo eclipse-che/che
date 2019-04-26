@@ -11,18 +11,21 @@ import "reflect-metadata";
 import { LoginPage } from "./LoginPage";
 import { injectable, inject } from "inversify";
 import { ThenableWebDriver } from "selenium-webdriver";
-import { TYPES } from "../../inversify.types";
+import { TYPES, CLASSES } from "../../inversify.types";
 import { Driver } from "../../driver/Driver";
 import { TestConstants } from "../../TestConstants";
+import { Dashboard } from "../dashboard/Dashboard";
 
 @injectable()
 export class SingleUserLoginPage implements LoginPage {
     constructor(
-        @inject(TYPES.Driver) private readonly driver: Driver) { }
+        @inject(TYPES.Driver) private readonly driver: Driver,
+        @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard) { }
 
-    async login() {
+    async login(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         const webDriver: ThenableWebDriver = this.driver.get()
         await webDriver.navigate().to(TestConstants.TS_SELENIUM_BASE_URL)
+        await this.dashboard.waitPage(timeout)
     }
 
 }

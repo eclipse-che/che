@@ -53,38 +53,29 @@ suite("E2E", async () => {
         test("login", async () => {
             await loginPage.login()
         })
-
-        test("wait dashboard", async () => {
-            await dashboard.waitLoader()
-            await dashboard.waitLoaderDisappearance()
-            await dashboard.waitPage()
-        })
     })
 
     suite("Create workspace and open IDE", async () => {
-
-        test("Go to 'New Workspace' page", async () => {
+        test(`Create a '${workspaceName}' workspace`, async () => {
+            await dashboard.waitPage()
             await dashboard.clickWorkspacesButton()
             await workspaces.clickAddWorkspaceButton()
-        })
 
-        test(`Create a '${workspaceName}' workspace`, async () => {
             await newWorkspace.typeWorkspaceName(workspaceName)
             await newWorkspace.clickOnChe7Stack()
-            await newWorkspace.waitChe7StackSelected()
             await newWorkspace.clickOnAddOrImportProjectButton()
             await newWorkspace.enableSampleCheckbox(sampleName)
             await newWorkspace.clickOnAddButton()
             await newWorkspace.waitProjectAdding(sampleName)
 
             await newWorkspace.selectCreateWorkspaceAndProceedEditing()
+            await workspaceDetails.waitPage(workspaceName);
         })
 
         test("Add 'Java Language Support' plugin to workspace", async () => {
             const javaPluginName: string = "Language Support for Java(TM)";
             const execPlugin: string = "Che machine-exec Service";
 
-            await workspaceDetails.waitPage(workspaceName);
             await workspaceDetails.waitTabSelected('Overview')
             await workspaceDetails.clickOnTab('Plugins')
             await workspaceDetails.waitTabSelected('Plugins')
