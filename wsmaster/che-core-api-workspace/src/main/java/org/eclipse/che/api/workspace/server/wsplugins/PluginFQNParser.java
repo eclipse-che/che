@@ -42,9 +42,14 @@ public class PluginFQNParser {
 
   private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
       "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'publisher/name/version'";
+  private static final String REGISTRY_PATTERN = "https?://[-./\\w]+(:[0-9]+)?";
+  private static final String PUBLISHER_PATTERN = "[-a-z0-9]+";
+  private static final String NAME_PATTERN = "[-a-z0-9]+";
+  private static final String VERSION_PATTERN = "[-.a-z0-9]+";
+  private static final String ID_PATTERN = PUBLISHER_PATTERN + "/" + NAME_PATTERN + "/" + VERSION_PATTERN;
   private static final Pattern PLUGIN_PATTERN =
       Pattern.compile(
-          "((?<registry>(https?://)[-./\\w]+(:[0-9]+)?)/)?(?<id>[-a-z0-9]+/[-a-z0-9]+/[-.a-z0-9]+)");
+          "((?<registry>" + REGISTRY_PATTERN + ")/)?(?<id>" + ID_PATTERN + ")");
 
   /**
    * Parses a workspace attributes map into a collection of {@link PluginFQN}.
