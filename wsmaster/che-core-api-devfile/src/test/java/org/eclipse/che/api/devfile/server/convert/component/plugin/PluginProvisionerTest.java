@@ -19,9 +19,11 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
+import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -29,14 +31,15 @@ import org.testng.annotations.Test;
 public class PluginProvisionerTest {
 
   private PluginProvisioner pluginComponentProvisioner;
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {
-    pluginComponentProvisioner = new PluginProvisioner();
+    pluginComponentProvisioner = new PluginProvisioner(fqnParser);
   }
 
   @Test
-  public void shouldProvisionChePluginComponent() {
+  public void shouldProvisionChePluginComponent() throws WorkspaceExportException {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     workspaceConfig
@@ -72,7 +75,8 @@ public class PluginProvisionerTest {
   }
 
   @Test
-  public void shouldSetAliasOnComponentIfAliasIsMissingInWorkspaceConfig() {
+  public void shouldSetAliasOnComponentIfAliasIsMissingInWorkspaceConfig()
+      throws WorkspaceExportException {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     workspaceConfig

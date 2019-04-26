@@ -48,11 +48,15 @@ public class PluginFQNParser {
   private static final String NAME_PATTERN = "[-a-z0-9]+";
   private static final String VERSION_PATTERN = "[-.a-z0-9]+";
   private static final String ID_PATTERN =
-      "(?<publisher>" + PUBLISHER_PATTERN + ")/(?<name>" + NAME_PATTERN + ")/(?<version>"
-          + VERSION_PATTERN + ")";
+      "(?<publisher>"
+          + PUBLISHER_PATTERN
+          + ")/(?<name>"
+          + NAME_PATTERN
+          + ")/(?<version>"
+          + VERSION_PATTERN
+          + ")";
   private static final Pattern PLUGIN_PATTERN =
-      Pattern.compile(
-          "((?<registry>" + REGISTRY_PATTERN + ")/)?(?<id>" + ID_PATTERN + ")");
+      Pattern.compile("((?<registry>" + REGISTRY_PATTERN + ")/)?(?<id>" + ID_PATTERN + ")");
 
   /**
    * Parses a workspace attributes map into a collection of {@link PluginFQN}.

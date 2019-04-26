@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.net.URI;
 import java.util.Objects;
 
@@ -22,7 +20,6 @@ import java.util.Objects;
  * @author Oleksandr Garagatyi
  * @see PluginFQN
  */
-@JsonInclude(Include.NON_NULL)
 public class ExtendedPluginFQN extends PluginFQN {
 
   private String name;
@@ -60,6 +57,10 @@ public class ExtendedPluginFQN extends PluginFQN {
     this.version = version;
   }
 
+  public String getPublisherAndName() {
+    return publisher + "/" + name;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -72,9 +73,9 @@ public class ExtendedPluginFQN extends PluginFQN {
       return false;
     }
     ExtendedPluginFQN that = (ExtendedPluginFQN) o;
-    return Objects.equals(getName(), that.getName()) &&
-        Objects.equals(getVersion(), that.getVersion()) &&
-        Objects.equals(getPublisher(), that.getPublisher());
+    return Objects.equals(getName(), that.getName())
+        && Objects.equals(getVersion(), that.getVersion())
+        && Objects.equals(getPublisher(), that.getPublisher());
   }
 
   @Override
@@ -84,8 +85,8 @@ public class ExtendedPluginFQN extends PluginFQN {
 
   @Override
   public String toString() {
-    return String
-        .format("{id:%s, registry:%s, publisher:%s, name:%s, version:%s}", getId(), getRegistry(),
-            getPublisher(), getName(), getVersion());
+    return String.format(
+        "{id:%s, registry:%s, publisher:%s, name:%s, version:%s}",
+        getId(), getRegistry(), getPublisher(), getName(), getVersion());
   }
 }

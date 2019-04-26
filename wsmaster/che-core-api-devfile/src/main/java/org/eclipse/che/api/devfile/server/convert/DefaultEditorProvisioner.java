@@ -11,14 +11,11 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 
 import com.google.common.base.Strings;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,10 +23,12 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
-import org.eclipse.che.api.devfile.server.convert.component.plugin.PluginReferenceParser;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
 /**
  * Provision default editor if there is no any another editor and default plugins for it.
@@ -41,17 +40,23 @@ public class DefaultEditorProvisioner {
   private final String defaultEditorRef;
   private final String defaultEditor;
   private final Map<String, String> defaultPluginsToRefs;
+  private final PluginFQNParser fqnParser;
 
   @Inject
   public DefaultEditorProvisioner(
       @Named("che.workspace.devfile.default_editor") String defaultEditorRef,
-      @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs) {
+      @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs,
+      PluginFQNParser fqnParser)
+      throws DevfileException {
     this.defaultEditorRef = Strings.isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
+    this.fqnParser = fqnParser;
     this.defaultEditor =
         this.defaultEditorRef == null ? null : getPluginPublisherAndName(this.defaultEditorRef);
-    this.defaultPluginsToRefs =
-        Arrays.stream(defaultPluginsRefs)
-            .collect(toMap(this::getPluginPublisherAndName, identity()));
+    Map<String, String> map = new HashMap<>();
+    for (String defaultPluginsRef : defaultPluginsRefs) {
+      map.put(getPluginPublisherAndName(defaultPluginsRef), defaultPluginsRef);
+    }
+    this.defaultPluginsToRefs = map;
   }
 
   /**
@@ -60,7 +65,7 @@ public class DefaultEditorProvisioner {
    *
    * @param devfile devfile where editor and plugins should be provisioned
    */
-  public void apply(DevfileImpl devfile) {
+  public void apply(DevfileImpl devfile) throws DevfileException {
     if (defaultEditorRef == null) {
       // there is no default editor configured
       return;
@@ -89,21 +94,26 @@ public class DefaultEditorProvisioner {
     }
   }
 
-  private void provisionDefaultPlugins(List<ComponentImpl> components) {
+  private void provisionDefaultPlugins(List<ComponentImpl> components) throws DevfileException {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
 
-    components
-        .stream()
-        .filter(t -> PLUGIN_COMPONENT_TYPE.equals(t.getType()))
-        .forEach(t -> missingPluginsIdToRef.remove(getPluginPublisherAndName(t.getId())));
+    for (ComponentImpl t : components) {
+      if (PLUGIN_COMPONENT_TYPE.equals(t.getType())) {
+        missingPluginsIdToRef.remove(getPluginPublisherAndName(t.getId()));
+      }
+    }
 
     missingPluginsIdToRef
         .values()
         .forEach(pluginRef -> components.add(new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef)));
   }
 
-  private String getPluginPublisherAndName(String reference) {
-    PluginMeta meta = PluginReferenceParser.resolveMeta(reference);
-    return meta.getPublisher() + "/" + meta.getName();
+  private String getPluginPublisherAndName(String reference) throws DevfileException {
+    try {
+      ExtendedPluginFQN meta = fqnParser.parsePluginFQN(reference);
+      return meta.getPublisherAndName();
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
   }
 }

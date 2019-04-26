@@ -23,11 +23,15 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.inject.Inject;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
+import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.wsplugins.model.PluginMeta;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
@@ -38,6 +42,13 @@ import org.eclipse.che.api.workspace.shared.Constants;
  */
 public class PluginProvisioner implements ComponentProvisioner {
 
+  private final PluginFQNParser fqnParser;
+
+  @Inject
+  public PluginProvisioner(PluginFQNParser fqnParser) {
+    this.fqnParser = fqnParser;
+  }
+
   /**
    * Provision chePlugin components in {@link DevfileImpl} according to the value of {@link
    * Constants#WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE} in the specified {@link WorkspaceConfigImpl}.
@@ -47,7 +58,8 @@ public class PluginProvisioner implements ComponentProvisioner {
    * @throws IllegalArgumentException if the specified workspace config or devfile is null
    */
   @Override
-  public void provision(DevfileImpl devfile, WorkspaceConfigImpl workspaceConfig) {
+  public void provision(DevfileImpl devfile, WorkspaceConfigImpl workspaceConfig)
+      throws WorkspaceExportException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
     checkArgument(devfile != null, "Workspace config must not be null");
 
@@ -60,18 +72,20 @@ public class PluginProvisioner implements ComponentProvisioner {
     Map<String, String> pluginIdToComponentAlias = extractPluginIdToComponentAlias(workspaceConfig);
 
     for (String pluginId : pluginsAttribute.split(",")) {
-      PluginMeta meta = PluginReferenceParser.resolveMeta(pluginId);
+      final ExtendedPluginFQN fqn;
+      try {
+        fqn = fqnParser.parsePluginFQN(pluginId);
+      } catch (InfrastructureException e) {
+        throw new WorkspaceExportException(e.getMessage(), e);
+      }
 
-      ComponentImpl pluginComponent = new ComponentImpl(PLUGIN_COMPONENT_TYPE, meta.getId());
+      ComponentImpl pluginComponent = new ComponentImpl(PLUGIN_COMPONENT_TYPE, fqn.getId());
 
-      pluginComponent.setAlias(pluginIdToComponentAlias.get(meta.getId()));
+      pluginComponent.setAlias(pluginIdToComponentAlias.get(fqn.getId()));
       pluginComponent.setMemoryLimit(
           workspaceConfig
               .getAttributes()
-              .get(
-                  format(
-                      SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE,
-                      meta.getPublisher() + "/" + meta.getName())));
+              .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName())));
       devfile.getComponents().add(pluginComponent);
     }
   }

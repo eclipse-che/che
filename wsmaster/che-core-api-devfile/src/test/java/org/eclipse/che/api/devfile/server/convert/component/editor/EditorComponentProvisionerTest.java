@@ -18,9 +18,11 @@ import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMI
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
+import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -28,14 +30,15 @@ import org.testng.annotations.Test;
 public class EditorComponentProvisionerTest {
 
   private EditorComponentProvisioner editorComponentProvisioner;
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {
-    editorComponentProvisioner = new EditorComponentProvisioner();
+    editorComponentProvisioner = new EditorComponentProvisioner(fqnParser);
   }
 
   @Test
-  public void shouldProvisionCheEditorComponent() {
+  public void shouldProvisionCheEditorComponent() throws WorkspaceExportException {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     String editorId = "eclipse/super-editor/0.0.1";
@@ -59,7 +62,8 @@ public class EditorComponentProvisionerTest {
   }
 
   @Test
-  public void shouldUseEditorIdAsComponentNameIfAliasIsMissingDuringEditorComponentProvisioning() {
+  public void shouldUseEditorIdAsComponentNameIfAliasIsMissingDuringEditorComponentProvisioning()
+      throws WorkspaceExportException {
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     workspaceConfig

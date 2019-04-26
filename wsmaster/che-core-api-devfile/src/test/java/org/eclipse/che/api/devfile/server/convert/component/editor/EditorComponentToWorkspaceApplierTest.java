@@ -20,9 +20,11 @@ import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMI
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,14 +32,16 @@ import org.testng.annotations.Test;
 public class EditorComponentToWorkspaceApplierTest {
 
   private EditorComponentToWorkspaceApplier editorComponentApplier;
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {
-    editorComponentApplier = new EditorComponentToWorkspaceApplier();
+    editorComponentApplier = new EditorComponentToWorkspaceApplier(fqnParser);
   }
 
   @Test
-  public void shouldProvisionWorkspaceEditorAttributeDuringCheEditorComponentApplying() {
+  public void shouldProvisionWorkspaceEditorAttributeDuringCheEditorComponentApplying()
+      throws DevfileException {
     String editorId = "eclipse/super-editor/0.0.1";
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -62,7 +66,8 @@ public class EditorComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying() {
+  public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying()
+      throws DevfileException {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("editor");
@@ -84,7 +89,8 @@ public class EditorComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry() {
+  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
+      throws DevfileException {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("editor");

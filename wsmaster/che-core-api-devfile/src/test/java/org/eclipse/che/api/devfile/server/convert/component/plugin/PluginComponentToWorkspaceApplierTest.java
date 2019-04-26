@@ -21,9 +21,11 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,14 +33,16 @@ import org.testng.annotations.Test;
 public class PluginComponentToWorkspaceApplierTest {
 
   private PluginComponentToWorkspaceApplier pluginComponentApplier;
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {
-    pluginComponentApplier = new PluginComponentToWorkspaceApplier();
+    pluginComponentApplier = new PluginComponentToWorkspaceApplier(fqnParser);
   }
 
   @Test
-  public void shouldProvisionPluginWorkspaceAttributeDuringChePluginComponentApplying() {
+  public void shouldProvisionPluginWorkspaceAttributeDuringChePluginComponentApplying()
+      throws DevfileException {
 
     String superPluginId = "eclipse/super-plugin/0.0.1";
     // given
@@ -78,7 +82,8 @@ public class PluginComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributesDuringChePluginComponentApplying() {
+  public void shouldProvisionPluginCommandAttributesDuringChePluginComponentApplying()
+      throws DevfileException {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
@@ -100,7 +105,8 @@ public class PluginComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry() {
+  public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
+      throws DevfileException {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
