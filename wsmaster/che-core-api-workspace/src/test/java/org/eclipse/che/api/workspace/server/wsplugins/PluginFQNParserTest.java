@@ -354,9 +354,9 @@ public class PluginFQNParserTest {
    */
   private static class AttributeParsingTestCase {
 
-    String description;
-    List<PluginFQN> expectedPlugins;
-    Map<String, String> attributes;
+    private String description;
+    private List<PluginFQN> expectedPlugins;
+    private Map<String, String> attributes;
 
     public AttributeParsingTestCase(
         String description, List<PluginFQN> expectedPlugins, Map<String, String> attributes) {
