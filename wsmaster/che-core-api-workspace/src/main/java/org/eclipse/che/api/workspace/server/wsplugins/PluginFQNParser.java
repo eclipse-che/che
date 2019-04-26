@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.api.workspace.shared.Constants;
 
@@ -42,11 +43,13 @@ public class PluginFQNParser {
 
   private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
       "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'publisher/name/version'";
-  private static final String REGISTRY_PATTERN = "https?://[-./\\w]+(:[0-9]+)?";
+  private static final String REGISTRY_PATTERN = "https?://[-./\\w]+(:[0-9]+)?(/[-./\\w]+)?";
   private static final String PUBLISHER_PATTERN = "[-a-z0-9]+";
   private static final String NAME_PATTERN = "[-a-z0-9]+";
   private static final String VERSION_PATTERN = "[-.a-z0-9]+";
-  private static final String ID_PATTERN = PUBLISHER_PATTERN + "/" + NAME_PATTERN + "/" + VERSION_PATTERN;
+  private static final String ID_PATTERN =
+      "(?<publisher>" + PUBLISHER_PATTERN + ")/(?<name>" + NAME_PATTERN + ")/(?<version>"
+          + VERSION_PATTERN + ")";
   private static final Pattern PLUGIN_PATTERN =
       Pattern.compile(
           "((?<registry>" + REGISTRY_PATTERN + ")/)?(?<id>" + ID_PATTERN + ")");
@@ -107,14 +110,20 @@ public class PluginFQNParser {
     return collectedFQNs;
   }
 
-  private PluginFQN parsePluginFQN(String plugin) throws InfrastructureException {
+  public ExtendedPluginFQN parsePluginFQN(String plugin) throws InfrastructureException {
     String registry;
     String id;
+    String publisher;
+    String name;
+    String version;
     URI registryURI = null;
     Matcher matcher = PLUGIN_PATTERN.matcher(plugin);
     if (matcher.matches()) {
       registry = matcher.group("registry");
       id = matcher.group("id");
+      publisher = matcher.group("publisher");
+      name = matcher.group("name");
+      version = matcher.group("version");
     } else {
       throw new InfrastructureException(format(INCORRECT_PLUGIN_FORMAT_TEMPLATE, plugin));
     }
@@ -129,7 +138,7 @@ public class PluginFQNParser {
       }
     }
 
-    return new PluginFQN(registryURI, id);
+    return new ExtendedPluginFQN(registryURI, id, publisher, name, version);
   }
 
   private String[] splitAttribute(String attribute) {

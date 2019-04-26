@@ -149,7 +149,7 @@ public class BrokerEnvironmentFactoryTest {
   }
 
   @Test
-  public void shouldCreateConfigmapWithPluginFQNs() throws Exception {
+  public void shouldCreateConfigMapWithPluginFQNs() throws Exception {
     // given
     Collection<PluginFQN> pluginFQNs =
         ImmutableList.of(

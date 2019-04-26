@@ -58,11 +58,12 @@ public class PluginFQN {
     if (this == obj) {
       return true;
     }
-    if (obj == null || getClass() != obj.getClass()) {
+    if (!(obj instanceof PluginFQN)) {
       return false;
     }
     PluginFQN other = (PluginFQN) obj;
-    return Objects.equals(id, other.id) && Objects.equals(registry, other.registry);
+    return Objects.equals(getId(), other.getId()) && Objects
+        .equals(getRegistry(), other.getRegistry());
   }
 
   @Override
