@@ -193,7 +193,6 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         new K8sContainerResolverBuilder()
             .setContainer(container)
             .setImagePullPolicy(sidecarImagePullPolicy)
-            .setPluginName(chePlugin.getName())
             .setPluginEndpoints(chePlugin.getEndpoints())
             .build();
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
