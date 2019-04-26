@@ -46,10 +46,10 @@ class CheReporter extends mocha.reporters.Spec {
 
     runner.on('end', async function (test: mocha.Test) {
       // ensure that fired events done
-      await driver.get().sleep(5000).catch(err => {throw err})
+      await driver.get().sleep(5000)
 
       // close driver
-      await driver.get().quit().catch(err => { throw err })
+      await driver.get().quit()
     })
 
 
@@ -86,13 +86,13 @@ class CheReporter extends mocha.reporters.Spec {
       })
 
       // take screenshot and write to file
-      const screenshot: string = await driver.get().takeScreenshot().catch(err => { throw err });
+      const screenshot: string = await driver.get().takeScreenshot();
       const screenshotStream = fs.createWriteStream(screenshotFileName)
       screenshotStream.write(new Buffer(screenshot, 'base64'))
       screenshotStream.end()
 
       // take pagesource and write to file
-      const pageSource: string = await driver.get().getPageSource().catch(err => { throw err })
+      const pageSource: string = await driver.get().getPageSource()
       const pageSourceStream = fs.createWriteStream(pageSourceFileName)
       pageSourceStream.write(new Buffer(pageSource))
       pageSourceStream.end()
