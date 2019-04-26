@@ -117,7 +117,6 @@ public class BrokerEnvironmentFactoryTest {
           String.format(
               "%s:%s:%s",
               runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()),
-          "--download-metas",
           "--registry-address",
           DEFAULT_REGISTRY
         });

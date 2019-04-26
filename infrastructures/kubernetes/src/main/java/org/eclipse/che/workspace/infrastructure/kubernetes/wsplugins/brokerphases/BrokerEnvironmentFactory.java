@@ -167,7 +167,6 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                     runtimeId.getWorkspaceId(),
                     MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
                     runtimeId.getOwnerId()),
-                "--download-metas",
                 "--registry-address",
                 Strings.nullToEmpty(pluginRegistryUrl))
             .withImagePullPolicy(brokerPullPolicy)
