@@ -40,7 +40,6 @@ class CheReporter extends mocha.reporters.Spec {
 
 ########################################################
       `
-
       console.log(launchInformation)
     })
 
@@ -51,7 +50,6 @@ class CheReporter extends mocha.reporters.Spec {
       // close driver
       await driver.get().quit()
     })
-
 
     runner.on('fail', async function (test: mocha.Test) {
 
