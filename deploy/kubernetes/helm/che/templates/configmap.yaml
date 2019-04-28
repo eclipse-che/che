@@ -87,6 +87,9 @@ data:
 {{- if .Values.workspaceSidecarDefaultRamLimit }}
   CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit }}
 {{- end }}
+{{- if .Values.global.cheWorkspaceClusterRole }}
+  CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME: {{ .Values.global.cheWorkspaceClusterRole }}
+{{- end }}
   CHE_CORS_ENABLED: "true"
   CHE_CORS_ALLOW__CREDENTIALS: "false"
   CHE_CORS_ALLOWED__ORIGINS: "*"

@@ -53,22 +53,58 @@ defaultEntryPoints = ["http"]
         [backends.chemaster.servers.server1]
              url = "http://che-host:8080"
 [frontends]
-  [frontends.frontend2]
-    priority = 10
+  [frontends.liveness]
+    priority = 20
+    backend = "ide"
+    passHostHeader = true
+    entrypoints = ["http2"]
+    [frontends.liveness.routes.api_workspace]
+    rule = "PathPrefix:/api/liveness"
+  [frontends.api]
+    backend = "chemaster"
+    priority = 19
+    passHostHeader = true
+    [frontends.api.headers.customrequestheaders]
+      Authorization = 'Bearer che_machine_token_placeholder'
+    [frontends.api.routes.api]
+    rule = "PathPrefix:/api"
+  [frontends.api_entrypoint]
+    priority = 15
     backend = "chemaster"
     passHostHeader = true
-    [frontends.frontend2.routes.api]
-    rule = "PathPrefix:/api/"
+    [frontends.api_entrypoint.redirect]
+      regex = "^(http|https)://(.*)/gwt/ide/sidecar/entrypoint/api/(.*)"
+      replacement = "$1://$2/api/$3"
+    [frontends.api_entrypoint.routes.ide]
+      rule = "PathPrefix:/api/"
   [frontends.frontend1]
-    priority = 5
+    priority = 10
     backend = "ide"
     passHostHeader = true
     [frontends.frontend1.redirect]
       regex = "^(http|https)://(.*)/gwt/ide/sidecar/entrypoint"
       replacement = "$1://$2/che_workspace_namespace_placeholder/che_workspace_name_placeholder"
     [frontends.frontend1.routes.ide]
-    rule = "PathPrefix: /; AddPrefix: /ide"
-  [frontends.frontend3]
+      rule = "PathPrefix:/; AddPrefix:/ide"
+  [frontends.workspace-loader]
+    priority = 10
+    backend = "ide"
+    passHostHeader = true
+    [frontends.workspace-loader.redirect]
+      regex = "^(http|https)://(.*)/workspace-loader/che_workspace_namespace_placeholder/che_workspace_name_placeholder"
+      replacement = "$1://$2/che_workspace_namespace_placeholder/che_workspace_name_placeholder"
+    [frontends.workspace-loader.routes.ide]
+      rule = "PathPrefix:/; AddPrefix:/ide"
+  [frontends.loader]
+    priority = 5
+    backend = "ide"
+    passHostHeader = true
+    [frontends.loader.redirect]
+      regex = "^(http|https)://(.*)/_app/loader.html"
+      replacement = "$1://$2/"
+    [frontends.loader.routes.ide]
+      route = "PathPrefix:/"
+  [frontends.default]
     backend = "ide"
     passHostHeader = true
     entrypoints = ["http2"]
