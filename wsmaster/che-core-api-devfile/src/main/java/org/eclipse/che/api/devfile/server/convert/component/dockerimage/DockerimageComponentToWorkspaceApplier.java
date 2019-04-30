@@ -251,7 +251,28 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   }
 
   @VisibleForTesting
-  static String toMachineName(String imageName) {
-    return imageName.replaceAll(":", "-").replaceAll("\\.", "-");
+  static String toMachineName(String imageName) throws DevfileException {
+    if (imageName.isEmpty()) {
+      return imageName;
+    }
+
+    // the name needs to be both a valid k8s label and a valid machine name.
+    String clean = imageName.replaceAll("[^-a-zA-Z0-9_]", "-");
+
+    if (isInvalidStartEndChar(clean.charAt(0))
+        || isInvalidStartEndChar(clean.charAt(clean.length() - 1))) {
+      throw new DevfileException(
+          format(
+              "Cannot convert image %s to a valid component name."
+                  + " Please provide an alias that conforms to the Kubernetes label value format.",
+              imageName));
+    }
+
+    return clean;
+  }
+
+  /** @return true if the character isn't an ASCII letter (of either case) or a number. */
+  private static boolean isInvalidStartEndChar(char ch) {
+    return ch < '0' || ch > 'z';
   }
 }
