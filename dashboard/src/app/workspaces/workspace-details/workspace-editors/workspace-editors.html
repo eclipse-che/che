@@ -13,7 +13,7 @@
                                 che-column-title="Enable"></che-list-header-column>
         <che-list-header-column flex="25" layout="column" layout-align="center start"
                                 che-sort-value="workspaceEditorsController.editorOrderBy"
-                                che-sort-item="name"
+                                che-sort-item="displayName"
                                 che-column-title="Editor"></che-list-header-column>
         <che-list-header-column flex="15" layout="column" layout-align="center start"
                                 che-column-title="Version"></che-list-header-column>
@@ -26,12 +26,12 @@
   <che-list class="plugins-list" flex
             ng-if="workspaceEditorsController.editors && workspaceEditorsController.editors.length > 0">
     <div class="plugin-item"
-        ng-repeat="editor in workspaceEditorsController.editors | orderBy:[workspaceEditorsController.editorOrderBy, 'name' ]">
+        ng-repeat="editor in workspaceEditorsController.editors | orderBy:[workspaceEditorsController.editorOrderBy, 'displayName' ]">
       <che-list-item flex>
         <div flex="100"
             layout="row"
             layout-align="start stretch"
-            plugin-item-name="{{editor.name}}"
+            plugin-item-name="{{editor.displayName}}"
             plugin-item-version="{{editor.version}}"
             class="che-list-item-row">
           <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
@@ -41,12 +41,13 @@
               <md-switch ng-model="editor.isEnabled"
                         ng-change="workspaceEditorsController.updateEditor(editor)"
                         aria-label="editor"
-                        plugin-switch="{{editor.name}}">
+                        plugin-switch="{{editor.displayName}}">
               </md-switch>
             </div>
             <!-- Name -->
             <div flex="25">
-              <span class="che-list-item-name" plugin-name="{{editor.name}}">{{editor.name}}</span>
+              <span class="che-list-item-name" plugin-name="{{editor.name}}">{{editor.displayName}}</span>
+              <span ng-if="editor.publisher" class="che-list-item-secondary">({{editor.publisher}} publisher)</span>
             </div>
             <!-- Version -->
             <div flex="15">
@@ -67,4 +68,3 @@
     </span>
   </div>
 </div>
-

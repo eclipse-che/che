@@ -14,12 +14,12 @@ specVersion: 0.0.1
 name: terminal-sample
 components:
   - type: chePlugin
-    id: terminal-sample:0.0.1
+    id: check/terminal-sample/0.0.1
     memoryLimit: 256G
   - type: chePlugin
-    id: org.eclipse.chemaven-jdk8:1.0.0
+    id: eclipse/chemaven-jdk8/1.0.0
     memoryLimit: 108M
   - alias: theia
     type: cheEditor
-    id: org.eclipse.theia:0.0.3
+    id: eclipse/theia/0.0.3
     memoryLimit: 1048M

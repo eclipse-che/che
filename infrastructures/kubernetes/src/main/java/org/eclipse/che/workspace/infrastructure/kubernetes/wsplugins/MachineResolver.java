@@ -39,7 +39,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 /** @author Oleksandr Garagatyi */
 public class MachineResolver {
 
-  private final String pluginId;
+  private final String pluginPublisherAndName;
   private final Container container;
   private final CheContainer cheContainer;
   private final String defaultSidecarMemoryLimitBytes;
@@ -48,14 +48,15 @@ public class MachineResolver {
   private final Pair<String, String> projectsRootPathEnvVar;
 
   public MachineResolver(
-      String pluginId,
+      String pluginPublisher,
+      String pluginName,
       Pair<String, String> projectsRootPathEnvVar,
       Container container,
       CheContainer cheContainer,
       String defaultSidecarMemoryLimitBytes,
       List<ChePluginEndpoint> containerEndpoints,
       Map<String, String> wsAttributes) {
-    this.pluginId = pluginId;
+    this.pluginPublisherAndName = pluginPublisher + "/" + pluginName;
     this.container = container;
     this.cheContainer = cheContainer;
     this.defaultSidecarMemoryLimitBytes = defaultSidecarMemoryLimitBytes;
@@ -78,8 +79,9 @@ public class MachineResolver {
     if (ramLimit == 0) {
       machineConfig.getAttributes().put(MEMORY_LIMIT_ATTRIBUTE, defaultSidecarMemoryLimitBytes);
     }
+    // Use plugin_publisher/plugin_name to find overriding of memory limit.
     String overriddenSidecarMemLimit =
-        wsAttributes.get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginId));
+        wsAttributes.get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginPublisherAndName));
     if (!isNullOrEmpty(overriddenSidecarMemLimit)) {
       machineConfig
           .getAttributes()
@@ -108,7 +110,7 @@ public class MachineResolver {
                     + " the mountSources attribute to true instead and remove the manual volume"
                     + " mount in the plugin. After that the mount path of the sources will be"
                     + " available automatically in the '%s' environment variable.",
-                pluginId,
+                pluginPublisherAndName,
                 PROJECTS_VOLUME_NAME,
                 container.getName(),
                 volume.getMountPath(),
@@ -126,7 +128,7 @@ public class MachineResolver {
 
   private ServerConfigImpl toServer(ChePluginEndpoint endpoint) {
     ServerConfigImpl serverConfig =
-        new ServerConfigImpl().withPort(Integer.toString(endpoint.getTargetPort()) + "/tcp");
+        new ServerConfigImpl().withPort(endpoint.getTargetPort() + "/tcp");
     serverConfig.getAttributes().put("internal", Boolean.toString(!endpoint.isPublic()));
     for (Entry<String, String> attribute : endpoint.getAttributes().entrySet()) {
       switch (attribute.getKey()) {

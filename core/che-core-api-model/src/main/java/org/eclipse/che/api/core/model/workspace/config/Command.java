@@ -36,7 +36,8 @@ public interface Command {
   /**
    * {@link Command} attribute which indicates in which plugin command must be run. If specified
    * plugin has multiple containers then first containers should be used. Attribute value has the
-   * following format: `{PLUGIN_ID}:{PLUGIN_VERSION}`. For example: org.eclipse.sample-plugin:0.0.1
+   * following format: `{PLUGIN_PUBLISHER}/{PLUGIN_NAME}/{PLUGIN_VERSION}`. For example:
+   * eclipse/sample-plugin/0.0.1
    */
   String PLUGIN_ATTRIBUTE = "plugin";
 

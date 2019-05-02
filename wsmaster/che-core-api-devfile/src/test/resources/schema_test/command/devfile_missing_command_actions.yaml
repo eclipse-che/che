@@ -14,8 +14,8 @@
 specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
- - name: theia
+ - alias: theia
    type: cheEditor
-   id: org.eclipse.chetheia:0.0.3
+   id: eclipse/chetheia/0.0.3
 commands:
   - name: build

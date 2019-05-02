@@ -15,9 +15,8 @@ import static org.eclipse.che.api.devfile.server.Constants.SCHEMA_LOCATION;
 import static org.eclipse.che.commons.lang.IoUtil.getResource;
 import static org.eclipse.che.commons.lang.IoUtil.readAndCloseQuietly;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.ref.SoftReference;
 import javax.inject.Singleton;
 
@@ -36,8 +35,8 @@ public class DevfileSchemaProvider {
     return schema;
   }
 
-  public JsonNode getJsoneNode() throws IOException {
-    return JsonLoader.fromString(getSchemaContent());
+  public StringReader getAsReader() throws IOException {
+    return new StringReader(getSchemaContent());
   }
 
   private String loadFile() throws IOException {

@@ -19,6 +19,7 @@ import java.util.Objects;
 public class PluginBase {
 
   private String name = null;
+  private String publisher = null;
   private String id = null;
   private String version = null;
   private List<CheContainer> containers = new ArrayList<>();
@@ -56,6 +57,19 @@ public class PluginBase {
 
   public PluginBase version(String version) {
     this.version = version;
+    return this;
+  }
+
+  public String getPublisher() {
+    return publisher;
+  }
+
+  public void setPublisher(String publisher) {
+    this.publisher = publisher;
+  }
+
+  public PluginBase publisher(String publisher) {
+    this.publisher = publisher;
     return this;
   }
 
@@ -127,6 +141,7 @@ public class PluginBase {
     PluginBase chePlugin = (PluginBase) o;
     return Objects.equals(getName(), chePlugin.getName())
         && Objects.equals(getId(), chePlugin.getId())
+        && Objects.equals(getPublisher(), chePlugin.getPublisher())
         && Objects.equals(getVersion(), chePlugin.getVersion())
         && Objects.equals(getContainers(), chePlugin.getContainers())
         && Objects.equals(getEndpoints(), chePlugin.getEndpoints())
@@ -136,7 +151,13 @@ public class PluginBase {
   @Override
   public int hashCode() {
     return Objects.hash(
-        getName(), getId(), getVersion(), getContainers(), getEndpoints(), getWorkspaceEnv());
+        getName(),
+        getId(),
+        getVersion(),
+        getPublisher(),
+        getContainers(),
+        getEndpoints(),
+        getWorkspaceEnv());
   }
 
   @Override
@@ -147,6 +168,9 @@ public class PluginBase {
         + '\''
         + ", id='"
         + id
+        + '\''
+        + ", publisher='"
+        + publisher
         + '\''
         + ", version='"
         + version

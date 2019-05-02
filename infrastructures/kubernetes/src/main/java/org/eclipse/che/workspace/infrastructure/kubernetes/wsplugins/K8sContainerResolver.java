@@ -26,6 +26,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
@@ -39,19 +40,14 @@ public class K8sContainerResolver {
 
   static final int MAX_CONTAINER_NAME_LENGTH = 63; // K8S container name limit
 
-  private final String pluginName;
   private final String imagePullPolicy;
   private final CheContainer cheContainer;
   private final List<ChePluginEndpoint> containerEndpoints;
 
   public K8sContainerResolver(
-      String pluginName,
-      String imagePullPolicy,
-      CheContainer container,
-      List<ChePluginEndpoint> containerEndpoints) {
+      String imagePullPolicy, CheContainer container, List<ChePluginEndpoint> containerEndpoints) {
     this.imagePullPolicy = imagePullPolicy;
     this.cheContainer = container;
-    this.pluginName = pluginName;
     this.containerEndpoints = containerEndpoints;
   }
 
@@ -64,7 +60,7 @@ public class K8sContainerResolver {
         new ContainerBuilder()
             .withImage(cheContainer.getImage())
             .withImagePullPolicy(imagePullPolicy)
-            .withName(buildContainerName(pluginName, cheContainer.getName()))
+            .withName(buildContainerName(cheContainer.getName()))
             .withEnv(toK8sEnv(cheContainer.getEnv()))
             .withPorts(getContainerPorts())
             .build();
@@ -113,24 +109,8 @@ public class K8sContainerResolver {
         .collect(Collectors.toList());
   }
 
-  private String buildContainerName(String pluginName, String cheContainerName) {
-    if (pluginName == null) {
-      return cheContainerName.substring(
-          0, min(cheContainerName.length(), MAX_CONTAINER_NAME_LENGTH));
-    }
-    String preliminaryName = (pluginName + "-" + cheContainerName).toLowerCase();
-    if (preliminaryName.length() <= MAX_CONTAINER_NAME_LENGTH) {
-      return preliminaryName;
-    }
-    final String limitedContainerName =
-        cheContainerName.substring(0, min(cheContainerName.length(), 49));
-    return (pluginName.substring(
-                0,
-                min(
-                    pluginName.length(),
-                    MAX_CONTAINER_NAME_LENGTH - limitedContainerName.length() - 1))
-            + "-"
-            + limitedContainerName)
-        .toLowerCase();
+  private String buildContainerName(String cheContainerName) {
+    String uniqueName = NameGenerator.generate(cheContainerName, 3).toLowerCase();
+    return uniqueName.substring(0, min(uniqueName.length(), MAX_CONTAINER_NAME_LENGTH));
   }
 }

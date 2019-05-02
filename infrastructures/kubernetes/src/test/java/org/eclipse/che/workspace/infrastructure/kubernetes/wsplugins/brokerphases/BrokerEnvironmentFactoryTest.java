@@ -90,7 +90,7 @@ public class BrokerEnvironmentFactoryTest {
   @Test
   public void testInitBrokerContainer() throws Exception {
     // given
-    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id", "version"));
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
@@ -117,7 +117,6 @@ public class BrokerEnvironmentFactoryTest {
           String.format(
               "%s:%s:%s",
               runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()),
-          "--download-metas",
           "--registry-address",
           DEFAULT_REGISTRY
         });
@@ -128,7 +127,7 @@ public class BrokerEnvironmentFactoryTest {
   @Test
   public void shouldNameContainersAfterPluginBrokerImage() throws Exception {
     // given
-    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id", "version"));
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
@@ -149,12 +148,12 @@ public class BrokerEnvironmentFactoryTest {
   }
 
   @Test
-  public void shouldCreateConfigmapWithPluginFQNs() throws Exception {
+  public void shouldCreateConfigMapWithPluginFQNs() throws Exception {
     // given
     Collection<PluginFQN> pluginFQNs =
         ImmutableList.of(
-            new PluginFQN(null, "testPlugin1", "testver1"),
-            new PluginFQN(new URI("testregistry"), "testPlugin2", "testver2"));
+            new PluginFQN(null, "testPublisher/testPlugin1/testver1"),
+            new PluginFQN(new URI("testregistry"), "testPublisher/testPlugin2/testver2"));
     ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
 
     // when
@@ -169,11 +168,9 @@ public class BrokerEnvironmentFactoryTest {
     assertFalse(config.contains("\"registry\":null"), "Should not serialize null registry");
     List<String> expected =
         ImmutableList.of(
-            "\"id\":\"testPlugin1\"",
-            "\"version\":\"testver2\"",
+            "\"id\":\"testPublisher/testPlugin1/testver1\"",
             "\"registry\":\"testregistry\"",
-            "\"id\":\"testPlugin2\"",
-            "\"version\":\"testver2\"");
+            "\"id\":\"testPublisher/testPlugin2/testver2\"");
     for (String expect : expected) {
       assertTrue(
           config.contains(expect),

@@ -40,6 +40,7 @@ import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -60,6 +61,7 @@ public class DefaultFactoryParameterResolverTest {
 
   @Mock private URLFetcher urlFetcher;
   @Mock private KubernetesRecipeParser kubernetesRecipeParser;
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @Test
   public void shouldResolveRelativeFiles() throws Exception {
@@ -92,7 +94,7 @@ public class DefaultFactoryParameterResolverTest {
             new CommandConverter(),
             componentProvisioners,
             appliers,
-            new DefaultEditorProvisioner(null, new String[] {}),
+            new DefaultEditorProvisioner(null, new String[] {}, fqnParser),
             new URLFetcher());
 
     WorkspaceManager workspaceManager = mock(WorkspaceManager.class);

@@ -12,6 +12,7 @@
 package org.eclipse.che.api.workspace.server.wsplugins;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 import com.google.common.annotations.Beta;
@@ -22,7 +23,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.api.workspace.shared.Constants;
 
@@ -36,6 +40,23 @@ import org.eclipse.che.api.workspace.shared.Constants;
  */
 @Beta
 public class PluginFQNParser {
+
+  private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
+      "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'publisher/name/version'";
+  private static final String REGISTRY_PATTERN = "https?://[-./\\w]+(:[0-9]+)?(/[-./\\w]+)?";
+  private static final String PUBLISHER_PATTERN = "[-a-z0-9]+";
+  private static final String NAME_PATTERN = "[-a-z0-9]+";
+  private static final String VERSION_PATTERN = "[-.a-z0-9]+";
+  private static final String ID_PATTERN =
+      "(?<publisher>"
+          + PUBLISHER_PATTERN
+          + ")/(?<name>"
+          + NAME_PATTERN
+          + ")/(?<version>"
+          + VERSION_PATTERN
+          + ")";
+  private static final Pattern PLUGIN_PATTERN =
+      Pattern.compile("((?<registry>" + REGISTRY_PATTERN + ")/)?(?<id>" + ID_PATTERN + ")");
 
   /**
    * Parses a workspace attributes map into a collection of {@link PluginFQN}.
@@ -57,60 +78,75 @@ public class PluginFQNParser {
 
     List<PluginFQN> metaFQNs = new ArrayList<>();
     if (!isNullOrEmpty(pluginsAttribute)) {
-      String[] plugins = splitAttribute(pluginsAttribute);
-      if (plugins.length != 0) {
-        metaFQNs.addAll(parsePluginFQNs(plugins));
-      }
+      metaFQNs.addAll(parsePluginFQNs(pluginsAttribute));
     }
     if (!isNullOrEmpty(editorAttribute)) {
-      String[] editor = splitAttribute(editorAttribute);
-      if (editor.length > 1) {
+      Collection<PluginFQN> editorsFQNs = parsePluginFQNs(editorAttribute);
+      if (editorsFQNs.size() > 1) {
         throw new InfrastructureException(
             "Multiple editors found in workspace config attributes. "
                 + "Only one editor is supported per workspace.");
       }
-      metaFQNs.addAll(parsePluginFQNs(editor));
+      metaFQNs.addAll(editorsFQNs);
     }
     return metaFQNs;
   }
 
-  private Collection<PluginFQN> parsePluginFQNs(String... plugins) throws InfrastructureException {
+  private Collection<PluginFQN> parsePluginFQNs(String attribute) throws InfrastructureException {
+
+    String[] plugins = splitAttribute(attribute);
+    if (plugins.length == 0) {
+      return emptyList();
+    }
+
     List<PluginFQN> collectedFQNs = new ArrayList<>();
     for (String plugin : plugins) {
-      URI repo = null;
-      String idVersionString;
-      final int idVersionTagDelimiter = plugin.lastIndexOf("/");
-      idVersionString = plugin.substring(idVersionTagDelimiter + 1);
-      if (idVersionTagDelimiter > -1) {
-        try {
-          repo = new URI(plugin.substring(0, idVersionTagDelimiter));
-        } catch (URISyntaxException e) {
-          throw new InfrastructureException(
-              String.format(
-                  "Plugin registry URL is incorrect. Problematic plugin entry: %s", plugin));
-        }
-      }
-      String[] idAndVersion = idVersionString.split(":");
-      if (idAndVersion.length != 2 || idAndVersion[0].isEmpty() || idAndVersion[1].isEmpty()) {
+      PluginFQN pFQN = parsePluginFQN(plugin);
+
+      if (collectedFQNs.stream().anyMatch(p -> p.getId().equals(pFQN.getId()))) {
         throw new InfrastructureException(
-            String.format("Plugin format is illegal. Problematic plugin entry: %s", plugin));
+            format(
+                "Invalid Che tooling plugins configuration: plugin %s is duplicated",
+                pFQN.getId())); // even if different registries
       }
-      if (collectedFQNs
-          .stream()
-          .anyMatch(
-              p -> p.getId().equals(idAndVersion[0]) && p.getVersion().equals(idAndVersion[1]))) {
-        throw new InfrastructureException(
-            String.format(
-                "Invalid Che tooling plugins configuration: plugin %s:%s is duplicated",
-                idAndVersion[0], idAndVersion[1])); // even if different repos
-      }
-      collectedFQNs.add(new PluginFQN(repo, idAndVersion[0], idAndVersion[1]));
+      collectedFQNs.add(pFQN);
     }
     return collectedFQNs;
   }
 
+  public ExtendedPluginFQN parsePluginFQN(String plugin) throws InfrastructureException {
+    String registry;
+    String id;
+    String publisher;
+    String name;
+    String version;
+    URI registryURI = null;
+    Matcher matcher = PLUGIN_PATTERN.matcher(plugin);
+    if (matcher.matches()) {
+      registry = matcher.group("registry");
+      id = matcher.group("id");
+      publisher = matcher.group("publisher");
+      name = matcher.group("name");
+      version = matcher.group("version");
+    } else {
+      throw new InfrastructureException(format(INCORRECT_PLUGIN_FORMAT_TEMPLATE, plugin));
+    }
+    if (!isNullOrEmpty(registry)) {
+      try {
+        registryURI = new URI(registry);
+      } catch (URISyntaxException e) {
+        throw new InfrastructureException(
+            format(
+                "Plugin registry URL '%s' is invalid. Problematic plugin entry: '%s'",
+                registry, plugin));
+      }
+    }
+
+    return new ExtendedPluginFQN(registryURI, id, publisher, name, version);
+  }
+
   private String[] splitAttribute(String attribute) {
     String[] plugins = attribute.split(",");
-    return Arrays.stream(plugins).map(s -> s.trim()).toArray(String[]::new);
+    return Arrays.stream(plugins).map(String::trim).toArray(String[]::new);
   }
 }

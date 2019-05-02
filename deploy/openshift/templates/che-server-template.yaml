@@ -179,6 +179,8 @@ objects:
             value: "${CHE_WSAGENT_CORS_ALLOWED__ORIGINS}"
           - name: CHE_WSAGENT_CORS_ALLOW__CREDENTIALS
             value: "${CHE_WSAGENT_CORS_ALLOW__CREDENTIALS}"
+          - name: CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME
+            value: "${CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME}"
           image: ${IMAGE_CHE}:${CHE_VERSION}
           imagePullPolicy: "${PULL_POLICY}"
           livenessProbe:
@@ -367,6 +369,10 @@ parameters:
   displayName: CORS credentials support for WS Agent
   description: Allow requests with credentials for CORS filter on WS Agent.
   value: 'true'
+- name: CHE_INFRA_KUBERNETES_CLUSTER__ROLE__NAME
+  displayName: Cluster role to bind to workspace
+  description: Binds the specified Cluster role to the workspace service account.
+  value: ''
 labels:
   app: che
   template: che

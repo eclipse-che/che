@@ -74,6 +74,9 @@ public class DynaModuleScanner {
     this.skipResources.add(".*com/fasterxml/jackson/core/.*.jar");
     this.skipResources.add(".*org/eclipse/xtend/.*.jar");
     this.skipResources.add(".*org/eclipse/search/.*.jar");
+    this.skipResources.add(".*org/glassfish/javax.json/.*.jar");
+    this.skipResources.add(".*javax/json/javax.json-api/.*.jar");
+    this.skipResources.add(".*org/leadpony/justify/justify/.*.jar");
   }
 
   /**

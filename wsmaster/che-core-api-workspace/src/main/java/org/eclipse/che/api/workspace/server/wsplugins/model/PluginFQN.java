@@ -17,7 +17,7 @@ import java.net.URI;
 import java.util.Objects;
 
 /**
- * Represents full information about plugin, including registry address, id and version.
+ * Represents full information about plugin, including registry address and id.
  *
  * @author Max Shaposhnyk
  */
@@ -26,12 +26,10 @@ public class PluginFQN {
 
   private URI registry;
   private String id;
-  private String version;
 
-  public PluginFQN(URI registry, String id, String version) {
+  public PluginFQN(URI registry, String id) {
     this.registry = registry;
     this.id = id;
-    this.version = version;
   }
 
   public URI getRegistry() {
@@ -50,17 +48,9 @@ public class PluginFQN {
     this.id = id;
   }
 
-  public String getVersion() {
-    return version;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
   @Override
   public int hashCode() {
-    return Objects.hash(getRegistry(), getId(), getVersion());
+    return Objects.hash(getRegistry(), getId());
   }
 
   @Override
@@ -68,17 +58,16 @@ public class PluginFQN {
     if (this == obj) {
       return true;
     }
-    if (obj == null || getClass() != obj.getClass()) {
+    if (!(obj instanceof PluginFQN)) {
       return false;
     }
     PluginFQN other = (PluginFQN) obj;
-    return Objects.equals(id, other.id)
-        && Objects.equals(version, other.version)
-        && Objects.equals(registry, other.registry);
+    return Objects.equals(getId(), other.getId())
+        && Objects.equals(getRegistry(), other.getRegistry());
   }
 
   @Override
   public String toString() {
-    return String.format("{id:%s, version:%s, registry:%s}", this.id, this.version, this.registry);
+    return String.format("{id:%s, registry:%s}", this.id, this.registry);
   }
 }

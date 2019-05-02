@@ -12,5 +12,3 @@
 
 ---
 name: petclinic-dev-environment
-components:
-  - id: org.eclipse.chemaven-jdk8:1.0.0

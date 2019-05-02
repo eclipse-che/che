@@ -47,7 +47,6 @@ public class SidecarToolingProvisionerTest {
 
   private static final String RECIPE_TYPE = "TestingRecipe";
   private static final String PLUGIN_FQN_ID = "TestPluginId";
-  private static final String PLUGIN_FQN_VERSION = "TestPluginVersion";
 
   @Mock private StartSynchronizer startSynchronizer;
   @Mock private KubernetesBrokerInitContainerApplier<KubernetesEnvironment> brokerApplier;
@@ -60,11 +59,10 @@ public class SidecarToolingProvisionerTest {
 
   private static Map<String, String> environmentAttributesBase =
       ImmutableMap.of(
-          "editor", "org.eclipse.che.editor.theia:1.0.0",
-          "plugins", "che-machine-exec-plugin:0.0.1");
+          "editor", "eclipse/theia/1.0.0",
+          "plugins", "eclipse/che-machine-exec-plugin/0.0.1");
 
-  private Collection<PluginFQN> pluginFQNs =
-      ImmutableList.of(new PluginFQN(null, PLUGIN_FQN_ID, PLUGIN_FQN_VERSION));
+  private Collection<PluginFQN> pluginFQNs = ImmutableList.of(new PluginFQN(null, PLUGIN_FQN_ID));
 
   private SidecarToolingProvisioner<KubernetesEnvironment> provisioner;
 
