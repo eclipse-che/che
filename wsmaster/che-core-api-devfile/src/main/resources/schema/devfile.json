@@ -171,11 +171,11 @@
                   "alias": {},
                   "id": {
                     "type": "string",
-                    "description": "Describes the component id. It has the following format: [{REGISTRY_URL}/]{plugin/editor ID}:{plugin/editor VERSION}, where `{REGISTRY_URL}/` is an optional part.",
+                    "description": "Describes the component id. It has the following format: [{REGISTRY_URL}/]{plugin/editor PUBLISHER}/{plugin/editor NAME}/{plugin/editor VERSION}, where {REGISTRY_URL}/ is an optional part.",
                     "pattern": "^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$",
                     "examples": [
-                      "org.eclipse.che.maven-jdk8:1.0.0",
-                      "https://che-plugin-registry.openshift.io/org.eclipse.che.maven-jdk8:1.0.0"
+                      "eclipse/maven-jdk8/1.0.0",
+                      "https://che-plugin-registry.openshift.io/eclipse/maven-jdk8/1.0.0"
                     ]
                   },
                   "memoryLimit": {
