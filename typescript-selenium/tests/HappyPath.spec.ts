@@ -9,26 +9,15 @@
  **********************************************************************/
 
 import { e2eContainer } from "../inversify.config";
-import { Driver } from "../driver/Driver";
 import { TYPES, CLASSES } from "../inversify.types";
-import { DriverHelper } from "../utils/DriverHelper";
-import { By, WebElementCondition, Condition } from "selenium-webdriver";
-import { describe, after, test } from "mocha";
 import { LoginPage } from "../pageobjects/login/LoginPage";
 import { Dashboard } from "../pageobjects/dashboard/Dashboard";
-import { expect, assert } from 'chai'
-import { Workspaces } from "../pageobjects/dashboard/Workspaces";
 import { NameGenerator } from "../utils/NameGenerator";
 import { NewWorkspace } from "../pageobjects/dashboard/NewWorkspace";
-import { WorkspaceDetails } from "../pageobjects/dashboard/workspace-details/WorkspaceDetails";
 import { WorkspaceDetailsPlugins } from "../pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins";
-import { Request, post, get } from "selenium-webdriver/http";
-import { TestWorkspaceUtil } from "../utils/workspace/TestWorkspaceUtil";
 import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
-import { TestConstants } from "../TestConstants";
-import * as mocha from 'mocha'
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
@@ -36,24 +25,18 @@ const sampleName: string = "console-java-simple";
 const pluginId: string = "org.eclipse.che.vscode-redhat.java";
 const javaPluginName: string = "Language Support for Java(TM)";
 
-const driver: Driver = e2eContainer.get<Driver>(TYPES.Driver);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const loginPage: LoginPage = e2eContainer.get<LoginPage>(TYPES.LoginPage);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
-const workspaces: Workspaces = e2eContainer.get(CLASSES.Workspaces);
 const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
-const workspaceDetails: WorkspaceDetails = e2eContainer.get(CLASSES.WorkspaceDetails);
 const workspaceDetailsPlugins: WorkspaceDetailsPlugins = e2eContainer.get(CLASSES.WorkspaceDetailsPlugins)
 const ide: Ide = e2eContainer.get(CLASSES.Ide)
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree)
 const editor: Editor = e2eContainer.get(CLASSES.Editor)
-const testWorkspaceUtil: TestWorkspaceUtil = e2eContainer.get(CLASSES.TestWorkspaceUtil)
-
 
 suite("E2E", async () => {
 
     suite("Login and wait dashboard", async () => {
-        test("login", async () => {
+        test("Login", async () => {
             await loginPage.login()
         })
     })
