@@ -80,7 +80,7 @@ public class DevfileIntegrityValidatorTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Multiple editor components found: 'org.eclipse.chetheia:0.0.3', 'editor-2'")
+          "Multiple editor components found: 'eclipse/che-theia/0.0.3', 'editor-2'")
   public void shouldThrowExceptionOnMultipleEditors() throws Exception {
     DevfileImpl broken = new DevfileImpl(initialDevfile);
     ComponentImpl component = new ComponentImpl();

@@ -50,8 +50,8 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class URLFactoryBuilderTest {
 
-  private final String defaultEditor = "org.eclipse.che.editor.theia:1.0.0";
-  private final String defaultPlugin = "che-machine-exec-plugin:0.0.1";
+  private final String defaultEditor = "eclipse/che-theia/1.0.0";
+  private final String defaultPlugin = "eclipse/che-machine-exec-plugin/0.0.1";
   /** Grab content of URLs */
   @Mock private URLFetcher urlFetcher;
 

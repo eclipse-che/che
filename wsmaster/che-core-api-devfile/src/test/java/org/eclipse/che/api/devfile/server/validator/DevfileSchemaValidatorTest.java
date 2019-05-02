@@ -145,7 +145,7 @@ public class DevfileSchemaValidatorTest {
       {
         "editor_plugin_component/devfile_editor_component_without_version.yaml",
         "Devfile schema validation failed. Error: "
-            + "/devfile/components/0/id ECMA 262 regex \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\" does not match input string \"org.eclipse.theia\""
+            + "/devfile/components/0/id ECMA 262 regex \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\" does not match input string \"eclipse/theia\""
       },
       {
         "editor_plugin_component/devfile_editor_plugins_components_with_invalid_memory_limit.yaml",
@@ -154,7 +154,7 @@ public class DevfileSchemaValidatorTest {
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
         "Devfile schema validation failed. Error: "
-            + "/devfile/components/0/id ECMA 262 regex \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\" does not match input string \"org.eclipse.theia:dev:v1\""
+            + "/devfile/components/0/id ECMA 262 regex \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\" does not match input string \"eclipse/theia/dev:v1\""
       },
       // kubernetes/openshift component model testing
       {

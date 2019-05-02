@@ -5,7 +5,7 @@
     </div>
     <div che-multi-transclude-part="che-list-search">
       <che-list-header-search placeholder="Search"
-                              query="workspacePluginsController.pluginFilter.name"
+                              query="workspacePluginsController.pluginFilter.displayName"
                               on-change="workspacePluginsController.onSearchChanged(query)"></che-list-header-search>
     </div>
   </che-list-header-additional-parts>
@@ -23,7 +23,7 @@
                                 che-column-title="Enable"></che-list-header-column>
         <che-list-header-column flex="25" layout="column" layout-align="center start"
                                 che-sort-value="workspacePluginsController.pluginOrderBy"
-                                che-sort-item="name"
+                                che-sort-item="displayName"
                                 che-column-title="Plugin"></che-list-header-column>
         <che-list-header-column flex="15" layout="column" layout-align="center start"
                                 che-column-title="Version"></che-list-header-column>
@@ -36,12 +36,12 @@
   <che-list class="plugins-list" flex
             ng-if="workspacePluginsController.plugins && workspacePluginsController.plugins.length > 0">
     <div class="plugin-item"
-        ng-repeat="plugin in workspacePluginsController.cheListHelper.getVisibleItems() | orderBy:[workspacePluginsController.pluginOrderBy, 'name' ]">
+        ng-repeat="plugin in workspacePluginsController.cheListHelper.getVisibleItems() | orderBy:[workspacePluginsController.pluginOrderBy, 'displayName' ]">
       <che-list-item flex>
         <div flex="100"
             layout="row"
             layout-align="start stretch"
-            plugin-item-name="{{plugin.name}}"
+            plugin-item-name="{{plugin.displayName}}"
             plugin-item-version="{{plugin.version}}"
             class="che-list-item-row">
           <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
@@ -51,12 +51,13 @@
               <md-switch ng-model="plugin.isEnabled"
                         ng-change="workspacePluginsController.updatePlugin(plugin)"
                         aria-label="plugin"
-                        plugin-switch="{{plugin.name}}">
+                        plugin-switch="{{plugin.displayName}}">
               </md-switch>
             </div>
             <!-- Name -->
             <div flex="25">
-              <span class="che-list-item-name" plugin-name="{{plugin.name}}">{{plugin.name}}</span>
+              <span class="che-list-item-name" plugin-name="{{plugin.displayName}}">{{plugin.displayName}}</span>
+              <span ng-if="plugin.publisher" class="che-list-item-secondary">({{plugin.publisher}} publisher)</span>
             </div>
             <!-- Version -->
             <div flex="15">

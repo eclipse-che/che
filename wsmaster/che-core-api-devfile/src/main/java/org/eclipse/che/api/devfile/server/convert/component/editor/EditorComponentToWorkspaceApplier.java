@@ -20,10 +20,15 @@ import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 
+import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
 /**
  * Applies changes on workspace config according to the specified editor component.
@@ -31,6 +36,13 @@ import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
  * @author Sergii Leshchenko
  */
 public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceApplier {
+
+  private final PluginFQNParser fqnParser;
+
+  @Inject
+  public EditorComponentToWorkspaceApplier(PluginFQNParser fqnParser) {
+    this.fqnParser = fqnParser;
+  }
 
   /**
    * Applies changes on workspace config according to the specified editor component.
@@ -46,7 +58,8 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
   public void apply(
       WorkspaceConfigImpl workspaceConfig,
       Component editorComponent,
-      FileContentProvider contentProvider) {
+      FileContentProvider contentProvider)
+      throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
     checkArgument(editorComponent != null, "Component must not be null");
     checkArgument(
@@ -65,12 +78,16 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
     }
 
-    String editorIdVersion = resolveIdAndVersion(editorComponent.getId());
+    final ExtendedPluginFQN fqn;
+    try {
+      fqn = fqnParser.parsePluginFQN(editorId);
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
     if (memoryLimit != null) {
-      String editorIdPart = editorIdVersion.split(":")[0];
       workspaceConfig
           .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, editorIdPart), memoryLimit);
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
     }
     workspaceConfig
         .getCommands()
@@ -80,15 +97,6 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
                 c.getAttributes()
                     .get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
                     .equals(editorComponentAlias))
-        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, editorIdVersion));
-  }
-
-  private String resolveIdAndVersion(String ref) {
-    int lastSlashPosition = ref.lastIndexOf("/");
-    if (lastSlashPosition < 0) {
-      return ref;
-    } else {
-      return ref.substring(lastSlashPosition + 1);
-    }
+        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId()));
   }
 }

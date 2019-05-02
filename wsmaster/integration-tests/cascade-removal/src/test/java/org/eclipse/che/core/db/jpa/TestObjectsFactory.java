@@ -114,7 +114,7 @@ public final class TestObjectsFactory {
     return new ComponentImpl(
         "kubernetes",
         name,
-        "che-theia:0.0.1",
+        "eclipse/che-theia/0.0.1",
         "/dev.yaml",
         null,
         singletonList(createEntrypoint()),

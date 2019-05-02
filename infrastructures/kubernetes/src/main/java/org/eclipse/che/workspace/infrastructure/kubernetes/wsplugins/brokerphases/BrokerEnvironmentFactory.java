@@ -50,7 +50,6 @@ import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
-import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
 
 /**
  * Creates {@link KubernetesEnvironment} with everything needed to deploy Plugin brokers.
@@ -101,10 +100,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   /**
    * Creates {@link KubernetesEnvironment} with everything needed to deploy Plugin broker.
    *
-   * @param pluginFQN fully qualified names of plugins that needs to be resolved by the broker
+   * @param pluginFQNs fully qualified names of plugins that needs to be resolved by the broker
    * @param runtimeID ID of the runtime the broker would be started
-   * @param brokersResult needs to be called with {@link BrokersResult#oneMoreBroker()} for each
-   *     broker to allow proper waiting of execution of all the brokers
    * @return kubernetes environment (or its extension) with the Plugin broker objects
    */
   public E create(Collection<PluginFQN> pluginFQNs, RuntimeIdentity runtimeID)
@@ -170,7 +167,6 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                     runtimeId.getWorkspaceId(),
                     MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
                     runtimeId.getOwnerId()),
-                "--download-metas",
                 "--registry-address",
                 Strings.nullToEmpty(pluginRegistryUrl))
             .withImagePullPolicy(brokerPullPolicy)

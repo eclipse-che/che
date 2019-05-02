@@ -585,7 +585,7 @@ public class WorkspaceDaoTest {
     new ComponentImpl(
         "kubernetes",
         "component3",
-        "che-theia:0.0.1",
+        "eclipse/che-theia/0.0.1",
         "/dev.yaml",
         null,
         asList(entrypoint3),
@@ -897,7 +897,7 @@ public class WorkspaceDaoTest {
         new ComponentImpl(
             "kubernetes",
             "component1",
-            "che-theia:0.0.1",
+            "eclipse/che-theia/0.0.1",
             "/dev.yaml",
             "refcontent1",
             asList(entrypoint1, entrypoint2),
@@ -915,7 +915,7 @@ public class WorkspaceDaoTest {
         new ComponentImpl(
             "kubernetes",
             "component2",
-            "che-theia:0.0.1",
+            "eclipse/che-theia/0.0.1",
             "/dev.yaml",
             "refcontent2",
             asList(entrypoint1, entrypoint2),
