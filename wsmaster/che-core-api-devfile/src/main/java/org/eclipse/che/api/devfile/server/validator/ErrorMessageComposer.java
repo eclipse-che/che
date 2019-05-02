@@ -11,63 +11,46 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.github.fge.jsonschema.core.report.LogLevel;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import java.util.ArrayList;
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import org.leadpony.justify.api.Problem;
 
 /**
- * Helps to convert json schema validation result {@link ProcessingReport} into an error message
+ * Helps to convert json schema validation result list of {@link Problem} into an error message
  * string.
  */
 public class ErrorMessageComposer {
 
   /**
-   * Parses {@link ProcessingReport} into an error string. Each processing message is recursively
-   * parsed to extract nested errors if any.
+   * Parses {@link Problem} list into an error string. Each problem is recursively parsed to extract
+   * nested errors if any.
    *
-   * @param report Schema validation processing report
+   * @param validationErrors Schema validation problems list
    * @return composite error string
    */
-  public String prepareErrorMessage(ProcessingReport report) {
-    List<String> errors = new ArrayList<>();
-    StreamSupport.stream(report.spliterator(), false)
-        .filter(m -> m.getLogLevel() == LogLevel.ERROR || m.getLogLevel() == LogLevel.FATAL)
-        .forEach(msg -> recursivelyFindErrors(msg.asJson(), errors));
-    StringBuilder sb = new StringBuilder("Devfile schema validation failed.");
-    if (errors.size() == 1) {
-      sb.append(" Error: ").append(errors.get(0));
-    } else {
-      String msg = errors.stream().collect(Collectors.joining(",", "[", "]"));
-      sb.append(" Errors: ").append(msg);
-    }
-    return sb.toString();
-  }
-
-  private void recursivelyFindErrors(JsonNode node, List<String> messages) {
-    if (node instanceof ArrayNode) {
-      node.forEach(n -> recursivelyFindErrors(n, messages));
-    } else {
-      JsonNode reports = node.get("reports");
-      if (reports != null) {
-        messages.add(getMessage(node));
-        reports.forEach(n -> recursivelyFindErrors(n, messages));
+  public String extractMessages(List<Problem> validationErrors, StringBuilder messageBuilder) {
+    for (Problem problem : validationErrors) {
+      int branchCount = problem.countBranches();
+      if (branchCount == 0) {
+        messageBuilder.append(getMessage(problem));
       } else {
-        String pointer = "/devfile" + getPointer(node);
-        messages.add(pointer + " " + getMessage(node));
+        messageBuilder.append(problem.getMessage()).append(": [");
+        for (int i = 0; i < branchCount; i++) {
+          extractMessages(problem.getBranch(i), messageBuilder);
+        }
+        messageBuilder.append("]");
       }
     }
+    return messageBuilder.toString();
   }
 
-  private String getPointer(JsonNode node) {
-    return node.get("instance").get("pointer").asText();
-  }
-
-  private String getMessage(JsonNode node) {
-    return node.get("message").asText();
+  private String getMessage(Problem problem) {
+    StringBuilder messageBuilder = new StringBuilder();
+    if (!isNullOrEmpty(problem.getPointer())) {
+      messageBuilder.append("(").append(problem.getPointer()).append("):");
+    }
+    messageBuilder.append(problem.getMessage());
+    return messageBuilder.toString();
   }
 }

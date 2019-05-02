@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
+import static java.lang.String.format;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -71,7 +72,7 @@ public class DevfileSchemaValidatorTest {
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),
-          expectedMessageRegexp,
+          format("Devfile schema validation failed. Error: %s", expectedMessageRegexp),
           "DevfileFormatException thrown with message that doesn't match expected pattern:");
       return;
     }
@@ -84,128 +85,84 @@ public class DevfileSchemaValidatorTest {
       // Devfile model testing
       {
         "devfile/devfile_missing_name.yaml",
-        "Devfile schema validation failed. Error: /devfile object has missing required properties ([\"name\"])"
+        "The object must have a property whose name is \"name\"."
       },
       {
         "devfile/devfile_missing_spec_version.yaml",
-        "Devfile schema validation failed. Error: /devfile object has missing required properties ([\"specVersion\"])"
+        "The object must have a property whose name is \"specVersion\"."
       },
       {
         "devfile/devfile_with_undeclared_field.yaml",
-        "Devfile schema validation failed. Error: /devfile object instance has properties which are not allowed by the schema: [\"unknown\"]"
+        "(/unknown):The object must not have a property whose name is \"unknown\"."
       },
       // component model testing
       {
         "component/devfile_missing_component_type.yaml",
-        "Devfile schema validation failed. Error: /devfile/components/0 object has missing required properties ([\"type\"])"
+        "(/components/0):The object must have a property whose name is \"type\"."
+      },
+      {
+        "component/devfile_unknown_component_type.yaml",
+        "(/components/0/type):The value must be one of [\"cheEditor\", \"chePlugin\", \"kubernetes\", \"openshift\", \"dockerimage\"]."
       },
       {
         "component/devfile_component_with_undeclared_field.yaml",
-        "Devfile schema validation failed. Errors: [/devfile/components/0 object instance has properties which are not allowed by the schema: "
-            + "[\"unknown\"],instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"unknown\"],"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"unknown\"],"
-            + "instance failed to match at least one required schema among 2,"
-            + "/devfile/components/0 object has missing required properties ([\"reference\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"referenceContent\"]),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"unknown\"],"
-            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+        "(/components/0/unknown):The object must not have a property whose name is \"unknown\"."
       },
       // Command model testing
       {
         "command/devfile_missing_command_name.yaml",
-        "Devfile schema validation failed. Error: /devfile/commands/0 object has missing required properties ([\"name\"])"
+        "(/commands/0):The object must have a property whose name is \"name\"."
       },
       {
         "command/devfile_missing_command_actions.yaml",
-        "Devfile schema validation failed. Error: /devfile/commands/0 object has missing required properties ([\"actions\"])"
+        "(/commands/0):The object must have a property whose name is \"actions\"."
       },
       {
         "command/devfile_multiple_commands_actions.yaml",
-        "Devfile schema validation failed. Error: /devfile/commands/0/actions array is too long: must have at most 1 elements but instance has 2 elements"
+        "(/commands/0/actions):The array must have at most 1 element(s), but actual number is 2."
       },
       // cheEditor/chePlugin component model testing
       {
         "editor_plugin_component/devfile_editor_component_with_missing_id.yaml",
-        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
-            + "instance failed to match at least one required schema among 2,"
-            + "/devfile/components/0 object has missing required properties ([\"reference\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"referenceContent\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+        "(/components/0):The object must have a property whose name is \"id\"."
       },
       {
         "editor_plugin_component/devfile_editor_component_with_indistinctive_field_reference.yaml",
-        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"reference\"],"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\"],"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"reference\"],"
-            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+        "(/components/0/reference):The object must not have a property whose name is \"reference\"."
       },
       {
         "editor_plugin_component/devfile_editor_component_without_version.yaml",
-        "Devfile schema validation failed. Error: "
-            + "/devfile/components/0/id ECMA 262 regex \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\" does not match input string \"eclipse/theia\""
+        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
       },
       {
         "editor_plugin_component/devfile_editor_plugins_components_with_invalid_memory_limit.yaml",
-        "Devfile schema validation failed. Error: /devfile/components/0/memoryLimit instance type (integer) does not match any allowed primitive type (allowed: [\"string\"])"
+        "(/components/0/memoryLimit):The value must be of string type, but actual type is integer."
       },
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
-        "Devfile schema validation failed. Error: "
-            + "/devfile/components/0/id ECMA 262 regex \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\" does not match input string \"eclipse/theia/dev:v1\""
+        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
       },
       // kubernetes/openshift component model testing
       {
         "kubernetes_openshift_component/devfile_openshift_component_with_missing_reference_and_referenceContent.yaml",
-        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
-            + "instance failed to match at least one required schema among 2,"
-            + "/devfile/components/0 object has missing required properties ([\"reference\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"referenceContent\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+        "At least one of the following sets of problems must be resolved.: [(/components/0):The object must have a property whose name is \"reference\".(/components/0):The object must have a property whose name is \"referenceContent\".]"
       },
       {
         "kubernetes_openshift_component/devfile_openshift_component_with_indistinctive_field_id.yaml",
-        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3)"
-            + ",/devfile/components/0 object instance has properties which are not allowed by the schema: [\"reference\",\"selector\"],"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\"],"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"id\",\"reference\",\"selector\"],"
-            + "/devfile/components/0 object has missing required properties ([\"image\",\"memoryLimit\"])]"
+        "(/components/0/id):The object must not have a property whose name is \"id\"."
       },
       // Dockerimage component model testing
       {
         "dockerimage_component/devfile_dockerimage_component_with_missing_image.yaml",
-        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"memoryLimit\"],"
-            + "instance failed to match at least one required schema among 2,"
-            + "/devfile/components/0 object has missing required properties ([\"reference\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"referenceContent\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"image\"])]"
+        "(/components/0):The object must have a property whose name is \"image\"."
       },
       {
         "dockerimage_component/devfile_dockerimage_component_with_missing_memory_limit.yaml",
-        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"image\"],"
-            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"image\"],"
-            + "instance failed to match at least one required schema among 2,"
-            + "/devfile/components/0 object has missing required properties ([\"reference\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"referenceContent\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"memoryLimit\"])]"
+        "(/components/0):The object must have a property whose name is \"memoryLimit\"."
       },
       {
         "dockerimage_component/devfile_dockerimage_component_with_indistinctive_field_selector.yaml",
-        "Devfile schema validation failed. Errors: [instance failed to match exactly one schema (matched 0 out of 3),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"endpoints\",\"env\",\"image\",\"selector\",\"volumes\"],"
-            + "/devfile/components/0 object has missing required properties ([\"id\"]),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"endpoints\",\"env\",\"image\",\"memoryLimit\",\"volumes\"],"
-            + "instance failed to match at least one required schema among 2,"
-            + "/devfile/components/0 object has missing required properties ([\"reference\"]),"
-            + "/devfile/components/0 object has missing required properties ([\"referenceContent\"]),"
-            + "/devfile/components/0 object instance has properties which are not allowed by the schema: [\"selector\"]]"
+        "(/components/0/selector):The object must not have a property whose name is \"selector\"."
       },
     };
   }

@@ -36,18 +36,6 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.github.java-json-tools</groupId>
-            <artifactId>jackson-coreutils</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.java-json-tools</groupId>
-            <artifactId>json-schema-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.github.java-json-tools</groupId>
-            <artifactId>json-schema-validator</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
@@ -110,6 +98,14 @@
         <dependency>
             <groupId>org.eclipse.che.infrastructure.docker</groupId>
             <artifactId>docker-environment</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.leadpony.justify</groupId>
+            <artifactId>justify</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
