@@ -13,11 +13,15 @@ import 'reflect-metadata';
 import { CLASSES } from "../../../inversify.types";
 import { TestConstants } from "../../../TestConstants";
 import { By } from "selenium-webdriver";
+import { WorkspaceDetails } from "./WorkspaceDetails";
+import { TestWorkspaceUtil, WorkspaceStatus } from "../../../utils/workspace/TestWorkspaceUtil";
 
 
 @injectable()
 export class WorkspaceDetailsPlugins {
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails,
+        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
 
     private getPluginListItemCssLocator(pluginName: string): string {
         return `.plugin-item div[plugin-item-name='${pluginName}']`
@@ -33,19 +37,40 @@ export class WorkspaceDetailsPlugins {
         await this.driverHelper.waitVisibility(pluginListItemLocator, timeout)
     }
 
-    async clickOnPluginListItemSwitcher(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async enablePlugin(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.waitPluginDisabling(pluginName, timeout)
+        await this.clickOnPluginListItemSwitcher(pluginName, timeout)
+        await this.waitPluginEnabling(pluginName, timeout)
+    }
+
+    async disablePlugin(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.waitPluginEnabling(pluginName, timeout)
+        await this.clickOnPluginListItemSwitcher(pluginName, timeout)
+        await this.waitPluginDisabling(pluginName, timeout)
+    }
+
+    async addPluginAndOpenWorkspace(namespace: string, workspaceName: string, pluginName: string, pluginId: string) {
+        await this.workspaceDetails.selectTab('Plugins')
+        await this.enablePlugin(pluginName)
+        await this.workspaceDetails.saveChanges()
+        await this.workspaceDetails.openWorkspace(namespace, workspaceName)
+        await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.RUNNING)
+        await this.testWorkspaceUtil.waitPluginAdding(namespace, workspaceName, pluginId)
+    }
+
+    private async clickOnPluginListItemSwitcher(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const pluginListItemSwitcherLocator = By.css(this.getPluginListItemSwitcherCssLocator(pluginName))
 
         await this.driverHelper.waitAndClick(pluginListItemSwitcherLocator, timeout)
     }
 
-    async waitPluginEnabling(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    private async waitPluginEnabling(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const enabledPluginSwitcherLocator: By = By.css(`${this.getPluginListItemCssLocator(pluginName)} md-switch[aria-checked='true']`)
 
         await this.driverHelper.waitVisibility(enabledPluginSwitcherLocator, timeout)
     }
 
-    async waitPluginDisabling(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    private async waitPluginDisabling(pluginName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const disabledPluginSwitcherLocator: By = By.css(`${this.getPluginListItemCssLocator(pluginName)} md-switch[aria-checked='false']`)
 
         await this.driverHelper.waitVisibility(disabledPluginSwitcherLocator, timeout)

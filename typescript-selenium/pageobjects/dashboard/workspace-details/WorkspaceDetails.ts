@@ -13,6 +13,8 @@ import { CLASSES } from "../../../inversify.types";
 import 'reflect-metadata';
 import { TestConstants } from "../../../TestConstants";
 import { By } from "selenium-webdriver";
+import { Ide } from "../../ide/Ide";
+import { TestWorkspaceUtil, WorkspaceStatus } from "../../../utils/workspace/TestWorkspaceUtil";
 
 
 @injectable()
@@ -24,7 +26,8 @@ export class WorkspaceDetails {
     private static readonly ENABLED_SAVE_BUTTON_CSS: string = "button[name='save-button'][aria-disabled='false']";
     private static readonly WORKSPACE_DETAILS_LOADER_CSS: string = "workspace-details-overview md-progress-linear";
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
 
     private getWorkspaceTitleCssLocator(workspaceName: string): string {
         return `che-row-toolbar[che-title='${workspaceName}']`
@@ -42,16 +45,22 @@ export class WorkspaceDetails {
         await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.WORKSPACE_DETAILS_LOADER_CSS), attempts, polling)
     }
 
-    async waitSaveButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    private async waitSaveButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.ENABLED_SAVE_BUTTON_CSS), timeout)
     }
 
-    async waitSaveButtonDisappearance(attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+    private async waitSaveButtonDisappearance(attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.SAVE_BUTTON_CSS), attempts, polling)
     }
 
-    async clickOnSaveButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    private async clickOnSaveButton(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.css(WorkspaceDetails.ENABLED_SAVE_BUTTON_CSS), timeout)
+    }
+
+    async saveChanges() {
+        await this.waitSaveButton()
+        await this.clickOnSaveButton()
+        await this.waitSaveButtonDisappearance()
     }
 
     async waitPage(workspaceName: string, timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
@@ -80,8 +89,15 @@ export class WorkspaceDetails {
         await this.driverHelper.waitVisibility(By.css(WorkspaceDetails.OPEN_BUTTON_CSS), timeout)
     }
 
-    async clickOnOpenButton(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+    private async clickOnOpenButton(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndClick(By.css(WorkspaceDetails.OPEN_BUTTON_CSS), timeout)
+    }
+
+    async openWorkspace(namespace: string, workspaceName: string, timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        await this.clickOnOpenButton(timeout)
+
+        await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS))
+        await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING)
     }
 
     async waitTabsPresence(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
@@ -95,17 +111,22 @@ export class WorkspaceDetails {
         }
     }
 
-    async clickOnTab(tabTitle: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    private async clickOnTab(tabTitle: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const workspaceDetailsTabLocator: By = By.xpath(this.getTabXpathLocator(tabTitle))
 
 
         await this.driverHelper.waitAndClick(workspaceDetailsTabLocator, timeout)
     }
 
-    async waitTabSelected(tabTitle: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    private async waitTabSelected(tabTitle: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const selectedTabLocator: By = By.xpath(this.getSelectedTabXpathLocator(tabTitle))
 
         await this.driverHelper.waitVisibility(selectedTabLocator, timeout)
+    }
+
+    async selectTab(tabTitle: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.clickOnTab(tabTitle, timeout)
+        await this.waitTabSelected(tabTitle, timeout)
     }
 
 }

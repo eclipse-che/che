@@ -33,6 +33,8 @@ import * as mocha from 'mocha'
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
 const sampleName: string = "console-java-simple";
+const pluginId: string = "org.eclipse.che.vscode-redhat.java";
+const javaPluginName: string = "Language Support for Java(TM)";
 
 const driver: Driver = e2eContainer.get<Driver>(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -45,6 +47,7 @@ const workspaceDetailsPlugins: WorkspaceDetailsPlugins = e2eContainer.get(CLASSE
 const ide: Ide = e2eContainer.get(CLASSES.Ide)
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree)
 const editor: Editor = e2eContainer.get(CLASSES.Editor)
+const testWorkspaceUtil: TestWorkspaceUtil = e2eContainer.get(CLASSES.TestWorkspaceUtil)
 
 
 suite("E2E", async () => {
@@ -55,48 +58,19 @@ suite("E2E", async () => {
         })
     })
 
-    suite("Create workspace and open IDE", async () => {
-        test(`Create a '${workspaceName}' workspace`, async () => {
-            await dashboard.waitPage()
-            await dashboard.clickWorkspacesButton()
-            await workspaces.clickAddWorkspaceButton()
+    suite("Create workspace and add plugin", async () => {
+        test("Open 'New Workspace' page", async () => {
+            await newWorkspace.openPageByUI();
+        })
 
-            await newWorkspace.typeWorkspaceName(workspaceName)
-            await newWorkspace.clickOnChe7Stack()
-            await newWorkspace.clickOnAddOrImportProjectButton()
-            await newWorkspace.enableSampleCheckbox(sampleName)
-            await newWorkspace.clickOnAddButton()
-            await newWorkspace.waitProjectAdding(sampleName)
-
-            await newWorkspace.selectCreateWorkspaceAndProceedEditing()
-            await workspaceDetails.waitPage(workspaceName);
+        test(`Create a '${workspaceName}' workspace and proceed editing`, async () => {
+            await newWorkspace.createWorkspaceAndProceedEditing(workspaceName, 'che7-preview', sampleName)
         })
 
         test("Add 'Java Language Support' plugin to workspace", async () => {
-            const javaPluginName: string = "Language Support for Java(TM)";
-            const execPlugin: string = "Che machine-exec Service";
-
-            await workspaceDetails.waitTabSelected('Overview')
-            await workspaceDetails.clickOnTab('Plugins')
-            await workspaceDetails.waitTabSelected('Plugins')
-
-
-            await workspaceDetailsPlugins.waitPluginEnabling(execPlugin)
-            await workspaceDetailsPlugins.waitPluginDisabling(javaPluginName)
-            await workspaceDetailsPlugins.clickOnPluginListItemSwitcher(javaPluginName)
-            await workspaceDetailsPlugins.waitPluginEnabling(javaPluginName)
-
-            await workspaceDetails.waitSaveButton()
-            await workspaceDetails.clickOnSaveButton()
-            await workspaceDetails.waitSaveButtonDisappearance()
-
-            await workspaceDetails.clickOnOpenButton()
+            await workspaceDetailsPlugins.addPluginAndOpenWorkspace(namespace, workspaceName, javaPluginName, pluginId)
         })
 
-        test("Wait IDE availability", async () => {
-            await ide.waitAndSwitchToIdeFrame()
-            await ide.waitWorkspaceAndIde(namespace, workspaceName);
-        })
     })
 
     suite("Work with IDE", async () => {
@@ -104,9 +78,15 @@ suite("E2E", async () => {
         let tabTitle: string = "HelloWorld.java";
         let filePath: string = `${fileFolderPath}/${tabTitle}`
 
+        test("Wait IDE availability", async () => {
+            await ide.waitWorkspaceAndIde(namespace, workspaceName)
+        })
+
         test("Open project tree container", async () => {
             await projectTree.openProjectTreeContainer();
-            await projectTree.waitProjectTreeContainer();
+        })
+
+        test("Wait project imported", async () => {
             await projectTree.waitProjectImported(sampleName, "src")
         })
 
@@ -132,23 +112,11 @@ suite("E2E", async () => {
 
     suite("Stop and remove workspace", async () => {
         test("Stop workspace", async () => {
-            await dashboard.openDashboard()
-            await dashboard.clickWorkspacesButton()
-            await workspaces.waitPage()
-            await workspaces.waitWorkspaceListItem(workspaceName)
-            await workspaces.waitWorkspaceWithRunningStatus(workspaceName)
-            await workspaces.clickOnStopWorkspaceButton(workspaceName)
-            await workspaces.waitWorkspaceWithStoppedStatus(workspaceName)
+            await dashboard.stopWorkspaceByUI(workspaceName)
         })
 
         test("Delete workspace", async () => {
-            await workspaces.waitPage()
-            await workspaces.waitWorkspaceListItem(workspaceName)
-            await workspaces.clickWorkspaceListItem(workspaceName);
-            await workspaces.clickDeleteButtonOnWorkspaceDetails();
-            await workspaces.clickConfirmDeletionButton();
-            await workspaces.waitPage()
-            await workspaces.waitWorkspaceListItemAbcence(workspaceName);
+            await dashboard.deleteWorkspaceByUI(workspaceName)
         })
 
     })

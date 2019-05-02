@@ -67,6 +67,16 @@ export const TestConstants = {
     /**
      * Delay in milliseconds between checking workspace status tries.
      */
-    TS_SELENIUM_WORKSPACE_STATUS_POLLING: Number(process.env.TS_SELENIUM_WORKSPACE_STATUS_POLLING) || 10000
+    TS_SELENIUM_WORKSPACE_STATUS_POLLING: Number(process.env.TS_SELENIUM_WORKSPACE_STATUS_POLLING) || 10000,
+
+    /**
+     * Amount of tries for checking plugin precence.
+     */
+    TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS) || 20,
+
+    /**
+     * Delay in milliseconds between checking plugin precence.
+     */
+    TS_SELENIUM_PLUGIN_PRECENCE_POLLING: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_POLLING) || 2000,
 
 }

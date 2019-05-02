@@ -12,7 +12,7 @@ import { injectable, inject } from "inversify";
 import { CLASSES } from "../../inversify.types";
 import { TestConstants } from "../../TestConstants";
 import { By } from "selenium-webdriver";
-import { TestWorkspaceUtil } from "../../utils/workspace/TestWorkspaceUtil";
+import { TestWorkspaceUtil, WorkspaceStatus } from "../../utils/workspace/TestWorkspaceUtil";
 
 
 @injectable()
@@ -23,6 +23,7 @@ export class Ide {
     public static readonly SELECTED_EXPLORER_BUTTON_XPATH: string = "(//ul[@class='p-TabBar-content']//li[@title='Explorer' and contains(@class, 'p-mod-current')])[1]"
     private static readonly PRELOADER_CSS: string = ".theia-preload";
     private static readonly IDE_IFRAME_CSS: string = "iframe#ide-application-iframe";
+    public static readonly ACTIVATED_IDE_IFRAME_CSS: string = "#ide-iframe-window[aria-hidden='false']"
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
@@ -45,7 +46,8 @@ export class Ide {
     }
 
     async waitWorkspaceAndIde(workspaceNamespace: string, workspaceName: string, timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
-        await this.testWorkspaceUtil.waitRunningStatus(workspaceNamespace, workspaceName)
+        await this.waitAndSwitchToIdeFrame(timeout)
+        await this.testWorkspaceUtil.waitWorkspaceStatus(workspaceNamespace, workspaceName, WorkspaceStatus.RUNNING)
         await this.waitIde(timeout)
     }
 

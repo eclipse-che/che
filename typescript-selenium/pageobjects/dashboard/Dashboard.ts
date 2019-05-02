@@ -14,6 +14,7 @@ import { Driver } from "../../driver/Driver";
 import { WebElementCondition, By } from "selenium-webdriver";
 import { DriverHelper } from "../../utils/DriverHelper";
 import { TestConstants } from "../../TestConstants";
+import { Workspaces } from "./Workspaces";
 
 @injectable()
 export class Dashboard {
@@ -23,7 +24,30 @@ export class Dashboard {
     private static readonly FACTORIES_BUTTON_CSS: string = "#factories-item";
     private static readonly LOADER_PAGE_CSS: string = ".main-page-loader"
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces) { }
+
+    async stopWorkspaceByUI(workspaceName: string) {
+        await this.openDashboard()
+        await this.clickWorkspacesButton()
+        await this.workspaces.waitPage()
+        await this.workspaces.waitWorkspaceListItem(workspaceName)
+        await this.workspaces.waitWorkspaceWithRunningStatus(workspaceName)
+        await this.workspaces.clickOnStopWorkspaceButton(workspaceName)
+        await this.workspaces.waitWorkspaceWithStoppedStatus(workspaceName)
+    }
+
+    async deleteWorkspaceByUI(workspaceName: string) {
+        await this.openDashboard()
+        await this.clickWorkspacesButton()
+        await this.workspaces.waitPage()
+        await this.workspaces.waitWorkspaceListItem(workspaceName)
+        await this.workspaces.clickWorkspaceListItem(workspaceName);
+        await this.workspaces.clickDeleteButtonOnWorkspaceDetails();
+        await this.workspaces.clickConfirmDeletionButton();
+        await this.workspaces.waitPage()
+        await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
+    }
 
     async openDashboard(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.navigateTo(TestConstants.TS_SELENIUM_BASE_URL)

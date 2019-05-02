@@ -13,6 +13,11 @@ import { CLASSES } from "../../inversify.types";
 import { TestConstants } from "../../TestConstants";
 import { By } from "selenium-webdriver";
 import 'reflect-metadata';
+import { Dashboard } from "./Dashboard";
+import { Workspaces } from "./Workspaces";
+import { Ide } from "../ide/Ide";
+import { TestWorkspaceUtil, WorkspaceStatus } from "../../utils/workspace/TestWorkspaceUtil";
+import { WorkspaceDetails } from "./workspace-details/WorkspaceDetails";
 
 
 @injectable()
@@ -24,9 +29,88 @@ export class NewWorkspace {
     private static readonly ADD_OR_IMPORT_PROJECT_BUTTON_CSS: string = ".add-import-project-toggle-button";
     private static readonly ADD_BUTTON_CSS: string = "button[aria-disabled='false'][name='addButton']";
     private static readonly NAME_FIELD_CSS: string = "#workspace-name-input";
+    private static readonly TITLE_CSS: string = "#New_Workspace";
+    private static readonly VISIBLE_LOADER_CSS = "md-progress-linear.create-workspace-progress[aria-hidden='false']";
+    private static readonly HIDDEN_LOADER_CSS = "md-progress-linear.create-workspace-progress[aria-hidden='true']";
+    private static readonly PROJECT_SOURCE_FORM_CSS = "#project-source-selector .project-source-selector-popover[aria-hidden='false']"
 
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
+        @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
+        @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
+        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil,
+        @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails) { }
+
+    private getStackCssLocator(dataStackId: string): string {
+        return `div[data-stack-id='${dataStackId}']`
+    }
+
+    private getSelectedStackCssLocator(dataStackId: string) {
+        return `div.stack-selector-item-selected[data-stack-id='${dataStackId}']`
+    }
+
+    private async prepareWorkspace(workspaceName: string, dataStackId: string, sampleName: string) {
+        await this.typeWorkspaceName(workspaceName)
+        await this.selectStack(dataStackId)
+        await this.clickOnAddOrImportProjectButton()
+        await this.enableSampleCheckbox(sampleName)
+        await this.confirmProjectAdding(sampleName)
+    }
+
+    async createAndRunWorkspace(namespace: string, workspaceName: string, dataStackId: string, sampleName: string) {
+        await this.prepareWorkspace(workspaceName, dataStackId, sampleName)
+        await this.clickOnCreateAndOpenButton()
+
+        await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS))
+        await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING)
+    }
+
+    async createWorkspaceAndProceedEditing(workspaceName: string, dataStackId: string, sampleName: string) {
+        await this.prepareWorkspace(workspaceName, dataStackId, sampleName)
+        await this.selectCreateWorkspaceAndProceedEditing()
+
+        await this.workspaceDetails.waitPage(workspaceName);
+    }
+
+    async confirmProjectAdding(sampleName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.clickOnAddButton(timeout)
+        await this.waitProjectAdding(sampleName, timeout)
+    }
+
+    async waitProjectSourceForm(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.css(NewWorkspace.PROJECT_SOURCE_FORM_CSS), timeout)
+    }
+
+    async selectStack(dataStackId: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const stackLocator: By = By.css(this.getStackCssLocator(dataStackId))
+
+        await this.driverHelper.waitAndClick(stackLocator, timeout)
+        await this.waitStackSelection(dataStackId, timeout)
+    }
+
+    async waitStackSelection(dataStackId: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const selectedStackLocator: By = By.css(this.getSelectedStackCssLocator(dataStackId))
+
+        await this.driverHelper.waitAndClick(selectedStackLocator, timeout)
+    }
+
+    async openPageByUI() {
+        await this.dashboard.waitPage()
+        await this.dashboard.clickWorkspacesButton()
+        await this.workspaces.clickAddWorkspaceButton()
+
+        await this.waitPage()
+    }
+
+    async waitPage(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.css(NewWorkspace.NAME_FIELD_CSS), timeout)
+        await this.driverHelper.waitVisibility(By.css(NewWorkspace.TITLE_CSS), timeout)
+        await this.waitLoaderAbsence(timeout)
+    }
+
+    async waitLoaderAbsence(timeout = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        await this.driverHelper.waitPresence(By.css(NewWorkspace.HIDDEN_LOADER_CSS), timeout)
+    }
 
     async selectCreateWorkspaceAndProceedEditing(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const createAndProceedEditingButtonLocator: By = By.xpath("//span[text()='Create & Proceed Editing']")
@@ -70,6 +154,7 @@ export class NewWorkspace {
         const addOrImportProjectButtonLocator: By = By.css(NewWorkspace.ADD_OR_IMPORT_PROJECT_BUTTON_CSS)
 
         await this.driverHelper.waitAndClick(addOrImportProjectButtonLocator, timeout)
+        await this.waitProjectSourceForm(timeout)
     }
 
     async waitSampleCheckboxEnabling(sampleName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
