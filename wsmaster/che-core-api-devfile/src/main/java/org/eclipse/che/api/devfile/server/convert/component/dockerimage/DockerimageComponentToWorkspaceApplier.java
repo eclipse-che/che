@@ -165,9 +165,9 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         .stream()
         .filter(
             c ->
-                c.getAttributes()
-                    .get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
-                    .equals(componentAlias))
+                componentAlias != null
+                    && componentAlias.equals(
+                        c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
         .forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
   }
 

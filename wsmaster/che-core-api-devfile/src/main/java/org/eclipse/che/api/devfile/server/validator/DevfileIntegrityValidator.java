@@ -190,6 +190,12 @@ public class DevfileIntegrityValidator {
       }
       Action action = command.getActions().get(0);
 
+      if (action.getComponent() == null) {
+        if (action.getReference() != null || action.getReferenceContent() != null) {
+          continue;
+        }
+      }
+
       if (!knownAliases.contains(action.getComponent())) {
         throw new DevfileFormatException(
             format(

@@ -15,12 +15,18 @@ public interface Action {
   /** Returns action type. Is is mandatory. */
   String getType();
 
-  /** Returns component to which given action relates. It is mandatory. */
+  /** Returns component to which given action relates. */
   String getComponent();
 
-  /** Returns the actual action command-line string. It is mandatory. */
+  /** Returns the actual action command-line string. */
   String getCommand();
 
   /** Returns the working directory where the command should be executed. It is optional. */
   String getWorkdir();
+
+  /** Returns the name of the referenced IDE-specific configuration file. */
+  String getReference();
+
+  /** Returns the content of the referenced IDE-specific configuration file. */
+  String getReferenceContent();
 }

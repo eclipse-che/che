@@ -16,9 +16,11 @@ import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMA
 import static org.eclipse.che.api.devfile.server.Constants.EXEC_ACTION_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNull;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
+import org.eclipse.che.api.core.model.workspace.config.Command;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
@@ -91,7 +93,7 @@ public class CommandConverterTest {
 
     // when
     org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
-        commandConverter.toWorkspaceCommand(devfileCommand);
+        commandConverter.toWorkspaceCommand(devfileCommand, null);
 
     // then
     assertEquals(workspaceCommand.getName(), "build");
@@ -118,7 +120,7 @@ public class CommandConverterTest {
 
     // when
     org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
-        commandConverter.toWorkspaceCommand(devfileCommand);
+        commandConverter.toWorkspaceCommand(devfileCommand, null);
 
     // then
     assertFalse(workspaceCommand.getAttributes().containsKey(WORKING_DIRECTORY_ATTRIBUTE));
@@ -136,6 +138,70 @@ public class CommandConverterTest {
     devfileCommand.getActions().add(new ActionImpl());
 
     // when
-    commandConverter.toWorkspaceCommand(devfileCommand);
+    commandConverter.toWorkspaceCommand(devfileCommand, null);
+  }
+
+  @Test
+  public void shouldAcceptActionWithCommand() throws Exception {
+    // given
+    CommandImpl devfileCommand = new CommandImpl();
+    devfileCommand.setName("build");
+
+    ActionImpl action = new ActionImpl();
+    action.setType("exec");
+    action.setCommand("blah");
+
+    devfileCommand.getActions().add(action);
+
+    // when
+    Command command = commandConverter.toWorkspaceCommand(devfileCommand, null);
+
+    // then
+    assertEquals(command.getCommandLine(), "blah");
+  }
+
+  @Test
+  public void shouldAcceptActionWithReference() throws Exception {
+    // given
+    CommandImpl devfileCommand = new CommandImpl();
+    devfileCommand.setName("build");
+
+    ActionImpl action = new ActionImpl();
+    action.setType("exec");
+    action.setReference("blah");
+
+    devfileCommand.getActions().add(action);
+
+    // when
+    Command command = commandConverter.toWorkspaceCommand(devfileCommand, fileURL -> "content");
+
+    // then
+    assertNull(command.getCommandLine());
+    assertEquals("blah", command.getAttributes().get(Command.COMMAND_ACTION_REFERENCE_ATTRIBUTE));
+    assertEquals(
+        "content", command.getAttributes().get(Command.COMMAND_ACTION_REFERENCE_CONTENT_ATTRIBUTE));
+  }
+
+  @Test
+  public void shouldAcceptActionWithReferenceContent() throws Exception {
+    // given
+    CommandImpl devfileCommand = new CommandImpl();
+    devfileCommand.setName("build");
+
+    ActionImpl action = new ActionImpl();
+    action.setType("exec");
+    action.setReference("blah");
+    action.setReferenceContent("content");
+
+    devfileCommand.getActions().add(action);
+
+    // when
+    Command command = commandConverter.toWorkspaceCommand(devfileCommand, null);
+
+    // then
+    assertNull(command.getCommandLine());
+    assertEquals("blah", command.getAttributes().get(Command.COMMAND_ACTION_REFERENCE_ATTRIBUTE));
+    assertEquals(
+        "content", command.getAttributes().get(Command.COMMAND_ACTION_REFERENCE_CONTENT_ATTRIBUTE));
   }
 }
