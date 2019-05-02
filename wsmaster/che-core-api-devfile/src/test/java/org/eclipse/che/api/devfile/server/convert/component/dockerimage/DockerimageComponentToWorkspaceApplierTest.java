@@ -38,8 +38,10 @@ import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.devfile.server.convert.component.kubernetes.KubernetesEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -49,12 +51,15 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -142,7 +147,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
             eq(KubernetesEnvironment.TYPE),
             objectsCaptor.capture(),
             machinesCaptor.capture());
-    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("eclipse-ubuntu_jdk8-latest");
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("eclipse/ubuntu_jdk8-latest");
     assertNotNull(machineConfig);
 
     List<HasMetadata> objects = objectsCaptor.getValue();
@@ -151,7 +156,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
     Deployment deployment = (Deployment) objects.get(0);
     PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
     ObjectMeta podMeta = podTemplate.getMetadata();
-    assertEquals(podMeta.getName(), "eclipse-ubuntu_jdk8-latest");
+    assertEquals(podMeta.getName(), "eclipse/ubuntu_jdk8-latest");
 
     Map<String, String> deploymentSelector = deployment.getSpec().getSelector().getMatchLabels();
     assertFalse(deploymentSelector.isEmpty());
@@ -159,11 +164,11 @@ public class DockerimageComponentToWorkspaceApplierTest {
 
     Map<String, String> annotations = podMeta.getAnnotations();
     assertEquals(
-        annotations.get(String.format(MACHINE_NAME_ANNOTATION_FMT, "eclipse-ubuntu_jdk8-latest")),
-        "eclipse-ubuntu_jdk8-latest");
+        annotations.get(String.format(MACHINE_NAME_ANNOTATION_FMT, "eclipse/ubuntu_jdk8-latest")),
+        "eclipse/ubuntu_jdk8-latest");
 
     Container container = podTemplate.getSpec().getContainers().get(0);
-    assertEquals(container.getName(), "eclipse-ubuntu_jdk8-latest");
+    assertEquals(container.getName(), "eclipse/ubuntu_jdk8-latest");
     assertEquals(container.getImage(), "eclipse/ubuntu_jdk8:latest");
   }
 
@@ -473,5 +478,28 @@ public class DockerimageComponentToWorkspaceApplierTest {
     Container container = podTemplate.getSpec().getContainers().get(0);
     assertEquals(container.getCommand(), command);
     assertEquals(container.getArgs(), args);
+  }
+
+  @Test(dataProvider = "imageNames")
+  public void testGeneratesValidMachineNameFromImageName(String imageName)
+      throws ValidationException {
+
+    // given
+    String machineName = DockerimageComponentToWorkspaceApplier.toMachineName(imageName);
+    MachineConfigsValidator validator = new MachineConfigsValidator();
+    Map<String, InternalMachineConfig> configs = new HashMap<>();
+    configs.put(machineName, new InternalMachineConfig());
+
+    // when
+    validator.validate(configs);
+
+    // then no exception is thrown
+  }
+
+  @DataProvider
+  public static Object[][] imageNames() {
+    return new Object[][] {
+      new Object[] {"maven"}, new Object[] {"maven-3.6"}, new Object[] {"eclipse/che-3.6:latest"}
+    };
   }
 }

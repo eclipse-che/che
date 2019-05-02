@@ -8,10 +8,10 @@ projects:
 tools:
   - name: theia-editor
     type: cheEditor
-    id: org.eclipse.che.editor.theia:master
+    id: eclipse/che-theia/master
   - name: exec-plugin
     type: chePlugin
-    id: che-machine-exec-plugin:0.0.1
+    id: eclipse/che-machine-exec-plugin/0.0.1
   - name: dash-dev
     type: dockerimage
     image: 'eclipse/che-dashboard-dev:nightly'

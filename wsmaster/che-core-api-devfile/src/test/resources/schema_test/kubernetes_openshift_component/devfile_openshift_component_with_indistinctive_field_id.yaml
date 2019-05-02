@@ -21,7 +21,7 @@ components:
       app.kubernetes.io/name: mysql
       app.kubernetes.io/component: database
       app.kubernetes.io/part-of: petclinic
-    id: org.eclipse.chetheia:0.0.3
+    id: eclipse/chetheia/0.0.3
 commands:
   - name: build
     actions:

@@ -21,9 +21,11 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -31,17 +33,18 @@ import org.testng.annotations.Test;
 public class PluginComponentToWorkspaceApplierTest {
 
   private PluginComponentToWorkspaceApplier pluginComponentApplier;
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {
-    pluginComponentApplier = new PluginComponentToWorkspaceApplier();
+    pluginComponentApplier = new PluginComponentToWorkspaceApplier(fqnParser);
   }
 
   @Test
   public void shouldProvisionPluginWorkspaceAttributeDuringChePluginComponentApplying()
-      throws Exception {
+      throws DevfileException {
 
-    String superPluginId = "org.eclipse.che.super-plugin:0.0.1";
+    String superPluginId = "eclipse/super-plugin/0.0.1";
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
@@ -51,7 +54,7 @@ public class PluginComponentToWorkspaceApplierTest {
 
     ComponentImpl customPluginComponent = new ComponentImpl();
     customPluginComponent.setAlias("custom");
-    customPluginComponent.setId("custom-plugin:v1");
+    customPluginComponent.setId("publisher1/custom-plugin/v1");
     customPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -63,28 +66,28 @@ public class PluginComponentToWorkspaceApplierTest {
     // then
     String workspaceTooling =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
-    assertTrue(workspaceTooling.matches("(.+:.+),(.+:.+)"));
+    assertTrue(workspaceTooling.matches("(.+/.+/.+),(.+/.+/.+)"));
     assertTrue(workspaceTooling.contains(superPluginId));
-    assertTrue(workspaceTooling.contains("custom-plugin:v1"));
+    assertTrue(workspaceTooling.contains("publisher1/custom-plugin/v1"));
     String toolingAliases =
         workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
-    assertTrue(toolingAliases.matches("(.+:.+=.+),(.+:.+=.+)"));
+    assertTrue(toolingAliases.matches("(.+/.+/.+=.+),(.+/.+/.+=.+)"));
     assertTrue(toolingAliases.contains(superPluginId + "=super-plugin"));
-    assertTrue(toolingAliases.contains("custom-plugin:v1=custom"));
+    assertTrue(toolingAliases.contains("publisher1/custom-plugin/v1=custom"));
     assertEquals(
         workspaceConfig
             .getAttributes()
-            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, superPluginId.split(":")[0])),
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
         "1234M");
   }
 
   @Test
   public void shouldProvisionPluginCommandAttributesDuringChePluginComponentApplying()
-      throws Exception {
+      throws DevfileException {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
-    superPluginComponent.setId("org.eclipse.che.super-plugin:0.0.1");
+    superPluginComponent.setId("eclipse/super-plugin/0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -98,17 +101,16 @@ public class PluginComponentToWorkspaceApplierTest {
     // then
     assertEquals(
         workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
-        "org.eclipse.che.super-plugin:0.0.1");
+        "eclipse/super-plugin/0.0.1");
   }
 
   @Test
   public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
-      throws Exception {
+      throws DevfileException {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
-    superPluginComponent.setId(
-        "https://custom-plugin.registry/plugins/org.eclipse.che.super-plugin:0.0.1");
+    superPluginComponent.setId("https://custom-plugin.registry/plugins/eclipse/super-plugin/0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -122,6 +124,6 @@ public class PluginComponentToWorkspaceApplierTest {
     // then
     assertEquals(
         workspaceConfig.getCommands().get(0).getAttributes().get(PLUGIN_ATTRIBUTE),
-        "org.eclipse.che.super-plugin:0.0.1");
+        "eclipse/super-plugin/0.0.1");
   }
 }

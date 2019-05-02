@@ -132,7 +132,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "editor_plugin_component/devfile_editor_component_without_version.yaml",
-        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\"."
+        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
       },
       {
         "editor_plugin_component/devfile_editor_plugins_components_with_invalid_memory_limit.yaml",
@@ -140,7 +140,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
-        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-\\./]+)?[a-zA-Z0-9_\\-\\.]{1,}:[a-zA-Z0-9_\\-\\.]{1,}$\"."
+        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
       },
       // kubernetes/openshift component model testing
       {

@@ -14,8 +14,8 @@ specVersion: 0.0.1
 name: terminal-sample
 components:
   - type: chePlugin
-    id: https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/terminal-sample:0.0.1
+    id: https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/publisher/terminal-sample/0.0.1
   - type: chePlugin
-    id: http://raw.githubusercontent.com/eclipse/che-plugin-registry/master/terminal-sample:0.0.1
+    id: http://raw.githubusercontent.com/eclipse/che-plugin-registry/master/publisher/terminal-sample/0.0.1
   - type: cheEditor
-    id: https://che-plugin-registry.openshift.io/org.eclipse.theia-ide:0.0.1
+    id: https://che-plugin-registry.openshift.io/eclipse/theia-ide/0.0.1

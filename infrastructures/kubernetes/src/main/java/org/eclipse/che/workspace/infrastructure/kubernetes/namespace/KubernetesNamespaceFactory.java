@@ -32,16 +32,19 @@ public class KubernetesNamespaceFactory {
   private final String namespaceName;
   private final boolean isPredefined;
   private final String serviceAccountName;
+  private final String clusterRoleName;
   private final KubernetesClientFactory clientFactory;
 
   @Inject
   public KubernetesNamespaceFactory(
       @Nullable @Named("che.infra.kubernetes.namespace") String namespaceName,
       @Nullable @Named("che.infra.kubernetes.service_account_name") String serviceAccountName,
+      @Nullable @Named("che.infra.kubernetes.cluster_role_name") String clusterRoleName,
       KubernetesClientFactory clientFactory) {
     this.namespaceName = namespaceName;
     this.isPredefined = !isNullOrEmpty(namespaceName);
     this.serviceAccountName = serviceAccountName;
+    this.clusterRoleName = clusterRoleName;
     this.clientFactory = clientFactory;
   }
 
@@ -101,6 +104,6 @@ public class KubernetesNamespaceFactory {
   KubernetesWorkspaceServiceAccount doCreateServiceAccount(
       String workspaceId, String namespaceName) {
     return new KubernetesWorkspaceServiceAccount(
-        workspaceId, namespaceName, serviceAccountName, clientFactory);
+        workspaceId, namespaceName, serviceAccountName, clusterRoleName, clientFactory);
   }
 }
