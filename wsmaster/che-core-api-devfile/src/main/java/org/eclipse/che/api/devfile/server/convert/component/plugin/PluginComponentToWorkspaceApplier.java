@@ -21,11 +21,16 @@ import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
+import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -34,6 +39,13 @@ import org.eclipse.che.commons.annotation.Nullable;
  * @author Sergii Leshchenko
  */
 public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceApplier {
+
+  private final PluginFQNParser fqnParser;
+
+  @Inject
+  public PluginComponentToWorkspaceApplier(PluginFQNParser fqnParser) {
+    this.fqnParser = fqnParser;
+  }
 
   /**
    * Applies changes on workspace config according to the specified plugin component.
@@ -49,7 +61,8 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
   public void apply(
       WorkspaceConfigImpl workspaceConfig,
       Component pluginComponent,
-      @Nullable FileContentProvider contentProvider) {
+      @Nullable FileContentProvider contentProvider)
+      throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
     checkArgument(pluginComponent != null, "Component must not be null");
     checkArgument(
@@ -74,13 +87,17 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
               append(pluginsAliases, pluginComponent.getId() + "=" + pluginComponent.getAlias()));
     }
 
-    String pluginIdVersion = resolveIdAndVersion(pluginComponent.getId());
+    ExtendedPluginFQN fqn;
+    try {
+      fqn = fqnParser.parsePluginFQN(pluginComponent.getId());
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
     String memoryLimit = pluginComponent.getMemoryLimit();
     if (memoryLimit != null) {
-      String pluginIdPart = pluginIdVersion.split(":")[0];
       workspaceConfig
           .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, pluginIdPart), memoryLimit);
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
     }
 
     for (CommandImpl command : workspaceConfig.getCommands()) {
@@ -95,16 +112,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         continue;
       }
 
-      command.getAttributes().put(PLUGIN_ATTRIBUTE, pluginIdVersion);
-    }
-  }
-
-  private String resolveIdAndVersion(String ref) {
-    int lastSlashPosition = ref.lastIndexOf("/");
-    if (lastSlashPosition < 0) {
-      return ref;
-    } else {
-      return ref.substring(lastSlashPosition + 1);
+      command.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId());
     }
   }
 

@@ -10,9 +10,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IPlugin, PluginRegistry} from '../../../../components/api/plugin-registry.factory';
+import { IPlugin, PluginRegistry } from '../../../../components/api/plugin-registry.factory';
 import IWorkspaceConfig = che.IWorkspaceConfig;
-import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import { CheNotification } from '../../../../components/notification/che-notification.factory';
 
 const PLUGIN_SEPARATOR = ',';
 const PLUGIN_VERSION_SEPARATOR = ':';
@@ -35,7 +35,7 @@ export class WorkspaceEditorsController {
   onChange: Function;
   isLoading: boolean;
 
-  editorOrderBy = 'name';
+  editorOrderBy = 'displayName';
   editors: Array<IPlugin> = [];
   selectedEditor: string = '';
   editorFilter: any;
@@ -46,7 +46,7 @@ export class WorkspaceEditorsController {
    * Default constructor that is using resource
    */
   constructor(pluginRegistry: PluginRegistry, cheListHelperFactory: che.widget.ICheListHelperFactory, $scope: ng.IScope,
-              cheNotification: CheNotification) {
+    cheNotification: CheNotification) {
     this.pluginRegistry = pluginRegistry;
     this.cheNotification = cheNotification;
 
@@ -57,7 +57,7 @@ export class WorkspaceEditorsController {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    this.editorFilter = {name: ''};
+    this.editorFilter = { displayName: '' };
 
     const deRegistrationFn = $scope.$watch(() => {
       return this.workspaceConfig;
@@ -87,7 +87,7 @@ export class WorkspaceEditorsController {
         if (item.type === EDITOR_TYPE) {
           this.editors.push(item);
         };
-      });  
+      });
 
       this.updateEditors();
     }, (error: any) => {
@@ -102,8 +102,8 @@ export class WorkspaceEditorsController {
    * @param str {string} a string to filter projects names
    */
   onSearchChanged(str: string): void {
-    this.editorFilter.name = str;
-    this.cheListHelper.applyFilter('name', this.editorFilter);
+    this.editorFilter.displayName = str;
+    this.cheListHelper.applyFilter('displayName', this.editorFilter);
   }
 
   /**
@@ -112,13 +112,11 @@ export class WorkspaceEditorsController {
    * @param {IPlugin} plugin
    */
   updateEditor(plugin: IPlugin): void {
-    let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
-
     if (plugin.type === EDITOR_TYPE) {
-      this.selectedEditor = plugin.isEnabled ? name : '';
+      this.selectedEditor = plugin.isEnabled ? plugin.id : '';
       this.workspaceConfig.attributes.editor = this.selectedEditor;
     }
-    
+
     this.cleanupInstallers();
     this.onChange();
   }
@@ -127,9 +125,9 @@ export class WorkspaceEditorsController {
    * Clean up all the installers in all machines, when plugin is selected.
    */
   cleanupInstallers(): void {
-    let defaultEnv : string = this.workspaceConfig.defaultEnv;
-    let machines : any = this.workspaceConfig.environments[defaultEnv].machines;
-    let machineNames : Array<string> = Object.keys(machines);
+    let defaultEnv: string = this.workspaceConfig.defaultEnv;
+    let machines: any = this.workspaceConfig.environments[defaultEnv].machines;
+    let machineNames: Array<string> = Object.keys(machines);
     machineNames.forEach((machineName: string) => {
       machines[machineName].installers = [];
     });
@@ -141,9 +139,9 @@ export class WorkspaceEditorsController {
   private updateEditors(): void {
     // get selected plugins from workspace configuration attribute - "editor":
     this.selectedEditor = this.workspaceConfig && this.workspaceConfig.attributes && this.workspaceConfig.attributes.editor ?
-     this.workspaceConfig.attributes.editor : '';
+      this.workspaceConfig.attributes.editor : '';
 
-     // check each editor's enabled state:
+    // check each editor's enabled state:
     this.editors.forEach((editor: IPlugin) => {
       editor.isEnabled = this.isEditorEnabled(editor);
     });
@@ -157,8 +155,6 @@ export class WorkspaceEditorsController {
    * @returns {boolean} the editor's enabled state
    */
   private isEditorEnabled(editor: IPlugin): boolean {
-    // name in the format: id:version
-    let name = editor.id + PLUGIN_VERSION_SEPARATOR + editor.version;
-    return name === this.selectedEditor;
+    return editor.id === this.selectedEditor;
   }
 }

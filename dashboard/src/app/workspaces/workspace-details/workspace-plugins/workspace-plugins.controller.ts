@@ -10,9 +10,9 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IPlugin, PluginRegistry} from '../../../../components/api/plugin-registry.factory';
+import { IPlugin, PluginRegistry } from '../../../../components/api/plugin-registry.factory';
 import IWorkspaceConfig = che.IWorkspaceConfig;
-import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import { CheNotification } from '../../../../components/notification/che-notification.factory';
 
 const PLUGIN_SEPARATOR = ',';
 const PLUGIN_VERSION_SEPARATOR = ':';
@@ -35,7 +35,7 @@ export class WorkspacePluginsController {
   onChange: Function;
   isLoading: boolean;
 
-  pluginOrderBy = 'name';
+  pluginOrderBy = 'displayName';
   plugins: Array<IPlugin> = [];
   selectedPlugins: Array<string> = [];
 
@@ -47,7 +47,7 @@ export class WorkspacePluginsController {
    * Default constructor that is using resource
    */
   constructor(pluginRegistry: PluginRegistry, cheListHelperFactory: che.widget.ICheListHelperFactory, $scope: ng.IScope,
-              cheNotification: CheNotification) {
+    cheNotification: CheNotification) {
     this.pluginRegistry = pluginRegistry;
     this.cheNotification = cheNotification;
 
@@ -58,7 +58,7 @@ export class WorkspacePluginsController {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    this.pluginFilter = {name: ''};
+    this.pluginFilter = { displayName: '' };
 
     const deRegistrationFn = $scope.$watch(() => {
       return this.workspaceConfig;
@@ -88,7 +88,7 @@ export class WorkspacePluginsController {
         if (item.type !== EDITOR_TYPE) {
           this.plugins.push(item);
         }
-      });  
+      });
 
       this.updatePlugins();
     }, (error: any) => {
@@ -103,8 +103,8 @@ export class WorkspacePluginsController {
    * @param str {string} a string to filter projects names
    */
   onSearchChanged(str: string): void {
-    this.pluginFilter.name = str;
-    this.cheListHelper.applyFilter('name', this.pluginFilter);
+    this.pluginFilter.displayName = str;
+    this.cheListHelper.applyFilter('displayName', this.pluginFilter);
   }
 
   /**
@@ -113,13 +113,11 @@ export class WorkspacePluginsController {
    * @param {IPlugin} plugin
    */
   updatePlugin(plugin: IPlugin): void {
-    let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
-
     if (plugin.type !== EDITOR_TYPE) {
       if (plugin.isEnabled) {
-        this.selectedPlugins.push(name);
+        this.selectedPlugins.push(plugin.id);
       } else {
-        this.selectedPlugins.splice(this.selectedPlugins.indexOf(name), 1);
+        this.selectedPlugins.splice(this.selectedPlugins.indexOf(plugin.id), 1);
       }
       this.workspaceConfig.attributes.plugins = this.selectedPlugins.join(PLUGIN_SEPARATOR);
     }
@@ -132,9 +130,9 @@ export class WorkspacePluginsController {
    * Clean up all the installers in all machines, when plugin is selected.
    */
   cleanupInstallers(): void {
-    let defaultEnv : string = this.workspaceConfig.defaultEnv;
-    let machines : any = this.workspaceConfig.environments[defaultEnv].machines;
-    let machineNames : Array<string> = Object.keys(machines);
+    let defaultEnv: string = this.workspaceConfig.defaultEnv;
+    let machines: any = this.workspaceConfig.environments[defaultEnv].machines;
+    let machineNames: Array<string> = Object.keys(machines);
     machineNames.forEach((machineName: string) => {
       machines[machineName].installers = [];
     });
@@ -151,7 +149,7 @@ export class WorkspacePluginsController {
     this.plugins.forEach((plugin: IPlugin) => {
       plugin.isEnabled = this.isPluginEnabled(plugin);
     });
-    this.cheListHelper.setList(this.plugins, 'name');
+    this.cheListHelper.setList(this.plugins, 'displayName');
   }
 
   /**
@@ -160,8 +158,6 @@ export class WorkspacePluginsController {
    * @returns {boolean} the plugin's enabled state
    */
   private isPluginEnabled(plugin: IPlugin): boolean {
-    // name in the format: id:version
-    let name = plugin.id + PLUGIN_VERSION_SEPARATOR + plugin.version;
-    return this.selectedPlugins.indexOf(name) >= 0;
+    return this.selectedPlugins.indexOf(plugin.id) >= 0
   }
 }

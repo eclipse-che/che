@@ -17,4 +17,8 @@ public class WorkspaceExportException extends Exception {
   public WorkspaceExportException(String error) {
     super(error);
   }
+
+  public WorkspaceExportException(String error, Exception cause) {
+    super(error, cause);
+  }
 }

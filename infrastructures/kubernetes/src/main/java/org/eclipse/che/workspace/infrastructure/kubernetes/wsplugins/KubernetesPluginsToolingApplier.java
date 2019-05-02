@@ -193,7 +193,6 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         new K8sContainerResolverBuilder()
             .setContainer(container)
             .setImagePullPolicy(sidecarImagePullPolicy)
-            .setPluginName(chePlugin.getName())
             .setPluginEndpoints(chePlugin.getEndpoints())
             .build();
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
@@ -212,7 +211,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             .setDefaultSidecarMemorySizeAttribute(defaultSidecarMemoryLimitBytes)
             .setAttributes(kubernetesEnvironment.getAttributes())
             .setProjectsRootPathEnvVar(projectsRootEnvVariableProvider.get(runtimeIdentity))
-            .setPluginId(chePlugin.getId())
+            .setPluginPublisher(chePlugin.getPublisher())
+            .setPluginName(chePlugin.getName())
             .build();
 
     InternalMachineConfig machineConfig = machineResolver.resolve();
@@ -240,10 +240,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
   private CommandImpl asCommand(String machineName, Command command) {
     CommandImpl cmd =
-        new CommandImpl(
-            command.getName(),
-            command.getCommand().stream().collect(Collectors.joining(" ")),
-            "custom");
+        new CommandImpl(command.getName(), String.join(" ", command.getCommand()), "custom");
     cmd.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, command.getWorkingDir());
     cmd.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName);
     return cmd;
@@ -276,7 +273,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     private Collection<CommandImpl> resolve(ChePlugin chePlugin) {
       List<CheContainer> containers = chePlugin.getContainers();
 
-      String pluginRef = chePlugin.getId() + ":" + chePlugin.getVersion();
+      String pluginRef = chePlugin.getId();
       Collection<CommandImpl> pluginsCommands = pluginRefToCommand.removeAll(pluginRef);
 
       if (pluginsCommands.isEmpty()) {
