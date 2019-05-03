@@ -1,5 +1,54 @@
 # Change Log
 
+## [7.0.0-beta-4.0](https://github.com/eclipse/che/tree/7.0.0-beta-4.0) (2019-05-03)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.3...7.0.0-beta-4.0)
+
+**Merged pull requests:**
+
+- Change default plugin registry image [\#13252](https://github.com/eclipse/che/pull/13252) ([garagatyi](https://github.com/garagatyi))
+- Fix the machine naming of a dockerimage without alias. [\#13251](https://github.com/eclipse/che/pull/13251) ([metlos](https://github.com/metlos))
+- \[typescript dto\] Keep in sync the file with current che version [\#13240](https://github.com/eclipse/che/pull/13240) ([benoitf](https://github.com/benoitf))
+- Switch to Justify json schema validator [\#13231](https://github.com/eclipse/che/pull/13231) ([mshaposhnik](https://github.com/mshaposhnik))
+- Use alias in devfile.yaml and remove component names. [\#13228](https://github.com/eclipse/che/pull/13228) ([metlos](https://github.com/metlos))
+- Update broker version to bugfix release [\#13215](https://github.com/eclipse/che/pull/13215) ([garagatyi](https://github.com/garagatyi))
+- Do not inherit pod name by plugins machines [\#13214](https://github.com/eclipse/che/pull/13214) ([sleshchenko](https://github.com/sleshchenko))
+- Avoid redirection loop in case if gwt-ide loaded in the sidecar [\#13205](https://github.com/eclipse/che/pull/13205) ([skabashnyuk](https://github.com/skabashnyuk))
+- Adapt UD and wsmaster to new plugin notation [\#13204](https://github.com/eclipse/che/pull/13204) ([garagatyi](https://github.com/garagatyi))
+- Make possible to set memory limit for sidecar plugins [\#13202](https://github.com/eclipse/che/pull/13202) ([mshaposhnik](https://github.com/mshaposhnik))
+- \[Cypress\] Change workspace details tabs list according to UI changes  [\#13196](https://github.com/eclipse/che/pull/13196) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Notify user about workspace 'stopped event' if previous state was 'starting.' [\#13192](https://github.com/eclipse/che/pull/13192) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Make reference of kubernetes component optional if referenceContent is provided [\#13191](https://github.com/eclipse/che/pull/13191) ([sleshchenko](https://github.com/sleshchenko))
+- Added an ability to use Devfile as workspace configuration as an alternative to WorkspaceConfig [\#13185](https://github.com/eclipse/che/pull/13185) ([sleshchenko](https://github.com/sleshchenko))
+- Make it possible to update and stop a workspace [\#13181](https://github.com/eclipse/che/pull/13181) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Add option to specify additional cluster role for workspaces. [\#13178](https://github.com/eclipse/che/pull/13178) ([johnmcollier](https://github.com/johnmcollier))
+- Update CONTRIBUTING.md [\#13177](https://github.com/eclipse/che/pull/13177) ([bmicklea](https://github.com/bmicklea))
+- Add Che7 Go stack and samples [\#13176](https://github.com/eclipse/che/pull/13176) ([tolusha](https://github.com/tolusha))
+- Fix filter of the plugins list [\#13174](https://github.com/eclipse/che/pull/13174) ([ashumilova](https://github.com/ashumilova))
+- Remove outdated devfile plans [\#13172](https://github.com/eclipse/che/pull/13172) ([skabashnyuk](https://github.com/skabashnyuk))
+- Rename component "name" to "alias" [\#13166](https://github.com/eclipse/che/pull/13166) ([metlos](https://github.com/metlos))
+- Add yarn.lock to UD sources jar [\#13162](https://github.com/eclipse/che/pull/13162) ([garagatyi](https://github.com/garagatyi))
+- Ignore `.theia/` directories. [\#13161](https://github.com/eclipse/che/pull/13161) ([monaka](https://github.com/monaka))
+- Refocused README on Kube capabilities [\#13159](https://github.com/eclipse/che/pull/13159) ([bmicklea](https://github.com/bmicklea))
+- Set proper Java Options in Che 7 maven and gradle stacks \(JDK 11\) [\#13158](https://github.com/eclipse/che/pull/13158) ([l0rd](https://github.com/l0rd))
+- Revert a part of 2a18d4d2. \(applyed by \#13105\) [\#13140](https://github.com/eclipse/che/pull/13140) ([monaka](https://github.com/monaka))
+- Add machine token support for GWT-IDE [\#13137](https://github.com/eclipse/che/pull/13137) ([monaka](https://github.com/monaka))
+- Add Django sample [\#13135](https://github.com/eclipse/che/pull/13135) ([tolusha](https://github.com/tolusha))
+- Fix typo OpenJKD -\> OpenJDK [\#13134](https://github.com/eclipse/che/pull/13134) ([apupier](https://github.com/apupier))
+- Add an ability to enable ephemeral mode with devfile [\#13129](https://github.com/eclipse/che/pull/13129) ([sleshchenko](https://github.com/sleshchenko))
+- Use random ingress/route name for Che-generated ingresses/routes [\#13126](https://github.com/eclipse/che/pull/13126) ([metlos](https://github.com/metlos))
+- Made Devfile part of a workspace [\#13122](https://github.com/eclipse/che/pull/13122) ([sleshchenko](https://github.com/sleshchenko))
+- Database model and scripts for devfile [\#13111](https://github.com/eclipse/che/pull/13111) ([mshaposhnik](https://github.com/mshaposhnik))
+
+## [6.19.3](https://github.com/eclipse/che/tree/6.19.3) (2019-04-11)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-3.0...6.19.3)
+
+**Merged pull requests:**
+
+- RELEASE: Update CHANGELOG [\#13120](https://github.com/eclipse/che/pull/13120) ([riuvshin](https://github.com/riuvshin))
+- Add option to enable Postgres debug logs in the Che Helm chart [\#13093](https://github.com/eclipse/che/pull/13093) ([johnmcollier](https://github.com/johnmcollier))
+- Fix licence year for some files. [\#13082](https://github.com/eclipse/che/pull/13082) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+
+
 ## [7.0.0-beta-3.0](https://github.com/eclipse/che/tree/7.0.0-beta-3.0) (2019-04-10)
 [Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-2.0...7.0.0-beta-3.0)
 
