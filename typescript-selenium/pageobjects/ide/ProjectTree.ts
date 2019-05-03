@@ -14,12 +14,14 @@ import { CLASSES } from '../../inversify.types';
 import { Ide } from './Ide';
 import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
+import { Editor } from './Editor';
 
 @injectable()
 export class ProjectTree {
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) private readonly ide: Ide) { }
+        @inject(CLASSES.Ide) private readonly ide: Ide,
+        @inject(CLASSES.Editor) private readonly editor: Editor) { }
 
     private static readonly PROJECT_TREE_CONTAINER_CSS: string = "#theia-left-side-panel .theia-TreeContainer";
 
@@ -141,6 +143,10 @@ export class ProjectTree {
 
         // open file  
         await this.clickOnItem(`${pathToItem}/${fileName}`, timeout)
+
+        // check file appearance in the editor
+        await this.editor.waitEditorOpened(timeout)
+        await this.editor.waitTab(fileName)
     }
 
     async waitProjectImported(projectName: string, rootSubItem: string, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,

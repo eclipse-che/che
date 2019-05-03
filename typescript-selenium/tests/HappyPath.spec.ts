@@ -22,7 +22,7 @@ import { Editor } from "../pageobjects/ide/Editor";
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
 const sampleName: string = "console-java-simple";
-const pluginId: string = "org.eclipse.che.vscode-redhat.java";
+const pluginId: string = "redhat/java/0.38.0";
 const javaPluginName: string = "Language Support for Java(TM)";
 
 const loginPage: LoginPage = e2eContainer.get<LoginPage>(TYPES.LoginPage);
