@@ -16,9 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Represents Che plugin in sidecar-powered workspace.
- */
+/** Represents Che plugin in sidecar-powered workspace. */
 public class ChePlugin {
 
   private String name = null;
@@ -31,9 +29,7 @@ public class ChePlugin {
   @JsonProperty("workspaceEnv")
   private List<EnvVar> workspaceEnv = new ArrayList<>();
 
-  /**
-   * Object name. Name must be unique.
-   */
+  /** Object name. Name must be unique. */
   public ChePlugin name(String name) {
     this.name = name;
     return this;
@@ -118,9 +114,7 @@ public class ChePlugin {
     this.endpoints = endpoints;
   }
 
-  /**
-   * List of environment variables to set in all the containers of a workspace
-   */
+  /** List of environment variables to set in all the containers of a workspace */
   public ChePlugin workspaceEnv(List<EnvVar> workspaceEnv) {
     this.workspaceEnv = workspaceEnv;
     return this;
@@ -146,32 +140,48 @@ public class ChePlugin {
       return false;
     }
     ChePlugin chePlugin = (ChePlugin) o;
-    return Objects.equals(getName(), chePlugin.getName()) &&
-        Objects.equals(getPublisher(), chePlugin.getPublisher()) &&
-        Objects.equals(getId(), chePlugin.getId()) &&
-        Objects.equals(getVersion(), chePlugin.getVersion()) &&
-        Objects.equals(getContainers(), chePlugin.getContainers()) &&
-        Objects.equals(getEndpoints(), chePlugin.getEndpoints()) &&
-        Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv());
+    return Objects.equals(getName(), chePlugin.getName())
+        && Objects.equals(getPublisher(), chePlugin.getPublisher())
+        && Objects.equals(getId(), chePlugin.getId())
+        && Objects.equals(getVersion(), chePlugin.getVersion())
+        && Objects.equals(getContainers(), chePlugin.getContainers())
+        && Objects.equals(getEndpoints(), chePlugin.getEndpoints())
+        && Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv());
   }
 
   @Override
   public int hashCode() {
-    return Objects
-        .hash(getName(), getPublisher(), getId(), getVersion(), getContainers(), getEndpoints(),
-            getWorkspaceEnv());
+    return Objects.hash(
+        getName(),
+        getPublisher(),
+        getId(),
+        getVersion(),
+        getContainers(),
+        getEndpoints(),
+        getWorkspaceEnv());
   }
 
   @Override
   public String toString() {
-    return "ChePlugin{" +
-        "name='" + name + '\'' +
-        ", publisher='" + publisher + '\'' +
-        ", id='" + id + '\'' +
-        ", version='" + version + '\'' +
-        ", containers=" + containers +
-        ", endpoints=" + endpoints +
-        ", workspaceEnv=" + workspaceEnv +
-        '}';
+    return "ChePlugin{"
+        + "name='"
+        + name
+        + '\''
+        + ", publisher='"
+        + publisher
+        + '\''
+        + ", id='"
+        + id
+        + '\''
+        + ", version='"
+        + version
+        + '\''
+        + ", containers="
+        + containers
+        + ", endpoints="
+        + endpoints
+        + ", workspaceEnv="
+        + workspaceEnv
+        + '}';
   }
 }
