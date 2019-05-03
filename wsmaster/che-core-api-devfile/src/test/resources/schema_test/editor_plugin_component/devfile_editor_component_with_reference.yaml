@@ -14,11 +14,6 @@ specVersion: 0.0.1
 name: terminal-sample
 components:
   - type: chePlugin
-    registryUrl: https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/
-    id: publisher/terminal-sample/0.0.1
-  - type: chePlugin
-    registryUrl: https://raw.githubusercontent.com/eclipse/che-plugin-registry/master/
-    id: publisher/terminal-sample/0.0.1
+    reference: https://raw.githubusercontent.com/eclipse/che-plugin-registry/myplugin/meta.yaml
   - type: cheEditor
-    registryUrl: https://che-plugin-registry.openshift.io/
-    id: eclipse/theia-ide/0.0.1
+    reference: https://gist.githubusercontent.com/sleshchenko/e132bd9d37e8cf8f2c0a2b4929ecda3e/raw/9c28962cc3a24dcaf357b5716d98068734f51165/meta.yaml

@@ -29,10 +29,19 @@ public interface Component {
   String getId();
 
   /**
-   * Returns absolute or devfile-relative location of Kubernetes list yaml file. It is mandatory and
-   * applicable only for 'kubernetes' and 'openshift' components types.
+   * For 'kubernetes' and 'openshift' components types, returns absolute or devfile-relative
+   * location of Kubernetes list yaml file. It is mandatory for those types.
+   *
+   * <p>For 'cheEditor' and 'chePlugin' components types, returns absolute location of plugin
+   * descriptor (typically, named plugin,yaml). For those types this field is optional.
    */
   String getReference();
+
+  /**
+   * Returns address of custom plugin registry. It is optional and applicable only for 'cheEditor'
+   * and 'chePlugin' components types.
+   */
+  String getRegistryUrl();
 
   /**
    * Returns inlined content of a file specified in field 'reference'. It is optional and applicable

@@ -43,7 +43,12 @@ public interface ComponentDto extends Component {
 
   ComponentDto withId(String id);
 
-  // k8s/OS
+  @Override
+  String getRegistryUrl();
+
+  void setRegistryUrl(String registryUrl);
+
+  ComponentDto withRegistryUrl(String registryUrl);
 
   @Override
   String getReference();
@@ -51,6 +56,8 @@ public interface ComponentDto extends Component {
   void setReference(String reference);
 
   ComponentDto withReference(String reference);
+
+  // k8s/OS
 
   @Override
   String getReferenceContent();

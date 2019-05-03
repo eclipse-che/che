@@ -60,7 +60,8 @@ public class DevfileSchemaValidatorTest {
       {"dockerimage_component/devfile_dockerimage_component.yaml"},
       {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"},
       {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
-      {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"}
+      {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
+      {"editor_plugin_component/devfile_editor_component_with_reference.yaml"}
     };
   }
 
@@ -124,11 +125,27 @@ public class DevfileSchemaValidatorTest {
       // cheEditor/chePlugin component model testing
       {
         "editor_plugin_component/devfile_editor_component_with_missing_id.yaml",
-        "(/components/0):The object must have a property whose name is \"id\"."
+        "Exactly one of the following sets of problems must be resolved.: [(/components/0):The object must have a property whose name is \"id\".(/components/0):The object must have a property whose name is \"reference\".]"
       },
       {
-        "editor_plugin_component/devfile_editor_component_with_indistinctive_field_reference.yaml",
-        "(/components/0/reference):The object must not have a property whose name is \"reference\"."
+        // T_O_D_O: try to simplify message, find out why it is so complex?
+        "editor_plugin_component/devfile_editor_component_with_id_and_reference.yaml",
+        "All but one of the following sets of problems must be resolved.: [At least one of the following sets of problems must be resolved.: "
+            + "[(/components/0):The object must not have a property whose name is \"id\"."
+            + "At least one of the following sets of problems must be resolved.: "
+            + "[(/components/0/type):The object must not have a property whose name is \"type\"."
+            + "(/components/0/reference):The object must not have a property whose name is \"reference\"."
+            + "(/components/0/id):The object must not have a property whose name is \"id\".]]"
+            + "At least one of the following sets of problems must be resolved.: "
+            + "[(/components/0):The object must not have a property whose name is \"reference\"."
+            + "At least one of the following sets of problems must be resolved.: "
+            + "[(/components/0/type):The object must not have a property whose name is \"type\"."
+            + "(/components/0/reference):The object must not have a property whose name is \"reference\"."
+            + "(/components/0/id):The object must not have a property whose name is \"id\".]]]"
+      },
+      {
+        "editor_plugin_component/devfile_editor_component_with_indistinctive_field.yaml",
+        "(/components/0/unknown):The object must not have a property whose name is \"unknown\"."
       },
       {
         "editor_plugin_component/devfile_editor_component_without_version.yaml",

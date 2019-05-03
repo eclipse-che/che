@@ -115,6 +115,7 @@ public final class TestObjectsFactory {
         "kubernetes",
         name,
         "eclipse/che-theia/0.0.1",
+        "https://mysite.com/registry/somepath",
         "/dev.yaml",
         null,
         singletonList(createEntrypoint()),
