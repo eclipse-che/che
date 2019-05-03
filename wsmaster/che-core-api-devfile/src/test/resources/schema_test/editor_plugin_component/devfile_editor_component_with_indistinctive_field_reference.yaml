@@ -15,5 +15,5 @@ specVersion: 0.0.1
 name: petclinic-dev-environment
 components:
   - type: cheEditor
-    id: org.eclipse.theia:0.0.3
+    id: eclipse/theia/0.0.3
     reference: petclinic.yaml

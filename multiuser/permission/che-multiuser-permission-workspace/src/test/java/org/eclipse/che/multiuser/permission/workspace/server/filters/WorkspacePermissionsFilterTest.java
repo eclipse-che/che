@@ -46,6 +46,8 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -124,7 +126,7 @@ public class WorkspacePermissionsFilterTest {
   }
 
   @Test
-  public void shouldAccountPermissionsAccessOnWorkspaceCreation() throws Exception {
+  public void shouldCheckAccountPermissionsAccessOnWorkspaceCreationFromConfig() throws Exception {
     doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
 
     final Response response =
@@ -132,17 +134,37 @@ public class WorkspacePermissionsFilterTest {
             .auth()
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .contentType("application/json")
+            .body(DtoFactory.newDto(WorkspaceConfigDto.class))
             .when()
             .post(SECURE_PATH + "/workspace?namespace=userok");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(workspaceService).create(any(), any(), any(), eq("userok"));
+    verify(workspaceService).create(any(WorkspaceConfigDto.class), any(), any(), eq("userok"));
     verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.CREATE_WORKSPACE);
     verifyZeroInteractions(subject);
   }
 
   @Test
-  public void shouldAccountPermissionsOnFetchingWorkspacesByNamespace() throws Exception {
+  public void shouldCheckAccountPermissionsAccessOnWorkspaceCreationFromDevfile() throws Exception {
+    doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(DtoFactory.newDto(DevfileDto.class))
+            .when()
+            .post(SECURE_PATH + "/workspace/devfile?namespace=userok");
+
+    assertEquals(response.getStatusCode(), 204);
+    verify(workspaceService).create(any(DevfileDto.class), any(), any(), eq("userok"));
+    verify(permissionsFilter).checkAccountPermissions("userok", AccountOperation.CREATE_WORKSPACE);
+    verifyZeroInteractions(subject);
+  }
+
+  @Test
+  public void shouldCheckAccountPermissionsOnFetchingWorkspacesByNamespace() throws Exception {
     when(superPrivilegesChecker.hasSuperPrivileges()).thenReturn(false);
     doNothing().when(permissionsFilter).checkAccountPermissions(anyString(), any());
 

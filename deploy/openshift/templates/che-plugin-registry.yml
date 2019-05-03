@@ -45,14 +45,14 @@ objects:
           - containerPort: 8080
           livenessProbe:
             httpGet:
-              path: /plugins/
+              path: /v2/plugins/
               port: 8080
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 3
           readinessProbe:
             httpGet:
-              path: /plugins/
+              path: /v2/plugins/
               port: 8080
             initialDelaySeconds: 3
             periodSeconds: 10

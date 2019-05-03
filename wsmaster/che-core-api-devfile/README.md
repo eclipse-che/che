@@ -33,10 +33,10 @@ projects:
 components:
   - alias: theia-editor
     type: cheEditor
-    id: org.eclipse.che.editor.theia:1.0.0
+    id: eclipse/che-theia/1.0.0
   - alias: exec-plugin
     type: chePlugin
-    id: che-machine-exec-plugin:0.0.1
+    id: eclipse/che-machine-exec-plugin/0.0.1
 ```
  
 For the detailed explanation of all devfile components assignment and possible values, please see the following resources:
@@ -108,7 +108,7 @@ Devfile can only contain one component with `cheEditor` type.
 components:
   - alias: theia-editor
     type: cheEditor
-    id: org.eclipse.che.editor.theia:1.0.0
+    id: eclipse/che-theia/1.0.0
 ```
 
 If it is missing then a default editor will be provided along with its default plugins.
@@ -125,12 +125,21 @@ It is allowed to have several `chePlugin` components.
   components:
    - alias: exec-plugin
      type: chePlugin
-     id: che-machine-exec-plugin:0.0.1
+     id: eclipse/che-machine-exec-plugin/0.0.1
 ```
 
 Both types above using composite id, which is colon-separated id and version of plugin from Che Plugin registry.  
 List of available Che plugins and more information about registry can be found on https://github.com/eclipse/che-plugin-registry 
-
+For each of types above it is also possible to specify container(s) memory limit as follows: 
+```
+...
+  components:
+   - alias: exec-plugin
+     type: chePlugin
+     id: eclipse/che-machine-exec-plugin/0.0.1
+     memoryLimit: 256M
+```
+This limit will be apllied to each container of given plugin. 
 
 
 #### kubernetes/openshift

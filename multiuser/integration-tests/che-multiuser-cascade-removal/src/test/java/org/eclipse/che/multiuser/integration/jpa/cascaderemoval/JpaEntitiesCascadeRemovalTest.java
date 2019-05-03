@@ -75,6 +75,7 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
+import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
@@ -261,6 +262,14 @@ public class JpaEntitiesCascadeRemovalTest {
                     .annotatedWith(Names.named("che.auth.reserved_user_names"))
                     .toInstance(new String[0]);
                 bind(RemoveOrganizationOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
+
+                // is not used in a scope of integration tests
+                // but instance is needed for setting WorkspaceManager up
+                bind(DevfileToWorkspaceConfigConverter.class)
+                    .toInstance(
+                        devfile -> {
+                          throw new UnsupportedOperationException("Operation is not implemented");
+                        });
 
                 Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class);
                 Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);

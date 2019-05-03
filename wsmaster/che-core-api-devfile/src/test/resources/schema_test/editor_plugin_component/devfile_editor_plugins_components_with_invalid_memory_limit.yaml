@@ -10,16 +10,9 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
----
 specVersion: 0.0.1
-name: petclinic-dev-environment
+name: terminal-sample
 components:
- - alias: theia
-   type: cheEditor
-   id: eclipse/chetheia/0.0.3
-commands:
-  - actions:
-      - type: exec
-        component: mvn-stack
-        command: mvn package
-        workdir: /projects/spring-petclinic
+  - type: chePlugin
+    id: publisher/terminal-sample/0.0.1
+    memoryLimit: 0

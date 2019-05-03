@@ -46,7 +46,9 @@ import org.testng.annotations.Test;
 public class MachineResolverTest {
 
   private static final String DEFAULT_MEM_LIMIT = "100001";
-  private static final String PLUGIN_ID = "testplugin";
+  private static final String PLUGIN_NAME = "testplugin";
+  private static final String PLUGIN_PUBLISHER = "testpublisher";
+  private static final String PLUGIN_PUBLISHER_NAME = PLUGIN_PUBLISHER + "/" + PLUGIN_NAME;
   private static final String PROJECTS_ENV_VAR = "env_with_with_location_of_projects";
   private static final String PROJECTS_MOUNT_PATH = "/wherever/i/may/roam";
 
@@ -64,7 +66,8 @@ public class MachineResolverTest {
     wsAttributes = new HashMap<>();
     resolver =
         new MachineResolver(
-            PLUGIN_ID,
+            PLUGIN_PUBLISHER,
+            PLUGIN_NAME,
             new Pair<>(PROJECTS_ENV_VAR, PROJECTS_MOUNT_PATH),
             container,
             cheContainer,
@@ -146,7 +149,8 @@ public class MachineResolverTest {
   public void shouldSetMemoryLimitOfASidecarIfCorrespondingWSConfigAttributeIsSet(
       String attributeValue, String expectedMemLimit) throws InfrastructureException {
     wsAttributes.put(
-        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, PLUGIN_ID), attributeValue);
+        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, PLUGIN_PUBLISHER_NAME),
+        attributeValue);
 
     InternalMachineConfig machineConfig = resolver.resolve();
 
@@ -171,7 +175,8 @@ public class MachineResolverTest {
     String expectedMemLimit = toBytesString(attributeValue);
     Containers.addRamLimit(container, 123456789);
     wsAttributes.put(
-        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, PLUGIN_ID), attributeValue);
+        format(Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, PLUGIN_PUBLISHER_NAME),
+        attributeValue);
 
     InternalMachineConfig machineConfig = resolver.resolve();
 

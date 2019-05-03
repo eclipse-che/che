@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.K8sContainerResolver.MAX_CONTAINER_NAME_LENGTH;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
+import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.Container;
@@ -37,7 +38,6 @@ import org.testng.annotations.Test;
 /** @author Alexander Garagatyi */
 public class K8sContainerResolverTest {
   private static final String IMAGE = "testImage:tag";
-  private static final String PLUGIN_NAME = "test_plugin_name";
 
   private CheContainer cheContainer;
   private K8sContainerResolver resolver;
@@ -47,7 +47,7 @@ public class K8sContainerResolverTest {
   public void setUp() {
     cheContainer = new CheContainer();
     endpoints = new ArrayList<>();
-    resolver = new K8sContainerResolver(PLUGIN_NAME, "Always", cheContainer, endpoints);
+    resolver = new K8sContainerResolver("Always", cheContainer, endpoints);
   }
 
   @Test
@@ -66,13 +66,13 @@ public class K8sContainerResolverTest {
 
     Container container = resolver.resolve();
 
-    assertEquals(container.getName(), (PLUGIN_NAME + "-" + cheContainer.getName()).toLowerCase());
+    assertTrue(container.getName().startsWith((cheContainer.getName()).toLowerCase()));
   }
 
   @Test
   public void shouldLimitNameByMaxAllowedLength() throws Exception {
 
-    cheContainer.setName("cheContainerNameWhichIsGreatlySucceedsMaxAllowedLengthByK8S");
+    cheContainer.setName("cheContainerNameWhichIsGreatlySucceedsMaxAllowedLengthByKubernetes");
 
     Container container = resolver.resolve();
 

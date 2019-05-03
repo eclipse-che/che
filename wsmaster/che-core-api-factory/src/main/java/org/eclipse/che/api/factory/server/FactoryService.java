@@ -289,13 +289,17 @@ public class FactoryService extends Service {
     @ApiResponse(code = 200, message = "Response contains requested factory JSON"),
     @ApiResponse(code = 400, message = "Missed required parameters, parameters are not valid"),
     @ApiResponse(code = 404, message = "Workspace not found"),
+    @ApiResponse(code = 409, message = "Workspace can not be exported as factory"),
     @ApiResponse(code = 500, message = "Internal server error")
   })
   public Response getFactoryJson(
       @ApiParam(value = "Workspace identifier") @PathParam("ws-id") String wsId,
       @ApiParam(value = "Project path") @QueryParam("path") String path)
-      throws BadRequestException, NotFoundException, ServerException {
+      throws BadRequestException, NotFoundException, ServerException, ConflictException {
     final WorkspaceImpl workspace = workspaceManager.getWorkspace(wsId);
+    if (workspace.getConfig() == null) {
+      throw new ConflictException("Workspace created with Devfile can not be exported as Factory.");
+    }
     excludeProjectsWithoutLocation(workspace, path);
     final FactoryDto factoryDto =
         DtoFactory.newDto(FactoryDto.class)

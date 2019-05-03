@@ -12,5 +12,3 @@
 
 ---
 specVersion: 0.0.1
-components:
-  - id: org.eclipse.chemaven-jdk8:1.0.0
