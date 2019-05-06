@@ -12,7 +12,7 @@ export const TestConstants = {
     /**
      * Base URL of the application which should be checked
      */
-    TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || "http://che-che.192.168.99.100.nip.io",
+    TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || "http://sample-url",
 
     /**
      * Run browser in "Headless" (hiden) mode, "false" by default.  
