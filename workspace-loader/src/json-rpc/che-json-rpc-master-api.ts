@@ -15,19 +15,19 @@ import { ICommunicationClient, CODE_REQUEST_TIMEOUT, CommunicationClientEvent } 
 import { WorkspaceLoader } from '../workspace-loader';
 
 enum MasterChannels {
-  ENVIRONMENT_OUTPUT = <any>'runtime/log',
-  ENVIRONMENT_STATUS = <any>'machine/statusChanged',
-  INSTALLER_OUTPUT = <any>'installer/log',
-  WORKSPACE_STATUS = <any>'workspace/statusChanged'
+    ENVIRONMENT_OUTPUT = <any>'runtime/log',
+    ENVIRONMENT_STATUS = <any>'machine/statusChanged',
+    INSTALLER_OUTPUT = <any>'installer/log',
+    WORKSPACE_STATUS = <any>'workspace/statusChanged'
 }
 const SUBSCRIBE: string = 'subscribe';
 const UNSUBSCRIBE: string = 'unsubscribe';
 
 export interface WorkspaceStatusChangedEvent {
-  status: string;
-  prevStatus: string;
-  workspaceId: string;
-  error: string;
+    status: string;
+    prevStatus: string;
+    workspaceId: string;
+    error: string;
 }
 
 /**
@@ -36,235 +36,227 @@ export interface WorkspaceStatusChangedEvent {
  * @author Ann Shumilova
  */
 export class CheJsonRpcMasterApi {
-  private cheJsonRpcApi: CheJsonRpcApiClient;
-  private clientId: string;
+    private cheJsonRpcApi: CheJsonRpcApiClient;
+    private clientId: string;
 
-  private checkingInterval: number;
-  private checkingDelay = 10000;
-  private fetchingClientIdTimeout = 5000;
+    private checkingInterval: number;
+    private checkingDelay = 10000;
+    private fetchingClientIdTimeout = 5000;
 
-  private client: ICommunicationClient;
-  private loader: WorkspaceLoader;
+    constructor(
+        private readonly client: ICommunicationClient,
+        private readonly entryPoint: string,
+        private readonly loader: WorkspaceLoader,
+    ) {
+        this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
 
-  constructor(client: ICommunicationClient,
-              entryPoint: string,
-              loader: WorkspaceLoader) {
-    this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
-    this.client = client;
-    this.loader = loader;
-
-    client.addListener('open', () => this.onConnectionOpen());
-    client.addListener('close', (event: any) => {
-      switch (event.code) {
-        case 1000: // normal close
-          break;
-        default:
-          this.connect(entryPoint).catch(console.error);
-      }
-    });
-  }
-
-  addListener(eventType: CommunicationClientEvent, handler: Function): void {
-    this.client.addListener(eventType, handler);
-  }
-
-  removeListener(eventType: CommunicationClientEvent, handler: Function): void {
-    this.client.removeListener(eventType, handler);
-  }
-
-  onConnectionOpen(): void {
-    if (this.checkingInterval) {
-      clearInterval(this.checkingInterval);
-      this.checkingInterval = undefined;
+        client.addListener('open', () => this.onConnectionOpen());
     }
 
-    this.checkingInterval = setInterval(() => {
-      let isAlive = false;
-      const fetchClientPromise = new Promise((resolve) => {
-        this.fetchClientId().then(() => {
-          isAlive = true;
-          resolve(isAlive);
-        }, () => {
-          isAlive = false;
-          resolve(isAlive);
-        });
-      });
+    addListener(eventType: CommunicationClientEvent, handler: Function): void {
+        this.client.addListener(eventType, handler);
+    }
 
-      // this is timeout of fetchClientId request
-      const fetchClientTimeoutPromise = new Promise((resolve) => {
-        setTimeout(() => {
-          resolve(isAlive);
-        }, this.fetchingClientIdTimeout);
-      });
+    removeListener(eventType: CommunicationClientEvent, handler: Function): void {
+        this.client.removeListener(eventType, handler);
+    }
 
-      Promise.race([fetchClientPromise, fetchClientTimeoutPromise]).then((isAlive: boolean) => {
-        if (isAlive) {
-          return;
+    onConnectionOpen(): void {
+        if (this.checkingInterval) {
+            clearInterval(this.checkingInterval);
+            this.checkingInterval = undefined;
         }
 
-        clearInterval(this.checkingInterval);
-        this.checkingInterval = undefined;
+        this.checkingInterval = setInterval(() => {
+            let isAlive = false;
+            const fetchClientPromise = new Promise((resolve) => {
+                this.fetchClientId().then(() => {
+                    isAlive = true;
+                    resolve(isAlive);
+                }, () => {
+                    isAlive = false;
+                    resolve(isAlive);
+                });
+            });
 
-        this.client.disconnect(CODE_REQUEST_TIMEOUT);
-      });
+            // this is timeout of fetchClientId request
+            const fetchClientTimeoutPromise = new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(isAlive);
+                }, this.fetchingClientIdTimeout);
+            });
 
-    }, this.checkingDelay);
-  }
+            Promise.race([fetchClientPromise, fetchClientTimeoutPromise]).then((isAlive: boolean) => {
+                if (isAlive) {
+                    return;
+                }
 
-  /**
-   * Opens connection to pointed entryPoint.
-   *
-   * @param {string} entryPoint
-   * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
-   */
-  connect(entryPoint: string): Promise<any> {
-    entryPoint += this.loader.getAuthenticationToken();
-    if (this.clientId) {
-      let clientId = `clientId=${this.clientId}`;
-      // in case of reconnection
-      // we need to test entrypoint on existing query parameters
-      // to add already gotten clientId
-      if (/\?/.test(entryPoint) === false) {
-        clientId = '?' + clientId;
-      } else {
-        clientId = '&' + clientId;
-      }
-      entryPoint += clientId;
+                clearInterval(this.checkingInterval);
+                this.checkingInterval = undefined;
+
+                this.client.disconnect(CODE_REQUEST_TIMEOUT);
+            });
+
+        }, this.checkingDelay);
     }
-    return this.cheJsonRpcApi.connect(entryPoint).then(() =>
-      this.fetchClientId());
-  }
 
-  /**
-   * Subscribes the environment output.
-   *
-   * @param workspaceId workspace's id
-   * @param machineName machine's name
-   * @param callback callback to process event
-   */
-  subscribeEnvironmentOutput(workspaceId: string, callback: Function): void {
-    this.subscribe(MasterChannels.ENVIRONMENT_OUTPUT, workspaceId, callback);
-  }
+    /**
+     * Opens connection to pointed entryPoint.
+     *
+     * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
+     */
+    connect(): Promise<any> {
+        const entryPointFunction = () => {
+            const entryPoint = this.entryPoint + this.loader.getAuthenticationToken();
+            if (this.clientId) {
+                 let clientId = `clientId=${this.clientId}`;
+                // in case of reconnection
+                // we need to test entrypoint on existing query parameters
+                // to add already gotten clientId
+                if (/\?/.test(entryPoint) === false) {
+                    clientId = '?' + clientId;
+                } else {
+                    clientId = '&' + clientId;
+                }
+                return entryPoint + clientId;
+            }
+            return entryPoint;
+        }
 
-  /**
-   * Un-subscribes the pointed callback from the environment output.
-   *
-   * @param workspaceId workspace's id
-   * @param machineName machine's name
-   * @param callback callback to process event
-   */
-  unSubscribeEnvironmentOutput(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.ENVIRONMENT_OUTPUT, workspaceId, callback);
-  }
+        return this.cheJsonRpcApi.connect(entryPointFunction).then(() =>
+            this.fetchClientId());
+    }
 
-  /**
-   * Subscribes the environment status changed.
-   *
-   * @param workspaceId workspace's id
-   * @param callback callback to process event
-   */
-  subscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
-    this.subscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
-  }
+    /**
+     * Subscribes the environment output.
+     *
+     * @param workspaceId workspace's id
+     * @param machineName machine's name
+     * @param callback callback to process event
+     */
+    subscribeEnvironmentOutput(workspaceId: string, callback: Function): void {
+        this.subscribe(MasterChannels.ENVIRONMENT_OUTPUT, workspaceId, callback);
+    }
 
-  /**
-   * Un-subscribes the pointed callback from environment status changed.
-   *
-   * @param workspaceId workspace's id
-   * @param callback callback to process event
-   */
-  unSubscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
-  }
+    /**
+     * Un-subscribes the pointed callback from the environment output.
+     *
+     * @param workspaceId workspace's id
+     * @param machineName machine's name
+     * @param callback callback to process event
+     */
+    unSubscribeEnvironmentOutput(workspaceId: string, callback: Function): void {
+        this.unsubscribe(MasterChannels.ENVIRONMENT_OUTPUT, workspaceId, callback);
+    }
 
-  /**
-   * Subscribes on workspace agent output.
-   *
-   * @param workspaceId workspace's id
-   * @param callback callback to process event
-   */
-  subscribeInstallerOutput(workspaceId: string, callback: Function): void {
-    this.subscribe(MasterChannels.INSTALLER_OUTPUT, workspaceId, callback);
-  }
+    /**
+     * Subscribes the environment status changed.
+     *
+     * @param workspaceId workspace's id
+     * @param callback callback to process event
+     */
+    subscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
+        this.subscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
+    }
 
-  /**
-   * Un-subscribes from workspace agent output.
-   *
-   * @param workspaceId workspace's id
-   * @param callback callback to process event
-   */
-  unSubscribeInstallerOutput(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.INSTALLER_OUTPUT, workspaceId, callback);
-  }
+    /**
+     * Un-subscribes the pointed callback from environment status changed.
+     *
+     * @param workspaceId workspace's id
+     * @param callback callback to process event
+     */
+    unSubscribeEnvironmentStatus(workspaceId: string, callback: Function): void {
+        this.unsubscribe(MasterChannels.ENVIRONMENT_STATUS, workspaceId, callback);
+    }
 
-  /**
-   * Subscribes to workspace's status.
-   *
-   * @param workspaceId workspace's id
-   * @param callback callback to process event
-   */
-  subscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
-    const statusHandler = (message: any) => {
-      if (workspaceId === message.workspaceId) {
-        callback(message);
-      }
-    };
-    this.subscribe(MasterChannels.WORKSPACE_STATUS, workspaceId, statusHandler);
-  }
+    /**
+     * Subscribes on workspace agent output.
+     *
+     * @param workspaceId workspace's id
+     * @param callback callback to process event
+     */
+    subscribeInstallerOutput(workspaceId: string, callback: Function): void {
+        this.subscribe(MasterChannels.INSTALLER_OUTPUT, workspaceId, callback);
+    }
 
-  /**
-   * Un-subscribes pointed callback from workspace's status.
-   *
-   * @param workspaceId
-   * @param callback
-   */
-  unSubscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
-    this.unsubscribe(MasterChannels.WORKSPACE_STATUS, workspaceId, callback);
-  }
+    /**
+     * Un-subscribes from workspace agent output.
+     *
+     * @param workspaceId workspace's id
+     * @param callback callback to process event
+     */
+    unSubscribeInstallerOutput(workspaceId: string, callback: Function): void {
+        this.unsubscribe(MasterChannels.INSTALLER_OUTPUT, workspaceId, callback);
+    }
 
-  /**
-   * Fetch client's id and stores it.
-   *
-   * @returns {IPromise<TResult>}
-   */
-  fetchClientId(): Promise<any> {
-    return this.cheJsonRpcApi.request('websocketIdService/getId').then((data: any) => {
-      this.clientId = data[0];
-    });
-  }
+    /**
+     * Subscribes to workspace's status.
+     *
+     * @param workspaceId workspace's id
+     * @param callback callback to process event
+     */
+    subscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
+        const statusHandler = (message: any) => {
+            if (workspaceId === message.workspaceId) {
+                callback(message);
+            }
+        };
+        this.subscribe(MasterChannels.WORKSPACE_STATUS, workspaceId, statusHandler);
+    }
 
-  /**
-   * Returns client's id.
-   *
-   * @returns {string} clinet connection identifier
-   */
-  getClientId(): string {
-    return this.clientId;
-  }
+    /**
+     * Un-subscribes pointed callback from workspace's status.
+     *
+     * @param workspaceId
+     * @param callback
+     */
+    unSubscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
+        this.unsubscribe(MasterChannels.WORKSPACE_STATUS, workspaceId, callback);
+    }
 
-  /**
-   * Performs subscribe to the pointed channel for pointed workspace's ID and callback.
-   *
-   * @param channel channel to un-subscribe
-   * @param workspaceId workspace's id
-   * @param callback callback
-   */
-  private subscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
-    const method: string = channel.toString();
-    const params = {method: method, scope: {workspaceId: workspaceId}};
-    this.cheJsonRpcApi.subscribe(SUBSCRIBE, method, callback, params);
-  }
+    /**
+     * Fetch client's id and stores it.
+     *
+     * @returns {IPromise<TResult>}
+     */
+    fetchClientId(): Promise<any> {
+        return this.cheJsonRpcApi.request('websocketIdService/getId').then((data: any) => {
+            this.clientId = data[0];
+        });
+    }
 
-  /**
-   * Performs un-subscribe of the pointed channel by pointed workspace's ID and callback.
-   *
-   * @param channel channel to un-subscribe
-   * @param workspaceId workspace's id
-   * @param callback callback
-   */
-  private unsubscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
-    const method: string = channel.toString();
-    const params = {method: method, scope: {workspaceId: workspaceId}};
-    this.cheJsonRpcApi.unsubscribe(UNSUBSCRIBE, method, callback, params);
-  }
+    /**
+     * Returns client's id.
+     *
+     * @returns {string} clinet connection identifier
+     */
+    getClientId(): string {
+        return this.clientId;
+    }
+
+    /**
+     * Performs subscribe to the pointed channel for pointed workspace's ID and callback.
+     *
+     * @param channel channel to un-subscribe
+     * @param workspaceId workspace's id
+     * @param callback callback
+     */
+    private subscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
+        const method: string = channel.toString();
+        const params = {method: method, scope: {workspaceId: workspaceId}};
+        this.cheJsonRpcApi.subscribe(SUBSCRIBE, method, callback, params);
+    }
+
+    /**
+     * Performs un-subscribe of the pointed channel by pointed workspace's ID and callback.
+     *
+     * @param channel channel to un-subscribe
+     * @param workspaceId workspace's id
+     * @param callback callback
+     */
+    private unsubscribe(channel: MasterChannels, workspaceId: string, callback: Function): void {
+        const method: string = channel.toString();
+        const params = {method: method, scope: {workspaceId: workspaceId}};
+        this.cheJsonRpcApi.unsubscribe(UNSUBSCRIBE, method, callback, params);
+    }
 }

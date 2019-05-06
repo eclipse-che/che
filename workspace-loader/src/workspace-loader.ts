@@ -38,7 +38,7 @@ export class WorkspaceLoader {
 
         try {
             this.workspace = await this.getWorkspace(workspaceKey);
-            await this.handleWorkspace()
+            await this.handleWorkspace();
             await this.openIDE();
         }
         catch(err) {
@@ -78,7 +78,7 @@ export class WorkspaceLoader {
 
     /**
      * Get workspace by ID.
-     * 
+     *
      * @param workspaceId workspace id
      */
     getWorkspace(workspaceId: string): Promise<che.IWorkspace> {
@@ -181,7 +181,7 @@ export class WorkspaceLoader {
 
     /**
      * Shows environment outputs.
-     * 
+     *
      * @param message output message
      */
     onEnvironmentOutput(message) : void {
@@ -192,7 +192,7 @@ export class WorkspaceLoader {
         return new Promise((resolve, reject) => {
             const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT;
             const master = new CheJsonRpcMasterApi(new WebsocketClient(), entryPoint, this);
-            master.connect(entryPoint)
+            master.connect()
                 .then(() => resolve(master))
                 .catch((error: any) => reject(error));
         });
@@ -264,7 +264,7 @@ export class WorkspaceLoader {
     /**
      * Schedule opening URL.
      * Scheduling prevents appearing an error net::ERR_CONNECTION_REFUSED instead opening the URL.
-     * 
+     *
      * @param url url to be opened
      */
     openURL(url) : void {
