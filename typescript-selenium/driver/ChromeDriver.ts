@@ -21,7 +21,10 @@ export class ChromeDriver implements Driver {
 
     constructor() {
         const isHeadless: boolean = TestConstants.TS_SELENIUM_HEADLESS;
-        let options: Options = new Options().addArguments('--no-sandbox')
+        let options: Options = new Options()
+            .addArguments('--no-sandbox')
+            .addArguments("--disable-web-security")
+            .addArguments("--allow-running-insecure-content")
 
         if (isHeadless) {
             options = options.addArguments('headless')

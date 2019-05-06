@@ -37,15 +37,13 @@ export class ProjectTree {
         return `${this.getExpandIconCssLocator(itemPath)}:not(.theia-mod-collapsed)`;
     }
 
-    private getExpandIconCssLocator(itemPath: string) {
+    private getExpandIconCssLocator(itemPath: string): string {
         return `div[data-node-id='/projects:/projects${itemPath}']`;
     }
 
-    private getTreeItemCssLocator(itemPath: string) {
+    private getTreeItemCssLocator(itemPath: string): string {
         return `.theia-TreeNode[title='/projects${itemPath}']`
     }
-
-
 
     async openProjectTreeContainer(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const selectedExplorerButtonLocator: By = By.xpath(Ide.SELECTED_EXPLORER_BUTTON_XPATH)
@@ -156,10 +154,7 @@ export class ProjectTree {
         const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}`));
         const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}/${rootSubItem}`));
 
-
-
         for (let i = 0; i < attempts; i++) {
-
             const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, attempts, visibilityItemPolling)
 
             if (!isProjectFolderVisible) {

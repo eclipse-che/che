@@ -21,6 +21,7 @@ export class Editor {
     private static readonly EDITOR_BODY_CSS: string = "#theia-main-content-panel .lines-content";
     private static readonly EDITOR_LINES_XPATH: string = "//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line']";
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = "div[widgetId='editor.widget.suggestWidget']";
+    private static readonly EDITOR_INTERACTION_СSS: string = ".monaco-editor textarea";
 
     private getEditorLineXpathLocator(lineNumber: number): string {
         return `(//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line'])[${lineNumber}]`
@@ -89,26 +90,50 @@ export class Editor {
         await this.waitEditorOpened(timeout);
     }
 
-    async getLineText(lineNumber: number, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
-        const lineXpathLocator: By = By.xpath(this.getEditorLineXpathLocator(lineNumber))
+    async getLineText(lineNumber: number): Promise<string> {
+        const lineIndex: number = lineNumber - 1;
+        const editorText: string = await this.getEditorText();
+        const editorLines: string[] = editorText.split('\n');
+        const editorLine = editorLines[lineIndex] + '\n';
 
-        const lineText = await this.driverHelper.waitAndGetText(lineXpathLocator, timeout)
-        return lineText
+        return editorLine;
     }
 
-    async getEditorText(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
-        const lines: Array<WebElement> = await this.driverHelper.waitAllPresence(By.xpath(Editor.EDITOR_LINES_XPATH), timeout)
-        const linesCapacity: number = lines.length
+    async getEditorText(): Promise<string> {
+        const interactionContainerLocator: By = By.css(Editor.EDITOR_INTERACTION_СSS);
 
-        let editorText = "";
+        const editorText: string = await this.driverHelper.waitAndGetValue(interactionContainerLocator)
+        return editorText;
+    }
 
-        for (let i = 1; i <= linesCapacity; i++) {
-            await this.driverHelper.scrollTo(By.xpath(this.getEditorLineXpathLocator(i)), timeout)
-            const lineText: string = await this.getLineText(i, timeout)
-            editorText = editorText + lineText + "\n"
+    async moveCursorToLineAndChar(line: number, char: number) {
+        // set cursor to the 1:1 position
+        await this.performKeyCombination(Key.chord(Key.CONTROL, Key.HOME));
+
+        // for ensuring that cursor has been set to the 1:1 position
+        await this.driverHelper.wait(1000);
+
+        // move cursor to line
+        for (let i = 1; i < line; i++) {
+            await this.performKeyCombination(Key.ARROW_DOWN);
         }
 
-        return editorText;
+        // move cursor to char
+        for (let i = 1; i < char; i++) {
+            await this.performKeyCombination(Key.ARROW_RIGHT);
+        }
+    }
+
+    private async performKeyCombination(text: string) {
+        const interactionContainerLocator: By = By.css(Editor.EDITOR_INTERACTION_СSS);
+
+        await this.driverHelper.type(interactionContainerLocator, text);
+    }
+
+    async type(text: string, line: number) {
+        await this.moveCursorToLineAndChar(line, 1)
+        await this.performKeyCombination(text)
+
     }
 
 }

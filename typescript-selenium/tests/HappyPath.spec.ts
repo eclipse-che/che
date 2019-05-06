@@ -18,12 +18,16 @@ import { WorkspaceDetailsPlugins } from "../pageobjects/dashboard/workspace-deta
 import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
+import { DriverHelper } from "../utils/DriverHelper";
+import { By, Key } from "selenium-webdriver";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
 const sampleName: string = "console-java-simple";
 const pluginId: string = "redhat/java/0.38.0";
 const javaPluginName: string = "Language Support for Java(TM)";
+const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
+const tabTitle: string = "HelloWorld.java";
 
 const loginPage: LoginPage = e2eContainer.get<LoginPage>(TYPES.LoginPage);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
@@ -33,7 +37,52 @@ const ide: Ide = e2eContainer.get(CLASSES.Ide)
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree)
 const editor: Editor = e2eContainer.get(CLASSES.Editor)
 
-suite("E2E", async () => {
+const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper)
+
+suite('Editor', async () => {
+    test('Prepare', async () => {
+        await driverHelper.navigateTo("http://che-che.192.168.99.100.nip.io/dashboard/#/ide/che/wksp-rffi")
+        await ide.waitWorkspaceAndIde('che', 'wksp-rffi')
+        await projectTree.openProjectTreeContainer()
+        await projectTree.expandPathAndOpenFile(fileFolderPath, tabTitle);
+    })
+
+    test('Work with editor', async () => {
+
+        await editor.type(" RRRRRRRRRRRRR ", 3);
+        
+        let text: string = "";
+
+        text = text + await editor.getLineText(3);
+        text = text + await editor.getLineText(3);
+        text = text + await editor.getLineText(3);
+        text = text + await editor.getLineText(3);
+        text = text + await editor.getLineText(3);
+        text = text + await editor.getLineText(3);
+
+        console.log(text);
+
+        // await editor.clickOnTab(tabTitle)
+
+        // console.log("===>>>> ", 2)
+        // await editor.waitTabFocused(tabTitle)
+
+        // console.log("===>>>> ", 3)
+        // await driverHelper.wait(3000)
+
+        // await driverHelper.executeJavaScript("document.getElementById('theia-main-content-panel').dispatchEvent(new KeyboardEvent('keydown', { keyCode: 40, which: 40 }))")
+        // await driverHelper.executeJavaScript("document.getElementById('theia-main-content-panel').dispatchEvent(new KeyboardEvent('keydown', { keyCode: 40, which: 40 }))")
+        // await driverHelper.executeJavaScript("document.getElementById('theia-main-content-panel').dispatchEvent(new KeyboardEvent('keydown', { keyCode: 40, which: 40 }))")
+        // await driverHelper.executeJavaScript("document.getElementById('theia-main-content-panel').dispatchEvent(new KeyboardEvent('keydown', { keyCode: 40, which: 40 }))")
+
+        // console.log("===>>>> ", 5)
+
+        await driverHelper.wait(60000)
+    })
+
+})
+
+suite.skip("E2E", async () => {
 
     suite("Login and wait dashboard", async () => {
         test("Login", async () => {
@@ -57,8 +106,6 @@ suite("E2E", async () => {
     })
 
     suite("Work with IDE", async () => {
-        let fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
-        let tabTitle: string = "HelloWorld.java";
         let filePath: string = `${fileFolderPath}/${tabTitle}`
 
         test("Wait IDE availability", async () => {
