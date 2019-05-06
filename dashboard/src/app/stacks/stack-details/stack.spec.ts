@@ -147,7 +147,6 @@ function getTestStack(): che.IStack {
             'dev-machine': {
               'env': { 'CHE_MACHINE_NAME': 'dev-machine' },
               'volumes': {},
-              'installers': ['org.eclipse.che.ws-agent'],
               'servers': {
                 'tomcat8-debug': {
                   'protocol': 'http',

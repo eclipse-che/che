@@ -56,7 +56,7 @@ describe('KubernetesEnvironmentManager', () => {
               'volume1': {
                 'path': '/123'
               }
-            }, 'installers': ['org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
+            }, 'attributes': {'memoryLimitBytes': '16642998272'}
           }
         }, 'recipe': {
           'contentType': 'application/x-yaml',
@@ -90,12 +90,6 @@ describe('KubernetesEnvironmentManager', () => {
 
       let expectedMemoryLimit = environment.machines[`${podName}/${containerName}`].attributes.memoryLimitBytes;
       expect(memoryLimit.toString()).toEqual(expectedMemoryLimit.toString());
-    });
-
-    it(`the machine should be a dev machine`, () => {
-      let isDev = envManager.isDev(machines[0]);
-
-      expect(isDev).toBe(true);
     });
 
     it(`should update environment's recipe via machine's source`, () => {
@@ -142,7 +136,7 @@ describe('KubernetesEnvironmentManager', () => {
               'volume1': {
                 'path': '/123'
               }
-            }, 'installers': ['org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
+            }, 'attributes': {'memoryLimitBytes': '16642998272'}
           }
         }, 'recipe': {
           'contentType': 'application/x-yaml',
@@ -176,12 +170,6 @@ describe('KubernetesEnvironmentManager', () => {
 
       let expectedMemoryLimit = environment.machines[`${podAnnotatedContainerName}`].attributes.memoryLimitBytes;
       expect(memoryLimit.toString()).toEqual(expectedMemoryLimit.toString());
-    });
-
-    it(`the machine should be a dev machine`, () => {
-      let isDev = envManager.isDev(machines[0]);
-
-      expect(isDev).toBe(true);
     });
 
     it(`should update environment's recipe via machine's source`, () => {

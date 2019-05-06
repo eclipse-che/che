@@ -40,7 +40,7 @@ describe('DockerImageEnvironmentManager', () => {
             'volume1': {
               'path': '/123'
             }
-          }, 'installers': ['ws-agent', 'org.eclipse.che.ws-agent'], 'attributes': {'memoryLimitBytes': '16642998272'}
+          }, 'attributes': {'memoryLimitBytes': '16642998272'}
         }
       }, 'recipe': {'content': 'codenvy/ubuntu_jdk8', 'type': 'dockerimage'}
     };
@@ -71,12 +71,6 @@ describe('DockerImageEnvironmentManager', () => {
 
     let expectedMemoryLimit = environment.machines['dev-machine'].attributes.memoryLimitBytes;
     expect(memoryLimit.toString()).toEqual(expectedMemoryLimit.toString());
-  });
-
-  it('the machine should be a dev machine', () => {
-    let isDev = envManager.isDev(machines[0]);
-
-    expect(isDev).toBe(true);
   });
 
   it('should update environment\'s recipe via machine\'s source', () => {

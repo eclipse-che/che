@@ -1,6 +1,9 @@
-<che-row-toolbar
-  che-title="{{workspaceDetailsController.workspaceName}}"
-  link-href="#/workspaces" link-title="Workspaces" class="workspace-details-toolbar">
+<che-description ng-hide="workspaceDetailsController.isSupportedVersion()" class="workspace-details-warning-info">
+  This workspace is using old definition format which is not compatible anymore. 
+  Please follow the <a ng-href="{{branding.docs.workspace}}" target="_blank">documentation</a> to update the definition of the workspace and benefits from the latest capabilities.
+</che-description>
+<che-row-toolbar che-title="{{workspaceDetailsController.workspaceName}}" link-href="#/workspaces"
+  link-title="Workspaces" class="workspace-details-toolbar">
   <div layout="row" layout-align="start center" class="toolbar-info">
     <!-- is environment supported -->
     <workspace-status che-status="workspaceDetailsController.getWorkspaceStatus()"
