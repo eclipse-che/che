@@ -175,7 +175,6 @@ export class DiagnosticsWorkspaceStartCheck {
           'diagnostics': {
             'machines': {
               'dev-machine': {
-                'installers': ['org.eclipse.che.ws-agent'],
                 'servers': {},
                 'attributes': {'memoryLimitBytes': '1147483648'}
               }

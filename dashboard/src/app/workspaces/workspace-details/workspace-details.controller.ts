@@ -16,7 +16,6 @@ import {WorkspaceDetailsService} from './workspace-details.service';
 import IdeSvc from '../../ide/ide.service';
 import {WorkspacesService} from '../workspaces.service';
 import {ICheEditModeOverlayConfig} from '../../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
-import {IEnvironmentManagerMachine} from '../../../components/api/environment/environment-manager-machine';
 
 export  interface IInitData {
   namespaceId: string;
@@ -169,12 +168,20 @@ export class WorkspaceDetailsController {
   }
 
   /**
-   * Returns `true` if the recipe of default environment of the workspace has supported recipe type
+   * Returns `true` if supported.
    *
    * @returns {boolean}
    */
   get isSupported(): boolean {
     return this.workspacesService.isSupported(this.workspaceDetails);
+  }
+
+  isSupportedVersion(): boolean {
+    return this.workspacesService.isSupportedVersion(this.workspaceDetails);
+  }
+
+  isSupportedRecipeType(): boolean {
+    return this.workspacesService.isSupportedRecipeType(this.workspaceDetails);
   }
 
   /**
@@ -282,7 +289,7 @@ export class WorkspaceDetailsController {
     }
 
     this.workspaceDetails.config = config;
-    
+
 
     if (!this.originWorkspaceDetails || !this.workspaceDetails) {
       return;
@@ -292,7 +299,7 @@ export class WorkspaceDetailsController {
     const failedTabs = this.checkForFailedTabs();
     // publish changes
     this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
-    
+
     if (!failedTabs || failedTabs.length === 0) {
       let runningWorkspace = this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING];
       this.saveConfigChanges(false, runningWorkspace);
@@ -315,16 +322,16 @@ export class WorkspaceDetailsController {
     if (this.newName !== devfile.name) {
       this.newName = devfile.name;
     }
-    
+
     this.workspaceDetails.devfile = devfile;
-    
+
 
     if (!this.originWorkspaceDetails || !this.workspaceDetails) {
       return;
     }
 
     this.workspaceDetailsService.publishWorkspaceChange(this.workspaceDetails);
-    
+
     let runningWorkspace = this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.STARTING] || this.getWorkspaceStatus() === WorkspaceStatus[WorkspaceStatus.RUNNING];
     this.saveConfigChanges(false, runningWorkspace);
   }
@@ -356,8 +363,12 @@ export class WorkspaceDetailsController {
    * @returns {string}
    */
   getOverlayMessage(failedTabs?: string[]): string {
-    if (this.isSupported === false) {
+    if (!this.isSupportedRecipeType()) {
       return `Current infrastructure doesn't support this workspace recipe type.`;
+    }
+
+    if (!this.isSupportedVersion()) {
+      return `This workspace is using old definition format which is not compatible anymore.`;
     }
 
     if (failedTabs && failedTabs.length > 0) {
@@ -471,7 +482,7 @@ export class WorkspaceDetailsController {
 
   /**
    * Updates workspace with new config.
-   * 
+   *
    */
   saveConfigChanges(refreshPage: boolean, notifyRestart?: boolean): void {
     this.editOverlayConfig.disabled = true;
