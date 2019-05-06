@@ -32,14 +32,6 @@ export class ProjectTree {
         return `${this.getExpandIconLocator(itemPath)}:not(.theia-mod-collapsed)`;
     }
 
-    private getExpandIconLocator(itemPath: string) {
-        return `div[data-node-id='/projects:/projects${itemPath}']`;
-    }
-
-    private getTreeItemLocator(itemPath: string) {
-        return `.theia-TreeNode[title='/projects${itemPath}']`
-    }
-
     openProjectTreeContainer() {
         cy.get(Ide.EXPLORER_BUTTON)
             .should('be.visible')
@@ -98,6 +90,14 @@ export class ProjectTree {
         let selectedItemLocator: string = `div[title='/projects/${itemPath}'].theia-mod-selected.theia-mod-focus`;
 
         cy.get(selectedItemLocator).should('be.visible');
+    }
+
+    private getExpandIconLocator(itemPath: string) {
+        return `div[data-node-id='/projects:/projects${itemPath}']`;
+    }
+
+    private getTreeItemLocator(itemPath: string) {
+        return `.theia-TreeNode[title='/projects${itemPath}']`
     }
 
     expandItem(itemPath: string) {

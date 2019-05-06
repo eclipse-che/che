@@ -40,6 +40,4 @@ e2eContainer.bind<TestWorkspaceUtil>(CLASSES.TestWorkspaceUtil).to(TestWorkspace
 e2eContainer.bind<ProjectTree>(CLASSES.ProjectTree).to(ProjectTree).inSingletonScope();
 e2eContainer.bind<Editor>(CLASSES.Editor).to(Editor).inSingletonScope();
 
-
-
 export { e2eContainer }
