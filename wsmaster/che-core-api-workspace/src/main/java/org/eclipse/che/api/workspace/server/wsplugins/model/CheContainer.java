@@ -11,19 +11,21 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /** Represents sidecar container in Che workspace. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CheContainer {
 
   private String image = null;
   private String name = null;
   private List<EnvVar> env = new ArrayList<>();
 
-  @JsonProperty("editorCommands")
+  @JsonProperty("commands")
   private List<Command> commands = new ArrayList<>();
 
   private List<Volume> volumes = new ArrayList<>();

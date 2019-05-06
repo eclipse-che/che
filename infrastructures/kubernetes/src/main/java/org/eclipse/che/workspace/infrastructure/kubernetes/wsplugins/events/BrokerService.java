@@ -91,7 +91,6 @@ public class BrokerService {
   }
 
   private void handle(BrokerStatusChangedEvent event) {
-    // Tooling has fields that can't be parsed by DTO and JSON_RPC framework works with DTO only
     String encodedTooling = event.getTooling();
     RuntimeIdentity runtimeId = event.getRuntimeId();
     if (event.getStatus() == null || runtimeId == null || runtimeId.getWorkspaceId() == null) {

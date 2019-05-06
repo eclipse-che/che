@@ -11,12 +11,14 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 /** Represents Che plugin in sidecar-powered workspace. */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChePlugin {
 
   private String name = null;
