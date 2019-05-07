@@ -18,8 +18,6 @@ import { WorkspaceDetailsPlugins } from "../pageobjects/dashboard/workspace-deta
 import { Ide } from "../pageobjects/ide/Ide";
 import { ProjectTree } from "../pageobjects/ide/ProjectTree";
 import { Editor } from "../pageobjects/ide/Editor";
-import { DriverHelper } from "../utils/DriverHelper";
-import { By, Key } from "selenium-webdriver";
 
 const workspaceName: string = NameGenerator.generate("wksp-test-", 5);
 const namespace: string = "che";
@@ -36,8 +34,6 @@ const workspaceDetailsPlugins: WorkspaceDetailsPlugins = e2eContainer.get(CLASSE
 const ide: Ide = e2eContainer.get(CLASSES.Ide)
 const projectTree: ProjectTree = e2eContainer.get(CLASSES.ProjectTree)
 const editor: Editor = e2eContainer.get(CLASSES.Editor)
-
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper)
 
 suite("E2E", async () => {
 
