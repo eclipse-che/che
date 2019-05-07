@@ -1,0 +1,93 @@
+{
+    "defaultEnv": "default",
+    "environments": {
+      "default": {
+        "machines": {
+          "ws/dev": {
+            "attributes": {
+              "memoryLimitBytes": "536870912"
+            },
+            "servers": {},
+            "volumes": {
+              "projects": {
+                "path": "/projects"
+              }
+            },
+            "installers": [],
+            "env": {}
+          }
+        },
+        "recipe": {
+          "type": "kubernetes",
+          "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
+          "contentType": "application/x-yaml"
+        }
+      }
+    },
+    "projects": [
+      {
+        "links": [],
+        "name": "console-java-simple",
+        "attributes": {
+          "language": [
+            "java"
+          ]
+        },
+        "type": "maven",
+        "source": {
+          "location": "https://github.com/che-samples/console-java-simple.git",
+          "type": "git",
+          "parameters": {}
+        },
+        "path": "/console-java-simple",
+        "description": "A hello world Java application.",
+        "mixins": [],
+        "problems": []
+      }
+    ],
+    "name": "wksp-w7uz",
+    "attributes": {
+      "editor": "eclipse/che-theia/1.0.0",
+      "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/java/0.38.0"
+    },
+    "commands": [
+      {
+        "commandLine": "mvn -Duser.home=${HOME} -f ${CHE_PROJECTS_ROOT}/console-java-simple clean install",
+        "name": "console-java-simple:maven build",
+        "attributes": {
+          "goal": "Build",
+          "previewUrl": ""
+        },
+        "type": "mvn"
+      },
+      {
+        "commandLine": "mvn -Duser.home=${HOME} -f ${CHE_PROJECTS_ROOT}/console-java-simple clean install \njava -jar ${CHE_PROJECTS_ROOT}/console-java-simple/target/*.jar",
+        "name": "console-java-simple:maven build and run",
+        "attributes": {
+          "goal": "Run",
+          "previewUrl": ""
+        },
+        "type": "mvn"
+      },
+      {
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/console-java-simple; gradle build",
+        "name": "console-java-simple:gradle build",
+        "attributes": {
+          "goal": "Build",
+          "previewUrl": ""
+        },
+        "type": "gralde"
+      },
+      {
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/console-java-simple; gradle run",
+        "name": "console-java-simple:gradle run",
+        "attributes": {
+          "goal": "Run",
+          "previewUrl": ""
+        },
+        "type": "gradle"
+      }
+    ],
+    "links": []
+  }
+  
