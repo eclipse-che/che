@@ -2783,7 +2783,7 @@
     }
   },
   {
-    "id": ".NET Core",
+    "id": "dotnet",
     "name": ".NET Core with Theia IDE",
     "creator": "Valerii Svydenko",
     "tags": [
