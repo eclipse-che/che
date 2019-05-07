@@ -13,7 +13,7 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
-import * as rm from 'typed-rest-client/RestClient'
+import axios from 'axios'
 
 export enum WorkspaceStatus {
     RUNNING = 'RUNNING',
@@ -23,8 +23,7 @@ export enum WorkspaceStatus {
 
 @injectable()
 export class TestWorkspaceUtil {
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        private readonly rest: rm.RestClient = new rm.RestClient('rest-samples')) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     public async waitWorkspaceStatus(namespace: string, workspaceName: string, expectedWorkspaceStatus: WorkspaceStatus) {
         const workspaceStatusApiUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/api/workspace/${namespace}:${workspaceName}`;
@@ -32,14 +31,14 @@ export class TestWorkspaceUtil {
         const polling: number = TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING;
 
         for (let i = 0; i < attempts; i++) {
-            const response: rm.IRestResponse<any> = await this.rest.get(workspaceStatusApiUrl)
+            const response = await axios.get(workspaceStatusApiUrl)
 
-            if (response.statusCode !== 200) {
+            if (response.status !== 200) {
                 await this.driverHelper.wait(polling)
                 continue
             }
 
-            const workspaceStatus: string = await response.result.status
+            const workspaceStatus: string = await response.data.status
 
             if (workspaceStatus === expectedWorkspaceStatus) {
                 return;
@@ -57,14 +56,14 @@ export class TestWorkspaceUtil {
         const polling: number = TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_POLLING;
 
         for (let i = 0; i < attempts; i++) {
-            const response: rm.IRestResponse<any> = await this.rest.get(workspaceStatusApiUrl)
+            const response = await axios.get(workspaceStatusApiUrl)
 
-            if (response.statusCode !== 200) {
+            if (response.status !== 200) {
                 await this.driverHelper.wait(polling)
                 continue
             }
 
-            const machines: string = JSON.stringify(response.result.runtime.machines);
+            const machines: string = JSON.stringify(response.data.runtime.machines);
             const isPluginPresent: boolean = machines.search(pluginName) > 0;
 
             if (isPluginPresent) {
