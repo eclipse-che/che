@@ -77,7 +77,7 @@ public class CreateWorkspaceFromCentosWildFlySwarmStackTest {
 
   @Test(priority = 1)
   public void checkWfswarmRestHttpProjectCommands() {
-    By textOnPreviewPage = By.xpath("//h2[@id='_http_booster']");
+    By textOnPreviewPage = By.xpath("//h2[text()='Thorntail REST API Level 0 Example']");
 
     consoles.executeCommandFromProjectExplorer(
         PROJECT_NAME, BUILD_GOAL, BUILD_COMMAND, BUILD_SUCCESS);

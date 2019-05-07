@@ -83,9 +83,9 @@ docs/assets/imgs
 plugins/plugin-terminal-ui/node_modules/
 plugins/plugin-terminal-ui/build/
 requirements.lock
-typescript-selenium/dist/
-typescript-selenium/node_modules/
-typescript-selenium/report/
+e2e/dist/
+e2e/node_modules/
+e2e/report/
 
 # Cypress modules #
 ###################
