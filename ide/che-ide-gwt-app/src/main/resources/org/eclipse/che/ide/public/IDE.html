@@ -191,6 +191,9 @@
                         return;
                     }
                     var workspace = JSON.parse(this.responseText);
+                    if (!workspace || !workspace.runtime) {
+                        return;
+                    }
                     var machines = workspace.runtime.machines;
                     for (var machineName in machines) {
                         var servers = machines[machineName].servers;
@@ -210,7 +213,7 @@
                                 return;
                             }
                         }
-                    }                            
+                    }
                 };
                 //GWT IDE Loading
                 setTimeout(() => {
