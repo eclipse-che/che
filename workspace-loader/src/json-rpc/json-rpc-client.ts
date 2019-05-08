@@ -38,7 +38,7 @@ export interface ICommunicationClient {
    *
    * @param entrypoint
    */
-  connect(entrypoint: string): Promise<any>;
+  connect(entrypoint: () => string): Promise<any>;
   /**
    * Close the connection.
    * @param {number} code close code
