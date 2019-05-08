@@ -23,6 +23,6 @@
   },
   "dependencies": {
     "inversify": "^4.13.0",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.8"
   }
 }
