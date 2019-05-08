@@ -2814,7 +2814,7 @@
           "machines": {
             "dotnet": {
               "servers": {
-                "conduit": {
+                "5000/tcp": {
                   "attributes": {},
                   "protocol": "http",
                   "port": "5000"

@@ -910,7 +910,7 @@
         "type": "custom",
         "commandLine": "cd ${CHE_PROJECTS_ROOT}/aspnetcore-realworld-example-app/publish && dotnet Conduit.dll",
         "attributes": {
-          "previewUrl": "${server.conduit}/swagger",
+          "previewUrl": "${server.5000/tcp}/swagger",
           "goal": "Run"
         }
       }
