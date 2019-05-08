@@ -120,7 +120,7 @@ public class DefaultEditorProvisionerTest {
     ComponentImpl defaultEditorWithDifferentVersion =
         new ComponentImpl(
             EDITOR_COMPONENT_TYPE,
-            "https://my-custom-registry/" + EDITOR_PUBLISHER + "/" + EDITOR_NAME + "/latest");
+            "https://my-custom-registry#" + EDITOR_PUBLISHER + "/" + EDITOR_NAME + "/latest");
     devfile.getComponents().add(defaultEditorWithDifferentVersion);
 
     // when

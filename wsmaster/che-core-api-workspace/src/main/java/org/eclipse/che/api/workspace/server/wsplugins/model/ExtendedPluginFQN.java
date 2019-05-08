@@ -33,6 +33,10 @@ public class ExtendedPluginFQN extends PluginFQN {
     this.version = version;
   }
 
+  public ExtendedPluginFQN(String reference) {
+    super(reference);
+  }
+
   public String getPublisher() {
     return publisher;
   }

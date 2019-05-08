@@ -46,7 +46,7 @@ public class PluginProvisionerTest {
         .getAttributes()
         .put(
             WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
-            "eclipse/super-plugin/0.0.1,https://localhost:8080/publisher1/custom-plugin/v1");
+            "eclipse/super-plugin/0.0.1,https://localhost:8080#publisher1/custom-plugin/v1");
     workspaceConfig
         .getAttributes()
         .put(

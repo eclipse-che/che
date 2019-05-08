@@ -82,6 +82,93 @@ public class PluginComponentToWorkspaceApplierTest {
   }
 
   @Test
+  public void
+      shouldProvisionPluginWorkspaceAttributeWithCustomRegistryDuringChePluginComponentApplying()
+          throws DevfileException {
+
+    String superPluginId = "eclipse/super-plugin/0.0.1";
+    String registryUrl = "https://myregistry.com/infolder/";
+    // given
+    ComponentImpl superPluginComponent = new ComponentImpl();
+    superPluginComponent.setAlias("super-plugin");
+    superPluginComponent.setId(superPluginId);
+    superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
+    superPluginComponent.setMemoryLimit("1234M");
+
+    ComponentImpl customPluginComponent = new ComponentImpl();
+    customPluginComponent.setAlias("custom");
+    customPluginComponent.setId("publisher1/custom-plugin/v1");
+    customPluginComponent.setRegistryUrl(registryUrl);
+    customPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
+
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+
+    // when
+    pluginComponentApplier.apply(workspaceConfig, superPluginComponent, null);
+    pluginComponentApplier.apply(workspaceConfig, customPluginComponent, null);
+
+    // then
+    String workspaceTooling =
+        workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
+    assertTrue(workspaceTooling.matches("(.+/.+/.+),(.+/.+/.+)"));
+    assertTrue(workspaceTooling.contains(superPluginId));
+    assertTrue(workspaceTooling.contains(registryUrl + "#" + "publisher1/custom-plugin/v1"));
+    String toolingAliases =
+        workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
+    assertTrue(toolingAliases.matches("(.+/.+/.+=.+),(.+/.+/.+=.+)"));
+    assertTrue(toolingAliases.contains(superPluginId + "=super-plugin"));
+    assertTrue(toolingAliases.contains("publisher1/custom-plugin/v1=custom"));
+    assertEquals(
+        workspaceConfig
+            .getAttributes()
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
+        "1234M");
+  }
+
+  @Test
+  public void shouldProvisionPluginWorkspaceAttributeWithReferenceDuringChePluginComponentApplying()
+      throws DevfileException {
+
+    String superPluginId = "eclipse/super-plugin/0.0.1";
+    String reference = "https://myregistry.com/infolder/meta.yaml";
+    // given
+    ComponentImpl superPluginComponent = new ComponentImpl();
+    superPluginComponent.setAlias("super-plugin");
+    superPluginComponent.setId(superPluginId);
+    superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
+    superPluginComponent.setMemoryLimit("1234M");
+
+    ComponentImpl customPluginComponent = new ComponentImpl();
+    customPluginComponent.setAlias("custom");
+    customPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
+    customPluginComponent.setReference(reference);
+
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+
+    // when
+    pluginComponentApplier.apply(workspaceConfig, superPluginComponent, null);
+    pluginComponentApplier.apply(workspaceConfig, customPluginComponent, null);
+
+    // then
+    String workspaceTooling =
+        workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
+    assertTrue(workspaceTooling.matches("(.+/.+/.+),(https://.+/.+/.+)"));
+    assertTrue(workspaceTooling.contains(superPluginId));
+    assertTrue(workspaceTooling.contains(reference));
+    //  FIXME:
+    //    String toolingAliases =
+    //        workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
+    //    assertTrue(toolingAliases.matches("(.+/.+/.+=.+),(.+/.+/.+=.+)"));
+    //    assertTrue(toolingAliases.contains(superPluginId + "=super-plugin"));
+    //    assertTrue(toolingAliases.contains("publisher1/custom-plugin/v1=custom"));
+    //    assertEquals(
+    //        workspaceConfig
+    //            .getAttributes()
+    //            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
+    //        "1234M");
+  }
+
+  @Test
   public void shouldProvisionPluginCommandAttributesDuringChePluginComponentApplying()
       throws DevfileException {
     // given
@@ -110,7 +197,8 @@ public class PluginComponentToWorkspaceApplierTest {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
-    superPluginComponent.setId("https://custom-plugin.registry/plugins/eclipse/super-plugin/0.0.1");
+    superPluginComponent.setId(
+        "https://custom-plugin.registry/plugins/#eclipse/super-plugin/0.0.1");
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();

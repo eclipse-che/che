@@ -42,8 +42,8 @@ import org.eclipse.che.api.workspace.shared.Constants;
 public class PluginFQNParser {
 
   private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
-      "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'publisher/name/version'";
-  private static final String REGISTRY_PATTERN = "https?://[-./\\w]+(:[0-9]+)?(/[-./\\w]+)?";
+      "Plugin '%s' has incorrect format. Should be: 'registryURL#publisher/name/version' or 'publisher/name/version' or `referenceURL`";
+  private static final String URL_PATTERN = "https?://[-.\\w]+(:[0-9]+)?(/[-.\\w]+)*";
   private static final String PUBLISHER_PATTERN = "[-a-z0-9]+";
   private static final String NAME_PATTERN = "[-a-z0-9]+";
   private static final String VERSION_PATTERN = "[-.a-z0-9]+";
@@ -56,7 +56,7 @@ public class PluginFQNParser {
           + VERSION_PATTERN
           + ")";
   private static final Pattern PLUGIN_PATTERN =
-      Pattern.compile("((?<registry>" + REGISTRY_PATTERN + ")/)?(?<id>" + ID_PATTERN + ")");
+      Pattern.compile("((?<url>" + URL_PATTERN + ")(/?)(#?))?(?<id>" + ID_PATTERN + ")?");
 
   /**
    * Parses a workspace attributes map into a collection of {@link PluginFQN}.
@@ -115,7 +115,7 @@ public class PluginFQNParser {
   }
 
   public ExtendedPluginFQN parsePluginFQN(String plugin) throws InfrastructureException {
-    String registry;
+    String url;
     String id;
     String publisher;
     String name;
@@ -123,7 +123,7 @@ public class PluginFQNParser {
     URI registryURI = null;
     Matcher matcher = PLUGIN_PATTERN.matcher(plugin);
     if (matcher.matches()) {
-      registry = matcher.group("registry");
+      url = matcher.group("url");
       id = matcher.group("id");
       publisher = matcher.group("publisher");
       name = matcher.group("name");
@@ -131,17 +131,22 @@ public class PluginFQNParser {
     } else {
       throw new InfrastructureException(format(INCORRECT_PLUGIN_FORMAT_TEMPLATE, plugin));
     }
-    if (!isNullOrEmpty(registry)) {
-      try {
-        registryURI = new URI(registry);
-      } catch (URISyntaxException e) {
-        throw new InfrastructureException(
-            format(
-                "Plugin registry URL '%s' is invalid. Problematic plugin entry: '%s'",
-                registry, plugin));
+    if (!isNullOrEmpty(url)) {
+      if (isNullOrEmpty(id)) {
+        // reference only
+        return new ExtendedPluginFQN(url);
+      } else {
+        // registry + id
+        try {
+          registryURI = new URI(url);
+        } catch (URISyntaxException e) {
+          throw new InfrastructureException(
+              format(
+                  "Plugin registry URL '%s' is invalid. Problematic plugin entry: '%s'",
+                  url, plugin));
+        }
       }
     }
-
     return new ExtendedPluginFQN(registryURI, id, publisher, name, version);
   }
 

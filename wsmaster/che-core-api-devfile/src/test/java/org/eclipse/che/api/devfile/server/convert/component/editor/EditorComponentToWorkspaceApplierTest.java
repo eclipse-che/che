@@ -66,6 +66,64 @@ public class EditorComponentToWorkspaceApplierTest {
   }
 
   @Test
+  public void
+      shouldProvisionWorkspaceEditorAttributeWithCustomRegistryDuringCheEditorComponentApplying()
+          throws DevfileException {
+    String editorId = "eclipse/super-editor/0.0.1";
+    String registryUrl = "https://myregistry.com/infolder/";
+    // given
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    ComponentImpl editorComponent = new ComponentImpl();
+    editorComponent.setType(EDITOR_COMPONENT_TYPE);
+    editorComponent.setAlias("editor1");
+    editorComponent.setId(editorId);
+    editorComponent.setRegistryUrl(registryUrl);
+    editorComponent.setMemoryLimit("12345M");
+
+    // when
+    editorComponentApplier.apply(workspaceConfig, editorComponent, null);
+
+    // then
+    assertEquals(
+        workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE),
+        registryUrl + "#" + editorId);
+    assertEquals(
+        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE), "editor1");
+    assertEquals(
+        workspaceConfig
+            .getAttributes()
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor")),
+        "12345M");
+  }
+
+  @Test
+  public void shouldProvisionWorkspaceEditorAttributeWithReferenceDuringCheEditorComponentApplying()
+      throws DevfileException {
+    String reference = "https://myregistry.com/infolder/meta.yaml";
+    // given
+    WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
+    ComponentImpl editorComponent = new ComponentImpl();
+    editorComponent.setType(EDITOR_COMPONENT_TYPE);
+    editorComponent.setAlias("editor1");
+    editorComponent.setReference(reference);
+
+    // when
+    editorComponentApplier.apply(workspaceConfig, editorComponent, null);
+
+    // then
+    assertEquals(
+        workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE), reference);
+    assertEquals(
+        workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE), "editor1");
+    //    FIXME:
+    //    assertEquals(
+    //        workspaceConfig
+    //            .getAttributes()
+    //            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor")),
+    //        "12345M");
+  }
+
+  @Test
   public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying()
       throws DevfileException {
     // given
@@ -94,7 +152,7 @@ public class EditorComponentToWorkspaceApplierTest {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("editor");
-    superPluginComponent.setId("https://custom-plugin.registry/plugins/eclipse/super-editor/0.0.1");
+    superPluginComponent.setId("https://custom-plugin.registry/plugins#eclipse/super-editor/0.0.1");
     superPluginComponent.setType(EDITOR_COMPONENT_TYPE);
 
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();

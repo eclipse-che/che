@@ -71,11 +71,50 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
     String workspacePluginsAttribute =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
-    workspaceConfig
-        .getAttributes()
-        .put(
-            WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
-            append(workspacePluginsAttribute, pluginComponent.getId()));
+
+    String reference = pluginComponent.getReference();
+    String pluginId = pluginComponent.getId();
+    String registryUrl = pluginComponent.getRegistryUrl();
+    String compositeId = registryUrl != null ? registryUrl + "#" + pluginId : pluginId;
+
+    if (!isNullOrEmpty(reference)) {
+      workspaceConfig
+          .getAttributes()
+          .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, append(workspacePluginsAttribute, reference));
+    } else {
+      workspaceConfig
+          .getAttributes()
+          .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, append(workspacePluginsAttribute, compositeId));
+
+      ExtendedPluginFQN fqn;
+      try {
+        fqn = fqnParser.parsePluginFQN(pluginComponent.getId());
+      } catch (InfrastructureException e) {
+        throw new DevfileException(e.getMessage(), e);
+      }
+      String memoryLimit = pluginComponent.getMemoryLimit();
+      if (memoryLimit != null) {
+        workspaceConfig
+            .getAttributes()
+            .put(
+                format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
+      }
+
+      for (CommandImpl command : workspaceConfig.getCommands()) {
+        String commandComponent = command.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE);
+
+        if (commandComponent == null) {
+          // command does not have component information
+          continue;
+        }
+
+        if (!commandComponent.equals(pluginComponent.getAlias())) {
+          continue;
+        }
+
+        command.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId());
+      }
+    }
 
     String pluginsAliases =
         workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
@@ -84,35 +123,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .getAttributes()
           .put(
               PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
-              append(pluginsAliases, pluginComponent.getId() + "=" + pluginComponent.getAlias()));
-    }
-
-    ExtendedPluginFQN fqn;
-    try {
-      fqn = fqnParser.parsePluginFQN(pluginComponent.getId());
-    } catch (InfrastructureException e) {
-      throw new DevfileException(e.getMessage(), e);
-    }
-    String memoryLimit = pluginComponent.getMemoryLimit();
-    if (memoryLimit != null) {
-      workspaceConfig
-          .getAttributes()
-          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
-    }
-
-    for (CommandImpl command : workspaceConfig.getCommands()) {
-      String commandComponent = command.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE);
-
-      if (commandComponent == null) {
-        // command does not have component information
-        continue;
-      }
-
-      if (!commandComponent.equals(pluginComponent.getAlias())) {
-        continue;
-      }
-
-      command.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId());
+              append(pluginsAliases, compositeId + "=" + pluginComponent.getAlias()));
     }
   }
 

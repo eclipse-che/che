@@ -134,7 +134,6 @@ public class PluginFQNParserTest {
       {formatPlugin("http://testregistry:8080", "name/version")},
       {formatPlugin("http://testregistry:8080", "id:version")},
       {formatPlugin("http://testregistry:8080", "publisher/name:version")},
-      {formatPlugin("http://testregistry:8080", "")}
     };
   }
 
@@ -147,7 +146,8 @@ public class PluginFQNParserTest {
     PluginFQN noRegistry = new PluginFQN(null, "publisher/pluginnoregistry/2.0");
     PluginFQN pathRegistry =
         new PluginFQN(
-            URI.create("http://registry/multiple/path/"), "publisher/pluginpathregistry/3.0");
+            URI.create("http://registry/multiple/path"), "publisher/pluginpathregistry/3.0");
+    PluginFQN reference = new PluginFQN("http://mysite:8080/multiple/path/meta.yaml");
     return new AttributeParsingTestCase[][] {
       {
         new AttributeParsingTestCase(
@@ -175,7 +175,8 @@ public class PluginFQNParserTest {
                 null,
                 formatPlugin(
                     new PluginFQN(
-                        URI.create("https://registry:8080/some/path/v3"), "publisher/editor/ver"))))
+                        URI.create("https://registry:8080/some/path/v3/"),
+                        "publisher/editor/ver"))))
       },
       {
         new AttributeParsingTestCase(
@@ -188,6 +189,13 @@ public class PluginFQNParserTest {
             "Test plugin with multi-level path in registry",
             ImmutableList.of(basicEditor, pathRegistry),
             createAttributes(formatPlugin(basicEditor), formatPlugins(pathRegistry)))
+      },
+      {
+        new AttributeParsingTestCase(
+            "Test plugin described by reference",
+            ImmutableList.of(basicEditor, reference),
+            createAttributes(
+                formatPlugin(basicEditor), "http://mysite:8080/multiple/path/meta.yaml"))
       },
       {
         new AttributeParsingTestCase(
@@ -241,7 +249,7 @@ public class PluginFQNParserTest {
   public static Object[][] validPluginStringProvider() {
     return new Object[][] {
       {
-        "http://registry:8080/publisher/editor/ver",
+        "http://registry:8080#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("http://registry:8080"),
             "publisher/editor/ver",
@@ -250,7 +258,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://registry:8080/publisher/editor/ver",
+        "https://registry:8080#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://registry:8080"),
             "publisher/editor/ver",
@@ -259,7 +267,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://che-registry.com.ua/publisher/editor/ver",
+        "https://che-registry.com.ua#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://che-registry.com.ua"),
             "publisher/editor/ver",
@@ -268,7 +276,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://che-registry.com.ua/plugins/publisher/editor/ver",
+        "https://che-registry.com.ua/plugins#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://che-registry.com.ua/plugins"),
             "publisher/editor/ver",
@@ -277,7 +285,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://che-registry.com.ua/plugins/v3/publisher/editor/ver",
+        "https://che-registry.com.ua/plugins/v3/#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://che-registry.com.ua/plugins/v3"),
             "publisher/editor/ver",
@@ -286,7 +294,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://che-registry.com.ua/some/long/path/publisher/editor/ver",
+        "https://che-registry.com.ua/some/long/path#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://che-registry.com.ua/some/long/path"),
             "publisher/editor/ver",
@@ -331,7 +339,7 @@ public class PluginFQNParserTest {
     if (registry == null) {
       return id;
     } else {
-      return registry + "/" + id;
+      return registry + "#" + id;
     }
   }
 
