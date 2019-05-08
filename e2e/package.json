@@ -22,7 +22,7 @@
     "typescript": "^3.4.3"
   },
   "dependencies": {
-    "inversify": "^5.0.1",
+    "inversify": "^4.13.0",
     "reflect-metadata": "^0.1.13"
   }
 }
