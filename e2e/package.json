@@ -19,7 +19,7 @@
     "mocha": "^6.1.4",
     "selenium-webdriver": "^3.6.0",
     "ts-node": "^8.0.3",
-    "typescript": "^3.4.3"
+    "typescript": "^3.4.5"
   },
   "dependencies": {
     "inversify": "^4.13.0",
