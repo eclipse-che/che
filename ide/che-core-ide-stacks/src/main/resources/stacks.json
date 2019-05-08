@@ -2781,5 +2781,81 @@
       "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
+  },
+  {
+    "id": "dotnet",
+    "name": ".NET Core with Theia IDE",
+    "creator": "Valerii Svydenko",
+    "tags": [
+      "Theia",
+      "Debian",
+      "Dotnet",
+      "C#"
+    ],
+    "scope": "general",
+    "description": "Default stack with .Net 2.2.105 and Theia IDE",
+    "components": [
+      {
+        "version": "9",
+        "name": "Debian"
+      },
+      {
+        "version": "2.2.105",
+        "name": ".Net Core SDK"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "content": "mcr.microsoft.com/dotnet/core/sdk:2.2-stretch",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "dotnet": {
+              "servers": {
+                "5000/tcp": {
+                  "attributes": {},
+                  "protocol": "http",
+                  "port": "5000"
+                }
+              },
+              "env": {
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              },
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                },
+                "dotnet": {
+                  "path": "/home/user"
+                }
+              },
+              "installers": [],
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              }
+            }
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "sidecar.redhat-developer/che-omnisharp-plugin.memory_limit": "1024Mi",
+        "sidecar.redhat-developer/netcoredbg-theia-plugin.memory_limit": "512Mi",
+        "editor": "eclipse/che-theia/next",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat-developer/che-omnisharp-plugin/0.0.1,redhat-developer/netcoredbg-theia-plugin/0.0.1"
+      },
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
   }
 ]
