@@ -88,7 +88,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
       ExtendedPluginFQN fqn;
       try {
-        fqn = fqnParser.parsePluginFQN(pluginComponent.getId());
+        fqn = fqnParser.parsePluginFQN(compositeId);
       } catch (InfrastructureException e) {
         throw new DevfileException(e.getMessage(), e);
       }

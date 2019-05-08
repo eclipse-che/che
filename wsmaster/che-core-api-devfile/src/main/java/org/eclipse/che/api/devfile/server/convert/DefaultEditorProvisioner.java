@@ -11,11 +11,11 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 
-import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +48,7 @@ public class DefaultEditorProvisioner {
       @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs,
       PluginFQNParser fqnParser)
       throws DevfileException {
-    this.defaultEditorRef = Strings.isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
+    this.defaultEditorRef = isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
     this.fqnParser = fqnParser;
     this.defaultEditor =
         this.defaultEditorRef == null ? null : getPluginPublisherAndName(this.defaultEditorRef);
@@ -86,7 +86,9 @@ public class DefaultEditorProvisioner {
       isDefaultEditorUsed = true;
     } else {
       Component editor = editorOpt.get();
-      isDefaultEditorUsed = defaultEditor.equals(getPluginPublisherAndName(editor.getId()));
+      isDefaultEditorUsed =
+          !isNullOrEmpty(editor.getId())
+              && defaultEditor.equals(getPluginPublisherAndName(editor.getId()));
     }
 
     if (isDefaultEditorUsed) {
@@ -98,7 +100,7 @@ public class DefaultEditorProvisioner {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
 
     for (ComponentImpl t : components) {
-      if (PLUGIN_COMPONENT_TYPE.equals(t.getType())) {
+      if (PLUGIN_COMPONENT_TYPE.equals(t.getType()) && !isNullOrEmpty(t.getId())) {
         missingPluginsIdToRef.remove(getPluginPublisherAndName(t.getId()));
       }
     }

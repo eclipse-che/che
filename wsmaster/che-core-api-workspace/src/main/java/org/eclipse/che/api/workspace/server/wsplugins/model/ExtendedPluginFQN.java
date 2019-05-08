@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.net.URI;
 import java.util.Objects;
 
@@ -61,6 +62,7 @@ public class ExtendedPluginFQN extends PluginFQN {
     this.version = version;
   }
 
+  @JsonIgnore
   public String getPublisherAndName() {
     return publisher + "/" + name;
   }
