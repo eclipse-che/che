@@ -33,7 +33,7 @@ public interface Component {
    * location of Kubernetes list yaml file. It is mandatory for those types.
    *
    * <p>For 'cheEditor' and 'chePlugin' components types, returns absolute location of plugin
-   * descriptor (typically, named plugin,yaml). For those types this field is optional.
+   * descriptor (typically, named meta.yaml). For those types this field is optional.
    */
   String getReference();
 
