@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -103,11 +104,13 @@ public class PluginFQNParser {
     for (String plugin : plugins) {
       PluginFQN pFQN = parsePluginFQN(plugin);
 
-      if (collectedFQNs.stream().anyMatch(p -> p.getId().equals(pFQN.getId()))) {
+      String pluginKey = firstNonNull(pFQN.getReference(), pFQN.getId());
+      if (collectedFQNs.stream()
+          .anyMatch(p -> p.getId().equals(pluginKey) || p.getReference().equals(pluginKey))) {
         throw new InfrastructureException(
             format(
                 "Invalid Che tooling plugins configuration: plugin %s is duplicated",
-                pFQN.getId())); // even if different registries
+                pluginKey)); // even if different registries
       }
       collectedFQNs.add(pFQN);
     }

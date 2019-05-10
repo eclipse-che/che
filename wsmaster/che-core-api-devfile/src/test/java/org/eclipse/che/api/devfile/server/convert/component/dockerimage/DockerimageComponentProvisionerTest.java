@@ -185,7 +185,7 @@ public class DockerimageComponentProvisionerTest {
     assertEquals(dockerimageComponent.getEndpoints().size(), 1);
     EndpointImpl endpoint = dockerimageComponent.getEndpoints().get(0);
     assertEquals(endpoint.getName(), "server");
-    assertEquals(endpoint.getPort(), new Integer(8080));
+    assertEquals(endpoint.getPort(), Integer.valueOf(8080));
     assertEquals(endpoint.getAttributes().size(), 3);
     assertEquals(endpoint.getAttributes().get("protocol"), "http");
     assertEquals(endpoint.getAttributes().get("path"), "/api");
@@ -224,7 +224,7 @@ public class DockerimageComponentProvisionerTest {
     assertEquals(dockerimageComponent.getEndpoints().size(), 1);
     EndpointImpl endpoint = dockerimageComponent.getEndpoints().get(0);
     assertEquals(endpoint.getName(), "server");
-    assertEquals(endpoint.getPort(), new Integer(8080));
+    assertEquals(endpoint.getPort(), Integer.valueOf(8080));
     assertTrue(endpoint.getAttributes().isEmpty());
   }
 
