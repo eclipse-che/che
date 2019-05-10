@@ -215,7 +215,7 @@
       ],
       "attributes": {
         "plugins": "eclipse/che-machine-exec-plugin/0.0.1",
-        "editor": "eclipse/che-theia/1.0.0"
+        "editor": "eclipse/che-theia/next"
       },
       "links": []
     },
@@ -284,7 +284,7 @@
       "projects": [],
       "attributes": {
         "plugins": "eclipse/che-machine-exec-plugin/0.0.1",
-        "editor": "eclipse/che-theia/1.0.0"
+        "editor": "eclipse/che-theia/next"
       },
       "commands": [],
       "links": []
@@ -358,7 +358,7 @@
       "projects": [],
       "attributes": {
         "plugins": "eclipse/che-machine-exec-plugin/0.0.1",
-        "editor": "eclipse/che-theia/1.0.0"
+        "editor": "eclipse/che-theia/next"
       },
       "commands": [],
       "links": []
@@ -431,7 +431,7 @@
       "projects": [],
       "attributes": {
         "plugins": "eclipse/che-machine-exec-plugin/0.0.1",
-        "editor": "eclipse/che-theia/1.0.0"
+        "editor": "eclipse/che-theia/next"
       },
       "commands": [
         {
