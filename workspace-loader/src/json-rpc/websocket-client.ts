@@ -28,9 +28,11 @@ export class WebsocketClient implements ICommunicationClient {
      *
      * @param entrypoint the entrypoint to connect to
      */
-    connect(entrypoint: string): Promise<void> {
+    connect(entrypoint: (() => string)): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.websocketStream = new RWS(entrypoint, [], {});
+            this.websocketStream = new RWS(entrypoint, [], {
+                connectionTimeout: 10000
+            });
             this.websocketStream.addEventListener("open", (event: Event) => {
                 const eventType: CommunicationClientEvent = "open";
                 this.callHandlers(eventType, event);

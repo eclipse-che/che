@@ -845,7 +845,7 @@
       {
         "name": "update dependencies",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} \ndotnet restore",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/dotnet-web-simple \ndotnet restore",
         "attributes": {
           "previewUrl": "",
           "goal": "Build"
@@ -854,9 +854,63 @@
       {
         "name": "run",
         "type": "custom",
-        "commandLine": "cd ${current.project.path} \ndotnet run",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/dotnet-web-simple \ndotnet run",
         "attributes": {
           "previewUrl": "${server.dotnet}",
+          "goal": "Run"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "Dotnet"
+    ]
+  },
+  {
+    "name": "aspnetcore-realworld-example-app",
+    "displayName": "aspnetcore-realworld-example-app",
+    "path": "/aspnetcore-realworld-example-app",
+    "description": "ASP.NET Core backend implementation for RealWorld https://realworld.io",
+    "projectType": "csharp",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "dotnet"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/gothinkster/aspnetcore-realworld-example-app.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "install cake",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/aspnetcore-realworld-example-app && dotnet tool install -g Cake.Tool",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "run cake",
+        "type": "custom",
+        "commandLine": "export PATH=\"$PATH:/home/user/.dotnet/tools\" && cd ${CHE_PROJECTS_ROOT}/aspnetcore-realworld-example-app && dotnet cake build.cake --runtime=linux-x64",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Build"
+        }
+      },
+      {
+        "name": "run",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/aspnetcore-realworld-example-app/publish && dotnet Conduit.dll",
+        "attributes": {
+          "previewUrl": "${server.5000/tcp}/swagger",
           "goal": "Run"
         }
       }

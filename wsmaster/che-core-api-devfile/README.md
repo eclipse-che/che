@@ -33,7 +33,7 @@ projects:
 components:
   - alias: theia-editor
     type: cheEditor
-    id: eclipse/che-theia/1.0.0
+    id: eclipse/che-theia/next
   - alias: exec-plugin
     type: chePlugin
     id: eclipse/che-machine-exec-plugin/0.0.1
@@ -108,7 +108,7 @@ Devfile can only contain one component with `cheEditor` type.
 components:
   - alias: theia-editor
     type: cheEditor
-    id: eclipse/che-theia/1.0.0
+    id: eclipse/che-theia/next
 ```
 
 If it is missing then a default editor will be provided along with its default plugins.
