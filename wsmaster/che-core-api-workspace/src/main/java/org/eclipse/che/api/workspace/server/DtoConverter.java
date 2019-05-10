@@ -92,6 +92,9 @@ public final class DtoConverter {
 
     if (workspace.getDevfile() != null) {
       workspaceDto.setDevfile(asDto(workspace.getDevfile()));
+
+      workspaceDto.setConfig(
+          newDto(WorkspaceConfigDto.class).withName(workspace.getDevfile().getName()));
     }
 
     if (workspace.getRuntime() != null) {

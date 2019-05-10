@@ -195,8 +195,9 @@ public class WorkspaceServiceTest {
                     + "&attribute=custom:custom:value");
 
     assertEquals(response.getStatusCode(), 201);
-    assertEquals(
-        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
+    // null stub workspace config
+    WorkspaceDto workspaceDto = unwrapDto(response, WorkspaceDto.class).withConfig(null);
+    assertEquals(new WorkspaceImpl(workspaceDto, TEST_ACCOUNT), workspace);
     verify(wsManager)
         .createWorkspace(
             any(Devfile.class),
