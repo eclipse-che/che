@@ -310,16 +310,12 @@
     ],
     "components": [
       {
-        "name": "Centos",
-        "version": "7"
-      },
-      {
         "name": "NodeJS",
-        "version": "8.12.0"
+        "version": "10.2.1"
       },
       {
         "name": "NPM",
-        "version": "6.4.1"
+        "version": "5.6.0"
       }
     ],
     "workspaceConfig": {
@@ -350,14 +346,15 @@
           },
           "recipe": {
             "type": "kubernetes",
-            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-theia-dev:next'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n",
             "contentType": "application/x-yaml"
           }
         }
       },
       "projects": [],
       "attributes": {
-        "plugins": "eclipse/che-machine-exec-plugin/0.0.1",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,che-incubator/typescript/1.30.2",
+        "sidecar.che-incubator/typescript.memory_limit": "700Mi",
         "editor": "eclipse/che-theia/next"
       },
       "commands": [],
