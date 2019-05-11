@@ -61,7 +61,7 @@ public class URLFileContentProvider implements FileContentProvider {
           format(
               "Failed to fetch a file %s specified in devfile %s from URL %s. Make sure the URL"
                   + " of the devfile points to the raw content of it (e.g. not to the webpage"
-                  + " showing it but really just its contents). Additionally, if you 're using "
+                  + " showing it but really just its contents). Additionally, if you're using "
                   + " relative form, make sure the referenced files are actually stored"
                   + " relative to the devfile on the same host,"
                   + " or try to specify URL in absolute form. The current attempt to download"
