@@ -173,6 +173,7 @@ public class ComponentImpl implements Component {
       String id,
       String reference,
       String referenceContent,
+      Map<String, String> selector,
       List<? extends Entrypoint> entrypoints,
       String image,
       String memoryLimit,
@@ -187,6 +188,9 @@ public class ComponentImpl implements Component {
     this.componentId = id;
     this.reference = reference;
     this.referenceContent = referenceContent;
+    if (selector != null) {
+      this.selector = new HashMap<>(selector);
+    }
     if (entrypoints != null) {
       this.entrypoints =
           entrypoints.stream().map(EntrypointImpl::new).collect(toCollection(ArrayList::new));
@@ -215,6 +219,7 @@ public class ComponentImpl implements Component {
         component.getId(),
         component.getReference(),
         component.getReferenceContent(),
+        component.getSelector(),
         component.getEntrypoints(),
         component.getImage(),
         component.getMemoryLimit(),
