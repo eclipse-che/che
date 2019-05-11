@@ -105,8 +105,9 @@ public class PluginFQNParser {
       PluginFQN pFQN = parsePluginFQN(plugin);
 
       String pluginKey = firstNonNull(pFQN.getReference(), pFQN.getId());
-      if (collectedFQNs.stream()
-          .anyMatch(p -> p.getId().equals(pluginKey) || p.getReference().equals(pluginKey))) {
+      if (collectedFQNs
+          .stream()
+          .anyMatch(p -> pluginKey.equals(p.getId()) || pluginKey.equals(p.getReference()))) {
         throw new InfrastructureException(
             format(
                 "Invalid Che tooling plugins configuration: plugin %s is duplicated",

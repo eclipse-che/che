@@ -92,7 +92,7 @@ public class ExtendedPluginFQN extends PluginFQN {
   @Override
   public String toString() {
     return String.format(
-        "{id:%s, registry:%s, publisher:%s, name:%s, version:%s}",
-        getId(), getRegistry(), getPublisher(), getName(), getVersion());
+        "{id:%s, registry:%s, publisher:%s, name:%s, version:%s, reference:%s}",
+        getId(), getRegistry(), getPublisher(), getName(), getVersion(), getReference());
   }
 }
