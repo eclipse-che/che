@@ -5,14 +5,17 @@ projects:
     source:
       type: git
       location: 'https://github.com/eclipse/che.git'
-tools:
-  - name: theia-editor
+components:
+  - alias: theia-editor
     type: cheEditor
-    id: eclipse/che-theia/master
-  - name: exec-plugin
+    id: eclipse/che-theia/next
+  - alias: typescript-plugin
+    type: chePlugin
+    id: che-incubator/typescript/1.30.2
+  - alias: exec-plugin
     type: chePlugin
     id: eclipse/che-machine-exec-plugin/0.0.1
-  - name: dash-dev
+  - alias: dash-dev
     type: dockerimage
     image: 'eclipse/che-dashboard-dev:nightly'
     endpoints:
@@ -28,18 +31,18 @@ commands:
   - name: dashboard_build
     actions:
       - type: exec
-        tool: dash-dev
+        component: dash-dev
         command: cd /projects/che/dashboard && yarn
         workdir: /projects/che/dashboard
   - name: dashboard_test
     actions:
       - type: exec
-        tool: dash-dev
+        component: dash-dev
         command: cd /projects/che/dashboard && yarn test
         workdir: /projects/che/dashboard
   - name: dashboard_dev_server
     actions:
       - type: exec
-        tool: dash-dev
+        component: dash-dev
         command: cd /projects/che/dashboard && node_modules/.bin/gulp serve --server=${CHE_API_EXTERNAL%????}
         workdir: /projects/che/dashboard
