@@ -1,0 +1,60 @@
+specVersion: 0.0.1
+name: workspace-loader
+projects:
+  - name: che
+    source:
+      type: git
+      location: 'https://github.com/eclipse/che.git'
+components:
+  - alias: theia-editor
+    type: cheEditor
+    id: eclipse/che-theia/next
+  - alias: exec-plugin
+    type: chePlugin
+    id: eclipse/che-machine-exec-plugin/0.0.1
+  - alias: typescript-plugin
+    type: chePlugin
+    id: che-incubator/typescript/1.30.2
+  - alias: ws-loader-dev
+    type: dockerimage
+    image: 'eclipse/che-dashboard-dev:nightly'
+    endpoints:
+      - name: dev-server
+        port: 3000
+        attributes:
+          path: /
+          protocol: http
+          public: "true"
+    mountSources: true
+    memoryLimit: 1Gi
+commands:
+  - name: '[workspace loader] install dependencies'
+    actions:
+      - type: exec
+        component: ws-loader-dev
+        command: yarn
+        workdir: /projects/che/workspace-loader
+  - name: '[workspace loader] run build'
+    actions:
+      - type: exec
+        component: ws-loader-dev
+        command: yarn run build
+        workdir: /projects/che/workspace-loader
+  - name: '[workspace loader] run tests'
+    actions:
+      - type: exec
+        component: ws-loader-dev
+        command: yarn run test
+        workdir: /projects/che/workspace-loader
+  - name: '[workspace loader] start dev server'
+    actions:
+      - type: exec
+        component: ws-loader-dev
+        command: 'yarn start --disable-host-check --public=$(echo ${server.dev-server} | sed -e s/https:\\/\\/// -e s/http:\\/\\/// -e s/\\///) --host="0.0.0.0" --env.target=${CHE_API_EXTERNAL%????}'
+        workdir: /projects/che/workspace-loader
+  - name: '[workspace loader] kill dev server'
+    actions:
+      - type: exec
+        component: ws-loader-dev
+        command: 'dev_server_pid=$(pgrep -f disable-host-check) && echo "Webpack dev server processes are killed" && kill $(echo $dev_server_pid | tr "\\n" " ")'
+        workdir: /projects/che/workspace-loader

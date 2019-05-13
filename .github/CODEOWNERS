@@ -12,17 +12,16 @@ ide/che-core-ide-stacks/** @ashumilova
 
 # agents
 agents/** @tolusha
-agents/go-agents/** @garagatyi
 
 # assembly
 assembly/** @riuvshin @skabashnyuk
-assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk @garagatyi
+assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk
 
 # core
 core/** @skabashnyuk
 
 # workspace runtime infrastructure implementations
-infrastructures/** @garagatyi @sleshchenko @amisevsk @metlos
+infrastructures/** @sleshchenko @amisevsk @metlos
 
 # multiuser che
 multiuser/api/**  @sleshchenko
@@ -36,7 +35,7 @@ multiuser/sql-schema/**  @mshaposhnik @sleshchenko
 # plugins
 plugins/plugin*debugger/** @tolusha
 plugins/plugin-gdb/** @tolusha
-plugins/plugin-docker/** @garagatyi @sleshchenko
+plugins/plugin-docker/** @sleshchenko
 plugins/plugin-java/** @vparfonov
 plugins/plugin-languageserver/** @vparfonov @dkuleshov
 plugins/plugin-maven/** @vparfonov
@@ -46,7 +45,6 @@ plugins/plugin-traefik/** @benoitf
 
 # wsmaster
 wsmaster/** @skabashnyuk
-wsmaster/che-core-api-workspace*/** @garagatyi
 wsmaster/che-core-api-factory/** @mshaposhnik
 wsmaster/che-core-api-factory-shared/**   @mshaposhnik
 wsmaster/che-core-api-workspace-activity/**   @mshaposhnik
@@ -64,7 +62,7 @@ wsagent/che-core-api-project/src/main/java/org/eclipse/che/api/search/server/** 
 wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabashnyuk
 
 # deploy
-deploy/** @riuvshin @l0rd @garagatyi @eivantsov @sleshchenko
+deploy/** @riuvshin @l0rd @eivantsov @sleshchenko
 deploy/openshift/templates/che-monitoring.yaml @skabashnyuk @metlos
 
 # selenium tests

@@ -26,6 +26,7 @@ import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.C
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CHE_7_THEIA_DEV;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CPP;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.DOT_NET_DEFAULT;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_CHE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ECLIPSE_VERTX;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.GO;
@@ -85,6 +86,7 @@ public class NewWorkspacePageTest {
       asList(
           BLANK,
           JAVA,
+          DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
           CPP,
@@ -107,6 +109,7 @@ public class NewWorkspacePageTest {
       asList(
           BLANK,
           JAVA,
+          DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
           CPP,
@@ -130,6 +133,7 @@ public class NewWorkspacePageTest {
           BLANK,
           JAVA,
           JAVA_MYSQL,
+          DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
           CPP,
@@ -149,6 +153,7 @@ public class NewWorkspacePageTest {
       asList(
           BLANK,
           JAVA,
+          DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -180,6 +185,7 @@ public class NewWorkspacePageTest {
       asList(
           BLANK,
           JAVA,
+          DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -211,6 +217,7 @@ public class NewWorkspacePageTest {
       asList(
           BLANK,
           JAVA,
+          DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
           CAMEL_SPRINGBOOT,
@@ -265,7 +272,8 @@ public class NewWorkspacePageTest {
               CHE_7_PREVIEW,
               CPP,
               ANDROID,
-              DOT_NET);
+              DOT_NET,
+              DOT_NET_DEFAULT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_K8S_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
@@ -287,7 +295,8 @@ public class NewWorkspacePageTest {
           CHE_7_PREVIEW,
           CPP,
           ANDROID,
-          DOT_NET);
+          DOT_NET,
+          DOT_NET_DEFAULT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_DOCKER_QUICK_START_STACKS_REVERSE_ORDER =
       asList(
@@ -307,7 +316,8 @@ public class NewWorkspacePageTest {
           ECLIPSE_CHE,
           CPP,
           ANDROID,
-          DOT_NET);
+          DOT_NET,
+          DOT_NET_DEFAULT);
 
   private static final List<NewWorkspace.Stack> EXPECTED_OPENSHIFT_JAVA_STACKS =
       asList(JAVA, ANDROID, ECLIPSE_CHE, JAVA_MYSQL_THEIA_ON_KUBERNETES);

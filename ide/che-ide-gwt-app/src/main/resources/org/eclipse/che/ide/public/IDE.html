@@ -85,7 +85,7 @@
                     };
 
                     request.onload = function() {
-                        if (request.status == 200) {
+                        if (request.status === 200) {
                             Loader.injectKeycloakScript(JSON.parse(this.responseText));
                         } else {
                             console.error(msg);
@@ -186,11 +186,20 @@
                         return;
                     }
                     if (this.status !== 200) {
-                        var response = JSON.parse(this.responseText);
-                        errorMessage = 'Failed to get the workspace: "' + response.message;
+                        var message;
+                        try {
+                            message = JSON.parse(this.responseText).message;
+                        } catch(e) {
+                            /* Maybe plain text. */
+                            message = this.responseText;
+                        }
+                        errorMessage = 'Failed to get the workspace: "' + message;
                         return;
                     }
                     var workspace = JSON.parse(this.responseText);
+                    if (!workspace || !workspace.runtime) {
+                        return;
+                    }
                     var machines = workspace.runtime.machines;
                     for (var machineName in machines) {
                         var servers = machines[machineName].servers;
@@ -210,7 +219,7 @@
                                 return;
                             }
                         }
-                    }                            
+                    }
                 };
                 //GWT IDE Loading
                 setTimeout(() => {
