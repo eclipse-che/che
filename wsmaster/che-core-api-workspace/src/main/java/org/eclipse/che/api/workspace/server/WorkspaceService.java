@@ -371,6 +371,9 @@ public class WorkspaceService extends Service {
       @ApiParam(value = "The workspace update", required = true) WorkspaceDto update)
       throws BadRequestException, ServerException, ForbiddenException, NotFoundException,
           ConflictException {
+    checkArgument(
+        update.getConfig() != null || update.getDevfile() != null,
+        "Required non-null workspace configuration or devfile update");
     if (update.getDevfile() != null) {
       // devfile is not null and config should be dropped since it's a stub with name only
       update.setConfig(null);
