@@ -385,7 +385,7 @@ public class WorkspaceRuntimes {
    */
   @Traced
   public CompletableFuture<Void> startAsync(
-      WorkspaceImpl workspace, String envName, Map<String, String> options)
+      WorkspaceImpl workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
     TracingTags.WORKSPACE_ID.set(workspace.getId());
     TracingTags.STACK_ID.set(() -> workspace.getAttributes().getOrDefault("stackId", "no stack"));
@@ -402,6 +402,9 @@ public class WorkspaceRuntimes {
     WorkspaceConfig config = workspace.getConfig();
     if (config == null) {
       config = devfileConverter.convert(workspace.getDevfile());
+    }
+
+    if (envName == null) {
       envName = config.getDefaultEnv();
     }
 
