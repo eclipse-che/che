@@ -372,12 +372,8 @@ public class WorkspaceService extends Service {
       throws BadRequestException, ServerException, ForbiddenException, NotFoundException,
           ConflictException {
     checkArgument(
-        update.getConfig() != null || update.getDevfile() != null,
-        "Required non-null workspace configuration or devfile update");
-    if (update.getDevfile() != null) {
-      // devfile is not null and config should be dropped since it's a stub with name only
-      update.setConfig(null);
-    }
+        update.getConfig() != null ^ update.getDevfile() != null,
+        "Required non-null workspace configuration or devfile update but not both");
     relativizeRecipeLinks(update.getConfig());
     return asDtoWithLinksAndToken(doUpdate(id, update));
   }

@@ -195,9 +195,8 @@ public class WorkspaceServiceTest {
                     + "&attribute=custom:custom:value");
 
     assertEquals(response.getStatusCode(), 201);
-    // null stub workspace config
-    WorkspaceDto workspaceDto = unwrapDto(response, WorkspaceDto.class).withConfig(null);
-    assertEquals(new WorkspaceImpl(workspaceDto, TEST_ACCOUNT), workspace);
+    assertEquals(
+        new WorkspaceImpl(unwrapDto(response, WorkspaceDto.class), TEST_ACCOUNT), workspace);
     verify(wsManager)
         .createWorkspace(
             any(Devfile.class),
@@ -745,6 +744,29 @@ public class WorkspaceServiceTest {
   }
 
   @Test
+  public void shouldNotUpdateTheWorkspaceWithConfigAndDevfileAtTheSameTime() throws Exception {
+    final WorkspaceDto workspaceDto =
+        newDto(WorkspaceDto.class)
+            .withId("workspace123")
+            .withConfig(newDto(WorkspaceConfigDto.class))
+            .withDevfile(newDto(DevfileDto.class));
+
+    final Response response =
+        given()
+            .auth()
+            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
+            .contentType("application/json")
+            .body(workspaceDto)
+            .when()
+            .put(SECURE_PATH + "/workspace/" + workspaceDto.getId());
+
+    assertEquals(response.getStatusCode(), 400);
+    assertEquals(
+        unwrapError(response),
+        "Required non-null workspace configuration or devfile update but not both");
+  }
+
+  @Test
   public void shouldNotUpdateTheWorkspaceWithoutConfigAndDevfile() throws Exception {
     final WorkspaceDto workspaceDto = newDto(WorkspaceDto.class).withId("workspace123");
 
@@ -759,7 +781,8 @@ public class WorkspaceServiceTest {
 
     assertEquals(response.getStatusCode(), 400);
     assertEquals(
-        unwrapError(response), "Required non-null workspace configuration or devfile update");
+        unwrapError(response),
+        "Required non-null workspace configuration or devfile update but not both");
   }
 
   @Test
