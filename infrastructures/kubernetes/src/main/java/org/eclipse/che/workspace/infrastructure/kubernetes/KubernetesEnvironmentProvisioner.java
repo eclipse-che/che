@@ -26,6 +26,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ImagePullSe
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.IngressTlsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.LogsVolumeMachineProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTerminationGracePeriodProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.PodTolerationProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettingsProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
@@ -68,6 +69,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final LogsVolumeMachineProvisioner logsVolumeMachineProvisioner;
     private final SecurityContextProvisioner securityContextProvisioner;
     private final PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner;
+    private final PodTolerationProvisioner podTolerationProvisioner;
     private final IngressTlsProvisioner externalServerIngressTlsProvisioner;
     private final ImagePullSecretProvisioner imagePullSecretProvisioner;
     private final ProxySettingsProvisioner proxySettingsProvisioner;
@@ -90,6 +92,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         LogsVolumeMachineProvisioner logsVolumeMachineProvisioner,
         SecurityContextProvisioner securityContextProvisioner,
         PodTerminationGracePeriodProvisioner podTerminationGracePeriodProvisioner,
+        PodTolerationProvisioner podTolerationProvisioner,
         IngressTlsProvisioner externalServerIngressTlsProvisioner,
         ImagePullSecretProvisioner imagePullSecretProvisioner,
         ProxySettingsProvisioner proxySettingsProvisioner,
@@ -109,6 +112,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.logsVolumeMachineProvisioner = logsVolumeMachineProvisioner;
       this.securityContextProvisioner = securityContextProvisioner;
       this.podTerminationGracePeriodProvisioner = podTerminationGracePeriodProvisioner;
+      this.podTolerationProvisioner = podTolerationProvisioner;
       this.externalServerIngressTlsProvisioner = externalServerIngressTlsProvisioner;
       this.imagePullSecretProvisioner = imagePullSecretProvisioner;
       this.proxySettingsProvisioner = proxySettingsProvisioner;
@@ -150,6 +154,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       externalServerIngressTlsProvisioner.provision(k8sEnv, identity);
       securityContextProvisioner.provision(k8sEnv, identity);
       podTerminationGracePeriodProvisioner.provision(k8sEnv, identity);
+      podTolerationProvisioner.provision(k8sEnv, identity);
       imagePullSecretProvisioner.provision(k8sEnv, identity);
       proxySettingsProvisioner.provision(k8sEnv, identity);
       serviceAccountProvisioner.provision(k8sEnv, identity);

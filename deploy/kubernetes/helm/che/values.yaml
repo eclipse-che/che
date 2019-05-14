@@ -83,6 +83,7 @@ global:
   postgresDebugLogs: false
   cheDevfileRegistryUrlFormat: "devfile-registry-%s.%s"
   chePluginRegistryUrlFormat: "plugin-registry-%s.%s"
+  podTolerations: ""
 
 che:
   workspace: {}
