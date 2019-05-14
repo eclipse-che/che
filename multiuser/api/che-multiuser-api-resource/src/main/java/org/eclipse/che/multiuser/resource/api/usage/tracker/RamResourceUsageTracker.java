@@ -88,15 +88,16 @@ public class RamResourceUsageTracker implements ResourceUsageTracker {
           }
           if (SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(config.getAttributes())) {
             LOG.warn(
-                "Sidecar based workspace `{}` is starting, memory of its plugins is not taken in "
-                    + "account while workspace is starting. Set memory resources limits may work incorrectly");
+                "Memory consumption of plugins in a sidecar-based workspace `{}` is not taken"
+                    + " into account while the workspace is starting. The memory limits may not be"
+                    + " applied correctly.");
           }
         } else {
           // Estimation of memory for starting workspace with Devfile is not implemented yet
           // just ignore such
           LOG.warn(
-              "Devfile based workspace `{}` is starting, its memory is not taken in account "
-                  + "while workspace is starting. Set memory resources limits may work incorrectly");
+              "Memory consumption is not taken into account while a devfile-based workspace"
+                  + " `{}` is starting. The memory limits may not be applied correctly.");
         }
       } else {
         currentlyUsedRamMB += environmentRamCalculator.calculate(activeWorkspace.getRuntime());

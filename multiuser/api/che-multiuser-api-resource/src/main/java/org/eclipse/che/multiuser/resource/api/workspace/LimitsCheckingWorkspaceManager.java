@@ -174,7 +174,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
       checkMaxEnvironmentRam(workspace.getId(), workspace.getConfig());
     } else {
       LOG.warn(
-          "Can not estimate memory needed for devfile based workspace {}. Set environment memory limits may work incorrectly",
+          "Can not estimate memory needed for devfile based workspace `{}`."
+              + " The environment memory limits may not be applied correctly.",
           workspace.getId());
     }
   }
@@ -191,7 +192,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
     if (SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(config.getAttributes())) {
       LOG.warn(
-          "Can not estimate memory needed for sidecar based workspace{}. Set environment memory limits may work incorrectly",
+          "Cannot estimate the memory requirements of a devfile-based workspace `{}`."
+              + " The memory limits may not be applied correctly.",
           workspaceId == null ? "" : ' ' + workspaceId);
     }
 
@@ -223,7 +225,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
           accountId, namespace, workspace.getId(), workspace.getConfig(), envName);
     } else {
       LOG.warn(
-          "Can not estimate memory needed for devfile based workspace {}. Set memory resources limits may work incorrectly",
+          "Cannot estimate the memory requirements of a devfile-based workspace `{}`."
+              + " The memory limits may not be applied correctly.",
           workspace.getId());
     }
   }
@@ -242,8 +245,8 @@ public class LimitsCheckingWorkspaceManager extends WorkspaceManager {
 
     if (SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(config.getAttributes())) {
       LOG.warn(
-          "Sidecar memory of plugins of workspace `{}` is not taken in account. "
-              + "Set memory resources limits may work incorrectly",
+          "The memory requirements for the plugin sidecars of workspace `{}` are not taken"
+              + " into account. The memory limits may not be applied correctly.",
           workspaceId);
     }
 
