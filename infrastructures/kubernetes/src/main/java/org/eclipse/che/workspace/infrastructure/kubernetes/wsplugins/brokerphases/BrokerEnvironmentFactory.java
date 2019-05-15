@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.eclipse.che.api.core.model.workspace.config.Volume;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -69,6 +70,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private static final String BROKER_VOLUME = "broker-config-volume";
   private static final String CONF_FOLDER = "/broker-config";
   private static final String PLUGINS_VOLUME_NAME = "plugins";
+  private static final String SIDECAR_PLUGINS_VOLUME_NAME = "sidecar-plugins";
   private static final String BROKERS_POD_NAME = "che-plugin-broker";
 
   private final ObjectMapper objectMapper = new ObjectMapper();
@@ -229,10 +231,9 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     brokerConfig.container = newContainer(runtimeId, envVars, image, configMapVolume);
     brokerConfig.machineName = Names.machineName(pod, brokerConfig.container);
     brokerConfig.machineConfig = new InternalMachineConfig();
-    brokerConfig
-        .machineConfig
-        .getVolumes()
-        .put(PLUGINS_VOLUME_NAME, new VolumeImpl().withPath("/plugins"));
+    Map<String, Volume> volumes = brokerConfig.machineConfig.getVolumes();
+    volumes.put(SIDECAR_PLUGINS_VOLUME_NAME, new VolumeImpl().withPath("/sidecar-plugins"));
+    volumes.put(PLUGINS_VOLUME_NAME, new VolumeImpl().withPath("/plugins"));
 
     return brokerConfig;
   }
