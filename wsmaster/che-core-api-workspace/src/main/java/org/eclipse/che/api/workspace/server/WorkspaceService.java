@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
@@ -373,8 +372,12 @@ public class WorkspaceService extends Service {
       throws BadRequestException, ServerException, ForbiddenException, NotFoundException,
           ConflictException {
     checkArgument(
-        update.getConfig() != null ^ update.getDevfile() != null,
-        "Required non-null workspace configuration or devfile update but not both");
+        update.getConfig() != null || update.getDevfile() != null,
+        "Required non-null workspace configuration or devfile update");
+    if (update.getDevfile() != null) {
+      // devfile is not null and config should be dropped since it's a stub with name only
+      update.setConfig(null);
+    }
     relativizeRecipeLinks(update.getConfig());
     return asDtoWithLinksAndToken(doUpdate(id, update));
   }

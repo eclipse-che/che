@@ -745,29 +745,6 @@ public class WorkspaceServiceTest {
   }
 
   @Test
-  public void shouldNotUpdateTheWorkspaceWithConfigAndDevfileAtTheSameTime() throws Exception {
-    final WorkspaceDto workspaceDto =
-        newDto(WorkspaceDto.class)
-            .withId("workspace123")
-            .withConfig(newDto(WorkspaceConfigDto.class))
-            .withDevfile(newDto(DevfileDto.class));
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .contentType("application/json")
-            .body(workspaceDto)
-            .when()
-            .put(SECURE_PATH + "/workspace/" + workspaceDto.getId());
-
-    assertEquals(response.getStatusCode(), 400);
-    assertEquals(
-        unwrapError(response),
-        "Required non-null workspace configuration or devfile update but not both");
-  }
-
-  @Test
   public void shouldNotUpdateTheWorkspaceWithoutConfigAndDevfile() throws Exception {
     final WorkspaceDto workspaceDto = newDto(WorkspaceDto.class).withId("workspace123");
 
@@ -782,8 +759,7 @@ public class WorkspaceServiceTest {
 
     assertEquals(response.getStatusCode(), 400);
     assertEquals(
-        unwrapError(response),
-        "Required non-null workspace configuration or devfile update but not both");
+        unwrapError(response), "Required non-null workspace configuration or devfile update");
   }
 
   @Test
