@@ -28,7 +28,6 @@ import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_N
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -423,13 +422,7 @@ public class WorkspaceManagerTest {
     workspaceManager.startWorkspace(
         workspace.getId(), workspace.getConfig().getDefaultEnv(), emptyMap());
 
-    verify(runtimes)
-        .startAsync(
-            workspace,
-            getDefaultEnvironment(workspace),
-            workspace.getConfig().getCommands(),
-            emptyMap(),
-            emptyMap());
+    verify(runtimes).startAsync(workspace, workspace.getConfig().getDefaultEnv(), emptyMap());
     assertNotNull(workspace.getAttributes().get(UPDATED_ATTRIBUTE_NAME));
   }
 
@@ -439,13 +432,8 @@ public class WorkspaceManagerTest {
     mockStart(workspace);
 
     workspaceManager.startWorkspace(workspace.getId(), null, emptyMap());
-    verify(runtimes)
-        .startAsync(
-            workspace,
-            getDefaultEnvironment(workspace),
-            workspace.getConfig().getCommands(),
-            emptyMap(),
-            emptyMap());
+
+    verify(runtimes).startAsync(workspace, null, emptyMap());
   }
 
   @Test
@@ -459,13 +447,7 @@ public class WorkspaceManagerTest {
 
     workspaceManager.startWorkspace(workspace.getId(), "non-default-env", emptyMap());
 
-    verify(runtimes)
-        .startAsync(
-            eq(workspace),
-            eq(getEnvironment(workspace, "non-default-env")),
-            anyList(),
-            anyMap(),
-            anyMap());
+    verify(runtimes).startAsync(eq(workspace), eq("non-default-env"), anyMap());
   }
 
   @Test
@@ -490,22 +472,7 @@ public class WorkspaceManagerTest {
 
     workspaceManager.startWorkspace(workspace.getId(), null, emptyMap());
 
-    verify(runtimes)
-        .startAsync(
-            eq(workspace),
-            eq(Pair.of("default", environment)),
-            eq(singletonList(command)),
-            eq(ImmutableMap.of("attr", "value")),
-            anyMap());
-  }
-
-  @Test(
-      expectedExceptions = NotFoundException.class,
-      expectedExceptionsMessageRegExp = "Workspace '.*' doesn't contain environment '.*'")
-  public void throwsNotFoundExceptionWhenStartWorkspaceWithNotExistingEnv() throws Exception {
-    final WorkspaceImpl workspace = createAndMockWorkspace();
-
-    workspaceManager.startWorkspace(workspace.getId(), "fake", null);
+    verify(runtimes).startAsync(eq(workspace), eq(null), anyMap());
   }
 
   @Test
@@ -519,12 +486,7 @@ public class WorkspaceManagerTest {
     workspaceManager.startWorkspace(workspaceConfig, workspace.getNamespace(), true, emptyMap());
 
     verify(runtimes)
-        .startAsync(
-            workspaceCaptor.capture(),
-            eq(getDefaultEnvironment(workspace)),
-            anyList(),
-            anyMap(),
-            anyMap());
+        .startAsync(workspaceCaptor.capture(), eq(workspaceConfig.getDefaultEnv()), anyMap());
     assertTrue(workspaceCaptor.getValue().isTemporary());
   }
 
@@ -711,18 +673,12 @@ public class WorkspaceManagerTest {
 
   private void mockStart(WorkspaceImpl workspace) throws Exception {
     CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
-    lenient()
-        .when(
-            runtimes.startAsync(
-                eq(workspace), eq(getDefaultEnvironment(workspace)), anyList(), anyMap(), any()))
-        .thenReturn(cmpFuture);
+    lenient().when(runtimes.startAsync(eq(workspace), any(), any())).thenReturn(cmpFuture);
   }
 
   private void mockAnyWorkspaceStart() throws Exception {
     CompletableFuture<Void> cmpFuture = CompletableFuture.completedFuture(null);
-    lenient()
-        .when(runtimes.startAsync(any(), any(), anyList(), anyMap(), any()))
-        .thenReturn(cmpFuture);
+    lenient().when(runtimes.startAsync(any(), any(), any())).thenReturn(cmpFuture);
   }
 
   private void mockAnyWorkspaceStop() throws Exception {
@@ -733,9 +689,7 @@ public class WorkspaceManagerTest {
   private void mockAnyWorkspaceStartFailed(Exception cause) throws Exception {
     final CompletableFuture<Void> cmpFuture = new CompletableFuture<>();
     cmpFuture.completeExceptionally(cause);
-    lenient()
-        .when(runtimes.startAsync(any(), any(), anyList(), anyMap(), any()))
-        .thenReturn(cmpFuture);
+    lenient().when(runtimes.startAsync(any(), any(), any())).thenReturn(cmpFuture);
   }
 
   private static WorkspaceConfigImpl createConfig() {

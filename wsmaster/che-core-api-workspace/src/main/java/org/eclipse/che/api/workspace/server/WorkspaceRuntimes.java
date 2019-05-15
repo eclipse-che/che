@@ -82,7 +82,6 @@ import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.lang.NameGenerator;
-import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.commons.lang.concurrent.ThreadLocalPropagateContext;
 import org.eclipse.che.commons.lang.concurrent.Unlocker;
 import org.eclipse.che.commons.subject.Subject;
@@ -113,6 +112,7 @@ public class WorkspaceRuntimes {
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
   private final RuntimeInfrastructure infrastructure;
   private final ProbeScheduler probeScheduler;
+  private final DevfileToWorkspaceConfigConverter devfileConverter;
   // Unique identifier for this workspace runtimes
   private final String workspaceRuntimesId;
 
@@ -127,7 +127,8 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService) {
+      WorkspaceLockService lockService,
+      DevfileToWorkspaceConfigConverter devfileConverter) {
     this(
         eventService,
         envFactories,
@@ -137,7 +138,8 @@ public class WorkspaceRuntimes {
         ignored,
         probeScheduler,
         statuses,
-        lockService);
+        lockService,
+        devfileConverter);
     this.runtimes = runtimes;
   }
 
@@ -151,7 +153,8 @@ public class WorkspaceRuntimes {
       @SuppressWarnings("unused") DBInitializer ignored,
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
-      WorkspaceLockService lockService) {
+      WorkspaceLockService lockService,
+      DevfileToWorkspaceConfigConverter devfileConverter) {
     this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
     this.statuses = statuses;
@@ -162,6 +165,7 @@ public class WorkspaceRuntimes {
     this.infrastructure = infra;
     this.environmentFactories = ImmutableMap.copyOf(envFactories);
     this.lockService = lockService;
+    this.devfileConverter = devfileConverter;
     LOG.info("Configured factories for environments: '{}'", envFactories.keySet());
     LOG.info("Registered infrastructure '{}'", infra.getName());
     SetView<String> notSupportedByInfra =
@@ -193,14 +197,73 @@ public class WorkspaceRuntimes {
     }
   }
 
-  public void validate(Environment environment)
-      throws NotFoundException, InfrastructureException, ValidationException {
+  /**
+   * Validates the specified workspace configuration.
+   *
+   * <p>The typical usage of this method is performing validating before asynchronous start of
+   * workspace.
+   *
+   * @param workspace workspace config that contains environment or devfile to start
+   * @param envName environment to start. Default will be used if null.
+   * @throws NotFoundException if workspace does not have environment with the specified name
+   * @throws NotFoundException if workspace has environment with type that is not supported
+   * @throws ValidationException if environment is not a valid and can not be run
+   * @throws ServerException if any other issue occurred during validation
+   */
+  public void validate(WorkspaceImpl workspace, @Nullable String envName)
+      throws ValidationException, NotFoundException, ServerException {
+    WorkspaceConfig config = workspace.getConfig();
+
+    if (workspace.getDevfile() != null) {
+      config = devfileConverter.convert(workspace.getDevfile());
+    }
+
+    if (envName != null && !config.getEnvironments().containsKey(envName)) {
+      throw new NotFoundException(
+          format(
+              "Workspace '%s:%s' doesn't contain environment '%s'",
+              workspace.getNamespace(), config.getName(), envName));
+    }
+
+    if (envName == null) {
+      // use default environment if it is not defined
+      envName = config.getDefaultEnv();
+    }
+
+    if (envName == null
+        && SidecarToolingWorkspaceUtil.isSidecarBasedWorkspace(config.getAttributes())) {
+      // Sidecar-based workspaces are allowed not to have any environments
+      return;
+    }
+
+    // validate environment in advance
+    if (envName == null) {
+      throw new NotFoundException(
+          format(
+              "Workspace %s:%s can't use null environment",
+              workspace.getNamespace(), config.getName()));
+    }
+
+    Environment environment = config.getEnvironments().get(envName);
+
+    if (environment == null) {
+      throw new NotFoundException(
+          format(
+              "Workspace does not have environment with name %s that specified to be run",
+              envName));
+    }
+
     String type = environment.getRecipe().getType();
     if (!infrastructure.getRecipeTypes().contains(type)) {
       throw new NotFoundException("Infrastructure not found for type: " + type);
     }
+
     // try to create internal environment to check if the specified environment is valid
-    createInternalEnvironment(environment, emptyMap(), emptyList());
+    try {
+      createInternalEnvironment(environment, emptyMap(), emptyList());
+    } catch (InfrastructureException e) {
+      throw new ServerException(e.getMessage(), e);
+    }
   }
 
   /**
@@ -310,7 +373,7 @@ public class WorkspaceRuntimes {
    * WorkspaceStatus#STARTING} status.
    *
    * @param workspace workspace which environment should be started
-   * @param environment optional environment to run
+   * @param envName optional environment name to run
    * @param options whether machines should be recovered(true) or not(false)
    * @return completable future of start execution.
    * @throws ConflictException when workspace is already running
@@ -322,11 +385,7 @@ public class WorkspaceRuntimes {
    */
   @Traced
   public CompletableFuture<Void> startAsync(
-      WorkspaceImpl workspace,
-      @Nullable Pair<String, Environment> environment,
-      List<? extends Command> commands,
-      Map<String, String> attributes,
-      Map<String, String> options)
+      WorkspaceImpl workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
     TracingTags.WORKSPACE_ID.set(workspace.getId());
     TracingTags.STACK_ID.set(() -> workspace.getAttributes().getOrDefault("stackId", "no stack"));
@@ -340,14 +399,21 @@ public class WorkspaceRuntimes {
               workspace.getName()));
     }
 
+    WorkspaceConfig config = workspace.getConfig();
+    if (config == null) {
+      config = devfileConverter.convert(workspace.getDevfile());
+    }
+
+    if (envName == null) {
+      envName = config.getDefaultEnv();
+    }
+
     final String ownerId = EnvironmentContext.getCurrent().getSubject().getUserId();
-    final RuntimeIdentity runtimeId =
-        new RuntimeIdentityImpl(
-            workspaceId, environment == null ? null : environment.first, ownerId);
+    final RuntimeIdentity runtimeId = new RuntimeIdentityImpl(workspaceId, envName, ownerId);
     try {
       InternalEnvironment internalEnv =
           createInternalEnvironment(
-              environment == null ? null : environment.second, attributes, commands);
+              config.getEnvironments().get(envName), config.getAttributes(), config.getCommands());
 
       RuntimeContext runtimeContext = infrastructure.prepare(runtimeId, internalEnv);
       InternalRuntime runtime = runtimeContext.getRuntime();
@@ -585,6 +651,10 @@ public class WorkspaceRuntimes {
 
     Environment environment = null;
     WorkspaceConfig workspaceConfig = workspace.getConfig();
+    if (workspaceConfig == null) {
+      workspaceConfig = devfileConverter.convert(workspace.getDevfile());
+    }
+
     if (identity.getEnvName() != null) {
       environment = workspaceConfig.getEnvironments().get(identity.getEnvName());
       if (environment == null) {
