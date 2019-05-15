@@ -16,6 +16,7 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATT
 import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_PREFERENCE_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
@@ -51,6 +52,7 @@ public class PluginComponentToWorkspaceApplierTest {
     superPluginComponent.setId(superPluginId);
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
     superPluginComponent.setMemoryLimit("1234M");
+    superPluginComponent.getPreferences().put("java-home", "/home/user/jdk11");
 
     ComponentImpl customPluginComponent = new ComponentImpl();
     customPluginComponent.setAlias("custom");
@@ -79,6 +81,12 @@ public class PluginComponentToWorkspaceApplierTest {
             .getAttributes()
             .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
         "1234M");
+
+    assertEquals(
+        workspaceConfig
+            .getAttributes()
+            .get(format(PLUGIN_PREFERENCE_ATTR_TEMPLATE, "eclipse/super-plugin", "java-home")),
+        "/home/user/jdk11");
   }
 
   @Test

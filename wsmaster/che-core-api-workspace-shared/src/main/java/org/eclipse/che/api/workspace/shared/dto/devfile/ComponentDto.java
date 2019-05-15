@@ -43,6 +43,15 @@ public interface ComponentDto extends Component {
 
   ComponentDto withId(String id);
 
+  // plugin
+
+  @Override
+  Map<String, String> getPreferences();
+
+  void setPreferences(Map<String, String> preferences);
+
+  ComponentDto withPreferences(Map<String, String> preferences);
+
   // k8s/OS
 
   @Override

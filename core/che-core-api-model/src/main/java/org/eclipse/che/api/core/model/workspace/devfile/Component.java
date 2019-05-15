@@ -29,6 +29,12 @@ public interface Component {
   String getId();
 
   /**
+   * Returns the preferences of the plugin. Example value of preference: {@code java.home:
+   * /home/user/jdk11}
+   */
+  Map<String, String> getPreferences();
+
+  /**
    * Returns absolute or devfile-relative location of Kubernetes list yaml file. It is mandatory and
    * applicable only for 'kubernetes' and 'openshift' components types.
    */
