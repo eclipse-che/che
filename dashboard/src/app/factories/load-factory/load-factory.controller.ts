@@ -17,7 +17,7 @@ import {RouteHistory} from '../../../components/routing/route-history.service';
 import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
 import {CheJsonRpcMasterApi} from '../../../components/api/json-rpc/che-json-rpc-master-api';
 
-const WS_AGENT_STEP: number = 3;
+const WS_AGENT_STEP: number = 4;
 
 /**
  * This class is handling the controller for the factory loading.
