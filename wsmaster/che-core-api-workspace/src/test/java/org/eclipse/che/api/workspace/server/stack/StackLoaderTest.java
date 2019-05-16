@@ -61,6 +61,8 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class StackLoaderTest {
 
+  @Mock private StackValidator stackValidator;
+
   @Mock private StackDao stackDao;
 
   @Mock private DBInitializer dbInitializer;
@@ -72,15 +74,20 @@ public class StackLoaderTest {
     when(dbInitializer.isBareInit()).thenReturn(true);
     stackLoader =
         new StackLoader(
-            false, ImmutableMap.of("stacks.json", "stack_img"), stackDao, dbInitializer);
+            false,
+            ImmutableMap.of("test-stacks.json", "stack_img"),
+            stackValidator,
+            stackDao,
+            dbInitializer);
   }
 
   @Test
   public void predefinedStackWithValidJsonShouldBeUpdated() throws Exception {
     stackLoader.start();
 
-    verify(stackDao, times(5)).update(any());
+    verify(stackDao, times(6)).update(any());
     verify(stackDao, never()).create(any());
+    verify(stackValidator, times(6)).check(any());
   }
 
   @Test
@@ -89,8 +96,9 @@ public class StackLoaderTest {
 
     stackLoader.start();
 
-    verify(stackDao, times(5)).update(any());
-    verify(stackDao, times(5)).create(any());
+    verify(stackDao, times(6)).update(any());
+    verify(stackDao, times(6)).create(any());
+    verify(stackValidator, times(6)).check(any());
   }
 
   @Test
@@ -99,8 +107,9 @@ public class StackLoaderTest {
 
     stackLoader.start();
 
-    verify(stackDao, times(5)).update(any());
+    verify(stackDao, times(6)).update(any());
     verify(stackDao, never()).create(any());
+    verify(stackValidator, times(6)).check(any());
   }
 
   @Test
@@ -110,20 +119,22 @@ public class StackLoaderTest {
 
     stackLoader.start();
 
-    verify(stackDao, times(5)).update(any());
-    verify(stackDao, times(5)).create(any());
+    verify(stackDao, times(6)).update(any());
+    verify(stackDao, times(6)).create(any());
+    verify(stackValidator, times(6)).check(any());
   }
 
   @Test
   public void testOverrideStacksWithoutImages() throws Exception {
     final Map<String, String> map = new HashMap<>();
-    map.put("stacks.json", null);
-    stackLoader = new StackLoader(true, map, stackDao, dbInitializer);
+    map.put("test-stacks.json", null);
+    stackLoader = new StackLoader(true, map, stackValidator, stackDao, dbInitializer);
 
     stackLoader.start();
 
-    verify(stackDao, times(5)).update(any());
+    verify(stackDao, times(6)).update(any());
     verify(stackDao, never()).create(any());
+    verify(stackValidator, times(6)).check(any());
   }
 
   @Test
@@ -134,10 +145,11 @@ public class StackLoaderTest {
 
     verify(stackDao, never()).update(any());
     verify(stackDao, never()).create(any());
+    verify(stackValidator, never()).check(any());
   }
 
   @Test
-  public void dtoShouldBeSerialized() throws Exception {
+  public void dtoShouldBeSerializedStackWithWsConfig() throws Exception {
     StackDto stackDtoDescriptor = newDto(StackDto.class).withName("nameWorkspaceConfig");
     StackComponentDto stackComponentDto =
         newDto(StackComponentDto.class).withName("java").withVersion("1.8");

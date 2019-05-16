@@ -25,6 +25,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.stack.StackLoader;
+import org.eclipse.che.api.workspace.server.stack.StackValidator;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.core.db.DBInitializer;
@@ -54,10 +55,11 @@ public class MultiuserStackLoader extends StackLoader {
   public MultiuserStackLoader(
       @Named("che.predefined.stacks.reload_on_start") boolean reloadStacksOnStart,
       @Named(CHE_PREDEFINED_STACKS) Map<String, String> stacks2images,
+      StackValidator stackValidator,
       StackDao stackDao,
       JpaStackPermissionsDao permissionsDao,
       DBInitializer dbInitializer) {
-    super(reloadStacksOnStart, stacks2images, stackDao, dbInitializer);
+    super(reloadStacksOnStart, stacks2images, stackValidator, stackDao, dbInitializer);
     this.permissionsDao = permissionsDao;
   }
 

@@ -29,6 +29,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -62,16 +63,19 @@ public class StackLoader {
   private final Map<String, String> stacks2images;
   private final DBInitializer dbInitializer;
   private final Boolean reloadStacksOnStart;
+  private final StackValidator stackValidator;
 
   @Inject
   @SuppressWarnings("unused")
   public StackLoader(
       @Named("che.predefined.stacks.reload_on_start") boolean reloadStacksOnStart,
       @Named(CHE_PREDEFINED_STACKS) Map<String, String> stacks2images,
+      StackValidator stackValidator,
       StackDao stackDao,
       DBInitializer dbInitializer) {
     this.reloadStacksOnStart = reloadStacksOnStart;
     this.stacks2images = stacks2images;
+    this.stackValidator = stackValidator;
     this.stackDao = stackDao;
     this.dbInitializer = dbInitializer;
     GSON = new GsonBuilder().create();
@@ -98,7 +102,7 @@ public class StackLoader {
           final Path imagesDirPath = !isNullOrEmpty(imagesDir) ? Paths.get(imagesDir) : null;
           stacks.forEach(stack -> loadStack(stack, imagesDirPath));
         } catch (Exception ex) {
-          LOG.error("Failed to store stacks from '{}'", stackFile);
+          LOG.error("Failed to store stacks from '{}'. Cause: %s", stackFile, ex.getMessage());
         }
       }
       LOG.info("Stacks initialization finished");
@@ -108,13 +112,15 @@ public class StackLoader {
   protected void loadStack(StackImpl stack, Path imagePath) {
     setIconData(stack, imagePath);
     try {
+      stackValidator.check(stack);
       try {
         stackDao.update(stack);
       } catch (NotFoundException ex) {
         stackDao.create(stack);
       }
-    } catch (ServerException | ConflictException ex) {
-      LOG.warn(format("Failed to load stack with id '%s' ", stack.getId()), ex.getMessage());
+    } catch (BadRequestException | ServerException | NotFoundException | ConflictException ex) {
+      LOG.warn(
+          format("Failed to load stack with id '%s'. Cause: %s", stack.getId(), ex.getMessage()));
     }
   }
 

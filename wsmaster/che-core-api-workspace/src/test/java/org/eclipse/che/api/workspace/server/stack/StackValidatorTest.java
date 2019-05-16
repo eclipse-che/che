@@ -20,6 +20,7 @@ import java.util.Collections;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.workspace.server.WorkspaceValidator;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
 import org.mockito.InjectMocks;
@@ -47,7 +48,7 @@ public class StackValidatorTest {
   }
 
   @Test
-  public void shouldcheck() throws Exception {
+  public void shouldCheck() throws Exception {
     validator.check(createStack());
   }
 
@@ -96,16 +97,34 @@ public class StackValidatorTest {
     validator.check(createStack().withScope("not-valid"));
   }
 
-  @Test(
-      expectedExceptions = BadRequestException.class,
-      expectedExceptionsMessageRegExp = "Workspace config required")
-  public void shouldValidateIfSourceIsStackSourceAndWorkspaceConfigIsNull() throws Exception {
-    validator.check(createStack().withWorkspaceConfig(null));
+  @Test
+  public void shouldValidateIfStackWorkspaceConfigIsNotNull() throws Exception {
+    validator.check(
+        createStack().withDevfile(null).withWorkspaceConfig(newDto(WorkspaceConfigDto.class)));
   }
 
   @Test
-  public void shouldNotcheck() throws Exception {
-    validator.check(createStack());
+  public void shouldValidateIfStackDevfileIsNotNull() throws Exception {
+    validator.check(createStack().withWorkspaceConfig(null).withDevfile(newDto(DevfileDto.class)));
+  }
+
+  @Test(
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp =
+          "Required non-null workspace configuration or devfile but not both")
+  public void shouldNotValidateIfWorkspaceConfigAndDevfileAreNull() throws Exception {
+    validator.check(createStack().withWorkspaceConfig(null));
+  }
+
+  @Test(
+      expectedExceptions = BadRequestException.class,
+      expectedExceptionsMessageRegExp =
+          "Required non-null workspace configuration or devfile but not both")
+  public void shouldNotValidateIfWorkspaceConfigAndDevfileAreSet() throws Exception {
+    validator.check(
+        createStack()
+            .withWorkspaceConfig(newDto(WorkspaceConfigDto.class))
+            .withDevfile(newDto(DevfileDto.class)));
   }
 
   private static StackDto createStack() {
