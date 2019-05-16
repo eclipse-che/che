@@ -286,43 +286,39 @@ public class StackDaoTest {
   }
 
   private static StackImpl createStackWithWsConfig(String id, String name) {
-    final StackImpl stack =
-        StackImpl.builder()
-            .setId(id)
-            .setName(name)
-            .setCreator("user123")
-            .setDescription(id + "-description")
-            .setScope(id + "-scope")
-            .setTags(asList(id + "-tag1", id + "-tag2"))
-            .setComponents(
-                asList(
-                    new StackComponentImpl(id + "-component1", id + "-component1-version"),
-                    new StackComponentImpl(id + "-component2", id + "-component2-version")))
-            .setStackIcon(
-                new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
-            .setWorkspaceConfig(createWorkspaceConfig("test"))
-            .build();
-    return stack;
+    return StackImpl.builder()
+        .setId(id)
+        .setName(name)
+        .setCreator("user123")
+        .setDescription(id + "-description")
+        .setScope(id + "-scope")
+        .setTags(asList(id + "-tag1", id + "-tag2"))
+        .setComponents(
+            asList(
+                new StackComponentImpl(id + "-component1", id + "-component1-version"),
+                new StackComponentImpl(id + "-component2", id + "-component2-version")))
+        .setStackIcon(
+            new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
+        .setWorkspaceConfig(createWorkspaceConfig("test"))
+        .build();
   }
 
   private static StackImpl createStackWithDevfile(String id, String name) {
-    final StackImpl stack =
-        StackImpl.builder()
-            .setId(id)
-            .setName(name)
-            .setCreator("user123")
-            .setDescription(id + "-description")
-            .setScope(id + "-scope")
-            .setTags(asList(id + "-tag1", id + "-tag2"))
-            .setComponents(
-                asList(
-                    new StackComponentImpl(id + "-component1", id + "-component1-version"),
-                    new StackComponentImpl(id + "-component2", id + "-component2-version")))
-            .setStackIcon(
-                new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
-            .setDevfile(createDevfile("test"))
-            .build();
-    return stack;
+    return StackImpl.builder()
+        .setId(id)
+        .setName(name)
+        .setCreator("user123")
+        .setDescription(id + "-description")
+        .setScope(id + "-scope")
+        .setTags(asList(id + "-tag1", id + "-tag2"))
+        .setComponents(
+            asList(
+                new StackComponentImpl(id + "-component1", id + "-component1-version"),
+                new StackComponentImpl(id + "-component2", id + "-component2-version")))
+        .setStackIcon(
+            new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
+        .setDevfile(createDevfile("test"))
+        .build();
   }
 
   private <T extends CascadeEvent> CascadeEventSubscriber<T> mockCascadeEventSubscriber() {
