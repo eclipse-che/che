@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.spi.tck;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createDevfile;
 import static org.eclipse.che.api.workspace.server.spi.tck.WorkspaceDaoTest.createWorkspaceConfig;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
@@ -33,7 +34,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.event.BeforeStackRemovedEvent;
 import org.eclipse.che.api.workspace.server.event.StackPersistedEvent;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.StackDao;
@@ -59,7 +59,7 @@ public class StackDaoTest {
 
   public static final String SUITE_NAME = "StackDaoTck";
 
-  private static final int STACKS_SIZE = 5;
+  private static final int STACKS_SIZE = 6;
 
   private StackImpl[] stacks;
 
@@ -72,8 +72,11 @@ public class StackDaoTest {
   @BeforeMethod
   private void createStacks() throws TckRepositoryException {
     stacks = new StackImpl[STACKS_SIZE];
-    for (int i = 0; i < STACKS_SIZE; i++) {
-      stacks[i] = createStack("stack-" + i, "name-" + i);
+    for (int i = 0; i < STACKS_SIZE / 2; i++) {
+      stacks[i] = createStackWithWsConfig("stack-" + i, "name-" + i);
+    }
+    for (int i = STACKS_SIZE / 2; i < STACKS_SIZE; i++) {
+      stacks[i] = createStackWithDevfile("stack-" + i, "name-" + i);
     }
     stackRepo.createAll(Stream.of(stacks).map(StackImpl::new).collect(toList()));
   }
@@ -102,7 +105,7 @@ public class StackDaoTest {
 
   @Test(dependsOnMethods = "shouldGetById")
   public void shouldCreateStack() throws Exception {
-    final StackImpl stack = createStack("new-stack", "new-stack-name");
+    final StackImpl stack = createStackWithWsConfig("new-stack", "new-stack-name");
 
     stackDao.create(stack);
 
@@ -113,7 +116,7 @@ public class StackDaoTest {
       dependsOnMethods = "shouldThrowNotFoundExceptionWhenGettingNonExistingStack",
       expectedExceptions = NotFoundException.class)
   public void shouldNotCreateStackWhenSubscriberThrowsExceptionOnStackStoring() throws Exception {
-    final StackImpl stack = createStack("new-stack", "new-stack-name");
+    final StackImpl stack = createStackWithWsConfig("new-stack", "new-stack-name");
 
     CascadeEventSubscriber<StackPersistedEvent> subscriber = mockCascadeEventSubscriber();
     doThrow(new ConflictException("error")).when(subscriber).onCascadeEvent(any());
@@ -132,7 +135,7 @@ public class StackDaoTest {
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionWhenCreatingStackWithIdThatAlreadyExists()
       throws Exception {
-    final StackImpl stack = createStack(stacks[0].getId(), "new-name");
+    final StackImpl stack = createStackWithWsConfig(stacks[0].getId(), "new-name");
 
     stackDao.create(stack);
   }
@@ -140,7 +143,7 @@ public class StackDaoTest {
   @Test(expectedExceptions = ConflictException.class)
   public void shouldThrowConflictExceptionWhenCreatingStackWithNameThatAlreadyExists()
       throws Exception {
-    final StackImpl stack = createStack("new-stack-id", stacks[0].getName());
+    final StackImpl stack = createStackWithWsConfig("new-stack-id", stacks[0].getName());
 
     stackDao.create(stack);
   }
@@ -229,7 +232,7 @@ public class StackDaoTest {
 
   @Test(expectedExceptions = NotFoundException.class)
   public void shouldThrowNotFoundExceptionWhenUpdatingNonExistingStack() throws Exception {
-    stackDao.update(createStack("new-stack", "new-stack-name"));
+    stackDao.update(createStackWithWsConfig("new-stack", "new-stack-name"));
   }
 
   @Test(expectedExceptions = NullPointerException.class)
@@ -271,7 +274,7 @@ public class StackDaoTest {
     final boolean[] isNotified = new boolean[] {false};
     eventService.subscribe(event -> isNotified[0] = true, StackPersistedEvent.class);
 
-    stackDao.create(createStack("test", "test"));
+    stackDao.create(createStackWithWsConfig("test", "test"));
 
     assertTrue(isNotified[0], "Event subscriber notified");
   }
@@ -282,7 +285,7 @@ public class StackDaoTest {
     }
   }
 
-  private static StackImpl createStack(String id, String name) {
+  private static StackImpl createStackWithWsConfig(String id, String name) {
     final StackImpl stack =
         StackImpl.builder()
             .setId(id)
@@ -297,9 +300,28 @@ public class StackDaoTest {
                     new StackComponentImpl(id + "-component2", id + "-component2-version")))
             .setStackIcon(
                 new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
+            .setWorkspaceConfig(createWorkspaceConfig("test"))
             .build();
-    final WorkspaceConfigImpl config = createWorkspaceConfig("test");
-    stack.setWorkspaceConfig(config);
+    return stack;
+  }
+
+  private static StackImpl createStackWithDevfile(String id, String name) {
+    final StackImpl stack =
+        StackImpl.builder()
+            .setId(id)
+            .setName(name)
+            .setCreator("user123")
+            .setDescription(id + "-description")
+            .setScope(id + "-scope")
+            .setTags(asList(id + "-tag1", id + "-tag2"))
+            .setComponents(
+                asList(
+                    new StackComponentImpl(id + "-component1", id + "-component1-version"),
+                    new StackComponentImpl(id + "-component2", id + "-component2-version")))
+            .setStackIcon(
+                new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
+            .setDevfile(createDevfile("test"))
+            .build();
     return stack;
   }
 

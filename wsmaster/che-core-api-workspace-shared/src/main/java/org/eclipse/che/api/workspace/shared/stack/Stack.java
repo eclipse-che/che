@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.shared.stack;
 
 import java.util.List;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.commons.annotation.Nullable;
 
 /**
@@ -55,11 +56,22 @@ public interface Stack {
   List<String> getTags();
 
   /**
-   * Return the {@link WorkspaceConfig} for creation workspace. This workspaceConfig can be used for
-   * store machine source, list predefined commands, projects etc.
+   * Return the {@link WorkspaceConfig} for creation workspace.
+   *
+   * <p>The only one format (workspace config or devfile) may be used for workspace at the same
+   * time.
    */
   @Nullable
   WorkspaceConfig getWorkspaceConfig();
+
+  /**
+   * Return the {@link Devfile} for creation workspace.
+   *
+   * <p>The only one format (workspace config or devfile) may be used for workspace at the same
+   * time.
+   */
+  @Nullable
+  Devfile getDevfile();
 
   /**
    * Return the list of the components that stack consist of.

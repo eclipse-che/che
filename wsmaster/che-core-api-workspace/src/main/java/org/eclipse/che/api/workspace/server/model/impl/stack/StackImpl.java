@@ -29,7 +29,9 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
+import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.api.workspace.shared.stack.StackComponent;
@@ -86,6 +88,10 @@ public class StackImpl implements Stack {
   @JoinColumn(name = "workspaceconfig_id")
   private WorkspaceConfigImpl workspaceConfig;
 
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "devfile_id")
+  private DevfileImpl devfile;
+
   @ElementCollection
   @CollectionTable(name = "stack_components", joinColumns = @JoinColumn(name = "stack_id"))
   private List<StackComponentImpl> components;
@@ -103,6 +109,7 @@ public class StackImpl implements Stack {
         stack.getCreator(),
         stack.getTags(),
         stack.getWorkspaceConfig(),
+        stack.getDevfile(),
         stack.getComponents(),
         stack.getStackIcon());
   }
@@ -116,6 +123,7 @@ public class StackImpl implements Stack {
         stack.getCreator(),
         stack.getTags(),
         stack.getWorkspaceConfig(),
+        stack.getDevfile(),
         stack.getComponents(),
         null);
   }
@@ -128,6 +136,7 @@ public class StackImpl implements Stack {
       String creator,
       List<String> tags,
       WorkspaceConfig workspaceConfig,
+      Devfile devfile,
       List<? extends StackComponent> components,
       StackIcon stackIcon) {
     this.id = id;
@@ -143,6 +152,9 @@ public class StackImpl implements Stack {
     }
     if (workspaceConfig != null) {
       this.workspaceConfig = new WorkspaceConfigImpl(workspaceConfig);
+    }
+    if (devfile != null) {
+      this.devfile = new DevfileImpl(devfile);
     }
     if (components != null) {
       this.components = components.stream().map(StackComponentImpl::new).collect(toList());
@@ -216,6 +228,15 @@ public class StackImpl implements Stack {
   }
 
   @Override
+  public DevfileImpl getDevfile() {
+    return devfile;
+  }
+
+  public void setDevfile(DevfileImpl devfile) {
+    this.devfile = devfile;
+  }
+
+  @Override
   public List<StackComponentImpl> getComponents() {
     if (components == null) {
       components = new ArrayList<>();
@@ -251,6 +272,7 @@ public class StackImpl implements Stack {
         && Objects.equals(creator, that.creator)
         && getTags().equals(that.getTags())
         && Objects.equals(workspaceConfig, that.workspaceConfig)
+        && Objects.equals(devfile, that.devfile)
         && getComponents().equals(that.getComponents())
         && Objects.equals(stackIcon, that.stackIcon);
   }
@@ -265,6 +287,7 @@ public class StackImpl implements Stack {
     hash = 31 * hash + Objects.hashCode(creator);
     hash = 31 * hash + getTags().hashCode();
     hash = 31 * hash + Objects.hashCode(workspaceConfig);
+    hash = 31 * hash + Objects.hashCode(devfile);
     hash = 31 * hash + getComponents().hashCode();
     hash = 31 * hash + Objects.hashCode(stackIcon);
     return hash;
@@ -292,6 +315,8 @@ public class StackImpl implements Stack {
         + tags
         + ", workspaceConfig="
         + workspaceConfig
+        + ", devfile="
+        + devfile
         + ", components="
         + components
         + ", stackIcon="
@@ -308,6 +333,7 @@ public class StackImpl implements Stack {
     private String creator;
     private List<String> tags;
     private WorkspaceConfig workspaceConfig;
+    private Devfile devfile;
     private StackSource source;
     private List<? extends StackComponent> components;
     private StackIcon stackIcon;
@@ -352,6 +378,11 @@ public class StackImpl implements Stack {
       return this;
     }
 
+    public StackBuilder setDevfile(Devfile devfile) {
+      this.devfile = devfile;
+      return this;
+    }
+
     public StackBuilder setSource(StackSource source) {
       this.source = source;
       return this;
@@ -369,7 +400,16 @@ public class StackImpl implements Stack {
 
     public StackImpl build() {
       return new StackImpl(
-          id, name, description, scope, creator, tags, workspaceConfig, components, stackIcon);
+          id,
+          name,
+          description,
+          scope,
+          creator,
+          tags,
+          workspaceConfig,
+          devfile,
+          components,
+          stackIcon);
     }
   }
 }

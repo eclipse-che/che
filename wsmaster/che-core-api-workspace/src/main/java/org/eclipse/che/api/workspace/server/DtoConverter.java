@@ -243,6 +243,11 @@ public final class DtoConverter {
       workspaceConfigDto = asDto(stack.getWorkspaceConfig());
     }
 
+    DevfileDto devfileDto = null;
+    if (stack.getDevfile() != null) {
+      devfileDto = asDto(stack.getDevfile());
+    }
+
     List<StackComponentDto> componentsDto = null;
     if (stack.getComponents() != null) {
       componentsDto =
@@ -265,7 +270,8 @@ public final class DtoConverter {
         .withScope(stack.getScope())
         .withTags(stack.getTags())
         .withComponents(componentsDto)
-        .withWorkspaceConfig(workspaceConfigDto);
+        .withWorkspaceConfig(workspaceConfigDto)
+        .withDevfile(devfileDto);
   }
 
   /** Converts {@link ProjectConfig} to {@link ProjectConfigDto}. */

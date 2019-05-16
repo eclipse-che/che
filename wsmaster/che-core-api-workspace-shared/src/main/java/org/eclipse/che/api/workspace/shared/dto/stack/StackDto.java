@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.che.api.core.rest.shared.dto.Hyperlinks;
 import org.eclipse.che.api.core.rest.shared.dto.Link;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.stack.Stack;
 import org.eclipse.che.dto.shared.DTO;
 
@@ -52,6 +53,13 @@ public interface StackDto extends Stack, Hyperlinks {
   void setWorkspaceConfig(WorkspaceConfigDto workspaceConfigDto);
 
   StackDto withWorkspaceConfig(WorkspaceConfigDto workspaceConfigDto);
+
+  @Override
+  DevfileDto getDevfile();
+
+  void setDevfile(DevfileDto devfile);
+
+  StackDto withDevfile(DevfileDto devfile);
 
   @Override
   List<StackComponentDto> getComponents();

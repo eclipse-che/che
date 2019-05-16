@@ -363,5 +363,57 @@
                 }
             ]
         }
+    },
+    {
+        "id": "che7-preview-devfile",
+        "creator": "ide",
+        "name": "Che 7",
+        "description": "Workspace.next sidecars and Theia as IDE",
+        "scope": "general",
+        "tags": [
+            "ws.next",
+            "Theia",
+            "Java",
+            "JDK",
+            "Node.JS",
+            "NPM",
+            "Yeoman"
+        ],
+        "components": [
+            {
+                "name": "Centos",
+                "version": "7"
+            },
+            {
+                "name": "OpenJDK",
+                "version": "1.8.0_181"
+            },
+            {
+                "name": "NodeJS",
+                "version": "8.12.0"
+            },
+            {
+                "name": "NPM",
+                "version": "6.4.1"
+            }
+        ],
+        "devfile": {
+            "specVersion": "0.0.1",
+            "name": "che7",
+            "components": [
+                {
+                    "type": "cheEditor",
+                    "id": "eclipse/che-theia/next"
+                },
+                {
+                    "type": "chePlugin",
+                    "id": "eclipse/che-machine-exec-plugin/0.0.1"
+                },
+                {
+                    "type": "kubernetes",
+                    "referenceContent": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: ws\n  spec:\n   containers:\n    - \n     image: 'eclipse/che-dev:nightly'\n     name: dev\n     resources:\n      limits:\n       memory: 512Mi\n"
+                }
+            ]
+        }
     }
 ]

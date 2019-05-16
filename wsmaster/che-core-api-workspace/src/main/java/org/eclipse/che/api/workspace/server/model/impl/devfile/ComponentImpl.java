@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import static java.util.stream.Collectors.toCollection;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ public class ComponentImpl implements Component {
   @Column(name = "id")
   private Long generatedId;
 
+  @SerializedName("id")
   @Column(name = "component_id", nullable = false)
   private String componentId;
 

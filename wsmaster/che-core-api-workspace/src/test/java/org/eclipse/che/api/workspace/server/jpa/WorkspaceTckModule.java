@@ -125,9 +125,12 @@ public class WorkspaceTckModule extends TckModule {
 
     @Override
     public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
-      for (StackImpl stack : entities) {
-        stack.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
-      }
+      entities
+          .stream()
+          .filter(s -> s.getWorkspaceConfig() != null)
+          .map(StackImpl::getWorkspaceConfig)
+          .flatMap(ws -> ws.getProjects().stream())
+          .forEach(ProjectConfigImpl::prePersistAttributes);
       super.createAll(entities);
     }
   }

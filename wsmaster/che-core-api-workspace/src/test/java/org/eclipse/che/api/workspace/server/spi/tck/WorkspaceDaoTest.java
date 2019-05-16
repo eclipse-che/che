@@ -846,7 +846,7 @@ public class WorkspaceDaoTest {
     return workspace;
   }
 
-  private static DevfileImpl createDevfile(String name) {
+  public static DevfileImpl createDevfile(String name) {
 
     SourceImpl source1 =
         new SourceImpl("type1", "http://location", "branch1", "point1", "tag1", "commit1");
