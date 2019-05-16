@@ -5,7 +5,7 @@
 dashboard/** @ashumilova @benoitf
 
 # dockerfiles
-dockerfiles/** @riuvshin @benoitf
+dockerfiles/** @benoitf
 
 # ide
 ide/che-core-ide-stacks/** @ashumilova
@@ -14,7 +14,7 @@ ide/che-core-ide-stacks/** @ashumilova
 agents/** @tolusha
 
 # assembly
-assembly/** @riuvshin @skabashnyuk
+assembly/** @skabashnyuk
 assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk
 
 # core
@@ -62,7 +62,7 @@ wsagent/che-core-api-project/src/main/java/org/eclipse/che/api/search/server/** 
 wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabashnyuk
 
 # deploy
-deploy/** @riuvshin @l0rd @eivantsov @sleshchenko
+deploy/** @l0rd @sleshchenko
 deploy/openshift/templates/che-monitoring.yaml @skabashnyuk @metlos
 
 # selenium tests
