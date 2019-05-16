@@ -8,13 +8,13 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import * as mocha from 'mocha';
-import { Driver } from './Driver';
+import { IDriver } from './IDriver';
 import { e2eContainer } from '../inversify.config';
 import { TYPES } from '../inversify.types';
 import * as fs from 'fs';
 import { TestConstants } from '../TestConstants';
 
-const driver: Driver = e2eContainer.get(TYPES.Driver);
+const driver: IDriver = e2eContainer.get(TYPES.Driver);
 
 class CheReporter extends mocha.reporters.Spec {
 
@@ -41,63 +41,63 @@ class CheReporter extends mocha.reporters.Spec {
       TS_SELENIUM_PLUGIN_PRECENCE_POLLING: ${TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_POLLING}
 
 ########################################################
-      `
-      console.log(launchInformation)
-    })
+      `;
+      console.log(launchInformation);
+    });
 
     runner.on('end', async function (test: mocha.Test) {
       // ensure that fired events done
-      await driver.get().sleep(5000)
+      await driver.get().sleep(5000);
 
       // close driver
-      await driver.get().quit()
-    })
+      await driver.get().quit();
+    });
 
     runner.on('fail', async function (test: mocha.Test) {
 
-      const reportDirPath: string = './report'
-      const testFullTitle: string = test.fullTitle().replace(/\s/g, '_')
-      const testTitle: string = test.title.replace(/\s/g, '_')
+      const reportDirPath: string = './report';
+      const testFullTitle: string = test.fullTitle().replace(/\s/g, '_');
+      const testTitle: string = test.title.replace(/\s/g, '_');
 
-      const testReportDirPath: string = `${reportDirPath}/${testFullTitle}`
-      const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`
-      const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`
+      const testReportDirPath: string = `${reportDirPath}/${testFullTitle}`;
+      const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`;
+      const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
 
       // create reporter dir if not exist
       await fs.exists(reportDirPath, async isDirExist => {
         if (!isDirExist) {
           await fs.mkdir(reportDirPath, err => {
             if (err) {
-              throw err
+              throw err;
             }
-          })
+          });
         }
-      })
+      });
 
       // create dir for collected data if not exist
       await fs.exists(testReportDirPath, async isDirExist => {
         if (!isDirExist) {
           await fs.mkdir(testReportDirPath, err => {
             if (err) {
-              throw err
+              throw err;
             }
-          })
+          });
         }
-      })
+      });
 
       // take screenshot and write to file
       const screenshot: string = await driver.get().takeScreenshot();
-      const screenshotStream = fs.createWriteStream(screenshotFileName)
-      screenshotStream.write(new Buffer(screenshot, 'base64'))
-      screenshotStream.end()
+      const screenshotStream = fs.createWriteStream(screenshotFileName);
+      screenshotStream.write(new Buffer(screenshot, 'base64'));
+      screenshotStream.end();
 
       // take pagesource and write to file
-      const pageSource: string = await driver.get().getPageSource()
-      const pageSourceStream = fs.createWriteStream(pageSourceFileName)
-      pageSourceStream.write(new Buffer(pageSource))
-      pageSourceStream.end()
+      const pageSource: string = await driver.get().getPageSource();
+      const pageSourceStream = fs.createWriteStream(pageSourceFileName);
+      pageSourceStream.write(new Buffer(pageSource));
+      pageSourceStream.end();
 
-    })
+    });
   }
 }
 

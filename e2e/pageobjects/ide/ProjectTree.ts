@@ -18,12 +18,150 @@ import { Editor } from './Editor';
 
 @injectable()
 export class ProjectTree {
+
+    private static readonly PROJECT_TREE_CONTAINER_CSS: string = '#theia-left-side-panel .theia-TreeContainer';
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide,
         @inject(CLASSES.Editor) private readonly editor: Editor) { }
 
-    private static readonly PROJECT_TREE_CONTAINER_CSS: string = "#theia-left-side-panel .theia-TreeContainer";
+    async openProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const selectedExplorerButtonLocator: By = By.xpath(Ide.SELECTED_EXPLORER_BUTTON_XPATH);
+
+        await this.ide.waitExplorerButton(timeout);
+
+        const isButtonEnabled: boolean = await this.driverHelper.waitVisibilityBoolean(selectedExplorerButtonLocator);
+
+        if (!isButtonEnabled) {
+            await this.ide.clickOnExplorerButton();
+        }
+
+        await this.waitProjectTreeContainer();
+    }
+
+    async waitItemExpanded(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const expandedItemLocator: By = By.css(this.getExpandedItemCssLocator(itemPath));
+
+        await this.driverHelper.waitVisibility(expandedItemLocator, timeout);
+    }
+
+    async waitItemCollapsed(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const collapsedItemLocator: By = By.css(this.getCollapsedItemCssLocator(itemPath));
+
+        await this.driverHelper.waitVisibility(collapsedItemLocator, timeout);
+    }
+
+    async waitProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), timeout);
+    }
+
+    async waitProjectTreeContainerClosed(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+        await this.driverHelper.waitDisappearance(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), attempts, polling);
+    }
+
+    async waitItemDisappearance(itemPath: string, attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+        await this.driverHelper.waitDisappearance(By.css(this.getItemCss(itemPath)), attempts, polling);
+    }
+
+    async clickOnItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitAndClick(By.css(this.getItemCss(itemPath)), timeout);
+        await this.waitItemSelected(itemPath, timeout);
+    }
+
+    async waitItemSelected(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const selectedItemLocator: By = By.css(`div[title='/projects/${itemPath}'].theia-mod-selected.theia-mod-focus`);
+
+        await this.driverHelper.waitVisibility(selectedItemLocator, timeout);
+    }
+
+    async expandItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const expandIconLocator: By = By.css(this.getExpandIconCssLocator(itemPath));
+        const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath));
+
+
+        const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout);
+        const isItemCollapsed: boolean = classAttributeValue.search('theia-mod-collapsed') > 0;
+
+        if (isItemCollapsed) {
+            await this.driverHelper.waitAndClick(treeItemLocator, timeout);
+        }
+
+        await this.waitItemExpanded(itemPath, timeout);
+    }
+
+    async collapseItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const expandIconLocator: By = By.css(this.getExpandIconCssLocator(itemPath));
+        const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath));
+
+        const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout);
+        const isItemCollapsed: boolean = classAttributeValue.search('theia-mod-collapsed') > 0;
+
+        if (!isItemCollapsed) {
+            await this.driverHelper.waitAndClick(treeItemLocator, timeout);
+        }
+
+        await this.waitItemCollapsed(itemPath, timeout);
+    }
+
+    async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        let currentPath: string = '';
+        let paths: Array<string> = new Array();
+
+        // make direct path for each project tree item
+        pathToItem.split('/')
+            .forEach(item => {
+                currentPath = `${currentPath}/${item}`;
+                paths.push(currentPath);
+            });
+
+        // expand each project tree item
+        for (const path of paths) {
+            await this.expandItem(path, timeout);
+        }
+
+        // open file
+        await this.clickOnItem(`${pathToItem}/${fileName}`, timeout);
+
+        // check file appearance in the editor
+        await this.editor.waitEditorOpened(timeout);
+        await this.editor.waitTab(fileName);
+    }
+
+    async waitProjectImported(projectName: string, rootSubItem: string, attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+        visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5, triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
+
+        const rootItem: string = `/${projectName}`;
+        const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}`));
+
+        for (let i = 0; i < attempts; i++) {
+            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, attempts, visibilityItemPolling);
+
+            if (!isProjectFolderVisible) {
+                await this.driverHelper.reloadPage();
+                await this.driverHelper.wait(triesPolling);
+                await this.ide.waitAndSwitchToIdeFrame();
+                await this.ide.waitIde();
+                await this.openProjectTreeContainer();
+                continue;
+            }
+
+            await this.expandItem(rootItem);
+            await this.waitItemExpanded(rootItem);
+
+            if (!isProjectFolderVisible) {
+                await this.driverHelper.reloadPage();
+                await this.driverHelper.wait(triesPolling);
+                await this.ide.waitAndSwitchToIdeFrame();
+                await this.ide.waitIde();
+                await this.openProjectTreeContainer();
+                continue;
+            }
+
+            return;
+        }
+
+        throw new Error('Exceeded the maximum number of checking attempts, project has not been imported');
+    }
 
     private getItemCss(itemPath: string): string {
         return `div[id='/projects:/projects/${itemPath}']`;
@@ -42,148 +180,7 @@ export class ProjectTree {
     }
 
     private getTreeItemCssLocator(itemPath: string): string {
-        return `.theia-TreeNode[title='/projects${itemPath}']`
-    }
-
-    async openProjectTreeContainer(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const selectedExplorerButtonLocator: By = By.xpath(Ide.SELECTED_EXPLORER_BUTTON_XPATH)
-
-        await this.ide.waitExplorerButton(timeout)
-
-        const isButtonEnabled: boolean = await this.driverHelper.waitVisibilityBoolean(selectedExplorerButtonLocator)
-
-        if (!isButtonEnabled) {
-            await this.ide.clickOnExplorerButton();
-        }
-
-        await this.waitProjectTreeContainer();
-    }
-
-    async waitItemExpanded(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const expandedItemLocator: By = By.css(this.getExpandedItemCssLocator(itemPath))
-
-        await this.driverHelper.waitVisibility(expandedItemLocator, timeout)
-    }
-
-    async waitItemCollapsed(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const collapsedItemLocator: By = By.css(this.getCollapsedItemCssLocator(itemPath))
-
-        await this.driverHelper.waitVisibility(collapsedItemLocator, timeout)
-    }
-
-    async waitProjectTreeContainer(timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        await this.driverHelper.waitVisibility(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), timeout)
-    }
-
-    async waitProjectTreeContainerClosed(attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
-        await this.driverHelper.waitDisappearance(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), attempts, polling)
-    }
-
-    async waitItemDisappearance(itemPath: string, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
-        await this.driverHelper.waitDisappearance(By.css(this.getItemCss(itemPath)), attempts, polling)
-    }
-
-    async clickOnItem(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        await this.driverHelper.waitAndClick(By.css(this.getItemCss(itemPath)), timeout)
-        await this.waitItemSelected(itemPath, timeout);
-    }
-
-    async waitItemSelected(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const selectedItemLocator: By = By.css(`div[title='/projects/${itemPath}'].theia-mod-selected.theia-mod-focus`);
-
-        await this.driverHelper.waitVisibility(selectedItemLocator, timeout)
-    }
-
-    async expandItem(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const expandIconLocator: By = By.css(this.getExpandIconCssLocator(itemPath))
-        const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath))
-
-
-        const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout)
-        const isItemCollapsed: boolean = classAttributeValue.search('theia-mod-collapsed') > 0
-
-        if (isItemCollapsed) {
-            await this.driverHelper.waitAndClick(treeItemLocator, timeout)
-        }
-
-        await this.waitItemExpanded(itemPath, timeout);
-    }
-
-    async collapseItem(itemPath: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const expandIconLocator: By = By.css(this.getExpandIconCssLocator(itemPath))
-        const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath))
-
-        const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout)
-        const isItemCollapsed: boolean = classAttributeValue.search('theia-mod-collapsed') > 0
-
-        if (!isItemCollapsed) {
-            await this.driverHelper.waitAndClick(treeItemLocator, timeout)
-        }
-
-        await this.waitItemCollapsed(itemPath, timeout);
-    }
-
-    async expandPathAndOpenFile(pathToItem: string, fileName: string, timeout = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        let currentPath: string = "";
-        let paths: Array<string> = new Array();
-
-        // make direct path for each project tree item
-        pathToItem.split('/')
-            .forEach(item => {
-                currentPath = `${currentPath}/${item}`;
-                paths.push(currentPath);
-            })
-
-        // expand each project tree item
-        for (const path of paths) {
-            await this.expandItem(path, timeout)
-        }
-
-        // open file  
-        await this.clickOnItem(`${pathToItem}/${fileName}`, timeout)
-
-        // check file appearance in the editor
-        await this.editor.waitEditorOpened(timeout)
-        await this.editor.waitTab(fileName)
-    }
-
-    async waitProjectImported(projectName: string, rootSubItem: string, attempts = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
-        visibilityItemPolling = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5, triesPolling = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
-
-        const rootItem: string = `/${projectName}`;
-        const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}`));
-        const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}/${rootSubItem}`));
-
-        for (let i = 0; i < attempts; i++) {
-            const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, attempts, visibilityItemPolling)
-
-            if (!isProjectFolderVisible) {
-                await this.driverHelper.reloadPage()
-                await this.driverHelper.wait(triesPolling)
-                await this.ide.waitAndSwitchToIdeFrame()
-                await this.ide.waitIde()
-                await this.openProjectTreeContainer()
-                continue;
-            }
-
-            await this.expandItem(rootItem)
-            await this.waitItemExpanded(rootItem)
-
-            const isRootSubItemVisible = await this.driverHelper.waitVisibilityBoolean(rootSubitemLocator, attempts, visibilityItemPolling)
-
-            if (!isProjectFolderVisible) {
-                await this.driverHelper.reloadPage()
-                await this.driverHelper.wait(triesPolling)
-                await this.ide.waitAndSwitchToIdeFrame()
-                await this.ide.waitIde()
-                await this.openProjectTreeContainer()
-                continue;
-            }
-
-            return
-        }
-
-        throw new Error("Exceeded the maximum number of checking attempts, project has not been imported")
+        return `.theia-TreeNode[title='/projects${itemPath}']`;
     }
 
 }

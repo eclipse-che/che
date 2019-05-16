@@ -1,6 +1,5 @@
---require ts-node/register
 --timeout 1200000
---reporter 'driver/CheReporter.ts'
+--reporter 'dist/driver/CheReporter.js'
 -u tdd 
 --bail
---spec tests/*.spec.ts
+--spec dist/tests/*.spec.js

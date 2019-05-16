@@ -9,25 +9,25 @@
  **********************************************************************/
 import 'chromedriver';
 import 'reflect-metadata';
-import { injectable, inject } from "inversify";
-import { ThenableWebDriver, Builder } from "selenium-webdriver";
-import { Driver } from './Driver';
+import { injectable } from 'inversify';
+import { ThenableWebDriver, Builder } from 'selenium-webdriver';
+import { IDriver } from './IDriver';
 import { Options } from 'selenium-webdriver/chrome';
 import { TestConstants } from '../TestConstants';
 
 @injectable()
-export class ChromeDriver implements Driver {
+export class ChromeDriver implements IDriver {
     private readonly driver: ThenableWebDriver;
 
     constructor() {
         const isHeadless: boolean = TestConstants.TS_SELENIUM_HEADLESS;
         let options: Options = new Options()
             .addArguments('--no-sandbox')
-            .addArguments("--disable-web-security")
-            .addArguments("--allow-running-insecure-content")
+            .addArguments('--disable-web-security')
+            .addArguments('--allow-running-insecure-content');
 
         if (isHeadless) {
-            options = options.addArguments('headless')
+            options = options.addArguments('headless');
         }
 
         this.driver = new Builder()
@@ -38,11 +38,11 @@ export class ChromeDriver implements Driver {
         this.driver
             .manage()
             .window()
-            .setSize(TestConstants.TS_SELENIUM_RESOLUTION_WIDTH, TestConstants.TS_SELENIUM_RESOLUTION_HEIGHT)
+            .setSize(TestConstants.TS_SELENIUM_RESOLUTION_WIDTH, TestConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
     }
 
     get(): ThenableWebDriver {
-        return this.driver
+        return this.driver;
     }
 
 }

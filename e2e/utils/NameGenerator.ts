@@ -10,9 +10,9 @@
 
 export class NameGenerator {
     public static generate(prefix: string, randomLength: number): string {
-        const possibleCharacters: string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-        const possibleCharactersLength: number = possibleCharacters.length
-        let randomPart: string = "";
+        const possibleCharacters: string = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        const possibleCharactersLength: number = possibleCharacters.length;
+        let randomPart: string = '';
 
         for (let i = 0; i < randomLength; i++) {
             let currentRandomIndex: number = Math.floor(Math.random() * Math.floor(possibleCharactersLength));
