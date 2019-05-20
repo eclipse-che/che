@@ -121,8 +121,8 @@ public class CommandConverter {
       } catch (IOException e) {
         throw new DevfileException(
             format(
-                "Failed to fetch content of action from reference %s",
-                commandAction.getReference()),
+                "Failed to fetch content of action from reference %s: %s",
+                commandAction.getReference(), e.getMessage()),
             e);
       }
     }
