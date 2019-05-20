@@ -193,10 +193,10 @@ public class DevfileIntegrityValidator {
 
       if (action.getComponent() == null
           && (action.getReference() != null || action.getReferenceContent() != null)) {
-          // ok, this action contains a reference to the file containing the definition. Such
-          // actions don't have to have component alias defined.
-          continue;
-        }
+        // ok, this action contains a reference to the file containing the definition. Such
+        // actions don't have to have component alias defined.
+        continue;
+      }
 
       if (!knownAliases.contains(action.getComponent())) {
         throw new DevfileFormatException(
