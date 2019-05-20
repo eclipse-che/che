@@ -589,15 +589,16 @@ public class WorkspaceDaoTest {
         "https://mysite.com/registry/somepath",
         "/dev.yaml",
         null,
-        asList(entrypoint3),
+        ImmutableMap.of("app.kubernetes.io/component", "webapp"),
+        singletonList(entrypoint3),
         "image",
         "1256G",
         false,
         singletonList("command"),
         singletonList("arg"),
-        asList(volume3),
-        asList(env3),
-        asList(endpoint3));
+        singletonList(volume3),
+        singletonList(env3),
+        singletonList(endpoint3));
     component3.setSelector(singletonMap("key3", "value3"));
 
     // Update workspace object
@@ -902,6 +903,7 @@ public class WorkspaceDaoTest {
             "https://mysite.com/registry/somepath1",
             "/dev.yaml",
             "refcontent1",
+            ImmutableMap.of("app.kubernetes.io/component", "db"),
             asList(entrypoint1, entrypoint2),
             "image",
             "256G",
@@ -921,6 +923,7 @@ public class WorkspaceDaoTest {
             "https://mysite.com/registry/somepath2",
             "/dev.yaml",
             "refcontent2",
+            ImmutableMap.of("app.kubernetes.io/component", "webapp"),
             asList(entrypoint1, entrypoint2),
             "image",
             "256G",

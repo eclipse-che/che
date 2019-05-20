@@ -12,6 +12,7 @@
 package org.eclipse.che.core.db.jpa;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.*;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
@@ -117,7 +118,8 @@ public final class TestObjectsFactory {
         "eclipse/che-theia/0.0.1",
         "https://mysite.com/registry/somepath",
         "/dev.yaml",
-        null,
+        "refContent",
+        ImmutableMap.of("app.kubernetes.io/component", "webapp"),
         singletonList(createEntrypoint()),
         "image",
         "256G",
@@ -141,7 +143,7 @@ public final class TestObjectsFactory {
   private static org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl
       createDevfileCommand(String name) {
     return new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
-        name, asList(createAction()), singletonMap("attr1", "value1"));
+        name, singletonList(createAction()), singletonMap("attr1", "value1"));
   }
 
   private static ActionImpl createAction() {

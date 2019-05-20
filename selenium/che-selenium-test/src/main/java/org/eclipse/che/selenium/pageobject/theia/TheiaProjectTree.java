@@ -63,7 +63,7 @@ public class TheiaProjectTree {
         "//div[@data-node-id='/projects:/projects/%s' and contains(@class, 'theia-mod-collapsed')]";
     String EXPAND_ITEM_ICON_XPATH_TEMPLATE = "//div[@data-node-id='/projects:/projects/%s']";
     String FILES_TAB_XPATH =
-        "//div[contains(@class, 'theia-app-left')]//ul[@class='p-TabBar-content']//li[@title='Files']";
+        "//div[contains(@class, 'theia-app-left')]//ul[@class='p-TabBar-content']//li[@title='Explorer']";
     String OPEN_WORKSPACE_BUTTON_XPATH = "//button[@class='open-workspace-button']";
   }
 

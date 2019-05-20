@@ -19,6 +19,7 @@ import static org.eclipse.che.api.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRI
 import static org.eclipse.che.api.devfile.server.convert.component.dockerimage.DockerimageComponentToWorkspaceApplier.CHE_COMPONENT_NAME_LABEL;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
@@ -44,6 +45,7 @@ import java.util.Map;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.devfile.server.convert.component.kubernetes.KubernetesEnvironmentProvisioner;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -143,11 +145,11 @@ public class DockerimageComponentToWorkspaceApplierTest {
     // then
     verify(k8sEnvProvisioner)
         .provision(
-            eq(workspaceConfig),
+            any(),
             eq(KubernetesEnvironment.TYPE),
             objectsCaptor.capture(),
             machinesCaptor.capture());
-    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("eclipse/ubuntu_jdk8-latest");
+    MachineConfigImpl machineConfig = machinesCaptor.getValue().get("eclipse-ubuntu_jdk8-latest");
     assertNotNull(machineConfig);
 
     List<HasMetadata> objects = objectsCaptor.getValue();
@@ -156,7 +158,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
     Deployment deployment = (Deployment) objects.get(0);
     PodTemplateSpec podTemplate = deployment.getSpec().getTemplate();
     ObjectMeta podMeta = podTemplate.getMetadata();
-    assertEquals(podMeta.getName(), "eclipse/ubuntu_jdk8-latest");
+    assertEquals(podMeta.getName(), "eclipse-ubuntu_jdk8-latest");
 
     Map<String, String> deploymentSelector = deployment.getSpec().getSelector().getMatchLabels();
     assertFalse(deploymentSelector.isEmpty());
@@ -164,11 +166,11 @@ public class DockerimageComponentToWorkspaceApplierTest {
 
     Map<String, String> annotations = podMeta.getAnnotations();
     assertEquals(
-        annotations.get(String.format(MACHINE_NAME_ANNOTATION_FMT, "eclipse/ubuntu_jdk8-latest")),
-        "eclipse/ubuntu_jdk8-latest");
+        annotations.get(String.format(MACHINE_NAME_ANNOTATION_FMT, "eclipse-ubuntu_jdk8-latest")),
+        "eclipse-ubuntu_jdk8-latest");
 
     Container container = podTemplate.getSpec().getContainers().get(0);
-    assertEquals(container.getName(), "eclipse/ubuntu_jdk8-latest");
+    assertEquals(container.getName(), "eclipse-ubuntu_jdk8-latest");
     assertEquals(container.getImage(), "eclipse/ubuntu_jdk8:latest");
   }
 
@@ -482,7 +484,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
 
   @Test(dataProvider = "imageNames")
   public void testGeneratesValidMachineNameFromImageName(String imageName)
-      throws ValidationException {
+      throws ValidationException, DevfileException {
 
     // given
     String machineName = DockerimageComponentToWorkspaceApplier.toMachineName(imageName);

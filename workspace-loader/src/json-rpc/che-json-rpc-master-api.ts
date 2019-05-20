@@ -43,25 +43,12 @@ export class CheJsonRpcMasterApi {
   private checkingDelay = 10000;
   private fetchingClientIdTimeout = 5000;
 
-  private client: ICommunicationClient;
-  private loader: WorkspaceLoader;
-
-  constructor(client: ICommunicationClient,
-              entryPoint: string,
-              loader: WorkspaceLoader) {
+  constructor(private readonly client: ICommunicationClient,
+              private readonly entryPoint: string,
+              private readonly loader: WorkspaceLoader) {
     this.cheJsonRpcApi = new CheJsonRpcApiClient(client);
-    this.client = client;
-    this.loader = loader;
 
     client.addListener('open', () => this.onConnectionOpen());
-    client.addListener('close', (event: any) => {
-      switch (event.code) {
-        case 1000: // normal close
-          break;
-        default:
-          this.connect(entryPoint).catch(console.error);
-      }
-    });
   }
 
   addListener(eventType: CommunicationClientEvent, handler: Function): void {
@@ -114,24 +101,27 @@ export class CheJsonRpcMasterApi {
   /**
    * Opens connection to pointed entryPoint.
    *
-   * @param {string} entryPoint
    * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
    */
-  connect(entryPoint: string): Promise<any> {
-    entryPoint += this.loader.getAuthenticationToken();
-    if (this.clientId) {
-      let clientId = `clientId=${this.clientId}`;
-      // in case of reconnection
-      // we need to test entrypoint on existing query parameters
-      // to add already gotten clientId
-      if (/\?/.test(entryPoint) === false) {
-        clientId = '?' + clientId;
-      } else {
-        clientId = '&' + clientId;
+  connect(): Promise<any> {
+    const entryPointFunction = () => {
+      const entryPoint = this.entryPoint + this.loader.getAuthenticationToken();
+      if (this.clientId) {
+        let clientId = `clientId=${this.clientId}`;
+        // in case of reconnection
+        // we need to test entrypoint on existing query parameters
+        // to add already gotten clientId
+        if (/\?/.test(entryPoint) === false) {
+          clientId = '?' + clientId;
+        } else {
+          clientId = '&' + clientId;
+        }
+        return entryPoint + clientId;
       }
-      entryPoint += clientId;
+      return entryPoint;
     }
-    return this.cheJsonRpcApi.connect(entryPoint).then(() =>
+
+    return this.cheJsonRpcApi.connect(entryPointFunction).then(() =>
       this.fetchClientId());
   }
 

@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ import java.util.Objects;
  * <p>Whether an endpoint is accessible from the outside of a workspace is defined by {@link
  * #isPublic()} method.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ChePluginEndpoint {
 
   private String name = null;

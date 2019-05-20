@@ -83,9 +83,12 @@ docs/assets/imgs
 plugins/plugin-terminal-ui/node_modules/
 plugins/plugin-terminal-ui/build/
 requirements.lock
+e2e/dist/
+e2e/node_modules/
+e2e/report/
 
 # Cypress modules #
-##################
+###################
 */cypress/screenshots
 */cypress/videos
 */node_modules
