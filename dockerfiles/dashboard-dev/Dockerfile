@@ -8,7 +8,7 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-FROM node:8.15.1
+FROM node:8.16.0
 
 RUN apt-get update && \
     apt-get install -y git \
