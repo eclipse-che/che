@@ -13,8 +13,8 @@
 ---
 specVersion: 0.0.1
 name: petclinic-dev-environment
-"attributes": {
-    "editorFree": "true",
-    "persistVolumes": "false",
-    "additionalAttributes": "false"
-}
+attributes:
+    editorFree: 'true'
+    persistVolumes: 'false'
+    additionalAttributes: 'false'
+
