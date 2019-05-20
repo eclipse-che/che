@@ -41,6 +41,7 @@ public class DevfileSchemaValidatorTest {
   @DataProvider
   public Object[][] validDevfiles() {
     return new Object[][] {
+      {"devfile/devfile_with_attributes.yaml"},
       {"editor_plugin_component/devfile_editor_plugins.yaml"},
       {"kubernetes_openshift_component/devfile_kubernetes_component_reference.yaml"},
       {"kubernetes_openshift_component/devfile_kubernetes_component_absolute_reference.yaml"},
