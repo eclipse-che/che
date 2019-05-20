@@ -14,8 +14,7 @@ RUN apt-get update && \
     apt-get install -y git \
     && apt-get -y clean \
     && rm -rf /var/lib/apt/lists/* \
-    && echo fs.inotify.max_user_watches=524288 | tee -a /etc/sysctl.conf \
-    && yarn global upgrade yarn@1.13.0
+    && echo fs.inotify.max_user_watches=524288 | tee -a /etc/sysctl.conf
 WORKDIR "/projects"
 
 ADD src/entrypoint.sh /entrypoint.sh
