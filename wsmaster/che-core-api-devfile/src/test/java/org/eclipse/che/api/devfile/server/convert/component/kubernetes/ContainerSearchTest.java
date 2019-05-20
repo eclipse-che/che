@@ -43,6 +43,7 @@ import io.fabric8.openshift.api.model.TemplateBuilder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.devfile.shared.kubernetes.ContainerSearch;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

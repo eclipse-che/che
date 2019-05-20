@@ -27,6 +27,7 @@
     <inherits name="org.eclipse.che.api.core.model.Model"/>
     <inherits name="org.eclipse.che.api.core.Core"/>
     <inherits name="org.eclipse.che.api.debug.Debug"/>
+    <inherits name="org.eclipse.che.api.devfile.Devfile"/>
     <inherits name="org.eclipse.che.api.factory.Factory"/>
     <inherits name="org.eclipse.che.api.git.Git"/>
     <inherits name="org.eclipse.che.api.machine.Machine"/>

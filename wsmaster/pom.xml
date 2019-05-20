@@ -51,5 +51,6 @@
         <module>che-core-api-logger-shared</module>
         <module>che-core-api-logger</module>
         <module>che-core-api-metrics</module>
+        <module>che-core-api-devfile-shared</module>
     </modules>
 </project>

@@ -11,28 +11,30 @@
  */
 package org.eclipse.che.api.devfile.server.validator;
 
-import static org.eclipse.che.api.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.DOCKERIMAGE_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
+import org.eclipse.che.api.devfile.shared.RecipeParser;
+import org.eclipse.che.api.devfile.shared.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.model.impl.ActionImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.CommandImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.EntrypointImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ProjectImpl;
+import org.eclipse.che.api.devfile.shared.validator.DevfileIntegrityValidator;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
@@ -49,11 +51,12 @@ public class DevfileIntegrityValidatorTest {
 
   private DevfileIntegrityValidator integrityValidator;
 
-  @Mock private KubernetesRecipeParser kubernetesRecipeParser;
+  @Mock private RecipeParser kubernetesRecipeParser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    integrityValidator = new DevfileIntegrityValidator(kubernetesRecipeParser);
+    integrityValidator =
+        new DevfileIntegrityValidator(ImmutableMap.of("kubernetes", kubernetesRecipeParser));
     String devFileYamlContent =
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile.yaml"));
     initialDevfile = objectMapper.readValue(devFileYamlContent, DevfileImpl.class);

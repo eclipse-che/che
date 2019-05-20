@@ -16,8 +16,9 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
 import java.io.IOException;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
+import org.eclipse.che.api.devfile.shared.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.schema.DevfileSchemaProvider;
+import org.eclipse.che.api.devfile.shared.validator.DevfileSchemaValidator;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

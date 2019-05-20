@@ -20,13 +20,13 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.devfile.server.DevfileManager;
-import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.URLFetcher;
 import org.eclipse.che.api.devfile.server.convert.CommandConverter;
 import org.eclipse.che.api.devfile.server.convert.DefaultEditorProvisioner;
@@ -34,12 +34,14 @@ import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
 import org.eclipse.che.api.devfile.server.convert.ProjectConverter;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
-import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
-import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
-import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
+import org.eclipse.che.api.devfile.shared.Constants;
+import org.eclipse.che.api.devfile.shared.FileContentProvider;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.schema.DevfileSchemaProvider;
+import org.eclipse.che.api.devfile.shared.validator.DevfileIntegrityValidator;
+import org.eclipse.che.api.devfile.shared.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
@@ -70,7 +72,8 @@ public class DefaultFactoryParameterResolverTest {
     // we need to set up an "almost real" devfile converter which is a little bit involved
     DevfileSchemaValidator validator = new DevfileSchemaValidator(new DevfileSchemaProvider());
     DevfileIntegrityValidator integrityValidator =
-        new DevfileIntegrityValidator(kubernetesRecipeParser);
+        new DevfileIntegrityValidator(
+            ImmutableMap.of(Constants.KUBERNETES_COMPONENT_TYPE, kubernetesRecipeParser));
     Set<ComponentProvisioner> componentProvisioners = new HashSet<>();
     Map<String, ComponentToWorkspaceApplier> appliers = new HashMap<>();
     ComponentToWorkspaceApplier applier = mock(ComponentToWorkspaceApplier.class);

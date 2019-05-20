@@ -28,6 +28,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
+import org.eclipse.che.api.devfile.shared.FileContentProvider;
 import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
@@ -70,8 +71,7 @@ public class GithubFactoryParametersResolverTest {
   /**
    * Capturing the location parameter when calling {@link
    * URLFactoryBuilder#createFactoryFromJson(RemoteFactoryUrl)} or {@link
-   * URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl,
-   * org.eclipse.che.api.devfile.server.FileContentProvider)}
+   * URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl, FileContentProvider)}
    */
   @Captor private ArgumentCaptor<RemoteFactoryUrl> factoryUrlArgumentCaptor;
 

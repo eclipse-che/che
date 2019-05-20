@@ -12,8 +12,8 @@
 package org.eclipse.che.api.devfile.server.convert.component;
 
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
-import org.eclipse.che.api.devfile.server.FileContentProvider;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.FileContentProvider;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 
 /**

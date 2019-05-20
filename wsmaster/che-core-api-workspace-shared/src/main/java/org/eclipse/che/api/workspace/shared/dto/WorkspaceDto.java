@@ -14,7 +14,7 @@ package org.eclipse.che.api.workspace.shared.dto;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.devfile.shared.dto.DevfileDto;
 import org.eclipse.che.dto.shared.DTO;
 
 /** @author Yevhenii Voevodin */

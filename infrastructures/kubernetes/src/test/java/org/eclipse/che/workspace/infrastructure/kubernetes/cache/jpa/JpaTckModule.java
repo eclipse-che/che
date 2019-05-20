@@ -13,6 +13,14 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa;
 
 import com.google.inject.TypeLiteral;
 import org.eclipse.che.account.spi.AccountImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ActionImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.EndpointImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.EntrypointImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.EnvImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ProjectImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.SourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -22,14 +30,6 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
 import org.eclipse.che.commons.test.db.PersistTestModuleBuilder;
@@ -80,7 +80,7 @@ public class JpaTckModule extends TckModule {
                 ServerId.class,
                 // devfile
                 ActionImpl.class,
-                org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl.class,
+                org.eclipse.che.api.devfile.shared.model.impl.CommandImpl.class,
                 ComponentImpl.class,
                 DevfileImpl.class,
                 EndpointImpl.class,
@@ -88,7 +88,7 @@ public class JpaTckModule extends TckModule {
                 EnvImpl.class,
                 ProjectImpl.class,
                 SourceImpl.class,
-                org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl.class)
+                org.eclipse.che.api.devfile.shared.model.impl.VolumeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
             .setExceptionHandler(H2ExceptionHandler.class)

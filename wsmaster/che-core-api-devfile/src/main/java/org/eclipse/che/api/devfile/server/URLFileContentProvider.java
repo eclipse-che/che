@@ -16,7 +16,8 @@ import static java.lang.String.format;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.FileContentProvider;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
 
 /**
  * A simple implementation of the FileContentProvider that merely uses the function resolve relative

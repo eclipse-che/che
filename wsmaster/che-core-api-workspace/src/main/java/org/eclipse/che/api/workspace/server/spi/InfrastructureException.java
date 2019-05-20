@@ -12,8 +12,8 @@
 package org.eclipse.che.api.workspace.server.spi;
 
 /**
- * An exception thrown by {@link RuntimeInfrastructure} and related components. Indicates that an
- * infrastructure operation can't be performed or an error occurred during operation execution.
+ * An exception thrown by infrastructures and related components. Indicates that an infrastructure
+ * operation can't be performed or an error occurred during operation execution.
  *
  * @author Yevhenii Voevodin
  */

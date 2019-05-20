@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.ValidationException;
+import org.eclipse.che.api.devfile.shared.RecipeParser;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -33,7 +34,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFacto
  *
  * @author Sergii Leshchenko
  */
-public class KubernetesRecipeParser {
+public class KubernetesRecipeParser implements RecipeParser {
 
   private static final Set<String> SUPPORTED_CONTENT_TYPES =
       ImmutableSet.of("application/x-yaml", "text/yaml", "text/x-yaml");
@@ -80,10 +81,8 @@ public class KubernetesRecipeParser {
    * @throws IllegalArgumentException if recipe content is null
    * @throws ValidationException if recipe content has broken format
    * @throws ValidationException if recipe content has unrecognized objects
-   * @throws InfrastructureException when exception occurred during kubernetes client creation
    */
-  public List<HasMetadata> parse(String recipeContent)
-      throws ValidationException, InfrastructureException {
+  public List<HasMetadata> parse(String recipeContent) throws ValidationException {
     checkNotNull(recipeContent, "Recipe content type must not be null");
 
     try {
@@ -112,6 +111,8 @@ public class KubernetesRecipeParser {
         message = message.split("\\n", 2)[0];
       }
       throw new ValidationException(format("Could not parse Kubernetes recipe: %s", message));
+    } catch (InfrastructureException e) {
+      throw new ValidationException("Failed to read the recipe content.", e);
     }
   }
 }

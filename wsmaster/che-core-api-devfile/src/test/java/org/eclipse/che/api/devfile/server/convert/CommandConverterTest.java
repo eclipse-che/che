@@ -12,17 +12,17 @@
 package org.eclipse.che.api.devfile.server.convert;
 
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.EXEC_ACTION_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.shared.Constants.EXEC_ACTION_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
+import org.eclipse.che.api.devfile.shared.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.model.impl.ActionImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.CommandImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

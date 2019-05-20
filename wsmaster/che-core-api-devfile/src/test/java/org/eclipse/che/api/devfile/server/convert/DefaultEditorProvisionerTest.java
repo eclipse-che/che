@@ -11,18 +11,18 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.shared.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.testng.annotations.Test;
 

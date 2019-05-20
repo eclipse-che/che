@@ -12,7 +12,6 @@
 package org.eclipse.che.core.db.jpa;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
@@ -26,6 +25,12 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
+import org.eclipse.che.api.devfile.shared.model.impl.ActionImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.EntrypointImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ProjectImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.SourceImpl;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
 import org.eclipse.che.api.user.server.model.impl.ProfileImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
@@ -40,12 +45,6 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
@@ -139,9 +138,9 @@ public final class TestObjectsFactory {
         asList("arg1", "arg2"));
   }
 
-  private static org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl
-      createDevfileCommand(String name) {
-    return new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+  private static org.eclipse.che.api.devfile.shared.model.impl.CommandImpl createDevfileCommand(
+      String name) {
+    return new org.eclipse.che.api.devfile.shared.model.impl.CommandImpl(
         name, singletonList(createAction()), singletonMap("attr1", "value1"));
   }
 

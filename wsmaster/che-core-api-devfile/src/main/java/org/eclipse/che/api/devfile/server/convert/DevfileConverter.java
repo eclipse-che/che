@@ -14,8 +14,8 @@ package org.eclipse.che.api.devfile.server.convert;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toCollection;
-import static org.eclipse.che.api.devfile.server.Components.getIdentifiableComponentName;
-import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.devfile.shared.Components.getIdentifiableComponentName;
+import static org.eclipse.che.api.devfile.shared.Constants.CURRENT_SPEC_VERSION;
 
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -27,21 +27,21 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
-import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
-import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.URLFetcher;
 import org.eclipse.che.api.devfile.server.URLFileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.FileContentProvider;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileRecipeFormatException;
+import org.eclipse.che.api.devfile.shared.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ProjectImpl;
 import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 
 /**
  * Helps to convert Devfile to workspace config and back.
@@ -85,7 +85,7 @@ public class DevfileConverter implements DevfileToWorkspaceConfigConverter {
       throws WorkspaceExportException {
     if (wsConfig.getEnvironments().size() > 1) {
       throw new WorkspaceExportException(
-          format(
+          String.format(
               "Workspace '%s' cannot be converted to devfile because it contains multiple environments",
               wsConfig.getName()));
     }

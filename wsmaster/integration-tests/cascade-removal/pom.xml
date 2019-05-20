@@ -23,6 +23,10 @@
     <name>Integration Tests :: Cascade Removal</name>
     <dependencies>
         <dependency>
+            <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-devfile-shared</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <scope>test</scope>

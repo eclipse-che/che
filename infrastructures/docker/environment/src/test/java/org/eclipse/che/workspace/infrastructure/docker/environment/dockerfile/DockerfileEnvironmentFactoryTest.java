@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.installer.server.InstallerRegistry;
 import org.eclipse.che.api.workspace.server.spi.environment.*;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;

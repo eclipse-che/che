@@ -34,8 +34,37 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
+            <artifactId>che-core-api-devfile-shared</artifactId>
+            <classifier>sources</classifier>
+            <exclusions>
+                <!--
+                GWT uses an older version of ICU than is the one indirectly referenced
+                through workspace which depends on devfile which includes the "justify"
+                library for schema validation. Since the GWT IDE doesn't support devfile-based
+                workspaces anyway, we're safe here.
+                -->
+                <exclusion>
+                    <artifactId>icu4j</artifactId>
+                    <groupId>com.ibm.icu</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-ide-full</artifactId>
             <type>gwt-lib</type>
+            <exclusions>
+                <!--
+                GWT uses an older version of ICU than is the one indirectly referenced
+                through workspace which depends on devfile which includes the "justify"
+                library for schema validation. Since the GWT IDE doesn't support devfile-based
+                workspaces anyway, we're safe here.
+                -->
+                <exclusion>
+                    <artifactId>icu4j</artifactId>
+                    <groupId>com.ibm.icu</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <build>

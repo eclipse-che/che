@@ -16,11 +16,11 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DI
 
 import org.eclipse.che.api.core.model.workspace.devfile.Action;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
-import org.eclipse.che.api.devfile.server.Constants;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
+import org.eclipse.che.api.devfile.shared.Constants;
+import org.eclipse.che.api.devfile.shared.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.model.impl.ActionImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.CommandImpl;
 
 /**
  * Helps to convert {@link CommandImpl workspace command} to {@link Command devfile command} and

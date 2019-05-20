@@ -21,11 +21,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.model.impl.ProjectImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.SourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 
 /**
  * Helps to convert {@link ProjectConfigImpl workspace project} to {@link Project devfile project}

@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
+import static org.eclipse.che.api.devfile.shared.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy.PER_WORKSPACE_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
@@ -24,6 +25,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import java.util.Map;
+import org.eclipse.che.api.devfile.shared.RecipeParser;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -39,6 +41,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.Kubernet
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironmentFactory;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.RemoveNamespaceOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy;
@@ -168,5 +171,9 @@ public class KubernetesInfraModule extends AbstractModule {
 
     bind(SidecarToolingProvisioner.class)
         .to(new TypeLiteral<SidecarToolingProvisioner<KubernetesEnvironment>>() {});
+
+    MapBinder.newMapBinder(binder(), String.class, RecipeParser.class)
+        .addBinding(KUBERNETES_COMPONENT_TYPE)
+        .to(KubernetesRecipeParser.class);
   }
 }

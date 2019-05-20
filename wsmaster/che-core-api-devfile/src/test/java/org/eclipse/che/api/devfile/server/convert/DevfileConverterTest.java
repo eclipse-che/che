@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
-import static org.eclipse.che.api.devfile.server.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.devfile.shared.Constants.CURRENT_SPEC_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -29,20 +29,20 @@ import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
-import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.URLFetcher;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.FileContentProvider;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.model.impl.CommandImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;

@@ -11,9 +11,9 @@
  */
 package org.eclipse.che.api.devfile.server.convert.component;
 
-import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 
 /**
  * Provision component in {@link DevfileImpl} according to the specified {@link

@@ -12,16 +12,16 @@
 package org.eclipse.che.api.devfile.server.convert.component.editor;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.shared.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
-import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

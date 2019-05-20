@@ -13,7 +13,7 @@ package org.eclipse.che.api.devfile.server.convert.component.kubernetes;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
-import static org.eclipse.che.api.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.OPENSHIFT_COMPONENT_TYPE;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import javax.inject.Inject;
-import org.eclipse.che.api.devfile.server.DevfileRecipeFormatException;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileRecipeFormatException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;

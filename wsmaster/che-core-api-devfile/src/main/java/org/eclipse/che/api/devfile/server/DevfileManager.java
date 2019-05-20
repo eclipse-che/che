@@ -27,15 +27,17 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
-import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
-import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
+import org.eclipse.che.api.devfile.shared.FileContentProvider;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileFormatException;
+import org.eclipse.che.api.devfile.shared.exception.DevfileRecipeFormatException;
+import org.eclipse.che.api.devfile.shared.exception.WorkspaceExportException;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.validator.DevfileIntegrityValidator;
+import org.eclipse.che.api.devfile.shared.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
 /**

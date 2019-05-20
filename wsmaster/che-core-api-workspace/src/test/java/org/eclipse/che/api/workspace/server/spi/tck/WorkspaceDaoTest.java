@@ -41,6 +41,14 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.devfile.shared.model.impl.ActionImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.EndpointImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.EntrypointImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.EnvImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.ProjectImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.SourceImpl;
 import org.eclipse.che.api.workspace.server.event.BeforeWorkspaceRemovedEvent;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
@@ -52,14 +60,6 @@ import org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceRemovedEvent;
 import org.eclipse.che.commons.test.tck.TckListener;
@@ -553,13 +553,13 @@ public class WorkspaceDaoTest {
     ActionImpl action3 = new ActionImpl("exec3", "component3", "run.sh", "/home/user/3");
     ActionImpl action4 = new ActionImpl("exec4", "component4", "run.sh", "/home/user/4");
     // Add a new command
-    final org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl newCmd =
-        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+    final org.eclipse.che.api.devfile.shared.model.impl.CommandImpl newCmd =
+        new org.eclipse.che.api.devfile.shared.model.impl.CommandImpl(
             "command-3", singletonList(action3), singletonMap("attr3", "value3"));
     workspace.getDevfile().getCommands().add(newCmd);
 
     // Update an existing command
-    final org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command =
+    final org.eclipse.che.api.devfile.shared.model.impl.CommandImpl command =
         workspace.getDevfile().getCommands().get(0);
     command.setName("new-name");
     command.setActions(asList(action4));
@@ -575,8 +575,8 @@ public class WorkspaceDaoTest {
             asList("command3", "command5"),
             asList("arg3", "arg5"));
 
-    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume3 =
-        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name3", "path3");
+    org.eclipse.che.api.devfile.shared.model.impl.VolumeImpl volume3 =
+        new org.eclipse.che.api.devfile.shared.model.impl.VolumeImpl("name3", "path3");
 
     EnvImpl env3 = new EnvImpl("name3", "value3");
     EndpointImpl endpoint3 = new EndpointImpl("name3", 3333, singletonMap("key3", "value3"));
@@ -859,11 +859,11 @@ public class WorkspaceDaoTest {
     ActionImpl action1 = new ActionImpl("exec1", "component1", "run.sh", "/home/user/1");
     ActionImpl action2 = new ActionImpl("exec2", "component2", "run.sh", "/home/user/2");
 
-    org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command1 =
-        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+    org.eclipse.che.api.devfile.shared.model.impl.CommandImpl command1 =
+        new org.eclipse.che.api.devfile.shared.model.impl.CommandImpl(
             name + "-1", singletonList(action1), singletonMap("attr1", "value1"));
-    org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command2 =
-        new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
+    org.eclipse.che.api.devfile.shared.model.impl.CommandImpl command2 =
+        new org.eclipse.che.api.devfile.shared.model.impl.CommandImpl(
             name + "-2", singletonList(action2), singletonMap("attr2", "value2"));
 
     EntrypointImpl entrypoint1 =
@@ -882,11 +882,11 @@ public class WorkspaceDaoTest {
             asList("command3", "command4"),
             asList("arg3", "arg4"));
 
-    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume1 =
-        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name1", "path1");
+    org.eclipse.che.api.devfile.shared.model.impl.VolumeImpl volume1 =
+        new org.eclipse.che.api.devfile.shared.model.impl.VolumeImpl("name1", "path1");
 
-    org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl volume2 =
-        new org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl("name2", "path2");
+    org.eclipse.che.api.devfile.shared.model.impl.VolumeImpl volume2 =
+        new org.eclipse.che.api.devfile.shared.model.impl.VolumeImpl("name2", "path2");
 
     EnvImpl env1 = new EnvImpl("name1", "value1");
     EnvImpl env2 = new EnvImpl("name2", "value2");

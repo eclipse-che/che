@@ -11,9 +11,9 @@
  */
 package org.eclipse.che.api.devfile.server.convert;
 
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
-import static org.eclipse.che.api.devfile.server.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
-import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.devfile.shared.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
+import static org.eclipse.che.api.devfile.shared.Constants.PLUGIN_COMPONENT_TYPE;
 
 import com.google.common.base.Strings;
 import java.util.HashMap;
@@ -23,9 +23,9 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.devfile.shared.exception.DevfileException;
+import org.eclipse.che.api.devfile.shared.model.impl.ComponentImpl;
+import org.eclipse.che.api.devfile.shared.model.impl.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
