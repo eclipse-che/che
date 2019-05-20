@@ -559,20 +559,27 @@
     },
     "attributes": {
       "type": "object",
-      "editorFree": {
-        "type": "boolean",
-        "description": "Defines that no editor is needed and default one should not be provisioned. Defaults to `false`.",
-        "default": "false"
-      },
-      "persistVolumes": {
-        "type": "boolean",
-        "description": "Defines whether volumes should be stored or not. Defaults to `true`. In case of `false` workspace volumes will be created as `emptyDir`. The data in the `emptyDir` volume is deleted forever when a workspace Pod is removed for any reason(pod is crashed, workspace is restarted).",
-        "default": "true"
+      "properties": {
+        "editorFree": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "description": "Defines that no editor is needed and default one should not be provisioned. Defaults to `false`.",
+          "default": "false"
+        },
+        "persistVolumes": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "description": "Defines whether volumes should be stored or not. Defaults to `true`. In case of `false` workspace volumes will be created as `emptyDir`. The data in the `emptyDir` volume is deleted forever when a workspace Pod is removed for any reason(pod is crashed, workspace is restarted).",
+          "default": "true"
+        }
       },
       "additionalProperties": {
         "type": "string"
-      },
-      "javaType": "java.util.Map<String, String>"
+      }
     }
   }
 }
