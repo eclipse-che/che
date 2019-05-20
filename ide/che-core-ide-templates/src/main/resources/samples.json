@@ -1489,7 +1489,7 @@
       {
         "name": "build the project",
         "type": "mvn",
-        "commandLine": "cd ${CHE_PROJECTS_ROOT}/fuse-rest-http-booster && mvn clean package",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/fuse-rest-http-booster && mvn clean install",
         "attributes": {
           "goal": "Run"
         }
@@ -1497,7 +1497,7 @@
       {
         "name": "run the services",
         "type": "mvn",
-        "commandLine": "cd ${CHE_PROJECTS_ROOT}/fuse-rest-http-booster && mvn spring-boot:run",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/fuse-rest-http-booster && mvn spring-boot:run -DskipTests",
         "attributes": {
           "goal": "Run",
           "previewUrl": "${server.8080/tcp}"
@@ -1506,7 +1506,7 @@
       {
         "name": "run and debug the services",
         "type": "mvn",
-        "commandLine": "cd ${CHE_PROJECTS_ROOT}/fuse-rest-http-booster && mvn spring-boot:run -Drun.jvmArguments=\"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005\"",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/fuse-rest-http-booster && mvn spring-boot:run -DskipTests -Drun.jvmArguments=\"-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5005\"",
         "attributes": {
           "goal": "Debug",
           "previewUrl": "${server.8080/tcp}"
