@@ -42,6 +42,15 @@ public interface Command {
   String PLUGIN_ATTRIBUTE = "plugin";
 
   /**
+   * An attribute of the command to store the original path to the file that contains the editor
+   * specific configuration.
+   */
+  String COMMAND_ACTION_REFERENCE_ATTRIBUTE = "actionReference";
+
+  /** The contents of editor-specific content. */
+  String COMMAND_ACTION_REFERENCE_CONTENT_ATTRIBUTE = "actionReferenceContent";
+
+  /**
    * Returns command name (i.e. 'start tomcat') The name should be unique per user in one workspace,
    * which means that user may create only one command with the same name in the same workspace
    */

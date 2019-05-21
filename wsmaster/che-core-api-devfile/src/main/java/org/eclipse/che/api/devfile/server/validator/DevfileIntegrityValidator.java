@@ -188,7 +188,15 @@ public class DevfileIntegrityValidator {
         throw new DevfileFormatException(
             format("Multiple actions in command '%s' are not supported yet.", command.getName()));
       }
+
       Action action = command.getActions().get(0);
+
+      if (action.getComponent() == null
+          && (action.getReference() != null || action.getReferenceContent() != null)) {
+        // ok, this action contains a reference to the file containing the definition. Such
+        // actions don't have to have component alias defined.
+        continue;
+      }
 
       if (!knownAliases.contains(action.getComponent())) {
         throw new DevfileFormatException(

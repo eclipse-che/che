@@ -41,17 +41,37 @@ public class ActionImpl implements Action {
   @Column(name = "workdir")
   private String workdir;
 
+  @Column(name = "reference")
+  private String reference;
+
+  @Column(name = "reference_content")
+  private String referenceContent;
+
   public ActionImpl() {}
 
-  public ActionImpl(String type, String component, String command, String workdir) {
+  public ActionImpl(
+      String type,
+      String component,
+      String command,
+      String workdir,
+      String reference,
+      String referenceContent) {
     this.type = type;
     this.component = component;
     this.command = command;
     this.workdir = workdir;
+    this.reference = reference;
+    this.referenceContent = referenceContent;
   }
 
   public ActionImpl(Action action) {
-    this(action.getType(), action.getComponent(), action.getCommand(), action.getWorkdir());
+    this(
+        action.getType(),
+        action.getComponent(),
+        action.getCommand(),
+        action.getWorkdir(),
+        action.getReference(),
+        action.getReferenceContent());
   }
 
   @Override
@@ -88,6 +108,24 @@ public class ActionImpl implements Action {
 
   public void setWorkdir(String workdir) {
     this.workdir = workdir;
+  }
+
+  @Override
+  public String getReference() {
+    return reference;
+  }
+
+  public void setReference(String reference) {
+    this.reference = reference;
+  }
+
+  @Override
+  public String getReferenceContent() {
+    return referenceContent;
+  }
+
+  public void setReferenceContent(String referenceContent) {
+    this.referenceContent = referenceContent;
   }
 
   @Override

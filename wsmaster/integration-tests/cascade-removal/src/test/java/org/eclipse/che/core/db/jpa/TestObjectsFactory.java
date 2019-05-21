@@ -146,7 +146,7 @@ public final class TestObjectsFactory {
   }
 
   private static ActionImpl createAction() {
-    return new ActionImpl("exec", "component", "run.sh", "/home/user");
+    return new ActionImpl("exec", "component", "run.sh", "/home/user", null, null);
   }
 
   private static ProjectImpl createDevfileProject(String name) {

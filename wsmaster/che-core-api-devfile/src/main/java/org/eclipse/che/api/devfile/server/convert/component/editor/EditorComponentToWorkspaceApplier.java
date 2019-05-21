@@ -94,9 +94,9 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         .stream()
         .filter(
             c ->
-                c.getAttributes()
-                    .get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
-                    .equals(editorComponentAlias))
+                editorComponentAlias != null
+                    && editorComponentAlias.equals(
+                        c.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
         .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId()));
   }
 }

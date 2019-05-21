@@ -66,14 +66,14 @@ public class DevfileSchemaValidatorTest {
 
   @Test(dataProvider = "invalidDevfiles")
   public void shouldThrowExceptionOnValidationOfNonValidDevfile(
-      String resourceFilePath, String expectedMessageRegexp) throws Exception {
+      String resourceFilePath, String expectedMessage) throws Exception {
     try {
       schemaValidator.validateBySchema(getResource(resourceFilePath));
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),
-          format("Devfile schema validation failed. Error: %s", expectedMessageRegexp),
-          "DevfileFormatException thrown with message that doesn't match expected pattern:");
+          format("Devfile schema validation failed. Error: %s", expectedMessage),
+          "DevfileFormatException thrown with message that doesn't match expected message:");
       return;
     }
     fail("DevfileFormatException expected to be thrown but is was not");
@@ -120,6 +120,10 @@ public class DevfileSchemaValidatorTest {
       {
         "command/devfile_multiple_commands_actions.yaml",
         "(/commands/0/actions):The array must have at most 1 element(s), but actual number is 2."
+      },
+      {
+        "command/devfile_action_without_commandline_and_reference.yaml",
+        "Exactly one of the following sets of problems must be resolved.: [(/commands/0/actions/0):The object must have a property whose name is \"component\".(/commands/0/actions/0):The object must have a property whose name is \"command\".At least one of the following sets of problems must be resolved.: [(/commands/0/actions/0):The object must have a property whose name is \"reference\".(/commands/0/actions/0):The object must have a property whose name is \"referenceContent\".]]"
       },
       // cheEditor/chePlugin component model testing
       {

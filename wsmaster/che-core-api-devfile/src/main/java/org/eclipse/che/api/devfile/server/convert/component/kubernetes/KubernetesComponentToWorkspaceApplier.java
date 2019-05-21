@@ -159,9 +159,11 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
             .stream()
             .filter(
                 c ->
-                    c.getAttributes()
-                        .get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
-                        .equals(component.getAlias()))
+                    component.getAlias() != null
+                        && component
+                            .getAlias()
+                            .equals(
+                                c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
             .collect(toList());
     if (componentCommands.isEmpty()) {
       return;

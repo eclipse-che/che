@@ -78,8 +78,10 @@ public class WorkspaceValidator {
           "Workspace %s contains command with null or empty name",
           config.getName());
       check(
-          !isNullOrEmpty(command.getCommandLine()),
-          "Command line required for command '%s' in workspace '%s'",
+          !isNullOrEmpty(command.getCommandLine())
+              || !isNullOrEmpty(
+                  command.getAttributes().get(Command.COMMAND_ACTION_REFERENCE_CONTENT_ATTRIBUTE)),
+          "Command line or content required for command '%s' in workspace '%s'.",
           command.getName(),
           config.getName());
     }

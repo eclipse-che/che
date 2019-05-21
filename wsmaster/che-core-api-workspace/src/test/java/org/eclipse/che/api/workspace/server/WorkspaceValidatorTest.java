@@ -240,7 +240,8 @@ public class WorkspaceValidatorTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Command line required for command '.*'")
+      expectedExceptionsMessageRegExp =
+          "Command line or content required for command '.*' in workspace '.*'\\.")
   public void shouldFailValidationIfCommandLineIsNull() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withCommandLine(null);
@@ -250,7 +251,8 @@ public class WorkspaceValidatorTest {
 
   @Test(
       expectedExceptions = ValidationException.class,
-      expectedExceptionsMessageRegExp = "Command line required for command '.*'")
+      expectedExceptionsMessageRegExp =
+          "Command line or content required for command '.*' in workspace '.*'\\.")
   public void shouldFailValidationIfCommandLineIsEmpty() throws Exception {
     final WorkspaceConfigDto config = createConfig();
     config.getCommands().get(0).withCommandLine("");
