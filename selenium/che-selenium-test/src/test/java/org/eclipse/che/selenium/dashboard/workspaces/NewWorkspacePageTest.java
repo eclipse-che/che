@@ -90,6 +90,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
@@ -113,6 +114,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
@@ -137,6 +139,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CPP,
           ECLIPSE_CHE,
           GO_DEFAULT,
@@ -275,6 +278,7 @@ public class NewWorkspacePageTest {
               CHE_7_PREVIEW_DEV,
               CHE_7_PREVIEW,
               CPP,
+              CAMEL_SPRINGBOOT_CHE7,
               ANDROID,
               DOT_NET,
               DOT_NET_DEFAULT);
@@ -298,6 +302,7 @@ public class NewWorkspacePageTest {
           CHE_7_PREVIEW_DEV,
           CHE_7_PREVIEW,
           CPP,
+          CAMEL_SPRINGBOOT_CHE7,
           ANDROID,
           DOT_NET,
           DOT_NET_DEFAULT);
@@ -319,6 +324,7 @@ public class NewWorkspacePageTest {
           GO_DEFAULT,
           ECLIPSE_CHE,
           CPP,
+          CAMEL_SPRINGBOOT_CHE7,
           ANDROID,
           DOT_NET,
           DOT_NET_DEFAULT);
