@@ -15,6 +15,7 @@ import {IParser} from './parser';
 
 export interface ISupportedItemList {
   kind: string;
+  apiVersion: string;
   items: Array<ISupportedListItem>;
 }
 

@@ -146,7 +146,7 @@ export abstract class EnvironmentManager {
    * @returns {string}
    */
   getUniqueMachineName(environment: che.IWorkspaceEnvironment, namePrefix?: string): string {
-    let newMachineName =  'new-machine';
+    let newMachineName =  'new-container';
     if (namePrefix) {
       newMachineName = `${namePrefix}/${newMachineName}`;
     }
@@ -183,7 +183,9 @@ export abstract class EnvironmentManager {
           servers: runtimeMachine.servers
         };
       }
-      machines.push(machine);
+      if (runtimeMachine.attributes['source'] === 'recipe') {
+        machines.push(machine);
+      }
     });
 
     return machines;

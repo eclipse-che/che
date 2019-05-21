@@ -118,7 +118,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
 
     const recipe: ISupportedItemList = this.parseRecipe(environment.recipe.content);
     if (!recipe) {
-      this.$log.error('EnvironmentManager: cannot parse recipe.');
+      this.$log.error('EnvironmentManager: cannot parse environment recipe.');
       return machines;
     }
 
@@ -202,7 +202,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
     }
     const recipe = this.parseRecipe(newEnvironment.recipe.content);
     if (!recipe) {
-      this.$log.error('EnvironmentManager: cannot parse recipe.');
+      this.$log.error('EnvironmentManager: cannot parse environment recipe.');
       return newEnvironment;
     }
     if (!recipe || recipe.kind !== LIST || !angular.isArray(recipe.items)) {
@@ -248,7 +248,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
     try {
       newEnvironment.recipe.content = this.stringifyRecipe(recipe);
     } catch (e) {
-      this.$log.error('Cannot retrieve environment\'s recipe, error: ', e);
+      this.$log.error('Cannot retrieve environment recipe, error: ', e);
     }
 
     return newEnvironment;
@@ -317,12 +317,12 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
     }
     const environmentRecipe = environment && environment.recipe ? environment.recipe.content : null;
     if (!environmentRecipe || !fullOldName || !newMachineName) {
-      this.$log.error('EnvironmentManager: cannot rename machine.');
+      this.$log.error('EnvironmentManager: cannot rename a container.');
       return environment;
     }
     const recipe = this.parseRecipe(environment.recipe.content);
     if (!recipe) {
-      this.$log.error('EnvironmentManager: cannot rename machine.');
+      this.$log.error('EnvironmentManager: cannot rename a container.');
       return environment;
     }
     let pod;
@@ -330,7 +330,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
     if (recipe && recipe.kind === LIST && angular.isArray(recipe.items)) {
       pod = getPodItemOrNull(recipe.items.find((item: ISupportedListItem) => {
         const podItem = getPodItemOrNull(item);
-        if (!podItem || podItem.kind !== POD || !podItem.metadata.name || !podItem.spec || !angular.isArray(podItem.spec.containers)) {
+        if (!podItem || !podItem.metadata.name || !podItem.spec || !angular.isArray(podItem.spec.containers)) {
           return false;
         }
 
@@ -355,7 +355,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
       }));
     }
     if (!pod) {
-      this.$log.error('EnvironmentManager: cannot rename machine.');
+      this.$log.error('EnvironmentManager: cannot rename a container.');
       return environment;
     }
     const containerIndex = pod.spec.containers.findIndex((container: IPodItemContainer) => {
@@ -410,7 +410,11 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
    */
   createMachine(environment: che.IWorkspaceEnvironment, image?: string): IEnvironmentManagerMachine {
     const uniqueMachineName = this.getUniqueMachineName(environment);
-    const [podName, containerName] = this.splitName(uniqueMachineName);
+    let [podName, containerName] = this.splitName(uniqueMachineName);
+    if(!containerName) {
+      podName = 'new-pod';
+      containerName = uniqueMachineName;
+    }
     const machineImage = !image ? 'rhche/centos_jdk8:latest' : image;
 
     return {
@@ -432,12 +436,12 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
     const machineRecipe: IPodItem = machine ? machine.recipe : null;
     const environmentRecipe = environment && environment.recipe ? environment.recipe.content : null;
     if (!environmentRecipe || !machineRecipe) {
-      this.$log.error('EnvironmentManager: cannot add machine.');
+      this.$log.error('EnvironmentManager: cannot add a container.');
       return environment;
     }
     const recipe = this.parseRecipe(environmentRecipe);
     if (!recipe) {
-      this.$log.error('EnvironmentManager: cannot add machine.');
+      this.$log.error('EnvironmentManager: cannot add a container.');
       return environment;
     }
 
@@ -465,7 +469,10 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
           machine.name = name;
         }
       } else {
-        const [, containerName] = this.splitName(machine.name);
+        let [, containerName] = this.splitName(machine.name);
+        if (!containerName) {
+          containerName = machine.name;
+        }
         const podItemName = machineRecipe.metadata.name ? machineRecipe.metadata.name : machineRecipe.metadata.generateName;
         machine.name = `${podItemName}/${containerName}`;
       }
@@ -502,7 +509,7 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
 
     const envRecipe = this.parseRecipe(environment.recipe.content);
     if (!envRecipe) {
-      this.$log.error('Cannot delete machine, error: ');
+      this.$log.error('Cannot delete a container, error: ');
       return environment;
     }
     if (!envRecipe || !angular.isArray(envRecipe.items)) {
@@ -555,10 +562,10 @@ export class KubernetesEnvironmentManager extends EnvironmentManager {
           envRecipe.items.splice(podIndex, 1);
         }
       } else {
-        this.$log.error('Cannot delete machine.');
+        this.$log.error('Cannot delete a container.');
       }
     } else {
-      this.$log.error('Cannot delete machine.');
+      this.$log.error('Cannot delete a container.');
     }
     environment.recipe.content = this.stringifyRecipe(envRecipe);
 

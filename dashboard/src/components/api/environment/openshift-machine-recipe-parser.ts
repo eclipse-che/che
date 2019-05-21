@@ -81,12 +81,6 @@ export class OpenShiftMachineRecipeParser implements IParser {
   }
 
   validate(recipe: ISupportedOpenShiftItem): void {
-    if (!recipe || !recipe.kind) {
-      throw new TypeError(`Recipe item should contain a 'kind' section.`);
-    }
-    if (!recipe.apiVersion) {
-      throw new TypeError(`Recipe item should contain 'apiVersion' section`);
-    }
     if (isSupportedItem(recipe)) {
       this.kubernetesMachineRecipeParser.validate(recipe);
     } else if (isRouteItem(recipe)) {
