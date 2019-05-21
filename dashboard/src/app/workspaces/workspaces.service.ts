@@ -77,7 +77,7 @@ export class WorkspacesService {
       return false;
     }
     const config = workspace.config;
-    const machines = config.environments[config.defaultEnv];
+    const machines = config.environments[config.defaultEnv].machines;
 
     let version: number;
     if (!Object.keys(machines).length || config.attributes.editor || config.attributes.plugins) {

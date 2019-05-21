@@ -176,7 +176,6 @@ export class WorkspaceMachinesController {
         return <machine>{
           image: source && source.image ? source.image : '',
           name: machine.name,
-          isDev: this.environmentManager.isDev(machine),
           memoryLimitGBytes: memoryLimitGBytes
         };
       });
