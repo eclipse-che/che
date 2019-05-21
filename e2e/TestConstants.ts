@@ -12,10 +12,10 @@ export const TestConstants = {
     /**
      * Base URL of the application which should be checked
      */
-    TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || "http://sample-url",
+    TS_SELENIUM_BASE_URL: process.env.TS_SELENIUM_BASE_URL || 'http://sample-url',
 
     /**
-     * Run browser in "Headless" (hiden) mode, "false" by default.  
+     * Run browser in "Headless" (hiden) mode, "false" by default.
      */
     TS_SELENIUM_HEADLESS: process.env.TS_SELENIUM_HEADLESS === 'true',
 
@@ -79,4 +79,4 @@ export const TestConstants = {
      */
     TS_SELENIUM_PLUGIN_PRECENCE_POLLING: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_POLLING) || 2000,
 
-}
+};
