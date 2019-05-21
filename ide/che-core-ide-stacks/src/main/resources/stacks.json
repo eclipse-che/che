@@ -353,8 +353,11 @@
       },
       "projects": [],
       "attributes": {
-        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,che-incubator/typescript/1.30.2",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,che-incubator/typescript/1.30.2,ms-vscode/node-debug/1.32.1,ms-vscode/node-debug2/1.31.6",
         "sidecar.che-incubator/typescript.memory_limit": "700Mi",
+        "sidecar.ms-vscode/node-debug.memory_limit": "256Mi",
+        "sidecar.ms-vscode/node-debug2.memory_limit": "500Mi",
+        "sidecar.eclipse/che-theia.memory_limit": "256Mi",
         "editor": "eclipse/che-theia/next"
       },
       "commands": [],
