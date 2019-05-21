@@ -42,8 +42,11 @@ import org.eclipse.che.api.workspace.shared.Constants;
 public class PluginFQNParser {
 
   private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
-      "Plugin '%s' has incorrect format. Should be: 'registryURL/publisher/name/version' or 'publisher/name/version'";
-  private static final String REGISTRY_PATTERN = "https?://[-./\\w]+(:[0-9]+)?(/[-./\\w]+)?";
+      "Plugin '%s' has incorrect format. Should be: 'registryURL/path', 'publisher/name/version', or 'publisher/name'";
+
+  // First potential format: 'publisher/name/version', where 'version' is optional. No alternate
+  // registry
+  // is permitted here.
   private static final String PUBLISHER_PATTERN = "[-a-z0-9]+";
   private static final String NAME_PATTERN = "[-a-z0-9]+";
   private static final String VERSION_PATTERN = "[-.a-z0-9]+";
@@ -52,11 +55,18 @@ public class PluginFQNParser {
           + PUBLISHER_PATTERN
           + ")/(?<name>"
           + NAME_PATTERN
-          + ")/(?<version>"
+          + ")(:?/(?<version>"
           + VERSION_PATTERN
-          + ")";
-  private static final Pattern PLUGIN_PATTERN =
-      Pattern.compile("((?<registry>" + REGISTRY_PATTERN + ")/)?(?<id>" + ID_PATTERN + ")");
+          + "))?";
+  private static final Pattern PLUGIN_PATTERN = Pattern.compile("(?<id>" + ID_PATTERN + ")");
+  private static final String LATEST_VERSION = "latest";
+
+  // Second potential format: 'registryURL/identifier'. We do not extract publisher, name, and
+  // version here.
+  private static final String REGISTRY_PATTERN = "https?://[-./\\w]+(:[0-9]+)?(/[-./\\w]+)?";
+  private static final String REGISTRY_ID_PATTERN = "[-_.A-Za-z0-9]+";
+  private static final Pattern PLUGIN_WITH_REGISTRY_PATTERN =
+      Pattern.compile("(?<registry>" + REGISTRY_PATTERN + "/)(?<id>" + REGISTRY_ID_PATTERN + ")/?");
 
   /**
    * Parses a workspace attributes map into a collection of {@link PluginFQN}.
@@ -115,23 +125,28 @@ public class PluginFQNParser {
   }
 
   public ExtendedPluginFQN parsePluginFQN(String plugin) throws InfrastructureException {
-    String registry;
-    String id;
-    String publisher;
-    String name;
-    String version;
-    URI registryURI = null;
+    // Check if plugin matches default format: 'publisher/name/version' or 'publisher/name'
     Matcher matcher = PLUGIN_PATTERN.matcher(plugin);
     if (matcher.matches()) {
-      registry = matcher.group("registry");
-      id = matcher.group("id");
-      publisher = matcher.group("publisher");
-      name = matcher.group("name");
-      version = matcher.group("version");
-    } else {
-      throw new InfrastructureException(format(INCORRECT_PLUGIN_FORMAT_TEMPLATE, plugin));
+      String id = matcher.group("id");
+      String publisher = matcher.group("publisher");
+      String name = matcher.group("name");
+      String version = matcher.group("version");
+      if (isNullOrEmpty(version)) {
+        version = LATEST_VERSION;
+        id = String.format("%s/%s", id, version);
+      }
+      return new ExtendedPluginFQN(null, id, publisher, name, version);
     }
-    if (!isNullOrEmpty(registry)) {
+
+    // Check if plugin matches registry format: 'registryURL/identifier'
+    Matcher referenceMatcher = PLUGIN_WITH_REGISTRY_PATTERN.matcher(plugin);
+    if (referenceMatcher.matches()) {
+      // Workaround; plugin broker expects an 'id' field for each plugin, so it's necessary to split
+      // the URL arbitrarily. See issue: https://github.com/eclipse/che/issues/13385
+      String registry = referenceMatcher.group("registry");
+      String id = referenceMatcher.group("id");
+      URI registryURI = null;
       try {
         registryURI = new URI(registry);
       } catch (URISyntaxException e) {
@@ -140,9 +155,11 @@ public class PluginFQNParser {
                 "Plugin registry URL '%s' is invalid. Problematic plugin entry: '%s'",
                 registry, plugin));
       }
+      return new ExtendedPluginFQN(registryURI, id, null, null, null);
     }
 
-    return new ExtendedPluginFQN(registryURI, id, publisher, name, version);
+    // Failed to match above options.
+    throw new InfrastructureException(format(INCORRECT_PLUGIN_FORMAT_TEMPLATE, plugin));
   }
 
   private String[] splitAttribute(String attribute) {

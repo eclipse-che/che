@@ -88,7 +88,7 @@ public class EditorComponentToWorkspaceApplierTest {
         "eclipse/super-editor/0.0.1");
   }
 
-  @Test
+  @Test(enabled = false) // Issue: https://github.com/eclipse/che/issues/13385
   public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
       throws DevfileException {
     // given

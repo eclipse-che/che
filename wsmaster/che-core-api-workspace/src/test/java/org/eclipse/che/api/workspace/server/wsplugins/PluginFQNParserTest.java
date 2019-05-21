@@ -103,8 +103,8 @@ public class PluginFQNParserTest {
     Map<String, String> attributes =
         createAttributes(
             "",
-            formatPlugin("http://testregistry1:8080", "publisher1/testplugin/1.0"),
-            formatPlugin("http://testregistry2:8080", "publisher1/testplugin/1.0"));
+            formatPlugin(null, "publisher1/testplugin/1.0"),
+            formatPlugin(null, "publisher1/testplugin/1.0"));
 
     parser.parsePlugins(attributes);
   }
@@ -118,8 +118,22 @@ public class PluginFQNParserTest {
     Map<String, String> attributes =
         createAttributes(
             "",
-            " " + formatPlugin("http://testregistry1:8080", "publisher1/testplugin/1.0"),
-            formatPlugin("http://testregistry2:8080", "publisher1/testplugin/1.0") + " ");
+            " " + formatPlugin(null, "publisher1/testplugin/1.0"),
+            formatPlugin(null, "publisher1/testplugin/1.0") + " ");
+
+    parser.parsePlugins(attributes);
+  }
+
+  @Test(
+      expectedExceptions = InfrastructureException.class,
+      expectedExceptionsMessageRegExp =
+          "Invalid Che tooling plugins configuration: plugin publisher1/testplugin/latest is duplicated")
+  public void shouldDetectDuplicatedPluginsIfOneLatestAndOtherNoVersion() throws Exception {
+    Map<String, String> attributes =
+        createAttributes(
+            "",
+            formatPlugin(null, "publisher1/testplugin"),
+            formatPlugin(null, "publisher1/testplugin/latest"));
 
     parser.parsePlugins(attributes);
   }
@@ -128,78 +142,62 @@ public class PluginFQNParserTest {
   public static Object[][] invalidAttributeStringProvider() {
     return new Object[][] {
       {formatPlugin("http://bad registry url", "testplugin/1.0")},
-      {formatPlugin("http://testregistry:8080", "bad:pluginname/1.0")},
-      {formatPlugin("http://testregistry:8080", "/version")},
-      {formatPlugin("http://testregistry:8080", "id/")},
-      {formatPlugin("http://testregistry:8080", "name/version")},
-      {formatPlugin("http://testregistry:8080", "id:version")},
-      {formatPlugin("http://testregistry:8080", "publisher/name:version")},
       {formatPlugin("http://testregistry:8080", "")}
     };
   }
 
   @DataProvider(name = "validAttributesProvider")
   public static Object[][] validAttributesProvider() {
-    PluginFQN basicEditor =
-        new PluginFQN(URI.create("http://registry:8080"), "publisher/editor/ver");
-    PluginFQN withRegistry =
-        new PluginFQN(URI.create("http://registry:8080"), "publisher/plugin/1.0");
-    PluginFQN noRegistry = new PluginFQN(null, "publisher/pluginnoregistry/2.0");
-    PluginFQN pathRegistry =
+    PluginFQN basicEditor = new PluginFQN(null, "publisher/editor/ver");
+    PluginFQN basicEditorNoVersion = new PluginFQN(null, "publisher/editor");
+    PluginFQN basicEditorLatestVersion = new PluginFQN(null, "publisher/editor/latest");
+    PluginFQN basicPlugin = new PluginFQN(null, "publisher/plugin/ver");
+    PluginFQN basicPluginNoVersion = new PluginFQN(null, "publisher/plugin");
+    PluginFQN basicPluginLatestVersion = new PluginFQN(null, "publisher/plugin/latest");
+
+    PluginFQN customRegistry =
+        new PluginFQN(URI.create("http://registry.com/plugins/"), "pluginId");
+    PluginFQN complexRegistry =
         new PluginFQN(
-            URI.create("http://registry/multiple/path/"), "publisher/pluginpathregistry/3.0");
+            URI.create("https://registry.com/plugins.v2/multiple.components_plugin/"),
+            "id.version");
+
     return new AttributeParsingTestCase[][] {
       {
         new AttributeParsingTestCase(
-            "Test plugin with registry",
-            ImmutableList.of(basicEditor, withRegistry),
-            createAttributes(formatPlugin(basicEditor), formatPlugins(withRegistry)))
+            "Test basic plugin and editor",
+            ImmutableList.of(basicEditor, basicPlugin),
+            createAttributes(formatPlugin(basicEditor), formatPlugins(basicPlugin)))
       },
       {
         new AttributeParsingTestCase(
-            "Test plugin with https registry",
-            ImmutableList.of(
-                new PluginFQN(URI.create("https://registry:8080"), "publisher/editor/ver")),
-            createAttributes(
-                null,
-                formatPlugin(
-                    new PluginFQN(URI.create("https://registry:8080"), "publisher/editor/ver"))))
+            "Test basic plugin with no version",
+            ImmutableList.of(basicEditor, basicPluginLatestVersion),
+            createAttributes(formatPlugin(basicEditor), formatPlugin(basicPluginNoVersion)))
       },
       {
         new AttributeParsingTestCase(
-            "Test plugin with registry containing path",
-            ImmutableList.of(
-                new PluginFQN(
-                    URI.create("https://registry:8080/some/path/v3"), "publisher/editor/ver")),
-            createAttributes(
-                null,
-                formatPlugin(
-                    new PluginFQN(
-                        URI.create("https://registry:8080/some/path/v3"), "publisher/editor/ver"))))
+            "Test basic editor with no version",
+            ImmutableList.of(basicEditorLatestVersion, basicPlugin),
+            createAttributes(formatPlugin(basicEditorNoVersion), formatPlugin(basicPlugin)))
       },
       {
-        new AttributeParsingTestCase(
-            "Test plugin without registry",
-            ImmutableList.of(basicEditor, noRegistry),
-            createAttributes(formatPlugin(basicEditor), formatPlugins(noRegistry)))
-      },
-      {
-        new AttributeParsingTestCase(
-            "Test plugin with multi-level path in registry",
-            ImmutableList.of(basicEditor, pathRegistry),
-            createAttributes(formatPlugin(basicEditor), formatPlugins(pathRegistry)))
+        new AttributeParsingTestCase( // TODO
+            "Test basic plugin with version 'latest'",
+            ImmutableList.of(basicEditor, basicPluginLatestVersion),
+            createAttributes(formatPlugin(basicEditor), formatPlugin(basicPluginLatestVersion)))
       },
       {
         new AttributeParsingTestCase(
             "Test attributes with no editor field",
-            ImmutableList.of(withRegistry),
-            createAttributes(null, formatPlugins(withRegistry)))
+            ImmutableList.of(basicPlugin),
+            createAttributes(null, formatPlugins(basicPlugin)))
       },
       {
         new AttributeParsingTestCase(
             "Test attributes with empty editor field",
-            ImmutableList.of(withRegistry),
-            createAttributes("", formatPlugins(withRegistry)))
+            ImmutableList.of(basicPlugin),
+            createAttributes("", formatPlugins(basicPlugin)))
       },
       {
         new AttributeParsingTestCase(
@@ -228,9 +226,29 @@ public class PluginFQNParserTest {
       {
         new AttributeParsingTestCase(
             "Test multiple plugins and an editor",
-            ImmutableList.of(basicEditor, withRegistry, noRegistry, pathRegistry),
+            ImmutableList.of(basicEditor, basicPlugin, basicPluginLatestVersion),
             createAttributes(
-                formatPlugin(basicEditor), formatPlugins(withRegistry, noRegistry, pathRegistry)))
+                formatPlugin(basicEditor), formatPlugins(basicPlugin, basicPluginLatestVersion)))
+      },
+      {
+        new AttributeParsingTestCase(
+            "Test multiple plugins and an editor, no version specified",
+            ImmutableList.of(basicEditorLatestVersion, basicPlugin, basicPluginLatestVersion),
+            createAttributes(
+                formatPlugin(basicEditorNoVersion),
+                formatPlugins(basicPlugin, basicPluginLatestVersion)))
+      },
+      {
+        new AttributeParsingTestCase(
+            "Test plugin with custom registry",
+            ImmutableList.of(basicEditor, customRegistry),
+            createAttributes(formatPlugin(basicEditor), formatPlugin(customRegistry)))
+      },
+      {
+        new AttributeParsingTestCase(
+            "Test plugin with complex registry",
+            ImmutableList.of(basicEditor, complexRegistry),
+            createAttributes(formatPlugin(basicEditor), formatPlugin(complexRegistry)))
       },
     };
   }
@@ -243,56 +261,35 @@ public class PluginFQNParserTest {
       {
         "http://registry:8080/publisher/editor/ver",
         new ExtendedPluginFQN(
-            URI.create("http://registry:8080"),
-            "publisher/editor/ver",
-            "publisher",
-            "editor",
-            "ver")
+            URI.create("http://registry:8080/publisher/editor/"), "ver", null, null, null)
       },
       {
         "https://registry:8080/publisher/editor/ver",
         new ExtendedPluginFQN(
-            URI.create("https://registry:8080"),
-            "publisher/editor/ver",
-            "publisher",
-            "editor",
-            "ver")
+            URI.create("https://registry:8080/publisher/editor/"), "ver", null, null, null)
       },
       {
         "https://che-registry.com.ua/publisher/editor/ver",
         new ExtendedPluginFQN(
-            URI.create("https://che-registry.com.ua"),
-            "publisher/editor/ver",
-            "publisher",
-            "editor",
-            "ver")
+            URI.create("https://che-registry.com.ua/publisher/editor/"), "ver", null, null, null)
       },
       {
         "https://che-registry.com.ua/plugins/publisher/editor/ver",
         new ExtendedPluginFQN(
-            URI.create("https://che-registry.com.ua/plugins"),
-            "publisher/editor/ver",
-            "publisher",
-            "editor",
-            "ver")
-      },
-      {
-        "https://che-registry.com.ua/plugins/v3/publisher/editor/ver",
-        new ExtendedPluginFQN(
-            URI.create("https://che-registry.com.ua/plugins/v3"),
-            "publisher/editor/ver",
-            "publisher",
-            "editor",
-            "ver")
+            URI.create("https://che-registry.com.ua/plugins/publisher/editor/"),
+            "ver",
+            null,
+            null,
+            null)
       },
       {
         "https://che-registry.com.ua/some/long/path/publisher/editor/ver",
         new ExtendedPluginFQN(
-            URI.create("https://che-registry.com.ua/some/long/path"),
-            "publisher/editor/ver",
-            "publisher",
-            "editor",
-            "ver")
+            URI.create("https://che-registry.com.ua/some/long/path/publisher/editor/"),
+            "ver",
+            null,
+            null,
+            null)
       },
       {
         "publisher/editor/ver",
@@ -315,6 +312,11 @@ public class PluginFQNParserTest {
         new ExtendedPluginFQN(
             null, "publisher/che-theia/2.12-latest", "publisher", "che-theia", "2.12-latest")
       },
+      {
+        "publisher/che-theia",
+        new ExtendedPluginFQN(
+            null, "publisher/che-theia/latest", "publisher", "che-theia", "latest")
+      },
     };
   }
 
@@ -331,8 +333,12 @@ public class PluginFQNParserTest {
     if (registry == null) {
       return id;
     } else {
-      return registry + "/" + id;
+      return registry + id;
     }
+  }
+
+  private static String formatPluginWithLatest(PluginFQN plugin) {
+    return plugin.getId() + "/latest";
   }
 
   private static Map<String, String> createAttributes(String editor, String... plugins) {

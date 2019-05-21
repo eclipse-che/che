@@ -108,7 +108,7 @@ public class DefaultEditorProvisionerTest {
     assertTrue(components.contains(new ComponentImpl(PLUGIN_COMPONENT_TYPE, TERMINAL_PLUGIN_REF)));
   }
 
-  @Test
+  @Test(enabled = false) // Issue: https://github.com/eclipse/che/issues/13385
   public void
       shouldProvisionDefaultPluginsIfTheyAreNotSpecifiedAndDefaultEditorFromCustomRegistryIsConfigured()
           throws DevfileException {

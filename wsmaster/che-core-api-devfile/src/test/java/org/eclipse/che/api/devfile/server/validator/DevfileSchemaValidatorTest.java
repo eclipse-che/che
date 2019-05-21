@@ -60,7 +60,8 @@ public class DevfileSchemaValidatorTest {
       {"dockerimage_component/devfile_dockerimage_component.yaml"},
       {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"},
       {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
-      {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"}
+      {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
+      {"editor_plugin_component/devfile_editor_component_without_version.yaml"},
     };
   }
 
@@ -135,16 +136,12 @@ public class DevfileSchemaValidatorTest {
         "(/components/0/reference):The object must not have a property whose name is \"reference\"."
       },
       {
-        "editor_plugin_component/devfile_editor_component_without_version.yaml",
-        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
-      },
-      {
         "editor_plugin_component/devfile_editor_plugins_components_with_invalid_memory_limit.yaml",
         "(/components/0/memoryLimit):The value must be of string type, but actual type is integer."
       },
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
-        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
+        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+(/[a-z0-9_\\-.]+)?$\"."
       },
       // kubernetes/openshift component model testing
       {
