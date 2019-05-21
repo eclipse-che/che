@@ -16,6 +16,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT_CHE7;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_NODEJS;
@@ -156,6 +157,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
@@ -188,6 +190,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
@@ -220,6 +223,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
