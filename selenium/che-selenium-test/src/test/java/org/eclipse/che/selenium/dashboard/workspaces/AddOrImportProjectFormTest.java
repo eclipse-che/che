@@ -58,6 +58,7 @@ public class AddOrImportProjectFormTest {
   private static final String EXPECTED_CONSOLE_REPOSITORY_URL =
       "https://github.com/che-samples/console-java-simple.git";
   private static final String BLANK_FORM_DESCRIPTION = "example of description";
+  private static final String SPRING_FUSE_SAMPLE = "fuse-rest-http-booster";
   private static final String CUSTOM_BLANK_PROJECT_NAME = "blank-project";
   private static final String BLANK_PROJECT_NAME = "blank";
   private static final String BLANK_DEFAULT_URL = "https://github.com/che-samples/blank";
@@ -65,6 +66,8 @@ public class AddOrImportProjectFormTest {
       ImmutableMap.of(
           SPRING_SAMPLE_NAME,
           "A basic example using Spring servlets. The app returns values entered into a submit form.",
+          SPRING_FUSE_SAMPLE,
+          "Fuse booster.",
           CONSOLE_SAMPLE_NAME,
           "A hello world Java application.");
   private static final String EXPECTED_TEXT_IN_EDITOR =
