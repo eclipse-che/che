@@ -130,14 +130,16 @@ build_image() {
   # Replace macros in Dockerfiles
   cat ${DIR}/${DOCKERFILE} | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
   cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} ${BUILD_ARGS} .
+  DOCKER_BUILD_STATUS=$?
   rm ${DIR}/.Dockerfile
-  if [ $? -eq 0 ]; then
+  if [ $DOCKER_BUILD_STATUS -eq 0 ]; then
     printf "Build of ${BLUE}${IMAGE_NAME} ${GREEN}[OK]${NC}\n"
     if [ ! -z "${IMAGE_ALIASES}" ]; then
       for TMP_IMAGE_NAME in ${IMAGE_ALIASES}
       do
         docker tag ${IMAGE_NAME} ${TMP_IMAGE_NAME}:${TAG}
-        if [ $? -eq 0 ]; then
+        DOCKER_TAG_STATUS=$?
+        if [ $DOCKER_TAG_STATUS -eq 0 ]; then
           printf "  /alias ${BLUE}${TMP_IMAGE_NAME}:${TAG}${NC} ${GREEN}[OK]${NC}\n"
         else
           printf "${RED}Failure when building docker image ${IMAGE_NAME}${NC}\n"
