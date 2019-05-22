@@ -33,7 +33,6 @@
 - Update default Theia IDE version to 'next' [\#13235](https://github.com/eclipse/che/pull/13235) ([sleshchenko](https://github.com/sleshchenko))
 - \[ TS-SELENIUM \] Investigating new typescript related test framework [\#13200](https://github.com/eclipse/che/pull/13200) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
 
-
 ## [7.0.0-beta-4.0](https://github.com/eclipse/che/tree/7.0.0-beta-4.0) (2019-05-03)
 [Full Changelog](https://github.com/eclipse/che/compare/6.19.3...7.0.0-beta-4.0)
 
