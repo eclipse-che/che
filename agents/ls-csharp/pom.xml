@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.19.4</version>
+        <version>6.19.5-SNAPSHOT</version>
     </parent>
     <artifactId>ls-csharp-agent</artifactId>
     <name>Language Server C# Agent</name>

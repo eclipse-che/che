@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-debugger-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.19.4</version>
+        <version>6.19.5-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-debugger-ide</artifactId>
     <packaging>gwt-lib</packaging>
