@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.Workspace;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -80,13 +81,16 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
   private final EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter;
   private final PVCProvisioner pvcProvisioner;
   private final SubPathPrefixes subpathPrefixes;
+  private final boolean waitBound;
 
   @Inject
   public UniqueWorkspacePVCStrategy(
+      @Named("che.infra.kubernetes.pvc.wait_bound") boolean waitBound,
       KubernetesNamespaceFactory factory,
       EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
       PVCProvisioner pvcProvisioner,
       SubPathPrefixes subpathPrefixes) {
+    this.waitBound = waitBound;
     this.factory = factory;
     this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
     this.pvcProvisioner = pvcProvisioner;
@@ -141,9 +145,11 @@ public class UniqueWorkspacePVCStrategy implements WorkspaceVolumesStrategy {
     LOG.debug("Creating PVCs for workspace '{}'", workspaceId);
     k8sClaims.createIfNotExist(k8sEnv.getPersistentVolumeClaims().values());
 
-    LOG.debug("Waiting PVCs for workspace '{}' to be bound", workspaceId);
-    for (PersistentVolumeClaim pvc : k8sEnv.getPersistentVolumeClaims().values()) {
-      k8sClaims.waitBound(pvc.getMetadata().getName(), timeoutMillis);
+    if (waitBound) {
+      LOG.debug("Waiting for PVC(s) of workspace '{}' to be bound", workspaceId);
+      for (PersistentVolumeClaim pvc : k8sEnv.getPersistentVolumeClaims().values()) {
+        k8sClaims.waitBound(pvc.getMetadata().getName(), timeoutMillis);
+      }
     }
     LOG.debug("Preparing PVCs done for workspace '{}'", workspaceId);
   }
