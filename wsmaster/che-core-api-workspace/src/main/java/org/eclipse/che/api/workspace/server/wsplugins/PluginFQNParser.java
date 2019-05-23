@@ -16,7 +16,11 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -24,8 +28,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.inject.Inject;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
@@ -41,6 +48,15 @@ import org.eclipse.che.api.workspace.shared.Constants;
  */
 @Beta
 public class PluginFQNParser {
+
+  private final URLFetcher urlFetcher;
+  private ObjectMapper yamlReader;
+
+  @Inject
+  public PluginFQNParser(URLFetcher urlFetcher) {
+    this.urlFetcher = urlFetcher;
+    this.yamlReader = new ObjectMapper(new YAMLFactory());
+  }
 
   private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
       "Plugin '%s' has incorrect format. Should be: 'registryURL#publisher/name/version' or 'publisher/name/version' or `referenceURL`";
@@ -157,5 +173,27 @@ public class PluginFQNParser {
   private String[] splitAttribute(String attribute) {
     String[] plugins = attribute.split(",");
     return Arrays.stream(plugins).map(String::trim).toArray(String[]::new);
+  }
+
+  public ExtendedPluginFQN evaluateFqn(String reference) throws InfrastructureException {
+    String pluginMetaContent = urlFetcher.fetchSafely(reference);
+    if (pluginMetaContent == null) {
+      throw new InfrastructureException(format("Plugin reference URL '%s' is invalid.", reference));
+    }
+    try {
+      JsonNode contentNode = yamlReader.readTree(pluginMetaContent);
+      String publisher = contentNode.get("publisher").textValue();
+      String name = contentNode.get("name").textValue();
+      String version = contentNode.get("version").textValue();
+      return new ExtendedPluginFQN(
+          null,
+          new StringJoiner("/").add(publisher).add(name).add(version).toString(),
+          publisher,
+          name,
+          version);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return null;
   }
 }

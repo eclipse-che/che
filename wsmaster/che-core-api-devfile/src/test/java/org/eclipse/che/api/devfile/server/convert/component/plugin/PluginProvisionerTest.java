@@ -20,18 +20,22 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
 public class PluginProvisionerTest {
 
+  @Mock private URLFetcher urlFetcher;
+
   private PluginProvisioner pluginComponentProvisioner;
-  private PluginFQNParser fqnParser = new PluginFQNParser();
+  private PluginFQNParser fqnParser = new PluginFQNParser(urlFetcher);
 
   @BeforeMethod
   public void setUp() {

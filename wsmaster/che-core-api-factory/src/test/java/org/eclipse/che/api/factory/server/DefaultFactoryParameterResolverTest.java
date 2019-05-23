@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.devfile.server.DevfileManager;
 import org.eclipse.che.api.devfile.server.FileContentProvider;
-import org.eclipse.che.api.devfile.server.URLFetcher;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.eclipse.che.api.devfile.server.convert.CommandConverter;
 import org.eclipse.che.api.devfile.server.convert.DefaultEditorProvisioner;
 import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
@@ -44,6 +44,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -61,7 +62,12 @@ public class DefaultFactoryParameterResolverTest {
 
   @Mock private URLFetcher urlFetcher;
   @Mock private KubernetesRecipeParser kubernetesRecipeParser;
-  private PluginFQNParser fqnParser = new PluginFQNParser();
+  private PluginFQNParser fqnParser;
+
+  @BeforeMethod
+  public void setUp() {
+    this.fqnParser = new PluginFQNParser(urlFetcher);
+  }
 
   @Test
   public void shouldResolveRelativeFiles() throws Exception {

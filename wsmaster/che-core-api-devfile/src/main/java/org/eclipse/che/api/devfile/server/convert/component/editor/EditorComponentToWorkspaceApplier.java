@@ -79,32 +79,36 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
     }
 
+    final ExtendedPluginFQN fqn;
     if (!isNullOrEmpty(reference)) {
       workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, reference);
+      try {
+        fqn = fqnParser.evaluateFqn(reference);
+      } catch (InfrastructureException e) {
+        throw new DevfileException(e.getMessage(), e);
+      }
     } else {
       String compositeId = registryUrl != null ? registryUrl + "#" + editorId : editorId;
       workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, compositeId);
-      final ExtendedPluginFQN fqn;
       try {
         fqn = fqnParser.parsePluginFQN(compositeId);
       } catch (InfrastructureException e) {
         throw new DevfileException(e.getMessage(), e);
       }
-      if (memoryLimit != null) {
-        workspaceConfig
-            .getAttributes()
-            .put(
-                format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
-      }
-      workspaceConfig
-          .getCommands()
-          .stream()
-          .filter(
-              c ->
-                  c.getAttributes()
-                      .get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
-                      .equals(editorComponentAlias))
-          .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId()));
     }
+    if (memoryLimit != null) {
+      workspaceConfig
+          .getAttributes()
+          .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
+    }
+    workspaceConfig
+        .getCommands()
+        .stream()
+        .filter(
+            c ->
+                c.getAttributes()
+                    .get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)
+                    .equals(editorComponentAlias))
+        .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId()));
   }
 }

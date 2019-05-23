@@ -24,10 +24,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -37,11 +39,13 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class PluginFQNParserTest {
 
+  @Mock private URLFetcher urlFetcher;
+
   private PluginFQNParser parser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    parser = new PluginFQNParser();
+    parser = new PluginFQNParser(urlFetcher);
   }
 
   @Test

@@ -21,9 +21,11 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.mockito.Mock;
 import org.testng.annotations.Test;
 
 /**
@@ -32,6 +34,8 @@ import org.testng.annotations.Test;
  * @author Sergii Leshchenko
  */
 public class DefaultEditorProvisionerTest {
+
+  @Mock private URLFetcher urlFetcher;
 
   private static final String EDITOR_NAME = "theia";
   private static final String EDITOR_VERSION = "1.0.0";
@@ -49,7 +53,7 @@ public class DefaultEditorProvisionerTest {
 
   private DefaultEditorProvisioner provisioner;
 
-  private PluginFQNParser fqnParser = new PluginFQNParser();
+  private PluginFQNParser fqnParser = new PluginFQNParser(urlFetcher);
 
   @Test
   public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws DevfileException {

@@ -18,25 +18,35 @@ import static org.eclipse.che.api.devfile.server.Constants.PLUGINS_COMPONENTS_AL
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
+@Listeners(MockitoTestNGListener.class)
 public class PluginComponentToWorkspaceApplierTest {
 
+  @Mock private URLFetcher urlFetcher;
+
   private PluginComponentToWorkspaceApplier pluginComponentApplier;
-  private PluginFQNParser fqnParser = new PluginFQNParser();
+  private PluginFQNParser fqnParser;
 
   @BeforeMethod
   public void setUp() {
+    fqnParser = new PluginFQNParser(urlFetcher);
     pluginComponentApplier = new PluginComponentToWorkspaceApplier(fqnParser);
   }
 
@@ -131,12 +141,20 @@ public class PluginComponentToWorkspaceApplierTest {
 
     String superPluginId = "eclipse/super-plugin/0.0.1";
     String reference = "https://myregistry.com/infolder/meta.yaml";
+    String meta =
+        "apiVersion: v2\n"
+            + "publisher: eclipse\n"
+            + "name: super-plugin\n"
+            + "version: 0.0.1\n"
+            + "type: Che Plugin";
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
     superPluginComponent.setId(superPluginId);
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
     superPluginComponent.setMemoryLimit("1234M");
+
+    when(urlFetcher.fetchSafely(anyString())).thenReturn(meta);
 
     ComponentImpl customPluginComponent = new ComponentImpl();
     customPluginComponent.setAlias("custom");
@@ -155,17 +173,11 @@ public class PluginComponentToWorkspaceApplierTest {
     assertTrue(workspaceTooling.matches("(.+/.+/.+),(https://.+/.+/.+)"));
     assertTrue(workspaceTooling.contains(superPluginId));
     assertTrue(workspaceTooling.contains(reference));
-    //  FIXME:
-    //    String toolingAliases =
-    //        workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
-    //    assertTrue(toolingAliases.matches("(.+/.+/.+=.+),(.+/.+/.+=.+)"));
-    //    assertTrue(toolingAliases.contains(superPluginId + "=super-plugin"));
-    //    assertTrue(toolingAliases.contains("publisher1/custom-plugin/v1=custom"));
-    //    assertEquals(
-    //        workspaceConfig
-    //            .getAttributes()
-    //            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
-    //        "1234M");
+    assertEquals(
+        workspaceConfig
+            .getAttributes()
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
+        "1234M");
   }
 
   @Test

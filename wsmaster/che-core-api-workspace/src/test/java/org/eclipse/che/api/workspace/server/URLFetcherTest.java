@@ -9,10 +9,10 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.workspace.server;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.eclipse.che.api.devfile.server.URLFetcher.MAXIMUM_READ_BYTES;
+import static org.eclipse.che.api.workspace.server.URLFetcher.MAXIMUM_READ_BYTES;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -30,7 +30,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Testing {@link org.eclipse.che.api.devfile.server.URLFetcher}
+ * Testing {@link org.eclipse.che.api.workspace.server.URLFetcher}
  *
  * @author Florent Benoit
  */
@@ -43,7 +43,7 @@ public class URLFetcherTest {
   /** Check that when url is null, NPE is thrown */
   @Test(expectedExceptions = NullPointerException.class)
   public void checkNullURL() {
-    URLFetcher.fetchSafely((String) null);
+    URLFetcher.fetchSafely(null);
   }
 
   /** Check that when url exists the content is retrieved */

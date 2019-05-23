@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 
 /**
  * A simple implementation of the FileContentProvider that merely uses the function resolve relative

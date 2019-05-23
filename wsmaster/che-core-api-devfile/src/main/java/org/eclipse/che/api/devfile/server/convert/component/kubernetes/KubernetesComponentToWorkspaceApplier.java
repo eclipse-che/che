@@ -39,7 +39,6 @@ import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
@@ -107,8 +106,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         workspaceConfig, k8sComponent.getType(), componentObjects, emptyMap());
   }
 
-  private String retrieveContent(
-      Component recipeComponent, @Nullable FileContentProvider fileContentProvider)
+  private String retrieveContent(Component recipeComponent, FileContentProvider fileContentProvider)
       throws DevfileException {
     checkArgument(fileContentProvider != null, "Content provider must not be null");
     if (!isNullOrEmpty(recipeComponent.getReferenceContent())) {

@@ -18,24 +18,34 @@ import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_ALIA
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
+@Listeners(MockitoTestNGListener.class)
 public class EditorComponentToWorkspaceApplierTest {
 
+  @Mock private URLFetcher urlFetcher;
+
   private EditorComponentToWorkspaceApplier editorComponentApplier;
-  private PluginFQNParser fqnParser = new PluginFQNParser();
+  private PluginFQNParser fqnParser;
 
   @BeforeMethod
   public void setUp() {
+    fqnParser = new PluginFQNParser(urlFetcher);
     editorComponentApplier = new EditorComponentToWorkspaceApplier(fqnParser);
   }
 
@@ -100,12 +110,20 @@ public class EditorComponentToWorkspaceApplierTest {
   public void shouldProvisionWorkspaceEditorAttributeWithReferenceDuringCheEditorComponentApplying()
       throws DevfileException {
     String reference = "https://myregistry.com/infolder/meta.yaml";
+    String meta =
+        "apiVersion: v2\n"
+            + "publisher: eclipse\n"
+            + "name: super-editor\n"
+            + "version: 0.0.1\n"
+            + "type: Che Editor";
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
     ComponentImpl editorComponent = new ComponentImpl();
     editorComponent.setType(EDITOR_COMPONENT_TYPE);
     editorComponent.setAlias("editor1");
     editorComponent.setReference(reference);
+    editorComponent.setMemoryLimit("12345M");
+    when(urlFetcher.fetchSafely(anyString())).thenReturn(meta);
 
     // when
     editorComponentApplier.apply(workspaceConfig, editorComponent, null);
@@ -115,12 +133,11 @@ public class EditorComponentToWorkspaceApplierTest {
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE), reference);
     assertEquals(
         workspaceConfig.getAttributes().get(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE), "editor1");
-    //    FIXME:
-    //    assertEquals(
-    //        workspaceConfig
-    //            .getAttributes()
-    //            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor")),
-    //        "12345M");
+    assertEquals(
+        workspaceConfig
+            .getAttributes()
+            .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-editor")),
+        "12345M");
   }
 
   @Test

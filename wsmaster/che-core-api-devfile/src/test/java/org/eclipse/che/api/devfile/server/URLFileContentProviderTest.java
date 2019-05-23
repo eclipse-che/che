@@ -16,6 +16,7 @@ import static org.testng.Assert.assertEquals;
 
 import java.net.URI;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
