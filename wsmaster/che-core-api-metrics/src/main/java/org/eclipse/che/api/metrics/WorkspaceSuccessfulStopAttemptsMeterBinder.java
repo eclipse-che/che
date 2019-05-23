@@ -44,8 +44,9 @@ public class WorkspaceSuccessfulStopAttemptsMeterBinder implements MeterBinder {
     // only subscribe to the event once we have the counters ready
     eventService.subscribe(
         event -> {
-          if (event.getPrevStatus() == WorkspaceStatus.STOPPING
-              && event.getStatus() == WorkspaceStatus.STOPPED) {
+          if ((event.getError() == null)
+              && (event.getPrevStatus() == WorkspaceStatus.STOPPING
+                  && event.getStatus() == WorkspaceStatus.STOPPED)) {
             stoppedCounter.increment();
           }
         },

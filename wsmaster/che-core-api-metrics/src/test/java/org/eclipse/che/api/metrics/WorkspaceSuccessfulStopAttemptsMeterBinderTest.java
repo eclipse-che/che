@@ -59,7 +59,7 @@ public class WorkspaceSuccessfulStopAttemptsMeterBinderTest {
   }
 
   @Test
-  public void shouldCollectOnlyStopped() {
+  public void shouldCollectOnlyStoppedWithoutError() {
     // given
     WorkspaceSuccessfulStopAttemptsMeterBinder meterBinder =
         new WorkspaceSuccessfulStopAttemptsMeterBinder(eventService);
@@ -74,6 +74,25 @@ public class WorkspaceSuccessfulStopAttemptsMeterBinderTest {
     // then
     Counter successful = registry.find("che.workspace.stopped.total").counter();
     Assert.assertEquals(successful.count(), 1.0);
+  }
+
+  @Test
+  public void shouldNotCollectStoppedWithError() {
+    // given
+    WorkspaceSuccessfulStopAttemptsMeterBinder meterBinder =
+        new WorkspaceSuccessfulStopAttemptsMeterBinder(eventService);
+    meterBinder.bindTo(registry);
+
+    // when
+    eventService.publish(
+        DtoFactory.newDto(WorkspaceStatusEvent.class)
+            .withPrevStatus(WorkspaceStatus.STOPPING)
+            .withStatus(WorkspaceStatus.STOPPED)
+            .withError("Error during workspace stop")
+            .withWorkspaceId("id1"));
+    // then
+    Counter successful = registry.find("che.workspace.stopped.total").counter();
+    Assert.assertEquals(successful.count(), 0.0);
   }
 
   @DataProvider
