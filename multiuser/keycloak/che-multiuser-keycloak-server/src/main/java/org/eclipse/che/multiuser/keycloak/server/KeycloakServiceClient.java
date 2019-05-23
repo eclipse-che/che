@@ -85,8 +85,7 @@ public class KeycloakServiceClient {
       @SuppressWarnings("rawtypes") Jwt token, String oauthProvider, String redirectAfterLogin) {
 
     DefaultClaims claims = (DefaultClaims) token.getBody();
-    final String clientId = claims.getAudience();
-
+    final String clientId = claims.get("azp", String.class);
     final String sessionState = claims.get("session_state", String.class);
     MessageDigest md;
     try {
