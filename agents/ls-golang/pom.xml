@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-agents-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.19.4-SNAPSHOT</version>
+        <version>6.19.4</version>
     </parent>
     <artifactId>ls-golang-agent</artifactId>
     <name>Language Server Golang Agent</name>

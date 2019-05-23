@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-github-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.19.4-SNAPSHOT</version>
+        <version>6.19.4</version>
     </parent>
     <artifactId>che-plugin-github-server</artifactId>
     <packaging>jar</packaging>
