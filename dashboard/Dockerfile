@@ -14,6 +14,7 @@
 #  $ docker run --rm eclipse-che-dashboard | tar -C target/ -zxf -
 FROM node:8.10.0
 
+RUN sed -i '/jessie-updates/d' /etc/apt/sources.list
 RUN apt-get update && \
     apt-get install -y git \
     && apt-get -y clean \
