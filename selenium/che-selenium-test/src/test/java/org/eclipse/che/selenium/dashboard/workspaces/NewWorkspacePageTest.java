@@ -16,6 +16,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CAMEL_SPRINGBOOT_CHE7;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_BLANK;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_GO;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.CENTOS_NODEJS;
@@ -89,6 +90,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
@@ -112,6 +114,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CPP,
           CHE_7_PREVIEW,
           CHE_7_PREVIEW_DEV,
@@ -136,6 +139,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CPP,
           ECLIPSE_CHE,
           GO_DEFAULT,
@@ -156,6 +160,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
@@ -188,6 +193,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
@@ -220,6 +226,7 @@ public class NewWorkspacePageTest {
           DOT_NET_DEFAULT,
           DOT_NET,
           ANDROID,
+          CAMEL_SPRINGBOOT_CHE7,
           CAMEL_SPRINGBOOT,
           CPP,
           CENTOS_BLANK,
@@ -271,6 +278,7 @@ public class NewWorkspacePageTest {
               CHE_7_PREVIEW_DEV,
               CHE_7_PREVIEW,
               CPP,
+              CAMEL_SPRINGBOOT_CHE7,
               ANDROID,
               DOT_NET,
               DOT_NET_DEFAULT);
@@ -294,6 +302,7 @@ public class NewWorkspacePageTest {
           CHE_7_PREVIEW_DEV,
           CHE_7_PREVIEW,
           CPP,
+          CAMEL_SPRINGBOOT_CHE7,
           ANDROID,
           DOT_NET,
           DOT_NET_DEFAULT);
@@ -315,6 +324,7 @@ public class NewWorkspacePageTest {
           GO_DEFAULT,
           ECLIPSE_CHE,
           CPP,
+          CAMEL_SPRINGBOOT_CHE7,
           ANDROID,
           DOT_NET,
           DOT_NET_DEFAULT);

@@ -12,7 +12,6 @@
 package org.eclipse.che.core.db.jpa;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.*;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
@@ -116,6 +115,7 @@ public final class TestObjectsFactory {
         "kubernetes",
         name,
         "eclipse/che-theia/0.0.1",
+        ImmutableMap.of("java.home", "/home/user/jdk11"),
         "https://mysite.com/registry/somepath",
         "/dev.yaml",
         "refContent",
@@ -147,7 +147,7 @@ public final class TestObjectsFactory {
   }
 
   private static ActionImpl createAction() {
-    return new ActionImpl("exec", "component", "run.sh", "/home/user");
+    return new ActionImpl("exec", "component", "run.sh", "/home/user", null, null);
   }
 
   private static ProjectImpl createDevfileProject(String name) {

@@ -294,10 +294,17 @@ declare namespace che {
     status?: string;
     namespace?: string;
     attributes?: IWorkspaceAttributes;
-    config: IWorkspaceConfig;
+    config?: IWorkspaceConfig;
+    devfile?: IWorkspaceDevfile;
     runtime?: IWorkspaceRuntime;
     isLocked?: boolean;
     usedResources?: string;
+  }
+
+  export interface IWorkspaceSettings {
+    supportedRecipeTypes: string;
+    cheWorkspacePluginRegistryUrl: string;
+    [propName: string]: string | boolean;
   }
 
   export interface IWorkspaceAttributes {
@@ -323,6 +330,15 @@ declare namespace che {
     persistVolumes?: string;
     editor?: string;
     plugins?: string;
+  }
+
+  export interface IWorkspaceDevfile {
+    specVersion: string;
+    name: string;
+    components: Array<any>;
+    projects?: Array <any>;
+    commands?: Array <any>;
+    attributes?: che.IWorkspaceConfigAttributes;
   }
 
   export interface IWorkspaceEnvironment {

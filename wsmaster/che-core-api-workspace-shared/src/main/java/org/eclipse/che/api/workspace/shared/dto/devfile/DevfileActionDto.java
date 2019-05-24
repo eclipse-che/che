@@ -44,4 +44,18 @@ public interface DevfileActionDto extends Action {
   void setWorkdir(String workdir);
 
   DevfileActionDto withWorkdir(String workdir);
+
+  @Override
+  String getReference();
+
+  void setReference(String reference);
+
+  DevfileActionDto withReference(String reference);
+
+  @Override
+  String getReferenceContent();
+
+  void setReferenceContent(String referenceContent);
+
+  DevfileActionDto withReferenceContent(String referenceContent);
 }

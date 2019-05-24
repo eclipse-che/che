@@ -163,7 +163,7 @@ export class WorkspaceMachinesController {
     }
     this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.environment.recipe.type);
 
-    this.machines = this.environmentManager.getMachines(this.environment);
+    this.machines = this.environmentManager.getMachines(this.environment, workspaceDetails.runtime);
     this.environment = this.environmentManager.getEnvironment(this.environment, this.machines);
 
     if (!angular.isArray(this.machines)) {
@@ -295,7 +295,7 @@ export class WorkspaceMachinesController {
 
     if (!machine) {
       return;
-    } 
+    }
 
     const currentMemoryLimitBytes = this.environmentManager.getMemoryLimit(machine);
     const currentMemoryLimitGBytes = currentMemoryLimitBytes === -1 ? 0 : this.getNumber(this.$filter('changeMemoryUnit')(currentMemoryLimitBytes, [MemoryUnit[MemoryUnit.B], MemoryUnit[MemoryUnit.GB]]));

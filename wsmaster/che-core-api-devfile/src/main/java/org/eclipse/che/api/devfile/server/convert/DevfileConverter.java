@@ -152,7 +152,10 @@ public class DevfileConverter implements DevfileToWorkspaceConfigConverter {
     config.setName(devfile.getName());
 
     for (Command command : devfile.getCommands()) {
-      config.getCommands().add(commandConverter.toWorkspaceCommand(command));
+      CommandImpl com = commandConverter.toWorkspaceCommand(command, contentProvider);
+      if (com != null) {
+        config.getCommands().add(com);
+      }
     }
 
     // note that component applier modifies commands in workspace config

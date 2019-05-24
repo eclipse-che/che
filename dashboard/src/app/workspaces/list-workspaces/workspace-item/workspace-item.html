@@ -13,7 +13,7 @@
 -->
 <che-list-item flex ng-mouseover="hover=true" ng-mouseout="hover=false">
   <div flex="100"
-       id="ws-name-{{workspaceItemCtrl.workspace.config.name}}"
+       id="ws-name-{{workspaceItemCtrl.workspaceName}}"
        data-ws-status="{{workspaceItemCtrl.getWorkspaceStatus()}}"
        layout="row"
        layout-align="start stretch"
@@ -24,7 +24,7 @@
          ng-if="workspaceItemCtrl.isSelectable === true">
       <che-list-item-checked ng-model="workspaceItemCtrl.isSelect"
                              ng-show="('RUNNING' === workspaceItemCtrl.getWorkspaceStatus() || 'STOPPED' === workspaceItemCtrl.getWorkspaceStatus())"
-                             che-aria-label-checkbox="Workspace {{workspaceItemCtrl.workspace.config.name}}"
+                             che-aria-label-checkbox="Workspace {{workspaceItemCtrl.workspaceName}}"
                              ng-click="workspaceItemCtrl.onCheckboxClick()"></che-list-item-checked>
     </div>
     <div flex
@@ -41,10 +41,10 @@
         <span class="che-xs-header noselect" hide-gt-xs>Name</span>
         <div layout="row" flex>
           <workspace-status-indicator flex="none" che-status="workspaceItemCtrl.getWorkspaceStatus()"></workspace-status-indicator>
-          <div class="workspace-name-clip" id="ws-full-name-{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}">
+          <div class="workspace-name-clip" id="ws-full-name-{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspaceName}}">
             <span uib-tooltip="{{'RUNNING' === workspaceItemCtrl.getWorkspaceStatus() ? 'Running' : 'Last modified: ' + (workspaceItemCtrl.workspace.attributes.updated | amTimeAgo)}}"
                   class="che-hover">
-              <che-clip-the-middle>{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}</che-clip-the-middle>
+              <che-clip-the-middle>{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspaceName}}</che-clip-the-middle>
             </span>
           </div>
         </div>
@@ -86,7 +86,7 @@
           <che-workspace-status workspace-id="workspaceItemCtrl.workspace.id"
                                 name="workspace-stop-start-button"
                                 is-request-pending="workspaceItemCtrl.isRequestPending"></che-workspace-status>
-          <a href="#/workspace/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspace.config.name}}?tab=Config"
+          <a href="#/workspace/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspaceName}}?tab=Config"
              name="configure-workspace-button"
              uib-tooltip="Configure workspace">
             <span class="fa fa-cog"></span>
@@ -98,8 +98,8 @@
         <div class="che-list-item-secondary workspace-item-not-supported"
              ng-if="workspaceItemCtrl.isSupported === false">
           <div>
-            <span>Not supported</span>
-            <span class="che-list-actions"><i class="fa fa-question-circle" uib-tooltip="Current infrastructure doesn't support this workspace recipe type."></i></span>
+            <span>Not compatible</span>
+            <span class="che-list-actions"><i class="fa fa-question-circle" uib-tooltip="{{workspaceItemCtrl.workspaceSupportIssues}}"></i></span>
           </div>
         </div>
 

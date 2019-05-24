@@ -353,8 +353,11 @@
       },
       "projects": [],
       "attributes": {
-        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,che-incubator/typescript/1.30.2",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,che-incubator/typescript/1.30.2,ms-vscode/node-debug/1.32.1,ms-vscode/node-debug2/1.31.6",
         "sidecar.che-incubator/typescript.memory_limit": "700Mi",
+        "sidecar.ms-vscode/node-debug.memory_limit": "256Mi",
+        "sidecar.ms-vscode/node-debug2.memory_limit": "500Mi",
+        "sidecar.eclipse/che-theia.memory_limit": "256Mi",
         "editor": "eclipse/che-theia/next"
       },
       "commands": [],
@@ -2848,6 +2851,93 @@
         "editor": "eclipse/che-theia/next",
         "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat-developer/che-omnisharp-plugin/0.0.1,redhat-developer/netcoredbg-theia-plugin/0.0.1"
       },
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "apache-camel-springboot-che7",
+    "creator": "ide",
+    "name": "Apache Camel based projects on Che 7",
+    "description": "Stack with environment ready to develop Integration projects with Apache Camel based on SpringBoot.",
+    "scope": "general",
+    "tags": [
+      "Java",
+      "OpenJDK",
+      "Maven",
+      "Debian",
+      "Apache Camel",
+      "Red Hat Fuse"
+    ],
+    "components": [
+      {
+        "name": "Debian",
+        "version": "9.8"
+      },
+      {
+        "name": "OpenJDK",
+        "version": "1.8.0"
+      },
+      {
+        "name": "Maven",
+        "version": "3.6.1"
+      }
+    ],
+    "workspaceConfig": {
+      "name": "camel",
+      "defaultEnv": "default",
+      "environments": {
+        "default": {
+          "machines": {
+            "maven-container": {
+              "servers": {
+                "8080/tcp": {
+                  "port": "8080",
+                  "protocol": "http"
+                }
+              },
+              "attributes": {
+                "memoryLimitBytes": "512000000",
+                "containerCommand": "['sleep']",
+                "containerArgs": "['infinity']"
+              },
+              "volumes": {
+                "m2": {
+                  "path": "/home/user/.m2"
+                },
+                "projects": {
+                  "path": "/projects"
+                }
+              },
+              "env": {
+                "MAVEN_CONFIG": "/home/user/.m2",
+                "MAVEN_OPTS": "-XX:MaxRAMPercentage=50.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_OPTS": "-XX:MaxRAMPercentage=50.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "JAVA_TOOL_OPTIONS": "-XX:MaxRAMPercentage=50.0 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dsun.zip.disableMemoryMapping=true -Xms20m -Djava.security.egd=file:/dev/./urandom",
+                "PS1": "$(echo ${0})\\$ ",
+                "HOME": "/home/user"
+              }
+            }
+          },
+          "recipe": {
+            "content": "maven:3.6.1-jdk-8",
+            "type": "dockerimage"
+          }
+        }
+      },
+      "projects": [],
+      "attributes": {
+        "editor": "eclipse/che-theia/next",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/vscode-xml/0.5.1,camel-tooling/vscode-apache-camel/0.0.14,redhat/java/0.38.0",
+        "sidecar.eclipse/che-theia.memory_limit": "512Mi",
+        "sidecar.redhat/vscode-xml.memory_limit": "128Mi",
+        "sidecar.camel-tooling/vscode-apache-camel.memory_limit": "128Mi",
+        "sidecar.redhat/java.memory_limit": "1500Mi"
+      },
+      "commands": [],
       "links": []
     },
     "stackIcon": {

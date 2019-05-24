@@ -226,7 +226,7 @@ public class DevfileConverterTest {
 
     org.eclipse.che.api.workspace.server.model.impl.CommandImpl workspaceCommand =
         mock(org.eclipse.che.api.workspace.server.model.impl.CommandImpl.class);
-    when(commandConverter.toWorkspaceCommand(any())).thenReturn(workspaceCommand);
+    when(commandConverter.toWorkspaceCommand(any(), any())).thenReturn(workspaceCommand);
 
     // when
     WorkspaceConfigImpl workspaceConfig =

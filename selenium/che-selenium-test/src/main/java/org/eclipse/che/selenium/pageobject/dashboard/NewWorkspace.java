@@ -135,6 +135,7 @@ public class NewWorkspace {
     DOT_NET("dotnet"),
     ANDROID("android-default"),
     CPP("cpp-default"),
+    CAMEL_SPRINGBOOT_CHE7("apache-camel-springboot-che7"),
     CAMEL_SPRINGBOOT("apache-camel-springboot"),
     CENTOS_BLANK("centos"),
     CENTOS_GO("centos-go"),

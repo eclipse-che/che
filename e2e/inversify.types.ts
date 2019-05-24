@@ -9,21 +9,21 @@
  **********************************************************************/
 
 const TYPES = {
-    Driver: Symbol.for("Driver"),
-    LoginPage: Symbol.for("LoginPage")
-}
+    Driver: Symbol.for('Driver'),
+    LoginPage: Symbol.for('LoginPage')
+};
 
 const CLASSES = {
-    DriverHelper: "DriverHelper",
-    Dashboard: "Dashboard",
-    Workspaces: "Workspaces",
-    NewWorkspace: "NewWorkspace",
-    WorkspaceDetails: "WorkspaceDetails",
-    WorkspaceDetailsPlugins: "WorkspaceDetailsPlugins",
-    Ide: "Ide",
-    TestWorkspaceUtil: "TestWorkspaceUtil",
-    ProjectTree: "ProjectTree",
-    Editor: "Editor",
-}
+    DriverHelper: 'DriverHelper',
+    Dashboard: 'Dashboard',
+    Workspaces: 'Workspaces',
+    NewWorkspace: 'NewWorkspace',
+    WorkspaceDetails: 'WorkspaceDetails',
+    WorkspaceDetailsPlugins: 'WorkspaceDetailsPlugins',
+    Ide: 'Ide',
+    TestWorkspaceUtil: 'TestWorkspaceUtil',
+    ProjectTree: 'ProjectTree',
+    Editor: 'Editor',
+};
 
 export { TYPES, CLASSES };

@@ -7,7 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { ThenableWebDriver } from 'selenium-webdriver';
 
-export interface LoginPage {
-    login(): void
+export interface IDriver {
+    get(): ThenableWebDriver;
 }

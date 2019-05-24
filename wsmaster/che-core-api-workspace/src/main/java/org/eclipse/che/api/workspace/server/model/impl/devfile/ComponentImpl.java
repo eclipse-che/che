@@ -49,6 +49,14 @@ public class ComponentImpl implements Component {
   @Column(name = "component_id", nullable = false)
   private String componentId;
 
+  @ElementCollection(fetch = FetchType.EAGER)
+  @CollectionTable(
+      name = "devfile_component_preferences",
+      joinColumns = @JoinColumn(name = "devfile_component_id"))
+  @MapKeyColumn(name = "preference_key")
+  @Column(name = "preference")
+  private Map<String, String> preferences;
+
   @Column(name = "alias")
   private String alias;
 
@@ -118,6 +126,14 @@ public class ComponentImpl implements Component {
     this.componentId = id;
   }
 
+  public ComponentImpl(String type, String id, Map<String, String> preferences) {
+    this.type = type;
+    this.componentId = id;
+    if (preferences != null) {
+      this.preferences = new HashMap<>(preferences);
+    }
+  }
+
   public ComponentImpl(
       String type,
       String id,
@@ -174,6 +190,7 @@ public class ComponentImpl implements Component {
       String type,
       String alias,
       String id,
+      Map<String, String> preferences,
       String registryUrl,
       String reference,
       String referenceContent,
@@ -191,6 +208,9 @@ public class ComponentImpl implements Component {
     this.type = type;
     this.componentId = id;
     this.registryUrl = registryUrl;
+    if (preferences != null) {
+      this.preferences = new HashMap<>(preferences);
+    }
     this.reference = reference;
     this.referenceContent = referenceContent;
     if (selector != null) {
@@ -222,6 +242,7 @@ public class ComponentImpl implements Component {
         component.getType(),
         component.getAlias(),
         component.getId(),
+        component.getPreferences(),
         component.getRegistryUrl(),
         component.getReference(),
         component.getReferenceContent(),
@@ -271,6 +292,17 @@ public class ComponentImpl implements Component {
 
   public void setRegistryUrl(String registryUrl) {
     this.registryUrl = registryUrl;
+  }
+
+  public Map<String, String> getPreferences() {
+    if (preferences == null) {
+      preferences = new HashMap<>();
+    }
+    return preferences;
+  }
+
+  public void setPreferences(Map<String, String> preferences) {
+    this.preferences = preferences;
   }
 
   @Override
@@ -421,6 +453,7 @@ public class ComponentImpl implements Component {
         && Objects.equals(referenceContent, component.referenceContent)
         && Objects.equals(image, component.image)
         && Objects.equals(memoryLimit, component.memoryLimit)
+        && Objects.equals(getPreferences(), component.getPreferences())
         && Objects.equals(getSelector(), component.getSelector())
         && Objects.equals(getEntrypoints(), component.getEntrypoints())
         && Objects.equals(getCommand(), component.getCommand())
@@ -443,6 +476,7 @@ public class ComponentImpl implements Component {
         referenceContent,
         image,
         memoryLimit,
+        getPreferences(),
         getSelector(),
         getEntrypoints(),
         getMountSources(),
@@ -465,6 +499,8 @@ public class ComponentImpl implements Component {
         + ", type='"
         + type
         + '\''
+        + ", preferences="
+        + preferences
         + ", registryUrl='"
         + registryUrl
         + '\''

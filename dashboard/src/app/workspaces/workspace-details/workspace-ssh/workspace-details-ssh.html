@@ -16,7 +16,7 @@
                       ng-show="workspaceDetailsSshCtrl.isLoading"></md-progress-linear>
 </div>
 <div class="che-list-empty" ng-if="!workspaceDetailsSshCtrl.workspace.config.defaultEnv">
-  <span>There are no machines to display.</span>
+  <span>There are no containers to display.</span>
 </div>
 <md-content flex class="workspace-ssh-content" ng-if="workspaceDetailsSshCtrl.workspace.config.defaultEnv">
   <div layout="row" flex class="workspace-ssh-content-invalid-notification" ng-if="workspaceDetailsSshCtrl.workspace.status !== 'RUNNING'">

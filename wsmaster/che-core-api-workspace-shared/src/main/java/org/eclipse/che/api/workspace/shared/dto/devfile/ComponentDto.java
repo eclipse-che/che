@@ -51,6 +51,13 @@ public interface ComponentDto extends Component {
   ComponentDto withRegistryUrl(String registryUrl);
 
   @Override
+  Map<String, String> getPreferences();
+
+  void setPreferences(Map<String, String> preferences);
+
+  ComponentDto withPreferences(Map<String, String> preferences);
+
+  @Override
   String getReference();
 
   void setReference(String reference);
@@ -58,7 +65,6 @@ public interface ComponentDto extends Component {
   ComponentDto withReference(String reference);
 
   // k8s/OS
-
   @Override
   String getReferenceContent();
 

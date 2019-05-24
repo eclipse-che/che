@@ -167,16 +167,23 @@
                     "required": [
                       "id"
                     ],
-                    "additionalProperties": true
+                    "not": {
+                      "required": [
+                        "reference"
+                      ]
+                    }
                   },
                   {
                     "required": [
                       "reference"
                     ],
-                    "additionalProperties": true
+                    "not": {
+                      "required": [
+                        "id"
+                      ]
+                    }
                   }
                 ],
-                "additionalProperties": false,
                 "properties": {
                   "type": {},
                   "alias": {},
@@ -211,6 +218,60 @@
                       "129M",
                       "123Mi"
                     ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "cheEditor"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "additionalProperties": false,
+                "properties": {
+                  "type": {},
+                  "alias": {},
+                  "id": {},
+                  "reference": {},
+                  "registryUrl": {},
+                  "memoryLimit": {}
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "type": {
+                    "enum": [
+                      "chePlugin"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "additionalProperties": false,
+                "properties": {
+                  "type": {},
+                  "alias": {},
+                  "id": {},
+                  "memoryLimit": {},
+                  "reference": {},
+                  "registryUrl": {},
+                  "preferences": {
+                    "type": "object",
+                    "description": "Additional plugin preferences",
+                    "examples": [
+                      "{\"java.home\": \"/home/user/jdk11\", \"java.jdt.ls.vmargs\": \"-Xmx1G\"}"
+                    ],
+                    "additionalProperties": {
+                      "type": "string"
+                    }
                   }
                 }
               }
@@ -540,12 +601,47 @@
             "minItems": 1,
             "maxItems": 1,
             "items": {
-              "type": "object",
-              "required": [
-                "type",
-                "component",
-                "command"
+              "oneOf": [
+                {
+                  "properties": {
+                    "type": {},
+                    "component": {},
+                    "command": {},
+                    "workdir": {}
+                  },
+                  "required": [
+                    "type",
+                    "component",
+                    "command"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "properties": {
+                    "type": {},
+                    "reference": {},
+                    "referenceContent": {}
+                  },
+                  "anyOf": [
+                    {
+                      "required": [
+                        "type",
+                        "reference"
+                      ],
+                      "additionalProperties": true
+                    },
+                    {
+                      "required": [
+                        "type",
+                        "referenceContent"
+                      ],
+                      "additionalProperties": true
+                    }
+                  ],
+                  "additionalProperties": false
+                }
               ],
+              "type": "object",
               "properties": {
                 "type": {
                   "description": "Describes action type",
@@ -573,6 +669,20 @@
                   "description": "Working directory where the command should be executed",
                   "examples": [
                     "/projects/spring-petclinic"
+                  ]
+                },
+                "reference": {
+                  "type": "string",
+                  "description": "the path relative to the location of the devfile to the configuration file defining one or more actions in the editor-specific format",
+                  "examples": [
+                    "../ide-config/launch.json"
+                  ]
+                },
+                "referenceContent": {
+                  "type": "string",
+                  "description": "The content of the referenced configuration file that defines one or more actions in the editor-specific format",
+                  "examples": [
+                    "{\"version\": \"2.0.0\",\n    \"tasks\": [\n        {\n            \"type\": \"typescript\",\n            \"tsconfig\": \"tsconfig.json\",\n            \"problemMatcher\": [\n                \"$tsc\"\n            ],\n            \"group\": {\n                \"kind\": \"build\",\n                \"isDefault\": true\n            }\n        }\n    ]}"
                   ]
                 }
               }

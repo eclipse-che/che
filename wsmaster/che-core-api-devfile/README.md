@@ -1,7 +1,7 @@
 
 
 ### Introduction
-Previously, two kind of recipes were available to bootstrap a cloud developer workspace and to make it portable: [Chefile](https://www.eclipse.org/che/docs/chefile.html) 
+Previously, two kind of recipes were available to bootstrap a cloud developer workspace and to make it portable: [Chefile](https://www.eclipse.org/che/docs/chefile.html)
 and [Factories](https://www.eclipse.org/che/docs/factories-getting-started.html#try-a-factory).
 As a continuation of this, the brand new `devfile` format was introduced, which combines simplicity and support for high variety of different components available to develop a container based application.
 
@@ -38,37 +38,37 @@ components:
     type: chePlugin
     id: eclipse/che-machine-exec-plugin/0.0.1
 ```
- 
+
 For the detailed explanation of all devfile components assignment and possible values, please see the following resources:
  - [Specification repository](https://github.com/redhat-developer/devfile)  
  - [detailed json-schema documentation](https://redhat-developer.github.io/devfile/devfile).
 
 ### Getting Started
 The simplest way to use devfile is to have it deployed into GitHub source repository and then create factory from this repo.
-This is as simple as create `devfile.yaml` file in the root of your GH repo, and then execute the factory: 
+This is as simple as create `devfile.yaml` file in the root of your GH repo, and then execute the factory:
 ```
 https://<your-che-host>/f?url=https://github.com/mygroup/myrepo
 ```
 
-Also, it is possible to execute devfile by constructing the factory with the URL to it's raw content, for example, 
+Also, it is possible to execute devfile by constructing the factory with the URL to it's raw content, for example,
 ```
 https://<your-che-host>/f?url=https://pastebin.com/raw/ux6iCGaW
-``` 
-or sending a devfile to a dedicated REST API using curl/swagger, which will create new workspace and return it's configuration: 
+```
+or sending a devfile to a dedicated REST API using curl/swagger, which will create new workspace and return it's configuration:
 ```
 curl -X POST  -H "Authorization: <TOKEN>" -H "Content-Type: application/yaml" -d <devlile_content> https://<your-che-host>/api/devfile
-``` 
+```
 
-If you're a user of `chectl` tool, it is also possible to execute workspace from devfile, using `workspace:start` command 
+If you're a user of `chectl` tool, it is also possible to execute workspace from devfile, using `workspace:start` command
 parameter as follows:
 ```
 chectl workspace:start --devfile=devfile.yaml
-```` 
+````
 Please note that currently this way only works for the local (same machine) devfiles - URL can't be used here atm.
 
 ### Project details
 A single devfile can specify several projects. For each project, one has to specify the type of the
-source repository, its location and optionally also the directory to which the project should be 
+source repository, its location and optionally also the directory to which the project should be
 cloned to.
 
 As an example, consider this devfile:
@@ -89,17 +89,17 @@ projects:
 ```
 
 In the example above, we see a devfile with 2 projects, `frontend` and `backend`, each located in
-its own repository on github. `backend` has a specific requirement to be cloned into the 
+its own repository on github. `backend` has a specific requirement to be cloned into the
 `src/github.com/acmecorp/backend` directory under the source root (implicitly defined by the Che
 runtime) while frontend will be cloned into `frontend` directory under the source root.
- 
+
 ### Supported component types
-There are currently four types of components supported. There is two simpler types, such as `cheEditor` and `chePlugin` and 
+There are currently four types of components supported. There is two simpler types, such as `cheEditor` and `chePlugin` and
 two more complex - `kubernetes` (or `openshift`) and `dockerimage`.
 Please note that all components inside single devfile must have unique names.
 Detailed component types explanation below:
 
-#### cheEditor 
+#### cheEditor
 Describes the editor which used in workspace by defining its id.
 Devfile can only contain one component with `cheEditor` type.
 
@@ -117,7 +117,7 @@ By default, `Che Theia` is configured as default editor along with `Che Machine 
 You're able to put `editorFree:true` attribute into Devfile attributes in case you do not need any editor in your workspace.
 
 #### chePlugin
-Describes the plugin which used in workspace by defining it's id. 
+Describes the plugin which used in workspace by defining it's id.
 It is allowed to have several `chePlugin` components.
 
 ```
@@ -128,9 +128,9 @@ It is allowed to have several `chePlugin` components.
      id: eclipse/che-machine-exec-plugin/0.0.1
 ```
 
-Both types above using composite id, which is colon-separated id and version of plugin from Che Plugin registry.  
-List of available Che plugins and more information about registry can be found on https://github.com/eclipse/che-plugin-registry 
-For each of types above it is also possible to specify container(s) memory limit as follows: 
+Both types above using id, which is slash-separated publisher, name and version of plugin from Che Plugin registry.  
+List of available Che plugins and more information about registry can be found on https://github.com/eclipse/che-plugin-registry.
+For each of types above it is also possible to specify container(s) memory limit as follows:
 ```
 ...
   components:
@@ -139,8 +139,18 @@ For each of types above it is also possible to specify container(s) memory limit
      id: eclipse/che-machine-exec-plugin/0.0.1
      memoryLimit: 256M
 ```
-This limit will be apllied to each container of given plugin. 
+This limit will be applied to each container of given plugin.
 
+A plugin may need to be precisely tuned and in such case plugin preferences should be used.
+Example shows how jvm may be configured with plugin's preferences.
+```
+...
+-
+  id: redhat/java/0.38.0
+  type: chePlugin
+  preferences:
+     java.jdt.ls.vmargs: '-noverify -Xmx1G -XX:+UseG1GC -XX:+UseStringDeduplication'
+```
 
 #### kubernetes/openshift
 More complex component type, which allows to apply configuration from kubernetes/openshift lists. Content of the component may be provided either via `reference` attribute which points to the file with component content.
@@ -212,12 +222,12 @@ Other types of constraints (and their combinations) are possible:
 * `parentName` - the name of the parent object that (indirectly) contains the containers to override
 * `parentSelector` - the set of labels the parent object needs to have
 
-Combination of these constraints can be used to precisely locate the containers inside the 
+Combination of these constraints can be used to precisely locate the containers inside the
 referenced Kubernetes list.
 
 #### dockerimage
 Component type which allows to define docker image based configuration of container in workspace.
-Devfile can only contain one component with `dockerimage` type. 
+Devfile can only contain one component with `dockerimage` type.
 
 ```
  ...

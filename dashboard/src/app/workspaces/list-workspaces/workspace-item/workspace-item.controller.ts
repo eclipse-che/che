@@ -29,6 +29,8 @@ export class WorkspaceItemCtrl {
   workspacesService: WorkspacesService;
 
   workspace: che.IWorkspace;
+  workspaceName: string;
+  workspaceSupportIssues = '';
 
   /**
    * Default constructor that is using resource
@@ -41,15 +43,31 @@ export class WorkspaceItemCtrl {
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
     this.workspacesService = workspacesService;
+    this.workspaceName = this.cheWorkspace.getWorkspaceDataManager().getName(this.workspace);
   }
 
   /**
-   * Returns `true` if default environment of workspace contains supported recipe type.
+   * Returns `true` if supported.
    *
    * @returns {boolean}
    */
   get isSupported(): boolean {
-    return this.workspacesService.isSupported(this.workspace);
+    if (!this.workspacesService.isSupportedRecipeType(this.workspace)) {
+      this.workspaceSupportIssues = 'Current infrastructure doesn\'t support this workspace recipe type.';
+
+      return false;
+    }
+    if (!this.workspacesService.isSupportedVersion(this.workspace)) {
+      this.workspaceSupportIssues = `This workspace is using old definition format which is not compatible anymore. 
+          Please follow the documentation to update the definition of the workspace and benefits from the latest capabilities.`;
+
+      return false;
+    }
+    if (!this.workspaceSupportIssues) {
+      this.workspaceSupportIssues = '';
+    }
+
+    return true;
   }
 
   /**
@@ -57,7 +75,7 @@ export class WorkspaceItemCtrl {
    * @param tab {string}
    */
   redirectToWorkspaceDetails(tab?: string): void {
-    this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspace.config.name).search({tab: tab ? tab : 'Overview'});
+    this.$location.path('/workspace/' + this.workspace.namespace + '/' + this.workspaceName).search({tab: tab ? tab : 'Overview'});
   }
 
   getDefaultEnvironment(workspace: che.IWorkspace): che.IWorkspaceEnvironment {
@@ -68,6 +86,10 @@ export class WorkspaceItemCtrl {
   }
 
   getMemoryLimit(workspace: che.IWorkspace): string {
+    if (!workspace.config && workspace.devfile) {
+      return '-';
+    }
+
     let environment = this.getDefaultEnvironment(workspace);
     if (environment) {
       let limits = this.lodash.pluck(environment.machines, 'attributes.memoryLimitBytes');

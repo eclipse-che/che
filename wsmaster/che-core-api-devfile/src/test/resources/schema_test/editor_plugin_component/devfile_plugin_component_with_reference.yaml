@@ -15,5 +15,3 @@ name: terminal-sample
 components:
   - type: chePlugin
     reference: https://raw.githubusercontent.com/eclipse/che-plugin-registry/myplugin/meta.yaml
-  - type: cheEditor
-    reference: https://gist.githubusercontent.com/sleshchenko/e132bd9d37e8cf8f2c0a2b4929ecda3e/raw/9c28962cc3a24dcaf357b5716d98068734f51165/meta.yaml

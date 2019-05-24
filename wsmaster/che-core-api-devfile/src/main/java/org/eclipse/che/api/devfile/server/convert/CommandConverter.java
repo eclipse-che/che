@@ -12,11 +12,16 @@
 package org.eclipse.che.api.devfile.server.convert;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.core.model.workspace.config.Command.COMMAND_ACTION_REFERENCE_ATTRIBUTE;
+import static org.eclipse.che.api.core.model.workspace.config.Command.COMMAND_ACTION_REFERENCE_CONTENT_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 
+import java.io.IOException;
 import org.eclipse.che.api.core.model.workspace.devfile.Action;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.devfile.server.Constants;
+import org.eclipse.che.api.devfile.server.FileContentProvider;
+import org.eclipse.che.api.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
@@ -71,7 +76,7 @@ public class CommandConverter {
    * @throws DevfileFormatException if devfile command has more than one action
    */
   public org.eclipse.che.api.workspace.server.model.impl.CommandImpl toWorkspaceCommand(
-      Command devfileCommand) throws DevfileFormatException {
+      Command devfileCommand, FileContentProvider fileContentProvider) throws DevfileException {
     if (devfileCommand.getActions().size() != 1) {
       throw new DevfileFormatException(
           format("Command `%s` MUST has one and only one action", devfileCommand.getName()));
@@ -79,11 +84,12 @@ public class CommandConverter {
 
     Action commandAction = devfileCommand.getActions().get(0);
 
-    return toWorkspaceCommand(devfileCommand, commandAction);
+    return toWorkspaceCommand(devfileCommand, commandAction, fileContentProvider);
   }
 
   private org.eclipse.che.api.workspace.server.model.impl.CommandImpl toWorkspaceCommand(
-      Command devCommand, Action commandAction) {
+      Command devCommand, Action commandAction, FileContentProvider contentProvider)
+      throws DevfileException {
     org.eclipse.che.api.workspace.server.model.impl.CommandImpl command =
         new org.eclipse.che.api.workspace.server.model.impl.CommandImpl();
     command.setName(devCommand.getName());
@@ -94,9 +100,32 @@ public class CommandConverter {
       command.getAttributes().put(WORKING_DIRECTORY_ATTRIBUTE, commandAction.getWorkdir());
     }
 
-    command
-        .getAttributes()
-        .put(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE, commandAction.getComponent());
+    if (commandAction.getComponent() != null) {
+      command
+          .getAttributes()
+          .put(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE, commandAction.getComponent());
+    }
+
+    if (commandAction.getReference() != null) {
+      command.getAttributes().put(COMMAND_ACTION_REFERENCE_ATTRIBUTE, commandAction.getReference());
+    }
+
+    if (commandAction.getReferenceContent() != null) {
+      command
+          .getAttributes()
+          .put(COMMAND_ACTION_REFERENCE_CONTENT_ATTRIBUTE, commandAction.getReferenceContent());
+    } else if (commandAction.getReference() != null) {
+      try {
+        String referenceContent = contentProvider.fetchContent(commandAction.getReference());
+        command.getAttributes().put(COMMAND_ACTION_REFERENCE_CONTENT_ATTRIBUTE, referenceContent);
+      } catch (IOException e) {
+        throw new DevfileException(
+            format(
+                "Failed to fetch content of action from reference %s: %s",
+                commandAction.getReference(), e.getMessage()),
+            e);
+      }
+    }
 
     command.getAttributes().putAll(devCommand.getAttributes());
 

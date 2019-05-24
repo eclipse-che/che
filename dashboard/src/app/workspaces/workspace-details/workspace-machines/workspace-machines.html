@@ -13,7 +13,7 @@
 -->
 <md-content flex layout="column" md-theme="maincontent-theme" class="workspace-machines">
   <div class="che-list-empty" ng-if="workspaceMachinesController.machines.length === 0">
-    <span>There are no machines to display.</span>
+    <span>There are no containers to display.</span>
   </div>
   <div class="warning-message" ng-hide="workspaceMachinesController.isScalable() || workspaceMachinesController.machines.length === 0">
     <span>Add another machine by changing the environment type to <b>compose</b>, <b>kubernetes</b> or <b>openshift</b></span>

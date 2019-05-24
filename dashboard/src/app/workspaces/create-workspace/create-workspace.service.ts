@@ -156,20 +156,13 @@ export class CreateWorkspaceSvc {
     return defer.promise;
   }
 
-  /**
-   * Creates a workspace from config.
-   *
-   * @param {che.IWorkspaceConfig} workspaceConfig the config of workspace which will be created
-   * @param {any} attributes the attributes of the workspace
-   * @returns {ng.IPromise<che.IWorkspace>}
-   */
-  createWorkspace(workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<che.IWorkspace> {
+  createWorkspaceFromConfig(workspaceConfig: che.IWorkspaceConfig, attributes: any): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
     return this.checkEditingProgress().then(() => {
       workspaceConfig.projects = projectTemplates;
-      this.addProjectCommands(workspaceConfig, projectTemplates);
+      this.addProjectCommands({config: workspaceConfig}, projectTemplates);
       return this.cheWorkspace.createWorkspaceFromConfig(namespaceId, workspaceConfig, attributes).then((workspace: che.IWorkspace) => {
         return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
       })
@@ -195,6 +188,39 @@ export class CreateWorkspaceSvc {
       });
     });
   }
+
+  /*createWorkspaceFromDevfile(workspaceDevfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
+    const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
+          projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
+
+    return this.checkEditingProgress().then(() => {
+      workspaceDevfile.projects = projectTemplates;
+      this.addProjectCommands({devfile: workspaceDevfile}, projectTemplates);
+      return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, workspaceDevfile, attributes).then((workspace: che.IWorkspace) => {
+        return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
+      })
+      .then((workspace: che.IWorkspace) => {
+        this.projectSourceSelectorService.clearTemplatesList();
+        const workspaces = this.cheWorkspace.getWorkspaces();
+        if (workspaces.findIndex((_workspace: che.IWorkspace) => {
+            return _workspace.id === workspace.id;
+          }) === -1) {
+          workspaces.push(workspace);
+        }
+        this.cheWorkspace.startUpdateWorkspaceStatus(workspace.id);
+
+        return workspace;
+      }, (error: any) => {
+        let errorMessage = 'Creation workspace failed.';
+        if (error && error.data && error.data.message) {
+          errorMessage = error.data.message;
+        }
+        this.cheNotification.showError(errorMessage);
+
+        return this.$q.reject(error);
+      });
+    });
+  }*/
 
   /**
    * Show confirmation dialog when project editing is not completed.
@@ -233,19 +259,17 @@ export class CreateWorkspaceSvc {
   }
 
   /**
-   * Adds commands from the bunch of project templates to provided workspace config.
+   * Adds commands from the bunch of project templates to provided workspace.
    *
-   * @param {che.IWorkspaceConfig} workspaceConfig workspace config
+   * @param {che.IWorkspace} workspace
    * @param {Array<che.IProjectTemplate>} projectTemplates the list of project templates
    */
-  addProjectCommands(workspaceConfig: che.IWorkspaceConfig, projectTemplates: Array<che.IProjectTemplate>): void {
-    workspaceConfig.commands = workspaceConfig.commands || [];
-
+  addProjectCommands(workspace: che.IWorkspace, projectTemplates: Array<che.IProjectTemplate>): void {
     projectTemplates.forEach((template: che.IProjectTemplate) => {
       let projectName = template.name;
       template.commands.forEach((command: any) => {
         command.name = projectName + ':' + command.name;
-        workspaceConfig.commands.push(command);
+        this.cheWorkspace.getWorkspaceDataManager().addCommand(workspace, command);
       });
     });
   }

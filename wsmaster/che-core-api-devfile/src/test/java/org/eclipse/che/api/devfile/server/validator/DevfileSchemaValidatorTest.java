@@ -42,6 +42,9 @@ public class DevfileSchemaValidatorTest {
   public Object[][] validDevfiles() {
     return new Object[][] {
       {"editor_plugin_component/devfile_editor_plugins.yaml"},
+      {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
+      {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
+      {"editor_plugin_component/devfile_plugin_components_with_preferences.yaml"},
       {"kubernetes_openshift_component/devfile_kubernetes_component_reference.yaml"},
       {"kubernetes_openshift_component/devfile_kubernetes_component_absolute_reference.yaml"},
       {"component/devfile_without_any_component.yaml"},
@@ -61,20 +64,20 @@ public class DevfileSchemaValidatorTest {
       {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"},
       {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
       {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
-      {"editor_plugin_component/devfile_editor_component_with_reference.yaml"}
+      {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"}
     };
   }
 
   @Test(dataProvider = "invalidDevfiles")
   public void shouldThrowExceptionOnValidationOfNonValidDevfile(
-      String resourceFilePath, String expectedMessageRegexp) throws Exception {
+      String resourceFilePath, String expectedMessage) throws Exception {
     try {
       schemaValidator.validateBySchema(getResource(resourceFilePath));
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),
-          format("Devfile schema validation failed. Error: %s", expectedMessageRegexp),
-          "DevfileFormatException thrown with message that doesn't match expected pattern:");
+          format("Devfile schema validation failed. Error: %s", expectedMessage),
+          "DevfileFormatException thrown with message that doesn't match expected message:");
       return;
     }
     fail("DevfileFormatException expected to be thrown but is was not");
@@ -122,26 +125,20 @@ public class DevfileSchemaValidatorTest {
         "command/devfile_multiple_commands_actions.yaml",
         "(/commands/0/actions):The array must have at most 1 element(s), but actual number is 2."
       },
+      {
+        "command/devfile_action_without_commandline_and_reference.yaml",
+        "Exactly one of the following sets of problems must be resolved.: [(/commands/0/actions/0):The object must have a property whose name is \"component\".(/commands/0/actions/0):The object must have a property whose name is \"command\".At least one of the following sets of problems must be resolved.: [(/commands/0/actions/0):The object must have a property whose name is \"reference\".(/commands/0/actions/0):The object must have a property whose name is \"referenceContent\".]]"
+      },
       // cheEditor/chePlugin component model testing
       {
         "editor_plugin_component/devfile_editor_component_with_missing_id.yaml",
         "Exactly one of the following sets of problems must be resolved.: [(/components/0):The object must have a property whose name is \"id\".(/components/0):The object must have a property whose name is \"reference\".]"
       },
       {
-        // T_O_D_O: try to simplify message, find out why it is so complex?
         "editor_plugin_component/devfile_editor_component_with_id_and_reference.yaml",
-        "All but one of the following sets of problems must be resolved.: [At least one of the following sets of problems must be resolved.: "
-            + "[(/components/0):The object must not have a property whose name is \"id\"."
-            + "At least one of the following sets of problems must be resolved.: "
-            + "[(/components/0/type):The object must not have a property whose name is \"type\"."
-            + "(/components/0/reference):The object must not have a property whose name is \"reference\"."
-            + "(/components/0/id):The object must not have a property whose name is \"id\".]]"
-            + "At least one of the following sets of problems must be resolved.: "
+        "Exactly one of the following sets of problems must be resolved.: "
             + "[(/components/0):The object must not have a property whose name is \"reference\"."
-            + "At least one of the following sets of problems must be resolved.: "
-            + "[(/components/0/type):The object must not have a property whose name is \"type\"."
-            + "(/components/0/reference):The object must not have a property whose name is \"reference\"."
-            + "(/components/0/id):The object must not have a property whose name is \"id\".]]]"
+            + "(/components/0):The object must not have a property whose name is \"id\".]"
       },
       {
         "editor_plugin_component/devfile_editor_component_with_indistinctive_field.yaml",

@@ -1,5 +1,38 @@
 # Change Log
 
+## [7.0.0-beta-5.0](https://github.com/eclipse/che/tree/7.0.0-beta-5.0) (2019-05-22)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-4.0...7.0.0-beta-5.0)
+
+**Merged pull requests:**
+
+- Fix docker build status test [\#13386](https://github.com/eclipse/che/pull/13386) ([danix800](https://github.com/danix800))
+- RELEASE: Set next development version [\#13377](https://github.com/eclipse/che/pull/13377) ([riuvshin](https://github.com/riuvshin))
+- Set memory limit for node debug sidecar containers [\#13370](https://github.com/eclipse/che/pull/13370) ([tolusha](https://github.com/tolusha))
+- Add Apache Camel stack and sample [\#13361](https://github.com/eclipse/che/pull/13361) ([tolusha](https://github.com/tolusha))
+- CHE-13358:Update dashboard dev image. [\#13359](https://github.com/eclipse/che/pull/13359) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- remove @riuvshin and @eivantsov as mandatory... [\#13352](https://github.com/eclipse/che/pull/13352) ([nickboldt](https://github.com/nickboldt))
+- Revert to OCP 3.9 [\#13351](https://github.com/eclipse/che/pull/13351) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add tslint to e2e tests [\#13350](https://github.com/eclipse/che/pull/13350) ([Katka92](https://github.com/Katka92))
+- Fix printing of runtime output during factory accepting [\#13332](https://github.com/eclipse/che/pull/13332) ([sleshchenko](https://github.com/sleshchenko))
+- Null workspace config on update if devfile is present [\#13330](https://github.com/eclipse/che/pull/13330) ([sleshchenko](https://github.com/sleshchenko))
+- Fix recovery of Devfile based workspaces [\#13321](https://github.com/eclipse/che/pull/13321) ([sleshchenko](https://github.com/sleshchenko))
+- Add copying of selector field on component copy creation [\#13314](https://github.com/eclipse/che/pull/13314) ([sleshchenko](https://github.com/sleshchenko))
+- Make dashboard devfile working again. [\#13310](https://github.com/eclipse/che/pull/13310) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Added devfile.yaml for workspace-loader [\#13305](https://github.com/eclipse/che/pull/13305) ([akurinnoy](https://github.com/akurinnoy))
+- Update theia dev stack to use latest dev image. [\#13296](https://github.com/eclipse/che/pull/13296) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Add CHE-7 stack for C\# with samples [\#13294](https://github.com/eclipse/che/pull/13294) ([svor](https://github.com/svor))
+- fix gwt-ide loader to not to fail if workspace runtime is missed [\#13292](https://github.com/eclipse/che/pull/13292) ([akurinnoy](https://github.com/akurinnoy))
+- Remove @garagatyi from code owners [\#13288](https://github.com/eclipse/che/pull/13288) ([garagatyi](https://github.com/garagatyi))
+- CHE-12917 Added an indicator to notify that the CHE 6 workspaces will not work anymore [\#13284](https://github.com/eclipse/che/pull/13284) ([olexii4](https://github.com/olexii4))
+- \[Selenium\] update selenium tests from factory and stack packages [\#13283](https://github.com/eclipse/che/pull/13283) ([SkorikSergey](https://github.com/SkorikSergey))
+- CHE-12063: Fix WorkspaceLoader hanging when Che Server is unreachable [\#13282](https://github.com/eclipse/che/pull/13282) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- RELEASE: Update CHANGELOG [\#13277](https://github.com/eclipse/che/pull/13277) ([riuvshin](https://github.com/riuvshin))
+- Content references in actions for editor specific action definitions. [\#13273](https://github.com/eclipse/che/pull/13273) ([metlos](https://github.com/metlos))
+- RELEASE: Set next development version [\#13264](https://github.com/eclipse/che/pull/13264) ([riuvshin](https://github.com/riuvshin))
+- Add stub for WorkspaceConfig if workspace is created with Devfile [\#13243](https://github.com/eclipse/che/pull/13243) ([sleshchenko](https://github.com/sleshchenko))
+- Update default Theia IDE version to 'next' [\#13235](https://github.com/eclipse/che/pull/13235) ([sleshchenko](https://github.com/sleshchenko))
+- \[ TS-SELENIUM \] Investigating new typescript related test framework [\#13200](https://github.com/eclipse/che/pull/13200) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+
 ## [7.0.0-beta-4.0](https://github.com/eclipse/che/tree/7.0.0-beta-4.0) (2019-05-03)
 [Full Changelog](https://github.com/eclipse/che/compare/6.19.3...7.0.0-beta-4.0)
 

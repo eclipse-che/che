@@ -550,8 +550,10 @@ public class WorkspaceDaoTest {
     // Remove an existing command
     workspace.getDevfile().getCommands().remove(1);
 
-    ActionImpl action3 = new ActionImpl("exec3", "component3", "run.sh", "/home/user/3");
-    ActionImpl action4 = new ActionImpl("exec4", "component4", "run.sh", "/home/user/4");
+    ActionImpl action3 =
+        new ActionImpl("exec3", "component3", "run.sh", "/home/user/3", null, null);
+    ActionImpl action4 =
+        new ActionImpl("exec4", "component4", "run.sh", "/home/user/4", null, null);
     // Add a new command
     final org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl newCmd =
         new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
@@ -586,6 +588,7 @@ public class WorkspaceDaoTest {
         "kubernetes",
         "component3",
         "eclipse/che-theia/0.0.1",
+        ImmutableMap.of("java.home", "/opt/jdk11"),
         "https://mysite.com/registry/somepath",
         "/dev.yaml",
         null,
@@ -857,8 +860,10 @@ public class WorkspaceDaoTest {
         new SourceImpl("type2", "http://location", "branch2", "point2", "tag2", "commit2");
     ProjectImpl project2 = new ProjectImpl("project2", source2, "path2");
 
-    ActionImpl action1 = new ActionImpl("exec1", "component1", "run.sh", "/home/user/1");
-    ActionImpl action2 = new ActionImpl("exec2", "component2", "run.sh", "/home/user/2");
+    ActionImpl action1 =
+        new ActionImpl("exec1", "component1", "run.sh", "/home/user/1", null, null);
+    ActionImpl action2 =
+        new ActionImpl("exec2", "component2", "run.sh", "/home/user/2", null, null);
 
     org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl command1 =
         new org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl(
@@ -900,6 +905,7 @@ public class WorkspaceDaoTest {
             "kubernetes",
             "component1",
             "eclipse/che-theia/0.0.1",
+            ImmutableMap.of("java.home", "/home/user/jdk11"),
             "https://mysite.com/registry/somepath1",
             "/dev.yaml",
             "refcontent1",
@@ -920,6 +926,7 @@ public class WorkspaceDaoTest {
             "kubernetes",
             "component2",
             "eclipse/che-theia/0.0.1",
+            ImmutableMap.of("java.home", "/home/user/jdk11"),
             "https://mysite.com/registry/somepath2",
             "/dev.yaml",
             "refcontent2",
