@@ -14,6 +14,8 @@ package org.eclipse.che.api.devfile.server.convert;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.devfile.server.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
 import static org.eclipse.che.api.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -26,6 +28,9 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
@@ -33,6 +38,7 @@ import org.testng.annotations.Test;
  *
  * @author Sergii Leshchenko
  */
+@Listeners(MockitoTestNGListener.class)
 public class DefaultEditorProvisionerTest {
 
   @Mock private URLFetcher urlFetcher;
@@ -44,8 +50,9 @@ public class DefaultEditorProvisionerTest {
       EDITOR_PUBLISHER + "/" + EDITOR_NAME + "/" + EDITOR_VERSION;
 
   private static final String TERMINAL_PLUGIN_NAME = "theia-terminal";
+  private static final String TERMINAL_PLUGIN_VERSION = "0.0.4";
   private static final String TERMINAL_PLUGIN_REF =
-      EDITOR_PUBLISHER + "/" + TERMINAL_PLUGIN_NAME + "/0.0.4";
+      EDITOR_PUBLISHER + "/" + TERMINAL_PLUGIN_NAME + "/" + TERMINAL_PLUGIN_VERSION;
 
   private static final String COMMAND_PLUGIN_NAME = "theia-command";
   private static final String COMMAND_PLUGIN_REF =
@@ -53,7 +60,12 @@ public class DefaultEditorProvisionerTest {
 
   private DefaultEditorProvisioner provisioner;
 
-  private PluginFQNParser fqnParser = new PluginFQNParser(urlFetcher);
+  private PluginFQNParser fqnParser;
+
+  @BeforeMethod
+  public void setUp() {
+     fqnParser = new PluginFQNParser(urlFetcher);
+  }
 
   @Test
   public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws DevfileException {
@@ -245,6 +257,33 @@ public class DefaultEditorProvisionerTest {
   }
 
   @Test
+  public void shouldNonProvisionDefaultEditorIfDevfileAlreadyContainsSuchByReference()
+      throws DevfileException {
+    // given
+    provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl myTheiaEditor =
+        new ComponentImpl(EDITOR_COMPONENT_TYPE, null, "https://myregistry.com/abc/meta.yaml", null, null,
+            null);
+    String meta =
+        "apiVersion: v2\n"
+            + "publisher: "+ EDITOR_PUBLISHER +  "\n"
+            + "name: " + EDITOR_NAME + "\n"
+            + "version: " + EDITOR_VERSION + "\n"
+            + "type: Che Editor";
+    devfile.getComponents().add(myTheiaEditor);
+    when(urlFetcher.fetchSafely(anyString())).thenReturn(meta);
+
+    // when
+    provisioner.apply(devfile);
+
+    // then
+    List<ComponentImpl> components = devfile.getComponents();
+    assertEquals(components.size(), 1);
+    assertTrue(components.contains(myTheiaEditor));
+  }
+
+  @Test
   public void shouldNotProvisionDefaultPluginIfDevfileAlreadyContainsSuchButWithDifferentVersion()
       throws DevfileException {
     // given
@@ -254,6 +293,35 @@ public class DefaultEditorProvisionerTest {
     ComponentImpl myTerminal =
         new ComponentImpl(
             PLUGIN_COMPONENT_TYPE, EDITOR_PUBLISHER + "/" + TERMINAL_PLUGIN_NAME + "/my-custom");
+    devfile.getComponents().add(myTerminal);
+
+    // when
+    provisioner.apply(devfile);
+
+    // then
+    List<ComponentImpl> components = devfile.getComponents();
+    assertEquals(components.size(), 2);
+    assertTrue(components.contains(new ComponentImpl(EDITOR_COMPONENT_TYPE, EDITOR_REF)));
+    assertTrue(components.contains(myTerminal));
+  }
+
+  @Test
+  public void shouldNotProvisionDefaultPluginIfDevfileAlreadyContainsSuchByReference()
+      throws DevfileException {
+    // given
+    provisioner =
+        new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
+    DevfileImpl devfile = new DevfileImpl();
+    String meta =
+        "apiVersion: v2\n"
+            + "publisher: "+ EDITOR_PUBLISHER +  "\n"
+            + "name: " + TERMINAL_PLUGIN_NAME + "\n"
+            + "version: " + TERMINAL_PLUGIN_VERSION + "\n"
+            + "type: Che Plugin";
+    ComponentImpl myTerminal =
+        new ComponentImpl(
+            PLUGIN_COMPONENT_TYPE, null, "https://myregistry.com/abc/meta.yaml", null, null, null);
+    when(urlFetcher.fetchSafely(anyString())).thenReturn(meta);
     devfile.getComponents().add(myTerminal);
 
     // when

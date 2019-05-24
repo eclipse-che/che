@@ -51,10 +51,10 @@ public class DefaultEditorProvisioner {
     this.defaultEditorRef = isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
     this.fqnParser = fqnParser;
     this.defaultEditor =
-        this.defaultEditorRef == null ? null : getPluginPublisherAndName(this.defaultEditorRef);
+        this.defaultEditorRef == null ? null : getPluginPublisherAndNameFromId(this.defaultEditorRef);
     Map<String, String> map = new HashMap<>();
     for (String defaultPluginsRef : defaultPluginsRefs) {
-      map.put(getPluginPublisherAndName(defaultPluginsRef), defaultPluginsRef);
+      map.put(getPluginPublisherAndNameFromId(defaultPluginsRef), defaultPluginsRef);
     }
     this.defaultPluginsToRefs = map;
   }
@@ -86,9 +86,10 @@ public class DefaultEditorProvisioner {
       isDefaultEditorUsed = true;
     } else {
       Component editor = editorOpt.get();
-      isDefaultEditorUsed =
-          !isNullOrEmpty(editor.getId())
-              && defaultEditor.equals(getPluginPublisherAndName(editor.getId()));
+      String editorPublisherAndName =
+          editor.getId() != null ? getPluginPublisherAndNameFromId(editor.getId())
+              : getPluginPublisherAndNameFromReference(editor.getReference());
+      isDefaultEditorUsed = defaultEditor.equals(editorPublisherAndName);
     }
 
     if (isDefaultEditorUsed) {
@@ -100,8 +101,11 @@ public class DefaultEditorProvisioner {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
 
     for (ComponentImpl t : components) {
-      if (PLUGIN_COMPONENT_TYPE.equals(t.getType()) && !isNullOrEmpty(t.getId())) {
-        missingPluginsIdToRef.remove(getPluginPublisherAndName(t.getId()));
+      if (PLUGIN_COMPONENT_TYPE.equals(t.getType())) {
+        String pluginPublisherAndName =
+            t.getId() != null ? getPluginPublisherAndNameFromId(t.getId())
+                : getPluginPublisherAndNameFromReference(t.getReference());
+        missingPluginsIdToRef.remove(pluginPublisherAndName);
       }
     }
 
@@ -110,9 +114,18 @@ public class DefaultEditorProvisioner {
         .forEach(pluginRef -> components.add(new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef)));
   }
 
-  private String getPluginPublisherAndName(String reference) throws DevfileException {
+  private String getPluginPublisherAndNameFromId(String pluginId) throws DevfileException {
     try {
-      ExtendedPluginFQN meta = fqnParser.parsePluginFQN(reference);
+      ExtendedPluginFQN meta = fqnParser.parsePluginFQN(pluginId);
+      return meta.getPublisherAndName();
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
+    }
+  }
+
+  private String getPluginPublisherAndNameFromReference(String reference) throws DevfileException {
+    try {
+      ExtendedPluginFQN meta = fqnParser.evaluateFqn(reference);
       return meta.getPublisherAndName();
     } catch (InfrastructureException e) {
       throw new DevfileException(e.getMessage(), e);
