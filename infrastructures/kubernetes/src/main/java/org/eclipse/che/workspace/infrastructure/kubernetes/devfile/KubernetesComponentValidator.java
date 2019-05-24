@@ -13,8 +13,6 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static java.lang.String.format;
 import static org.eclipse.che.api.workspace.devfile.server.Components.getIdentifiableComponentName;
-import static org.eclipse.che.api.workspace.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -23,7 +21,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.inject.Inject;
+import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
@@ -36,10 +36,15 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 
 public class KubernetesComponentValidator implements ComponentIntegrityValidator {
   private final KubernetesRecipeParser kubernetesRecipeParser;
+  private final Set<String> k8sBasedComponentTypes;
 
   @Inject
-  public KubernetesComponentValidator(KubernetesRecipeParser kubernetesRecipeParser) {
+  public KubernetesComponentValidator(
+      KubernetesRecipeParser kubernetesRecipeParser,
+      @Named(KubernetesDevfileBindings.KUBERNETES_BASED_COMPONENTS_KEY_NAME)
+          Set<String> k8sBasedComponentTypes) {
     this.kubernetesRecipeParser = kubernetesRecipeParser;
+    this.k8sBasedComponentTypes = k8sBasedComponentTypes;
   }
 
   @Override
@@ -73,8 +78,7 @@ public class KubernetesComponentValidator implements ComponentIntegrityValidator
       Component component, FileContentProvider contentProvider)
       throws ValidationException, InfrastructureException, IOException, DevfileException {
 
-    if (!component.getType().equals(KUBERNETES_COMPONENT_TYPE)
-        && !component.getType().equals(OPENSHIFT_COMPONENT_TYPE)) {
+    if (!k8sBasedComponentTypes.contains(component.getType())) {
       return Collections.emptyList();
     }
 

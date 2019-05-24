@@ -11,14 +11,16 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
-import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.eclipse.che.api.workspace.devfile.server.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
@@ -38,7 +40,9 @@ public class KubernetesComponentIntegrityValidatorTest {
 
   @BeforeMethod
   public void setup() {
-    validator = new KubernetesComponentValidator(kubernetesRecipeParser);
+    Set<String> k8sComponentTypes = new HashSet<>();
+    k8sComponentTypes.add(KUBERNETES_COMPONENT_TYPE);
+    validator = new KubernetesComponentValidator(kubernetesRecipeParser, k8sComponentTypes);
   }
 
   @Test(expectedExceptions = DevfileFormatException.class)
@@ -57,7 +61,7 @@ public class KubernetesComponentIntegrityValidatorTest {
     selector.put("app", "a different value");
 
     ComponentImpl component = new ComponentImpl();
-    component.setType(EDITOR_COMPONENT_TYPE);
+    component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReference("ref");
     component.setSelector(selector);
     component.setReferenceContent("content");
@@ -83,7 +87,7 @@ public class KubernetesComponentIntegrityValidatorTest {
                     .build()));
 
     ComponentImpl component = new ComponentImpl();
-    component.setType(EDITOR_COMPONENT_TYPE);
+    component.setType(KUBERNETES_COMPONENT_TYPE);
     component.setReferenceContent("content");
     component.setReference("ref");
 
