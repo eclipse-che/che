@@ -18,7 +18,6 @@ import static org.eclipse.che.api.workspace.devfile.server.Constants.KUBERNETES_
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesEnvironmentProvisioner.YAML_CONTENT_TYPE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
@@ -69,13 +68,26 @@ public class KubernetesEnvironmentProvisionerTest {
   @BeforeMethod
   public void setUp() {
     workspaceConfig = new WorkspaceConfigImpl();
+
+    // "openshift" is what we use in the test devfile files and what we need to test the upgrade
+    // and multiple k8s-based types
+    Map<String, Set<String>> allowedUpgrades = new HashMap<>();
+    allowedUpgrades
+        .compute("openshift", (__, ___) -> new HashSet<>())
+        .add(KubernetesEnvironment.TYPE);
+    Set<String> k8sEnvTypes = new HashSet<>();
+    k8sEnvTypes.add(KubernetesEnvironment.TYPE);
+    k8sEnvTypes.add("openshift");
+
+    k8sEnvProvisioner =
+        new KubernetesEnvironmentProvisioner(k8sRecipeParser, allowedUpgrades, k8sEnvTypes);
   }
 
   @Test
   public void shouldProvisionEnvironmentWithCorrectRecipeTypeAndContentFromK8SList()
       throws Exception {
     // given
-    String yamlRecipeContent = getResource("petclinic.yaml");
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     List<HasMetadata> componentsObjects = toK8SList(yamlRecipeContent).getItems();
 
     // when
@@ -96,18 +108,6 @@ public class KubernetesEnvironmentProvisionerTest {
     KubernetesList expectedKubernetesList =
         new KubernetesListBuilder().withItems(toK8SList(yamlRecipeContent).getItems()).build();
     assertEquals(toK8SList(recipe.getContent()).getItems(), expectedKubernetesList.getItems());
-
-    Map<String, Set<String>> allowedUpgrades = new HashMap<>();
-    allowedUpgrades
-        .computeIfAbsent("openshift", __ -> new HashSet<>())
-        .add(KubernetesEnvironment.TYPE);
-    Set<String> k8sEnvTypes = new HashSet<>();
-    k8sEnvTypes.add(KubernetesEnvironment.TYPE);
-    k8sEnvTypes.add("openshift");
-
-    k8sEnvProvisioner =
-        new KubernetesEnvironmentProvisioner(
-            mock(KubernetesRecipeParser.class), allowedUpgrades, k8sEnvTypes);
   }
 
   @Test(
