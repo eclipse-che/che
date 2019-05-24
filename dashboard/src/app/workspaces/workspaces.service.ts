@@ -13,7 +13,7 @@
 
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 
-const MINIMAL_SUPORTED_VERSION = 7;
+const MINIMAL_SUPPORTED_VERSION = 7;
 
 /**
  * This is a helper class for workspaces.
@@ -58,13 +58,10 @@ export class WorkspacesService {
  /**
    *  Returns `true` if supported.
    * @param {che.IWorkspace} workspace
-   * @param {string=} envName environment name
    * @returns {boolean}
    */
-  isSupported(workspace: che.IWorkspace, envName?: string): boolean {
-    envName = envName || workspace.config.defaultEnv;
-
-    return this.isSupportedRecipeType(workspace, envName) && this.isSupportedVersion(workspace);
+  isSupported(workspace: che.IWorkspace): boolean {
+    return this.isSupportedRecipeType(workspace) && this.isSupportedVersion(workspace);
   }
 
    /**
@@ -73,11 +70,15 @@ export class WorkspacesService {
    * @returns {boolean}
    */
   isSupportedVersion(workspace: che.IWorkspace): boolean {
+    if (workspace.devfile) {
+      return true;
+    }
+    
     if (!workspace || !workspace.config) {
       return false;
     }
     const config = workspace.config;
-    const machines = config.environments[config.defaultEnv];
+    const machines = config.environments[config.defaultEnv].machines;
 
     let version: number;
     if (!Object.keys(machines).length || config.attributes.editor || config.attributes.plugins) {
@@ -92,7 +93,7 @@ export class WorkspacesService {
       }
     }
 
-    return version && version >= MINIMAL_SUPORTED_VERSION;
+    return version && version >= MINIMAL_SUPPORTED_VERSION;
   }
 
 }
