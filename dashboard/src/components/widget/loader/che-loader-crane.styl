@@ -937,14 +937,14 @@ for $index, $layer-props in $layers-hash
 // define visibility of layers in box
 .che-loader-crane
   .layers-in-box
-    .layer-1, .layer-2, .layer-3, .layer-4
+    .layer-1, .layer-2, .layer-3, .layer-4, .layer-5
       opacity 0
 
 .che-loader-crane.step-1
   .layers-in-box
     .layer-1
       opacity 1
-    .layer-2, .layer-3, .layer-4
+    .layer-2, .layer-3, .layer-4, .layer-5
       opacity 0
 
 .che-loader-crane.step-2
@@ -954,7 +954,7 @@ for $index, $layer-props in $layers-hash
 
     .layer-1, .layer-2
       opacity 1
-    .layer-3, .layer-4
+    .layer-3, .layer-4, .layer-5
       opacity 0
 
 .che-loader-crane.step-3
@@ -965,7 +965,7 @@ for $index, $layer-props in $layers-hash
 
     .layer-1, .layer-2, .layer-3
       opacity 1
-    .layer-4
+    .layer-4, .layer-5
       opacity 0
 
 .che-loader-crane.step-4
@@ -976,6 +976,8 @@ for $index, $layer-props in $layers-hash
 
     .layer-1, .layer-2, .layer-3, .layer-4
       opacity 1
+    .layer-5
+      opacity 0
 
 .che-loader-crane.step-5
   .layers-in-box
@@ -985,6 +987,8 @@ for $index, $layer-props in $layers-hash
 
     .layer-1, .layer-2, .layer-3, .layer-4
       opacity 1
+    .layer-5
+      opacity 0
 
 .layers-in-box
   position relative
