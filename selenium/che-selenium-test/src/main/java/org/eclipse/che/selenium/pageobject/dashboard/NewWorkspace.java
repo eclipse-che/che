@@ -165,6 +165,8 @@ public class NewWorkspace {
     NODEJS_AND_POSTGRES("nodejs-postgres"),
     OPENSHIFT_SQL("openshift-sql"),
     PHP("php-default"),
+    PHP_CHE7("php"),
+    PHP_MYSQL_CHE7("php+mysql"),
     PHP_GAE("php-gae"),
     PHP_5_6("php5.6-default"),
     PLATFORMIO("platformio"),
