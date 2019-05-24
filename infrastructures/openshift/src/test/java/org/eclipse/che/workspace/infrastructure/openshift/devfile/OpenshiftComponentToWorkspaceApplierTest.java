@@ -27,9 +27,12 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesEnv
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+@Listeners(MockitoTestNGListener.class)
 public class OpenshiftComponentToWorkspaceApplierTest {
   public static final String REFERENCE_FILENAME = "reference.yaml";
   public static final String COMPONENT_NAME = "foo";
@@ -37,15 +40,15 @@ public class OpenshiftComponentToWorkspaceApplierTest {
   private WorkspaceConfigImpl workspaceConfig;
 
   private KubernetesComponentToWorkspaceApplier applier;
-  @Mock private KubernetesRecipeParser k8sRecipeParser;
   @Mock private KubernetesEnvironmentProvisioner k8sEnvProvisioner;
+  @Mock private KubernetesRecipeParser k8sRecipeParser;
 
   @BeforeMethod
   public void setUp() {
     Set<String> k8sBasedComponents = new HashSet<>();
     k8sBasedComponents.add(KUBERNETES_COMPONENT_TYPE);
     applier =
-        new KubernetesComponentToWorkspaceApplier(
+        new OpenshiftComponentToWorkspaceApplier(
             k8sRecipeParser, k8sEnvProvisioner, k8sBasedComponents);
 
     workspaceConfig = new WorkspaceConfigImpl();
@@ -62,7 +65,7 @@ public class OpenshiftComponentToWorkspaceApplierTest {
     component.setAlias(COMPONENT_NAME);
 
     // when
-    applier.apply(workspaceConfig, component, s -> "");
+    applier.apply(workspaceConfig, component, s -> "content");
 
     // then
     verify(k8sEnvProvisioner)
