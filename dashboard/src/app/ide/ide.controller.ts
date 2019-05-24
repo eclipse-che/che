@@ -140,7 +140,8 @@ class IdeCtrl {
 
     this.workspaces = this.cheWorkspace.getWorkspaces();
     for (let i = 0; i < this.workspaces.length; i++) {
-      if (this.workspaces[i].config.name === this.selectedWorkspaceName) {
+      let name = this.cheWorkspace.getWorkspaceDataManager().getName(this.workspaces[i]);
+      if (name === this.selectedWorkspaceName) {
         this.selectedWorkspace = this.workspaces[i];
       }
     }
