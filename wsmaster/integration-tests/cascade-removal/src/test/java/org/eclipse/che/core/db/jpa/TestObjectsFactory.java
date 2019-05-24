@@ -116,6 +116,7 @@ public final class TestObjectsFactory {
         "kubernetes",
         name,
         "eclipse/che-theia/0.0.1",
+        ImmutableMap.of("java.home", "/home/user/jdk11"),
         "/dev.yaml",
         "refContent",
         ImmutableMap.of("app.kubernetes.io/component", "webapp"),
