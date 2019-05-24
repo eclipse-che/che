@@ -34,7 +34,6 @@ import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalRuntime;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
@@ -57,7 +56,7 @@ public class InconsistentRuntimesDetectorTest {
   @Mock private KubernetesInternalRuntime k8sRuntime;
   @Mock private KubernetesRuntimeContext k8sContext;
 
-  @InjectMocks private InconsistentRuntimesDetector inconsistentRuntimesDetector;
+  private InconsistentRuntimesDetector inconsistentRuntimesDetector;
 
   @BeforeMethod
   public void setUp() throws Exception {

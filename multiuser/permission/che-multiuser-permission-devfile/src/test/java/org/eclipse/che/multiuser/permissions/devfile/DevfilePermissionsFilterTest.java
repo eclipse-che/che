@@ -26,7 +26,7 @@ import static org.testng.Assert.assertEquals;
 
 import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.devfile.server.DevfileService;
+import org.eclipse.che.api.workspace.devfile.server.DevfileService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
