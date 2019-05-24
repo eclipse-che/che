@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
+import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -23,16 +24,19 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
-import org.testng.annotations.BeforeTest;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+@Listeners(MockitoTestNGListener.class)
 public class KubernetesComponentIntegrityValidatorTest {
 
   @Mock private KubernetesRecipeParser kubernetesRecipeParser;
 
   private KubernetesComponentValidator validator;
 
-  @BeforeTest
+  @BeforeMethod
   public void setup() {
     validator = new KubernetesComponentValidator(kubernetesRecipeParser);
   }
@@ -53,6 +57,7 @@ public class KubernetesComponentIntegrityValidatorTest {
     selector.put("app", "a different value");
 
     ComponentImpl component = new ComponentImpl();
+    component.setType(EDITOR_COMPONENT_TYPE);
     component.setReference("ref");
     component.setSelector(selector);
     component.setReferenceContent("content");
@@ -78,6 +83,7 @@ public class KubernetesComponentIntegrityValidatorTest {
                     .build()));
 
     ComponentImpl component = new ComponentImpl();
+    component.setType(EDITOR_COMPONENT_TYPE);
     component.setReferenceContent("content");
     component.setReference("ref");
 
