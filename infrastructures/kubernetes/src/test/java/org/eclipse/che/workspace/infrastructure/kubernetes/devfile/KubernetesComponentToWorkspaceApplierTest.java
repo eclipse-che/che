@@ -76,6 +76,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   public void setUp() {
     Set<String> k8sBasedComponents = new HashSet<>();
     k8sBasedComponents.add(KUBERNETES_COMPONENT_TYPE);
+    k8sBasedComponents.add("openshift"); // so that we can work with the petclinic.yaml
     applier =
         new KubernetesComponentToWorkspaceApplier(
             k8sRecipeParser, k8sEnvProvisioner, k8sBasedComponents);
@@ -150,7 +151,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   public void shouldProvisionEnvironmentWithCorrectRecipeTypeAndContentFromK8SList()
       throws Exception {
     // given
-    String yamlRecipeContent = getResource("petclinic.yaml");
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
@@ -171,7 +172,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
   @Test
   public void shouldUseReferenceContentAsRecipeIfPresent() throws Exception {
-    String yamlRecipeContent = getResource("petclinic.yaml");
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
@@ -193,7 +194,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   public void shouldProvisionEnvironmentWithCorrectRecipeTypeAndContentFromOSList()
       throws Exception {
     // given
-    String yamlRecipeContent = getResource("petclinic.yaml");
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
     ComponentImpl component = new ComponentImpl();
     component.setType(KUBERNETES_COMPONENT_TYPE);
@@ -215,7 +216,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   @Test
   public void shouldFilterRecipeWithGivenSelectors() throws Exception {
     // given
-    String yamlRecipeContent = getResource("petclinic.yaml");
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
 
     final Map<String, String> selector = singletonMap("app.kubernetes.io/component", "webapp");
     ComponentImpl component = new ComponentImpl();
@@ -246,7 +247,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   public void shouldSetMachineNameAttributeToCommandConfiguredInOpenShiftComponentWithOneContainer()
       throws Exception {
     // given
-    String yamlRecipeContent = getResource("petclinic.yaml");
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     final Map<String, String> selector = singletonMap("app.kubernetes.io/component", "webapp");
@@ -272,7 +273,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
       shouldNotSetMachineNameAttributeToCommandConfiguredInOpenShiftComponentWithMultipleContainers()
           throws Exception {
     // given
-    String yamlRecipeContent = getResource("petclinic.yaml");
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     ComponentImpl component = new ComponentImpl();
@@ -295,7 +296,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   @Test
   public void shouldChangeEntrypointsOnMatchingContainers() throws Exception {
     // given
-    String yamlRecipeContent = getResource("petclinic.yaml");
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
 
     List<String> command = asList("teh", "command");
