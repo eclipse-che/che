@@ -11,7 +11,7 @@
  */
 'use strict';
 import {CheAPI} from '../../../components/api/che-api.factory';
-import {LoadFactoryService} from './load-factory.service';
+import {LoadFactoryService, FactoryLoadingStep} from './load-factory.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {RouteHistory} from '../../../components/routing/route-history.service';
 import {CheJsonRpcApi} from '../../../components/api/json-rpc/che-json-rpc-api.factory';
@@ -127,7 +127,7 @@ export class LoadFactoryController {
         } else {
           this.loadFactoryService.goToNextStep();
           this.$timeout(() => {
-             this.processFactorySource();
+            this.processFactorySource();
           }, 1500);
         }
       }, (error: any) => {
@@ -623,7 +623,7 @@ export class LoadFactoryController {
    *
    * @returns {any}
    */
-  getLoadingSteps(): any {
+  getLoadingSteps(): FactoryLoadingStep[] {
     return this.loadFactoryService.getFactoryLoadingSteps();
   }
 
