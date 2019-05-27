@@ -14,13 +14,14 @@ package org.eclipse.che.api.workspace.devfile.server.convert.component.editor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 
-import com.google.common.base.Preconditions;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
-import org.eclipse.che.api.workspace.devfile.server.Constants;
 import org.eclipse.che.api.workspace.devfile.server.FileContentProvider;
 import org.eclipse.che.api.workspace.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.devfile.server.exception.DevfileException;
@@ -61,9 +62,9 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
       throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
     checkArgument(editorComponent != null, "Component must not be null");
-    Preconditions.checkArgument(
-        Constants.EDITOR_COMPONENT_TYPE.equals(editorComponent.getType()),
-        String.format("Plugin must have `%s` type", Constants.EDITOR_COMPONENT_TYPE));
+    checkArgument(
+        EDITOR_COMPONENT_TYPE.equals(editorComponent.getType()),
+        format("Plugin must have `%s` type", EDITOR_COMPONENT_TYPE));
 
     String editorComponentAlias = editorComponent.getAlias();
     String editorId = editorComponent.getId();
@@ -74,7 +75,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     if (editorComponentAlias != null) {
       workspaceConfig
           .getAttributes()
-          .put(Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
+          .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
     }
 
     final ExtendedPluginFQN fqn;
@@ -95,7 +96,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
             c ->
                 editorComponentAlias != null
                     && editorComponentAlias.equals(
-                        c.getAttributes().get(Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
+                        c.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE)))
         .forEach(c -> c.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId()));
   }
 }

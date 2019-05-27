@@ -22,11 +22,9 @@ import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_PREFERENCE_A
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
-import com.google.common.base.Preconditions;
 import java.util.Map.Entry;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
-import org.eclipse.che.api.workspace.devfile.server.Constants;
 import org.eclipse.che.api.workspace.devfile.server.FileContentProvider;
 import org.eclipse.che.api.workspace.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.devfile.server.exception.DevfileException;
@@ -69,9 +67,9 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
       throws DevfileException {
     checkArgument(workspaceConfig != null, "Workspace config must not be null");
     checkArgument(pluginComponent != null, "Component must not be null");
-    Preconditions.checkArgument(
+    checkArgument(
         PLUGIN_COMPONENT_TYPE.equals(pluginComponent.getType()),
-        String.format("Plugin must have `%s` type", Constants.PLUGIN_COMPONENT_TYPE));
+        format("Plugin must have `%s` type", PLUGIN_COMPONENT_TYPE));
 
     String workspacePluginsAttribute =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);

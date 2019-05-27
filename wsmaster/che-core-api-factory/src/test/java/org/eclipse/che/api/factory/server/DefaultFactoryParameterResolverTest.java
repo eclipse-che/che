@@ -12,6 +12,10 @@
 package org.eclipse.che.api.factory.server;
 
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -24,7 +28,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
-import org.eclipse.che.api.workspace.devfile.server.Constants;
 import org.eclipse.che.api.workspace.devfile.server.DevfileManager;
 import org.eclipse.che.api.workspace.devfile.server.FileContentProvider;
 import org.eclipse.che.api.workspace.devfile.server.URLFetcher;
@@ -70,10 +73,10 @@ public class DefaultFactoryParameterResolverTest {
     DevfileSchemaValidator validator = new DevfileSchemaValidator(new DevfileSchemaProvider());
 
     Map<String, ComponentIntegrityValidator> validators = new HashMap<>();
-    validators.put(Constants.EDITOR_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
-    validators.put(Constants.PLUGIN_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
-    validators.put(Constants.KUBERNETES_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
-    validators.put(Constants.OPENSHIFT_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
+    validators.put(EDITOR_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
+    validators.put(PLUGIN_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
+    validators.put(KUBERNETES_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
+    validators.put(OPENSHIFT_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
 
     DevfileIntegrityValidator integrityValidator = new DevfileIntegrityValidator(validators);
     Set<ComponentProvisioner> componentProvisioners = new HashSet<>();

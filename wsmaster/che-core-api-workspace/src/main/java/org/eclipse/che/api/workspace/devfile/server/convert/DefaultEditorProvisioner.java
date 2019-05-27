@@ -11,6 +11,10 @@
  */
 package org.eclipse.che.api.workspace.devfile.server.convert;
 
+import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
+
 import com.google.common.base.Strings;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +23,6 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
-import org.eclipse.che.api.workspace.devfile.server.Constants;
 import org.eclipse.che.api.workspace.devfile.server.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
@@ -68,21 +71,18 @@ public class DefaultEditorProvisioner {
       return;
     }
 
-    if ("true".equals(devfile.getAttributes().get(Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE))) {
+    if ("true".equals(devfile.getAttributes().get(EDITOR_FREE_DEVFILE_ATTRIBUTE))) {
       return;
     }
 
     List<ComponentImpl> components = devfile.getComponents();
 
     Optional<ComponentImpl> editorOpt =
-        components
-            .stream()
-            .filter(t -> Constants.EDITOR_COMPONENT_TYPE.equals(t.getType()))
-            .findFirst();
+        components.stream().filter(t -> EDITOR_COMPONENT_TYPE.equals(t.getType())).findFirst();
 
     boolean isDefaultEditorUsed;
     if (!editorOpt.isPresent()) {
-      components.add(new ComponentImpl(Constants.EDITOR_COMPONENT_TYPE, defaultEditorRef));
+      components.add(new ComponentImpl(EDITOR_COMPONENT_TYPE, defaultEditorRef));
       isDefaultEditorUsed = true;
     } else {
       Component editor = editorOpt.get();
@@ -98,16 +98,14 @@ public class DefaultEditorProvisioner {
     Map<String, String> missingPluginsIdToRef = new HashMap<>(defaultPluginsToRefs);
 
     for (ComponentImpl t : components) {
-      if (Constants.PLUGIN_COMPONENT_TYPE.equals(t.getType())) {
+      if (PLUGIN_COMPONENT_TYPE.equals(t.getType())) {
         missingPluginsIdToRef.remove(getPluginPublisherAndName(t.getId()));
       }
     }
 
     missingPluginsIdToRef
         .values()
-        .forEach(
-            pluginRef ->
-                components.add(new ComponentImpl(Constants.PLUGIN_COMPONENT_TYPE, pluginRef)));
+        .forEach(pluginRef -> components.add(new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef)));
   }
 
   private String getPluginPublisherAndName(String reference) throws DevfileException {

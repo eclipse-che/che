@@ -15,6 +15,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toMap;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
@@ -77,10 +79,7 @@ public class PluginProvisioner implements ComponentProvisioner {
         throw new WorkspaceExportException(e.getMessage(), e);
       }
 
-      ComponentImpl pluginComponent =
-          new ComponentImpl(
-              org.eclipse.che.api.workspace.devfile.server.Constants.PLUGIN_COMPONENT_TYPE,
-              fqn.getId());
+      ComponentImpl pluginComponent = new ComponentImpl(PLUGIN_COMPONENT_TYPE, fqn.getId());
 
       pluginComponent.setAlias(pluginIdToComponentAlias.get(fqn.getId()));
       pluginComponent.setMemoryLimit(
@@ -93,11 +92,7 @@ public class PluginProvisioner implements ComponentProvisioner {
 
   private Map<String, String> extractPluginIdToComponentAlias(WorkspaceConfigImpl wsConfig) {
     String aliasesAttribute =
-        wsConfig
-            .getAttributes()
-            .get(
-                org.eclipse.che.api.workspace.devfile.server.Constants
-                    .PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
+        wsConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
     if (isNullOrEmpty(aliasesAttribute)) {
       return new HashMap<>();
     }

@@ -12,6 +12,12 @@
 package org.eclipse.che.api.workspace.devfile.server.validator;
 
 import static java.lang.String.format;
+import static org.eclipse.che.api.workspace.devfile.server.Components.getIdentifiableComponentName;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,8 +31,6 @@ import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
-import org.eclipse.che.api.workspace.devfile.server.Components;
-import org.eclipse.che.api.workspace.devfile.server.Constants;
 import org.eclipse.che.api.workspace.devfile.server.FileContentProvider;
 import org.eclipse.che.api.workspace.devfile.server.exception.DevfileFormatException;
 
@@ -108,31 +112,31 @@ public class DevfileIntegrityValidator {
 
       if (!idsPerComponentType
           .computeIfAbsent(component.getType(), __ -> new HashSet<>())
-          .add(Components.getIdentifiableComponentName(component))) {
+          .add(getIdentifiableComponentName(component))) {
 
         throw new DevfileFormatException(
-            String.format(
+            format(
                 "There are multiple components '%s' of type '%s' that cannot be uniquely"
                     + " identified. Please add aliases that would distinguish the components.",
-                Components.getIdentifiableComponentName(component), component.getType()));
+                getIdentifiableComponentName(component), component.getType()));
       }
 
       switch (component.getType()) {
-        case Constants.EDITOR_COMPONENT_TYPE:
+        case EDITOR_COMPONENT_TYPE:
           if (editorComponent != null) {
             throw new DevfileFormatException(
-                String.format(
+                format(
                     "Multiple editor components found: '%s', '%s'",
-                    Components.getIdentifiableComponentName(editorComponent),
-                    Components.getIdentifiableComponentName(component)));
+                    getIdentifiableComponentName(editorComponent),
+                    getIdentifiableComponentName(component)));
           }
           editorComponent = component;
           break;
 
-        case Constants.PLUGIN_COMPONENT_TYPE:
-        case Constants.KUBERNETES_COMPONENT_TYPE:
-        case Constants.OPENSHIFT_COMPONENT_TYPE:
-        case Constants.DOCKERIMAGE_COMPONENT_TYPE:
+        case PLUGIN_COMPONENT_TYPE:
+        case KUBERNETES_COMPONENT_TYPE:
+        case OPENSHIFT_COMPONENT_TYPE:
+        case DOCKERIMAGE_COMPONENT_TYPE:
           // do nothing
           break;
 
