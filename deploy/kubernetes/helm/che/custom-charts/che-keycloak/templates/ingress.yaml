@@ -17,6 +17,9 @@ metadata:
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout: "3600"
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout: "3600"
 {{- if .Values.global.tls.enabled }}
+{{- if .Values.global.tls.useCertManager }}
+    certmanager.k8s.io/cluster-issuer: "letsencrypt"
+{{- end }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect: "true"
     kubernetes.io/tls-acme: "true"
 {{- else }}

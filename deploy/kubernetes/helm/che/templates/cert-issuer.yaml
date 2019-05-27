@@ -19,10 +19,10 @@ spec:
 {{- if .Values.global.tls.useStaging }}
     server: https://acme-staging.api.letsencrypt.org/directory
 {{- else }}
-    server: https://acme-v01.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
 {{- end }}
     # Email address used for ACME registration
-    email: user@example.com
+    email: {{ .Values.global.tls.email }}
     # Name of a secret used to store the ACME account private key
     privateKeySecretRef:
       name: letsencrypt
