@@ -60,7 +60,7 @@ public class Constants {
 
   /**
    * {@link org.eclipse.che.api.core.model.workspace.devfile.Endpoint} attribute name which can
-   * identify endpoint as discoverable(means that it is accessible by its name from workspace's
+   * identify endpoint as discoverable(i.e. it is accessible by its name from workspace's
    * containers). Attribute value {@code true} makes a endpoint discoverable, any other value or
    * lack of the attribute makes the endpoint non-discoverable.
    */

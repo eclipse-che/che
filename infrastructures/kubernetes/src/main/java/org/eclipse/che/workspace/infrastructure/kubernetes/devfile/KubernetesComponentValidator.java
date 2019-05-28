@@ -119,8 +119,8 @@ public class KubernetesComponentValidator implements ComponentIntegrityValidator
         throw new DevfileFormatException(
             format(
                 "Component '%s' of type '%s' contains an entry point that doesn't match any"
-                    + " container:\n%s",
-                getIdentifiableComponentName(component), component.getType(), toYAML(ep)));
+                    + " container.",
+                getIdentifiableComponentName(component), component.getType()));
       }
     }
   }

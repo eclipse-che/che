@@ -215,7 +215,7 @@ public class KubernetesEnvironmentProvisionerTest {
   @Test(
       expectedExceptions = DevfileException.class,
       expectedExceptionsMessageRegExp =
-          "Kubernetes component can only be applied to a workspace with either kubernetes or openshift "
+          "Kubernetes component can only be applied to a workspace with any of kubernetes or openshift "
               + "recipe type but workspace has a recipe of type 'any'")
   public void shouldThrowAnExceptionIfWorkspaceAlreadyContainNonK8sNorOSRecipe() throws Exception {
     // given

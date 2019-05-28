@@ -45,7 +45,10 @@ public class KubernetesComponentIntegrityValidatorTest {
     validator = new KubernetesComponentValidator(kubernetesRecipeParser, k8sComponentTypes);
   }
 
-  @Test(expectedExceptions = DevfileFormatException.class)
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Failed to validate content reference of component 'ref' of type 'kubernetes': The selector of the component 'ref' of type 'kubernetes' filters out all objects from the list.")
   public void shouldThrowExceptionOnSelectorFilteringOutEverything() throws Exception {
     // given
     when(kubernetesRecipeParser.parse(any(String.class)))
@@ -72,7 +75,10 @@ public class KubernetesComponentIntegrityValidatorTest {
     // then exception is thrown
   }
 
-  @Test(expectedExceptions = DevfileFormatException.class)
+  @Test(
+      expectedExceptions = DevfileFormatException.class,
+      expectedExceptionsMessageRegExp =
+          "Failed to validate content reference of component 'ref' of type 'kubernetes': Component 'ref' of type 'kubernetes' contains an entry point that doesn't match any container.")
   public void shouldThrowExceptionOnEntrypointNotMatchingAnyContainer() throws Exception {
     // given
     when(kubernetesRecipeParser.parse(any(String.class)))

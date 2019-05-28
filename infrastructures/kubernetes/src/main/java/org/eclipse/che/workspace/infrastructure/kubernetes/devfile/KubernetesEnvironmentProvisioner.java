@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings.ALLOWED_ENVIRONMENT_TYPE_UPGRADES_KEY_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings.KUBERNETES_BASED_ENVIRONMENTS_KEY_NAME;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -53,7 +54,7 @@ public class KubernetesEnvironmentProvisioner {
   @Inject
   public KubernetesEnvironmentProvisioner(
       KubernetesRecipeParser objectsParser,
-      @Named(KubernetesDevfileBindings.ALLOWED_ENVIRONMENT_TYPE_UPGRADES_KEY_NAME)
+      @Named(ALLOWED_ENVIRONMENT_TYPE_UPGRADES_KEY_NAME)
           Map<String, Set<String>> allowedEnvironmentTypeUpgrades,
       @Named(KUBERNETES_BASED_ENVIRONMENTS_KEY_NAME) Set<String> k8sBasedEnvTypes) {
     this.objectsParser = objectsParser;
@@ -129,7 +130,7 @@ public class KubernetesEnvironmentProvisioner {
       String allowedEnvTypes = String.join(" or ", k8sBasedEnvTypes);
       throw new DevfileException(
           format(
-              "Kubernetes component can only be applied to a workspace with either %s recipe type"
+              "Kubernetes component can only be applied to a workspace with any of %s recipe type"
                   + " but workspace has a recipe of type '%s'",
               allowedEnvTypes, k8sRecipe.getType()));
     }
