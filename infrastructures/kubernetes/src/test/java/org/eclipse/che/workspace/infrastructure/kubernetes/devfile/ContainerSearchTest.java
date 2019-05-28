@@ -41,6 +41,7 @@ import io.fabric8.openshift.api.model.DeploymentConfigBuilder;
 import io.fabric8.openshift.api.model.Template;
 import io.fabric8.openshift.api.model.TemplateBuilder;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.testng.Assert;
@@ -317,7 +318,7 @@ public class ContainerSearchTest {
   }
 
   @Test
-  public void shouldRestrictByLabels() {
+  public void shouldRestrictByParentSelector() {
     Map<String, String> selector = ImmutableMap.of("app", "che");
     ContainerSearch search = new ContainerSearch(null, selector, null);
 
@@ -330,6 +331,27 @@ public class ContainerSearchTest {
     assertContainsContainer(results, "container7");
     assertContainsContainer(results, "container9");
     assertContainsContainer(results, "container11");
+  }
+
+  @Test
+  public void shouldConsiderEmptySelectorAsNotPresent() {
+    ContainerSearch search = new ContainerSearch(null, Collections.emptyMap(), null);
+
+    List<Container> results = search.search(testList);
+
+    Assert.assertEquals(results.size(), 12);
+    assertContainsContainer(results, "container1");
+    assertContainsContainer(results, "container2");
+    assertContainsContainer(results, "container3");
+    assertContainsContainer(results, "container4");
+    assertContainsContainer(results, "container5");
+    assertContainsContainer(results, "container6");
+    assertContainsContainer(results, "container7");
+    assertContainsContainer(results, "container8");
+    assertContainsContainer(results, "container9");
+    assertContainsContainer(results, "container10");
+    assertContainsContainer(results, "container11");
+    assertContainsContainer(results, "container12");
   }
 
   private static void assertContainsContainer(Collection<Container> containers, String name) {
