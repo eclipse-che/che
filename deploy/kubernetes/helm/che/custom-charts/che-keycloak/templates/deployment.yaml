@@ -103,5 +103,4 @@ spec:
       - name: keycloak-log
         persistentVolumeClaim:
           claimName: keycloak-log
-  test: false
 status: {}
