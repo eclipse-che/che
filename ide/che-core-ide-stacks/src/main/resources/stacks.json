@@ -3009,7 +3009,7 @@
       "description": null,
       "attributes": {
         "editor": "eclipse/che-theia/next",
-        "plugins": "eclipse/che-machine-exec-plugin/0.0.1"
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1, redhat/php/latest, redhat/php-debugger/latest"
       },
       "links": []
     },
@@ -3101,7 +3101,7 @@
       "description": null,
       "attributes": {
         "editor": "eclipse/che-theia/next",
-        "plugins": "eclipse/che-machine-exec-plugin/0.0.1"
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1, redhat/php/latest, redhat/php-debugger/latest"
       },
       "links": []
     }
