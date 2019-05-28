@@ -3897,6 +3897,7 @@ objects:
             "maxDataPoints": 100,
             "nullPointMode": "connected",
             "nullText": null,
+            "options": {},
             "postfix": "",
             "postfixFontSize": "50%",
             "prefix": "",
@@ -3978,6 +3979,7 @@ objects:
             "maxDataPoints": 100,
             "nullPointMode": "connected",
             "nullText": null,
+            "options": {},
             "postfix": "",
             "postfixFontSize": "50%",
             "prefix": "",
@@ -4060,12 +4062,14 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null as zero",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 2,
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
+            "spaceLength": 10,
             "stack": true,
             "steppedLine": false,
             "targets": [
@@ -4131,6 +4135,7 @@ objects:
             "dashLength": 10,
             "dashes": false,
             "datasource": "Che",
+            "description": "",
             "fill": 1,
             "gridPos": {
               "h": 5,
@@ -4138,12 +4143,13 @@ objects:
               "x": 5,
               "y": 7
             },
-            "id": 8,
+            "id": 48,
+            "interval": "",
             "legend": {
-              "avg": false,
+              "avg": true,
               "current": true,
-              "max": false,
-              "min": false,
+              "max": true,
+              "min": true,
               "show": true,
               "total": false,
               "values": true
@@ -4151,30 +4157,38 @@ objects:
             "lines": true,
             "linewidth": 1,
             "links": [],
-            "nullPointMode": "null",
+            "nullPointMode": "null as zero",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
-            "pointradius": 5,
+            "pointradius": 2,
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
             "spaceLength": 10,
-            "stack": false,
+            "stack": true,
             "steppedLine": false,
             "targets": [
               {
-                "expr": "sum(che_workspace_failure_total)",
+                "expr": "sum(increase(che_workspace_failure_total{while=\"STOPPING\"} [1h])) /(sum(increase(che_workspace_failure_total{while=\"STOPPING\"} [1h])) + sum(increase(che_workspace_stopped_total [1h])))",
                 "format": "time_series",
                 "intervalFactor": 1,
-                "legendFormat": "failure",
+                "legendFormat": "fail",
                 "refId": "A"
+              },
+              {
+                "expr": "sum(increase(che_workspace_stopped_total [1h]))/(sum(increase(che_workspace_failure_total{while=\"STOPPING\"} [1h])) + sum(increase(che_workspace_stopped_total [1h])))",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "success",
+                "refId": "B"
               }
             ],
             "thresholds": [],
             "timeFrom": null,
             "timeRegions": [],
             "timeShift": null,
-            "title": "Workspace Failures",
+            "title": "Workspace stop rate",
             "tooltip": {
               "shared": true,
               "sort": 0,
@@ -4190,7 +4204,7 @@ objects:
             },
             "yaxes": [
               {
-                "format": "short",
+                "format": "percentunit",
                 "label": null,
                 "logBase": 1,
                 "max": null,
@@ -4203,7 +4217,7 @@ objects:
                 "logBase": 1,
                 "max": null,
                 "min": null,
-                "show": true
+                "show": false
               }
             ],
             "yaxis": {
@@ -4220,7 +4234,7 @@ objects:
             "fill": 1,
             "gridPos": {
               "h": 5,
-              "w": 6,
+              "w": 5,
               "x": 11,
               "y": 7
             },
@@ -4238,6 +4252,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -4307,7 +4322,7 @@ objects:
             "gridPos": {
               "h": 5,
               "w": 7,
-              "x": 17,
+              "x": 16,
               "y": 7
             },
             "id": 10,
@@ -4324,6 +4339,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -4412,12 +4428,14 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null as zero",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 2,
             "points": false,
             "renderer": "flot",
             "seriesOverrides": [],
+            "spaceLength": 10,
             "stack": false,
             "steppedLine": false,
             "targets": [
@@ -4472,6 +4490,93 @@ objects:
             }
           },
           {
+            "aliasColors": {},
+            "bars": false,
+            "dashLength": 10,
+            "dashes": false,
+            "datasource": "Che",
+            "fill": 1,
+            "gridPos": {
+              "h": 5,
+              "w": 6,
+              "x": 6,
+              "y": 12
+            },
+            "id": 8,
+            "legend": {
+              "avg": false,
+              "current": true,
+              "max": false,
+              "min": false,
+              "show": true,
+              "total": false,
+              "values": true
+            },
+            "lines": true,
+            "linewidth": 1,
+            "links": [],
+            "nullPointMode": "null",
+            "options": {},
+            "paceLength": 10,
+            "percentage": false,
+            "pointradius": 5,
+            "points": false,
+            "renderer": "flot",
+            "seriesOverrides": [],
+            "spaceLength": 10,
+            "stack": false,
+            "steppedLine": false,
+            "targets": [
+              {
+                "expr": "sum(che_workspace_failure_total)",
+                "format": "time_series",
+                "intervalFactor": 1,
+                "legendFormat": "failure",
+                "refId": "A"
+              }
+            ],
+            "thresholds": [],
+            "timeFrom": null,
+            "timeRegions": [],
+            "timeShift": null,
+            "title": "Workspace Failures",
+            "tooltip": {
+              "shared": true,
+              "sort": 0,
+              "value_type": "individual"
+            },
+            "type": "graph",
+            "xaxis": {
+              "buckets": null,
+              "mode": "time",
+              "name": null,
+              "show": true,
+              "values": []
+            },
+            "yaxes": [
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              },
+              {
+                "format": "short",
+                "label": null,
+                "logBase": 1,
+                "max": null,
+                "min": null,
+                "show": true
+              }
+            ],
+            "yaxis": {
+              "align": false,
+              "alignLevel": null
+            }
+          },
+          {
             "collapsed": false,
             "gridPos": {
               "h": 1,
@@ -4511,6 +4616,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -4612,6 +4718,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null as zero",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -4724,6 +4831,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null as zero",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -4823,6 +4931,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -4919,6 +5028,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null as zero",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -5012,6 +5122,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null as zero",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -5107,6 +5218,7 @@ objects:
             "linewidth": 1,
             "links": [],
             "nullPointMode": "null as zero",
+            "options": {},
             "paceLength": 10,
             "percentage": false,
             "pointradius": 5,
@@ -5215,6 +5327,7 @@ objects:
               "show": true
             },
             "links": [],
+            "options": {},
             "targets": [
               {
                 "expr": "increase(che_workspace_start_time_seconds_bucket{result=\"fail\"}[1h])",
@@ -5278,6 +5391,7 @@ objects:
               "show": true
             },
             "links": [],
+            "options": {},
             "targets": [
               {
                 "expr": "increase(che_workspace_start_time_seconds_bucket{result=\"success\"} [1h])",
