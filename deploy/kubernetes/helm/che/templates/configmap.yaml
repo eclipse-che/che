@@ -39,7 +39,7 @@ data:
   CHE_INFRA_KUBERNETES_TLS__SECRET: ""
 {{- end }}
 {{- if .Values.global.multiuser }}
-  CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId }}
+  CHE_KEYCLOAK_CLIENT__ID: {{ .Values.cheKeycloakClientId | quote}}
   CHE_KEYCLOAK_AUTH__SERVER__URL: {{ template "keycloakAuthUrl" . }}
   CHE_KEYCLOAK_REALM: {{ .Values.cheKeycloakRealm }}
 {{- end }}
@@ -61,8 +61,8 @@ data:
   CHE_LOGS_DIR: /data/logs
   CHE_LOG_LEVEL: "INFO"
   CHE_MULTIUSER: {{ .Values.global.multiuser | quote }}
-  CHE_OAUTH_GITHUB_CLIENTID: {{ .Values.global.gitHubClientID }}
-  CHE_OAUTH_GITHUB_CLIENTSECRET: {{ .Values.global.gitHubClientSecret }}
+  CHE_OAUTH_GITHUB_CLIENTID: {{ .Values.global.gitHubClientID | quote}}
+  CHE_OAUTH_GITHUB_CLIENTSECRET: {{ .Values.global.gitHubClientSecret | quote}}
   CHE_PREDEFINED_STACKS_RELOAD__ON__START: "false"
   JAVA_OPTS: "-XX:MaxRAMFraction=2 -XX:+UseParallelGC -XX:MinHeapFreeRatio=10 -XX:MaxHeapFreeRatio=20 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -Dsun.zip.disableMemoryMapping=true -Xms20m "
   CHE_WORKSPACE_AUTO_START: "false"
@@ -72,11 +72,11 @@ data:
   CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"kubernetes.io/ingress.class": "nginx", "{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/rewrite-target": "/","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect": "false","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout": "3600","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout": "3600"}'
 {{- end }}
   CHE_INFRA_KUBERNETES_SERVER__STRATEGY: {{ .Values.global.serverStrategy }}
-  CHE_LOGGER_CONFIG: {{ .Values.global.log.loggerConfig }}
+  CHE_LOGGER_CONFIG: {{ .Values.global.log.loggerConfig | quote}}
   CHE_LOGS_APPENDERS_IMPL: {{ .Values.global.log.appenderName }}
-  CHE_WORKSPACE_HTTP__PROXY: {{ .Values.cheWorkspaceHttpProxy }}
-  CHE_WORKSPACE_HTTPS__PROXY: {{ .Values.cheWorkspaceHttpsProxy }}
-  CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy }}
+  CHE_WORKSPACE_HTTP__PROXY: {{ .Values.cheWorkspaceHttpProxy | quote}}
+  CHE_WORKSPACE_HTTPS__PROXY: {{ .Values.cheWorkspaceHttpsProxy | quote}}
+  CHE_WORKSPACE_NO__PROXY: {{ .Values.cheWorkspaceNoProxy | quote}}
   CHE_LIMITS_WORKSPACE_IDLE_TIMEOUT: '{{ .Values.global.workspaceIdleTimeout }}'
 {{- if .Values.workspaceDefaultRamRequest }}
   CHE_WORKSPACE_DEFAULT_MEMORY_REQUEST_MB: {{ .Values.workspaceDefaultRamRequest }}

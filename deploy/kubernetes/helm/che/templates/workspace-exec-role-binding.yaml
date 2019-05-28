@@ -16,7 +16,6 @@ metadata:
 roleRef:
   kind: Role
   name: exec
-  namespace: {{ .Values.global.cheWorkspacesNamespace }}
   apiGroup: rbac.authorization.k8s.io
 subjects:
 - kind: ServiceAccount

@@ -11,6 +11,13 @@
  */
 'use strict';
 
+export interface FactoryLoadingStep {
+  text: string;
+  logs: string;
+  hasError: boolean;
+  inProgressText?: string;
+}
+
 /**
  * This class is handling the service for the factory loading.
  * @author Ann Shumilova
@@ -18,7 +25,7 @@
 export class LoadFactoryService {
   private loadFactoryInProgress: boolean;
   private currentProgressStep: number;
-  private loadingSteps: Array<any>;
+  private loadingSteps: Array<FactoryLoadingStep>;
 
   /**
    * Default constructor that is using resource
@@ -26,7 +33,6 @@ export class LoadFactoryService {
   constructor () {
     this.loadFactoryInProgress = false;
     this.currentProgressStep = 0;
-
 
     this.loadingSteps = [
       {text: 'Loading factory', inProgressText: '', logs: '', hasError: false},
@@ -56,9 +62,9 @@ export class LoadFactoryService {
   /**
    * Returns the information of the factory's loading steps.
    *
-   * @returns {Array<any>} loading steps of the factory
+   * @returns {Array<FactoryLoadingStep>} loading steps of the factory
    */
-  getFactoryLoadingSteps(): Array<any> {
+  getFactoryLoadingSteps(): Array<FactoryLoadingStep> {
     return this.loadingSteps;
   }
 
@@ -91,7 +97,7 @@ export class LoadFactoryService {
    * Reset the loading progress.
    */
   resetLoadProgress(): void {
-    this.loadingSteps.forEach((step: any) => {
+    this.loadingSteps.forEach((step: FactoryLoadingStep) => {
       step.logs = '';
     step.hasError = false;
   });

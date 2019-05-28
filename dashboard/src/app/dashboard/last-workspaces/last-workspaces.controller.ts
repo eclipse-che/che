@@ -25,8 +25,8 @@ export class DashboardLastWorkspacesController {
 
   cheWorkspace: CheWorkspace;
   cheNotification: CheNotification;
-  workspaces: Array<che.IWorkspace>;
-  isLoading: boolean;
+  workspaces: Array<che.IWorkspace> = [];
+  isLoading: boolean = true;
 
   /**
    * Default constructor
@@ -35,28 +35,28 @@ export class DashboardLastWorkspacesController {
     this.cheWorkspace = cheWorkspace;
     this.cheNotification = cheNotification;
 
-    this.workspaces = cheWorkspace.getWorkspaces();
-
-    if (this.workspaces.length === 0) {
-      this.updateData();
-    }
+    this.loadData();
   }
 
   /**
-   * Update workspaces
+   * Load workspaces
    */
-  updateData(): void {
-    this.isLoading = true;
+  loadData(): void {
+    this.workspaces = this.cheWorkspace.getWorkspaces();
+
+    if (this.workspaces.length > 0) {
+      this.isLoading = false;
+      return;
+    }
+    
     let promise = this.cheWorkspace.fetchWorkspaces();
 
-    promise.then(() => {
+    promise.then((result) => {
+      this.workspaces = result;
       this.isLoading = false;
     }, (error: any) => {
       this.isLoading = false;
-      if (error.status === 304) {
-        return;
-      }
-      this.cheNotification.showError(error.data.message !== null ? error.data.message : 'Update workspaces failed.');
+      this.cheNotification.showError(error.data && error.data.message ? error.data.message : 'Update workspaces failed.');
     });
   }
 

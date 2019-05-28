@@ -26,6 +26,8 @@ spec:
       labels:
         app: che
     spec:
+      securityContext:
+        fsGroup: {{ .Values.global.securityContext.fsGroup }}
       initContainers:
 {{- if .Values.global.multiuser }}
       - name: wait-for-postgres
@@ -78,7 +80,6 @@ spec:
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
         securityContext:
           runAsUser: {{ .Values.global.securityContext.runAsUser }}
-          fsGroup: {{ .Values.global.securityContext.fsGroup }}
         livenessProbe:
           httpGet:
             path: /api/system/state
