@@ -106,7 +106,7 @@ $tower-offset-top = $load-jib-height
 $rope-thickness = 2px
 $layer-side-length-max = 125px
 
-$layers-hash = {
+$layers-map = {
   '1': {
     'top-side-color': $layer-stage-1-top-side-color
     'left-side-color': $layer-stage-1-left-side-color
@@ -135,23 +135,9 @@ $layers-hash = {
     'layer-side-length': $layer-side-length-max - 45px
     'offset': 3
   }
-  '5': {
-    'top-side-color': $layer-stage-1-top-side-color
-    'left-side-color': $layer-stage-1-left-side-color
-    'right-side-color': $layer-stage-1-right-side-color
-    'layer-side-length': $layer-side-length-max - 60px
-    'offset': 4
-  }
-  '6': {
-    'top-side-color': $layer-stage-1-top-side-color
-    'left-side-color': $layer-stage-1-left-side-color
-    'right-side-color': $layer-stage-1-right-side-color
-    'layer-side-length': $layer-side-length-max - 75px
-    'offset': 5
-  }
 }
 $layer-height = 30px
-$layer-offset-top = $layers-hash['1']['layer-side-length']
+$layer-offset-top = $layers-map['1']['layer-side-length']
 $layer-slide-in-offset-left = $layer-offset-top
 $layer-rope-height = $layer-offset-top
 
@@ -191,7 +177,7 @@ $rope-3-end-point-height = $rope-3-height + $rope-3-moving-distance
 $layers-in-box-offset-top = $box-offset-top
 
 /* ANIMATIONS */
-$animations-hash = {
+$animations-map = {
   'slide-trolley':  {
     '0': {
       transform: translate3d(0,0,0)
@@ -281,9 +267,9 @@ $animations-hash = {
     }
   }
 }
-for $name in $animations-hash
+for $name in $animations-map
   @keyframes {$name}
-    for $percent, $transform in $animations-hash[$name]
+    for $percent, $transform in $animations-map[$name]
       {1% * $percent}
         {$transform}
 
@@ -821,7 +807,7 @@ $che-crane-width = ($load-jib-1-width + $load-jib-2-width + $load-jib-3-width + 
 
 // .box
 
-for $index, $layer-props in $layers-hash
+for $index, $layer-props in $layers-map
   $layer-side-length = $layer-props['layer-side-length']
   $top-side-color = $layer-props['top-side-color']
   $left-side-color = $layer-props['left-side-color']
@@ -937,14 +923,14 @@ for $index, $layer-props in $layers-hash
 // define visibility of layers in box
 .che-loader-crane
   .layers-in-box
-    .layer-1, .layer-2, .layer-3, .layer-4
+    .layer-1, .layer-2, .layer-3, .layer-4, .layer-5
       opacity 0
 
 .che-loader-crane.step-1
   .layers-in-box
     .layer-1
       opacity 1
-    .layer-2, .layer-3, .layer-4
+    .layer-2, .layer-3, .layer-4, .layer-5
       opacity 0
 
 .che-loader-crane.step-2
@@ -954,7 +940,7 @@ for $index, $layer-props in $layers-hash
 
     .layer-1, .layer-2
       opacity 1
-    .layer-3, .layer-4
+    .layer-3, .layer-4, .layer-5
       opacity 0
 
 .che-loader-crane.step-3
@@ -965,7 +951,7 @@ for $index, $layer-props in $layers-hash
 
     .layer-1, .layer-2, .layer-3
       opacity 1
-    .layer-4
+    .layer-4, .layer-5
       opacity 0
 
 .che-loader-crane.step-4
@@ -976,6 +962,8 @@ for $index, $layer-props in $layers-hash
 
     .layer-1, .layer-2, .layer-3, .layer-4
       opacity 1
+    .layer-5
+      opacity 0
 
 .che-loader-crane.step-5
   .layers-in-box
@@ -985,6 +973,8 @@ for $index, $layer-props in $layers-hash
 
     .layer-1, .layer-2, .layer-3, .layer-4
       opacity 1
+    .layer-5
+      opacity 0
 
 .layers-in-box
   position relative

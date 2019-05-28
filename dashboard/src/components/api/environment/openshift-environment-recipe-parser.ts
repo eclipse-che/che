@@ -16,6 +16,7 @@ import {KubernetesMachineRecipeParser, IObjectMetadata} from './kubernetes-machi
 
 export interface IOpenShiftList {
   kind: string;
+  apiVersion: string;
   items: Array<ISupportedOpenShiftItem>;
 }
 

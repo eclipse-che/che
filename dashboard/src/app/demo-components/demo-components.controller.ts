@@ -19,7 +19,7 @@ import {
 import {ICheEditModeOverlayConfig} from '../../components/widget/edit-mode-overlay/che-edit-mode-overlay.directive';
 import {CheNotification} from '../../components/notification/che-notification.factory';
 
-enum Tab {Font, Panel, Selecter, Icons, Dropdown_button,  Buttons, Input, List, Label_container, Stack_selector, Popover, Edit_mode_overlay}
+enum Tab {Font, Panel, Selecter, Icons, Dropdown_button, Buttons, Input, List, Label_container, Stack_selector, Popover, Edit_mode_overlay, Loader}
 
 /**
  * This class is handling the controller for the demo of components
@@ -56,6 +56,8 @@ export class DemoComponentsController {
   };
 
   overlayConfig: ICheEditModeOverlayConfig;
+
+  loader: any;
 
   /**
    * Default constructor that is using resource
@@ -152,6 +154,8 @@ export class DemoComponentsController {
         disabled: false
       }
     };
+
+    this.createLoader();
   }
 
   /**
@@ -180,6 +184,28 @@ export class DemoComponentsController {
 
   numberChanged(): void {
     this.numberIsChanged++;
+  }
+
+  createLoader(): void {
+    this.loader = {};
+    const allSteps = [
+      {text: 'Loading factory', inProgressText: '', logs: '', hasError: false},
+      {text: 'Looking for devfile', inProgressText: '', logs: '', hasError: false},
+      {text: 'Initializing workspace', inProgressText: 'Provision workspace and associating it with the existing user', logs: '', hasError: false},
+      {text: 'Starting workspace runtime', inProgressText: 'Retrieving the stack\'s image and launching it', logs: '', hasError: false},
+      {text: 'Starting workspace agent', inProgressText: 'Agents provide RESTful services like intellisense and SSH', logs: '', hasError: false},
+      {text: 'Open IDE', inProgressText: '', logs: '', hasError: false}
+    ]
+    this.loader.getLoadingSteps = () => allSteps;
+    let currentProgressStep = 0;
+    this.loader.getCurrentProgressStep = () => currentProgressStep;
+    this.loader.nextStep = () => {
+      currentProgressStep++;
+      currentProgressStep = currentProgressStep % (allSteps.length);
+    }
+    this.loader.pause = () => {
+      this.loader.paused = !this.loader.paused;
+    };
   }
 
 }

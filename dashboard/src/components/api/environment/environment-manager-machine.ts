@@ -13,6 +13,7 @@ export interface IEnvironmentManagerMachine extends che.IEnvironmentMachine {
   name: string;
   recipe?: any;
   runtime?: any;
+  attributes?: any;
   servers?: {
     [serverRef: string]: IEnvironmentManagerMachineServer
   };

@@ -150,12 +150,6 @@ export class KubernetesMachineRecipeParser implements IParser {
   }
 
   validate(recipe: ISupportedListItem ): void {
-    if (!recipe || !recipe.kind) {
-      throw new TypeError(`Recipe item should contain a 'kind' section.`);
-    }
-    if (!recipe.apiVersion) {
-      throw new TypeError(`Recipe item should contain 'apiVersion' section`);
-    }
     if (isDeploymentItem(recipe)) {
       this.validateDeployment(<IDeploymentItem>recipe);
     } else if (isPodItem(recipe)) {
@@ -178,9 +172,6 @@ export class KubernetesMachineRecipeParser implements IParser {
       throw new TypeError(`Recipe deployment item should contain a 'spec' section.`);
     }
     const spec = deployment.spec;
-    if (!spec.replicas || spec.replicas !== 1) {
-      throw new TypeError(`Recipe deployment spec should contain replicas value equal to 1.`);
-    }
     if (!spec.template) {
       throw new TypeError(`Recipe deployment spec should contain template section.`);
     }
