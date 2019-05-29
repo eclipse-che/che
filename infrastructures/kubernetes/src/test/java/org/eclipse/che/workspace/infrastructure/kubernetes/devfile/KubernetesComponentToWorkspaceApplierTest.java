@@ -191,29 +191,6 @@ public class KubernetesComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionEnvironmentWithCorrectRecipeTypeAndContentFromOSList()
-      throws Exception {
-    // given
-    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
-    doReturn(toK8SList(yamlRecipeContent).getItems()).when(k8sRecipeParser).parse(anyString());
-    ComponentImpl component = new ComponentImpl();
-    component.setType(KUBERNETES_COMPONENT_TYPE);
-    component.setReference(REFERENCE_FILENAME);
-    component.setAlias(COMPONENT_NAME);
-
-    // when
-    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
-
-    // then
-    verify(k8sEnvProvisioner)
-        .provision(
-            workspaceConfig,
-            KubernetesEnvironment.TYPE,
-            toK8SList(yamlRecipeContent).getItems(),
-            emptyMap());
-  }
-
-  @Test
   public void shouldFilterRecipeWithGivenSelectors() throws Exception {
     // given
     String yamlRecipeContent = getResource("devfile/petclinic.yaml");
