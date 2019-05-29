@@ -57,6 +57,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 /**
  * Applies changes on workspace config according to the specified dockerimage component.
  *
+ * <p>The {@code dockerimage} devfile components are handled as Kubernetes deployments internally.
+ *
  * @author Sergii Leshchenko
  */
 public class DockerimageComponentToWorkspaceApplier implements ComponentToWorkspaceApplier {

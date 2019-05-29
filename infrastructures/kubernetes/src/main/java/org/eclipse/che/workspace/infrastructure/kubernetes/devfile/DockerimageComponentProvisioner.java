@@ -46,6 +46,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.Entr
  * Provision dockerimage component in {@link DevfileImpl} according to the value of environment with
  * dockerimage recipe if the specified {@link WorkspaceConfigImpl} has such.
  *
+ * <p>The {@code dockerimage} devfile components are handled as Kubernetes deployments internally.
+ *
  * @author Sergii Leshchenko
  */
 public class DockerimageComponentProvisioner implements ComponentProvisioner {
