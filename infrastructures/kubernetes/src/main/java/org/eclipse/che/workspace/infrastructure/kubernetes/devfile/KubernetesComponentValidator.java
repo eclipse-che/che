@@ -16,7 +16,6 @@ import static org.eclipse.che.api.workspace.devfile.server.Components.getIdentif
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.client.utils.Serialization;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;

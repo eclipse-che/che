@@ -13,6 +13,7 @@ package org.eclipse.che.api.workspace.devfile.server;
 
 import com.google.inject.Binder;
 import com.google.inject.multibindings.MapBinder;
+import com.google.inject.multibindings.Multibinder;
 import java.util.function.Consumer;
 import org.eclipse.che.api.workspace.devfile.server.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.workspace.devfile.server.convert.component.ComponentToWorkspaceApplier;
@@ -55,16 +56,21 @@ public class DevfileBindings {
   }
 
   /**
-   * The {@code binder} consumer can be used to bind {@link ComponentProvisioner} implementations to
-   * component types. I.e. the keys of the binder are component type strings and the bindings are the
-   * deemed implementations.
+   * Binds {@link ComponentProvisioner} implementations to be used in the {@link
+   * org.eclipse.che.api.workspace.devfile.server.convert.DevfileConverter}.
    *
    * @param baseBinder the binder available in the Guice module calling this method
-   * @param binder a consumer to accept a new binder for the component provisioners
+   * @param impls the classes to register as component provisioners
    */
-  public static void onComponentProvisionerBinder(
-      Binder baseBinder, Consumer<MapBinder<String, ComponentProvisioner>> binder) {
-    binder.accept(MapBinder.newMapBinder(baseBinder, String.class, ComponentProvisioner.class));
+  @SafeVarargs
+  public static void addComponentProvisioners(
+      Binder baseBinder, Class<? extends ComponentProvisioner>... impls) {
+    Multibinder<ComponentProvisioner> binder =
+        Multibinder.newSetBinder(baseBinder, ComponentProvisioner.class);
+
+    for (Class<? extends ComponentProvisioner> i : impls) {
+      binder.addBinding().to(i);
+    }
   }
 
   private DevfileBindings() {}

@@ -11,17 +11,11 @@
  */
 package org.eclipse.che.api.workspace.devfile.server;
 
-import static com.google.inject.multibindings.MapBinder.newMapBinder;
-import static com.google.inject.multibindings.Multibinder.newSetBinder;
 import static org.eclipse.che.api.workspace.devfile.server.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.devfile.server.Constants.PLUGIN_COMPONENT_TYPE;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.workspace.devfile.server.convert.DevfileConverter;
-import org.eclipse.che.api.workspace.devfile.server.convert.component.ComponentProvisioner;
-import org.eclipse.che.api.workspace.devfile.server.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.devfile.server.convert.component.editor.EditorComponentProvisioner;
 import org.eclipse.che.api.workspace.devfile.server.convert.component.editor.EditorComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.devfile.server.convert.component.plugin.PluginComponentToWorkspaceApplier;
@@ -38,19 +32,15 @@ public class DevfileModule extends AbstractModule {
     bind(DevfileSchemaValidator.class);
     bind(DevfileService.class);
 
-    Multibinder<ComponentProvisioner> workspaceToDevfileAppliers =
-        newSetBinder(binder(), ComponentProvisioner.class);
-    workspaceToDevfileAppliers.addBinding().to(EditorComponentProvisioner.class);
-    workspaceToDevfileAppliers.addBinding().to(PluginProvisioner.class);
+    DevfileBindings.addComponentProvisioners(
+        binder(), EditorComponentProvisioner.class, PluginProvisioner.class);
 
-    MapBinder<String, ComponentToWorkspaceApplier> componentToWorkspaceApplier =
-        newMapBinder(binder(), String.class, ComponentToWorkspaceApplier.class);
-    componentToWorkspaceApplier
-        .addBinding(Constants.EDITOR_COMPONENT_TYPE)
-        .to(EditorComponentToWorkspaceApplier.class);
-    componentToWorkspaceApplier
-        .addBinding(PLUGIN_COMPONENT_TYPE)
-        .to(PluginComponentToWorkspaceApplier.class);
+    DevfileBindings.onWorkspaceApplierBinder(
+        binder(),
+        binder -> {
+          binder.addBinding(EDITOR_COMPONENT_TYPE).to(EditorComponentToWorkspaceApplier.class);
+          binder.addBinding(PLUGIN_COMPONENT_TYPE).to(PluginComponentToWorkspaceApplier.class);
+        });
 
     bind(DevfileToWorkspaceConfigConverter.class).to(DevfileConverter.class);
 

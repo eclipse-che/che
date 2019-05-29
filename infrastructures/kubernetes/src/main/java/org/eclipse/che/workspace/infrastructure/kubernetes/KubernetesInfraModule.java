@@ -198,12 +198,8 @@ public class KubernetesInfraModule extends AbstractModule {
               .to(DockerimageComponentToWorkspaceApplier.class);
         });
 
-    DevfileBindings.onComponentProvisionerBinder(
-        binder(),
-        binder -> {
-          binder.addBinding(KUBERNETES_COMPONENT_TYPE).to(KubernetesComponentProvisioner.class);
-          binder.addBinding(DOCKERIMAGE_COMPONENT_TYPE).to(DockerimageComponentProvisioner.class);
-        });
+    DevfileBindings.addComponentProvisioners(
+        binder(), KubernetesComponentProvisioner.class, DockerimageComponentProvisioner.class);
 
     KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBindings(
         binder(), KubernetesEnvironment.TYPE);
