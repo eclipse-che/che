@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
@@ -38,13 +39,13 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class PluginFQNParserTest {
 
-  @Mock private URLFetcher urlFetcher;
+  @Mock private FileContentProvider fileContentProvider;
 
   private PluginFQNParser parser;
 
   @BeforeClass
   public void setUp() throws Exception {
-    parser = new PluginFQNParser(urlFetcher);
+    parser = new PluginFQNParser(fileContentProvider);
   }
 
   @Test

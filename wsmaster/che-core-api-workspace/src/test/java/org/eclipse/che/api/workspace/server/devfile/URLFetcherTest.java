@@ -22,7 +22,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
-import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
