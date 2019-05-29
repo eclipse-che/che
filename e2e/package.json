@@ -1,8 +1,8 @@
 {
-  "name": "typescript-selenium",
+  "name": "e2e",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "npm run lint && npm run tsc && mocha --opts mocha.opts",
     "lint": "tslint --fix -p .",
