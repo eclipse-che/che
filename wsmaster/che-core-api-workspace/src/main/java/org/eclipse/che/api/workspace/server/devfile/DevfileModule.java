@@ -15,8 +15,6 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMP
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
 
 import com.google.inject.AbstractModule;
-import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
-import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.editor.EditorComponentProvisioner;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.editor.EditorComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.plugin.PluginComponentToWorkspaceApplier;
@@ -41,8 +39,6 @@ public class DevfileModule extends AbstractModule {
           binder.addBinding(EDITOR_COMPONENT_TYPE).to(EditorComponentToWorkspaceApplier.class);
           binder.addBinding(PLUGIN_COMPONENT_TYPE).to(PluginComponentToWorkspaceApplier.class);
         });
-
-    bind(DevfileToWorkspaceConfigConverter.class).to(DevfileConverter.class);
 
     DevfileBindings.onComponentIntegrityValidatorBinder(
         binder(),

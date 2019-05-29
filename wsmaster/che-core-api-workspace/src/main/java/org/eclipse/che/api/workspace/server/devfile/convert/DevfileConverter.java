@@ -27,7 +27,6 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
-import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
 import org.eclipse.che.api.workspace.server.devfile.DevfileRecipeFormatException;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
@@ -49,7 +48,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
  * @author Max Shaposhnyk
  * @author Sergii Leshchenko
  */
-public class DevfileConverter implements DevfileToWorkspaceConfigConverter {
+public class DevfileConverter {
 
   private final ProjectConverter projectConverter;
   private final CommandConverter commandConverter;
@@ -113,7 +112,6 @@ public class DevfileConverter implements DevfileToWorkspaceConfigConverter {
     return devfile;
   }
 
-  @Override
   public WorkspaceConfig convert(Devfile devfile) throws ServerException {
     try {
       return devFileToWorkspaceConfig(new DevfileImpl(devfile), urlFileContentProvider);

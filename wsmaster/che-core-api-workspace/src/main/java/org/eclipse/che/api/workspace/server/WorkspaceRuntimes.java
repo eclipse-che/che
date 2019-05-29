@@ -60,6 +60,7 @@ import org.eclipse.che.api.core.model.workspace.config.Environment;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.core.notification.EventSubscriber;
+import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppedEvent;
 import org.eclipse.che.api.workspace.server.event.RuntimeAbnormalStoppingEvent;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
@@ -112,7 +113,7 @@ public class WorkspaceRuntimes {
   private final Map<String, InternalEnvironmentFactory> environmentFactories;
   private final RuntimeInfrastructure infrastructure;
   private final ProbeScheduler probeScheduler;
-  private final DevfileToWorkspaceConfigConverter devfileConverter;
+  private final DevfileConverter devfileConverter;
   // Unique identifier for this workspace runtimes
   private final String workspaceRuntimesId;
 
@@ -128,7 +129,7 @@ public class WorkspaceRuntimes {
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
       WorkspaceLockService lockService,
-      DevfileToWorkspaceConfigConverter devfileConverter) {
+      DevfileConverter devfileConverter) {
     this(
         eventService,
         envFactories,
@@ -154,7 +155,7 @@ public class WorkspaceRuntimes {
       ProbeScheduler probeScheduler,
       WorkspaceStatusCache statuses,
       WorkspaceLockService lockService,
-      DevfileToWorkspaceConfigConverter devfileConverter) {
+      DevfileConverter devfileConverter) {
     this.probeScheduler = probeScheduler;
     this.runtimes = new ConcurrentHashMap<>();
     this.statuses = statuses;
