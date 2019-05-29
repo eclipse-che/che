@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.workspace.devfile.server.Components.getIdentifiableComponentName;
+import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -26,10 +26,10 @@ import javax.inject.Named;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
-import org.eclipse.che.api.workspace.devfile.server.FileContentProvider;
-import org.eclipse.che.api.workspace.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.workspace.devfile.server.exception.DevfileFormatException;
-import org.eclipse.che.api.workspace.devfile.server.validator.ComponentIntegrityValidator;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 

@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
-import static org.eclipse.che.api.workspace.devfile.server.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy.PER_WORKSPACE_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
@@ -22,7 +22,7 @@ import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.system.server.ServiceTermination;
-import org.eclipse.che.api.workspace.devfile.server.DevfileBindings;
+import org.eclipse.che.api.workspace.server.devfile.DevfileBindings;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;

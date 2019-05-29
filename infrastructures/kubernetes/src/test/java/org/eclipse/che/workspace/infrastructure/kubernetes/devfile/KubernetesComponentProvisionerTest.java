@@ -16,7 +16,7 @@ import static java.lang.String.format;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import org.eclipse.che.api.workspace.devfile.server.exception.WorkspaceExportException;
+import org.eclipse.che.api.workspace.server.devfile.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;

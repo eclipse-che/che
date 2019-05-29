@@ -12,8 +12,8 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static com.google.inject.name.Names.named;
-import static org.eclipse.che.api.workspace.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy.PER_WORKSPACE_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.UniqueWorkspacePVCStrategy.UNIQUE_STRATEGY;
@@ -28,8 +28,8 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import java.util.Map;
 import org.eclipse.che.api.system.server.ServiceTermination;
-import org.eclipse.che.api.workspace.devfile.server.DevfileBindings;
-import org.eclipse.che.api.workspace.devfile.server.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
+import org.eclipse.che.api.workspace.server.devfile.DevfileBindings;
+import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;

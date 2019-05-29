@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
-import static org.eclipse.che.api.workspace.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.che.api.workspace.devfile.server.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;

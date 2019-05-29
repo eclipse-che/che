@@ -16,7 +16,7 @@ import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ForbiddenException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
-import org.eclipse.che.api.workspace.devfile.server.DevfileService;
+import org.eclipse.che.api.workspace.server.devfile.DevfileService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;

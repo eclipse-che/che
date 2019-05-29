@@ -13,8 +13,8 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.devfile.server.Constants.DOCKERIMAGE_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.devfile.server.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 
 import java.util.HashMap;
@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.MachineConfig;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
-import org.eclipse.che.api.workspace.devfile.server.convert.component.ComponentProvisioner;
-import org.eclipse.che.api.workspace.devfile.server.exception.WorkspaceExportException;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentProvisioner;
+import org.eclipse.che.api.workspace.server.devfile.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;

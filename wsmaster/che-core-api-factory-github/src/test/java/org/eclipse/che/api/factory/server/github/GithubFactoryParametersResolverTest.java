@@ -32,7 +32,7 @@ import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
-import org.eclipse.che.api.workspace.devfile.server.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.mockito.ArgumentCaptor;

@@ -47,7 +47,7 @@ import org.eclipse.che.api.user.server.jpa.JpaPreferenceDao;
 import org.eclipse.che.api.user.server.jpa.JpaUserDao;
 import org.eclipse.che.api.user.server.spi.PreferenceDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
-import org.eclipse.che.api.workspace.devfile.server.DevfileModule;
+import org.eclipse.che.api.workspace.server.devfile.DevfileModule;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;

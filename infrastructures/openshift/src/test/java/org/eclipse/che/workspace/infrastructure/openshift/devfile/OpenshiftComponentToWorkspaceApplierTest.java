@@ -13,7 +13,7 @@ package org.eclipse.che.workspace.infrastructure.openshift.devfile;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-import static org.eclipse.che.api.workspace.devfile.server.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
