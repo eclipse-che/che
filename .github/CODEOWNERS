@@ -48,7 +48,7 @@ wsmaster/** @skabashnyuk
 wsmaster/che-core-api-factory/** @mshaposhnik
 wsmaster/che-core-api-factory-shared/**   @mshaposhnik
 wsmaster/che-core-api-workspace-activity/**   @mshaposhnik
-wsmaster/che-core-api-devfile/**  @sleshchenko @mshaposhnik @metlos
+wsmaster/che-core-api-workspace/**  @sleshchenko @mshaposhnik @metlos
 
 # wsagent
 wsagent/activity/** @skabashnyuk
