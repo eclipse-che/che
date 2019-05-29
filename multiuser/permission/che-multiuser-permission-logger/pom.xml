@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-multiuser-permission</artifactId>
         <groupId>org.eclipse.che.multiuser</groupId>
-        <version>6.19.5-SNAPSHOT</version>
+        <version>6.19.5</version>
     </parent>
     <artifactId>che-multiuser-permission-logger</artifactId>
     <name>Che Multiuser :: Logger Permissions</name>
