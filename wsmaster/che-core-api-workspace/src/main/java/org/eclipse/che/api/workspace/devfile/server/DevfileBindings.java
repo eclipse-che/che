@@ -28,7 +28,7 @@ public class DevfileBindings {
 
   /**
    * The {@code binder} consumer can be used to bind {@link ComponentToWorkspaceApplier}
-   * implementations to component types. I.e. the key of the binder are component type strings and
+   * implementations to component types. I.e. the keys of the binder are component type strings and
    * the bindings are the deemed implementations.
    *
    * @param baseBinder the binder available in the Guice module calling this method
@@ -42,7 +42,7 @@ public class DevfileBindings {
 
   /**
    * The {@code binder} consumer can be used to bind {@link ComponentIntegrityValidator}
-   * implementations to component types. I.e. the key of the binder are component type strings and
+   * implementations to component types. I.e. the keys of the binder are component type strings and
    * the bindings are the deemed implementations.
    *
    * @param baseBinder the binder available in the Guice module calling this method
@@ -56,7 +56,7 @@ public class DevfileBindings {
 
   /**
    * The {@code binder} consumer can be used to bind {@link ComponentProvisioner} implementations to
-   * component types. I.e. the key of the binder are component type strings and the bindings are the
+   * component types. I.e. the keys of the binder are component type strings and the bindings are the
    * deemed implementations.
    *
    * @param baseBinder the binder available in the Guice module calling this method
