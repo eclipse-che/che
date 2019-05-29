@@ -16,6 +16,8 @@ import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -86,7 +88,7 @@ public class UniqueWorkspacePVCStrategyTest {
   public void setup() throws Exception {
     strategy =
         new UniqueWorkspacePVCStrategy(
-            factory, ephemeralWorkspaceAdapter, pvcProvisioner, subpathPrefixes);
+            true, factory, ephemeralWorkspaceAdapter, pvcProvisioner, subpathPrefixes);
 
     k8sEnv = KubernetesEnvironment.builder().build();
 
@@ -152,6 +154,28 @@ public class UniqueWorkspacePVCStrategyTest {
 
     verify(pvcs).createIfNotExist(any());
     verify(pvcs).waitBound(uniqueName, 100);
+  }
+
+  @Test
+  public void testCreatesProvisionedPVCsOnPrepareIfWaitIsDisabled() throws Exception {
+    strategy =
+        new UniqueWorkspacePVCStrategy(
+            false, // wait bound PVCs
+            factory,
+            ephemeralWorkspaceAdapter,
+            pvcProvisioner,
+            subpathPrefixes);
+
+    final String uniqueName = PVC_NAME_PREFIX + "-3121";
+    final PersistentVolumeClaim pvc = newPVC(uniqueName);
+    k8sEnv.getPersistentVolumeClaims().clear();
+    k8sEnv.getPersistentVolumeClaims().putAll(singletonMap(uniqueName, pvc));
+    doReturn(pvc).when(pvcs).create(any());
+
+    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+
+    verify(pvcs).createIfNotExist(any());
+    verify(pvcs, never()).waitBound(anyString(), anyLong());
   }
 
   @Test(expectedExceptions = InfrastructureException.class)
