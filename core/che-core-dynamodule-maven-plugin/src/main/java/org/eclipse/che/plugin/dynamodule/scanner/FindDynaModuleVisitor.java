@@ -31,7 +31,7 @@ public final class FindDynaModuleVisitor extends ClassVisitor {
 
   /** Default constructor. */
   public FindDynaModuleVisitor() {
-    super(Opcodes.ASM7);
+    super(Opcodes.ASM5);
   }
 
   /**
