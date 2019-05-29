@@ -95,6 +95,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
   private final PVCProvisioner pvcProvisioner;
   private final PodsVolumes podsVolumes;
   private final SubPathPrefixes subpathPrefixes;
+  private final boolean waitBound;
 
   @Inject
   public CommonPVCStrategy(
@@ -103,6 +104,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
       @Named("che.infra.kubernetes.pvc.access_mode") String pvcAccessMode,
       @Named("che.infra.kubernetes.pvc.precreate_subpaths") boolean preCreateDirs,
       @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
+      @Named("che.infra.kubernetes.pvc.wait_bound") boolean waitBound,
       PVCSubPathHelper pvcSubPathHelper,
       KubernetesNamespaceFactory factory,
       EphemeralWorkspaceAdapter ephemeralWorkspaceAdapter,
@@ -114,6 +116,7 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     this.pvcAccessMode = pvcAccessMode;
     this.preCreateDirs = preCreateDirs;
     this.pvcStorageClassName = pvcStorageClassName;
+    this.waitBound = waitBound;
     this.pvcSubPathHelper = pvcSubPathHelper;
     this.factory = factory;
     this.ephemeralWorkspaceAdapter = ephemeralWorkspaceAdapter;
@@ -199,8 +202,10 @@ public class CommonPVCStrategy implements WorkspaceVolumesStrategy {
     if (!existing.contains(commonPVC.getMetadata().getName())) {
       log.debug("Creating PVC for workspace '{}'", workspaceId);
       pvcs.create(commonPVC);
-      log.debug("Waiting PVC for workspace '{}' to be bound", workspaceId);
-      pvcs.waitBound(commonPVC.getMetadata().getName(), timeoutMillis);
+      if (waitBound) {
+        log.debug("Waiting for PVC for workspace '{}' to be bound", workspaceId);
+        pvcs.waitBound(commonPVC.getMetadata().getName(), timeoutMillis);
+      }
     }
 
     final String[] subpaths =
