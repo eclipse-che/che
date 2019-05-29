@@ -161,9 +161,8 @@ public class DevfileManager {
    * @throws NotFoundException when no workspace can be found by given key
    * @throws ConflictException when workspace cannot be exported into devfile
    * @throws ServerException when other error occurs
-   * @see WorkspaceManager#getByKey(String)
+   * @see WorkspaceManager#getWorkspace(String)
    */
-  @SuppressWarnings("JavadocReference")
   public DevfileImpl exportWorkspace(String key)
       throws NotFoundException, ServerException, ConflictException {
     WorkspaceImpl workspace = workspaceManager.getWorkspace(key);
