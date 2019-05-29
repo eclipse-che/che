@@ -9,15 +9,14 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.workspace.server.devfile;
 
 import static java.lang.String.format;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 
 /**
  * A simple implementation of the FileContentProvider that merely uses the function resolve relative

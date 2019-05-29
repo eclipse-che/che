@@ -23,7 +23,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;

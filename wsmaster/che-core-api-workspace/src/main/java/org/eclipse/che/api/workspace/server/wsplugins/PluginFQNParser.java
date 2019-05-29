@@ -32,7 +32,8 @@ import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
-import org.eclipse.che.api.workspace.server.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
@@ -49,12 +50,12 @@ import org.eclipse.che.api.workspace.shared.Constants;
 @Beta
 public class PluginFQNParser {
 
-  private final URLFetcher urlFetcher;
+  private final FileContentProvider fileContentProvider;
   private ObjectMapper yamlReader;
 
   @Inject
-  public PluginFQNParser(URLFetcher urlFetcher) {
-    this.urlFetcher = urlFetcher;
+  public PluginFQNParser(FileContentProvider fileContentProvider) {
+    this.fileContentProvider = fileContentProvider;
     this.yamlReader = new ObjectMapper(new YAMLFactory());
   }
 
@@ -176,11 +177,8 @@ public class PluginFQNParser {
   }
 
   public ExtendedPluginFQN evaluateFqn(String reference) throws InfrastructureException {
-    String pluginMetaContent = urlFetcher.fetchSafely(reference);
-    if (pluginMetaContent == null) {
-      throw new InfrastructureException(format("Plugin reference URL '%s' is invalid.", reference));
-    }
     try {
+      String pluginMetaContent = fileContentProvider.fetchContent(reference);
       JsonNode contentNode = yamlReader.readTree(pluginMetaContent);
       String publisher = contentNode.get("publisher").textValue();
       String name = contentNode.get("name").textValue();
@@ -191,9 +189,8 @@ public class PluginFQNParser {
           publisher,
           name,
           version);
-    } catch (IOException e) {
-      e.printStackTrace();
+    } catch (DevfileException | IOException e) {
+      throw new InfrastructureException(format("Plugin reference URL '%s' is invalid.", reference));
     }
-    return null;
   }
 }

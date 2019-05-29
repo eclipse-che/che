@@ -9,10 +9,10 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server;
+package org.eclipse.che.api.workspace.server.devfile;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.eclipse.che.api.workspace.server.URLFetcher.MAXIMUM_READ_BYTES;
+import static org.eclipse.che.api.workspace.server.devfile.URLFetcher.MAXIMUM_READ_BYTES;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
@@ -22,6 +22,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLConnection;
+import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.testng.MockitoTestNGListener;
@@ -30,7 +31,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
- * Testing {@link org.eclipse.che.api.workspace.server.URLFetcher}
+ * Testing {@link org.eclipse.che.api.workspace.server.devfile.URLFetcher}
  *
  * @author Florent Benoit
  */

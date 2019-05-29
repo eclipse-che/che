@@ -9,14 +9,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.workspace.server.devfile;
 
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertEquals;
 
 import java.net.URI;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.URLFetcher;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;

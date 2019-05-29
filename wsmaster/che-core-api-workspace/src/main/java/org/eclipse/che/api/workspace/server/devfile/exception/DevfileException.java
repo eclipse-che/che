@@ -9,7 +9,7 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server.exception;
+package org.eclipse.che.api.workspace.server.devfile.exception;
 
 /** Describes general devfile exception. */
 public class DevfileException extends Exception {

@@ -9,13 +9,13 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.devfile.server;
+package org.eclipse.che.api.workspace.server.devfile;
 
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 
 /**
  * Some types of {@link org.eclipse.che.api.core.model.workspace.devfile.Component} may have

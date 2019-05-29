@@ -39,7 +39,6 @@ import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
-import org.eclipse.che.api.devfile.server.FileContentProvider;
 import org.eclipse.che.api.devfile.server.convert.component.kubernetes.ContainerSearch;
 import org.eclipse.che.api.devfile.server.convert.component.kubernetes.SelectorFilter;
 import org.eclipse.che.api.devfile.server.exception.DevfileException;
