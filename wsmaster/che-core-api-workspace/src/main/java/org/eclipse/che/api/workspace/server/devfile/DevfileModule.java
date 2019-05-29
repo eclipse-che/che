@@ -20,7 +20,6 @@ import org.eclipse.che.api.workspace.server.devfile.convert.component.editor.Edi
 import org.eclipse.che.api.workspace.server.devfile.convert.component.plugin.PluginComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.plugin.PluginProvisioner;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
-import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
 
 /** @author Sergii Leshchenko */
 public class DevfileModule extends AbstractModule {
