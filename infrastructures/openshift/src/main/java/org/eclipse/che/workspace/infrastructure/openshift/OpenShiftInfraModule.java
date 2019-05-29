@@ -166,7 +166,7 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBidings(
         binder(), OpenShiftEnvironment.TYPE);
-    KubernetesDevfileBindings.addKubernetesBasedComponentTypeBidings(
+    KubernetesDevfileBindings.addKubernetesBasedComponentTypeBindings(
         binder(), OPENSHIFT_COMPONENT_TYPE);
 
     KubernetesDevfileBindings.addAllowedEnvironmentTypeUpgradeBindings(

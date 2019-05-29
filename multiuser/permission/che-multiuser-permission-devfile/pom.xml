@@ -107,7 +107,6 @@
                         <configuration>
                             <ignoredDependencies>
                                 <ignoreDependency>org.eclipse.che.multiuser:che-multiuser-api-permission</ignoreDependency>
-                                <ignoreDependency>org.eclipse.che.core:che-core-api-devfile</ignoreDependency>
                             </ignoredDependencies>
                         </configuration>
                     </execution>

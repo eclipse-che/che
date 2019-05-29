@@ -140,12 +140,4 @@ public class KubernetesComponentValidator implements ComponentIntegrityValidator
 
     return content;
   }
-
-  private String toYAML(Entrypoint ep) throws DevfileException {
-    try {
-      return Serialization.asYaml(ep);
-    } catch (Exception e) {
-      throw new DevfileException(e.getMessage(), e);
-    }
-  }
 }

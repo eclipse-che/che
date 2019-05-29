@@ -207,7 +207,7 @@ public class KubernetesInfraModule extends AbstractModule {
 
     KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBidings(
         binder(), KubernetesEnvironment.TYPE);
-    KubernetesDevfileBindings.addKubernetesBasedComponentTypeBidings(
+    KubernetesDevfileBindings.addKubernetesBasedComponentTypeBindings(
         binder(), KUBERNETES_COMPONENT_TYPE);
   }
 }

@@ -54,7 +54,7 @@ public class KubernetesDevfileBindings {
    * @param baseBinder the binder available in the Guice module calling this method.
    * @param componentTypes the component types to be registered as handled by Kubernetes recipes
    */
-  public static void addKubernetesBasedComponentTypeBidings(
+  public static void addKubernetesBasedComponentTypeBindings(
       Binder baseBinder, String... componentTypes) {
     Multibinder<String> binder =
         Multibinder.newSetBinder(
