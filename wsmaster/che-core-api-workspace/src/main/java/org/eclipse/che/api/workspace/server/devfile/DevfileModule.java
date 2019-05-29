@@ -27,7 +27,6 @@ public class DevfileModule extends AbstractModule {
 
   @Override
   protected void configure() {
-    bind(DevfileSchemaValidator.class);
     bind(DevfileService.class);
 
     DevfileBindings.addComponentProvisioners(
