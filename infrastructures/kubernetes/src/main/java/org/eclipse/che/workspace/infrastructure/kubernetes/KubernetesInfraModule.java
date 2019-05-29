@@ -205,7 +205,7 @@ public class KubernetesInfraModule extends AbstractModule {
           binder.addBinding(DOCKERIMAGE_COMPONENT_TYPE).to(DockerimageComponentProvisioner.class);
         });
 
-    KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBidings(
+    KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBindings(
         binder(), KubernetesEnvironment.TYPE);
     KubernetesDevfileBindings.addKubernetesBasedComponentTypeBindings(
         binder(), KUBERNETES_COMPONENT_TYPE);

@@ -36,7 +36,7 @@ public class KubernetesDevfileBindings {
    * @param baseBinder the binder available in the Guice module calling this method.
    * @param environmentTypes the environment types to be registered as handled by Kubernetes recipes
    */
-  public static void addKubernetesBasedEnvironmentTypeBidings(
+  public static void addKubernetesBasedEnvironmentTypeBindings(
       Binder baseBinder, String... environmentTypes) {
     Multibinder<String> binder =
         Multibinder.newSetBinder(
