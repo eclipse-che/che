@@ -17,7 +17,7 @@
     <parent>
         <artifactId>exec-agent-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>6.19.5</version>
+        <version>6.19.6-SNAPSHOT</version>
     </parent>
     <artifactId>exec-agent</artifactId>
     <name>Agent :: Exec</name>
