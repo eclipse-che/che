@@ -800,9 +800,8 @@
       "defaultEnv": "default",
       "description": null,
       "attributes": {
-        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/java/0.38.0",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/java/latest",
         "editor": "eclipse/che-theia/next",
-        "sidecar.redhat/java.memory_limit": "1500Mi",
         "sidecar.eclipse/che-theia.memory_limit": "512Mi"
       },
       "commands": []
@@ -882,9 +881,8 @@
       "defaultEnv": "default",
       "description": null,
       "attributes": {
-        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/java/0.38.0",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/java/latest",
         "editor": "eclipse/che-theia/next",
-        "sidecar.redhat/java.memory_limit": "1500Mi",
         "sidecar.eclipse/che-theia.memory_limit": "512Mi"
       },
       "commands": []
@@ -2931,11 +2929,10 @@
       "projects": [],
       "attributes": {
         "editor": "eclipse/che-theia/next",
-        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/vscode-xml/0.5.1,camel-tooling/vscode-apache-camel/0.0.14,redhat/java/0.38.0",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/vscode-xml/0.5.1,camel-tooling/vscode-apache-camel/0.0.14,redhat/java/latest",
         "sidecar.eclipse/che-theia.memory_limit": "512Mi",
         "sidecar.redhat/vscode-xml.memory_limit": "128Mi",
-        "sidecar.camel-tooling/vscode-apache-camel.memory_limit": "128Mi",
-        "sidecar.redhat/java.memory_limit": "1500Mi"
+        "sidecar.camel-tooling/vscode-apache-camel.memory_limit": "128Mi"
       },
       "commands": [],
       "links": []
