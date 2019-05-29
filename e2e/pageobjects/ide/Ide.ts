@@ -12,7 +12,6 @@ import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../utils/workspace/TestWorkspaceUtil';
 
 
 @injectable()
@@ -26,8 +25,7 @@ export class Ide {
     private static readonly IDE_IFRAME_CSS: string = 'iframe#ide-application-iframe';
 
     constructor(
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
@@ -47,7 +45,6 @@ export class Ide {
 
     async waitWorkspaceAndIde(workspaceNamespace: string, workspaceName: string, timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.waitAndSwitchToIdeFrame(timeout);
-        await this.testWorkspaceUtil.waitWorkspaceStatus(workspaceNamespace, workspaceName, WorkspaceStatus.RUNNING);
         await this.waitIde(timeout);
     }
 

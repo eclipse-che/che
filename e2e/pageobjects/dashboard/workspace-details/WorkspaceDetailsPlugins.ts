@@ -14,14 +14,12 @@ import { CLASSES } from '../../../inversify.types';
 import { TestConstants } from '../../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { WorkspaceDetails } from './WorkspaceDetails';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../../utils/workspace/TestWorkspaceUtil';
 
 
 @injectable()
 export class WorkspaceDetailsPlugins {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails) { }
 
     async waitPluginListItem(pluginName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const pluginListItemLocator: By = By.css(this.getPluginListItemCssLocator(pluginName));
@@ -46,8 +44,6 @@ export class WorkspaceDetailsPlugins {
         await this.enablePlugin(pluginName);
         await this.workspaceDetails.saveChanges();
         await this.workspaceDetails.openWorkspace(namespace, workspaceName);
-        await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.RUNNING);
-        await this.testWorkspaceUtil.waitPluginAdding(namespace, workspaceName, pluginId);
     }
 
     private getPluginListItemCssLocator(pluginName: string): string {

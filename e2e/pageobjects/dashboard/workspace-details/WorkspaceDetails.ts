@@ -14,7 +14,6 @@ import 'reflect-metadata';
 import { TestConstants } from '../../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { Ide } from '../../ide/Ide';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../../utils/workspace/TestWorkspaceUtil';
 
 
 @injectable()
@@ -25,8 +24,7 @@ export class WorkspaceDetails {
     private static readonly ENABLED_SAVE_BUTTON_CSS: string = 'button[name=\'save-button\'][aria-disabled=\'false\']';
     private static readonly WORKSPACE_DETAILS_LOADER_CSS: string = 'workspace-details-overview md-progress-linear';
 
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitLoaderDisappearance(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.WORKSPACE_DETAILS_LOADER_CSS), attempts, polling);
@@ -68,7 +66,6 @@ export class WorkspaceDetails {
         await this.clickOnOpenButton(timeout);
 
         await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS));
-        await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
     }
 
     async waitTabsPresence(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {

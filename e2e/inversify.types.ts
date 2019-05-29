@@ -21,7 +21,6 @@ const CLASSES = {
     WorkspaceDetails: 'WorkspaceDetails',
     WorkspaceDetailsPlugins: 'WorkspaceDetailsPlugins',
     Ide: 'Ide',
-    TestWorkspaceUtil: 'TestWorkspaceUtil',
     ProjectTree: 'ProjectTree',
     Editor: 'Editor',
 };

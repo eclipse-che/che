@@ -16,7 +16,6 @@ import 'reflect-metadata';
 import { Dashboard } from './Dashboard';
 import { Workspaces } from './Workspaces';
 import { Ide } from '../ide/Ide';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../utils/workspace/TestWorkspaceUtil';
 import { WorkspaceDetails } from './workspace-details/WorkspaceDetails';
 
 
@@ -37,7 +36,6 @@ export class NewWorkspace {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil,
         @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails) { }
 
     async createAndRunWorkspace(namespace: string, workspaceName: string, dataStackId: string, sampleName: string) {
@@ -45,7 +43,6 @@ export class NewWorkspace {
         await this.clickOnCreateAndOpenButton();
 
         await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS));
-        await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
     }
 
     async createWorkspaceAndProceedEditing(workspaceName: string, dataStackId: string, sampleName: string) {

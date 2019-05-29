@@ -20,7 +20,6 @@ import { NewWorkspace } from './pageobjects/dashboard/NewWorkspace';
 import { WorkspaceDetails } from './pageobjects/dashboard/workspace-details/WorkspaceDetails';
 import { WorkspaceDetailsPlugins } from './pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins';
 import { Ide } from './pageobjects/ide/Ide';
-import { TestWorkspaceUtil } from './utils/workspace/TestWorkspaceUtil';
 import { ProjectTree } from './pageobjects/ide/ProjectTree';
 import { Editor } from './pageobjects/ide/Editor';
 
@@ -36,7 +35,6 @@ e2eContainer.bind<NewWorkspace>(CLASSES.NewWorkspace).to(NewWorkspace).inSinglet
 e2eContainer.bind<WorkspaceDetails>(CLASSES.WorkspaceDetails).to(WorkspaceDetails).inSingletonScope();
 e2eContainer.bind<WorkspaceDetailsPlugins>(CLASSES.WorkspaceDetailsPlugins).to(WorkspaceDetailsPlugins).inSingletonScope();
 e2eContainer.bind<Ide>(CLASSES.Ide).to(Ide).inSingletonScope();
-e2eContainer.bind<TestWorkspaceUtil>(CLASSES.TestWorkspaceUtil).to(TestWorkspaceUtil).inSingletonScope();
 e2eContainer.bind<ProjectTree>(CLASSES.ProjectTree).to(ProjectTree).inSingletonScope();
 e2eContainer.bind<Editor>(CLASSES.Editor).to(Editor).inSingletonScope();
 
