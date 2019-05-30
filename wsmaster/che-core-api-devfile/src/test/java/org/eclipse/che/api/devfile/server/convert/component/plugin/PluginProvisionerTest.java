@@ -20,6 +20,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
 import org.eclipse.che.api.devfile.server.exception.WorkspaceExportException;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
@@ -31,10 +32,10 @@ import org.testng.annotations.Test;
 /** @author Sergii Leshchenko */
 public class PluginProvisionerTest {
 
-  @Mock private URLFetcher urlFetcher;
+  @Mock private FileContentProvider fileContentProvider;
 
   private PluginProvisioner pluginComponentProvisioner;
-  private PluginFQNParser fqnParser = new PluginFQNParser(urlFetcher);
+  private PluginFQNParser fqnParser = new PluginFQNParser(fileContentProvider);
 
   @BeforeMethod
   public void setUp() {

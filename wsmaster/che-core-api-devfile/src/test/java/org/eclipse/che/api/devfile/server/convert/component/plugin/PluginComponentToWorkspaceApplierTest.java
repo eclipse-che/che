@@ -24,7 +24,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -39,20 +39,20 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class PluginComponentToWorkspaceApplierTest {
 
-  @Mock private URLFetcher urlFetcher;
+  @Mock private FileContentProvider fileContentProvider;
 
   private PluginComponentToWorkspaceApplier pluginComponentApplier;
   private PluginFQNParser fqnParser;
 
   @BeforeMethod
   public void setUp() {
-    fqnParser = new PluginFQNParser(urlFetcher);
+    fqnParser = new PluginFQNParser(fileContentProvider);
     pluginComponentApplier = new PluginComponentToWorkspaceApplier(fqnParser);
   }
 
   @Test
   public void shouldProvisionPluginWorkspaceAttributeDuringChePluginComponentApplying()
-      throws DevfileException {
+      throws Exception {
 
     String superPluginId = "eclipse/super-plugin/0.0.1";
     // given
@@ -101,7 +101,7 @@ public class PluginComponentToWorkspaceApplierTest {
   @Test
   public void
       shouldProvisionPluginWorkspaceAttributeWithCustomRegistryDuringChePluginComponentApplying()
-          throws DevfileException {
+          throws Exception {
 
     String superPluginId = "eclipse/super-plugin/0.0.1";
     String registryUrl = "https://myregistry.com/infolder/";
@@ -144,7 +144,7 @@ public class PluginComponentToWorkspaceApplierTest {
 
   @Test
   public void shouldProvisionPluginWorkspaceAttributeWithReferenceDuringChePluginComponentApplying()
-      throws DevfileException {
+      throws Exception {
 
     String superPluginId = "eclipse/super-plugin/0.0.1";
     String reference = "https://myregistry.com/infolder/meta.yaml";
@@ -161,7 +161,7 @@ public class PluginComponentToWorkspaceApplierTest {
     superPluginComponent.setType(PLUGIN_COMPONENT_TYPE);
     superPluginComponent.setMemoryLimit("1234M");
 
-    when(urlFetcher.fetchSafely(anyString())).thenReturn(meta);
+    when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
 
     ComponentImpl customPluginComponent = new ComponentImpl();
     customPluginComponent.setAlias("custom");
@@ -189,7 +189,7 @@ public class PluginComponentToWorkspaceApplierTest {
 
   @Test
   public void shouldProvisionPluginCommandAttributesDuringChePluginComponentApplying()
-      throws DevfileException {
+      throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");
@@ -212,7 +212,7 @@ public class PluginComponentToWorkspaceApplierTest {
 
   @Test
   public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
-      throws DevfileException {
+      throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("super-plugin");

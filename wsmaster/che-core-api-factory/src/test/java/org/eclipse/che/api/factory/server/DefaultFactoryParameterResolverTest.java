@@ -38,6 +38,7 @@ import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
@@ -61,12 +62,13 @@ public class DefaultFactoryParameterResolverTest {
           + "  reference: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
+  @Mock private FileContentProvider fileContentProvider;
   @Mock private KubernetesRecipeParser kubernetesRecipeParser;
   private PluginFQNParser fqnParser;
 
   @BeforeMethod
   public void setUp() {
-    this.fqnParser = new PluginFQNParser(urlFetcher);
+    this.fqnParser = new PluginFQNParser(fileContentProvider);
   }
 
   @Test
