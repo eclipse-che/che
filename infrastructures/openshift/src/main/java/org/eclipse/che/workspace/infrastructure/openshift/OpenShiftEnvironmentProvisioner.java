@@ -33,6 +33,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.slf4j.Logger;
@@ -66,6 +67,7 @@ public class OpenShiftEnvironmentProvisioner
   private final ProxySettingsProvisioner proxySettingsProvisioner;
   private final ServiceAccountProvisioner serviceAccountProvisioner;
   private final CertificateProvisioner certificateProvisioner;
+  private final OpenShiftCommandProvisioner commandProvisioner;
 
   @Inject
   public OpenShiftEnvironmentProvisioner(
@@ -83,7 +85,8 @@ public class OpenShiftEnvironmentProvisioner
       ImagePullSecretProvisioner imagePullSecretProvisioner,
       ProxySettingsProvisioner proxySettingsProvisioner,
       ServiceAccountProvisioner serviceAccountProvisioner,
-      CertificateProvisioner certificateProvisioner) {
+      CertificateProvisioner certificateProvisioner,
+      OpenShiftCommandProvisioner commandProvisioner) {
     this.pvcEnabled = pvcEnabled;
     this.volumesStrategy = volumesStrategy;
     this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -99,6 +102,7 @@ public class OpenShiftEnvironmentProvisioner
     this.proxySettingsProvisioner = proxySettingsProvisioner;
     this.serviceAccountProvisioner = serviceAccountProvisioner;
     this.certificateProvisioner = certificateProvisioner;
+    this.commandProvisioner = commandProvisioner;
   }
 
   @Override
@@ -133,6 +137,7 @@ public class OpenShiftEnvironmentProvisioner
     proxySettingsProvisioner.provision(osEnv, identity);
     serviceAccountProvisioner.provision(osEnv, identity);
     certificateProvisioner.provision(osEnv, identity);
+    commandProvisioner.provision(osEnv, identity);
     LOG.debug(
         "Provisioning OpenShift environment done for workspace '{}'", identity.getWorkspaceId());
   }

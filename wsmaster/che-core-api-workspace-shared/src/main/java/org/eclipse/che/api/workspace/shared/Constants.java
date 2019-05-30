@@ -107,6 +107,26 @@ public final class Constants {
   public static final String PERSIST_VOLUMES_ATTRIBUTE = "persistVolumes";
 
   /**
+   * This attribute configures a workspace running on OpenShift to attempt to work around the
+   * OpenShift default of starting containers with an arbitrary UID. Should be set/read from {@link
+   * WorkspaceConfig#getAttributes()}.
+   *
+   * <p>Value is expected to be boolean; if it is set to 'true', then the recipe containers in the
+   * the workspace will have their entrypoint overridden to attempt to add an entry for the current
+   * user ID to the /etc/passwd file. If this fails for whatever reason, the original entrypoint
+   * should still be executed.
+   *
+   * <p>In general this attribute requires some modifications to the container being used to run the
+   * workspace to have any effect; containers running on OpenShift should set the /etc/passwd
+   * directory to be writable by the root group.
+   *
+   * @see <a
+   *     href="https://docs.openshift.com/container-platform/3.11/creating_images/guidelines.html#openshift-specific-guidelines">
+   *     OpenShift docs</a>
+   */
+  public static final String ARBITRARY_USER_ATTRIBUTE = "supportArbitraryUser";
+
+  /**
    * Contains a list of workspace tooling plugins that should be used in a workspace. Should be
    * set/read from {@link WorkspaceConfig#getAttributes}.
    *

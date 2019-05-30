@@ -28,6 +28,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.server.ServersConverter;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
+import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftCommandProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.OpenShiftUniqueNamesProvisioner;
 import org.eclipse.che.workspace.infrastructure.openshift.provision.RouteTlsProvisioner;
 import org.mockito.InOrder;
@@ -61,6 +62,7 @@ public class OpenShiftEnvironmentProvisionerTest {
   @Mock private ProxySettingsProvisioner proxySettingsProvisioner;
   @Mock private ServiceAccountProvisioner serviceAccountProvisioner;
   @Mock private CertificateProvisioner certificateProvisioner;
+  @Mock private OpenShiftCommandProvisioner commandProvisioner;
 
   private OpenShiftEnvironmentProvisioner osInfraProvisioner;
 
@@ -84,7 +86,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
             serviceAccountProvisioner,
-            certificateProvisioner);
+            certificateProvisioner,
+            commandProvisioner);
     provisionOrder =
         inOrder(
             installerServersPortProvisioner,
@@ -100,7 +103,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
             serviceAccountProvisioner,
-            certificateProvisioner);
+            certificateProvisioner,
+            commandProvisioner);
   }
 
   @Test
@@ -125,6 +129,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(commandProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }

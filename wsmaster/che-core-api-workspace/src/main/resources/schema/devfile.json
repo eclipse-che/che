@@ -712,6 +712,11 @@
         "description": "Defines whether volumes should be stored or not. Defaults to `true`. In case of `false` workspace volumes will be created as `emptyDir`. The data in the `emptyDir` volume is deleted forever when a workspace Pod is removed for any reason(pod is crashed, workspace is restarted).",
         "default": "true"
       },
+      "supportArbitraryUser": {
+        "type": "boolean",
+        "description": "Defines whether Che should modify containers to support running as an arbitrary user ID on OpenShift. Defaults to `false`. If `true`, workspace recipe containers will have their command and args overwritten to add a user entry to /etc/passwd.",
+        "default": "false"
+      },
       "additionalProperties": {
         "type": "string"
       },

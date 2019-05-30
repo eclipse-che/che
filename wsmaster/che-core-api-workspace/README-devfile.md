@@ -337,6 +337,31 @@ attributes:
   persistVolumes: false
 ```
 
+#### Arbitrary user ID support
+Containers running on OpenShift start using an arbitrarily assigned user ID. This means that the current user in the workspace will not have an entry in the `/etc/passwd` file, and thus not have an associated username or home directory.
+
+This can cause issues when certain tools depend on having a username or home directory; for example, maven will have trouble placing the `.m2` directory when there is no username (unless otherwise configured), and the terminal may have issues with autocompletion, keybindings, etc.
+
+When attribute `supportArbitraryUser` is set to `true`, workspaces running on OpenShift will have their main containers' command and arguments (i.e. their entrypoint) overwritten to add the current user ID to the `/etc/passwd` file. If this step fails (e.g. due to `/etc/passwd` not being writable by the root group), this attribute has no effect on the workspace; the original entrypoint will still execute.
+
+This attribute also depends on the main workspace container having a `command` and `args` defined in the devfile (i.e. it cannot depend on the underlying container's entrypoint).
+
+The default value for this attribute is `false`, and absence of this attribute is interpreted accordingly.
+
+Example devfile:
+```yaml
+apiVersion: 1.0.0
+metadata:
+  name: petclinic-dev-environment
+projects:
+  - name: petclinic
+    source:
+      type: git
+      location: 'https://github.com/che-samples/web-java-spring-petclinic.git'
+attributes:
+  supportArbitraryUser: true
+```
+
 ### Live working examples
 
   - [NodeJS simple "Hello World" example](https://che.openshift.io/f?url=https://raw.githubusercontent.com/redhat-developer/devfile/master/samples/web-nodejs-sample/devfile.yaml)
