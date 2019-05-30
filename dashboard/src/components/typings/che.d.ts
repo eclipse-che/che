@@ -519,6 +519,7 @@ declare namespace che {
     name?: string;
     v: string;
     workspace: IWorkspaceConfig;
+    devfile?: IWorkspaceDevfile;
     creator: any;
     ide?: any;
     button?: any;

@@ -10,6 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+import {WorkspacesService} from '../../workspaces/workspaces.service';
 
 export interface FactoryLoadingStep {
   text: string;
@@ -23,14 +24,19 @@ export interface FactoryLoadingStep {
  * @author Ann Shumilova
  */
 export class LoadFactoryService {
+
+  static $inject = ['workspacesService'];
+
   private loadFactoryInProgress: boolean;
   private currentProgressStep: number;
   private loadingSteps: Array<FactoryLoadingStep>;
+  private workspacesService: WorkspacesService;
 
   /**
    * Default constructor that is using resource
    */
-  constructor () {
+  constructor (workspacesService: WorkspacesService) {
+    this.workspacesService = workspacesService;
     this.loadFactoryInProgress = false;
     this.currentProgressStep = 0;
 
@@ -122,5 +128,20 @@ export class LoadFactoryService {
    */
   setLoadFactoryInProgress(value: boolean): void {
     this.loadFactoryInProgress = value;
+  }
+
+  /**
+   * Returns `true` if supported version of factory workspace.
+   * @param factory {che.IFactory}
+   * @returns {boolean}
+   */
+  isSupportedVersion(factory: che.IFactory): boolean {
+    if (!factory) {
+      return false;
+    }
+    return this.workspacesService.isSupportedVersion({ 
+      config: factory.workspace,
+      devfile: factory.devfile
+    });
   }
 }

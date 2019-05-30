@@ -43,11 +43,21 @@
       </div>
       <div flex-gt-xs="15">
         <span class="che-xs-header noselect" name="open-factory" hide-gt-xs>Actions</span>
-        <span class="che-list-actions">
+        <span class="che-list-actions" ng-if="factoryItemController.isSupportedVersion() === true">
           <a uib-tooltip="Open in IDE" ng-href="#/load-factory/{{factoryItemController.factory.id}}">
             <span class="fa fa-chevron-circle-right factory-action"></span>
           </a>
         </span>
+        <div class="che-list-item-secondary workspace-item-not-supported" ng-if="factoryItemController.isSupportedVersion() === false">
+          <div>
+           <span>Not compatible</span>
+            <span class="che-list-actions">
+             <i class="fa fa-question-circle"
+                uib-tooltip="This factory is using old workspace definition format which is not compatible anymore.
+                             Please follow the documentation to update the definition of the workspace and benefits from the latest capabilities."></i>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   </div>

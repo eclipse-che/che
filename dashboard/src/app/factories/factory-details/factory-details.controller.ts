@@ -12,6 +12,7 @@
 'use strict';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {CheFactory} from '../../../components/api/che-factory.factory';
+import {LoadFactoryService} from '../../factories/load-factory/load-factory.service';
 
 /**
  * Controller for a factory details.
@@ -19,25 +20,35 @@ import {CheFactory} from '../../../components/api/che-factory.factory';
  */
 export class FactoryDetailsController {
 
-  static $inject = ['$route', 'cheFactory', 'cheNotification'];
+  static $inject = ['$route', 'cheFactory', 'cheNotification', 'loadFactoryService'];
 
   private cheFactory: CheFactory;
   private factory: che.IFactory;
+  private loadFactoryService: LoadFactoryService;
 
   /**
    * Default constructor that is using resource injection
    */
-  constructor($route: ng.route.IRouteService, cheFactory: CheFactory, cheNotification: CheNotification) {
+  constructor($route: ng.route.IRouteService, cheFactory: CheFactory, cheNotification: CheNotification, loadFactoryService: LoadFactoryService) {
 
     this.cheFactory = cheFactory;
     let factoryId = $route.current.params.id;
     this.factory = this.cheFactory.getFactoryById(factoryId);
+    this.loadFactoryService = loadFactoryService;
 
     cheFactory.fetchFactoryById(factoryId).then((factory: che.IFactory) => {
       this.factory = factory;
     }, (error: any) => {
       cheNotification.showError(error.data.message ? error.data.message : 'Get factory failed.');
     });
+  }
+
+  /**
+   * Returns `true` if supported version of factory workspace.
+   * @returns {boolean}
+   */
+  isSupportedVersion(): boolean {
+    return this.loadFactoryService.isSupportedVersion(this.factory);
   }
 
   /**

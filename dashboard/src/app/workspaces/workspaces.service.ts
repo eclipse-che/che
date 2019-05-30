@@ -70,11 +70,13 @@ export class WorkspacesService {
    * @returns {boolean}
    */
   isSupportedVersion(workspace: che.IWorkspace): boolean {
+    if (!workspace){
+      return false;
+    }
     if (workspace.devfile) {
       return true;
     }
-    
-    if (!workspace || !workspace.config) {
+    if (!workspace.config) {
       return false;
     }
     const config = workspace.config;
