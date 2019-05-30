@@ -149,6 +149,12 @@
         <dependency>
             <groupId>org.leadpony.justify</groupId>
             <artifactId>justify</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>javax.json-api</artifactId>
+                    <groupId>javax.json</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
