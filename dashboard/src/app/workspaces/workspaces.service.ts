@@ -78,12 +78,13 @@ export class WorkspacesService {
       return false;
     }
     const config = workspace.config;
-    const machines = config.environments[config.defaultEnv].machines;
 
     let version: number;
-    if (!Object.keys(machines).length || config.attributes.editor || config.attributes.plugins) {
+    //Checking no-environment and editor or plugin attributes, that were introduced in Che7:
+    if (!workspace.config.defaultEnv || config.attributes.editor || config.attributes.plugins) {
       version = 7;
     } else {
+      const machines = config.environments[config.defaultEnv].machines;
       for (const key in machines) {
         const installers = machines[key].installers;
         if (installers && installers.length !== 0) {
