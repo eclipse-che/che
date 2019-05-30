@@ -59,6 +59,7 @@ HELP="
 --secure | -s - Deploy Che with SSL enabled
 --setup-ocp-oauth - register OCP oauth client and setup Keycloak and Che to use OpenShift Identity Provider
 --deploy-che-plugin-registry - deploy Che plugin registry
+--deploy-che-devfile-registry - deploy Che devfile registry
 --tracing - Deploy jaeger and enable tracing collection
 --monitoring - Deploy Grafana + Prometheus and enable metrics collection
 ===================================
@@ -121,6 +122,10 @@ case $key in
     ;;
     --deploy-che-plugin-registry)
     DEPLOY_CHE_PLUGIN_REGISTRY=true
+    shift
+    ;;
+    --deploy-che-devfile-registry)
+    DEPLOY_CHE_DEVFILE_REGISTRY=true
     shift
     ;;
     --help)
@@ -195,6 +200,9 @@ export KEYCLOAK_USER=${KEYCLOAK_USER:-${DEFAULT_KEYCLOAK_USER}}
 DEFAULT_KEYCLOAK_PASSWORD=admin
 export KEYCLOAK_PASSWORD=${KEYCLOAK_PASSWORD:-${DEFAULT_KEYCLOAK_PASSWORD}}
 
+###
+### Plugin Registry settings
+###
 DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG="latest"
 export PLUGIN_REGISTRY_IMAGE_TAG=${PLUGIN_REGISTRY_IMAGE_TAG:-${DEFAULT_PLUGIN_REGISTRY_IMAGE_TAG}}
 
@@ -206,6 +214,22 @@ export PLUGIN_REGISTRY_IMAGE_PULL_POLICY=${PLUGIN_REGISTRY_IMAGE_PULL_POLICY:-${
 
 DEFAULT_PLUGIN__REGISTRY__URL="https://che-plugin-registry.openshift.io/v3"
 export PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL:-${DEFAULT_PLUGIN__REGISTRY__URL}}
+
+###
+### Devfile Registry settings
+###
+DEFAULT_DEVFILE_REGISTRY_IMAGE_TAG="latest"
+export DEVFILE_REGISTRY_IMAGE_TAG=${DEVFILE_REGISTRY_IMAGE_TAG:-${DEFAULT_DEVFILE_REGISTRY_IMAGE_TAG}}
+
+DEFAULT_DEVFILE_REGISTRY_IMAGE="quay.io/openshiftio/che-devfile-registry"
+export DEVFILE_REGISTRY_IMAGE=${DEVFILE_REGISTRY_IMAGE:-${DEFAULT_DEVFILE_REGISTRY_IMAGE}}
+
+DEFAULT_DEVFILE_REGISTRY_IMAGE_PULL_POLICY="Always"
+export DEVFILE_REGISTRY_IMAGE_PULL_POLICY=${DEVFILE_REGISTRY_IMAGE_PULL_POLICY:-${DEFAULT_DEVFILE_REGISTRY_IMAGE_PULL_POLICY}}
+
+DEFAULT_DEVFILE__REGISTRY__URL="NULL"
+export DEVFILE__REGISTRY__URL=${DEVFILE__REGISTRY__URL:-${DEFAULT_DEVFILE__REGISTRY__URL}}
+
 
 DEFAULT_CHE_METRICS_ENABLED="false"
 export CHE_METRICS_ENABLED=${CHE_METRICS_ENABLED:-${DEFAULT_CHE_METRICS_ENABLED}}
@@ -449,6 +473,19 @@ if [ "${DEPLOY_CHE_PLUGIN_REGISTRY}" == "true" ]; then
 fi
 }
 
+deployCheDevfileRegistry() {
+if [ "${DEPLOY_CHE_DEVFILE_REGISTRY}" == "true" ]; then
+  echo "Deploying Che devfile registry..."
+  ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-devfile-registry.yml \
+             -p IMAGE=${DEVFILE_REGISTRY_IMAGE} \
+             -p IMAGE_TAG=${DEVFILE_REGISTRY_IMAGE_TAG} \
+             -p PULL_POLICY=${DEVFILE_REGISTRY_IMAGE_PULL_POLICY}
+
+  DEVFILE_REGISTRY_ROUTE=$($OC_BINARY get route/che-devfile-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+  echo "Che devfile registry deployment complete. $DEVFILE_REGISTRY_ROUTE"
+fi
+}
+
 deployJaeger(){
     if [ "${CHE_TRACING_ENABLED}" == "true" ]; then
       echo "Deploying Jaeger..."
@@ -566,6 +603,11 @@ ${CHE_VAR_ARRAY}"
         PLUGIN__REGISTRY__URL="${HTTP_PROTOCOL}://${PLUGIN_REGISTRY_ROUTE}/v3"
     fi
 
+    if [ "${DEPLOY_CHE_DEVFILE_REGISTRY}" == "true" ]; then
+        DEVFILE_REGISTRY_ROUTE=$($OC_BINARY get route/che-devfile-registry --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
+        DEVFILE__REGISTRY__URL="${HTTP_PROTOCOL}://${DEVFILE_REGISTRY_ROUTE}/"
+    fi
+
     if [ ! -z ${CHE_INFRA_OPENSHIFT_PROJECT} ]; then
         # create workspace service account in the predefined workspace
         ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-workspace-service-account.yaml \
@@ -587,6 +629,7 @@ ${CHE_VAR_ARRAY}"
                          -p CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER} \
                          -p TLS=${TLS} \
                          -p CHE_WORKSPACE_PLUGIN__REGISTRY__URL=${PLUGIN__REGISTRY__URL} \
+                         -p CHE_WORKSPACE_DEVFILE__REGISTRY__URL=${DEVFILE__REGISTRY__URL} \
                          -p CHE_INFRA_KUBERNETES_SERVICE__ACCOUNT__NAME=${WORKSPACE_SERVICE_ACCOUNT_NAME} \
                          -p CHE_DEBUG_SERVER=${CHE_DEBUG_SERVER} \
                          -p CHE_TRACING_ENABLED=${CHE_TRACING_ENABLED} \
@@ -617,6 +660,7 @@ isLoggedIn
 createNewProject
 getRoutingSuffix
 deployChePluginRegistry
+deployCheDevfileRegistry
 deployJaeger
 deployMetrics
 deployChe

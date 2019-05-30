@@ -15,6 +15,8 @@ import static java.lang.String.format;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_WORKSPACE_ID_LABEL;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.SUBPATHS_PROPERTY_FMT;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -75,6 +77,7 @@ public class PerWorkspacePVCStrategyTest {
             PVC_ACCESS_MODE,
             true,
             PVC_STORAGE_CLASS_NAME,
+            true,
             pvcSubPathHelper,
             factory,
             ephemeralWorkspaceAdapter,
@@ -109,6 +112,42 @@ public class PerWorkspacePVCStrategyTest {
   }
 
   @Test
+  public void shouldPreparePerWorkspacePVCWithSubPathsWhenWaitBoundIsDisabled() throws Exception {
+    // given
+    strategy =
+        new PerWorkspacePVCStrategy(
+            PVC_NAME_PREFIX,
+            PVC_QUANTITY,
+            PVC_ACCESS_MODE,
+            true,
+            PVC_STORAGE_CLASS_NAME,
+            false,
+            pvcSubPathHelper,
+            factory,
+            ephemeralWorkspaceAdapter,
+            volumeConverter,
+            podsVolumes,
+            subpathPrefixes);
+    final PersistentVolumeClaim pvc = newPVC(PVC_NAME_PREFIX + "-" + WORKSPACE_ID);
+    String perWorkspacePVCName = pvc.getMetadata().getName();
+
+    KubernetesEnvironment k8sEnv = KubernetesEnvironment.builder().build();
+    k8sEnv.getPersistentVolumeClaims().put(perWorkspacePVCName, pvc);
+
+    String[] subPaths = {"/projects", "/plugins"};
+    pvc.getAdditionalProperties().put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), subPaths);
+
+    // when
+    strategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+
+    // then
+    verify(pvcs).get();
+    verify(pvcs).create(pvc);
+    verify(pvcs, never()).waitBound(anyString(), anyLong());
+    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, perWorkspacePVCName, subPaths);
+  }
+
+  @Test
   public void shouldReturnPVCPerWorkspace() throws Exception {
     // when
     PersistentVolumeClaim commonPVC = strategy.createCommonPVC(WORKSPACE_ID);
@@ -131,6 +170,7 @@ public class PerWorkspacePVCStrategyTest {
               PVC_ACCESS_MODE,
               true,
               storageClassName,
+              true,
               pvcSubPathHelper,
               factory,
               ephemeralWorkspaceAdapter,

@@ -16,6 +16,7 @@ import static java.util.Collections.emptyList;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.SUBPATHS_PROPERTY_FMT;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -101,6 +102,7 @@ public class CommonPVCStrategyTest {
             PVC_ACCESS_MODE,
             true,
             PVC_STORAGE_CLASS_NAME,
+            true,
             pvcSubPathHelper,
             factory,
             ephemeralWorkspaceAdapter,
@@ -166,6 +168,7 @@ public class CommonPVCStrategyTest {
             PVC_ACCESS_MODE,
             false,
             PVC_STORAGE_CLASS_NAME,
+            true,
             pvcSubPathHelper,
             factory,
             ephemeralWorkspaceAdapter,
@@ -198,6 +201,36 @@ public class CommonPVCStrategyTest {
     verify(pvcs).get();
     verify(pvcs).create(pvc);
     verify(pvcs).waitBound(PVC_NAME, 100);
+    verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
+  }
+
+  @Test
+  public void testCreatesPVCsWithSubpathsOnPrepareIfWaitIsDisabled() throws Exception {
+    commonPVCStrategy =
+        new CommonPVCStrategy(
+            PVC_NAME,
+            PVC_QUANTITY,
+            PVC_ACCESS_MODE,
+            true,
+            PVC_STORAGE_CLASS_NAME,
+            false, // wait bound PVCs
+            pvcSubPathHelper,
+            factory,
+            ephemeralWorkspaceAdapter,
+            volumeConverter,
+            podsVolumes,
+            subpathPrefixes);
+    final PersistentVolumeClaim pvc = newPVC(PVC_NAME);
+    pvc.getAdditionalProperties()
+        .put(format(SUBPATHS_PROPERTY_FMT, WORKSPACE_ID), WORKSPACE_SUBPATHS);
+    k8sEnv.getPersistentVolumeClaims().put(PVC_NAME, pvc);
+    doNothing().when(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
+
+    commonPVCStrategy.prepare(k8sEnv, WORKSPACE_ID, 100);
+
+    verify(pvcs).get();
+    verify(pvcs).create(pvc);
+    verify(pvcs, never()).waitBound(anyString(), anyLong());
     verify(pvcSubPathHelper).createDirs(WORKSPACE_ID, PVC_NAME, WORKSPACE_SUBPATHS);
   }
 

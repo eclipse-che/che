@@ -19,6 +19,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
+import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY;
 
 import com.google.common.annotations.Beta;
@@ -96,6 +97,7 @@ public class WorkspaceService extends Service {
   private final MachineTokenProvider machineTokenProvider;
   private final WorkspaceLinksGenerator linksGenerator;
   private final String pluginRegistryUrl;
+  private final String devfileRegistryUrl;
   private final String apiEndpoint;
   private final boolean cheWorkspaceAutoStart;
 
@@ -106,13 +108,15 @@ public class WorkspaceService extends Service {
       WorkspaceManager workspaceManager,
       MachineTokenProvider machineTokenProvider,
       WorkspaceLinksGenerator linksGenerator,
-      @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl) {
+      @Named(CHE_WORKSPACE_PLUGIN_REGISTRY_URL_PROPERTY) @Nullable String pluginRegistryUrl,
+      @Named(CHE_WORKSPACE_DEVFILE_REGISTRY_URL_PROPERTY) @Nullable String devfileRegistryUrl) {
     this.apiEndpoint = apiEndpoint;
     this.cheWorkspaceAutoStart = cheWorkspaceAutoStart;
     this.workspaceManager = workspaceManager;
     this.machineTokenProvider = machineTokenProvider;
     this.linksGenerator = linksGenerator;
     this.pluginRegistryUrl = pluginRegistryUrl;
+    this.devfileRegistryUrl = devfileRegistryUrl;
   }
 
   @POST
@@ -794,6 +798,10 @@ public class WorkspaceService extends Service {
 
     if (pluginRegistryUrl != null) {
       settings.put("cheWorkspacePluginRegistryUrl", pluginRegistryUrl);
+    }
+
+    if (devfileRegistryUrl != null) {
+      settings.put("cheWorkspaceDevfileRegistryUrl", devfileRegistryUrl);
     }
 
     return settings.build();

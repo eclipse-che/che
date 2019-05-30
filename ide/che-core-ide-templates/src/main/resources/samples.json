@@ -691,7 +691,26 @@
       "location": "https://github.com/che-samples/web-php-simple.git",
       "parameters": {}
     },
-    "commands": [],
+    "commands": [
+      {
+        "name": "Start Apache Web Server",
+        "type": "custom",
+        "commandLine": "service apache2 start",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Stop Apache Web Server",
+        "type": "custom",
+        "commandLine": "service apache2 stop",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      }
+    ],
     "links": [],
     "category": "Samples",
     "tags": [
@@ -734,6 +753,189 @@
     "category": "Samples",
     "tags": [
       "php"
+    ]
+  },
+  {
+    "name": "symfony-demo",
+    "displayName": "symfony-demo",
+    "path": "/symfony-demo",
+    "description": "Symfony Demo Application https://symfony.com/",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/symfony/demo.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "Start Symfony Web Server",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/symfony-demo && $HOME/.symfony/bin/symfony server:start",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Stop Symfony Web Server",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/symfony-demo && $HOME/.symfony/bin/symfony server:stop",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Install dependencies",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/symfony-demo && composer install && wget https://get.symfony.com/cli/installer -O - | bash",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "MySQL",
+      "PHP"
+    ]
+  },
+  {
+    "name": "laravel-realworld-example-app",
+    "displayName": "laravel-realworld-example-app",
+    "path": "/laravel-realworld-example-app",
+    "description": "Exemplary real world backend API built with Laravel https://realworld.io",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/gothinkster/laravel-realworld-example-app.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "Start Artisan Web Server",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/laravel-realworld-example-app && php artisan serve",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Install dependencies",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/laravel-realworld-example-app && composer install",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Copy the example env file and make the required configuration changes in the .env file",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/laravel-realworld-example-app && cp .env.example .env",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Generate a new application key",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/laravel-realworld-example-app && php artisan key:generate",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Generate a new JWT authentication secret key",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/laravel-realworld-example-app && php artisan jwt:generate",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Run the database migrations",
+        "type": "custom",
+        "commandLine": "cd ${CHE_PROJECTS_ROOT}/laravel-realworld-example-app && php artisan migrate",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "MySQL",
+      "PHP"
+    ]
+  },
+  {
+    "name": "crud-php",
+    "displayName": "pdo",
+    "path": "/pdo",
+    "description": "Code for the simple PHP and MySQL database app tutorial. https://www.taniarascia.com/create-a-simple-database-app-connecting-to-mysql-with-php/",
+    "projectType": "php",
+    "mixins": [],
+    "attributes": {
+      "language": [
+        "php"
+      ]
+    },
+    "modules": [],
+    "problems": [],
+    "source": {
+      "type": "git",
+      "location": "https://github.com/taniarascia/pdo.git",
+      "parameters": {}
+    },
+    "commands": [
+      {
+        "name": "Start Apache Web Server",
+        "type": "custom",
+        "commandLine": "service apache2 start",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      },
+      {
+        "name": "Stop Apache Web Server",
+        "type": "custom",
+        "commandLine": "service apache2 stop",
+        "attributes": {
+          "previewUrl": "",
+          "goal": "Run"
+        }
+      }
+    ],
+    "links": [],
+    "category": "Samples",
+    "tags": [
+      "MySQL",
+      "PHP"
     ]
   },
   {

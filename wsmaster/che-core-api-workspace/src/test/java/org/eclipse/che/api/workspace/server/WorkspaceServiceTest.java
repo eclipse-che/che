@@ -114,6 +114,8 @@ public class WorkspaceServiceTest {
   private static final String USER_ID = "user123";
   private static final String API_ENDPOINT = "http://localhost:8080/api";
   private static final String CHE_WORKSPACE_PLUGIN_REGISTRY_ULR = "http://localhost:9898/plugins/";
+  private static final String CHE_WORKSPACE_DEVFILE_REGISTRY_ULR =
+      "http://localhost:9898/devfiles/";
   private static final Account TEST_ACCOUNT = new AccountImpl("anyId", NAMESPACE, "test");
 
   @SuppressWarnings("unused")
@@ -134,7 +136,8 @@ public class WorkspaceServiceTest {
             wsManager,
             machineTokenProvider,
             linksGenerator,
-            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR);
+            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
+            CHE_WORKSPACE_DEVFILE_REGISTRY_ULR);
   }
 
   @Test
@@ -1228,7 +1231,9 @@ public class WorkspaceServiceTest {
             Constants.CHE_WORKSPACE_AUTO_START,
             "true",
             "cheWorkspacePluginRegistryUrl",
-            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR));
+            CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
+            "cheWorkspaceDevfileRegistryUrl",
+            CHE_WORKSPACE_DEVFILE_REGISTRY_ULR));
   }
 
   private static String unwrapError(Response response) {
