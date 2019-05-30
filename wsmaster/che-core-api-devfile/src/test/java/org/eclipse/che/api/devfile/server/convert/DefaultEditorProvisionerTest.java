@@ -22,7 +22,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class DefaultEditorProvisionerTest {
 
-  @Mock private URLFetcher urlFetcher;
+  @Mock private FileContentProvider fileContentProvider;
 
   private static final String EDITOR_NAME = "theia";
   private static final String EDITOR_VERSION = "1.0.0";
@@ -63,11 +63,11 @@ public class DefaultEditorProvisionerTest {
 
   @BeforeMethod
   public void setUp() {
-     fqnParser = new PluginFQNParser(urlFetcher);
+     fqnParser = new PluginFQNParser(fileContentProvider);
   }
 
   @Test
-  public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws DevfileException {
+  public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(null, new String[] {}, fqnParser);
     DevfileImpl devfile = new DevfileImpl();
@@ -81,7 +81,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldProvisionDefaultEditorWithPluginsWhenDevfileDoNotHaveAny()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(
@@ -101,7 +101,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldProvisionDefaultPluginsIfTheyAreNotSpecifiedAndDefaultEditorIsConfigured()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -126,7 +126,7 @@ public class DefaultEditorProvisionerTest {
   @Test
   public void
       shouldProvisionDefaultPluginsIfTheyAreNotSpecifiedAndDefaultEditorFromCustomRegistryIsConfigured()
-          throws DevfileException {
+          throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -152,7 +152,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultPluginsIfCustomEditorIsConfiguredWhichStartWithDefaultId()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -175,7 +175,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultPluginsIfDevfileContainsEditorFreeAttribute()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -194,7 +194,7 @@ public class DefaultEditorProvisionerTest {
   @Test
   public void
       shouldProvisionDefaultPluginIfDevfileAlreadyContainPluginWithNameWhichStartWithDefaultOne()
-          throws DevfileException {
+          throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -218,7 +218,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultEditorOrDefaultPluginsIfDevfileAlreadyHasNonDefaultEditor()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);
     DevfileImpl devfile = new DevfileImpl();
@@ -237,7 +237,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNonProvisionDefaultEditorIfDevfileAlreadyContainsSuchButWithDifferentVersion()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);
     DevfileImpl devfile = new DevfileImpl();
@@ -257,7 +257,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNonProvisionDefaultEditorIfDevfileAlreadyContainsSuchByReference()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);
     DevfileImpl devfile = new DevfileImpl();
@@ -271,7 +271,7 @@ public class DefaultEditorProvisionerTest {
             + "version: " + EDITOR_VERSION + "\n"
             + "type: Che Editor";
     devfile.getComponents().add(myTheiaEditor);
-    when(urlFetcher.fetchSafely(anyString())).thenReturn(meta);
+    when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
 
     // when
     provisioner.apply(devfile);
@@ -284,7 +284,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultPluginIfDevfileAlreadyContainsSuchButWithDifferentVersion()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -306,7 +306,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultPluginIfDevfileAlreadyContainsSuchByReference()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -320,7 +320,7 @@ public class DefaultEditorProvisionerTest {
     ComponentImpl myTerminal =
         new ComponentImpl(
             PLUGIN_COMPONENT_TYPE, null, "https://myregistry.com/abc/meta.yaml", null, null, null);
-    when(urlFetcher.fetchSafely(anyString())).thenReturn(meta);
+    when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
     devfile.getComponents().add(myTerminal);
 
     // when
@@ -334,7 +334,7 @@ public class DefaultEditorProvisionerTest {
   }
 
   @Test
-  public void shouldGenerateDefaultPluginNameIfIdIsNotUnique() throws DevfileException {
+  public void shouldGenerateDefaultPluginNameIfIdIsNotUnique() throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(

@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
-import org.eclipse.che.api.devfile.server.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -37,20 +37,20 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class EditorComponentToWorkspaceApplierTest {
 
-  @Mock private URLFetcher urlFetcher;
+  @Mock private FileContentProvider fileContentProvider;
 
   private EditorComponentToWorkspaceApplier editorComponentApplier;
   private PluginFQNParser fqnParser;
 
   @BeforeMethod
   public void setUp() {
-    fqnParser = new PluginFQNParser(urlFetcher);
+    fqnParser = new PluginFQNParser(fileContentProvider);
     editorComponentApplier = new EditorComponentToWorkspaceApplier(fqnParser);
   }
 
   @Test
   public void shouldProvisionWorkspaceEditorAttributeDuringCheEditorComponentApplying()
-      throws DevfileException {
+      throws Exception {
     String editorId = "eclipse/super-editor/0.0.1";
     // given
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
@@ -77,7 +77,7 @@ public class EditorComponentToWorkspaceApplierTest {
   @Test
   public void
       shouldProvisionWorkspaceEditorAttributeWithCustomRegistryDuringCheEditorComponentApplying()
-          throws DevfileException {
+          throws Exception {
     String editorId = "eclipse/super-editor/0.0.1";
     String registryUrl = "https://myregistry.com/infolder/";
     // given
@@ -107,7 +107,7 @@ public class EditorComponentToWorkspaceApplierTest {
 
   @Test
   public void shouldProvisionWorkspaceEditorAttributeWithReferenceDuringCheEditorComponentApplying()
-      throws DevfileException {
+      throws Exception {
     String reference = "https://myregistry.com/infolder/meta.yaml";
     String meta =
         "apiVersion: v2\n"
@@ -122,7 +122,7 @@ public class EditorComponentToWorkspaceApplierTest {
     editorComponent.setAlias("editor1");
     editorComponent.setReference(reference);
     editorComponent.setMemoryLimit("12345M");
-    when(urlFetcher.fetchSafely(anyString())).thenReturn(meta);
+    when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
 
     // when
     editorComponentApplier.apply(workspaceConfig, editorComponent, null);
@@ -141,7 +141,7 @@ public class EditorComponentToWorkspaceApplierTest {
 
   @Test
   public void shouldProvisionPluginCommandAttributesDuringCheEditorComponentApplying()
-      throws DevfileException {
+      throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("editor");
@@ -164,7 +164,7 @@ public class EditorComponentToWorkspaceApplierTest {
 
   @Test
   public void shouldProvisionPluginCommandAttributeWhenIdIsURLToCustomPluginRegistry()
-      throws DevfileException {
+      throws Exception {
     // given
     ComponentImpl superPluginComponent = new ComponentImpl();
     superPluginComponent.setAlias("editor");
