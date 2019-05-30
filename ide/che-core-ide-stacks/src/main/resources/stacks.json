@@ -2944,5 +2944,166 @@
       "name": "type-che7.svg",
       "mediaType": "image/svg+xml"
     }
+  },
+  {
+    "id": "php",
+    "name": "PHP with Theia IDE",
+    "creator": "Valerii Svydenko",
+    "tags": [
+      "Theia",
+      "Debian",
+      "PHP",
+      "Apache"
+    ],
+    "scope": "general",
+    "description": "Default PHP Stack with PHP 7.1 and Theia IDE",
+    "components": [
+      {
+        "version": "9",
+        "name": "Debian"
+      },
+      {
+        "version": "7.1.29",
+        "name": "PHP"
+      },
+      {
+        "name": "Apache",
+        "version": "2.4"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "content": "eclipse/php:7.1-che7",
+            "type": "dockerimage"
+          },
+          "machines": {
+            "php-container": {
+              "attributes": {
+                "memoryLimitBytes": "536870912"
+              },
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                },
+                "composer": {
+                  "path": "/home/user/.composer"
+                },
+                "symfony": {
+                  "path": "/home/user/.symfony"
+                }
+              },
+              "installers": [],
+              "env": {
+                "HOME": "/home/user",
+                "PS1": "$(echo ${0})\\$ "
+              }
+            }
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "editor": "eclipse/che-theia/next",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1, redhat/php/latest, redhat/php-debugger/latest"
+      },
+      "links": []
+    },
+    "stackIcon": {
+      "name": "type-che7.svg",
+      "mediaType": "image/svg+xml"
+    }
+  },
+  {
+    "id": "php+mysql",
+    "name": "PHP + MySQL with Theia IDE",
+    "creator": "Valerii Svydenko",
+    "tags": [
+      "Theia",
+      "Debian",
+      "PHP",
+      "Apache",
+      "MySQL"
+    ],
+    "scope": "general",
+    "description": "Default PHP Stack with PHP 7.1 + MySQL and Theia IDE",
+    "components": [
+      {
+        "version": "9",
+        "name": "Debian"
+      },
+      {
+        "version": "7.1.29",
+        "name": "PHP"
+      },
+      {
+        "name": "Apache",
+        "version": "2.4"
+      },
+      {
+        "name": "MySQL",
+        "version": "14.14"
+      }
+    ],
+    "workspaceConfig": {
+      "environments": {
+        "default": {
+          "recipe": {
+            "content": "kind: List\nitems:\n - \n  apiVersion: v1\n  kind: Pod\n  metadata:\n   name: web\n   labels:\n    type: db\n  spec:\n   containers:\n    - \n     image: eclipse/php:7.1-che7\n     name: php-container\n     ports:\n      - \n       containerPort: 8080\n       protocol: TCP\n     resources:\n      limits:\n       memory: 512Mi\n    - \n     image: centos/mysql-57-centos7\n     name: mysql\n     ports:\n      - \n       name: mysql\n       containerPort: 3306\n       protocol: TCP\n     env:\n      - \n       name: MYSQL_USER\n       value: homestead\n      - \n       name: MYSQL_ROOT_PASSWORD\n       value: secret\n      - \n       name: MYSQL_PASSWORD\n       value: secret\n      - \n       name: MYSQL_DATABASE\n       value: homestead\n     resources:\n      limits:\n       memory: 256Mi\n - \n  apiVersion: v1\n  kind: Service\n  metadata:\n   name: db\n  spec:\n   selector:\n    type: db\n   ports:\n    - \n     name: mysql\n     port: 3306\n     protocol: TCP\n     targetPort: mysql\n",
+            "type": "kubernetes",
+            "contentType": "application/x-yaml"
+          },
+          "machines": {
+            "web/php-container": {
+              "attributes": {
+                "memoryLimitBytes": "536870912"
+              },
+              "servers": {},
+              "volumes": {
+                "projects": {
+                  "path": "/projects"
+                },
+                "composer": {
+                  "path": "/home/user/.composer"
+                },
+                "symfony": {
+                  "path": "/home/user/.symfony"
+                }
+              },
+              "installers": [],
+              "env": {
+                "HOME": "/home/user",
+                "PS1": "$(echo ${0})\\$ "
+              }
+            },
+            "web/mysql": {
+              "attributes": {},
+              "servers": {
+                "mysql": {
+                  "attributes": {},
+                  "port": "3306",
+                  "protocol": "tcp"
+                }
+              },
+              "volumes": {},
+              "installers": [],
+              "env": {}
+            }
+          }
+        }
+      },
+      "name": "default",
+      "defaultEnv": "default",
+      "description": null,
+      "attributes": {
+        "editor": "eclipse/che-theia/next",
+        "plugins": "eclipse/che-machine-exec-plugin/0.0.1, redhat/php/latest, redhat/php-debugger/latest"
+      },
+      "links": []
+    }
   }
 ]
