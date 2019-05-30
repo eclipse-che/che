@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.openshift;
 
+import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.CommonPVCStrategy.COMMON_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.PerWorkspacePVCStrategy.PER_WORKSPACE_STRATEGY;
@@ -24,6 +26,7 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.devfile.DevfileBindings;
+import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiExternalEnvVarProvider;
@@ -39,6 +42,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironment
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
+import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier;
+import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -154,20 +161,34 @@ public class OpenShiftInfraModule extends AbstractModule {
 
     DevfileBindings.onComponentIntegrityValidatorBinder(
         binder(),
-        binder ->
-            binder.addBinding(OPENSHIFT_COMPONENT_TYPE).to(KubernetesComponentValidator.class));
+        binder -> {
+          binder.addBinding(KUBERNETES_COMPONENT_TYPE).to(KubernetesComponentValidator.class);
+          binder.addBinding(OPENSHIFT_COMPONENT_TYPE).to(KubernetesComponentValidator.class);
+          binder.addBinding(DOCKERIMAGE_COMPONENT_TYPE).to(NoopComponentIntegrityValidator.class);
+        });
 
     DevfileBindings.onWorkspaceApplierBinder(
         binder(),
-        binder ->
-            binder
-                .addBinding(OPENSHIFT_COMPONENT_TYPE)
-                .to(OpenshiftComponentToWorkspaceApplier.class));
+        binder -> {
+          binder
+              .addBinding(KUBERNETES_COMPONENT_TYPE)
+              .to(KubernetesComponentToWorkspaceApplier.class);
+          binder
+              .addBinding(DOCKERIMAGE_COMPONENT_TYPE)
+              .to(DockerimageComponentToWorkspaceApplier.class);
+          binder
+              .addBinding(OPENSHIFT_COMPONENT_TYPE)
+              .to(OpenshiftComponentToWorkspaceApplier.class);
+        });
+
+    DevfileBindings.addComponentProvisioners(
+        binder(), KubernetesComponentProvisioner.class, DockerimageComponentProvisioner.class);
 
     KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBindings(
-        binder(), OpenShiftEnvironment.TYPE);
+        binder(), KubernetesEnvironment.TYPE, OpenShiftEnvironment.TYPE);
+
     KubernetesDevfileBindings.addKubernetesBasedComponentTypeBindings(
-        binder(), OPENSHIFT_COMPONENT_TYPE);
+        binder(), KUBERNETES_COMPONENT_TYPE, OPENSHIFT_COMPONENT_TYPE);
 
     KubernetesDevfileBindings.addAllowedEnvironmentTypeUpgradeBindings(
         binder(), OpenShiftEnvironment.TYPE, KubernetesEnvironment.TYPE);
