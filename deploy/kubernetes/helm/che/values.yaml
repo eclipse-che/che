@@ -67,6 +67,11 @@ global:
     fsGroup: 1724
   postgresDebugLogs: false
 
+#che:
+#  workspace:
+#    devfileRegistryUrl: "https://che-devfile-registry.openshift.io/"
+#    pluginRegistryUrl: "https://che-plugin-registry.openshift.io/v3"
+
 prometheus:
   alertmanager:
     enabled: false

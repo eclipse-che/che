@@ -84,6 +84,12 @@ data:
 {{- if .Values.workspaceDefaultRamLimit }}
   CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamLimit }}
 {{- end }}
+{{- if .Values.che.workspace.devfileRegistryUrl }}
+  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ .Values.che.workspace.devfileRegistryUrl }}
+{{- end }}
+{{- if .Values.che.workspace.pluginRegistryUrl }}
+  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ .Values.che.workspace.pluginRegistryUrl }}
+{{- end }}
 {{- if .Values.workspaceSidecarDefaultRamLimit }}
   CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB: {{ .Values.workspaceSidecarDefaultRamLimit }}
 {{- end }}
