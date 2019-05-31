@@ -163,6 +163,8 @@ objects:
                 optional: true
           - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
             value: "${CHE_WORKSPACE_PLUGIN__REGISTRY__URL}"
+          - name: CHE_WORKSPACE_DEVFILE__REGISTRY__URL
+            value: "${CHE_WORKSPACE_DEVFILE__REGISTRY__URL}"
           - name: CHE_TRACING_ENABLED
             value: "${CHE_TRACING_ENABLED}"
           - name: CHE_METRICS_ENABLED
@@ -328,6 +330,10 @@ parameters:
 - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
   displayName: Eclipse Che plugin registry URL
   description: Url that used to get meta information about Eclipse Che tooling
+  value: 'NULL'
+- name: CHE_WORKSPACE_DEVFILE__REGISTRY__URL
+  displayName: Eclipse Che devfile registry URL
+  description: Url that used to get meta information about predefined devfiles for workspaces
   value: 'NULL'
 - name: CHE_WORKSPACE_SIDECAR_DEFAULT__MEMORY__LIMIT__MB
   displayName: Plugin sidecar default memory limit
