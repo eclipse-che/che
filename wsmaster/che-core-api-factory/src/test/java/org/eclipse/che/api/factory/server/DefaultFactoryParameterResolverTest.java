@@ -11,8 +11,11 @@
  */
 package org.eclipse.che.api.factory.server;
 
-import static java.util.Collections.singletonList;
 import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -20,28 +23,28 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import io.fabric8.kubernetes.api.model.PodBuilder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.eclipse.che.api.devfile.server.DevfileManager;
-import org.eclipse.che.api.devfile.server.FileContentProvider;
-import org.eclipse.che.api.devfile.server.URLFetcher;
-import org.eclipse.che.api.devfile.server.convert.CommandConverter;
-import org.eclipse.che.api.devfile.server.convert.DefaultEditorProvisioner;
-import org.eclipse.che.api.devfile.server.convert.DevfileConverter;
-import org.eclipse.che.api.devfile.server.convert.ProjectConverter;
-import org.eclipse.che.api.devfile.server.convert.component.ComponentProvisioner;
-import org.eclipse.che.api.devfile.server.convert.component.ComponentToWorkspaceApplier;
-import org.eclipse.che.api.devfile.server.schema.DevfileSchemaProvider;
-import org.eclipse.che.api.devfile.server.validator.DevfileIntegrityValidator;
-import org.eclipse.che.api.devfile.server.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.convert.CommandConverter;
+import org.eclipse.che.api.workspace.server.devfile.convert.DefaultEditorProvisioner;
+import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
+import org.eclipse.che.api.workspace.server.devfile.convert.ProjectConverter;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentProvisioner;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
+import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
+import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
+import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -60,7 +63,6 @@ public class DefaultFactoryParameterResolverTest {
           + "  reference: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
-  @Mock private KubernetesRecipeParser kubernetesRecipeParser;
   private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @Test
@@ -69,8 +71,14 @@ public class DefaultFactoryParameterResolverTest {
 
     // we need to set up an "almost real" devfile converter which is a little bit involved
     DevfileSchemaValidator validator = new DevfileSchemaValidator(new DevfileSchemaProvider());
-    DevfileIntegrityValidator integrityValidator =
-        new DevfileIntegrityValidator(kubernetesRecipeParser);
+
+    Map<String, ComponentIntegrityValidator> validators = new HashMap<>();
+    validators.put(EDITOR_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
+    validators.put(PLUGIN_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
+    validators.put(KUBERNETES_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
+    validators.put(OPENSHIFT_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
+
+    DevfileIntegrityValidator integrityValidator = new DevfileIntegrityValidator(validators);
     Set<ComponentProvisioner> componentProvisioners = new HashSet<>();
     Map<String, ComponentToWorkspaceApplier> appliers = new HashMap<>();
     ComponentToWorkspaceApplier applier = mock(ComponentToWorkspaceApplier.class);
@@ -113,20 +121,6 @@ public class DefaultFactoryParameterResolverTest {
     factoryParameters.put(URL_PARAMETER_NAME, "scheme:/myloc/devfile");
     doReturn(DEVFILE).when(urlFetcher).fetchSafely(eq("scheme:/myloc/devfile"));
     doReturn("localfile").when(urlFetcher).fetch("scheme:/localfile");
-    doReturn(
-            singletonList(
-                new PodBuilder()
-                    .withNewMetadata()
-                    .withName("pod")
-                    .endMetadata()
-                    .withNewSpec()
-                    .addNewContainer()
-                    .withImage("image")
-                    .endContainer()
-                    .endSpec()
-                    .build()))
-        .when(kubernetesRecipeParser)
-        .parse("localfile");
 
     // when
     res.createFactory(factoryParameters);

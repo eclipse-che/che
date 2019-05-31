@@ -75,11 +75,11 @@ import org.eclipse.che.api.user.server.spi.ProfileDao;
 import org.eclipse.che.api.user.server.spi.UserDao;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
-import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
 import org.eclipse.che.api.workspace.server.WorkspaceLockService;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
+import org.eclipse.che.api.workspace.server.devfile.DevfileModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -238,6 +238,7 @@ public class JpaEntitiesCascadeRemovalTest {
                 install(new OrganizationJpaModule());
                 install(new MultiuserWorkspaceJpaModule());
                 install(new MachineAuthModule());
+                install(new DevfileModule());
 
                 bind(FreeResourcesLimitDao.class).to(JpaFreeResourcesLimitDao.class);
                 bind(RemoveFreeResourcesLimitSubscriber.class).asEagerSingleton();
@@ -262,14 +263,6 @@ public class JpaEntitiesCascadeRemovalTest {
                     .annotatedWith(Names.named("che.auth.reserved_user_names"))
                     .toInstance(new String[0]);
                 bind(RemoveOrganizationOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
-
-                // is not used in a scope of integration tests
-                // but instance is needed for setting WorkspaceManager up
-                bind(DevfileToWorkspaceConfigConverter.class)
-                    .toInstance(
-                        devfile -> {
-                          throw new UnsupportedOperationException("Operation is not implemented");
-                        });
 
                 Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class);
                 Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);
@@ -297,6 +290,17 @@ public class JpaEntitiesCascadeRemovalTest {
                                             RamResourceType.ID, 1024, RamResourceType.UNIT)))));
 
                 bindConstant().annotatedWith(Names.named("che.workspace.probe_pool_size")).to(1);
+
+                // setup bindings for the devfile that would otherwise be read from the config
+                bindConstant()
+                    .annotatedWith(Names.named("che.workspace.devfile.default_editor"))
+                    .to("default/editor/0.0.1");
+                bindConstant()
+                    .annotatedWith(Names.named("che.websocket.endpoint"))
+                    .to("che.websocket.endpoint");
+                bind(String[].class)
+                    .annotatedWith(Names.named("che.workspace.devfile.default_editor.plugins"))
+                    .toInstance(new String[] {"default/plugin/0.0.1"});
               }
             });
 

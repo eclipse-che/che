@@ -32,6 +32,7 @@ import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.mockito.ArgumentCaptor;
@@ -70,8 +71,7 @@ public class GithubFactoryParametersResolverTest {
   /**
    * Capturing the location parameter when calling {@link
    * URLFactoryBuilder#createFactoryFromJson(RemoteFactoryUrl)} or {@link
-   * URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl,
-   * org.eclipse.che.api.devfile.server.FileContentProvider)}
+   * URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl, FileContentProvider)}
    */
   @Captor private ArgumentCaptor<RemoteFactoryUrl> factoryUrlArgumentCaptor;
 

@@ -80,8 +80,7 @@ public class WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
-      WorkspaceValidator validator,
-      DevfileToWorkspaceConfigConverter devfileConverter) {
+      WorkspaceValidator validator) {
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;

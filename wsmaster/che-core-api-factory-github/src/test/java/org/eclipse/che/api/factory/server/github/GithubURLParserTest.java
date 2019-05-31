@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import org.eclipse.che.api.devfile.server.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
