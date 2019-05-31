@@ -11,3 +11,4 @@ export * from "./pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins
 export * from "./pageobjects/ide/Ide"
 export * from "./pageobjects/ide/ProjectTree"
 export * from "./pageobjects/ide/Editor"
+export * from "./utils/workspace/TestWorkspaceUtil"
