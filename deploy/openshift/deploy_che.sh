@@ -388,7 +388,7 @@ createNewProject() {
       if $CHE_REMOVE_PROJECT; then
         ${OC_BINARY} delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
         CHE_REMOVE_PROJECT=false
-        CREATE_ATTEMPTS=5
+        CREATE_ATTEMPTS=50
       fi
       DELETE_OPENSHIFT_PROJECT_MESSAGE="`tput setaf 2`.`tput sgr0`"
       if ! ${OC_BINARY} get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
@@ -409,7 +409,7 @@ createNewProject() {
 
     OUT=`${OC_BINARY} new-project "${CHE_OPENSHIFT_PROJECT}" > /dev/null 2>&1; echo $?`
     if [[ ${OUT} -ne 0 ]]; then
-      sleep `echo 2 ^ ${CURRENT_ATTEMPT} | bc`
+      sleep 5 
     else
       CREATE_SUCCESS=0
       CURRENT_ATTEMPT=${CREATE_ATTEMPTS}
