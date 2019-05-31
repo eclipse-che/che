@@ -24,6 +24,7 @@ import org.eclipse.che.api.factory.server.urlfactory.DefaultFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 
 /**
  * Default {@link FactoryParametersResolver} implementation. Tries to resolve factory based on

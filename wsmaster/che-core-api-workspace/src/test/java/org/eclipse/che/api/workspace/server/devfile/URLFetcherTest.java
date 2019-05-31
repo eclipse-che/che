@@ -51,7 +51,7 @@ public class URLFetcherTest {
   public void checkGetContent() {
 
     // test to download this class object
-    URL urlJson = getClass().getClassLoader().getResource(".che.json");
+    URL urlJson = getClass().getClassLoader().getResource("devfile/.che.json");
     Assert.assertNotNull(urlJson);
 
     String content = URLFetcher.fetchSafely(urlJson.toString());
@@ -89,7 +89,7 @@ public class URLFetcherTest {
   public void checkMissingContent() {
 
     // test to download this class object
-    URL urlJson = getClass().getClassLoader().getResource(".che.json");
+    URL urlJson = getClass().getClassLoader().getResource("devfile/.che.json");
     Assert.assertNotNull(urlJson);
 
     // add extra path to make url not found
@@ -104,7 +104,7 @@ public class URLFetcherTest {
   public void checkMissingContentUnsafeGet() throws Exception {
 
     // test to download this class object
-    URL urlJson = getClass().getClassLoader().getResource(".che.json");
+    URL urlJson = getClass().getClassLoader().getResource("devfile/.che.json");
     Assert.assertNotNull(urlJson);
 
     // add extra path to make url not found
@@ -115,7 +115,7 @@ public class URLFetcherTest {
   /** Check when we reach custom limit */
   @Test
   public void checkPartialContent() {
-    URL urlJson = getClass().getClassLoader().getResource(".che.json");
+    URL urlJson = getClass().getClassLoader().getResource("devfile/.che.json");
     Assert.assertNotNull(urlJson);
 
     String content = new OneByteURLFetcher().fetchSafely(urlJson.toString());

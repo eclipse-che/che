@@ -67,10 +67,10 @@ import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.inject.WorkspaceActivityModule;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceLockService;
 import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
-import org.eclipse.che.api.workspace.server.DevfileToWorkspaceConfigConverter;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
+import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
@@ -241,14 +241,6 @@ public class CascadeRemovalTest {
                 install(new JpaKubernetesRuntimeCacheModule());
                 bind(WorkspaceManager.class);
 
-                // is not used in a scope of integration tests
-                // but instance is needed for setting WorkspaceManager up
-                bind(DevfileToWorkspaceConfigConverter.class)
-                    .toInstance(
-                        devfile -> {
-                          throw new UnsupportedOperationException("Operation is not implemented");
-                        });
-
                 RuntimeInfrastructure infra = mock(RuntimeInfrastructure.class);
                 doReturn(emptySet()).when(infra).getRecipeTypes();
                 bind(RuntimeInfrastructure.class).toInstance(infra);
@@ -265,7 +257,7 @@ public class CascadeRemovalTest {
                             mock(ProbeScheduler.class),
                             new DefaultWorkspaceStatusCache(),
                             new DefaultWorkspaceLockService(),
-                            mock(DevfileToWorkspaceConfigConverter.class)));
+                            mock(DevfileConverter.class)));
                 when(wR.hasRuntime(anyString())).thenReturn(false);
                 bind(WorkspaceRuntimes.class).toInstance(wR);
                 bind(AccountManager.class);
