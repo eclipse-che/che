@@ -420,9 +420,9 @@ export class LoadFactoryController {
         // need to show the error
         this.$mdDialog.show(
           this.$mdDialog.alert()
-            .title('Error when starting agent')
-            .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
-            .ariaLabel('Workspace agent start')
+            .title('Error when starting workspace')
+            .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
+            .ariaLabel('Workspace start')
             .ok('OK')
         );
         this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
