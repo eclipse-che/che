@@ -1,5 +1,45 @@
 # Change Log
 
+## [7.0.0-RC-1.0](https://github.com/eclipse/che/tree/7.0.0-RC-1.0) (2019-06-03)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.5...7.0.0-RC-1.0)
+
+**Merged pull requests:**
+
+- Make workspace start errors more Che7 friendly [\#13462](https://github.com/eclipse/che/pull/13462) ([skabashnyuk](https://github.com/skabashnyuk))
+- Add -Duser.home parameter to maven opts in java-maven stack [\#13453](https://github.com/eclipse/che/pull/13453) ([amisevsk](https://github.com/amisevsk))
+- Fix handling no-environment in workspace config, introduced in Che7 [\#13450](https://github.com/eclipse/che/pull/13450) ([ashumilova](https://github.com/ashumilova))
+- CHE-12918 add checks for incompatible factories [\#13446](https://github.com/eclipse/che/pull/13446) ([olexii4](https://github.com/olexii4))
+- Change version of redhat-java plugin to latest in stacks [\#13440](https://github.com/eclipse/che/pull/13440) ([svor](https://github.com/svor))
+- Add PHP and PHP + MySQL Che-7 stacks with samples [\#13434](https://github.com/eclipse/che/pull/13434) ([svor](https://github.com/svor))
+- Integrate Che Server with Devfile Registry [\#13430](https://github.com/eclipse/che/pull/13430) ([sleshchenko](https://github.com/sleshchenko))
+- Merge api-devfile and api-workspace together [\#13417](https://github.com/eclipse/che/pull/13417) ([metlos](https://github.com/metlos))
+
+## [6.19.5](https://github.com/eclipse/che/tree/6.19.5) (2019-05-29)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.4...6.19.5)
+
+**Merged pull requests:**
+
+- Fix templates for helm 2.14.0 \(validating option is enabled\) [\#13432](https://github.com/eclipse/che/pull/13432) ([benoitf](https://github.com/benoitf))
+- Used latest keycloak 6.0.1 [\#13429](https://github.com/eclipse/che/pull/13429) ([skabashnyuk](https://github.com/skabashnyuk))
+- \[deploy/helm\] backport changes from chectl for templates [\#13425](https://github.com/eclipse/che/pull/13425) ([benoitf](https://github.com/benoitf))
+- switch to RC version scheme [\#13424](https://github.com/eclipse/che/pull/13424) ([riuvshin](https://github.com/riuvshin))
+- Fix handling supported versions based on the devfile introduction [\#13418](https://github.com/eclipse/che/pull/13418) ([ashumilova](https://github.com/ashumilova))
+- Fix loader animation on factory loading page [\#13415](https://github.com/eclipse/che/pull/13415) ([akurinnoy](https://github.com/akurinnoy))
+- Add an ability to disable waiting for PVCs to become bound [\#13409](https://github.com/eclipse/che/pull/13409) ([sleshchenko](https://github.com/sleshchenko))
+- Add successful stopped workspaces metric [\#13404](https://github.com/eclipse/che/pull/13404) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Remove dummy workspace config if devfile is present [\#13403](https://github.com/eclipse/che/pull/13403) ([sleshchenko](https://github.com/sleshchenko))
+- Add preferences for chePlugin components in Devfile [\#13341](https://github.com/eclipse/che/pull/13341) ([sleshchenko](https://github.com/sleshchenko))
+
+## [6.19.4](https://github.com/eclipse/che/tree/6.19.4) (2019-05-23)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-5.0...6.19.4)
+
+**Merged pull requests:**
+
+- RELEASE: Update CHANGELOG [\#13400](https://github.com/eclipse/che/pull/13400) ([riuvshin](https://github.com/riuvshin))
+- Restore account linking on newest keycloak versions [\#13398](https://github.com/eclipse/che/pull/13398) ([mshaposhnik](https://github.com/mshaposhnik))
+- Fix selenium tests [\#13371](https://github.com/eclipse/che/pull/13371) ([tolusha](https://github.com/tolusha))
+
+
 ## [7.0.0-beta-5.0](https://github.com/eclipse/che/tree/7.0.0-beta-5.0) (2019-05-22)
 [Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-4.0...7.0.0-beta-5.0)
 
