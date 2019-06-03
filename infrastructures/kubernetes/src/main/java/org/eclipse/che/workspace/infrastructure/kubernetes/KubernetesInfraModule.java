@@ -206,7 +206,7 @@ public class KubernetesInfraModule extends AbstractModule {
     KubernetesDevfileBindings.addKubernetesBasedComponentTypeBindings(
         binder(), KUBERNETES_COMPONENT_TYPE);
 
-    // We need to intialize the bindings somehow. Because no other environment type is upgradable
+    // We need to initialize the bindings somehow. Because no other environment type is upgradable
     // to kubernetes, we just call this in a way that initializes the binding with an empty map.
     KubernetesDevfileBindings.addAllowedEnvironmentTypeUpgradeBindings(
         binder(), KubernetesEnvironment.TYPE);
