@@ -402,6 +402,7 @@ createNewProject() {
   WAIT_FOR_PROJECT_TO_DELETE=true
   CHE_REMOVE_PROJECT=true
   DELETE_OPENSHIFT_PROJECT_MESSAGE=$(printInfo "Removing namespace ${CHE_OPENSHIFT_PROJECT}")
+  CREATE_ATTEMPTS=1
   if ${OC_BINARY} get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
     printWarning "Namespace \"${CHE_OPENSHIFT_PROJECT}\" exists."
     while $WAIT_FOR_PROJECT_TO_DELETE
@@ -411,6 +412,7 @@ createNewProject() {
       if $CHE_REMOVE_PROJECT; then
         ${OC_BINARY} delete project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null
         CHE_REMOVE_PROJECT=false
+        CREATE_ATTEMPTS=50
       fi
       DELETE_OPENSHIFT_PROJECT_MESSAGE="`tput setaf 2`.`tput sgr0`"
       if ! ${OC_BINARY} get project "${CHE_OPENSHIFT_PROJECT}" &> /dev/null; then
@@ -421,16 +423,28 @@ createNewProject() {
     done
     echo "`tput setaf 2` Done!`tput sgr0`"
   fi
-  printInfo "Creating namespace \"${CHE_OPENSHIFT_PROJECT}\""
-  # sometimes even if the project does not exist creating a new one is impossible as it's apparently exists
-  sleep 1
-  ${OC_BINARY} new-project "${CHE_OPENSHIFT_PROJECT}" > /dev/null
-  OUT=$?
-  if [ ${OUT} -eq 1 ]; then
-    printError "Failed to create namespace ${CHE_OPENSHIFT_PROJECT}. It may exist in someone else's account or namespace deletion has not been fully completed. Try again in a short while or pick a different project name -p=myProject"
-    exit ${OUT}
-  else
+
+  CURRENT_ATTEMPT=0
+  CREATE_SUCCESS=1
+
+  while [[ ${CURRENT_ATTEMPT} -lt ${CREATE_ATTEMPTS} ]]; do
+    CURRENT_ATTEMPT=$((CURRENT_ATTEMPT + 1));
+    printInfo "Creating namespace \"${CHE_OPENSHIFT_PROJECT}\" (attempt ${CURRENT_ATTEMPT}/${CREATE_ATTEMPTS})"
+
+    OUT=`${OC_BINARY} new-project "${CHE_OPENSHIFT_PROJECT}" > /dev/null 2>&1; echo $?`
+    if [[ ${OUT} -ne 0 ]]; then
+      sleep 5 
+    else
+      CREATE_SUCCESS=0
+      CURRENT_ATTEMPT=${CREATE_ATTEMPTS}
+    fi
+  done
+
+  if [[ ${CREATE_SUCCESS} ]]; then
     printInfo "Namespace \"${CHE_OPENSHIFT_PROJECT}\" successfully created"
+  else
+    printError "Failed to create namespace ${CHE_OPENSHIFT_PROJECT}. It may exist in someone else's account or namespace deletion has not been fully completed. Try again in a short while or pick a different project name -p=myProject"
+    exit 1
   fi
 }
 
