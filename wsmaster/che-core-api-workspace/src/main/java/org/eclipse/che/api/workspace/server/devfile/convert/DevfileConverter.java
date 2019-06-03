@@ -29,6 +29,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.workspace.server.devfile.DevfileRecipeFormatException;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider.CachingProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentProvisioner;
@@ -114,7 +115,8 @@ public class DevfileConverter {
 
   public WorkspaceConfig convert(Devfile devfile) throws ServerException {
     try {
-      return devFileToWorkspaceConfig(new DevfileImpl(devfile), urlFileContentProvider);
+      return devFileToWorkspaceConfig(
+          new DevfileImpl(devfile), new CachingProvider(urlFileContentProvider));
     } catch (DevfileException e) {
       throw new ServerException(e.getMessage(), e);
     }
@@ -124,7 +126,7 @@ public class DevfileConverter {
    * Converts given {@link Devfile} into {@link WorkspaceConfigImpl workspace config}.
    *
    * @param devfile initial devfile
-   * @param contentProvider content provider for recipe-type component
+   * @param contentProvider content provider for recipe-type component or plugin references
    * @return constructed workspace config
    * @throws DevfileException when general devfile error occurs
    * @throws DevfileException when devfile requires additional files content but the specified
@@ -143,7 +145,7 @@ public class DevfileConverter {
 
     validateCurrentVersion(devfile);
 
-    defaultEditorProvisioner.apply(devfile);
+    defaultEditorProvisioner.apply(devfile, contentProvider);
 
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 

@@ -83,7 +83,7 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     if (!isNullOrEmpty(reference)) {
       workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, reference);
       try {
-        fqn = fqnParser.evaluateFqn(reference);
+        fqn = fqnParser.evaluateFqn(reference, contentProvider);
       } catch (InfrastructureException e) {
         throw new DevfileException(e.getMessage(), e);
       }

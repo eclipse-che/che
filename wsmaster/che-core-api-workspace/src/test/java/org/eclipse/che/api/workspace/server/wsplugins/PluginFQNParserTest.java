@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertTrue;
@@ -45,7 +47,7 @@ public class PluginFQNParserTest {
 
   @BeforeClass
   public void setUp() throws Exception {
-    parser = new PluginFQNParser(fileContentProvider);
+    parser = new PluginFQNParser();
   }
 
   @Test
@@ -69,6 +71,14 @@ public class PluginFQNParserTest {
   public void shouldParsePluginOrEditorToExtendedFQN(String plugin, ExtendedPluginFQN expected)
       throws Exception {
     ExtendedPluginFQN actual = parser.parsePluginFQN(plugin);
+    assertEquals(actual, expected);
+  }
+
+  @Test(dataProvider = "validPluginReferencesProvider")
+  public void shouldParsePluginOrEditorFromReference(
+      String reference, String pluginYaml, ExtendedPluginFQN expected) throws Exception {
+    when(fileContentProvider.fetchContent(eq(reference))).thenReturn(pluginYaml);
+    ExtendedPluginFQN actual = parser.evaluateFqn(reference, fileContentProvider);
     assertEquals(actual, expected);
   }
 
@@ -327,6 +337,41 @@ public class PluginFQNParserTest {
         new ExtendedPluginFQN(
             null, "publisher/che-theia/2.12-latest", "publisher", "che-theia", "2.12-latest")
       },
+    };
+  }
+
+  // Objects are
+  //   (String reference, String yamlContent, ExtendedPluginFQN expectedPlugin)
+  @DataProvider(name = "validPluginReferencesProvider")
+  public static Object[][] validPluginReferencesProvider() {
+    return new Object[][] {
+      {
+        "http://registry:8080/publisher/editor/ver/meta.yaml",
+        "apiVersion: v2\n"
+            + "publisher: publisher\n"
+            + "name: editor\n"
+            + "version: ver\n"
+            + "type: Che Editor",
+        new ExtendedPluginFQN(null, "publisher/editor/ver", "publisher", "editor", "ver")
+      },
+      {
+        "https://pastebin.com/1ij3475rh",
+        "apiVersion: v2\n"
+            + "publisher: publisher\n"
+            + "name: editor\n"
+            + "version: 0.0.5\n"
+            + "type: Che Editor",
+        new ExtendedPluginFQN(null, "publisher/editor/0.0.5", "publisher", "editor", "0.0.5")
+      },
+      {
+        "https://che-registry.com.ua/publisher/plugin/0.0.5/meta.yaml",
+        "apiVersion: v2\n"
+            + "publisher: publisher\n"
+            + "name: plugin123\n"
+            + "version: 0.0.5\n"
+            + "type: Che Plugin",
+        new ExtendedPluginFQN(null, "publisher/plugin123/0.0.5", "publisher", "plugin123", "0.0.5")
+      }
     };
   }
 

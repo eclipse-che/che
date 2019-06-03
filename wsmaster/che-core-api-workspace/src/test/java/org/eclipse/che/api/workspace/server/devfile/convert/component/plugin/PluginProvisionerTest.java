@@ -19,23 +19,19 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_P
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
-import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
 public class PluginProvisionerTest {
 
-  @Mock private FileContentProvider fileContentProvider;
-
   private PluginProvisioner pluginComponentProvisioner;
-  private PluginFQNParser fqnParser = new PluginFQNParser(fileContentProvider);
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {

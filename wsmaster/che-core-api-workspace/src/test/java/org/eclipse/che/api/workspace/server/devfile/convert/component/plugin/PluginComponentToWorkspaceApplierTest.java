@@ -46,7 +46,7 @@ public class PluginComponentToWorkspaceApplierTest {
 
   @BeforeMethod
   public void setUp() {
-    fqnParser = new PluginFQNParser(fileContentProvider);
+    fqnParser = new PluginFQNParser();
     pluginComponentApplier = new PluginComponentToWorkspaceApplier(fqnParser);
   }
 
@@ -171,8 +171,8 @@ public class PluginComponentToWorkspaceApplierTest {
     WorkspaceConfigImpl workspaceConfig = new WorkspaceConfigImpl();
 
     // when
-    pluginComponentApplier.apply(workspaceConfig, superPluginComponent, null);
-    pluginComponentApplier.apply(workspaceConfig, customPluginComponent, null);
+    pluginComponentApplier.apply(workspaceConfig, superPluginComponent, fileContentProvider);
+    pluginComponentApplier.apply(workspaceConfig, customPluginComponent, fileContentProvider);
 
     // then
     String workspaceTooling =

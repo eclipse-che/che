@@ -44,7 +44,7 @@ public class EditorComponentToWorkspaceApplierTest {
 
   @BeforeMethod
   public void setUp() {
-    fqnParser = new PluginFQNParser(fileContentProvider);
+    fqnParser = new PluginFQNParser();
     editorComponentApplier = new EditorComponentToWorkspaceApplier(fqnParser);
   }
 
@@ -125,7 +125,7 @@ public class EditorComponentToWorkspaceApplierTest {
     when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
 
     // when
-    editorComponentApplier.apply(workspaceConfig, editorComponent, null);
+    editorComponentApplier.apply(workspaceConfig, editorComponent, fileContentProvider);
 
     // then
     assertEquals(

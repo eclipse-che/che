@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.inject.Inject;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
@@ -50,14 +49,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 @Beta
 public class PluginFQNParser {
 
-  private final FileContentProvider fileContentProvider;
-  private ObjectMapper yamlReader;
-
-  @Inject
-  public PluginFQNParser(FileContentProvider fileContentProvider) {
-    this.fileContentProvider = fileContentProvider;
-    this.yamlReader = new ObjectMapper(new YAMLFactory());
-  }
+  private ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
 
   private static final String INCORRECT_PLUGIN_FORMAT_TEMPLATE =
       "Plugin '%s' has incorrect format. Should be: 'registryURL#publisher/name/version' or 'publisher/name/version' or `referenceURL`";
@@ -176,7 +168,8 @@ public class PluginFQNParser {
     return Arrays.stream(plugins).map(String::trim).toArray(String[]::new);
   }
 
-  public ExtendedPluginFQN evaluateFqn(String reference) throws InfrastructureException {
+  public ExtendedPluginFQN evaluateFqn(String reference, FileContentProvider fileContentProvider)
+      throws InfrastructureException {
     try {
       String pluginMetaContent = fileContentProvider.fetchContent(reference);
       JsonNode contentNode = yamlReader.readTree(pluginMetaContent);

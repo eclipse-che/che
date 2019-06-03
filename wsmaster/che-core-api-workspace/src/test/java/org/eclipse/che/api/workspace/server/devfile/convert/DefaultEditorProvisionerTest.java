@@ -28,7 +28,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -59,12 +58,7 @@ public class DefaultEditorProvisionerTest {
 
   private DefaultEditorProvisioner provisioner;
 
-  private PluginFQNParser fqnParser;
-
-  @BeforeMethod
-  public void setUp() {
-    fqnParser = new PluginFQNParser(fileContentProvider);
-  }
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @Test
   public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws Exception {
@@ -73,7 +67,7 @@ public class DefaultEditorProvisionerTest {
     DevfileImpl devfile = new DevfileImpl();
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     assertTrue(devfile.getComponents().isEmpty());
@@ -88,7 +82,7 @@ public class DefaultEditorProvisionerTest {
     DevfileImpl devfile = new DevfileImpl();
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -111,7 +105,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(defaultEditorWithDifferentVersion);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -138,7 +132,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(defaultEditorWithDifferentVersion);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -163,7 +157,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(editorWithNameSimilarToDefault);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -183,7 +177,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getAttributes().put(EDITOR_FREE_DEVFILE_ATTRIBUTE, "true");
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -205,7 +199,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(pluginWithNameSimilarToDefault);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -226,7 +220,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(nonDefaultEditor);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -246,7 +240,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(myTheiaEditor);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -279,7 +273,7 @@ public class DefaultEditorProvisionerTest {
     when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -300,7 +294,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(myTerminal);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -335,7 +329,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(myTerminal);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -357,7 +351,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(myPlugin);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();

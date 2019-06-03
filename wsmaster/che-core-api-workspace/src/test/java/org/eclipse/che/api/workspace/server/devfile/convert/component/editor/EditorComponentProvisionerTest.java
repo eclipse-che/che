@@ -18,23 +18,19 @@ import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMI
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
 
-import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.exception.WorkspaceExportException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
-import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Sergii Leshchenko */
 public class EditorComponentProvisionerTest {
 
-  @Mock private FileContentProvider fileContentProvider;
-
   private EditorComponentProvisioner editorComponentProvisioner;
-  private PluginFQNParser fqnParser = new PluginFQNParser(fileContentProvider);
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {

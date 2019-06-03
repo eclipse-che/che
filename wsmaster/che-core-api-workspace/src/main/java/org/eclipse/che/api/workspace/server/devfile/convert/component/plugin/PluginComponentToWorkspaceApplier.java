@@ -85,7 +85,7 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .getAttributes()
           .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, append(workspacePluginsAttribute, reference));
       try {
-        fqn = fqnParser.evaluateFqn(reference);
+        fqn = fqnParser.evaluateFqn(reference, contentProvider);
       } catch (InfrastructureException e) {
         throw new DevfileException(e.getMessage(), e);
       }
