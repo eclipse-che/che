@@ -29,7 +29,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
-import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
 /**
  * Provision default editor if there is no any another editor and default plugins for it.
@@ -52,12 +51,10 @@ public class DefaultEditorProvisioner {
     this.defaultEditorRef = isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
     this.fqnParser = fqnParser;
     this.defaultEditor =
-        this.defaultEditorRef == null
-            ? null
-            : getPluginPublisherAndNameFromId(this.defaultEditorRef);
+        this.defaultEditorRef == null ? null : getPluginPublisherAndName(this.defaultEditorRef);
     Map<String, String> map = new HashMap<>();
     for (String defaultPluginsRef : defaultPluginsRefs) {
-      map.put(getPluginPublisherAndNameFromId(defaultPluginsRef), defaultPluginsRef);
+      map.put(getPluginPublisherAndName(defaultPluginsRef), defaultPluginsRef);
     }
     this.defaultPluginsToRefs = map;
   }
@@ -91,10 +88,7 @@ public class DefaultEditorProvisioner {
       isDefaultEditorUsed = true;
     } else {
       Component editor = editorOpt.get();
-      String editorPublisherAndName =
-          editor.getId() != null
-              ? getPluginPublisherAndNameFromId(editor.getId())
-              : getPluginPublisherAndNameFromReference(editor.getReference(), contentProvider);
+      String editorPublisherAndName = getPluginPublisherAndName(editor, contentProvider);
       isDefaultEditorUsed = defaultEditor.equals(editorPublisherAndName);
     }
 
@@ -109,10 +103,7 @@ public class DefaultEditorProvisioner {
 
     for (ComponentImpl t : components) {
       if (PLUGIN_COMPONENT_TYPE.equals(t.getType())) {
-        String pluginPublisherAndName =
-            t.getId() != null
-                ? getPluginPublisherAndNameFromId(t.getId())
-                : getPluginPublisherAndNameFromReference(t.getReference(), contentProvider);
+        String pluginPublisherAndName = getPluginPublisherAndName(t, contentProvider);
         missingPluginsIdToRef.remove(pluginPublisherAndName);
       }
     }
@@ -122,20 +113,24 @@ public class DefaultEditorProvisioner {
         .forEach(pluginRef -> components.add(new ComponentImpl(PLUGIN_COMPONENT_TYPE, pluginRef)));
   }
 
-  private String getPluginPublisherAndNameFromId(String pluginId) throws DevfileException {
+  private String getPluginPublisherAndName(Component component, FileContentProvider contentProvider)
+      throws DevfileException {
     try {
-      ExtendedPluginFQN meta = fqnParser.parsePluginFQN(pluginId);
-      return meta.getPublisherAndName();
+      if (component.getId() != null) {
+        return getPluginPublisherAndName(component.getId());
+      } else {
+        return fqnParser
+            .evaluateFqn(component.getReference(), contentProvider)
+            .getPublisherAndName();
+      }
     } catch (InfrastructureException e) {
       throw new DevfileException(e.getMessage(), e);
     }
   }
 
-  private String getPluginPublisherAndNameFromReference(
-      String reference, FileContentProvider contentProvider) throws DevfileException {
+  private String getPluginPublisherAndName(String pluginId) throws DevfileException {
     try {
-      ExtendedPluginFQN meta = fqnParser.evaluateFqn(reference, contentProvider);
-      return meta.getPublisherAndName();
+      return fqnParser.parsePluginFQN(pluginId).getPublisherAndName();
     } catch (InfrastructureException e) {
       throw new DevfileException(e.getMessage(), e);
     }
