@@ -66,12 +66,11 @@ public class DefaultFactoryParameterResolverTest {
 
   @Mock private URLFetcher urlFetcher;
   @Mock private KubernetesRecipeParser kubernetesRecipeParser;
-  @Mock private FileContentProvider fileContentProvider;
   private PluginFQNParser fqnParser;
 
   @BeforeMethod
   public void setUp() {
-    this.fqnParser = new PluginFQNParser(fileContentProvider);
+    this.fqnParser = new PluginFQNParser();
   }
 
   @Test
