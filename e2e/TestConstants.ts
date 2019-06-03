@@ -79,4 +79,14 @@ export const TestConstants = {
      */
     TS_SELENIUM_PLUGIN_PRECENCE_POLLING: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_POLLING) || 2000,
 
+    /**
+     * Username used to log in MultiUser Che
+     */
+    TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_USERNAME || 'che',
+
+    /**
+     * Password used to log in MultiUser Che
+     */
+    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || ''
+
 };
