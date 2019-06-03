@@ -43,6 +43,7 @@ import {CheTeamEventsManager} from './che-team-events-manager.factory';
 import {CheInvite} from './che-invite.factory';
 import {NpmRegistry} from './npm-registry.factory';
 import {PluginRegistry} from './plugin-registry.factory';
+import {DevfileRegistry} from './devfile-registry.factory';
 
 export class ApiConfig {
 
@@ -79,5 +80,6 @@ export class ApiConfig {
     register.factory('cheInvite', CheInvite);
     register.factory('npmRegistry', NpmRegistry);
     register.factory('pluginRegistry', PluginRegistry);
+    register.factory('devfileRegistry', DevfileRegistry);
   }
 }

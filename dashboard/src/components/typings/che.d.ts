@@ -304,6 +304,7 @@ declare namespace che {
   export interface IWorkspaceSettings {
     supportedRecipeTypes: string;
     cheWorkspacePluginRegistryUrl: string;
+    devfileRegistry?: string;
     [propName: string]: string | boolean;
   }
 

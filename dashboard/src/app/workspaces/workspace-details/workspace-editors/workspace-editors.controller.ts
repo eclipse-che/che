@@ -29,7 +29,6 @@ export class WorkspaceEditorsController {
 
   workspace: che.IWorkspace;
   pluginRegistryLocation: string;
-
   pluginRegistry: PluginRegistry;
   cheNotification: CheNotification;
   cheWorkspace: CheWorkspace;

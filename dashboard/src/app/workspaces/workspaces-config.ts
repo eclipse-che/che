@@ -84,6 +84,8 @@ import {WorkspaceWarningsController} from './workspace-details/warnings/workspac
 import {WorkspacesService} from './workspaces.service';
 import {WorkspacePluginsConfig} from './workspace-details/workspace-plugins/workspace-plugins-config';
 import {WorkspaceEditorsConfig} from './workspace-details/workspace-editors/workspace-editors-config';
+import {DevfileSelector} from './create-workspace/devfile-selector/devfile-selector.directive';
+import {DevfileSelectorController} from './create-workspace/devfile-selector/devfile-selector.controller';
 
 /**
  * @ngdoc controller
@@ -122,6 +124,8 @@ export class WorkspacesConfig {
     register.service('stackSelectorSvc', StackSelectorSvc);
     register.directive('stackSelector', StackSelector);
     register.directive('stackSelectorItem', StackSelectorItem);
+    register.directive('devfileSelector', DevfileSelector);
+    register.controller('DevfileSelectorController', DevfileSelectorController);
     register.controller('RamSettingsController', RamSettingsController);
     register.directive('ramSettings', RamSettings);
     register.controller('RamSettingsMachineItemController', RamSettingsMachineItemController);
