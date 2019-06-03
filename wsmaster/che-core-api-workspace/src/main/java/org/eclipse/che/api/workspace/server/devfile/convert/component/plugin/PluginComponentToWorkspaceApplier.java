@@ -74,34 +74,29 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     String workspacePluginsAttribute =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
 
-    String reference = pluginComponent.getReference();
-    String pluginId = pluginComponent.getId();
-    String registryUrl = pluginComponent.getRegistryUrl();
-    String compositeId = registryUrl != null ? registryUrl + "#" + pluginId : pluginId;
+    final String reference = pluginComponent.getReference();
+    final String pluginId = pluginComponent.getId();
+    final String registryUrl = pluginComponent.getRegistryUrl();
+    final String compositeId = registryUrl != null ? registryUrl + "#" + pluginId : pluginId;
 
     ExtendedPluginFQN fqn;
-    if (!isNullOrEmpty(reference)) {
-      workspaceConfig
-          .getAttributes()
-          .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, append(workspacePluginsAttribute, reference));
-      try {
+    try {
+      if (!isNullOrEmpty(reference)) {
+        workspaceConfig
+            .getAttributes()
+            .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, append(workspacePluginsAttribute, reference));
         fqn = fqnParser.evaluateFqn(reference, contentProvider);
-      } catch (InfrastructureException e) {
-        throw new DevfileException(e.getMessage(), e);
-      }
-
-    } else {
-      workspaceConfig
-          .getAttributes()
-          .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, append(workspacePluginsAttribute, compositeId));
-
-      try {
+      } else {
+        workspaceConfig
+            .getAttributes()
+            .put(
+                WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
+                append(workspacePluginsAttribute, compositeId));
         fqn = fqnParser.parsePluginFQN(compositeId);
-      } catch (InfrastructureException e) {
-        throw new DevfileException(e.getMessage(), e);
       }
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
     }
-
     String memoryLimit = pluginComponent.getMemoryLimit();
     if (memoryLimit != null) {
       workspaceConfig

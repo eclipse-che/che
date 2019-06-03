@@ -67,11 +67,11 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         EDITOR_COMPONENT_TYPE.equals(editorComponent.getType()),
         format("Plugin must have `%s` type", EDITOR_COMPONENT_TYPE));
 
-    String editorComponentAlias = editorComponent.getAlias();
-    String editorId = editorComponent.getId();
-    String registryUrl = editorComponent.getRegistryUrl();
-    String reference = editorComponent.getReference();
-    String memoryLimit = editorComponent.getMemoryLimit();
+    final String editorComponentAlias = editorComponent.getAlias();
+    final String editorId = editorComponent.getId();
+    final String registryUrl = editorComponent.getRegistryUrl();
+    final String reference = editorComponent.getReference();
+    final String memoryLimit = editorComponent.getMemoryLimit();
 
     if (editorComponentAlias != null) {
       workspaceConfig
@@ -80,21 +80,17 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     }
 
     final ExtendedPluginFQN fqn;
-    if (!isNullOrEmpty(reference)) {
-      workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, reference);
-      try {
+    try {
+      if (!isNullOrEmpty(reference)) {
+        workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, reference);
         fqn = fqnParser.evaluateFqn(reference, contentProvider);
-      } catch (InfrastructureException e) {
-        throw new DevfileException(e.getMessage(), e);
-      }
-    } else {
-      String compositeId = registryUrl != null ? registryUrl + "#" + editorId : editorId;
-      workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, compositeId);
-      try {
+      } else {
+        String compositeId = registryUrl != null ? registryUrl + "#" + editorId : editorId;
+        workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, compositeId);
         fqn = fqnParser.parsePluginFQN(compositeId);
-      } catch (InfrastructureException e) {
-        throw new DevfileException(e.getMessage(), e);
       }
+    } catch (InfrastructureException e) {
+      throw new DevfileException(e.getMessage(), e);
     }
     if (memoryLimit != null) {
       workspaceConfig

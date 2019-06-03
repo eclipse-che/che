@@ -29,6 +29,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
 /**
  * Provision default editor if there is no any another editor and default plugins for it.
@@ -130,7 +131,8 @@ public class DefaultEditorProvisioner {
 
   private String getPluginPublisherAndName(String pluginId) throws DevfileException {
     try {
-      return fqnParser.parsePluginFQN(pluginId).getPublisherAndName();
+      ExtendedPluginFQN meta = fqnParser.parsePluginFQN(pluginId);
+      return meta.getPublisherAndName();
     } catch (InfrastructureException e) {
       throw new DevfileException(e.getMessage(), e);
     }
