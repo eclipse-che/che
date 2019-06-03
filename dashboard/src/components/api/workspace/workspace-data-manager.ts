@@ -114,6 +114,7 @@ export class WorkspaceDataManager {
     if (workspace.config) {
       workspace.config.commands.push(command);
     } else if (workspace.devfile) {
+      workspace.devfile.commands = workspace.devfile.commands || [];
       workspace.devfile.commands.push(command);
     }
   }

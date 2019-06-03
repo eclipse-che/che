@@ -189,7 +189,7 @@ export class CreateWorkspaceSvc {
     });
   }
 
-  /*createWorkspaceFromDevfile(workspaceDevfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
+  createWorkspaceFromDevfile(workspaceDevfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
@@ -220,7 +220,7 @@ export class CreateWorkspaceSvc {
         return this.$q.reject(error);
       });
     });
-  }*/
+  }
 
   /**
    * Show confirmation dialog when project editing is not completed.
@@ -244,7 +244,8 @@ export class CreateWorkspaceSvc {
    * @param {che.IWorkspace} workspace the workspace to open in IDE
    */
   redirectToIDE(workspace: che.IWorkspace): void {
-    const path = `/ide/${workspace.namespace}/${workspace.config.name}`;
+    let name = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
+    const path = `/ide/${workspace.namespace}/${name}`;
     this.$location.path(path);
   }
 
@@ -254,7 +255,8 @@ export class CreateWorkspaceSvc {
    * @param {che.IWorkspace} workspace the workspace to open in IDE
    */
   redirectToDetails(workspace: che.IWorkspace): void {
-    const path = `/workspace/${workspace.namespace}/${workspace.config.name}`;
+    let name = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
+    const path = `/workspace/${workspace.namespace}/${name}`;
     this.$location.path(path);
   }
 
@@ -272,5 +274,14 @@ export class CreateWorkspaceSvc {
         this.cheWorkspace.getWorkspaceDataManager().addCommand(workspace, command);
       });
     });
+  }
+
+  /**
+   * Returns name of the pointed workspace.
+   * 
+   * @param workspace workspace
+   */
+  getWorkspaceName(workspace: che.IWorkspace): string {
+    return this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
   }
 }
