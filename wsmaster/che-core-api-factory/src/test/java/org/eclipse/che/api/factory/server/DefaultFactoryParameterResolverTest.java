@@ -45,10 +45,8 @@ import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityVa
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesRecipeParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -65,13 +63,7 @@ public class DefaultFactoryParameterResolverTest {
           + "  reference: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
-  @Mock private KubernetesRecipeParser kubernetesRecipeParser;
-  private PluginFQNParser fqnParser;
-
-  @BeforeMethod
-  public void setUp() {
-    this.fqnParser = new PluginFQNParser();
-  }
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @Test
   public void shouldResolveRelativeFiles() throws Exception {
