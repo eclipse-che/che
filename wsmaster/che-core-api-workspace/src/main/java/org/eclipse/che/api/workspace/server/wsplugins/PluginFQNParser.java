@@ -168,6 +168,14 @@ public class PluginFQNParser {
     return Arrays.stream(plugins).map(String::trim).toArray(String[]::new);
   }
 
+  /**
+   * Evaluates plugin FQN from provided reference by trying to fetch and parse its meta information.
+   *
+   * @param reference plugin reference ro evaluate FQN from
+   * @param fileContentProvider content provider instance to perform plugin meta requests
+   * @return plugin FQN evaluated from given reference
+   * @throws InfrastructureException if plugin reference is invalid or inaccessible
+   */
   public ExtendedPluginFQN evaluateFqn(String reference, FileContentProvider fileContentProvider)
       throws InfrastructureException {
     try {

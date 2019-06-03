@@ -42,11 +42,10 @@ public class PluginComponentToWorkspaceApplierTest {
   @Mock private FileContentProvider fileContentProvider;
 
   private PluginComponentToWorkspaceApplier pluginComponentApplier;
-  private PluginFQNParser fqnParser;
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {
-    fqnParser = new PluginFQNParser();
     pluginComponentApplier = new PluginComponentToWorkspaceApplier(fqnParser);
   }
 

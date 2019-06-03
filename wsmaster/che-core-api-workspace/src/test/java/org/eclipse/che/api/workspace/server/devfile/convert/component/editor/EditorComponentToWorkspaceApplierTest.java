@@ -40,11 +40,10 @@ public class EditorComponentToWorkspaceApplierTest {
   @Mock private FileContentProvider fileContentProvider;
 
   private EditorComponentToWorkspaceApplier editorComponentApplier;
-  private PluginFQNParser fqnParser;
+  private PluginFQNParser fqnParser = new PluginFQNParser();
 
   @BeforeMethod
   public void setUp() {
-    fqnParser = new PluginFQNParser();
     editorComponentApplier = new EditorComponentToWorkspaceApplier(fqnParser);
   }
 
