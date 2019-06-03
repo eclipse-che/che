@@ -59,24 +59,27 @@ public class DynaModuleScanner {
 
   public DynaModuleScanner() {
 
-    // skipping this dependencies
-    this.skipResources.add(".*com/google/gwt/gwt-.*/.*/gwt-.*.jar");
-    this.skipResources.add(".*com/google/inject/guice.*/.*/guice.*.jar");
-    this.skipResources.add(".*org/testng/testng/.*/testng-.*.jar");
-    this.skipResources.add(".*org/apache/lucene/lucene-.*/.*/lucene-.*.jar");
-    this.skipResources.add(".*com/google/guava/guava/.*/guava-.*.jar");
-    this.skipResources.add(
-        ".*org/eclipse/che/lib/org-eclipse-jdt-core-repack/.*/org-eclipse-jdt-core-repack-.*.jar");
-    this.skipResources.add(
-        ".*org/eclipse/che/plugin/org.eclipse.jdt.ui/.*/org.eclipse.jdt.ui-.*.jar");
-    this.skipResources.add(".*org/eclipse/lsp4j/org.eclipse.lsp4j/.*/org.eclipse.lsp4j-.*.jar");
-    this.skipResources.add(".*org/eclipse/tycho/org.eclipse.osgi/.*/org.eclipse.osgi-.*.jar");
-    this.skipResources.add(".*com/fasterxml/jackson/core/.*.jar");
-    this.skipResources.add(".*org/eclipse/xtend/.*.jar");
-    this.skipResources.add(".*org/eclipse/search/.*.jar");
-    this.skipResources.add(".*org/glassfish/javax.json/.*.jar");
-    this.skipResources.add(".*javax/json/javax.json-api/.*.jar");
-    this.skipResources.add(".*org/leadpony/justify/justify/.*.jar");
+    // regexp list for skipping dependencies
+    // note, that the name should match two patterns, as if its resolved from local maven repo,
+    // and as if it is resolved from target directory, while being scanned inside other WAR archive:
+
+    // home/user/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.9.7/jackson-databind-2.9.7.jar
+    // /home/user/che/assembly/assembly-wsagent-war/target/unpacked-dynamodule/che-wsagent-core-7.0.0-RC-1.0-SNAPSHOT.war/WEB-INF/lib/jackson-annotations-2.9.7.jar
+    this.skipResources.add(".*/gwt-.*.jar");
+    this.skipResources.add(".*/guice.*.jar");
+    this.skipResources.add(".*/testng-.*.jar");
+    this.skipResources.add(".*/lucene-.*.jar");
+    this.skipResources.add(".*/guava-.*.jar");
+    this.skipResources.add(".*/org-eclipse-jdt-core-repack-.*.jar");
+    this.skipResources.add(".*/org.eclipse.jdt.ui-.*.jar");
+    this.skipResources.add(".*/org.eclipse.lsp4j-.*.jar");
+    this.skipResources.add(".*/org.eclipse.osgi-.*.jar");
+    this.skipResources.add(".*/jackson-.*.jar");
+    this.skipResources.add(".*/xtend-.*.jar");
+    this.skipResources.add(".*/search-.*.jar");
+    this.skipResources.add(".*/javax.json-.*.jar");
+    this.skipResources.add(".*/javax.json-api-.*.jar");
+    this.skipResources.add(".*/justify-.*.jar");
   }
 
   /**
@@ -155,6 +158,7 @@ public class DynaModuleScanner {
             LOGGER.debug("skipping jar file {} inside directory {}", file.toFile(), directory);
           } else {
             try (JarFile jarFile = new JarFile(file.toFile())) {
+              LOGGER.debug("scanning jar file {} inside directory {}", file.toFile(), directory);
               scanJar(jarFile);
             } catch (IOException e) {
               throw new IllegalStateException("Unable to scan the file", e);
@@ -172,6 +176,7 @@ public class DynaModuleScanner {
     }
 
     if (Files.isRegularFile(file)) {
+      LOGGER.debug("scanning file {}", file);
       try (InputStream is = new FileInputStream(file.toFile())) {
         scanInputStream(is);
       }
@@ -188,8 +193,11 @@ public class DynaModuleScanner {
         boolean skip =
             skipResources.stream().anyMatch(pattern -> jarEntry.getName().matches(pattern));
         if (skip) {
-          LOGGER.debug("skipping jar entry from jarFile {}", jarFile);
+          LOGGER.debug(
+              "skipping jar entry {} from jarFile {}", jarEntry.getName(), jarFile.getName());
         } else {
+          LOGGER.debug(
+              "scanning jar entry {} from jarFile {}", jarEntry.getName(), jarFile.getName());
           scanInputStream(jarFile.getInputStream(jarEntry));
         }
       }
