@@ -19,7 +19,18 @@ module.exports = {
         rules: [
             {
                 test: /\.ts$/,
-                use: 'ts-loader',
+                use: [
+                    {
+                        loader: 'ts-loader'
+                    },
+                    {
+                        loader: 'tslint-loader',
+                        options: {
+                            configFile: './tslint.json',
+                            tsConfigFile: './tsconfig.json'
+                        }
+                    }
+                ],
                 exclude: /node_modules/
             },
         ]
