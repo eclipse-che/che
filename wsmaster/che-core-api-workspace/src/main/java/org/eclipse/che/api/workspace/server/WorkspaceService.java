@@ -251,7 +251,8 @@ public class WorkspaceService extends Service {
 
     DevfileImpl devfileModel;
     try {
-      if (headers.getRequestHeader(HttpHeaders.CONTENT_TYPE).contains(APPLICATION_JSON)) {
+      if (headers.getMediaType().getType().equals("application")
+          && headers.getMediaType().getSubtype().equals("json")) {
         devfileModel = devfileManager.parseJson(devfile);
       } else {
         devfileModel = devfileManager.parseYaml(devfile);
