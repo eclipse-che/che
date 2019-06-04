@@ -37,7 +37,7 @@ export class DevfileSelectorController {
   }
 
   loadDevfiles(): void {
-    let location = this.cheWorkspace.getWorkspaceSettings().devfileRegistry;
+    let location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
     this.devfileRegistry.fetchDevfiles(location).then((data: Array<IDevfileMetaData>) => {
       this.devfiles = data;
 
@@ -50,7 +50,7 @@ export class DevfileSelectorController {
   devfileOnClick(devfile: any): void {
     this.selectedDevfile = devfile;
     
-    let location = this.cheWorkspace.getWorkspaceSettings().devfileRegistry;
+    let location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
 
     let devfileContent = this.devfileRegistry.getDevfile(location, devfile.links.self);
     if (devfileContent) {

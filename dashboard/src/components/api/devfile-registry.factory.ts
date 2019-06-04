@@ -16,6 +16,7 @@ import { stringify } from "querystring";
 export interface IDevfileMetaData {
   displayName: string;
   description?: string;
+  globalMemoryLimit: string;
   icon: string;
   links: any;
 }

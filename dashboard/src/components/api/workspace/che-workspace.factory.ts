@@ -759,8 +759,6 @@ export class CheWorkspace {
     const promise = this.remoteWorkspaceAPI.getSettings().$promise;
     return promise.then((settings: che.IWorkspaceSettings) => {
       this.workspaceSettings = settings;
-      //TODO remove next line
-      this.workspaceSettings.devfileRegistry = 'http://che-devfile-registry-default.192.168.39.13.nip.io';
       return this.workspaceSettings;
     }, (error: any) => {
       if (error.status === 304) {

@@ -14,13 +14,16 @@
                  class="che-list-item-details">
               <che-list-header-column class="devfile-selector-icon-column"
                                       che-column-title=""></che-list-header-column>
-              <che-list-header-column flex="auto"
+              <che-list-header-column flex="25"
                                       che-sort-value="devfileSelectorController.devfileOrderBy"
                                       che-sort-item="name"
                                       che-column-title="Name"></che-list-header-column>
-              <che-list-header-column flex="40"
+              <che-list-header-column flex="50"
                                       che-sort-value="devfileSelectorController.devfileOrderBy"
-                                      che-column-title="Description"></che-list-header-column>                        
+                                      che-column-title="Description"></che-list-header-column>            
+              <che-list-header-column flex="10"
+                                      che-sort-value="devfileSelectorController.devfileOrderBy"
+                                      che-column-title="Required memory"></che-list-header-column>                                                
             </div>
           </div>
         </che-list-header>
@@ -44,12 +47,16 @@
                     </div>
                   </div>
                   <!-- Name -->
-                  <div flex="35">
+                  <div flex="25">
                     <span class="che-list-item-name" devfile-name="{{devfile.displayName}}">{{devfile.displayName}}</span>
                   </div>
                   <!-- Description -->
                   <div flex="50">
                     <span class="che-list-item-secondary" devfile-description="{{devfile.description}}">{{devfile.description}}</span>
+                  </div>
+                   <!-- Memory -->
+                   <div flex="10">
+                    <span class="che-list-item-secondary" devfile-memory="{{devfile.globalMemoryLimit}}">{{devfile.globalMemoryLimit}}</span>
                   </div>
                 </div>
               </div>
