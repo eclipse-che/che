@@ -10,15 +10,17 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
+import { che } from '@eclipse-che/api';
 import {CheJsonRpcApiClient} from './che-json-rpc-api-service';
 import { ICommunicationClient, CODE_REQUEST_TIMEOUT, CommunicationClientEvent } from './json-rpc-client';
 import { WorkspaceLoader } from '../workspace-loader';
 
 enum MasterChannels {
-  ENVIRONMENT_OUTPUT = <any>'runtime/log',
-  ENVIRONMENT_STATUS = <any>'machine/statusChanged',
-  INSTALLER_OUTPUT = <any>'installer/log',
-  WORKSPACE_STATUS = <any>'workspace/statusChanged'
+  ENVIRONMENT_OUTPUT = 'runtime/log',
+  ENVIRONMENT_STATUS = 'machine/statusChanged',
+  INSTALLER_OUTPUT = 'installer/log',
+  WORKSPACE_STATUS = 'workspace/statusChanged'
 }
 const SUBSCRIBE: string = 'subscribe';
 const UNSUBSCRIBE: string = 'unsubscribe';
@@ -67,7 +69,7 @@ export class CheJsonRpcMasterApi {
 
     this.checkingInterval = setInterval(() => {
       let isAlive = false;
-      const fetchClientPromise = new Promise((resolve) => {
+      const fetchClientPromise = new Promise(resolve => {
         this.fetchClientId().then(() => {
           isAlive = true;
           resolve(isAlive);
@@ -78,14 +80,14 @@ export class CheJsonRpcMasterApi {
       });
 
       // this is timeout of fetchClientId request
-      const fetchClientTimeoutPromise = new Promise((resolve) => {
+      const fetchClientTimeoutPromise = new Promise(resolve => {
         setTimeout(() => {
           resolve(isAlive);
         }, this.fetchingClientIdTimeout);
       });
 
-      Promise.race([fetchClientPromise, fetchClientTimeoutPromise]).then((isAlive: boolean) => {
-        if (isAlive) {
+      Promise.race([fetchClientPromise, fetchClientTimeoutPromise]).then((_isAlive: boolean) => {
+        if (_isAlive) {
           return;
         }
 
@@ -101,9 +103,9 @@ export class CheJsonRpcMasterApi {
   /**
    * Opens connection to pointed entryPoint.
    *
-   * @returns {IPromise<IHttpPromiseCallbackArg<any>>}
+   * @returns {Promise<void>}
    */
-  connect(): Promise<any> {
+  connect(): Promise<void> {
     const entryPointFunction = () => {
       const entryPoint = this.entryPoint + this.loader.getAuthenticationToken();
       if (this.clientId) {
@@ -119,10 +121,11 @@ export class CheJsonRpcMasterApi {
         return entryPoint + clientId;
       }
       return entryPoint;
-    }
+    };
 
     return this.cheJsonRpcApi.connect(entryPointFunction).then(() =>
-      this.fetchClientId());
+      this.fetchClientId()
+    );
   }
 
   /**
@@ -194,7 +197,7 @@ export class CheJsonRpcMasterApi {
    * @param callback callback to process event
    */
   subscribeWorkspaceStatus(workspaceId: string, callback: Function): void {
-    const statusHandler = (message: any) => {
+    const statusHandler = (message: che.workspace.event.WorkspaceStatusEvent) => {
       if (workspaceId === message.workspaceId) {
         callback(message);
       }
@@ -215,10 +218,10 @@ export class CheJsonRpcMasterApi {
   /**
    * Fetch client's id and stores it.
    *
-   * @returns {IPromise<TResult>}
+   * @returns {Promise<void>}
    */
-  fetchClientId(): Promise<any> {
-    return this.cheJsonRpcApi.request('websocketIdService/getId').then((data: any) => {
+  fetchClientId(): Promise<void> {
+    return this.cheJsonRpcApi.request('websocketIdService/getId').then((data: string[]) => {
       this.clientId = data[0];
     });
   }
@@ -226,7 +229,7 @@ export class CheJsonRpcMasterApi {
   /**
    * Returns client's id.
    *
-   * @returns {string} clinet connection identifier
+   * @returns {string} client connection identifier
    */
   getClientId(): string {
     return this.clientId;

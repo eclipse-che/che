@@ -6633,10 +6633,10 @@ tslint-loader@^3.5.4:
     rimraf "^2.4.4"
     semver "^5.3.0"
 
-tslint@5.10.0:
-  version "5.10.0"
-  resolved "https://registry.yarnpkg.com/tslint/-/tslint-5.10.0.tgz#11e26bccb88afa02dd0d9956cae3d4540b5f54c3"
-  integrity sha1-EeJrzLiK+gLdDZlWyuPUVAtfVMM=
+tslint@5.9.1:
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/tslint/-/tslint-5.9.1.tgz#1255f87a3ff57eb0b0e1f0e610a8b4748046c9ae"
+  integrity sha1-ElX4ej/1frCw4fDmEKi0dIBGya4=
   dependencies:
     babel-code-frame "^6.22.0"
     builtin-modules "^1.1.1"

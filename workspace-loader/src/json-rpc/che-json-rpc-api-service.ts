@@ -10,7 +10,10 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
+
 import {ICommunicationClient, JsonRpcClient} from './json-rpc-client';
+
+// tslint:disable:no-any
 
 export class IChannel {
   subscription: string;
@@ -46,6 +49,7 @@ export class CheJsonRpcApiClient {
    * @param handler event's handler
    * @param params params (optional)
    */
+  /* tslint:disable-next-line:no-any */
   subscribe(event: string, notification: string, handler: Function, params?: any): void {
     this.jsonRpcClient.addNotificationHandler(notification, handler);
     this.jsonRpcClient.notify(event, params);
@@ -59,6 +63,7 @@ export class CheJsonRpcApiClient {
    * @param handler handler to be removed
    * @param params params (optional)
    */
+  /* tslint:disable-next-line:no-any */
   unsubscribe(event: string, notification: string, handler: Function, params?: any): void {
     this.jsonRpcClient.removeNotificationHandler(notification, handler);
     this.jsonRpcClient.notify(event, params);
@@ -68,9 +73,9 @@ export class CheJsonRpcApiClient {
    * Connects to the pointed entrypoint
    *
    * @param entrypoint entrypoint to connect to
-   * @returns {Promise<any>} promise
+   * @returns {Promise<void>} promise
    */
-  connect(entrypoint: () => string): Promise<any> {
+  connect(entrypoint: () => string): Promise<void> {
     return this.client.connect(entrypoint);
   }
 
@@ -79,7 +84,7 @@ export class CheJsonRpcApiClient {
    *
    * @param method
    * @param params
-   * @returns {ng.IPromise<any>}
+   * @returns {Promise<any>}
    */
   request(method: string, params?: any): Promise<any> {
     return this.jsonRpcClient.request(method, params);

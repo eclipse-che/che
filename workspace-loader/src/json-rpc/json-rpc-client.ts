@@ -10,7 +10,11 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import { IDeffered, Deffered } from './util';
+
+import { IDeferred, Deferred } from './util';
+
+// tslint:disable:no-any
+
 const JSON_RPC_VERSION: string = '2.0';
 
 export type CommunicationClientEvent = 'close' | 'error' | 'open' | 'message';
@@ -38,7 +42,7 @@ export interface ICommunicationClient {
    *
    * @param entrypoint
    */
-  connect(entrypoint: () => string): Promise<any>;
+  connect(entrypoint: () => string): Promise<void>;
   /**
    * Close the connection.
    * @param {number} code close code
@@ -49,6 +53,7 @@ export interface ICommunicationClient {
    *
    * @param data data to be sent
    */
+  /* tslint:disable-next-line:no-any */
   send(data: any): void;
 }
 
@@ -78,7 +83,7 @@ export class JsonRpcClient {
   /**
    * The list of the pending requests by request id.
    */
-  private pendingRequests: Map<string, IDeffered<any>>;
+  private pendingRequests: Map<string, IDeferred<any>>;
   /**
    * The list of notification handlers by method name.
    */
@@ -87,10 +92,10 @@ export class JsonRpcClient {
 
   constructor(client: ICommunicationClient) {
     this.client = client;
-    this.pendingRequests = new Map<string, IDeffered<any>>();
+    this.pendingRequests = new Map<string, IDeferred<any>>();
     this.notificationHandlers = new Map<string, Array<Function>>();
 
-    this.client.addListener("message", (message: any) => {
+    this.client.addListener('message', (message: any) => {
       this.processResponse(message);
     });
   }
@@ -103,7 +108,7 @@ export class JsonRpcClient {
    * @returns {IPromise<any>}
    */
   request(method: string, params?: any): Promise<any> {
-    const deferred = new Deffered();
+    const deferred = new Deferred();
     const id: string = (this.counter++).toString();
     this.pendingRequests.set(id, deferred);
 
