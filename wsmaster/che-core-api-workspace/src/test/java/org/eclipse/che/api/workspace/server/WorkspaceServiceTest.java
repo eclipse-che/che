@@ -139,7 +139,7 @@ public class WorkspaceServiceTest {
             CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
             CHE_WORKSPACE_DEVFILE_REGISTRY_ULR,
             null,
-            Tnull);
+            null);
   }
 
   @Test
