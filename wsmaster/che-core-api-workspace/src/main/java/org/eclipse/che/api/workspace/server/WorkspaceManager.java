@@ -42,6 +42,9 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
@@ -73,6 +76,7 @@ public class WorkspaceManager {
   private final AccountManager accountManager;
   private final EventService eventService;
   private final WorkspaceValidator validator;
+  private final DevfileIntegrityValidator devfileIntegrityValidator;
 
   @Inject
   public WorkspaceManager(
@@ -80,12 +84,14 @@ public class WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
-      WorkspaceValidator validator) {
+      WorkspaceValidator validator,
+      DevfileIntegrityValidator devfileIntegrityValidator) {
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;
     this.eventService = eventService;
     this.validator = validator;
+    this.devfileIntegrityValidator = devfileIntegrityValidator;
   }
 
   /**
@@ -122,13 +128,23 @@ public class WorkspaceManager {
 
   @Traced
   public WorkspaceImpl createWorkspace(
-      Devfile devfile, String namespace, Map<String, String> attributes)
+      Devfile devfile,
+      String namespace,
+      Map<String, String> attributes,
+      FileContentProvider contentProvider)
       throws ServerException, NotFoundException, ConflictException, ValidationException {
     TracingTags.STACK_ID.set(() -> attributes.getOrDefault("stackId", "no stack"));
 
     requireNonNull(devfile, "Required non-null devfile");
     requireNonNull(namespace, "Required non-null namespace");
     validator.validateAttributes(attributes);
+
+    try {
+      devfileIntegrityValidator.validateDevfile(devfile);
+      devfileIntegrityValidator.validateContentReferences(devfile, contentProvider);
+    } catch (DevfileFormatException e) {
+      throw new ValidationException(e.getMessage(), e);
+    }
 
     WorkspaceImpl workspace =
         doCreateWorkspace(devfile, accountManager.getByName(namespace), attributes, false);

@@ -120,7 +120,7 @@ public class DevfileService extends Service {
 
     WorkspaceImpl workspace;
     try {
-      DevfileImpl devfile = devfileManager.parse(data);
+      DevfileImpl devfile = devfileManager.parseYaml(data);
       workspace = devfileManager.createWorkspace(devfile, urlFileContentProvider);
     } catch (DevfileException e) {
       throw new BadRequestException(e.getMessage());

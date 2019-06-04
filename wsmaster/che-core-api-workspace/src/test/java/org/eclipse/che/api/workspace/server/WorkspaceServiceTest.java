@@ -137,7 +137,9 @@ public class WorkspaceServiceTest {
             machineTokenProvider,
             linksGenerator,
             CHE_WORKSPACE_PLUGIN_REGISTRY_ULR,
-            CHE_WORKSPACE_DEVFILE_REGISTRY_ULR);
+            CHE_WORKSPACE_DEVFILE_REGISTRY_ULR,
+            null,
+            Tnull);
   }
 
   @Test
@@ -180,7 +182,8 @@ public class WorkspaceServiceTest {
   public void shouldCreateWorkspaceFromDevfile() throws Exception {
     final DevfileDto devfileDto = createDevfileDto();
     final WorkspaceImpl workspace = createWorkspace(devfileDto);
-    when(wsManager.createWorkspace(any(Devfile.class), anyString(), any())).thenReturn(workspace);
+    when(wsManager.createWorkspace(any(Devfile.class), anyString(), any(), any()))
+        .thenReturn(workspace);
 
     final Response response =
         given()
@@ -208,7 +211,8 @@ public class WorkspaceServiceTest {
                 ImmutableMap.of(
                     "stackId", "stack123",
                     "factoryId", "factory123",
-                    "custom", "custom:value")));
+                    "custom", "custom:value")),
+            any());
   }
 
   @Test

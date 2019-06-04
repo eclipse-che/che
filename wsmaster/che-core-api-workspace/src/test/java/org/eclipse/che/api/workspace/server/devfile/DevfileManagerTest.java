@@ -78,18 +78,18 @@ public class DevfileManagerTest {
   public void setUp() throws Exception {
     devfile = new DevfileImpl();
 
-    lenient().when(schemaValidator.validateBySchema(any())).thenReturn(devfileJsonNode);
+    lenient().when(schemaValidator.validateYaml(any())).thenReturn(devfileJsonNode);
     lenient().when(objectMapper.treeToValue(any(), eq(DevfileImpl.class))).thenReturn(devfile);
   }
 
   @Test
   public void testValidateAndParse() throws Exception {
     // when
-    DevfileImpl parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
+    DevfileImpl parsed = devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
 
     // then
     assertEquals(parsed, devfile);
-    verify(schemaValidator).validateBySchema(DEVFILE_YAML_CONTENT);
+    verify(schemaValidator).validateYaml(DEVFILE_YAML_CONTENT);
     verify(objectMapper).treeToValue(devfileJsonNode, DevfileImpl.class);
     verify(integrityValidator).validateDevfile(devfile);
   }
@@ -106,7 +106,7 @@ public class DevfileManagerTest {
     devfile.getComponents().add(component);
 
     // when
-    DevfileImpl parsed = devfileManager.parse(DEVFILE_YAML_CONTENT);
+    DevfileImpl parsed = devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
 
     // then
     assertNotNull(parsed.getCommands().get(0).getAttributes());
@@ -119,10 +119,10 @@ public class DevfileManagerTest {
       expectedExceptionsMessageRegExp = "non valid")
   public void shouldThrowExceptionWhenExceptionOccurredDuringSchemaValidation() throws Exception {
     // given
-    doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validateBySchema(any());
+    doThrow(new DevfileFormatException("non valid")).when(schemaValidator).validateYaml(any());
 
     // when
-    devfileManager.parse(DEVFILE_YAML_CONTENT);
+    devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
   }
 
   @Test(
@@ -135,7 +135,7 @@ public class DevfileManagerTest {
     doThrow(jsonException).when(objectMapper).treeToValue(any(), any());
 
     // when
-    devfileManager.parse(DEVFILE_YAML_CONTENT);
+    devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
   }
 
   @Test
