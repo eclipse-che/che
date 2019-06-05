@@ -3733,7 +3733,6 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
-          "description": "Total number of workspaces known to che server, regardless of state",
           "format": "none",
           "gauge": {
             "maxValue": 100,
