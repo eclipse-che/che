@@ -512,7 +512,10 @@ deployJaeger(){
 deployMetrics(){
     if [ "${CHE_METRICS_ENABLED}" == "true" ]; then
       echo "Deploying Grafana and Prometheus..."
-      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/che-monitoring.yaml
+      ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/grafana-dashboards.yaml
+      ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/grafana-datasources.yaml
+      ${OC_BINARY} apply -f ${BASE_DIR}/templates/monitoring/prometheus-config.yaml
+      ${OC_BINARY} new-app -f ${BASE_DIR}/templates/monitoring/che-monitoring.yaml
       echo "Grafana deployment complete. $($OC_BINARY get route/grafana --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})"
       echo "Prometheus deployment complete. $($OC_BINARY get route/prometheus --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})"
     fi
