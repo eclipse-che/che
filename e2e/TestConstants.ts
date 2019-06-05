@@ -22,12 +22,12 @@ export const TestConstants = {
     /**
      * Browser width resolution, "1920" by default.
      */
-    TS_SELENIUM_RESOLUTION_WIDTH: Number(process.env.TS_SELENIUM_BASE_URL) || 1920,
+    TS_SELENIUM_RESOLUTION_WIDTH: Number(process.env.TS_SELENIUM_RESOLUTION_WIDTH) || 1920,
 
     /**
      * Browser height resolution, "1080" by default.
      */
-    TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_BASE_URL) || 1080,
+    TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_RESOLUTION_HEIGHT) || 1080,
 
     /**
      * Timeout in milliseconds waiting for workspace start, "240 000" by default.
@@ -78,6 +78,11 @@ export const TestConstants = {
      * Delay in milliseconds between checking plugin precence.
      */
     TS_SELENIUM_PLUGIN_PRECENCE_POLLING: Number(process.env.TS_SELENIUM_PLUGIN_PRECENCE_POLLING) || 2000,
+
+    /**
+     * Name of workspace created for 'Happy Path' scenario validation.
+     */
+    TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',
 
     /**
      * Username used to log in MultiUser Che

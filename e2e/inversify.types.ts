@@ -24,6 +24,11 @@ const CLASSES = {
     TestWorkspaceUtil: 'TestWorkspaceUtil',
     ProjectTree: 'ProjectTree',
     Editor: 'Editor',
+    TopMenu: 'TopMenu',
+    QuickOpenContainer: 'QuickOpenContainer',
+    PreviewWidget: 'PreviewWidget',
+    GitHubPlugin: 'GitHubPlugin',
+    RightToolbar: 'RightToolbar'
 };
 
 export { TYPES, CLASSES };

@@ -8,16 +8,16 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { e2eContainer } from '../inversify.config';
-import { TYPES, CLASSES } from '../inversify.types';
-import { ILoginPage } from '../pageobjects/login/ILoginPage';
-import { Dashboard } from '../pageobjects/dashboard/Dashboard';
-import { NameGenerator } from '../utils/NameGenerator';
-import { NewWorkspace } from '../pageobjects/dashboard/NewWorkspace';
-import { WorkspaceDetailsPlugins } from '../pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins';
-import { Ide } from '../pageobjects/ide/Ide';
-import { ProjectTree } from '../pageobjects/ide/ProjectTree';
-import { Editor } from '../pageobjects/ide/Editor';
+import { e2eContainer } from '../../inversify.config';
+import { TYPES, CLASSES } from '../../inversify.types';
+import { ILoginPage } from '../../pageobjects/login/ILoginPage';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { NameGenerator } from '../../utils/NameGenerator';
+import { NewWorkspace } from '../../pageobjects/dashboard/NewWorkspace';
+import { WorkspaceDetailsPlugins } from '../../pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins';
+import { Ide } from '../../pageobjects/ide/Ide';
+import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
+import { Editor } from '../../pageobjects/ide/Editor';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const namespace: string = 'che';
