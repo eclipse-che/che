@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+import org.eclipse.che.commons.annotation.Nullable;
 
 /**
  * A simple implementation of the FileContentProvider that merely uses the function resolve relative
@@ -27,7 +28,7 @@ public class URLFileContentProvider implements FileContentProvider {
   private final URI devfileLocation;
   private final URLFetcher urlFetcher;
 
-  public URLFileContentProvider(URI devfileLocation, URLFetcher urlFetcher) {
+  public URLFileContentProvider(@Nullable URI devfileLocation, URLFetcher urlFetcher) {
     this.devfileLocation = devfileLocation;
     this.urlFetcher = urlFetcher;
   }

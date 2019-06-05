@@ -61,6 +61,7 @@ import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.core.ServerException;
+import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.model.workspace.Runtime;
 import org.eclipse.che.api.core.model.workspace.Warning;
 import org.eclipse.che.api.core.model.workspace.Workspace;
@@ -73,6 +74,8 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -120,6 +123,7 @@ public class WorkspaceManagerTest {
   @Mock private EventService eventService;
   @Mock private WorkspaceValidator validator;
   @Mock private DevfileConverter devfileConverter;
+  @Mock private DevfileIntegrityValidator devfileIntegrityValidator;
 
   @Captor private ArgumentCaptor<WorkspaceImpl> workspaceCaptor;
 
@@ -128,7 +132,13 @@ public class WorkspaceManagerTest {
   @BeforeMethod
   public void setUp() throws Exception {
     workspaceManager =
-        new WorkspaceManager(workspaceDao, runtimes, eventService, accountManager, validator);
+        new WorkspaceManager(
+            workspaceDao,
+            runtimes,
+            eventService,
+            accountManager,
+            validator,
+            devfileIntegrityValidator);
     lenient()
         .when(accountManager.getByName(NAMESPACE_1))
         .thenReturn(new AccountImpl("accountId", NAMESPACE_1, "test"));
@@ -577,6 +587,21 @@ public class WorkspaceManagerTest {
     workspaceManager.startWorkspace(workspaceConfig, workspace.getNamespace(), true, emptyMap());
 
     verify(workspaceDao, times(1)).remove(anyString());
+  }
+
+  @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "boom")
+  public void shouldFailTocreateWorkspaceUsingInconsistentDevfile() throws Exception {
+    // given
+    doThrow(new DevfileFormatException("boom"))
+        .when(devfileIntegrityValidator)
+        .validateContentReferences(any(), any());
+
+    Devfile devfile = mock(Devfile.class);
+
+    // when
+    workspaceManager.createWorkspace(devfile, "ns", emptyMap(), null);
+
+    // then exception is thrown
   }
 
   private void mockRuntimeStatus(WorkspaceImpl workspace, WorkspaceStatus status) {

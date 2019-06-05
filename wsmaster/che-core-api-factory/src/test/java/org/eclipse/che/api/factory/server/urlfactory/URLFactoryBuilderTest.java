@@ -119,7 +119,7 @@ public class URLFactoryBuilderTest {
     workspaceConfigImpl.setDefaultEnv("name");
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
-    when(devfileManager.parse(anyString())).thenReturn(devfile);
+    when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
     when(devfileManager.createWorkspaceConfig(any(DevfileImpl.class), any()))
         .thenReturn(workspaceConfigImpl);
 
