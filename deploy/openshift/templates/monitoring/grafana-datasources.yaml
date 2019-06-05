@@ -6,7 +6,9 @@ data:
   che-datasource.yaml: |-
     apiVersion: 1
     datasources:
-    - name: Che
+    - name: che
       type: prometheus
       access: proxy
       url: http://prometheus:9090
+
+  
