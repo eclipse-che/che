@@ -126,6 +126,24 @@ public class WorkspaceManager {
     return workspace;
   }
 
+  /**
+   * Creates a workspace out of a devfile.
+   *
+   * <p>The devfile should have been validated using the {@link
+   * DevfileIntegrityValidator#validateDevfile(Devfile)}. This method does rest of the validation
+   * and actually creates the workspace.
+   *
+   * @param devfile the devfile describing the workspace
+   * @param namespace workspace name is unique in this namespace
+   * @param attributes workspace instance attributes
+   * @return new workspace instance
+   * @throws NullPointerException when either {@code config} or {@code namespace} is null
+   * @throws NotFoundException when account with given id was not found
+   * @throws ConflictException when any conflict occurs (e.g Workspace with such name already exists
+   *     for {@code owner})
+   * @throws ServerException when any other error occurs
+   * @throws ValidationException when incoming configuration or attributes are not valid
+   */
   @Traced
   public WorkspaceImpl createWorkspace(
       Devfile devfile,
@@ -140,7 +158,6 @@ public class WorkspaceManager {
     validator.validateAttributes(attributes);
 
     try {
-      devfileIntegrityValidator.validateDevfile(devfile);
       devfileIntegrityValidator.validateContentReferences(devfile, contentProvider);
     } catch (DevfileFormatException e) {
       throw new ValidationException(e.getMessage(), e);

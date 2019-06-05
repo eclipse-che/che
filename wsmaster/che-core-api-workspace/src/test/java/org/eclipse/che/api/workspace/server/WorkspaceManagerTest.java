@@ -590,21 +590,6 @@ public class WorkspaceManagerTest {
   }
 
   @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "boom")
-  public void shouldFailToCreateWorkspaceUsingInvalidDevfile() throws Exception {
-    // given
-    doThrow(new DevfileFormatException("boom"))
-        .when(devfileIntegrityValidator)
-        .validateDevfile(any());
-
-    Devfile devfile = mock(Devfile.class);
-
-    // when
-    workspaceManager.createWorkspace(devfile, "ns", emptyMap(), null);
-
-    // then exception is thrown
-  }
-
-  @Test(expectedExceptions = ValidationException.class, expectedExceptionsMessageRegExp = "boom")
   public void shouldFailTocreateWorkspaceUsingInconsistentDevfile() throws Exception {
     // given
     doThrow(new DevfileFormatException("boom"))
