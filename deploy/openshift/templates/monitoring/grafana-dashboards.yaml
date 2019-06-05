@@ -3483,10 +3483,6 @@ data:
           {
             "allFormat": "glob",
             "allValue": null,
-            "current": {
-              "text": "che-host:8087",
-              "value": "che-host:8087"
-            },
             "datasource": "${datasource}",
             "definition": "",
             "hide": 0,
@@ -3562,10 +3558,6 @@ data:
             "useTags": false
           },
           {
-            "current": {
-              "text": "che",
-              "value": "che"
-            },
             "hide": 0,
             "includeAll": false,
             "label": null,
@@ -3741,6 +3733,7 @@ data:
             "#d44a3a"
           ],
           "datasource": "$datasource",
+          "description": "Total number of workspaces known to che server, regardless of state",
           "format": "none",
           "gauge": {
             "maxValue": 100,
@@ -5281,3 +5274,14 @@ data:
       "uid": "sL0Klq_mz",
       "version": 1
     }
+  dashboards.yaml: |-
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      updateIntervalSeconds: 10000
+      options:
+        path: /etc/grafana/provisioning/dashboards
