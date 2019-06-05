@@ -378,10 +378,10 @@ describe('Workspace Loader', () => {
 
             spyOn(workspaceLoader, 'connectMasterApi').and.callFake(() =>
                 Promise.resolve({
-                    addListener: () => {},
-                    subscribeEnvironmentOutput: () => {},
-                    subscribeInstallerOutput: () => {},
-                    subscribeWorkspaceStatus: () => {}
+                    addListener: () => { },
+                    subscribeEnvironmentOutput: () => { },
+                    subscribeInstallerOutput: () => { },
+                    subscribeWorkspaceStatus: () => { }
                 }));
 
             spyOn(workspaceLoader, 'subscribeWorkspaceEvents').and.callThrough();
@@ -429,10 +429,10 @@ describe('Workspace Loader', () => {
         let workspaceLoader: WorkspaceLoader;
         const loader = {
             log: () => undefined,
-            hideLoader: () => {},
-            showReload: () => {},
-            error: () => {},
-            onclickConsole: () => {},
+            hideLoader: () => { },
+            showReload: () => { },
+            error: () => { },
+            onclickConsole: () => { },
             onclickReload: () => true
         };
         let statusChangeCallback: Function;
@@ -460,9 +460,9 @@ describe('Workspace Loader', () => {
             spyOn(workspaceLoader, 'connectMasterApi').and.callFake(() => {
                 done();
                 return Promise.resolve({
-                    addListener: () => {},
-                    subscribeEnvironmentOutput: () => {},
-                    subscribeInstallerOutput: () => {},
+                    addListener: () => { },
+                    subscribeEnvironmentOutput: () => { },
+                    subscribeInstallerOutput: () => { },
                     subscribeWorkspaceStatus: (_workspaceId, callback) => {
                         statusChangeCallback = callback;
                     }
