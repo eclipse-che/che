@@ -136,6 +136,8 @@ public class WorkspaceManager {
    * @param devfile the devfile describing the workspace
    * @param namespace workspace name is unique in this namespace
    * @param attributes workspace instance attributes
+   * @param contentProvider the content provider to use for resolving content references in the
+   *     devfile
    * @return new workspace instance
    * @throws NullPointerException when either {@code config} or {@code namespace} is null
    * @throws NotFoundException when account with given id was not found

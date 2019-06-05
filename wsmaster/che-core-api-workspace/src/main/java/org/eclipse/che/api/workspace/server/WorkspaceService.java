@@ -15,7 +15,9 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
+import static javax.ws.rs.core.HttpHeaders.CONTENT_TYPE;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 import static org.eclipse.che.api.workspace.shared.Constants.CHE_WORKSPACE_AUTO_START;
@@ -44,14 +46,14 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.ConflictException;
@@ -244,15 +246,14 @@ public class WorkspaceService extends Service {
           Boolean startAfterCreate,
       @ApiParam("Namespace where workspace should be created") @QueryParam("namespace")
           String namespace,
-      @Context HttpHeaders headers)
+      @HeaderParam(CONTENT_TYPE) MediaType contentType)
       throws ConflictException, BadRequestException, ForbiddenException, NotFoundException,
           ServerException {
     requiredNotNull(devfile, "Devfile");
 
     DevfileImpl devfileModel;
     try {
-      if (headers.getMediaType().getType().equals("application")
-          && headers.getMediaType().getSubtype().equals("json")) {
+      if (APPLICATION_JSON_TYPE.isCompatible(contentType)) {
         devfileModel = devfileManager.parseJson(devfile);
       } else {
         devfileModel = devfileManager.parseYaml(devfile);
@@ -271,7 +272,14 @@ public class WorkspaceService extends Service {
     try {
       workspace =
           workspaceManager.createWorkspace(
-              devfileModel, namespace, attributes, devfileContentProvider);
+              devfileModel,
+              namespace,
+              attributes,
+              // create a new cache for each request so that we don't have to care about lifetime
+              // of the cache, etc. The content is cached only for the duration of this call
+              // (i.e. all the validation and provisioning of the devfile will download each
+              // referenced file only once per request)
+              FileContentProvider.cached(devfileContentProvider));
     } catch (ValidationException x) {
       throw new BadRequestException(x.getMessage());
     }
