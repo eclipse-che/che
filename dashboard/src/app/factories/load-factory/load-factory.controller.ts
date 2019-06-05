@@ -25,7 +25,7 @@ const WS_AGENT_STEP: number = 4;
  */
 export class LoadFactoryController {
 
-  static $inject = ['cheAPI', 'cheJsonRpcApi', '$route', '$timeout', '$mdDialog', 'loadFactoryService', 'lodash', 'cheNotification', '$location', 'routeHistory', '$window'];
+  static $inject = ['cheAPI', 'cheJsonRpcApi', '$route', '$timeout', '$mdDialog', 'loadFactoryService', 'lodash', 'cheNotification', '$location', 'routeHistory', '$window', 'loadFactoryService'];
 
   private cheAPI: CheAPI;
   private $timeout: ng.ITimeoutService;
@@ -116,14 +116,14 @@ export class LoadFactoryController {
         this.factory = factory;
 
         // check factory polices:
-        if (!this.checkPolicies(this.factory)) {
+        if (!this.factory || !this.checkPolicies(this.factory)) {
           return;
         }
 
-        // check factory contains workspace config:
-        if (!this.factory.workspace) {
+        // check factory contains compatible workspace config:
+        if (!this.factory.workspace || !this.isSupportedVersion()) {
           this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
-          this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no workspace config.';
+          this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no compatible workspace config.';
         } else {
           this.loadFactoryService.goToNextStep();
           this.$timeout(() => {
@@ -420,9 +420,9 @@ export class LoadFactoryController {
         // need to show the error
         this.$mdDialog.show(
           this.$mdDialog.alert()
-            .title('Error when starting agent')
-            .content('Unable to start workspace agent. Error when trying to start the workspace agent: ' + message.error)
-            .ariaLabel('Workspace agent start')
+            .title('Error when starting workspace')
+            .content('Unable to start workspace. Error when trying to start the workspace: ' + message.error)
+            .ariaLabel('Workspace start')
             .ok('OK')
         );
         this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
@@ -677,6 +677,21 @@ export class LoadFactoryController {
   backToDashboard(): void {
     this.restoreMenuAndFooter();
     this.$location.path('/');
+  }
+
+  /**
+   * Returns `true` if supported version of factory workspace.
+   * @returns {boolean}
+   */
+  isSupportedVersion(): boolean {
+    return this.loadFactoryService.isSupportedVersion(this.factory);
+  }
+
+  /**
+   * Redirects to create workspace flow.
+   */
+  redirectToCreateWorkspace(): void {
+    this.$location.path('/create-workspace').search({});
   }
 
   /**

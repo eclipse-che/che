@@ -12,6 +12,7 @@
 'use strict';
 import {CheAPI} from '../../../../components/api/che-api.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
+import {WorkspacesService} from '../../../workspaces/workspaces.service';
 
 /**
  * Controller for creating factory from a workspace.
@@ -20,7 +21,7 @@ import {CheNotification} from '../../../../components/notification/che-notificat
  */
 export class FactoryFromWorkspaceCtrl {
 
-  static $inject = ['$filter', 'cheAPI', 'cheNotification'];
+  static $inject = ['$filter', 'cheAPI', 'cheNotification', 'workspacesService'];
 
   private $filter: ng.IFilterService;
   private cheAPI: CheAPI;
@@ -32,16 +33,20 @@ export class FactoryFromWorkspaceCtrl {
   private isLoading: boolean;
   private isImporting: boolean;
   private factoryContent: any;
+  private workspacesService: WorkspacesService;
 
   /**
    * Default constructor that is using resource injection
    */
-  constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification) {
+  constructor($filter: ng.IFilterService, cheAPI: CheAPI, cheNotification: CheNotification, workspacesService: WorkspacesService) {
     this.$filter = $filter;
     this.cheAPI = cheAPI;
     this.cheNotification = cheNotification;
+    this.workspacesService = workspacesService;
 
-    this.workspaces = cheAPI.getWorkspace().getWorkspaces();
+    this.workspaces = cheAPI.getWorkspace().getWorkspaces().filter((workspace: che.IWorkspace) => {
+      return this.workspacesService.isSupported(workspace);
+    });
     this.workspacesById = cheAPI.getWorkspace().getWorkspacesById();
 
     this.filtersWorkspaceSelected = {};

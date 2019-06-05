@@ -18,6 +18,7 @@
 export class CheStepsContainer implements ng.IDirective {
 
   restrict = 'E';
+  transclude = true;
   templateUrl = 'components/steps-container/steps-container.html';
 
   scope = {

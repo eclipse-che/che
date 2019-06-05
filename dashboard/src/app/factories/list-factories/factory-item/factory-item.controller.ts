@@ -12,6 +12,7 @@
 'use strict';
 import {CheFactory} from '../../../../components/api/che-factory.factory';
 import {CheEnvironmentRegistry} from '../../../../components/api/environment/che-environment-registry.factory';
+import {LoadFactoryService} from '../../../factories/load-factory/load-factory.service';
 
 /**
  * Controller for a factory item.
@@ -19,13 +20,14 @@ import {CheEnvironmentRegistry} from '../../../../components/api/environment/che
  */
 export class FactoryItemController {
 
-  static $inject = ['$location', 'cheFactory', 'cheEnvironmentRegistry', 'lodash'];
+  static $inject = ['$location', 'cheFactory', 'cheEnvironmentRegistry', 'lodash', 'loadFactoryService'];
 
   private $location: ng.ILocationService;
   private cheFactory: CheFactory;
   private cheEnvironmentRegistry: CheEnvironmentRegistry;
   private lodash: any;
   private factory: che.IFactory;
+  private loadFactoryService: LoadFactoryService;
 
   /**
    * Default constructor that is using resource injection
@@ -33,11 +35,21 @@ export class FactoryItemController {
   constructor($location: ng.ILocationService,
               cheFactory: CheFactory,
               cheEnvironmentRegistry: CheEnvironmentRegistry,
-              lodash: any) {
+              lodash: any,
+              loadFactoryService: LoadFactoryService) {
     this.$location = $location;
     this.cheFactory = cheFactory;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.lodash = lodash;
+    this.loadFactoryService =  loadFactoryService;
+  }
+
+  /**
+   * Returns `true` if supported version of factory workspace.
+   * @returns {boolean}
+   */
+  isSupportedVersion(): boolean {
+    return this.loadFactoryService.isSupportedVersion(this.factory);
   }
 
   /**
