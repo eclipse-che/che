@@ -82,7 +82,7 @@ public class DevfileManager {
   }
 
   /**
-   * Creates {@link DevfileImpl} from given devfile content. Performs schema and integrity
+   * Creates {@link DevfileImpl} from given devfile content in YAML. Performs schema and integrity
    * validation of input data.
    *
    * @param devfileContent raw content of devfile
@@ -90,8 +90,26 @@ public class DevfileManager {
    * @throws DevfileFormatException when any of schema or integrity validations fail
    * @throws DevfileFormatException when any yaml parsing error occurs
    */
-  public DevfileImpl parse(String devfileContent) throws DevfileFormatException {
-    JsonNode parsed = schemaValidator.validateBySchema(devfileContent);
+  public DevfileImpl parseYaml(String devfileContent) throws DevfileFormatException {
+    return parse(devfileContent, schemaValidator::validateYaml);
+  }
+
+  /**
+   * Creates {@link DevfileImpl} from given devfile content in JSON. Performs schema and integrity
+   * validation of input data.
+   *
+   * @param devfileContent raw content of devfile
+   * @return Devfile object created from the source content
+   * @throws DevfileFormatException when any of schema or integrity validations fail
+   * @throws DevfileFormatException when any yaml parsing error occurs
+   */
+  public DevfileImpl parseJson(String devfileContent) throws DevfileFormatException {
+    return parse(devfileContent, schemaValidator::validateJson);
+  }
+
+  private DevfileImpl parse(String content, ValidationFunction validationFunction)
+      throws DevfileFormatException {
+    JsonNode parsed = validationFunction.validate(content);
 
     DevfileImpl devfile;
     try {
@@ -187,5 +205,10 @@ public class DevfileManager {
       }
     }
     return config;
+  }
+
+  @FunctionalInterface
+  private interface ValidationFunction {
+    JsonNode validate(String content) throws DevfileFormatException;
   }
 }

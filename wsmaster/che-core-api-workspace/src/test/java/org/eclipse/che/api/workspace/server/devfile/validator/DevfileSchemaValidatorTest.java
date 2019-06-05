@@ -35,7 +35,7 @@ public class DevfileSchemaValidatorTest {
   @Test(dataProvider = "validDevfiles")
   public void shouldNotThrowExceptionOnValidationOfValidDevfile(String resourceFilePath)
       throws Exception {
-    schemaValidator.validateBySchema(getResource(resourceFilePath));
+    schemaValidator.validateYaml(getResource(resourceFilePath));
   }
 
   @DataProvider
@@ -69,7 +69,7 @@ public class DevfileSchemaValidatorTest {
   public void shouldThrowExceptionOnValidationOfNonValidDevfile(
       String resourceFilePath, String expectedMessage) throws Exception {
     try {
-      schemaValidator.validateBySchema(getResource(resourceFilePath));
+      schemaValidator.validateYaml(getResource(resourceFilePath));
     } catch (DevfileFormatException e) {
       assertEquals(
           e.getMessage(),
