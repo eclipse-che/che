@@ -22,6 +22,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -29,10 +30,13 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
+import org.eclipse.che.api.core.model.workspace.devfile.Metadata;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 
 /** @author Sergii Leshchenko */
@@ -45,11 +49,8 @@ public class DevfileImpl implements Devfile {
   @Column(name = "id")
   private Long id;
 
-  @Column(name = "spec_version", nullable = false)
-  private String specVersion;
-
-  @Column(name = "name", nullable = false)
-  private String name;
+  @Column(name = "api_version", nullable = false)
+  private String apiVersion;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
   @JoinColumn(name = "devfile_id")
@@ -69,17 +70,18 @@ public class DevfileImpl implements Devfile {
   @Column(name = "value", columnDefinition = "TEXT")
   private Map<String, String> attributes;
 
+  @Embedded private MetadataImpl metadata;
+
   public DevfileImpl() {}
 
   public DevfileImpl(
-      String specVersion,
-      String name,
+      String apiVersion,
       List<? extends Project> projects,
       List<? extends Component> components,
       List<? extends Command> commands,
-      Map<String, String> attributes) {
-    this.specVersion = specVersion;
-    this.name = name;
+      Map<String, String> attributes,
+      Metadata metadata) {
+    this.apiVersion = apiVersion;
     if (projects != null) {
       this.projects = projects.stream().map(ProjectImpl::new).collect(toCollection(ArrayList::new));
     }
@@ -93,34 +95,39 @@ public class DevfileImpl implements Devfile {
     if (attributes != null) {
       this.attributes = new HashMap<>(attributes);
     }
+
+    this.metadata = metadata == null ? new MetadataImpl() : new MetadataImpl(metadata);
+  }
+
+  @PrePersist
+  @PreUpdate
+  protected void validate() {
+    if (metadata == null) {
+      throw new IllegalStateException("The devfile must have metadata.");
+    }
   }
 
   public DevfileImpl(Devfile devfile) {
     this(
-        devfile.getSpecVersion(),
-        devfile.getName(),
+        devfile.getApiVersion(),
         devfile.getProjects(),
         devfile.getComponents(),
         devfile.getCommands(),
-        devfile.getAttributes());
+        devfile.getAttributes(),
+        devfile.getMetadata());
   }
 
   @Override
-  public String getSpecVersion() {
-    return specVersion;
+  public String getApiVersion() {
+    return apiVersion;
   }
 
-  public void setSpecVersion(String specVersion) {
-    this.specVersion = specVersion;
-  }
-
-  @Override
-  public String getName() {
-    return name;
+  public void setApiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
   }
 
   public void setName(String name) {
-    this.name = name;
+    getMetadata().setName(name);
   }
 
   @Override
@@ -172,6 +179,15 @@ public class DevfileImpl implements Devfile {
   }
 
   @Override
+  public MetadataImpl getMetadata() {
+    return metadata;
+  }
+
+  public void setMetadata(MetadataImpl metadata) {
+    this.metadata = metadata;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -181,18 +197,24 @@ public class DevfileImpl implements Devfile {
     }
     DevfileImpl devfile = (DevfileImpl) o;
     return Objects.equals(id, devfile.id)
-        && Objects.equals(specVersion, devfile.specVersion)
-        && Objects.equals(name, devfile.name)
+        && Objects.equals(apiVersion, devfile.apiVersion)
         && Objects.equals(getProjects(), devfile.getProjects())
         && Objects.equals(getComponents(), devfile.getComponents())
         && Objects.equals(getCommands(), devfile.getCommands())
-        && Objects.equals(getAttributes(), devfile.getAttributes());
+        && Objects.equals(getAttributes(), devfile.getAttributes())
+        && Objects.equals(getMetadata(), devfile.getMetadata());
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-        id, specVersion, name, getProjects(), getComponents(), getCommands(), getAttributes());
+        id,
+        apiVersion,
+        getProjects(),
+        getComponents(),
+        getCommands(),
+        getAttributes(),
+        getMetadata());
   }
 
   @Override
@@ -201,11 +223,8 @@ public class DevfileImpl implements Devfile {
         + "id='"
         + id
         + '\''
-        + ", specVersion='"
-        + specVersion
-        + '\''
-        + ", name='"
-        + name
+        + ", apiVersion='"
+        + apiVersion
         + '\''
         + ", projects="
         + projects
@@ -215,6 +234,8 @@ public class DevfileImpl implements Devfile {
         + commands
         + ", attributes="
         + attributes
+        + ", metadata="
+        + metadata
         + '}';
   }
 }

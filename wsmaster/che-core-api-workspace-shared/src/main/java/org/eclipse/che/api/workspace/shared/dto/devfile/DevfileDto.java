@@ -20,18 +20,11 @@ import org.eclipse.che.dto.shared.DTO;
 @DTO
 public interface DevfileDto extends Devfile {
   @Override
-  String getSpecVersion();
+  String getApiVersion();
 
-  void setSpecVersion(String specVersion);
+  void setApiVersion(String apiVersion);
 
-  DevfileDto withSpecVersion(String specVersion);
-
-  @Override
-  String getName();
-
-  void setName(String name);
-
-  DevfileDto withName(String name);
+  DevfileDto withApiVersion(String apiVersion);
 
   @Override
   List<ProjectDto> getProjects();
@@ -60,4 +53,11 @@ public interface DevfileDto extends Devfile {
   void setAttributes(Map<String, String> attributes);
 
   DevfileDto withAttributes(Map<String, String> attributes);
+
+  @Override
+  MetadataDto getMetadata();
+
+  void setMetadata(MetadataDto metadata);
+
+  DevfileDto withMetadata(MetadataDto metadata);
 }

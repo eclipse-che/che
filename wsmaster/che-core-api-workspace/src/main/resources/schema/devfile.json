@@ -32,20 +32,25 @@
   ],
   "additionalProperties": false,
   "properties": {
-    "specVersion": {
+    "apiVersion": {
       "type": "string",
-      "title": "Devfile Specification Version",
+      "title": "Devfile API Version",
       "examples": [
         "0.0.1"
       ]
     },
-    "name": {
-      "type": "string",
-      "title": "Devfile Name",
-      "description": "The name of the devfile. Workspaces created from devfile, will inherit this name",
-      "examples": [
-        "petclinic-dev-environment"
-      ]
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Devfile Name",
+          "description": "The name of the devfile. Workspaces created from devfile, will inherit this name",
+          "examples": [
+            "petclinic-dev-environment"
+          ]
+        }
+      }
     },
     "projects": {
       "type": "array",

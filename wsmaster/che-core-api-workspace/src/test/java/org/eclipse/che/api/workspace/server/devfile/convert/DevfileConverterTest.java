@@ -98,7 +98,7 @@ public class DevfileConverterTest {
     DevfileImpl devfile = devfileConverter.workspaceToDevFile(wsConfig);
 
     // then
-    assertEquals(devfile.getSpecVersion(), CURRENT_SPEC_VERSION);
+    assertEquals(devfile.getApiVersion(), CURRENT_SPEC_VERSION);
   }
 
   @Test
@@ -300,7 +300,7 @@ public class DevfileConverterTest {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     DevfileImpl devfile = new DevfileImpl();
-    devfile.setSpecVersion("1.0.0-non-supported");
+    devfile.setApiVersion("1.0.0-non-supported");
     devfile.setName("petclinic");
 
     // when
@@ -334,7 +334,7 @@ public class DevfileConverterTest {
 
   private DevfileImpl newDevfile(String name) {
     DevfileImpl devfile = new DevfileImpl();
-    devfile.setSpecVersion(CURRENT_SPEC_VERSION);
+    devfile.setApiVersion(CURRENT_SPEC_VERSION);
     devfile.setName(name);
     return devfile;
   }

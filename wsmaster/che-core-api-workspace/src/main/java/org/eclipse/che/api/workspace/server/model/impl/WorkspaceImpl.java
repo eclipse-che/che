@@ -220,7 +220,7 @@ public class WorkspaceImpl implements Workspace {
   /** Returns the name of workspace. It can be stored by workspace config or devfile. */
   public String getName() {
     if (devfile != null) {
-      return devfile.getName();
+      return devfile.getMetadata().getName();
     } else if (config != null) {
       return config.getName();
     } else {

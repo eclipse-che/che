@@ -90,7 +90,7 @@ public class DevfileConverter {
     }
 
     DevfileImpl devfile = new DevfileImpl();
-    devfile.setSpecVersion(CURRENT_SPEC_VERSION);
+    devfile.setApiVersion(CURRENT_SPEC_VERSION);
     devfile.setName(wsConfig.getName());
 
     // Manage projects
@@ -180,12 +180,12 @@ public class DevfileConverter {
   }
 
   private static void validateCurrentVersion(Devfile devFile) throws DevfileFormatException {
-    if (Strings.isNullOrEmpty(devFile.getSpecVersion())) {
+    if (Strings.isNullOrEmpty(devFile.getApiVersion())) {
       throw new DevfileFormatException("Provided Devfile has no spec version specified");
     }
-    if (!CURRENT_SPEC_VERSION.equals(devFile.getSpecVersion())) {
+    if (!CURRENT_SPEC_VERSION.equals(devFile.getApiVersion())) {
       throw new DevfileFormatException(
-          format("Provided Devfile has unsupported version '%s'", devFile.getSpecVersion()));
+          format("Provided Devfile has unsupported version '%s'", devFile.getApiVersion()));
     }
   }
 }
