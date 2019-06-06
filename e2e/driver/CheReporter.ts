@@ -67,16 +67,16 @@ class CheReporter extends mocha.reporters.Spec {
       const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
 
       // create reporter dir if not exist
-      const isReportDirExist: boolean = fs.existsSync(reportDirPath);
+      const reportDirExists: boolean = fs.existsSync(reportDirPath);
 
-      if (!isReportDirExist) {
+      if (!reportDirExists) {
         fs.mkdirSync(reportDirPath);
       }
 
       // create dir for failed test report if not exist
-      const isTestReportDirExist: boolean = fs.existsSync(testReportDirPath);
+      const testReportDirExists: boolean = fs.existsSync(testReportDirPath);
 
-      if (!isTestReportDirExist) {
+      if (!testReportDirExists) {
         fs.mkdirSync(testReportDirPath);
       }
 
