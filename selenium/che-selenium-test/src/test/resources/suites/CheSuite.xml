@@ -37,7 +37,6 @@
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitTest"/>
           <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromZipTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.workspaces.details.WorkspaceDetailsComposeTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.NewWorkspacePageTest"/>
@@ -230,13 +229,6 @@
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
           <class name="org.eclipse.che.selenium.theia.Che7PreviewStackStartTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromBlankStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromPythonStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaMySqlStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromNodeStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaTheiaOpenshiftStackTest"/>
-          <class name="org.eclipse.che.selenium.stack.CreateWorkspaceFromJavaTheiaDockerStackTest"/>
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>
           <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>

@@ -12,8 +12,6 @@
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static java.util.Arrays.asList;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.ANDROID;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA_CENTOS;
 import static org.openqa.selenium.Keys.ESCAPE;
 
 import com.google.inject.Inject;
@@ -23,6 +21,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.Test;
@@ -112,14 +111,12 @@ public class WorkspaceDetailsOverviewTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
-    newWorkspace.clickOnAllStacksTab();
 
-    selectStackAndCheckWorkspaceName(ANDROID);
+    selectStackAndCheckWorkspaceName(Stack.APACHE_CAMEL);
 
-    selectStackAndCheckWorkspaceName(JAVA_CENTOS);
+    selectStackAndCheckWorkspaceName(Stack.JAVA_GRADLE);
 
     // create workspace
-    newWorkspace.setMachineRAM(MACHINE_NAME, 3.0);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.addSampleToWorkspace(SAMPLE_NAME);
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
