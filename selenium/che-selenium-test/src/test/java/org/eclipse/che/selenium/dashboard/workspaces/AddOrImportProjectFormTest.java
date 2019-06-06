@@ -147,7 +147,7 @@ public class AddOrImportProjectFormTest {
   public void checkOfCheckboxes() {
     // preparing
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack(Stack.JAVA);
+    newWorkspace.selectStack(Stack.JAVA_MAVEN);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
@@ -193,7 +193,7 @@ public class AddOrImportProjectFormTest {
   public void checkProjectSamples() {
     // preparing
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack(Stack.JAVA);
+    newWorkspace.selectStack(Stack.JAVA_MAVEN);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.waitSamplesButtonSelected();
@@ -341,8 +341,8 @@ public class AddOrImportProjectFormTest {
   public void checkProjectsBlank() throws Exception {
     // preparing
     newWorkspace.waitPageLoad();
-    newWorkspace.selectStack(Stack.BLANK);
-    newWorkspace.waitStackSelected(Stack.BLANK);
+    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    newWorkspace.waitStackSelected(Stack.JAVA_MAVEN);
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
     addOrImportForm.clickOnBlankButton();
@@ -401,7 +401,6 @@ public class AddOrImportProjectFormTest {
     addOrImportForm.waitAddOrImportFormOpened();
 
     addOrImportForm.clickOnGitHubButton();
-    newWorkspace.setMachineRAM("dev-machine", 5.0);
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
 
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
@@ -421,13 +420,9 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitStackSelected(Stack.DOT_NET);
     assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
 
-    newWorkspace.selectStack(Stack.JAVA);
-    newWorkspace.waitStackSelected(Stack.JAVA);
+    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    newWorkspace.waitStackSelected(Stack.JAVA_MAVEN);
     assertEquals(newWorkspace.getWorkspaceNameValue(), TEST_BLANK_WORKSPACE_NAME);
-
-    // add workspace with specified "RAM" value
-    newWorkspace.setMachineRAM("dev-machine", 3.0);
-    newWorkspace.waitRamValue("dev-machine", 3.0);
 
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();
@@ -499,8 +494,8 @@ public class AddOrImportProjectFormTest {
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(workspaceName);
 
-    newWorkspace.selectStack(Stack.JAVA);
-    newWorkspace.waitStackSelected(Stack.JAVA);
+    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    newWorkspace.waitStackSelected(Stack.JAVA_MAVEN);
 
     addOrImportForm.clickOnAddOrImportProjectButton();
     addOrImportForm.waitAddOrImportFormOpened();

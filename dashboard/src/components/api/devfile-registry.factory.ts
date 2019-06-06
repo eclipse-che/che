@@ -1,5 +1,3 @@
-import { stringify } from "querystring";
-
 /*
  * Copyright (c) 2015-2018 Red Hat, Inc.
  * This program and the accompanying materials are made

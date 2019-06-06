@@ -74,12 +74,7 @@ public class CreateWorkspaceHelper {
     workspaces.clickOnAddWorkspaceBtn();
 
     newWorkspace.waitToolbar();
-    newWorkspace.clickOnAllStacksTab();
     newWorkspace.selectStack(stack);
     newWorkspace.typeWorkspaceName(workspaceName);
-
-    if (machineRam != null) {
-      newWorkspace.setMachineRAM("dev-machine", machineRam);
-    }
   }
 }

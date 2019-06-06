@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack.JAVA;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GIT;
 
 import com.google.inject.Inject;
@@ -30,6 +29,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.AfterClass;
@@ -82,8 +82,7 @@ public class ImportMavenProjectFromGitTest {
     newWorkspace.waitToolbar();
 
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
-    newWorkspace.clickOnAllStacksTab();
-    newWorkspace.selectStack(JAVA);
+    newWorkspace.selectStack(Stack.JAVA_MAVEN);
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
