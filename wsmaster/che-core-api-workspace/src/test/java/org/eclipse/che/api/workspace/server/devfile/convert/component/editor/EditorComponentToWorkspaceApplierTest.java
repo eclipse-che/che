@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -44,7 +45,8 @@ public class EditorComponentToWorkspaceApplierTest {
 
   @BeforeMethod
   public void setUp() {
-    editorComponentApplier = new EditorComponentToWorkspaceApplier(fqnParser);
+    editorComponentApplier =
+        new EditorComponentToWorkspaceApplier(new ComponentFQNParser(fqnParser));
   }
 
   @Test

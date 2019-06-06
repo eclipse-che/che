@@ -16,7 +16,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_PREFERENCE_ATTR_TEMPLATE;
@@ -27,12 +26,11 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -43,11 +41,11 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceApplier {
 
-  private final PluginFQNParser fqnParser;
+  private final ComponentFQNParser componentFQNParser;
 
   @Inject
-  public PluginComponentToWorkspaceApplier(PluginFQNParser fqnParser) {
-    this.fqnParser = fqnParser;
+  public PluginComponentToWorkspaceApplier(ComponentFQNParser componentFQNParser) {
+    this.componentFQNParser = componentFQNParser;
   }
 
   /**
@@ -75,31 +73,24 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     String workspacePluginsAttribute =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
 
-    final String reference = pluginComponent.getReference();
     final String pluginId = pluginComponent.getId();
     final String registryUrl = pluginComponent.getRegistryUrl();
-    final String compositeId =
-        registryUrl != null
-            ? format(COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT, registryUrl, pluginId)
-            : pluginId;
 
-    ExtendedPluginFQN fqn;
-    try {
-      if (!isNullOrEmpty(reference)) {
-        workspaceConfig
-            .getAttributes()
-            .put(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE, append(workspacePluginsAttribute, reference));
-        fqn = fqnParser.evaluateFqn(reference, contentProvider);
-      } else {
-        workspaceConfig
-            .getAttributes()
-            .put(
-                WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
-                append(workspacePluginsAttribute, compositeId));
-        fqn = fqnParser.parsePluginFQN(compositeId);
-      }
-    } catch (InfrastructureException e) {
-      throw new DevfileException(e.getMessage(), e);
+    final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(pluginComponent, contentProvider);
+    if (!isNullOrEmpty(fqn.getReference())) {
+      workspaceConfig
+          .getAttributes()
+          .put(
+              WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
+              append(workspacePluginsAttribute, fqn.getReference()));
+    } else {
+      workspaceConfig
+          .getAttributes()
+          .put(
+              WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
+              append(
+                  workspacePluginsAttribute,
+                  componentFQNParser.getCompositeId(registryUrl, pluginId)));
     }
     String memoryLimit = pluginComponent.getMemoryLimit();
     if (memoryLimit != null) {
@@ -139,7 +130,13 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .getAttributes()
           .put(
               PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
-              append(pluginsAliases, compositeId + "=" + pluginComponent.getAlias()));
+              append(
+                  pluginsAliases,
+                  componentFQNParser.getCompositeId(
+                          fqn.getRegistry() != null ? fqn.getRegistry().toString() : null,
+                          fqn.getId())
+                      + "="
+                      + pluginComponent.getAlias()));
     }
   }
 

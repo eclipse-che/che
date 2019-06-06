@@ -23,6 +23,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.List;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
@@ -58,7 +59,7 @@ public class DefaultEditorProvisionerTest {
 
   private DefaultEditorProvisioner provisioner;
 
-  private PluginFQNParser fqnParser = new PluginFQNParser();
+  private ComponentFQNParser fqnParser = new ComponentFQNParser(new PluginFQNParser());
 
   @Test
   public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws Exception {

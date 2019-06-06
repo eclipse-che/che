@@ -24,11 +24,10 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
 /**
@@ -41,21 +40,23 @@ public class DefaultEditorProvisioner {
   private final String defaultEditorRef;
   private final String defaultEditor;
   private final Map<String, String> defaultPluginsToRefs;
-  private final PluginFQNParser fqnParser;
+  private final ComponentFQNParser componentFQNParser;
 
   @Inject
   public DefaultEditorProvisioner(
       @Named("che.workspace.devfile.default_editor") String defaultEditorRef,
       @Named("che.workspace.devfile.default_editor.plugins") String[] defaultPluginsRefs,
-      PluginFQNParser fqnParser)
+      ComponentFQNParser componentFQNParser)
       throws DevfileException {
     this.defaultEditorRef = isNullOrEmpty(defaultEditorRef) ? null : defaultEditorRef;
-    this.fqnParser = fqnParser;
+    this.componentFQNParser = componentFQNParser;
     this.defaultEditor =
-        this.defaultEditorRef == null ? null : getPluginPublisherAndName(this.defaultEditorRef);
+        this.defaultEditorRef == null
+            ? null
+            : componentFQNParser.getPluginPublisherAndName(this.defaultEditorRef);
     Map<String, String> map = new HashMap<>();
     for (String defaultPluginsRef : defaultPluginsRefs) {
-      map.put(getPluginPublisherAndName(defaultPluginsRef), defaultPluginsRef);
+      map.put(componentFQNParser.getPluginPublisherAndName(defaultPluginsRef), defaultPluginsRef);
     }
     this.defaultPluginsToRefs = map;
   }
@@ -116,25 +117,7 @@ public class DefaultEditorProvisioner {
 
   private String getPluginPublisherAndName(Component component, FileContentProvider contentProvider)
       throws DevfileException {
-    try {
-      if (component.getId() != null) {
-        return getPluginPublisherAndName(component.getId());
-      } else {
-        return fqnParser
-            .evaluateFqn(component.getReference(), contentProvider)
-            .getPublisherAndName();
-      }
-    } catch (InfrastructureException e) {
-      throw new DevfileException(e.getMessage(), e);
-    }
-  }
-
-  private String getPluginPublisherAndName(String pluginId) throws DevfileException {
-    try {
-      ExtendedPluginFQN meta = fqnParser.parsePluginFQN(pluginId);
-      return meta.getPublisherAndName();
-    } catch (InfrastructureException e) {
-      throw new DevfileException(e.getMessage(), e);
-    }
+    final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(component, contentProvider);
+    return fqn.getPublisherAndName();
   }
 }

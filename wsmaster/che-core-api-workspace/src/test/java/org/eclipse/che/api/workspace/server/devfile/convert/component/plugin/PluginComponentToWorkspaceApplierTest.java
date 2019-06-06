@@ -25,6 +25,7 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
@@ -46,7 +47,8 @@ public class PluginComponentToWorkspaceApplierTest {
 
   @BeforeMethod
   public void setUp() {
-    pluginComponentApplier = new PluginComponentToWorkspaceApplier(fqnParser);
+    pluginComponentApplier =
+        new PluginComponentToWorkspaceApplier(new ComponentFQNParser(fqnParser));
   }
 
   @Test

@@ -352,7 +352,8 @@ public class PluginFQNParserTest {
             + "name: editor\n"
             + "version: ver\n"
             + "type: Che Editor",
-        new ExtendedPluginFQN(null, "publisher/editor/ver", "publisher", "editor", "ver")
+        new ExtendedPluginFQN(
+            "http://registry:8080/publisher/editor/ver/meta.yaml", "publisher", "editor", "ver")
       },
       {
         "https://pastebin.com/1ij3475rh",
@@ -361,7 +362,7 @@ public class PluginFQNParserTest {
             + "name: editor\n"
             + "version: 0.0.5\n"
             + "type: Che Editor",
-        new ExtendedPluginFQN(null, "publisher/editor/0.0.5", "publisher", "editor", "0.0.5")
+        new ExtendedPluginFQN("https://pastebin.com/1ij3475rh", "publisher", "editor", "0.0.5")
       },
       {
         "https://che-registry.com.ua/publisher/plugin/0.0.5/meta.yaml",
@@ -370,7 +371,11 @@ public class PluginFQNParserTest {
             + "name: plugin123\n"
             + "version: 0.0.5\n"
             + "type: Che Plugin",
-        new ExtendedPluginFQN(null, "publisher/plugin123/0.0.5", "publisher", "plugin123", "0.0.5")
+        new ExtendedPluginFQN(
+            "https://che-registry.com.ua/publisher/plugin/0.0.5/meta.yaml",
+            "publisher",
+            "plugin123",
+            "0.0.5")
       }
     };
   }

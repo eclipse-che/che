@@ -28,7 +28,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -184,12 +183,7 @@ public class PluginFQNParser {
       String publisher = contentNode.get("publisher").textValue();
       String name = contentNode.get("name").textValue();
       String version = contentNode.get("version").textValue();
-      return new ExtendedPluginFQN(
-          null,
-          new StringJoiner("/").add(publisher).add(name).add(version).toString(),
-          publisher,
-          name,
-          version);
+      return new ExtendedPluginFQN(reference, publisher, name, version);
     } catch (DevfileException | IOException e) {
       throw new InfrastructureException(format("Plugin reference URL '%s' is invalid.", reference));
     }

@@ -16,7 +16,6 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
@@ -25,11 +24,10 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
 /**
@@ -39,11 +37,11 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
  */
 public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceApplier {
 
-  private final PluginFQNParser fqnParser;
+  private final ComponentFQNParser componentFQNParser;
 
   @Inject
-  public EditorComponentToWorkspaceApplier(PluginFQNParser fqnParser) {
-    this.fqnParser = fqnParser;
+  public EditorComponentToWorkspaceApplier(ComponentFQNParser componentFQNParser) {
+    this.componentFQNParser = componentFQNParser;
   }
 
   /**
@@ -71,7 +69,6 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     final String editorComponentAlias = editorComponent.getAlias();
     final String editorId = editorComponent.getId();
     final String registryUrl = editorComponent.getRegistryUrl();
-    final String reference = editorComponent.getReference();
     final String memoryLimit = editorComponent.getMemoryLimit();
 
     if (editorComponentAlias != null) {
@@ -79,22 +76,15 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .getAttributes()
           .put(EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE, editorComponentAlias);
     }
-
-    final ExtendedPluginFQN fqn;
-    try {
-      if (!isNullOrEmpty(reference)) {
-        workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, reference);
-        fqn = fqnParser.evaluateFqn(reference, contentProvider);
-      } else {
-        final String compositeId =
-            registryUrl != null
-                ? format(COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT, registryUrl, editorId)
-                : editorId;
-        workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, compositeId);
-        fqn = fqnParser.parsePluginFQN(compositeId);
-      }
-    } catch (InfrastructureException e) {
-      throw new DevfileException(e.getMessage(), e);
+    final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(editorComponent, contentProvider);
+    if (!isNullOrEmpty(fqn.getReference())) {
+      workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, fqn.getReference());
+    } else {
+      workspaceConfig
+          .getAttributes()
+          .put(
+              WORKSPACE_TOOLING_EDITOR_ATTRIBUTE,
+              componentFQNParser.getCompositeId(registryUrl, editorId));
     }
     if (memoryLimit != null) {
       workspaceConfig
