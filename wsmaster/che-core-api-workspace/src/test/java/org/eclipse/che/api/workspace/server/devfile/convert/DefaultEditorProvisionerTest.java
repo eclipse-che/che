@@ -229,7 +229,7 @@ public class DefaultEditorProvisionerTest {
   }
 
   @Test
-  public void shouldNonProvisionDefaultEditorIfDevfileAlreadyContainsSuchButWithDifferentVersion()
+  public void shouldNotProvisionDefaultEditorIfDevfileAlreadyContainsSuchButWithDifferentVersion()
       throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);
@@ -249,7 +249,7 @@ public class DefaultEditorProvisionerTest {
   }
 
   @Test
-  public void shouldNonProvisionDefaultEditorIfDevfileAlreadyContainsSuchByReference()
+  public void shouldNotProvisionDefaultEditorIfDevfileAlreadyContainsSuchByReference()
       throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);

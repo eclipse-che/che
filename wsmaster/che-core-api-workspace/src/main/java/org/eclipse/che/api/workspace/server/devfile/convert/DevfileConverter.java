@@ -29,7 +29,6 @@ import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.workspace.server.devfile.DevfileRecipeFormatException;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
-import org.eclipse.che.api.workspace.server.devfile.FileContentProvider.CachingProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.URLFileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentProvisioner;
@@ -116,7 +115,7 @@ public class DevfileConverter {
   public WorkspaceConfig convert(Devfile devfile) throws ServerException {
     try {
       return devFileToWorkspaceConfig(
-          new DevfileImpl(devfile), new CachingProvider(urlFileContentProvider));
+          new DevfileImpl(devfile), FileContentProvider.cached(urlFileContentProvider));
     } catch (DevfileException e) {
       throw new ServerException(e.getMessage(), e);
     }

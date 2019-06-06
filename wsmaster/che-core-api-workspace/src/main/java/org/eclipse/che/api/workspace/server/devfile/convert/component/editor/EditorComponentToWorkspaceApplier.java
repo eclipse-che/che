@@ -16,6 +16,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_ALIAS_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
@@ -85,7 +86,10 @@ public class EditorComponentToWorkspaceApplier implements ComponentToWorkspaceAp
         workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, reference);
         fqn = fqnParser.evaluateFqn(reference, contentProvider);
       } else {
-        String compositeId = registryUrl != null ? registryUrl + "#" + editorId : editorId;
+        final String compositeId =
+            registryUrl != null
+                ? format(COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT, registryUrl, editorId)
+                : editorId;
         workspaceConfig.getAttributes().put(WORKSPACE_TOOLING_EDITOR_ATTRIBUTE, compositeId);
         fqn = fqnParser.parsePluginFQN(compositeId);
       }

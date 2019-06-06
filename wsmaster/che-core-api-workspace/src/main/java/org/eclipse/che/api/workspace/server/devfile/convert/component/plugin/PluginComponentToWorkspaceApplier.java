@@ -16,6 +16,7 @@ import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
 import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_PREFERENCE_ATTR_TEMPLATE;
@@ -77,7 +78,10 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
     final String reference = pluginComponent.getReference();
     final String pluginId = pluginComponent.getId();
     final String registryUrl = pluginComponent.getRegistryUrl();
-    final String compositeId = registryUrl != null ? registryUrl + "#" + pluginId : pluginId;
+    final String compositeId =
+        registryUrl != null
+            ? format(COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT, registryUrl, pluginId)
+            : pluginId;
 
     ExtendedPluginFQN fqn;
     try {
