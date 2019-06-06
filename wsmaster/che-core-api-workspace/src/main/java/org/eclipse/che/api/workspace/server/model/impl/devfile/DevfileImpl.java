@@ -103,9 +103,9 @@ public class DevfileImpl implements Devfile {
 
   @PrePersist
   @PreUpdate
-  protected void validate() {
-    if (metadata == null) {
-      throw new IllegalStateException("The devfile must have metadata.");
+  public void validate() {
+    if (metadata == null || metadata.getName() == null || metadata.getName().isEmpty()) {
+      throw new IllegalStateException("The devfile must have metadata with a non-empty name.");
     }
   }
 

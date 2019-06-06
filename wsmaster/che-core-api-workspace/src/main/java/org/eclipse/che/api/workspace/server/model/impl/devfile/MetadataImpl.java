@@ -14,8 +14,6 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import org.eclipse.che.api.core.model.workspace.devfile.Metadata;
 
 @Embeddable
@@ -32,14 +30,6 @@ public class MetadataImpl implements Metadata {
 
   public MetadataImpl(Metadata metadata) {
     this.name = metadata.getName();
-  }
-
-  @PrePersist
-  @PreUpdate
-  protected void validate() {
-    if (this.name == null || this.name.isEmpty()) {
-      throw new IllegalStateException("Devfile name must be non-empty.");
-    }
   }
 
   @Override

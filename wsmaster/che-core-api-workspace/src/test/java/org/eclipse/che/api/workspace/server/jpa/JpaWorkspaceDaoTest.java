@@ -166,6 +166,60 @@ public class JpaWorkspaceDaoTest {
     assertEquals(result.getConfig().getProjects().get(0).getAttributes().size(), 3);
   }
 
+  @Test(expectedExceptions = IllegalStateException.class)
+  public void shouldNotSaveDevfileWithoutMetadata() {
+    final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+    final WorkspaceImpl workspace = createWorkspaceFromDevfile("id", account, "name");
+    workspace.getDevfile().setMetadata(null);
+
+    try {
+      // persist the workspace
+      manager.getTransaction().begin();
+      manager.persist(account);
+      manager.persist(workspace);
+      manager.getTransaction().commit();
+    } finally {
+      manager.getTransaction().rollback();
+      manager.clear();
+    }
+  }
+
+  @Test(expectedExceptions = IllegalStateException.class)
+  public void shouldNotSaveDevfileWithoutMetadataName() {
+    final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+    final WorkspaceImpl workspace = createWorkspaceFromDevfile("id", account, "name");
+    workspace.getDevfile().getMetadata().setName(null);
+
+    try {
+      // persist the workspace
+      manager.getTransaction().begin();
+      manager.persist(account);
+      manager.persist(workspace);
+      manager.getTransaction().commit();
+    } finally {
+      manager.getTransaction().rollback();
+      manager.clear();
+    }
+  }
+
+  @Test(expectedExceptions = IllegalStateException.class)
+  public void shouldNotSaveDevfileWithEmptyMetadataName() {
+    final AccountImpl account = new AccountImpl("accountId", "namespace", "test");
+    final WorkspaceImpl workspace = createWorkspaceFromDevfile("id", account, "name");
+    workspace.getDevfile().getMetadata().setName("");
+
+    try {
+      // persist the workspace
+      manager.getTransaction().begin();
+      manager.persist(account);
+      manager.persist(workspace);
+      manager.getTransaction().commit();
+    } finally {
+      manager.getTransaction().rollback();
+      manager.clear();
+    }
+  }
+
   private long asLong(String query) {
     return manager.createQuery(query, Long.class).getSingleResult();
   }
