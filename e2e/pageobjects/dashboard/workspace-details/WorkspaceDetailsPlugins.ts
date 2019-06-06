@@ -31,13 +31,13 @@ export class WorkspaceDetailsPlugins {
 
     async enablePlugin(pluginName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.waitPluginDisabling(pluginName, timeout);
-        await this.clickOnPluginListItemSwitcher(pluginName, timeout);
+        await this.clickOnPluginListItemSwitcher(pluginName, undefined, timeout);
         await this.waitPluginEnabling(pluginName, timeout);
     }
 
     async disablePlugin(pluginName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.waitPluginEnabling(pluginName, timeout);
-        await this.clickOnPluginListItemSwitcher(pluginName, timeout);
+        await this.clickOnPluginListItemSwitcher(pluginName, undefined, timeout);
         await this.waitPluginDisabling(pluginName, timeout);
     }
 
@@ -50,16 +50,23 @@ export class WorkspaceDetailsPlugins {
         await this.testWorkspaceUtil.waitPluginAdding(namespace, workspaceName, pluginId);
     }
 
-    private getPluginListItemCssLocator(pluginName: string): string {
+    private getPluginListItemCssLocator(pluginName: string, pluginVersion?: string): string {
+        if (pluginVersion) {
+            return `.plugin-item div[plugin-item-name='${pluginName}'][plugin-item-version='${pluginVersion}']`;
+        }
+
         return `.plugin-item div[plugin-item-name='${pluginName}']`;
     }
 
-    private getPluginListItemSwitcherCssLocator(pluginName: string): string {
-        return `${this.getPluginListItemCssLocator(pluginName)} md-switch`;
+    private getPluginListItemSwitcherCssLocator(pluginName: string, pluginVersion?: string): string {
+        return `${this.getPluginListItemCssLocator(pluginName, pluginVersion)} md-switch`;
     }
 
-    private async clickOnPluginListItemSwitcher(pluginName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const pluginListItemSwitcherLocator = By.css(this.getPluginListItemSwitcherCssLocator(pluginName));
+    private async clickOnPluginListItemSwitcher(pluginName: string,
+        pluginVersion?: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+
+        const pluginListItemSwitcherLocator = By.css(this.getPluginListItemSwitcherCssLocator(pluginName, pluginVersion));
 
         await this.driverHelper.waitAndClick(pluginListItemSwitcherLocator, timeout);
     }
