@@ -109,7 +109,8 @@ public final class TestObjectsFactory {
         asList(
             createDevfileComponent(id + "-component1"), createDevfileComponent(id + "-component2")),
         asList(createDevfileCommand(id + "-command1"), createDevfileCommand(id + "-command2")),
-        singletonMap("attribute1", "value1"), createMetadata(id + "name"));
+        singletonMap("attribute1", "value1"),
+        createMetadata(id + "name"));
   }
 
   private static ComponentImpl createDevfileComponent(String name) {

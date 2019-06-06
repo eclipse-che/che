@@ -11,4 +11,5 @@
 #
 
 ---
-name: petclinic-dev-environment
+metadata:
+  name: petclinic-dev-environment

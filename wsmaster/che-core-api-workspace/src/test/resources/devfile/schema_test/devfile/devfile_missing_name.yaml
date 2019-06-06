@@ -11,4 +11,6 @@
 #
 
 ---
-specVersion: 0.0.1
+apiVersion: 0.0.1
+metadata:
+  something: else

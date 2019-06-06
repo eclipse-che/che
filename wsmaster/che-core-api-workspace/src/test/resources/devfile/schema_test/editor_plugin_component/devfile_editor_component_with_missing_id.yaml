@@ -11,7 +11,8 @@
 #
 
 ---
-specVersion: 0.0.1
-name: petclinic-dev-environment
+apiVersion: 0.0.1
+metadata:
+  name: petclinic-dev-environment
 components:
   - type: cheEditor

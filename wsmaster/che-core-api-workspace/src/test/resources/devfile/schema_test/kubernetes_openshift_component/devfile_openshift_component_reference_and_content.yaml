@@ -11,8 +11,9 @@
 #
 
 ---
-specVersion: 0.0.1
-name: petclinic-dev-environment
+apiVersion: 0.0.1
+metadata:
+  name: petclinic-dev-environment
 components:
   - type: openshift
     referenceContent: it is supposed to be a content of the file specified in the local field

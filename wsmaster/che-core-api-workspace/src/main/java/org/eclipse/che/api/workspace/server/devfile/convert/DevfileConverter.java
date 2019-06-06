@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toCollection;
 import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -90,7 +90,7 @@ public class DevfileConverter {
     }
 
     DevfileImpl devfile = new DevfileImpl();
-    devfile.setApiVersion(CURRENT_SPEC_VERSION);
+    devfile.setApiVersion(CURRENT_API_VERSION);
     devfile.setName(wsConfig.getName());
 
     // Manage projects
@@ -183,7 +183,7 @@ public class DevfileConverter {
     if (Strings.isNullOrEmpty(devFile.getApiVersion())) {
       throw new DevfileFormatException("Provided Devfile has no spec version specified");
     }
-    if (!CURRENT_SPEC_VERSION.equals(devFile.getApiVersion())) {
+    if (!CURRENT_API_VERSION.equals(devFile.getApiVersion())) {
       throw new DevfileFormatException(
           format("Provided Devfile has unsupported version '%s'", devFile.getApiVersion()));
     }

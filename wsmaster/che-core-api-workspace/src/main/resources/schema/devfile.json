@@ -27,8 +27,8 @@
     }
   },
   "required": [
-    "specVersion",
-    "name"
+    "apiVersion",
+    "metadata"
   ],
   "additionalProperties": false,
   "properties": {
@@ -50,7 +50,8 @@
             "petclinic-dev-environment"
           ]
         }
-      }
+      },
+      "required": ["name"]
     },
     "projects": {
       "type": "array",

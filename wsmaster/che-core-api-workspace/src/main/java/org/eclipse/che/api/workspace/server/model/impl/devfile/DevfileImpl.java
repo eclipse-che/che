@@ -96,7 +96,9 @@ public class DevfileImpl implements Devfile {
       this.attributes = new HashMap<>(attributes);
     }
 
-    this.metadata = metadata == null ? new MetadataImpl() : new MetadataImpl(metadata);
+    if (metadata != null) {
+      this.metadata = new MetadataImpl(metadata);
+    }
   }
 
   @PrePersist
@@ -180,6 +182,9 @@ public class DevfileImpl implements Devfile {
 
   @Override
   public MetadataImpl getMetadata() {
+    if (metadata == null) {
+      metadata = new MetadataImpl();
+    }
     return metadata;
   }
 
