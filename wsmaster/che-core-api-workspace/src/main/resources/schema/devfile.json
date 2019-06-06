@@ -189,8 +189,8 @@
                   "alias": {},
                   "id": {
                     "type": "string",
-                    "description": "Describes the component id. It has the following format: [{REGISTRY_URL}/]{plugin/editor PUBLISHER}/{plugin/editor NAME}/{plugin/editor VERSION}, where {REGISTRY_URL}/ is an optional part.",
-                    "pattern": "^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$",
+                    "description": "Describes the component id. It has the following format: {plugin/editor PUBLISHER}/{plugin/editor NAME}/{plugin/editor VERSION}",
+                    "pattern": "[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$",
                     "examples": [
                       "eclipse/maven-jdk8/1.0.0"
                     ]
@@ -205,6 +205,7 @@
                   "registryUrl": {
                     "description": "Describes URL of custom plugin registry.",
                     "type": "string",
+                    "pattern": "^((https?://)[a-zA-Z0-9_\\-./]+)+",
                     "examples": [
                       "https://che-plugin-registry.openshift.io/"
                     ]

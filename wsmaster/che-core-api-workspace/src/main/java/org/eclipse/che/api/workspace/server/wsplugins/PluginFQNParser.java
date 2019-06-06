@@ -66,7 +66,7 @@ public class PluginFQNParser {
           + VERSION_PATTERN
           + ")";
   private static final Pattern PLUGIN_PATTERN =
-      Pattern.compile("((?<url>" + URL_PATTERN + ")(/?)(#?))?(?<id>" + ID_PATTERN + ")?");
+      Pattern.compile("((?<url>" + URL_PATTERN + ")/?#?)?(?<id>" + ID_PATTERN + ")?");
 
   /**
    * Parses a workspace attributes map into a collection of {@link PluginFQN}.
