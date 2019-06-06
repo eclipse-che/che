@@ -34,14 +34,14 @@ export class PreviewWidget {
         await this.driverHelper.waitDisappearance(By.css('div.theia-mini-browser'));
     }
 
-    async waitSpringAvailable(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+    async waitContentAvailable(contentLocator: By,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5) {
-        const titleLocator: By = By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']');
 
         await this.waitAndSwitchToWidgetFrame();
 
         await this.driverHelper.getDriver().wait(async () => {
-            const isApplicationTitleVisible: boolean = await this.driverHelper.isVisible(titleLocator);
+            const isApplicationTitleVisible: boolean = await this.driverHelper.isVisible(contentLocator);
 
             if (isApplicationTitleVisible) {
                 await this.driverHelper.getDriver().switchTo().defaultContent();

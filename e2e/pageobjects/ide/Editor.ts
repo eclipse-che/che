@@ -135,7 +135,7 @@ export class Editor {
         }, timeout);
     }
 
-    async waitSuccessBuildText(editorTabTitle: string,
+    async waitForText(editorTabTitle: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 

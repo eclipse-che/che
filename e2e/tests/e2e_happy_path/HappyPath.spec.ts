@@ -20,6 +20,7 @@ import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { GitHubPlugin } from '../../pageobjects/ide/GitHubPlugin';
 import { TestConstants } from '../../TestConstants';
 import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
+import { By } from 'selenium-webdriver';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -40,6 +41,8 @@ const javaFileName: string = 'PetClinicApplication.java';
 const pathToYamlFolder: string = projectName;
 const yamlFileName: string = 'devfile.yaml';
 const expectedGithubChanges: string = '_remote.repositories %3F/.m2/repository/antlr/antlr/2.7.7\n' + 'U';
+const springTitleLocator: By = By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']');
+
 
 suite('Ide checks', async () => {
     test('Build application', async () => {
@@ -58,7 +61,7 @@ suite('Ide checks', async () => {
         await editor.waitEditorAvailable('build-output.txt');
         await editor.clickOnTab('build-output.txt');
         await editor.waitTabFocused('build-output.txt');
-        await editor.waitSuccessBuildText('build-output.txt', 180000, 5000);
+        await editor.waitForText('build-output.txt', 180000, 5000);
     });
 
     test('Run application', async () => {
@@ -73,7 +76,7 @@ suite('Ide checks', async () => {
 
         await ide.waitNotification('Redirect is now enabled on port 8080', 120000);
         await ide.clickOnNotificationButton('Redirect is now enabled on port 8080', 'Open Link');
-        await previewWidget.waitSpringAvailable(60000, 10000);
+        await previewWidget.waitContentAvailable(springTitleLocator, 60000, 10000);
         await rightToolbar.clickOnToolIcon('Preview');
         await previewWidget.waitPreviewWidgetAbsence();
     });
