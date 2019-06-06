@@ -34,8 +34,6 @@ public interface ComponentDto extends Component {
 
   ComponentDto withType(String type);
 
-  // editor/plugin
-
   @Override
   String getId();
 
@@ -64,7 +62,6 @@ public interface ComponentDto extends Component {
 
   ComponentDto withReference(String reference);
 
-  // k8s/OS
   @Override
   String getReferenceContent();
 
@@ -85,8 +82,6 @@ public interface ComponentDto extends Component {
   void setSelector(Map<String, String> selector);
 
   ComponentDto withSelector(Map<String, String> selector);
-
-  // dockerimage
 
   @Override
   String getImage();

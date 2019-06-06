@@ -155,7 +155,7 @@ the reference field:
      reference: https://raw.githubusercontent.com.../plugin/1.0.1/meta.yaml
 ```
 
-Please note it's not possible to mix id and reference in single plugin definition, they are distinctive fields. 
+Please note it's not possible to mix id and reference in single plugin definition, they are mutually exclusive. 
 
 
 For each of types above it is also possible to specify container(s) memory limit as follows:
