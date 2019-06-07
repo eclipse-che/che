@@ -35,15 +35,15 @@ import org.leadpony.justify.api.ProblemHandler;
 public class DevfileSchemaValidator {
 
   private final JsonValidationService service = JsonValidationService.newInstance();
-  private ObjectMapper yamlReader;
-  private ObjectMapper jsonWriter;
+  private ObjectMapper yamlMapper;
+  private ObjectMapper jsonMapper;
   private JsonSchema schema;
   private ErrorMessageComposer errorMessageComposer;
 
   @Inject
   public DevfileSchemaValidator(DevfileSchemaProvider schemaProvider) {
-    this.yamlReader = new ObjectMapper(new YAMLFactory());
-    this.jsonWriter = new ObjectMapper();
+    this.yamlMapper = new ObjectMapper(new YAMLFactory());
+    this.jsonMapper = new ObjectMapper();
     this.errorMessageComposer = new ErrorMessageComposer();
     try {
       this.schema = service.readSchema(schemaProvider.getAsReader());
@@ -52,23 +52,39 @@ public class DevfileSchemaValidator {
     }
   }
 
-  public JsonNode validateBySchema(String yamlContent) throws DevfileFormatException {
+  public JsonNode validateYaml(String yamlContent) throws DevfileFormatException {
+    return validate(yamlContent, yamlMapper);
+  }
+
+  public JsonNode validateJson(String jsonContent) throws DevfileFormatException {
+    return validate(jsonContent, jsonMapper);
+  }
+
+  private JsonNode validate(String content, ObjectMapper mapper) throws DevfileFormatException {
     JsonNode contentNode;
     try {
-      contentNode = yamlReader.readTree(yamlContent);
+      contentNode = mapper.readTree(content);
+      validate(contentNode);
+      return contentNode;
+    } catch (IOException e) {
+      throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
+    }
+  }
+
+  private void validate(JsonNode contentNode) throws DevfileFormatException {
+    try {
       List<Problem> validationErrors = new ArrayList<>();
       ProblemHandler handler = ProblemHandler.collectingTo(validationErrors);
       try (JsonReader reader =
           service.createReader(
-              new StringReader(jsonWriter.writeValueAsString(contentNode)), schema, handler)) {
+              new StringReader(jsonMapper.writeValueAsString(contentNode)), schema, handler)) {
         reader.read();
       }
-      if (validationErrors.isEmpty()) {
-        return contentNode;
+      if (!validationErrors.isEmpty()) {
+        String error = errorMessageComposer.extractMessages(validationErrors, new StringBuilder());
+        throw new DevfileFormatException(
+            format("Devfile schema validation failed. Error: %s", error));
       }
-      String error = errorMessageComposer.extractMessages(validationErrors, new StringBuilder());
-      throw new DevfileFormatException(
-          format("Devfile schema validation failed. Error: %s", error));
     } catch (IOException e) {
       throw new DevfileFormatException("Unable to validate Devfile. Error: " + e.getMessage());
     }

@@ -36,6 +36,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Stage;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -71,6 +72,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
+import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao.RemoveWorkspaceBeforeAccountRemovedEventSubscriber;
 import org.eclipse.che.api.workspace.server.jpa.WorkspaceJpaModule;
@@ -263,6 +265,10 @@ public class CascadeRemovalTest {
                 bind(AccountManager.class);
                 bind(WorkspaceSharedPool.class)
                     .toInstance(new WorkspaceSharedPool("cached", null, null, null));
+
+                MapBinder.newMapBinder(binder(), String.class, ComponentIntegrityValidator.class)
+                    .addBinding("kubernetes")
+                    .toInstance(mock(ComponentIntegrityValidator.class));
               }
             });
 

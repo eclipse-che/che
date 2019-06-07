@@ -42,6 +42,9 @@ import org.eclipse.che.api.core.model.workspace.WorkspaceConfig;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.notification.EventService;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
+import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
@@ -73,6 +76,7 @@ public class WorkspaceManager {
   private final AccountManager accountManager;
   private final EventService eventService;
   private final WorkspaceValidator validator;
+  private final DevfileIntegrityValidator devfileIntegrityValidator;
 
   @Inject
   public WorkspaceManager(
@@ -80,12 +84,14 @@ public class WorkspaceManager {
       WorkspaceRuntimes runtimes,
       EventService eventService,
       AccountManager accountManager,
-      WorkspaceValidator validator) {
+      WorkspaceValidator validator,
+      DevfileIntegrityValidator devfileIntegrityValidator) {
     this.workspaceDao = workspaceDao;
     this.runtimes = runtimes;
     this.accountManager = accountManager;
     this.eventService = eventService;
     this.validator = validator;
+    this.devfileIntegrityValidator = devfileIntegrityValidator;
   }
 
   /**
@@ -120,15 +126,44 @@ public class WorkspaceManager {
     return workspace;
   }
 
+  /**
+   * Creates a workspace out of a devfile.
+   *
+   * <p>The devfile should have been validated using the {@link
+   * DevfileIntegrityValidator#validateDevfile(Devfile)}. This method does rest of the validation
+   * and actually creates the workspace.
+   *
+   * @param devfile the devfile describing the workspace
+   * @param namespace workspace name is unique in this namespace
+   * @param attributes workspace instance attributes
+   * @param contentProvider the content provider to use for resolving content references in the
+   *     devfile
+   * @return new workspace instance
+   * @throws NullPointerException when either {@code config} or {@code namespace} is null
+   * @throws NotFoundException when account with given id was not found
+   * @throws ConflictException when any conflict occurs (e.g Workspace with such name already exists
+   *     for {@code owner})
+   * @throws ServerException when any other error occurs
+   * @throws ValidationException when incoming configuration or attributes are not valid
+   */
   @Traced
   public WorkspaceImpl createWorkspace(
-      Devfile devfile, String namespace, Map<String, String> attributes)
+      Devfile devfile,
+      String namespace,
+      Map<String, String> attributes,
+      FileContentProvider contentProvider)
       throws ServerException, NotFoundException, ConflictException, ValidationException {
     TracingTags.STACK_ID.set(() -> attributes.getOrDefault("stackId", "no stack"));
 
     requireNonNull(devfile, "Required non-null devfile");
     requireNonNull(namespace, "Required non-null namespace");
     validator.validateAttributes(attributes);
+
+    try {
+      devfileIntegrityValidator.validateContentReferences(devfile, contentProvider);
+    } catch (DevfileFormatException e) {
+      throw new ValidationException(e.getMessage(), e);
+    }
 
     WorkspaceImpl workspace =
         doCreateWorkspace(devfile, accountManager.getByName(namespace), attributes, false);

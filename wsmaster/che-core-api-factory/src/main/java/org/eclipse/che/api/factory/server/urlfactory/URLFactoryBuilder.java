@@ -104,7 +104,7 @@ public class URLFactoryBuilder {
       return Optional.empty();
     }
     try {
-      DevfileImpl devfile = devfileManager.parse(devfileYamlContent);
+      DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent);
       WorkspaceConfigImpl wsConfig =
           devfileManager.createWorkspaceConfig(devfile, fileContentProvider);
       FactoryDto factoryDto =

@@ -89,7 +89,7 @@ public class DevfileServiceTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile/devfile.yaml"));
     DevfileImpl devfile = createDevfile(yamlContent);
     WorkspaceImpl ws = createWorkspace(WorkspaceStatus.STOPPED);
-    when(devfileManager.parse(anyString())).thenReturn(devfile);
+    when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
     when(devfileManager.createWorkspace(any(DevfileImpl.class), any())).thenReturn(ws);
     final Response response =
         given()
