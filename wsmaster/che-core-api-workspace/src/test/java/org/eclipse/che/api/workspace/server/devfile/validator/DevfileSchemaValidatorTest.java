@@ -90,7 +90,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "devfile/devfile_missing_name.yaml",
-        "(/metadata):The object must have a property whose name is \"name\"."
+        "(/metadata/something):The object must not have a property whose name is \"something\".(/metadata):The object must have a property whose name is \"name\"."
       },
       {
         "devfile/devfile_missing_api_version.yaml",
