@@ -61,7 +61,7 @@ suite('Ide checks', async () => {
         await editor.waitEditorAvailable('build-output.txt');
         await editor.clickOnTab('build-output.txt');
         await editor.waitTabFocused('build-output.txt');
-        await editor.waitForText('build-output.txt', 180000, 5000);
+        await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 180000, 5000);
     });
 
     test('Run application', async () => {

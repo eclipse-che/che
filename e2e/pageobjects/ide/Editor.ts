@@ -135,7 +135,8 @@ export class Editor {
         }, timeout);
     }
 
-    async waitForText(editorTabTitle: string,
+    async followAndWaitForText(editorTabTitle: string,
+        expectedText: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 
@@ -143,7 +144,7 @@ export class Editor {
             await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, Key.END));
             const editorText: string = await this.getEditorVisibleText();
 
-            const isEditorContainText: boolean = editorText.includes('[INFO] BUILD SUCCESS');
+            const isEditorContainText: boolean = editorText.includes(expectedText);
 
             if (isEditorContainText) {
                 return true;
