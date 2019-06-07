@@ -51,6 +51,7 @@
           ]
         }
       },
+      "additionalProperties": false,
       "required": ["name"]
     },
     "projects": {
