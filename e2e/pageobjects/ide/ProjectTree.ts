@@ -18,8 +18,8 @@ import { Editor } from './Editor';
 
 @injectable()
 export class ProjectTree {
-
     private static readonly PROJECT_TREE_CONTAINER_CSS: string = '#theia-left-side-panel .theia-TreeContainer';
+
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Ide) private readonly ide: Ide,
@@ -52,14 +52,23 @@ export class ProjectTree {
     }
 
     async waitProjectTreeContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        await this.driverHelper.waitVisibility(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), timeout);
+        await this.driverHelper.waitPresence(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), timeout);
     }
 
-    async waitProjectTreeContainerClosed(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+    async waitProjectTreeContainerClosed(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+        polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+
         await this.driverHelper.waitDisappearance(By.css(ProjectTree.PROJECT_TREE_CONTAINER_CSS), attempts, polling);
     }
 
-    async waitItemDisappearance(itemPath: string, attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+    async waitItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(By.css(this.getItemCss(itemPath)), timeout);
+    }
+
+    async waitItemDisappearance(itemPath: string,
+        attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+        polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
+
         await this.driverHelper.waitDisappearance(By.css(this.getItemCss(itemPath)), attempts, polling);
     }
 
@@ -123,15 +132,19 @@ export class ProjectTree {
         await this.clickOnItem(`${pathToItem}/${fileName}`, timeout);
 
         // check file appearance in the editor
-        await this.editor.waitEditorOpened(timeout);
+        await this.editor.waitEditorOpened(fileName, timeout);
         await this.editor.waitTab(fileName);
     }
 
-    async waitProjectImported(projectName: string, rootSubItem: string, attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
-        visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5, triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
+    async waitProjectImported(projectName: string,
+        rootSubItem: string,
+        attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS,
+        visibilityItemPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5,
+        triesPolling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 30) {
 
         const rootItem: string = `/${projectName}`;
         const rootItemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}`));
+        const rootSubitemLocator: By = By.css(this.getTreeItemCssLocator(`/${projectName}/${rootSubItem}`));
 
         for (let i = 0; i < attempts; i++) {
             const isProjectFolderVisible = await this.driverHelper.waitVisibilityBoolean(rootItemLocator, attempts, visibilityItemPolling);
@@ -148,7 +161,9 @@ export class ProjectTree {
             await this.expandItem(rootItem);
             await this.waitItemExpanded(rootItem);
 
-            if (!isProjectFolderVisible) {
+            const isRootSubItemVisible = await this.driverHelper.waitVisibilityBoolean(rootSubitemLocator, attempts, visibilityItemPolling);
+
+            if (!isRootSubItemVisible) {
                 await this.driverHelper.reloadPage();
                 await this.driverHelper.wait(triesPolling);
                 await this.ide.waitAndSwitchToIdeFrame();
