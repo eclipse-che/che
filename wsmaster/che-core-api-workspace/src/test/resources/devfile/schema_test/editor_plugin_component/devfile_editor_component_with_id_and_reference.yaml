@@ -10,8 +10,9 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
-specVersion: 0.0.1
-name: terminal-sample
+apiVersion: 1.0.0
+metadata:
+  name: terminal-sample
 components:
   - type: cheEditor
     reference: https://gist.githubusercontent.com/sleshchenko/e132bd9d37e8cf8f2c0a2b4929ecda3e/raw/9c28962cc3a24dcaf357b5716d98068734f51165/meta.yaml
