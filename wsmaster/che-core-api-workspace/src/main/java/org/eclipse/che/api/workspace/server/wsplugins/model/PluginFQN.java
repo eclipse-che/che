@@ -17,7 +17,8 @@ import java.net.URI;
 import java.util.Objects;
 
 /**
- * Represents full information about plugin, including registry address and id.
+ * Represents full information about plugin, including registry address and id, or direct reference
+ * to plugin descriptor. Should NOT contain both reference and id simultaneously.
  *
  * @author Max Shaposhnyk
  */
@@ -26,10 +27,15 @@ public class PluginFQN {
 
   private URI registry;
   private String id;
+  private String reference;
 
   public PluginFQN(URI registry, String id) {
     this.registry = registry;
     this.id = id;
+  }
+
+  public PluginFQN(String reference) {
+    this.reference = reference;
   }
 
   public URI getRegistry() {
@@ -48,9 +54,17 @@ public class PluginFQN {
     this.id = id;
   }
 
+  public String getReference() {
+    return reference;
+  }
+
+  public void setReference(String reference) {
+    this.reference = reference;
+  }
+
   @Override
   public int hashCode() {
-    return Objects.hash(getRegistry(), getId());
+    return Objects.hash(getRegistry(), getId(), getReference());
   }
 
   @Override
@@ -63,11 +77,13 @@ public class PluginFQN {
     }
     PluginFQN other = (PluginFQN) obj;
     return Objects.equals(getId(), other.getId())
-        && Objects.equals(getRegistry(), other.getRegistry());
+        && Objects.equals(getRegistry(), other.getRegistry())
+        && Objects.equals(getReference(), other.getReference());
   }
 
   @Override
   public String toString() {
-    return String.format("{id:%s, registry:%s}", this.id, this.registry);
+    return String.format(
+        "{id:%s, registry:%s, reference:%s}", this.id, this.registry, this.reference);
   }
 }

@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertTrue;
@@ -24,10 +26,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.api.workspace.shared.Constants;
+import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -36,6 +40,8 @@ import org.testng.annotations.Test;
 
 @Listeners(MockitoTestNGListener.class)
 public class PluginFQNParserTest {
+
+  @Mock private FileContentProvider fileContentProvider;
 
   private PluginFQNParser parser;
 
@@ -65,6 +71,14 @@ public class PluginFQNParserTest {
   public void shouldParsePluginOrEditorToExtendedFQN(String plugin, ExtendedPluginFQN expected)
       throws Exception {
     ExtendedPluginFQN actual = parser.parsePluginFQN(plugin);
+    assertEquals(actual, expected);
+  }
+
+  @Test(dataProvider = "validPluginReferencesProvider")
+  public void shouldParsePluginOrEditorFromReference(
+      String reference, String pluginYaml, ExtendedPluginFQN expected) throws Exception {
+    when(fileContentProvider.fetchContent(eq(reference))).thenReturn(pluginYaml);
+    ExtendedPluginFQN actual = parser.evaluateFqn(reference, fileContentProvider);
     assertEquals(actual, expected);
   }
 
@@ -134,7 +148,6 @@ public class PluginFQNParserTest {
       {formatPlugin("http://testregistry:8080", "name/version")},
       {formatPlugin("http://testregistry:8080", "id:version")},
       {formatPlugin("http://testregistry:8080", "publisher/name:version")},
-      {formatPlugin("http://testregistry:8080", "")}
     };
   }
 
@@ -147,7 +160,8 @@ public class PluginFQNParserTest {
     PluginFQN noRegistry = new PluginFQN(null, "publisher/pluginnoregistry/2.0");
     PluginFQN pathRegistry =
         new PluginFQN(
-            URI.create("http://registry/multiple/path/"), "publisher/pluginpathregistry/3.0");
+            URI.create("http://registry/multiple/path"), "publisher/pluginpathregistry/3.0");
+    PluginFQN reference = new PluginFQN("http://mysite:8080/multiple/path/meta.yaml");
     return new AttributeParsingTestCase[][] {
       {
         new AttributeParsingTestCase(
@@ -175,7 +189,8 @@ public class PluginFQNParserTest {
                 null,
                 formatPlugin(
                     new PluginFQN(
-                        URI.create("https://registry:8080/some/path/v3"), "publisher/editor/ver"))))
+                        URI.create("https://registry:8080/some/path/v3/"),
+                        "publisher/editor/ver"))))
       },
       {
         new AttributeParsingTestCase(
@@ -188,6 +203,13 @@ public class PluginFQNParserTest {
             "Test plugin with multi-level path in registry",
             ImmutableList.of(basicEditor, pathRegistry),
             createAttributes(formatPlugin(basicEditor), formatPlugins(pathRegistry)))
+      },
+      {
+        new AttributeParsingTestCase(
+            "Test plugin described by reference",
+            ImmutableList.of(basicEditor, reference),
+            createAttributes(
+                formatPlugin(basicEditor), "http://mysite:8080/multiple/path/meta.yaml"))
       },
       {
         new AttributeParsingTestCase(
@@ -241,7 +263,7 @@ public class PluginFQNParserTest {
   public static Object[][] validPluginStringProvider() {
     return new Object[][] {
       {
-        "http://registry:8080/publisher/editor/ver",
+        "http://registry:8080#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("http://registry:8080"),
             "publisher/editor/ver",
@@ -250,7 +272,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://registry:8080/publisher/editor/ver",
+        "https://registry:8080#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://registry:8080"),
             "publisher/editor/ver",
@@ -259,7 +281,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://che-registry.com.ua/publisher/editor/ver",
+        "https://che-registry.com.ua#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://che-registry.com.ua"),
             "publisher/editor/ver",
@@ -268,7 +290,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://che-registry.com.ua/plugins/publisher/editor/ver",
+        "https://che-registry.com.ua/plugins#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://che-registry.com.ua/plugins"),
             "publisher/editor/ver",
@@ -277,7 +299,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://che-registry.com.ua/plugins/v3/publisher/editor/ver",
+        "https://che-registry.com.ua/plugins/v3/#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://che-registry.com.ua/plugins/v3"),
             "publisher/editor/ver",
@@ -286,7 +308,7 @@ public class PluginFQNParserTest {
             "ver")
       },
       {
-        "https://che-registry.com.ua/some/long/path/publisher/editor/ver",
+        "https://che-registry.com.ua/some/long/path#publisher/editor/ver",
         new ExtendedPluginFQN(
             URI.create("https://che-registry.com.ua/some/long/path"),
             "publisher/editor/ver",
@@ -318,6 +340,46 @@ public class PluginFQNParserTest {
     };
   }
 
+  // Objects are
+  //   (String reference, String yamlContent, ExtendedPluginFQN expectedPlugin)
+  @DataProvider(name = "validPluginReferencesProvider")
+  public static Object[][] validPluginReferencesProvider() {
+    return new Object[][] {
+      {
+        "http://registry:8080/publisher/editor/ver/meta.yaml",
+        "apiVersion: v2\n"
+            + "publisher: publisher\n"
+            + "name: editor\n"
+            + "version: ver\n"
+            + "type: Che Editor",
+        new ExtendedPluginFQN(
+            "http://registry:8080/publisher/editor/ver/meta.yaml", "publisher", "editor", "ver")
+      },
+      {
+        "https://pastebin.com/1ij3475rh",
+        "apiVersion: v2\n"
+            + "publisher: publisher\n"
+            + "name: editor\n"
+            + "version: 0.0.5\n"
+            + "type: Che Editor",
+        new ExtendedPluginFQN("https://pastebin.com/1ij3475rh", "publisher", "editor", "0.0.5")
+      },
+      {
+        "https://che-registry.com.ua/publisher/plugin/0.0.5/meta.yaml",
+        "apiVersion: v2\n"
+            + "publisher: publisher\n"
+            + "name: plugin123\n"
+            + "version: 0.0.5\n"
+            + "type: Che Plugin",
+        new ExtendedPluginFQN(
+            "https://che-registry.com.ua/publisher/plugin/0.0.5/meta.yaml",
+            "publisher",
+            "plugin123",
+            "0.0.5")
+      }
+    };
+  }
+
   private static String[] formatPlugins(PluginFQN... plugins) {
     return Arrays.stream(plugins).map(PluginFQNParserTest::formatPlugin).toArray(String[]::new);
   }
@@ -331,7 +393,7 @@ public class PluginFQNParserTest {
     if (registry == null) {
       return id;
     } else {
-      return registry + "/" + id;
+      return registry + "#" + id;
     }
   }
 

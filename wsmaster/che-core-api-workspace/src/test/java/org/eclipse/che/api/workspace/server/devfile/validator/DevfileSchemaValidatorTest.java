@@ -62,6 +62,9 @@ public class DevfileSchemaValidatorTest {
       },
       {"dockerimage_component/devfile_dockerimage_component.yaml"},
       {"dockerimage_component/devfile_dockerimage_component_without_entry_point.yaml"},
+      {"editor_plugin_component/devfile_editor_component_with_custom_registry.yaml"},
+      {"editor_plugin_component/devfile_editor_plugins_components_with_memory_limit.yaml"},
+      {"editor_plugin_component/devfile_plugin_component_with_reference.yaml"}
     };
   }
 
@@ -129,15 +132,21 @@ public class DevfileSchemaValidatorTest {
       // cheEditor/chePlugin component model testing
       {
         "editor_plugin_component/devfile_editor_component_with_missing_id.yaml",
-        "(/components/0):The object must have a property whose name is \"id\"."
+        "Exactly one of the following sets of problems must be resolved.: [(/components/0):The object must have a property whose name is \"id\".(/components/0):The object must have a property whose name is \"reference\".]"
       },
       {
-        "editor_plugin_component/devfile_editor_component_with_indistinctive_field_reference.yaml",
-        "(/components/0/reference):The object must not have a property whose name is \"reference\"."
+        "editor_plugin_component/devfile_editor_component_with_id_and_reference.yaml",
+        "Exactly one of the following sets of problems must be resolved.: "
+            + "[(/components/0):The object must not have a property whose name is \"reference\"."
+            + "(/components/0):The object must not have a property whose name is \"id\".]"
+      },
+      {
+        "editor_plugin_component/devfile_editor_component_with_indistinctive_field.yaml",
+        "(/components/0/unknown):The object must not have a property whose name is \"unknown\"."
       },
       {
         "editor_plugin_component/devfile_editor_component_without_version.yaml",
-        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
+        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
       },
       {
         "editor_plugin_component/devfile_editor_plugins_components_with_invalid_memory_limit.yaml",
@@ -145,7 +154,15 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "editor_plugin_component/devfile_editor_component_with_multiple_colons_in_id.yaml",
-        "(/components/0/id):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+/)?[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
+        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
+      },
+      {
+        "editor_plugin_component/devfile_editor_component_with_registry_in_id.yaml",
+        "(/components/0/id):The string value must match the pattern \"[a-z0-9_\\-.]+/[a-z0-9_\\-.]+/[a-z0-9_\\-.]+$\"."
+      },
+      {
+        "editor_plugin_component/devfile_editor_component_with_bad_registry.yaml",
+        "(/components/0/registryUrl):The string value must match the pattern \"^(https?://)[a-zA-Z0-9_\\-./]+\"."
       },
       // kubernetes/openshift component model testing
       {

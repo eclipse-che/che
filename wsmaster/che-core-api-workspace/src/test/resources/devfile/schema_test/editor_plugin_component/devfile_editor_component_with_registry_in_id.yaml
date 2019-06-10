@@ -10,9 +10,9 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
+---
 specVersion: 0.0.1
-name: terminal-sample
+name: petclinic-dev-environment
 components:
   - type: cheEditor
-    registryUrl: https://che-plugin-registry.openshift.io/
-    id: eclipse/theia-ide/0.0.1
+    id: https://myregistry.com/eclipse/theia/dev:v1

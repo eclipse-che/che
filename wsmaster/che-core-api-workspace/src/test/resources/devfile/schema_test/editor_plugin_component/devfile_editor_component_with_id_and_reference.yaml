@@ -10,10 +10,10 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
----
 specVersion: 0.0.1
-name: petclinic-dev-environment
+name: terminal-sample
 components:
   - type: cheEditor
-    id: eclipse/theia/0.0.3
-    reference: petclinic.yaml
+    reference: https://gist.githubusercontent.com/sleshchenko/e132bd9d37e8cf8f2c0a2b4929ecda3e/raw/9c28962cc3a24dcaf357b5716d98068734f51165/meta.yaml
+    id: eclipse/che-theia/1.0.0
+

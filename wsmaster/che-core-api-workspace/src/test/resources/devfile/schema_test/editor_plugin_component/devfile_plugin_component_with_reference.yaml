@@ -13,6 +13,5 @@
 specVersion: 0.0.1
 name: terminal-sample
 components:
-  - type: cheEditor
-    registryUrl: https://che-plugin-registry.openshift.io/
-    id: eclipse/theia-ide/0.0.1
+  - type: chePlugin
+    reference: https://raw.githubusercontent.com/eclipse/che-plugin-registry/myplugin/meta.yaml

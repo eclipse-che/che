@@ -130,6 +130,34 @@ It is allowed to have several `chePlugin` components.
 
 Both types above using id, which is slash-separated publisher, name and version of plugin from Che Plugin registry.  
 List of available Che plugins and more information about registry can be found on https://github.com/eclipse/che-plugin-registry.
+
+It is also possible to specify own registry for the cheEditor and chePlugin types, by using
+`registryUrl` parameter as follows:
+
+```
+...
+  components:
+   - alias: exec-plugin
+     type: chePlugin
+     registryUrl: https://my-customregistry.com
+     id: eclipse/che-machine-exec-plugin/0.0.1
+```
+
+As an alternative way of specifying editor or plugin, instead of using plugin id (+ optional registry),
+it is possible to provide direct link to the plugin descriptor (typically, named `meta.yaml`) by using
+the reference field:
+
+```
+...
+  components:
+   - alias: exec-plugin
+     type: chePlugin
+     reference: https://raw.githubusercontent.com.../plugin/1.0.1/meta.yaml
+```
+
+Please note it's not possible to mix id and reference in single plugin definition, they are mutually exclusive. 
+
+
 For each of types above it is also possible to specify container(s) memory limit as follows:
 ```
 ...

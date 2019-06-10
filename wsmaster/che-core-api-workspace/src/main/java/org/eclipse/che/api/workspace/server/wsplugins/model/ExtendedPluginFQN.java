@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.net.URI;
 import java.util.Objects;
 
@@ -31,6 +32,17 @@ public class ExtendedPluginFQN extends PluginFQN {
     this.publisher = publisher;
     this.name = name;
     this.version = version;
+  }
+
+  public ExtendedPluginFQN(String reference, String publisher, String name, String version) {
+    super(reference);
+    this.publisher = publisher;
+    this.name = name;
+    this.version = version;
+  }
+
+  public ExtendedPluginFQN(String reference) {
+    super(reference);
   }
 
   public String getPublisher() {
@@ -57,6 +69,7 @@ public class ExtendedPluginFQN extends PluginFQN {
     this.version = version;
   }
 
+  @JsonIgnore
   public String getPublisherAndName() {
     return publisher + "/" + name;
   }
@@ -86,7 +99,7 @@ public class ExtendedPluginFQN extends PluginFQN {
   @Override
   public String toString() {
     return String.format(
-        "{id:%s, registry:%s, publisher:%s, name:%s, version:%s}",
-        getId(), getRegistry(), getPublisher(), getName(), getVersion());
+        "{id:%s, registry:%s, publisher:%s, name:%s, version:%s, reference:%s}",
+        getId(), getRegistry(), getPublisher(), getName(), getVersion(), getReference());
   }
 }
