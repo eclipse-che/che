@@ -39,6 +39,9 @@ class CheReporter extends mocha.reporters.Spec {
       TS_SELENIUM_WORKSPACE_STATUS_POLLING: ${TestConstants.TS_SELENIUM_WORKSPACE_STATUS_POLLING}
       TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS: ${TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_ATTEMPTS}
       TS_SELENIUM_PLUGIN_PRECENCE_POLLING: ${TestConstants.TS_SELENIUM_PLUGIN_PRECENCE_POLLING}
+      TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: ${TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME}
+      TS_SELENIUM_USERNAME: ${TestConstants.TS_SELENIUM_USERNAME}
+      TS_SELENIUM_PASSWORD: ${TestConstants.TS_SELENIUM_PASSWORD}
 
 ########################################################
       `;
@@ -64,26 +67,18 @@ class CheReporter extends mocha.reporters.Spec {
       const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
 
       // create reporter dir if not exist
-      await fs.exists(reportDirPath, async isDirExist => {
-        if (!isDirExist) {
-          await fs.mkdir(reportDirPath, err => {
-            if (err) {
-              throw err;
-            }
-          });
-        }
-      });
+      const reportDirExists: boolean = fs.existsSync(reportDirPath);
 
-      // create dir for collected data if not exist
-      await fs.exists(testReportDirPath, async isDirExist => {
-        if (!isDirExist) {
-          await fs.mkdir(testReportDirPath, err => {
-            if (err) {
-              throw err;
-            }
-          });
-        }
-      });
+      if (!reportDirExists) {
+        fs.mkdirSync(reportDirPath);
+      }
+
+      // create dir for failed test report if not exist
+      const testReportDirExists: boolean = fs.existsSync(testReportDirPath);
+
+      if (!testReportDirExists) {
+        fs.mkdirSync(testReportDirPath);
+      }
 
       // take screenshot and write to file
       const screenshot: string = await driver.get().takeScreenshot();
@@ -96,8 +91,8 @@ class CheReporter extends mocha.reporters.Spec {
       const pageSourceStream = fs.createWriteStream(pageSourceFileName);
       pageSourceStream.write(new Buffer(pageSource));
       pageSourceStream.end();
-
     });
+
   }
 }
 

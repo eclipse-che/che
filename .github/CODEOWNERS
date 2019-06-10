@@ -63,7 +63,7 @@ wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabas
 
 # deploy
 deploy/** @l0rd @sleshchenko
-deploy/openshift/templates/che-monitoring.yaml @skabashnyuk @metlos
+deploy/openshift/templates/monitoring/** @skabashnyuk @metlos
 
 # selenium tests
 selenium/** @musienko-maxim @dmytro-ndp @Ohrimenko1988
