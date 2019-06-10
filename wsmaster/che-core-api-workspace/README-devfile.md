@@ -23,7 +23,7 @@ Example of the minimal devfile with project and standard plugins set (Theia edit
 ```
 
 ---
-apiVersion: 0.0.1
+apiVersion: 1.0.0
 metadata:
   name: petclinic-dev-environment
 projects:
@@ -75,7 +75,7 @@ cloned to.
 As an example, consider this devfile:
 
 ```yaml
-apiVersion: 0.0.1
+apiVersion: 1.0.0
 metadata:
   name: example-devfile
 projects:
@@ -280,7 +280,7 @@ If editor is not specified Devfile then default one will be provided. In case wh
 Default value is `false` and means that Devfile needs default editor to be provisioned if no one is defined.
 Example of Devfile without editor
 ```yaml
-apiVersion: 0.0.1
+apiVersion: 1.0.0
 metadata:
   name: petclinic-dev-environment
 components:
@@ -297,7 +297,7 @@ Sometimes it may be needed to disable data persistence for some reasons, like wh
 To achieve it the `persistVolumes` devfile attribute should be used. Default value is `true`, and in case of `false` `emptyDir` volumes will be used for configured volumes and PVC.
 Example of Devfile with ephemeral mode enabled
 ```yaml
-apiVersion: 0.0.1
+apiVersion: 1.0.0
 metadata:
   name: petclinic-dev-environment
 projects:
