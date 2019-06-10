@@ -96,10 +96,17 @@ export class WorkspaceDataManager {
    * @param workspace workspace 
    * @param project project to be added to pointed workspace 
    */
-  addProject(workspace: che.IWorkspace, project: any): void {
+  addProject(workspace: che.IWorkspace, projectTemplate: che.IProjectTemplate): void {
     if (workspace.config) {
-      workspace.config.projects.push(project);
+      workspace.config.projects.push(projectTemplate);
     } else if (workspace.devfile) {
+      let project = {
+        name: projectTemplate.displayName,
+        source: {
+          type: projectTemplate.source.type,
+          location: projectTemplate.source.location
+        }
+      };
       workspace.devfile.projects.push(project);
     }
   }
