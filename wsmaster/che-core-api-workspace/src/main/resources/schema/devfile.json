@@ -27,6 +27,7 @@
     }
   },
   "required": [
+    "apiVersion",
     "metadata"
   ],
   "additionalProperties": false,
@@ -43,6 +44,7 @@
       "properties": {
         "name": {
           "type": "string",
+          "minLength": 1,
           "title": "Devfile Name",
           "description": "The name of the devfile. Workspaces created from devfile, will inherit this name",
           "examples": [

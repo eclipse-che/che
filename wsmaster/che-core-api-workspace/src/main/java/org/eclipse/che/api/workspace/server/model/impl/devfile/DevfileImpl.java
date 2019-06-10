@@ -30,8 +30,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
-import javax.persistence.PrePersist;
-import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import org.eclipse.che.api.core.model.workspace.devfile.Command;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
@@ -98,14 +96,6 @@ public class DevfileImpl implements Devfile {
 
     if (metadata != null) {
       this.metadata = new MetadataImpl(metadata);
-    }
-  }
-
-  @PrePersist
-  @PreUpdate
-  public void validate() {
-    if (metadata == null || metadata.getName() == null || metadata.getName().isEmpty()) {
-      throw new IllegalStateException("The devfile must have metadata with a non-empty name.");
     }
   }
 

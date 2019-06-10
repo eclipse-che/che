@@ -60,6 +60,6 @@ public class MetadataImpl implements Metadata {
 
   @Override
   public String toString() {
-    return "MetadataImpl{" + "name='" + name + '\'' + '}';
+    return "MetadataImpl{'name='" + name + '\'' + '}';
   }
 }

@@ -17,9 +17,9 @@ import java.util.Map;
 /** Defines Devfile. */
 public interface Devfile {
 
-  /** The name of the devfile. Shortcut for {@code getMetadata().getName()}. */
+  /** Returns the name of the devfile. Shortcut for {@code getMetadata().getName()}. */
   default String getName() {
-    return getMetadata().getName();
+    return getMetadata() == null ? null : getMetadata().getName();
   }
 
   /** Returns Devfile API Version. It is required. */
@@ -46,6 +46,6 @@ public interface Devfile {
   /** Returns devfile attributes. Devfile attributes must not contain null keys or values. */
   Map<String, String> getAttributes();
 
-  /** @return the metadata of the devfile. */
+  /** Returns the metadata of the devfile. */
   Metadata getMetadata();
 }

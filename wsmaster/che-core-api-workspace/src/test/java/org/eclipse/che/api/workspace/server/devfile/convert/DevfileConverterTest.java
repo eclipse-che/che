@@ -277,9 +277,9 @@ public class DevfileConverterTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Provided Devfile has no spec version specified")
+      expectedExceptionsMessageRegExp = "Provided Devfile has no API version specified")
   public void
-      shouldThrowAnExceptionIfDevfileSpecVersionIsMissingDuringConvertingDevfileToWorkspaceConfig()
+      shouldThrowAnExceptionIfDevfileApiVersionIsMissingDuringConvertingDevfileToWorkspaceConfig()
           throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
@@ -293,9 +293,9 @@ public class DevfileConverterTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Provided Devfile has unsupported version '1\\.0\\.0-non-supported'")
+          "Provided Devfile has unsupported version '1\\.0\\.0-non-supported'. The following versions are supported: .*")
   public void
-      shouldThrowAnExceptionIfDevfileSpecVersionIsNotSupportedDuringConvertingDevfileToWorkspaceConfig()
+      shouldThrowAnExceptionIfDevfileApiVersionIsNotSupportedDuringConvertingDevfileToWorkspaceConfig()
           throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
