@@ -25,7 +25,10 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 
-/** Helper class to build {@code ExtendedPluginFQN} from editor/plugin type components. */
+/**
+ * Helper class to build {@code ExtendedPluginFQN} from editor/plugin type components and other FQN
+ * utility functions.
+ */
 public class ComponentFQNParser {
 
   private final PluginFQNParser fqnParser;
