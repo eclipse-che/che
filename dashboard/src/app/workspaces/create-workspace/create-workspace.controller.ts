@@ -299,7 +299,7 @@ export class CreateWorkspaceController {
    */
   createWorkspace(): ng.IPromise<che.IWorkspace> {
     // update workspace name
-    this.selectedDevfile.name = this.workspaceName;
+    this.selectedDevfile.metadata.name = this.workspaceName;
     return this.createWorkspaceSvc.createWorkspaceFromDevfile(this.selectedDevfile, null);
   }
 

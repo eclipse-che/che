@@ -193,9 +193,22 @@ export class CreateWorkspaceSvc {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
+    let projects = [];
+    projectTemplates.forEach((template: che.IProjectTemplate) => {
+      let project = {
+        name: template.displayName,
+        source: {
+          type: template.source.type,
+          location: template.source.location
+        }
+      };
+      projects.push(project);
+    });      
+
     return this.checkEditingProgress().then(() => {
-      workspaceDevfile.projects = projectTemplates;
-      this.addProjectCommands({devfile: workspaceDevfile}, projectTemplates);
+      workspaceDevfile.projects = projects;
+     //TODO waits for fix https://github.com/eclipse/che/issues/13514
+     //this.addProjectCommands({devfile: workspaceDevfile}, projectTemplates);
       return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, workspaceDevfile, attributes).then((workspace: che.IWorkspace) => {
         return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
       })
