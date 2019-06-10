@@ -1,4 +1,4 @@
-apiVersion: 0.0.1
+apiVersion: 1.0.0
 metadata:
   name: che-in-che
 projects:

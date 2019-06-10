@@ -10,7 +10,7 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
-apiVersion: 0.0.1
+apiVersion: 1.0.0
 metadata:
   name: terminal-sample
 components:

@@ -55,7 +55,7 @@ public class DefaultFactoryParameterResolverTest {
 
   private static final String DEVFILE =
       ""
-          + "apiVersion: 0.0.1\n"
+          + "apiVersion: 1.0.0\n"
           + "metadata:\n"
           + "  name: test\n"
           + "components:\n"
