@@ -63,6 +63,9 @@ public class ComponentImpl implements Component {
   @Column(name = "type", nullable = false)
   private String type;
 
+  @Column(name = "registry_url")
+  private String registryUrl;
+
   @Column(name = "reference")
   private String reference;
 
@@ -188,6 +191,7 @@ public class ComponentImpl implements Component {
       String alias,
       String id,
       Map<String, String> preferences,
+      String registryUrl,
       String reference,
       String referenceContent,
       Map<String, String> selector,
@@ -203,6 +207,7 @@ public class ComponentImpl implements Component {
     this.alias = alias;
     this.type = type;
     this.componentId = id;
+    this.registryUrl = registryUrl;
     if (preferences != null) {
       this.preferences = new HashMap<>(preferences);
     }
@@ -238,6 +243,7 @@ public class ComponentImpl implements Component {
         component.getAlias(),
         component.getId(),
         component.getPreferences(),
+        component.getRegistryUrl(),
         component.getReference(),
         component.getReferenceContent(),
         component.getSelector(),
@@ -280,6 +286,14 @@ public class ComponentImpl implements Component {
   }
 
   @Override
+  public String getRegistryUrl() {
+    return registryUrl;
+  }
+
+  public void setRegistryUrl(String registryUrl) {
+    this.registryUrl = registryUrl;
+  }
+
   public Map<String, String> getPreferences() {
     if (preferences == null) {
       preferences = new HashMap<>();
@@ -434,6 +448,7 @@ public class ComponentImpl implements Component {
         && Objects.equals(alias, component.alias)
         && Objects.equals(type, component.type)
         && Objects.equals(componentId, component.componentId)
+        && Objects.equals(registryUrl, component.registryUrl)
         && Objects.equals(reference, component.reference)
         && Objects.equals(referenceContent, component.referenceContent)
         && Objects.equals(image, component.image)
@@ -456,6 +471,7 @@ public class ComponentImpl implements Component {
         alias,
         type,
         componentId,
+        registryUrl,
         reference,
         referenceContent,
         image,
@@ -485,6 +501,9 @@ public class ComponentImpl implements Component {
         + '\''
         + ", preferences="
         + preferences
+        + ", registryUrl='"
+        + registryUrl
+        + '\''
         + ", reference='"
         + reference
         + '\''

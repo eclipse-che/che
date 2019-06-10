@@ -34,8 +34,6 @@ public interface ComponentDto extends Component {
 
   ComponentDto withType(String type);
 
-  // editor/plugin
-
   @Override
   String getId();
 
@@ -43,7 +41,12 @@ public interface ComponentDto extends Component {
 
   ComponentDto withId(String id);
 
-  // plugin
+  @Override
+  String getRegistryUrl();
+
+  void setRegistryUrl(String registryUrl);
+
+  ComponentDto withRegistryUrl(String registryUrl);
 
   @Override
   Map<String, String> getPreferences();
@@ -51,8 +54,6 @@ public interface ComponentDto extends Component {
   void setPreferences(Map<String, String> preferences);
 
   ComponentDto withPreferences(Map<String, String> preferences);
-
-  // k8s/OS
 
   @Override
   String getReference();
@@ -81,8 +82,6 @@ public interface ComponentDto extends Component {
   void setSelector(Map<String, String> selector);
 
   ComponentDto withSelector(Map<String, String> selector);
-
-  // dockerimage
 
   @Override
   String getImage();

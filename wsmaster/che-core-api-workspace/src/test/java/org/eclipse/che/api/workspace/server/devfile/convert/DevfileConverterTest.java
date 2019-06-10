@@ -192,7 +192,7 @@ public class DevfileConverterTest {
     devfileConverter.devFileToWorkspaceConfig(devfile, fileContentProvider);
 
     // then
-    verify(defaultEditorToolApplier).apply(devfile);
+    verify(defaultEditorToolApplier).apply(devfile, fileContentProvider);
   }
 
   @Test

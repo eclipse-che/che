@@ -14,16 +14,22 @@ package org.eclipse.che.api.workspace.server.devfile.convert;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_FREE_DEVFILE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.List;
-import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
@@ -31,7 +37,10 @@ import org.testng.annotations.Test;
  *
  * @author Sergii Leshchenko
  */
+@Listeners(MockitoTestNGListener.class)
 public class DefaultEditorProvisionerTest {
+
+  @Mock private FileContentProvider fileContentProvider;
 
   private static final String EDITOR_NAME = "theia";
   private static final String EDITOR_VERSION = "1.0.0";
@@ -40,8 +49,9 @@ public class DefaultEditorProvisionerTest {
       EDITOR_PUBLISHER + "/" + EDITOR_NAME + "/" + EDITOR_VERSION;
 
   private static final String TERMINAL_PLUGIN_NAME = "theia-terminal";
+  private static final String TERMINAL_PLUGIN_VERSION = "0.0.4";
   private static final String TERMINAL_PLUGIN_REF =
-      EDITOR_PUBLISHER + "/" + TERMINAL_PLUGIN_NAME + "/0.0.4";
+      EDITOR_PUBLISHER + "/" + TERMINAL_PLUGIN_NAME + "/" + TERMINAL_PLUGIN_VERSION;
 
   private static final String COMMAND_PLUGIN_NAME = "theia-command";
   private static final String COMMAND_PLUGIN_REF =
@@ -49,24 +59,23 @@ public class DefaultEditorProvisionerTest {
 
   private DefaultEditorProvisioner provisioner;
 
-  private PluginFQNParser fqnParser = new PluginFQNParser();
+  private ComponentFQNParser fqnParser = new ComponentFQNParser(new PluginFQNParser());
 
   @Test
-  public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws DevfileException {
+  public void shouldNotProvisionDefaultEditorIfItIsNotConfigured() throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(null, new String[] {}, fqnParser);
     DevfileImpl devfile = new DevfileImpl();
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     assertTrue(devfile.getComponents().isEmpty());
   }
 
   @Test
-  public void shouldProvisionDefaultEditorWithPluginsWhenDevfileDoNotHaveAny()
-      throws DevfileException {
+  public void shouldProvisionDefaultEditorWithPluginsWhenDevfileDoNotHaveAny() throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(
@@ -74,7 +83,7 @@ public class DefaultEditorProvisionerTest {
     DevfileImpl devfile = new DevfileImpl();
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -86,7 +95,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldProvisionDefaultPluginsIfTheyAreNotSpecifiedAndDefaultEditorIsConfigured()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -97,7 +106,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(defaultEditorWithDifferentVersion);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -111,7 +120,7 @@ public class DefaultEditorProvisionerTest {
   @Test
   public void
       shouldProvisionDefaultPluginsIfTheyAreNotSpecifiedAndDefaultEditorFromCustomRegistryIsConfigured()
-          throws DevfileException {
+          throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -120,11 +129,11 @@ public class DefaultEditorProvisionerTest {
     ComponentImpl defaultEditorWithDifferentVersion =
         new ComponentImpl(
             EDITOR_COMPONENT_TYPE,
-            "https://my-custom-registry/" + EDITOR_PUBLISHER + "/" + EDITOR_NAME + "/latest");
+            "https://my-custom-registry#" + EDITOR_PUBLISHER + "/" + EDITOR_NAME + "/latest");
     devfile.getComponents().add(defaultEditorWithDifferentVersion);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -137,7 +146,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultPluginsIfCustomEditorIsConfiguredWhichStartWithDefaultId()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -149,7 +158,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(editorWithNameSimilarToDefault);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -160,7 +169,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultPluginsIfDevfileContainsEditorFreeAttribute()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -169,7 +178,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getAttributes().put(EDITOR_FREE_DEVFILE_ATTRIBUTE, "true");
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -179,7 +188,7 @@ public class DefaultEditorProvisionerTest {
   @Test
   public void
       shouldProvisionDefaultPluginIfDevfileAlreadyContainPluginWithNameWhichStartWithDefaultOne()
-          throws DevfileException {
+          throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -191,7 +200,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(pluginWithNameSimilarToDefault);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -203,7 +212,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultEditorOrDefaultPluginsIfDevfileAlreadyHasNonDefaultEditor()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);
     DevfileImpl devfile = new DevfileImpl();
@@ -212,7 +221,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(nonDefaultEditor);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -221,8 +230,8 @@ public class DefaultEditorProvisionerTest {
   }
 
   @Test
-  public void shouldNonProvisionDefaultEditorIfDevfileAlreadyContainsSuchButWithDifferentVersion()
-      throws DevfileException {
+  public void shouldNotProvisionDefaultEditorIfDevfileAlreadyContainsSuchButWithDifferentVersion()
+      throws Exception {
     // given
     provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);
     DevfileImpl devfile = new DevfileImpl();
@@ -232,7 +241,40 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(myTheiaEditor);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
+
+    // then
+    List<ComponentImpl> components = devfile.getComponents();
+    assertEquals(components.size(), 1);
+    assertTrue(components.contains(myTheiaEditor));
+  }
+
+  @Test
+  public void shouldNotProvisionDefaultEditorIfDevfileAlreadyContainsSuchByReference()
+      throws Exception {
+    // given
+    provisioner = new DefaultEditorProvisioner(EDITOR_REF, new String[] {}, fqnParser);
+    DevfileImpl devfile = new DevfileImpl();
+    ComponentImpl myTheiaEditor =
+        new ComponentImpl(
+            EDITOR_COMPONENT_TYPE, null, "https://myregistry.com/abc/meta.yaml", null, null, null);
+    String meta =
+        "apiVersion: v2\n"
+            + "publisher: "
+            + EDITOR_PUBLISHER
+            + "\n"
+            + "name: "
+            + EDITOR_NAME
+            + "\n"
+            + "version: "
+            + EDITOR_VERSION
+            + "\n"
+            + "type: Che Editor";
+    devfile.getComponents().add(myTheiaEditor);
+    when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
+
+    // when
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -242,7 +284,7 @@ public class DefaultEditorProvisionerTest {
 
   @Test
   public void shouldNotProvisionDefaultPluginIfDevfileAlreadyContainsSuchButWithDifferentVersion()
-      throws DevfileException {
+      throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
@@ -253,7 +295,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(myTerminal);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();
@@ -263,7 +305,42 @@ public class DefaultEditorProvisionerTest {
   }
 
   @Test
-  public void shouldGenerateDefaultPluginNameIfIdIsNotUnique() throws DevfileException {
+  public void shouldNotProvisionDefaultPluginIfDevfileAlreadyContainsSuchByReference()
+      throws Exception {
+    // given
+    provisioner =
+        new DefaultEditorProvisioner(EDITOR_REF, new String[] {TERMINAL_PLUGIN_REF}, fqnParser);
+    DevfileImpl devfile = new DevfileImpl();
+    String meta =
+        "apiVersion: v2\n"
+            + "publisher: "
+            + EDITOR_PUBLISHER
+            + "\n"
+            + "name: "
+            + TERMINAL_PLUGIN_NAME
+            + "\n"
+            + "version: "
+            + TERMINAL_PLUGIN_VERSION
+            + "\n"
+            + "type: Che Plugin";
+    ComponentImpl myTerminal =
+        new ComponentImpl(
+            PLUGIN_COMPONENT_TYPE, null, "https://myregistry.com/abc/meta.yaml", null, null, null);
+    when(fileContentProvider.fetchContent(anyString())).thenReturn(meta);
+    devfile.getComponents().add(myTerminal);
+
+    // when
+    provisioner.apply(devfile, fileContentProvider);
+
+    // then
+    List<ComponentImpl> components = devfile.getComponents();
+    assertEquals(components.size(), 2);
+    assertTrue(components.contains(new ComponentImpl(EDITOR_COMPONENT_TYPE, EDITOR_REF)));
+    assertTrue(components.contains(myTerminal));
+  }
+
+  @Test
+  public void shouldGenerateDefaultPluginNameIfIdIsNotUnique() throws Exception {
     // given
     provisioner =
         new DefaultEditorProvisioner(
@@ -275,7 +352,7 @@ public class DefaultEditorProvisionerTest {
     devfile.getComponents().add(myPlugin);
 
     // when
-    provisioner.apply(devfile);
+    provisioner.apply(devfile, fileContentProvider);
 
     // then
     List<ComponentImpl> components = devfile.getComponents();

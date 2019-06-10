@@ -72,4 +72,10 @@ public class Constants {
    * any other value of lack of the attributes activates provisioning of default editor
    */
   public static final String EDITOR_FREE_DEVFILE_ATTRIBUTE = "editorFree";
+
+  /**
+   * Format used for composite (containing registry URL and id) editor and plugin components
+   * workspace attribute values.
+   */
+  public static final String COMPOSITE_EDITOR_PLUGIN_ATTRIBUTE_FORMAT = "%s#%s";
 }

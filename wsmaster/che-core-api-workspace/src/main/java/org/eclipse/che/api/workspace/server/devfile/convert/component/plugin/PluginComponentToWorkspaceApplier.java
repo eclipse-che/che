@@ -26,12 +26,11 @@ import java.util.Map.Entry;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
-import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
-import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ExtendedPluginFQN;
 import org.eclipse.che.commons.annotation.Nullable;
 
@@ -42,11 +41,11 @@ import org.eclipse.che.commons.annotation.Nullable;
  */
 public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceApplier {
 
-  private final PluginFQNParser fqnParser;
+  private final ComponentFQNParser componentFQNParser;
 
   @Inject
-  public PluginComponentToWorkspaceApplier(PluginFQNParser fqnParser) {
-    this.fqnParser = fqnParser;
+  public PluginComponentToWorkspaceApplier(ComponentFQNParser componentFQNParser) {
+    this.componentFQNParser = componentFQNParser;
   }
 
   /**
@@ -73,27 +72,25 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
 
     String workspacePluginsAttribute =
         workspaceConfig.getAttributes().get(WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE);
-    workspaceConfig
-        .getAttributes()
-        .put(
-            WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
-            append(workspacePluginsAttribute, pluginComponent.getId()));
 
-    String pluginsAliases =
-        workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
-    if (pluginComponent.getAlias() != null) {
+    final String pluginId = pluginComponent.getId();
+    final String registryUrl = pluginComponent.getRegistryUrl();
+
+    final ExtendedPluginFQN fqn = componentFQNParser.evaluateFQN(pluginComponent, contentProvider);
+    if (!isNullOrEmpty(fqn.getReference())) {
       workspaceConfig
           .getAttributes()
           .put(
-              PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
-              append(pluginsAliases, pluginComponent.getId() + "=" + pluginComponent.getAlias()));
-    }
-
-    ExtendedPluginFQN fqn;
-    try {
-      fqn = fqnParser.parsePluginFQN(pluginComponent.getId());
-    } catch (InfrastructureException e) {
-      throw new DevfileException(e.getMessage(), e);
+              WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
+              append(workspacePluginsAttribute, fqn.getReference()));
+    } else {
+      workspaceConfig
+          .getAttributes()
+          .put(
+              WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE,
+              append(
+                  workspacePluginsAttribute,
+                  componentFQNParser.getCompositeId(registryUrl, pluginId)));
     }
     String memoryLimit = pluginComponent.getMemoryLimit();
     if (memoryLimit != null) {
@@ -124,6 +121,22 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
       }
 
       command.getAttributes().put(PLUGIN_ATTRIBUTE, fqn.getId());
+    }
+
+    String pluginsAliases =
+        workspaceConfig.getAttributes().get(PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE);
+    if (pluginComponent.getAlias() != null) {
+      workspaceConfig
+          .getAttributes()
+          .put(
+              PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE,
+              append(
+                  pluginsAliases,
+                  componentFQNParser.getCompositeId(
+                          fqn.getRegistry() != null ? fqn.getRegistry().toString() : null,
+                          fqn.getId())
+                      + "="
+                      + pluginComponent.getAlias()));
     }
   }
 

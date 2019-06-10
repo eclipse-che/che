@@ -334,7 +334,7 @@ public class DockerimageComponentToWorkspaceApplierTest {
     List<ServicePort> ports = service.getSpec().getPorts();
     assertEquals(ports.size(), 1);
     ServicePort port = ports.get(0);
-    assertEquals(port.getPort(), new Integer(4923));
+    assertEquals(port.getPort(), Integer.valueOf(4923));
     assertEquals(port.getTargetPort(), new IntOrString(4923));
   }
 
