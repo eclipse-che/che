@@ -27,7 +27,6 @@
     }
   },
   "required": [
-    "apiVersion",
     "metadata"
   ],
   "additionalProperties": false,
@@ -36,7 +35,7 @@
       "type": "string",
       "title": "Devfile API Version",
       "examples": [
-        "0.0.1"
+        "1.0.0"
       ]
     },
     "metadata": {
