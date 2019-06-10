@@ -2931,8 +2931,7 @@
         "editor": "eclipse/che-theia/next",
         "plugins": "eclipse/che-machine-exec-plugin/0.0.1,redhat/vscode-xml/0.5.1,camel-tooling/vscode-apache-camel/0.0.14,redhat/java/latest",
         "sidecar.eclipse/che-theia.memory_limit": "512Mi",
-        "sidecar.redhat/vscode-xml.memory_limit": "128Mi",
-        "sidecar.camel-tooling/vscode-apache-camel.memory_limit": "128Mi"
+        "sidecar.redhat/vscode-xml.memory_limit": "128Mi"
       },
       "commands": [],
       "links": []
