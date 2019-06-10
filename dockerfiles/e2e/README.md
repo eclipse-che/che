@@ -1,0 +1,48 @@
+# End-to-end typescript tests for Che 7
+
+## Table Of Content
+
+* [Requirements](#requirements)
+* [What are these tests meant for](#what-are-these-tests-meant-for)
+* [How to run it](#how-to-run-it)
+
+##Requirements
+To run these tests you need to have running Che instance. You can execute tests directly using ` npm ` but if you like to use this Docker image, you need to have 
+installed Docker on your machine. 
+
+## What are these tests meant for
+These tests serves for testing Che 7 happy path. You can see description about these tests here: https://github.com/eclipse/che/tree/master/e2e.
+
+## How to run it
+The easiest way is to run them via Docker. To build&run locally you have go to this folder and execute following command: 
+
+``` 
+docker build -t che7_tests . 
+```
+This command builds docker
+image named ` che7_tests `.  
+Once image is build, you can run the tests inside this docker image. You have to set URL of running Che and increase shared memory size (low shared memory makes chrome driver crash).
+
+```
+docker run --shm-size=256m -e THEIA_SELENIUM_BASE_URL=$URL che7_tests
+```
+
+If you want to gather screenshots of fallen tests, you have to mount a volume to the docker file. Create a folder, when you want to have the screenshots saved. Then run
+a command:
+
+```
+docker run --shm-size=256m -v /full/path/to/your/folder:/root/e2e/report:Z -e THEIA_SELENIUM_BASE_URL=$URL che7_tests
+```
+
+###Debugging
+####Running own code
+If you have done some changes locally and you want to test them, you can mount your code directly to the Docker. If you do so, your mounted code will be executed instead of the code from master.
+
+```
+docker run --shm-size=256m -v /full/path/to/your/e2e/folder:/root/local_tests:Z -e THEIA_SELENIUM_BASE_URL=$URL che7_tests
+```
+
+NOTE: If you want to run your own code and gather screenshots, you have to change the mount from ` /root/e2e/report:Z ` to ` /root/local_tests/report:Z `.
+
+####Watching Chrome
+If you want to see what is going on in chrome inside a docker, you can use VNC. When running a docker, you can see API where you can connect. This API is on the first line of output and can look like that: ` You can wath localy using VNC with IP: 172.17.0.2 `. Then you can easily join VNC using this API: ` 172.17.0.2:0 `.
