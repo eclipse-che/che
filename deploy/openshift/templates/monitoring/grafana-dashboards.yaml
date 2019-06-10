@@ -3448,7 +3448,7 @@ data:
           ]
         }
       ],
-      "refresh": "30s",
+      "refresh": "15m",
       "schemaVersion": 18,
       "style": "dark",
       "tags": [],
@@ -3696,9 +3696,9 @@ data:
           ],
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
+            "full": true,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
@@ -3778,9 +3778,9 @@ data:
           ],
           "sparkline": {
             "fillColor": "rgba(31, 118, 189, 0.18)",
-            "full": false,
+            "full": true,
             "lineColor": "rgb(31, 120, 193)",
-            "show": false
+            "show": true
           },
           "tableColumn": "",
           "targets": [
@@ -5218,7 +5218,7 @@ data:
           "yBucketSize": null
         }
       ],
-      "refresh": "5s",
+      "refresh": "15m",
       "schemaVersion": 18,
       "style": "dark",
       "tags": [],
@@ -5240,7 +5240,7 @@ data:
         ]
       },
       "time": {
-        "from": "now-1h",
+        "from": "now-24h",
         "to": "now"
       },
       "timepicker": {
