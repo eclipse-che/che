@@ -27,25 +27,33 @@
     }
   },
   "required": [
-    "specVersion",
-    "name"
+    "apiVersion",
+    "metadata"
   ],
   "additionalProperties": false,
   "properties": {
-    "specVersion": {
+    "apiVersion": {
       "type": "string",
-      "title": "Devfile Specification Version",
+      "title": "Devfile API Version",
       "examples": [
-        "0.0.1"
+        "1.0.0"
       ]
     },
-    "name": {
-      "type": "string",
-      "title": "Devfile Name",
-      "description": "The name of the devfile. Workspaces created from devfile, will inherit this name",
-      "examples": [
-        "petclinic-dev-environment"
-      ]
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Devfile Name",
+          "description": "The name of the devfile. Workspaces created from devfile, will inherit this name",
+          "examples": [
+            "petclinic-dev-environment"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name"]
     },
     "projects": {
       "type": "array",

@@ -10,8 +10,9 @@
 #   Red Hat, Inc. - initial API and implementation
 #
 
-specVersion: 0.0.1
-name: terminal-sample
+apiVersion: 1.0.0
+metadata:
+  name: terminal-sample
 components:
   - type: chePlugin
     id: check/terminal-sample/0.0.1

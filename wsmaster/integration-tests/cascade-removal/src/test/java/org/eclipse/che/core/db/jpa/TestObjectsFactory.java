@@ -23,6 +23,7 @@ import java.util.Map;
 import org.eclipse.che.account.shared.model.Account;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.model.workspace.devfile.Metadata;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.ServerStatus;
 import org.eclipse.che.api.ssh.server.model.impl.SshPairImpl;
@@ -43,6 +44,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.ActionImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
@@ -102,12 +104,12 @@ public final class TestObjectsFactory {
   public static DevfileImpl createDevfile(String id) {
     return new DevfileImpl(
         "0.0.1",
-        id + "name",
         asList(createDevfileProject(id + "-project1"), createDevfileProject(id + "-project2")),
         asList(
             createDevfileComponent(id + "-component1"), createDevfileComponent(id + "-component2")),
         asList(createDevfileCommand(id + "-command1"), createDevfileCommand(id + "-command2")),
-        singletonMap("attribute1", "value1"));
+        singletonMap("attribute1", "value1"),
+        createMetadata(id + "name"));
   }
 
   private static ComponentImpl createDevfileComponent(String name) {
@@ -261,6 +263,10 @@ public final class TestObjectsFactory {
                 "http://localhost:8080/api",
                 ServerStatus.RUNNING,
                 ImmutableMap.of("key", "value"))));
+  }
+
+  public static Metadata createMetadata(String name) {
+    return new MetadataImpl(name);
   }
 
   private TestObjectsFactory() {}

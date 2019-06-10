@@ -58,6 +58,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
@@ -945,11 +946,11 @@ public class WorkspaceDaoTest {
     DevfileImpl devfile =
         new DevfileImpl(
             "0.0.1",
-            name,
             asList(project1, project2),
             asList(component1, component2),
             asList(command1, command2),
-            singletonMap("attribute1", "value1"));
+            singletonMap("attribute1", "value1"),
+            new MetadataImpl(name));
 
     return devfile;
   }

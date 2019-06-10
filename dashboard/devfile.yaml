@@ -1,5 +1,6 @@
-specVersion: 0.0.1
-name: dashboard-in-che
+apiVersion: 1.0.0
+metadata:
+  name: dashboard-in-che
 projects:
   - name: che
     source:

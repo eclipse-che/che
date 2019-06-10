@@ -12,13 +12,3 @@
 
 ---
 apiVersion: 1.0.0
-metadata:
-  name: petclinic-dev-environment
-components:
-  - type: openshift
-    referenceContent: it is supposed to be a content of the file specified in the local field
-    reference: petclinic.yaml
-    selector:
-      app.kubernetes.io/name: mysql
-      app.kubernetes.io/component: database
-      app.kubernetes.io/part-of: petclinic

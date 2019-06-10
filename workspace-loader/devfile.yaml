@@ -1,5 +1,6 @@
-specVersion: 0.0.1
-name: workspace-loader
+apiVersion: 1.0.0
+metadata:
+  name: workspace-loader
 projects:
   - name: che
     source:

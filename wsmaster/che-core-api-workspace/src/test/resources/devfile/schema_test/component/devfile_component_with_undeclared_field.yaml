@@ -11,8 +11,9 @@
 #
 
 ---
-specVersion: 0.0.1
-name: petclinic-dev-environment
+apiVersion: 1.0.0
+metadata:
+  name: petclinic-dev-environment
 components:
   - type: chePlugin
     alias: maven

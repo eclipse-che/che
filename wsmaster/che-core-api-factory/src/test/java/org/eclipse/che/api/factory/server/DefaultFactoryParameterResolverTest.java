@@ -56,8 +56,9 @@ public class DefaultFactoryParameterResolverTest {
 
   private static final String DEVFILE =
       ""
-          + "specVersion: 0.0.1\n"
-          + "name: test\n"
+          + "apiVersion: 1.0.0\n"
+          + "metadata:\n"
+          + "  name: test\n"
           + "components:\n"
           + "- type: kubernetes\n"
           + "  alias: component\n"

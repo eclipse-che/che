@@ -17,14 +17,13 @@ import java.util.Map;
 /** Defines Devfile. */
 public interface Devfile {
 
-  /** Returns Specification Version. It is required. */
-  String getSpecVersion();
+  /** Returns the name of the devfile. Shortcut for {@code getMetadata().getName()}. */
+  default String getName() {
+    return getMetadata() == null ? null : getMetadata().getName();
+  }
 
-  /**
-   * Returns the name of the devfile. Workspaces created from devfile, will inherit this name. It is
-   * required.
-   */
-  String getName();
+  /** Returns Devfile API Version. It is required. */
+  String getApiVersion();
 
   /**
    * Returns projects configurations which are related to the devfile, when devfile doesn't contain
@@ -46,4 +45,7 @@ public interface Devfile {
 
   /** Returns devfile attributes. Devfile attributes must not contain null keys or values. */
   Map<String, String> getAttributes();
+
+  /** Returns the metadata of the devfile. */
+  Metadata getMetadata();
 }

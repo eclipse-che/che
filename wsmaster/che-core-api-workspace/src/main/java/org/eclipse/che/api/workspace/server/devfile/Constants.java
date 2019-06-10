@@ -17,7 +17,7 @@ public class Constants {
 
   public static final String SCHEMA_LOCATION = "schema/devfile.json";
 
-  public static final String CURRENT_SPEC_VERSION = "0.0.1";
+  public static final String CURRENT_API_VERSION = "1.0.0";
 
   public static final String EDITOR_COMPONENT_TYPE = "cheEditor";
 

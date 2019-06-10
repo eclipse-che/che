@@ -1,5 +1,6 @@
-specVersion: 0.0.1
-name: che-in-che
+apiVersion: 1.0.0
+metadata:
+  name: che-in-che
 projects:
   - name: che
     source:

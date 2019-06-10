@@ -86,6 +86,7 @@ import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 import org.eclipse.che.commons.env.EnvironmentContext;
@@ -1354,8 +1355,8 @@ public class WorkspaceServiceTest {
   private DevfileDtoImpl createDevfileDto() {
     return (DevfileDtoImpl)
         newDto(DevfileDto.class)
-            .withSpecVersion("0.0.1")
-            .withName("ws")
+            .withApiVersion("0.0.1")
+            .withMetadata(newDto(MetadataDto.class).withName("ws"))
             .withProjects(
                 singletonList(
                     newDto(ProjectDto.class)

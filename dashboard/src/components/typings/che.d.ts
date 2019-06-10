@@ -333,12 +333,15 @@ declare namespace che {
   }
 
   export interface IWorkspaceDevfile {
-    specVersion: string;
+    apiVersion: string;
     name: string;
     components: Array<any>;
     projects?: Array <any>;
     commands?: Array <any>;
     attributes?: che.IWorkspaceConfigAttributes;
+    metadata: {
+      name: string
+    }
   }
 
   export interface IWorkspaceEnvironment {

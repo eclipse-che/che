@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.devfile.convert;
 
-import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.PERSIST_VOLUMES_ATTRIBUTE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -98,7 +98,7 @@ public class DevfileConverterTest {
     DevfileImpl devfile = devfileConverter.workspaceToDevFile(wsConfig);
 
     // then
-    assertEquals(devfile.getSpecVersion(), CURRENT_SPEC_VERSION);
+    assertEquals(devfile.getApiVersion(), CURRENT_API_VERSION);
   }
 
   @Test
@@ -277,9 +277,9 @@ public class DevfileConverterTest {
 
   @Test(
       expectedExceptions = DevfileFormatException.class,
-      expectedExceptionsMessageRegExp = "Provided Devfile has no spec version specified")
+      expectedExceptionsMessageRegExp = "Provided Devfile has no API version specified")
   public void
-      shouldThrowAnExceptionIfDevfileSpecVersionIsMissingDuringConvertingDevfileToWorkspaceConfig()
+      shouldThrowAnExceptionIfDevfileApiVersionIsMissingDuringConvertingDevfileToWorkspaceConfig()
           throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
@@ -293,14 +293,14 @@ public class DevfileConverterTest {
   @Test(
       expectedExceptions = DevfileFormatException.class,
       expectedExceptionsMessageRegExp =
-          "Provided Devfile has unsupported version '1\\.0\\.0-non-supported'")
+          "Provided Devfile has unsupported version '1\\.0\\.0-non-supported'. The following versions are supported: .*")
   public void
-      shouldThrowAnExceptionIfDevfileSpecVersionIsNotSupportedDuringConvertingDevfileToWorkspaceConfig()
+      shouldThrowAnExceptionIfDevfileApiVersionIsNotSupportedDuringConvertingDevfileToWorkspaceConfig()
           throws Exception {
     // given
     FileContentProvider fileContentProvider = mock(FileContentProvider.class);
     DevfileImpl devfile = new DevfileImpl();
-    devfile.setSpecVersion("1.0.0-non-supported");
+    devfile.setApiVersion("1.0.0-non-supported");
     devfile.setName("petclinic");
 
     // when
@@ -334,7 +334,7 @@ public class DevfileConverterTest {
 
   private DevfileImpl newDevfile(String name) {
     DevfileImpl devfile = new DevfileImpl();
-    devfile.setSpecVersion(CURRENT_SPEC_VERSION);
+    devfile.setApiVersion(CURRENT_API_VERSION);
     devfile.setName(name);
     return devfile;
   }

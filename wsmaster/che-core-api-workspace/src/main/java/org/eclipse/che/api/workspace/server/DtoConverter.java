@@ -34,6 +34,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Devfile;
 import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Env;
+import org.eclipse.che.api.core.model.workspace.devfile.Metadata;
 import org.eclipse.che.api.core.model.workspace.devfile.Project;
 import org.eclipse.che.api.core.model.workspace.devfile.Source;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
@@ -63,6 +64,7 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileVolumeDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.EndpointDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.EntrypointDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.EnvDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
@@ -110,12 +112,12 @@ public final class DtoConverter {
     List<ProjectDto> projects =
         devfile.getProjects().stream().map(DtoConverter::asDto).collect(toList());
     return newDto(DevfileDto.class)
-        .withName(devfile.getName())
-        .withSpecVersion(devfile.getSpecVersion())
+        .withApiVersion(devfile.getApiVersion())
         .withCommands(commands)
         .withComponents(components)
         .withProjects(projects)
-        .withAttributes(devfile.getAttributes());
+        .withAttributes(devfile.getAttributes())
+        .withMetadata(asDto(devfile.getMetadata()));
   }
 
   private static ProjectDto asDto(Project project) {
@@ -414,6 +416,11 @@ public final class DtoConverter {
               .collect(toMap(Map.Entry::getKey, entry -> asDto(entry.getValue()))));
     }
     return machineDto;
+  }
+
+  /** Converts {@link Metadata} to {@link MetadataDto}. */
+  public static MetadataDto asDto(Metadata metadata) {
+    return newDto(MetadataDto.class).withName(metadata.getName());
   }
 
   private DtoConverter() {}

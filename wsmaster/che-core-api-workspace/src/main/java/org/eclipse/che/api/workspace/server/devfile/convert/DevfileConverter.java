@@ -13,9 +13,10 @@ package org.eclipse.che.api.workspace.server.devfile.convert;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toCollection;
 import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
-import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_SPEC_VERSION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 
 import com.google.common.base.Strings;
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class DevfileConverter {
     }
 
     DevfileImpl devfile = new DevfileImpl();
-    devfile.setSpecVersion(CURRENT_SPEC_VERSION);
+    devfile.setApiVersion(CURRENT_API_VERSION);
     devfile.setName(wsConfig.getName());
 
     // Manage projects
@@ -181,12 +182,15 @@ public class DevfileConverter {
   }
 
   private static void validateCurrentVersion(Devfile devFile) throws DevfileFormatException {
-    if (Strings.isNullOrEmpty(devFile.getSpecVersion())) {
-      throw new DevfileFormatException("Provided Devfile has no spec version specified");
+    if (Strings.isNullOrEmpty(devFile.getApiVersion())) {
+      throw new DevfileFormatException("Provided Devfile has no API version specified");
     }
-    if (!CURRENT_SPEC_VERSION.equals(devFile.getSpecVersion())) {
+    if (!CURRENT_API_VERSION.equals(devFile.getApiVersion())) {
       throw new DevfileFormatException(
-          format("Provided Devfile has unsupported version '%s'", devFile.getSpecVersion()));
+          format(
+              "Provided Devfile has unsupported version '%s'. The following versions are"
+                  + " supported: %s",
+              devFile.getApiVersion(), singleton(CURRENT_API_VERSION)));
     }
   }
 }

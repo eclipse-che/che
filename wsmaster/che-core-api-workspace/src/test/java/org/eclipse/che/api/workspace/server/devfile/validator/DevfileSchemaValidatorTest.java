@@ -88,12 +88,24 @@ public class DevfileSchemaValidatorTest {
     return new Object[][] {
       // Devfile model testing
       {
-        "devfile/devfile_missing_name.yaml",
-        "The object must have a property whose name is \"name\"."
+        "devfile/devfile_empty_metadata.yaml",
+        "(/metadata):The object must have a property whose name is \"name\"."
       },
       {
-        "devfile/devfile_missing_spec_version.yaml",
-        "The object must have a property whose name is \"specVersion\"."
+        "devfile/devfile_null_metadata.yaml",
+        "(/metadata):The value must be of object type, but actual type is null."
+      },
+      {
+        "devfile/devfile_missing_metadata.yaml",
+        "The object must have a property whose name is \"metadata\"."
+      },
+      {
+        "devfile/devfile_missing_name.yaml",
+        "(/metadata/something):The object must not have a property whose name is \"something\".(/metadata):The object must have a property whose name is \"name\"."
+      },
+      {
+        "devfile/devfile_missing_api_version.yaml",
+        "The object must have a property whose name is \"apiVersion\"."
       },
       {
         "devfile/devfile_with_undeclared_field.yaml",
