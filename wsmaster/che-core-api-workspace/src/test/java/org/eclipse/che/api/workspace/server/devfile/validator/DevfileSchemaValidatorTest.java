@@ -162,7 +162,7 @@ public class DevfileSchemaValidatorTest {
       },
       {
         "editor_plugin_component/devfile_editor_component_with_bad_registry.yaml",
-        "(/components/0/registryUrl):The string value must match the pattern \"^((https?://)[a-zA-Z0-9_\\-./]+)\"."
+        "(/components/0/registryUrl):The string value must match the pattern \"^(https?://)[a-zA-Z0-9_\\-./]+\"."
       },
       // kubernetes/openshift component model testing
       {
