@@ -205,7 +205,7 @@
                   "registryUrl": {
                     "description": "Describes URL of custom plugin registry.",
                     "type": "string",
-                    "pattern": "^((https?://)[a-zA-Z0-9_\\-./]+)+",
+                    "pattern": "^((https?://)[a-zA-Z0-9_\\-./]+)",
                     "examples": [
                       "https://che-plugin-registry.openshift.io/"
                     ]

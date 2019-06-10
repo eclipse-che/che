@@ -177,15 +177,33 @@ public class PluginFQNParser {
    */
   public ExtendedPluginFQN evaluateFqn(String reference, FileContentProvider fileContentProvider)
       throws InfrastructureException {
+    JsonNode contentNode;
     try {
       String pluginMetaContent = fileContentProvider.fetchContent(reference);
-      JsonNode contentNode = yamlReader.readTree(pluginMetaContent);
-      String publisher = contentNode.get("publisher").textValue();
-      String name = contentNode.get("name").textValue();
-      String version = contentNode.get("version").textValue();
-      return new ExtendedPluginFQN(reference, publisher, name, version);
+      contentNode = yamlReader.readTree(pluginMetaContent);
     } catch (DevfileException | IOException e) {
-      throw new InfrastructureException(format("Plugin reference URL '%s' is invalid.", reference));
+      throw new InfrastructureException(
+          format("Plugin reference URL '%s' is invalid.", reference), e);
     }
+    JsonNode publisher = contentNode.path("publisher");
+    if (publisher.isMissingNode()) {
+      throw new InfrastructureException(formatMessage(reference, "publisher"));
+    }
+    JsonNode name = contentNode.get("name");
+    if (name.isMissingNode()) {
+      throw new InfrastructureException(formatMessage(reference, "name"));
+    }
+    JsonNode version = contentNode.get("version");
+    if (version.isMissingNode()) {
+      throw new InfrastructureException(formatMessage(reference, "version"));
+    }
+    return new ExtendedPluginFQN(
+        reference, publisher.textValue(), name.textValue(), version.textValue());
+  }
+
+  private String formatMessage(String reference, String field) {
+    return format(
+        "Plugin specified by reference URL '%s' have missing required field '" + field + "'.",
+        reference);
   }
 }
