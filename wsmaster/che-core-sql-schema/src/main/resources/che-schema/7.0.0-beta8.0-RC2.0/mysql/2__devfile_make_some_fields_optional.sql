@@ -14,5 +14,4 @@ ALTER TABLE devfile_entrypoint
     MODIFY COLUMN parent_name        VARCHAR(255) NULL DEFAULT NULL,
     MODIFY COLUMN container_name     VARCHAR(255) NULL DEFAULT NULL;
 
-
 ALTER TABLE devfile_action MODIFY COLUMN component VARCHAR(255) NULL DEFAULT NULL;
