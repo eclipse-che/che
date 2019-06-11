@@ -32,7 +32,7 @@ export class WorkspaceDataManager {
     if (workspace.config) {
       return workspace.config.name;
     } else if (workspace.devfile) {
-      return workspace.devfile.name;
+      return workspace.devfile.metadata.name;
     }
   }
 
@@ -46,7 +46,7 @@ export class WorkspaceDataManager {
     if (workspace.config) {
       workspace.config.name = name;
     } else if (workspace.devfile) {
-      workspace.devfile.name = name;
+      workspace.devfile.metadata.name = name;
     }
   }
 
