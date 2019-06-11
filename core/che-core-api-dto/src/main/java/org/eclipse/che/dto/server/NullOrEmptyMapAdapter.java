@@ -18,9 +18,8 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-
 /**
- * This class will prevent serialization of null or empty fields of DTOs with Collection types
+ * This class will prevent serialization of null or empty fields of DTOs with Map types
  *
  * @author Mykhailo Kuznietsov
  */
