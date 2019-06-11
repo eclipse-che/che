@@ -33,7 +33,6 @@ import java.io.StringReader;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -104,10 +103,7 @@ public final class DtoFactory {
   private final Map<Class<?>, DtoProvider<?>> dtoImpl2Providers = new ConcurrentHashMap<>();
   private final Gson dtoGson =
       buildDtoParser(
-          ServiceLoader.load(TypeAdapterFactory.class).iterator(),
-          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()),
-          new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()),
-          new DtoInterfaceTAF());
+          ServiceLoader.load(TypeAdapterFactory.class).iterator(), new DtoInterfaceTAF());
 
   /**
    * Created deep copy of DTO object.
@@ -504,6 +500,10 @@ public final class DtoFactory {
     for (TypeAdapterFactory factory : factories) {
       builder.registerTypeAdapterFactory(factory);
     }
+
+    builder.registerTypeHierarchyAdapter(Collection.class, new NullOrEmptyCollectionAdapter());
+    builder.registerTypeHierarchyAdapter(Map.class, new NullOrEmptyMapAdapter());
+
     return builder.create();
   }
 }
