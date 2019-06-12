@@ -64,15 +64,37 @@ export class WorkspaceDataManager {
   }
 
   /**
+   * Set the attributes of the pointed workspace.
+   * 
+   * @param workspace workspace
+   * @param attributes workspace attributes
+   */
+  setAttributes(workspace: che.IWorkspace, attributes: che.IWorkspaceConfigAttributes): void {
+    if (workspace.config) {
+      if (attributes) {
+        workspace.config.attributes = attributes;
+      } else {
+        delete workspace.config.attributes;
+      }
+    } else if (workspace.devfile) {
+      if (attributes) {
+        workspace.devfile.attributes = attributes;
+      } else {
+        delete workspace.devfile.attributes;
+      }
+    }
+  }
+
+  /**
    * Returns the projects of the pointed workspace.
    * 
    * @param workspace workspace
    */
   getProjects(workspace: che.IWorkspace): Array <any> {
     if (workspace.config) {
-      return workspace.config.projects;
+      return workspace.config.projects || [];
     } else if (workspace.devfile) {
-      return workspace.devfile.projects;
+      return workspace.devfile.projects || [];
     }
   }
 
@@ -98,8 +120,10 @@ export class WorkspaceDataManager {
    */
   addProject(workspace: che.IWorkspace, project: any): void {
     if (workspace.config) {
+      workspace.config.projects = workspace.config.projects || [];
       workspace.config.projects.push(project);
     } else if (workspace.devfile) {
+      workspace.devfile.projects = workspace.devfile.projects || [];
       workspace.devfile.projects.push(project);
     }
   }
@@ -146,6 +170,7 @@ export class WorkspaceDataManager {
    */
   setPlugins(workspace: che.IWorkspace, plugins: Array<string>): void {
     if (workspace.config) {
+      workspace.config.attributes = workspace.config.attributes || {};
       workspace.config.attributes.plugins = plugins.join(',');
     } else if (workspace.devfile) {
       let pluginComponents = [];
@@ -198,6 +223,7 @@ export class WorkspaceDataManager {
    */
   setEditor(workspace: che.IWorkspace, editor: string): void {
     if (workspace.config) {
+      workspace.config.attributes = workspace.config.attributes || {};
       workspace.config.attributes.editor = editor;
     } else if (workspace.devfile) {
       let editorComponents = [];

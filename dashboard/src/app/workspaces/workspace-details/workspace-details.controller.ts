@@ -588,8 +588,8 @@ export class WorkspaceDetailsController {
    * Checks whether "plugins" are enabled in workspace config.
    */
   isPluginsEnabled(): boolean {
-    let editor = this.workspaceDetails.config.attributes.editor || '';
-    let plugins = this.workspaceDetails.config.attributes.plugins || '';
+    let editor = this.workspaceDetails.config.attributes ? this.workspaceDetails.config.attributes.editor : '';
+    let plugins = this.workspaceDetails.config.attributes ? this.workspaceDetails.config.attributes.plugins : '';
     return (editor.length > 0 || plugins.length > 0);
   }
 }
