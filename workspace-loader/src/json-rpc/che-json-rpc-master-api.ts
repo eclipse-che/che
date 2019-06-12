@@ -16,7 +16,7 @@ import { CheJsonRpcApiClient } from './che-json-rpc-api-service';
 import { ICommunicationClient, CODE_REQUEST_TIMEOUT, CommunicationClientEvent } from './json-rpc-client';
 import { WorkspaceLoader } from '../workspace-loader';
 
-enum MasterChannels {
+export enum MasterChannels {
     ENVIRONMENT_OUTPUT = 'runtime/log',
     ENVIRONMENT_STATUS = 'machine/statusChanged',
     INSTALLER_OUTPUT = 'installer/log',
@@ -24,13 +24,6 @@ enum MasterChannels {
 }
 const SUBSCRIBE: string = 'subscribe';
 const UNSUBSCRIBE: string = 'unsubscribe';
-
-export interface WorkspaceStatusChangedEvent {
-    status: string;
-    prevStatus: string;
-    workspaceId: string;
-    error: string;
-}
 
 /**
  * Client API for workspace master interactions.
@@ -105,12 +98,12 @@ export class CheJsonRpcMasterApi {
      *
      * @returns {Promise<void>}
      */
-    connect(): Promise<void> {
+    async connect(): Promise<void> {
         const entryPointFunction = () => {
             const entryPoint = this.entryPoint + this.loader.getAuthenticationToken();
             if (this.clientId) {
                 let clientId = `clientId=${this.clientId}`;
-                // in case of reconnection
+                // in case of re-connection
                 // we need to test entrypoint on existing query parameters
                 // to add already gotten clientId
                 if (/\?/.test(entryPoint) === false) {
@@ -123,9 +116,8 @@ export class CheJsonRpcMasterApi {
             return entryPoint;
         };
 
-        return this.cheJsonRpcApi.connect(entryPointFunction).then(() =>
-            this.fetchClientId()
-        );
+        await this.cheJsonRpcApi.connect(entryPointFunction);
+        return await this.fetchClientId();
     }
 
     /**
@@ -220,10 +212,9 @@ export class CheJsonRpcMasterApi {
      *
      * @returns {Promise<void>}
      */
-    fetchClientId(): Promise<void> {
-        return this.cheJsonRpcApi.request('websocketIdService/getId').then((data: string[]) => {
-            this.clientId = data[0];
-        });
+    async fetchClientId(): Promise<void> {
+        const data = await this.cheJsonRpcApi.request('websocketIdService/getId');
+        this.clientId = data[0];
     }
 
     /**
