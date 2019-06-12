@@ -319,8 +319,8 @@ export class WorkspaceDetailsController {
       return;
     }
 
-    if (this.newName !== devfile.name) {
-      this.newName = devfile.name;
+    if (this.newName !== devfile.metadata.name) {
+      this.newName = devfile.metadata.name;
     }
 
     this.workspaceDetails.devfile = devfile;
