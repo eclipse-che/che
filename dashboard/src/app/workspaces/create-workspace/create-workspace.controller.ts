@@ -137,8 +137,7 @@ export class CreateWorkspaceController {
     // loader should be hidden and page content shown
     // when stacks selector is rendered
     // and default stack is selected
-    //TODO 
-    this.hideLoader = true;
+    this.hideLoader = false;
 
     // header toolbar
     // dropdown button config
