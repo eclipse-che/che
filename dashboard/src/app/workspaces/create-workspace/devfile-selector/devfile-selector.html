@@ -1,0 +1,73 @@
+<div class="devfile-selector">
+  <div layout="column" layout-aling="start center"
+       layout-gt-md="row" layout-align-gt-md="start center"
+       flex>
+  <div class="devfile-selector-list" ng-hide="devfileSelectorController.devfiles.length === 0">
+    <div>
+      <div>
+        <che-list-header>
+          <div flex="100"
+               layout="row" layout-align="start stretch"
+               class="che-list-item-row">
+            <div flex layout="row"
+                 layout-align="start center"
+                 class="che-list-item-details">
+              <che-list-header-column class="devfile-selector-icon-column"
+                                      che-column-title=""></che-list-header-column>
+              <che-list-header-column flex="25"
+                                      che-sort-value="devfileSelectorController.devfileOrderBy"
+                                      che-sort-item="name"
+                                      che-column-title="Name"></che-list-header-column>
+              <che-list-header-column flex="50"
+                                      che-sort-value="devfileSelectorController.devfileOrderBy"
+                                      che-column-title="Description"></che-list-header-column>            
+              <che-list-header-column flex="10"
+                                      che-sort-value="devfileSelectorController.devfileOrderBy"
+                                      che-column-title="Required memory"></che-list-header-column>                                                
+            </div>
+          </div>
+        </che-list-header>
+        <che-list class="devfile-selector-devfile-list">
+          <div ng-repeat="devfile in devfileSelectorController.devfiles" data-devfile-id="{{devfile.displayName}}"
+            class="devfile-selector-item" ng-class="{'devfile-selector-item-selected': (devfile === devfileSelectorController.selectedDevfile)}">
+            <che-list-item flex ng-click="devfileSelectorController.devfileOnClick(devfile)">
+              <div flex="100"
+                  layout="row"
+                  layout-align="start stretch"
+                  class="che-list-item-row">
+                <div flex layout="row" layout-align="start center">
+                  <!-- Icon -->
+                  <div class="devfile-selector-icon-column"
+                        layout="column" layout-align="center center">
+                    <div ng-if="devfile.icon" class="devfile-selector-item-icon">
+                      <img ng-src="{{devfile.icon}}"/>
+                    </div>
+                    <div ng-if="!devfile.icon" class="devfile-selector-item-icon blank-icon">
+                      <div class="chefont cheico-type-blank"></div>
+                    </div>
+                  </div>
+                  <!-- Name -->
+                  <div flex="25">
+                    <span class="che-list-item-name" devfile-name="{{devfile.displayName}}">{{devfile.displayName}}</span>
+                  </div>
+                  <!-- Description -->
+                  <div flex="50">
+                    <span class="che-list-item-secondary" devfile-description="{{devfile.description}}">{{devfile.description}}</span>
+                  </div>
+                   <!-- Memory -->
+                   <div flex="10">
+                    <span class="che-list-item-secondary" devfile-memory="{{devfile.globalMemoryLimit}}">{{devfile.globalMemoryLimit | changeMemoryUnit:['MB','GB']}}</span>
+                  </div>
+                </div>
+              </div>
+            </che-list-item>
+          </div>
+        </che-list>
+      </div>
+    </div>
+  </div>
+  <div class="che-list-empty">
+    <span ng-show="devfileSelectorController.devfiles.length === 0">There are no devfiles.</span>
+  </div>
+
+</div>

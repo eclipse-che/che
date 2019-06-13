@@ -122,7 +122,7 @@ class IdeSvc {
   }
 
   startWorkspace(data: any): ng.IPromise<any> {
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config.defaultEnv);
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(data.id, data.config ? data.config.defaultEnv: null);
     return startWorkspacePromise;
   }
 

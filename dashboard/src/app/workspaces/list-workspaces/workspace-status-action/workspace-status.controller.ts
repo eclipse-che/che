@@ -50,13 +50,13 @@ export class WorkspaceStatusController {
       return;
     }
     const workspace = this.cheWorkspace.getWorkspaceById(this.workspaceId);
-    if (!workspace || !workspace.config) {
+    if (!workspace) {
       return;
     }
 
     const status = this.getWorkspaceStatus();
     const isRunButton = status !== WorkspaceStatus.RUNNING && status !== WorkspaceStatus.STOPPING && status !== WorkspaceStatus.STARTING;
-    const environment = workspace.config.defaultEnv;
+    const environment = workspace.config ? workspace.config.defaultEnv : null;
 
     if (isRunButton) {
       this.updateRecentWorkspace(this.workspaceId);
@@ -65,7 +65,6 @@ export class WorkspaceStatusController {
     this.cheWorkspace.fetchStatusChange(this.workspaceId, 'ERROR').then((data: any) => {
       this.cheNotification.showError(data.error);
     });
-
     const promise = isRunButton ? this.cheWorkspace.startWorkspace(this.workspaceId, environment) : this.cheWorkspace.stopWorkspace(this.workspaceId);
     promise.catch((error: any) => {
       this.cheNotification.showError(`${isRunButton ? 'Run' : 'Stop'} workspace error.`, error);

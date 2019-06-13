@@ -189,13 +189,26 @@ export class CreateWorkspaceSvc {
     });
   }
 
-  /*createWorkspaceFromDevfile(workspaceDevfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
+  createWorkspaceFromDevfile(workspaceDevfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
+    let projects = [];
+    projectTemplates.forEach((template: che.IProjectTemplate) => {
+      let project = {
+        name: template.displayName,
+        source: {
+          type: template.source.type,
+          location: template.source.location
+        }
+      };
+      projects.push(project);
+    });      
+
     return this.checkEditingProgress().then(() => {
-      workspaceDevfile.projects = projectTemplates;
-      this.addProjectCommands({devfile: workspaceDevfile}, projectTemplates);
+      workspaceDevfile.projects = projects;
+     //TODO waits for fix https://github.com/eclipse/che/issues/13514
+     //this.addProjectCommands({devfile: workspaceDevfile}, projectTemplates);
       return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, workspaceDevfile, attributes).then((workspace: che.IWorkspace) => {
         return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
       })
@@ -220,7 +233,7 @@ export class CreateWorkspaceSvc {
         return this.$q.reject(error);
       });
     });
-  }*/
+  }
 
   /**
    * Show confirmation dialog when project editing is not completed.
@@ -244,7 +257,8 @@ export class CreateWorkspaceSvc {
    * @param {che.IWorkspace} workspace the workspace to open in IDE
    */
   redirectToIDE(workspace: che.IWorkspace): void {
-    const path = `/ide/${workspace.namespace}/${workspace.config.name}`;
+    let name = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
+    const path = `/ide/${workspace.namespace}/${name}`;
     this.$location.path(path);
   }
 
@@ -254,7 +268,8 @@ export class CreateWorkspaceSvc {
    * @param {che.IWorkspace} workspace the workspace to open in IDE
    */
   redirectToDetails(workspace: che.IWorkspace): void {
-    const path = `/workspace/${workspace.namespace}/${workspace.config.name}`;
+    let name = this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
+    const path = `/workspace/${workspace.namespace}/${name}`;
     this.$location.path(path);
   }
 
@@ -272,5 +287,14 @@ export class CreateWorkspaceSvc {
         this.cheWorkspace.getWorkspaceDataManager().addCommand(workspace, command);
       });
     });
+  }
+
+  /**
+   * Returns name of the pointed workspace.
+   * 
+   * @param workspace workspace
+   */
+  getWorkspaceName(workspace: che.IWorkspace): string {
+    return this.cheWorkspace.getWorkspaceDataManager().getName(workspace);
   }
 }

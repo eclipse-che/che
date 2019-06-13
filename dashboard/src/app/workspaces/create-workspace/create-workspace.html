@@ -51,21 +51,10 @@
         on-namespace-change="createWorkspaceController.onNamespaceChanged(namespaceId)"></namespace-selector>
     </che-label-container>
 
-    <!-- Select Stack -->
     <che-label-container che-label-name="Select Stack"
                          che-label-description="Choose your workspace runtime environment used to build and run your projects.">
-      <stack-selector on-stack-select="createWorkspaceController.onStackSelected(stackId)"></stack-selector>
-    </che-label-container>
-
-    <!-- RAM Settings-->
-    <che-label-container che-label-name="Ram"
-                         che-label-description="Allocate the workspace machine(s) memory.">
-      <ng-form name="ramSettingsForm">
-        <ram-settings ng-init="createWorkspaceController.registerForm('ramSettings', ramSettingsForm)"
-                      machines="createWorkspaceController.stackMachines"
-                      environment-manager="createWorkspaceController.environmentManager"
-                      on-ram-change="createWorkspaceController.onRamChanged(name, memoryLimitBytes)"></ram-settings>
-      </ng-form>
+      <devfile-selector on-devfile-select="createWorkspaceController.onDevfileSelected(devfile)">
+      </devfile-selector>
     </che-label-container>
 
     <!-- Project source selector -->

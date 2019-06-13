@@ -190,11 +190,13 @@ export class WorkspaceDetailsProjectsCtrl {
       if (!projectTemplate.type && projectTemplate.projectType) {
         projectTemplate.type = projectTemplate.projectType;
       }
-
       this.workspaceDetailsProjectsService.addProjectTemplate(projectTemplate);
       this.workspaceDataManager.addProject(this.workspaceDetails, projectTemplate);
     });
-    this.createWorkspaceSvc.addProjectCommands(this.workspaceDetails, projectTemplates);
+    //TODO waits for fix https://github.com/eclipse/che/issues/13514 to enable for devfile
+    if (this.workspaceDetails.config) {
+      this.createWorkspaceSvc.addProjectCommands(this.workspaceDetails, projectTemplates);
+    }
     this.projectsOnChange();
   }
 
