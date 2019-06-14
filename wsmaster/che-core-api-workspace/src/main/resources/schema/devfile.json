@@ -215,7 +215,7 @@
                     "type": "string",
                     "pattern": "^(https?://)[a-zA-Z0-9_\\-./]+",
                     "examples": [
-                      "https://che-plugin-registry.openshift.io/"
+                      "https://che-plugin-registry.openshift.io/v3/"
                     ]
                   },
                   "memoryLimit": {
