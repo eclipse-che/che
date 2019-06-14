@@ -978,7 +978,7 @@
       },
       {
         "name": "gradle build",
-        "type": "gralde",
+        "type": "gradle",
         "commandLine": "cd ${CHE_PROJECTS_ROOT}/console-java-simple; gradle build",
         "attributes": {
           "previewUrl": "",
@@ -1337,7 +1337,7 @@
       },
       {
         "name": "gradle build",
-        "type": "gralde",
+        "type": "gradle",
         "commandLine": "cd ${CHE_PROJECTS_ROOT}/gs-rest-service/complete; gradle build",
         "attributes": {
           "previewUrl": "",
