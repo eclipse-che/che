@@ -44,7 +44,7 @@ export class NewWorkspace {
         await this.clickOnCreateAndOpenButton();
 
         await this.waitPageAbsence();
-        await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS)); await this.waitPageAbsence();
+        await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS));
         await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
     }
 
