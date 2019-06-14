@@ -502,7 +502,7 @@ public final class DtoFactory {
       builder.registerTypeAdapterFactory(factory);
     }
 
-    if (Boolean.valueOf(System.getenv("CHE_DTO_SERIALIZE__NULL__AND__EMPTY__ARRAYS"))) {
+    if (Boolean.valueOf(System.getenv("CHE_LEGACY__DTO__JSON__SERIALIZATION"))) {
       builder.registerTypeAdapterFactory(
           new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()));
       builder.registerTypeAdapterFactory(new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()));
