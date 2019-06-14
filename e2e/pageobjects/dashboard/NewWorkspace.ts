@@ -15,9 +15,8 @@ import { By } from 'selenium-webdriver';
 import 'reflect-metadata';
 import { Dashboard } from './Dashboard';
 import { Workspaces } from './Workspaces';
-import { Ide } from '../ide/Ide';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../utils/workspace/TestWorkspaceUtil';
 import { WorkspaceDetails } from './workspace-details/WorkspaceDetails';
+import { TestWorkspaceUtil, Ide, WorkspaceStatus } from '../..';
 
 
 @injectable()
@@ -44,13 +43,26 @@ export class NewWorkspace {
         await this.prepareWorkspace(workspaceName, dataStackId, sampleName);
         await this.clickOnCreateAndOpenButton();
 
+        await this.waitPageAbsence();
         await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS));
         await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
+    }
+
+    async waitPageAbsence(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
+        await this.driverHelper.waitDisappearanceTestWithTimeout(By.css(NewWorkspace.NAME_FIELD_CSS), timeout);
+        await this.driverHelper.waitDisappearanceTestWithTimeout(By.css(NewWorkspace.TITLE_CSS), timeout);
     }
 
     async createWorkspaceAndProceedEditing(workspaceName: string, dataStackId: string, sampleName: string) {
         await this.prepareWorkspace(workspaceName, dataStackId, sampleName);
         await this.selectCreateWorkspaceAndProceedEditing();
+
+        await this.workspaceDetails.waitPage(workspaceName);
+    }
+
+    async createAndOpenWorksapce(workspaceName: string, dataStackId: string, sampleName: string) {
+        await this.prepareWorkspace(workspaceName, dataStackId, sampleName);
+        await this.clickOnCreateAndOpenButton();
 
         await this.workspaceDetails.waitPage(workspaceName);
     }
@@ -170,11 +182,11 @@ export class NewWorkspace {
     }
 
     private getStackCssLocator(dataStackId: string): string {
-        return `div[data-stack-id='${dataStackId}']`;
+        return `span[devfile-name='${dataStackId}']`;
     }
 
     private getSelectedStackCssLocator(dataStackId: string) {
-        return `div.stack-selector-item-selected[data-stack-id='${dataStackId}']`;
+        return `div.devfile-selector-item-selected[data-devfile-id='${dataStackId}']`;
     }
 
     private async prepareWorkspace(workspaceName: string, dataStackId: string, sampleName: string) {
