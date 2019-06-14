@@ -15,5 +15,5 @@ metadata:
   name: terminal-sample
 components:
   - type: cheEditor
-    registryUrl: https://che-plugin-registry.openshift.io/
+    registryUrl: https://che-plugin-registry.openshift.io/v3/
     id: eclipse/theia-ide/0.0.1
