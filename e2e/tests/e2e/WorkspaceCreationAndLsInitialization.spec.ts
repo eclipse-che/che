@@ -45,7 +45,7 @@ suite('E2E', async () => {
         });
 
         test('Create and open workspace', async () => {
-            await newWorkspace.createAndRunWorkspace(workspaceName, 'Java Maven', sampleName);
+            await newWorkspace.createAndRunWorkspace(namespace, workspaceName, 'Java Maven', sampleName);
         });
     });
 

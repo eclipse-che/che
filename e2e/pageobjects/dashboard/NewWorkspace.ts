@@ -16,6 +16,7 @@ import 'reflect-metadata';
 import { Dashboard } from './Dashboard';
 import { Workspaces } from './Workspaces';
 import { WorkspaceDetails } from './workspace-details/WorkspaceDetails';
+import { TestWorkspaceUtil, Ide, WorkspaceStatus } from '../..';
 
 
 @injectable()
@@ -35,13 +36,16 @@ export class NewWorkspace {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard,
         @inject(CLASSES.Workspaces) private readonly workspaces: Workspaces,
+        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil,
         @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails) { }
 
-    async createAndRunWorkspace(workspaceName: string, dataStackId: string, sampleName: string) {
+    async createAndRunWorkspace(namespace: string, workspaceName: string, dataStackId: string, sampleName: string) {
         await this.prepareWorkspace(workspaceName, dataStackId, sampleName);
         await this.clickOnCreateAndOpenButton();
 
         await this.waitPageAbsence();
+        await this.driverHelper.waitVisibility(By.css(Ide.ACTIVATED_IDE_IFRAME_CSS)); await this.waitPageAbsence();
+        await this.testWorkspaceUtil.waitWorkspaceStatus(namespace, workspaceName, WorkspaceStatus.STARTING);
     }
 
     async waitPageAbsence(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
