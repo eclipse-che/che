@@ -67,3 +67,6 @@ deploy/openshift/templates/monitoring/** @skabashnyuk @metlos
 
 # selenium tests
 selenium/** @musienko-maxim @dmytro-ndp @Ohrimenko1988
+
+# e2e tests
+e2e/**  @musienko-maxim @Ohrimenko1988 @rhopp
