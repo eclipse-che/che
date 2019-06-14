@@ -33,6 +33,7 @@ import java.io.StringReader;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -501,8 +502,14 @@ public final class DtoFactory {
       builder.registerTypeAdapterFactory(factory);
     }
 
-    builder.registerTypeHierarchyAdapter(Collection.class, new NullOrEmptyCollectionAdapter());
-    builder.registerTypeHierarchyAdapter(Map.class, new NullOrEmptyMapAdapter());
+    if (Boolean.valueOf(System.getenv("CHE_DTO_SERIALIZE__NULL__AND__EMPTY__ARRAYS"))) {
+      builder.registerTypeAdapterFactory(
+          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()));
+      builder.registerTypeAdapterFactory(new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()));
+    } else {
+      builder.registerTypeHierarchyAdapter(Collection.class, new NullOrEmptyCollectionAdapter());
+      builder.registerTypeHierarchyAdapter(Map.class, new NullOrEmptyMapAdapter());
+    }
 
     return builder.create();
   }
