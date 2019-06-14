@@ -19,6 +19,7 @@ import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
 import java.util.List;
@@ -85,6 +86,10 @@ public class DeployBroker extends BrokerPhase {
         namespace.configMaps().create(configMap);
       }
 
+      for (Secret secret : brokerEnvironment.getSecrets().values()) {
+        namespace.secrets().create(secret);
+      }
+
       Pod pluginBrokerPod = getPluginBrokerPod(brokerEnvironment.getPodsCopy());
 
       if (factory.isConfigured()) {
@@ -111,6 +116,11 @@ public class DeployBroker extends BrokerPhase {
         deployments.delete();
       } catch (InfrastructureException e) {
         LOG.error("Brokers pod removal failed. Error: " + e.getLocalizedMessage(), e);
+      }
+      try {
+        namespace.secrets().delete();
+      } catch (InfrastructureException ex) {
+        LOG.error("Brokers secret removal failed. Error: " + ex.getLocalizedMessage(), ex);
       }
       try {
         namespace.configMaps().delete();
