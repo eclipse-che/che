@@ -264,7 +264,20 @@
               "attributes": {
                 "memoryLimitBytes": "536870912"
               },
-              "servers": {},
+              "servers": {
+                "9000/tcp": {
+                  "port": "9000",
+                  "protocol": "http"
+                },
+                "8080/tcp": {
+                  "port": "8080",
+                  "protocol": "http"
+                },
+                "3000/tcp": {
+                  "port": "3000",
+                  "protocol": "http"
+                }
+              },
               "volumes": {
                 "projects": {
                   "path": "/projects"
