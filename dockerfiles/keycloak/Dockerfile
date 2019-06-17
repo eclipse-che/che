@@ -11,6 +11,10 @@ ADD che /opt/jboss/keycloak/themes/che
 ADD . /scripts/
 ADD cli /scripts/cli
 RUN ln -s /opt/jboss/tools/docker-entrypoint.sh
+RUN curl --location https://github.com/davidfestal/KEYCLOAK-10169-OpenShift4-User-Provider/releases/download/6.0.1-openshift-v4-provider/openshift4-extension-6.0.1.jar -o /opt/jboss/keycloak/standalone/deployments/openshift4-extension-6.0.1.jar
+RUN cd /opt/jboss/keycloak/themes/base/admin/resources/partials && \
+    unzip -j /opt/jboss/keycloak/standalone/deployments/openshift4-extension-6.0.1.jar theme-resources/resources/realm-identity-provider-openshift-v4.html && \
+    unzip -j /opt/jboss/keycloak/standalone/deployments/openshift4-extension-6.0.1.jar theme-resources/resources/realm-identity-provider-openshift-v4-ext.html
 
 USER root
 RUN chgrp -R 0 /scripts && \
