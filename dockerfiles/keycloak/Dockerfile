@@ -10,6 +10,7 @@ FROM jboss/keycloak:6.0.1
 ADD che /opt/jboss/keycloak/themes/che
 ADD . /scripts/
 ADD cli /scripts/cli
+RUN ln -s /opt/jboss/tools/docker-entrypoint.sh
 
 USER root
 RUN chgrp -R 0 /scripts && \
