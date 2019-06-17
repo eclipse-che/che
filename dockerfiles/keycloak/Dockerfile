@@ -14,3 +14,5 @@ ADD cli /scripts/cli
 USER root
 RUN chgrp -R 0 /scripts && \
     chmod -R g+rwX /scripts
+
+USER 1000
