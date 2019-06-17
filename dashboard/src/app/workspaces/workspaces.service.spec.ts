@@ -139,10 +139,10 @@ describe(`WorkspacesService >`, () => {
       expect(workspacesService.isSupportedVersion(newCHE7Workspace)).toBeTruthy();
     });
 
-    it(`shouldn't support a CHE6 workspace >`, () => {
+    it(`should support a CHE6 workspace >`, () => {
       const oldCHE6Workspace = getCHE6Workspace();
-      expect(workspacesService.isSupported(oldCHE6Workspace)).toBeFalsy();
-      expect(workspacesService.isSupportedVersion(oldCHE6Workspace)).toBeFalsy();
+      expect(workspacesService.isSupported(oldCHE6Workspace)).toBeTruthy();
+      expect(workspacesService.isSupportedVersion(oldCHE6Workspace)).toBeTruthy();
     });
 
   });

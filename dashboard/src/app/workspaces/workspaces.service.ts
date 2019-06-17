@@ -13,7 +13,7 @@
 
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 
-const MINIMAL_SUPPORTED_VERSION = 7;
+const MINIMAL_SUPPORTED_VERSION = 6;
 
 /**
  * This is a helper class for workspaces.
