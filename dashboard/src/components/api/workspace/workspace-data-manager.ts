@@ -17,15 +17,15 @@ const PLUGIN_TYPE = 'chePlugin';
 
 
 /**
- * 
- * 
+ *
+ *
  * @author Ann Shumilova
  */
 export class WorkspaceDataManager {
-  
+
   /**
    * Returns the name of the pointed workspace.
-   * 
+   *
    * @param workspace workspace name
    */
   getName(workspace: che.IWorkspace): string {
@@ -38,7 +38,7 @@ export class WorkspaceDataManager {
 
   /**
    * Sets the name of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    * @param name workspace name
    */
@@ -52,7 +52,7 @@ export class WorkspaceDataManager {
 
   /**
    * Returns the attributes of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    */
   getAttributes(workspace: che.IWorkspace): che.IWorkspaceConfigAttributes {
@@ -64,21 +64,43 @@ export class WorkspaceDataManager {
   }
 
   /**
+   * Set the attributes of the pointed workspace.
+   *
+   * @param workspace workspace
+   * @param attributes workspace attributes
+   */
+  setAttributes(workspace: che.IWorkspace, attributes: che.IWorkspaceConfigAttributes): void {
+    if (workspace.config) {
+      if (attributes) {
+        workspace.config.attributes = attributes;
+      } else {
+        delete workspace.config.attributes;
+      }
+    } else if (workspace.devfile) {
+      if (attributes) {
+        workspace.devfile.attributes = attributes;
+      } else {
+        delete workspace.devfile.attributes;
+      }
+    }
+  }
+
+  /**
    * Returns the projects of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    */
   getProjects(workspace: che.IWorkspace): Array <any> {
     if (workspace.config) {
-      return workspace.config.projects;
+      return workspace.config.projects || [];
     } else if (workspace.devfile) {
-      return workspace.devfile.projects;
+      return workspace.devfile.projects || [];
     }
   }
 
   /**
    * Sets the projects of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    * @param projects workspace projects
    */
@@ -89,15 +111,16 @@ export class WorkspaceDataManager {
       workspace.devfile.projects = projects;
     }
   }
-  
+
   /**
    * Adds the project to the pointed workspace.
-   * 
-   * @param workspace workspace 
-   * @param project project to be added to pointed workspace 
+   *
+   * @param workspace workspace
+   * @param project project to be added to pointed workspace
    */
   addProject(workspace: che.IWorkspace, projectTemplate: che.IProjectTemplate): void {
     if (workspace.config) {
+      workspace.config.projects = workspace.config.projects || [];
       workspace.config.projects.push(projectTemplate);
     } else if (workspace.devfile) {
       let project = {
@@ -107,15 +130,16 @@ export class WorkspaceDataManager {
           location: projectTemplate.source.location
         }
       };
+      workspace.devfile.projects = workspace.devfile.projects || [];
       workspace.devfile.projects.push(project);
     }
   }
 
   /**
    * Adds the command to the pointed workspace.
-   * 
+   *
    * @param workspace workspace
-   * @param command command to be added to pointed workspace 
+   * @param command command to be added to pointed workspace
    */
   addCommand(workspace: che.IWorkspace, command: any): void {
     if (workspace.config) {
@@ -125,10 +149,10 @@ export class WorkspaceDataManager {
       workspace.devfile.commands.push(command);
     }
   }
-  
+
   /**
    * Returns the list of plugin ids of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    */
   getPlugins(workspace: che.IWorkspace): Array<string> {
@@ -148,12 +172,13 @@ export class WorkspaceDataManager {
 
   /**
    * Sets the list of plugins of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    * @param plugins the list of plugins
    */
   setPlugins(workspace: che.IWorkspace, plugins: Array<string>): void {
     if (workspace.config) {
+      workspace.config.attributes = workspace.config.attributes || {};
       workspace.config.attributes.plugins = plugins.join(',');
     } else if (workspace.devfile) {
       let pluginComponents = [];
@@ -180,7 +205,7 @@ export class WorkspaceDataManager {
 
   /**
    * Returns editor's id.
-   * 
+   *
    * @param workspace workspace
    */
   getEditor(workspace: che.IWorkspace): string {
@@ -200,12 +225,13 @@ export class WorkspaceDataManager {
 
   /**
    * Sets the editor of the pointed workspace.
-   * 
+   *
    * @param workspace workspace
    * @param editor editor's id
    */
   setEditor(workspace: che.IWorkspace, editor: string): void {
     if (workspace.config) {
+      workspace.config.attributes = workspace.config.attributes || {};
       workspace.config.attributes.editor = editor;
     } else if (workspace.devfile) {
       let editorComponents = [];

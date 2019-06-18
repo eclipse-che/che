@@ -93,7 +93,6 @@ export class WorkspaceDetailsOverviewController {
     this.attributes = this.cheWorkspace.getWorkspaceDataManager().getAttributes(this.workspaceDetails);
     this.name = this.cheWorkspace.getWorkspaceDataManager().getName(this.workspaceDetails);
     this.isEphemeralMode = this.attributes && this.attributes.persistVolumes ? !JSON.parse(this.attributes.persistVolumes) : false;
-    
     this.attributesCopy = angular.copy(this.cheWorkspace.getWorkspaceDataManager().getAttributes(this.workspaceDetails));
   }
 
@@ -287,14 +286,20 @@ export class WorkspaceDetailsOverviewController {
    */
   onEphemeralModeChange(): void {
     if (this.isEphemeralMode) {
+      this.attributes = this.attributes || {};
       this.attributes.persistVolumes = 'false';
     } else {
-      if (this.attributesCopy.persistVolumes) {
-        this.attributes.persistVolumes = 'true';
+      if (!this.attributesCopy) {
+        this.attributes = null;
       } else {
-        delete this.attributes.persistVolumes;
+        if (this.attributesCopy.persistVolumes) {
+          this.attributes.persistVolumes = 'true';
+        } else {
+          delete this.attributes.persistVolumes;
+        }
       }
     }
+    this.cheWorkspace.getWorkspaceDataManager().setAttributes(this.workspaceDetails, this.attributes);
     this.onChange();
   }
 

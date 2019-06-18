@@ -243,18 +243,13 @@ class Loader {
                 return;
             }
 
-            var machines = Object.keys(workspace.runtime.machines)
-                .map(machineName => workspace.runtime.machines[machineName]);
-            var servers = machines.map(machine => {
-                const servers = Object.keys(machine.servers)
-                    .map(serverName => machine.servers[serverName]);
-                return servers;
-            }).reduce((servers, machineServers) => {
-                return servers.concat(...machineServers);
-            }, []);
-            var server = servers.find(_server => {
-                return _server.url && redirectUrl.startsWith(_server.url);
-            });
+            var machines = Object.values(workspace.runtime.machines);
+
+            var servers = machines.filter(machines => machines.servers)
+              .map(machine => Object.values(machine.servers))
+              .reduce((servers, machineServers) => servers.concat(...machineServers), []);
+
+            var server = servers.find(_server => _server.url && redirectUrl.startsWith(_server.url));
 
             if (server) {
                 resolve(server);

@@ -583,13 +583,4 @@ export class WorkspaceDetailsController {
 
     return tabs.some((tabKey: string) => this.checkFormsNotValid(tabKey));
   }
-
-  /**
-   * Checks whether "plugins" are enabled in workspace config.
-   */
-  isPluginsEnabled(): boolean {
-    let editor = this.workspaceDetails.config.attributes.editor || '';
-    let plugins = this.workspaceDetails.config.attributes.plugins || '';
-    return (editor.length > 0 || plugins.length > 0);
-  }
 }

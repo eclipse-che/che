@@ -173,18 +173,6 @@ public class ServerDtoTest {
   }
 
   @Test
-  public void testCloneWithNullAny() throws Exception {
-    DtoWithAny dto1 = dtoFactory.createDto(DtoWithAny.class);
-    DtoWithAny dto2 = dtoFactory.clone(dto1);
-    Assert.assertEquals(dto1, dto2);
-    JsonElement json = new JsonParser().parse(dtoFactory.toJson(dto1));
-    JsonObject expJson = new JsonObject();
-    expJson.addProperty("id", 0);
-    expJson.add("objects", new JsonArray());
-    assertEquals(expJson, json);
-  }
-
-  @Test
   public void testShadowedFields() throws Exception {
     GrandchildDto dto1 = dtoFactory.createDto(GrandchildDto.class);
     dtoFactory.toJson(dto1);

@@ -83,7 +83,7 @@ export class WorkspacesService {
 
     let version: number;
     //Checking no-environment and editor or plugin attributes, that were introduced in Che7:
-    if (!workspace.config.defaultEnv || config.attributes.editor || config.attributes.plugins) {
+    if (!workspace.config.defaultEnv || (config.attributes && (config.attributes.editor || config.attributes.plugins))) {
       version = 7;
     } else {
       const machines = config.environments[config.defaultEnv].machines;

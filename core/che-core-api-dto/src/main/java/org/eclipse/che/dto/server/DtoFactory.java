@@ -104,10 +104,7 @@ public final class DtoFactory {
   private final Map<Class<?>, DtoProvider<?>> dtoImpl2Providers = new ConcurrentHashMap<>();
   private final Gson dtoGson =
       buildDtoParser(
-          ServiceLoader.load(TypeAdapterFactory.class).iterator(),
-          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()),
-          new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()),
-          new DtoInterfaceTAF());
+          ServiceLoader.load(TypeAdapterFactory.class).iterator(), new DtoInterfaceTAF());
 
   /**
    * Created deep copy of DTO object.
@@ -504,6 +501,16 @@ public final class DtoFactory {
     for (TypeAdapterFactory factory : factories) {
       builder.registerTypeAdapterFactory(factory);
     }
+
+    if (Boolean.valueOf(System.getenv("CHE_LEGACY__DTO__JSON__SERIALIZATION"))) {
+      builder.registerTypeAdapterFactory(
+          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()));
+      builder.registerTypeAdapterFactory(new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()));
+    } else {
+      builder.registerTypeHierarchyAdapter(Collection.class, new NullOrEmptyCollectionAdapter());
+      builder.registerTypeHierarchyAdapter(Map.class, new NullOrEmptyMapAdapter());
+    }
+
     return builder.create();
   }
 }
