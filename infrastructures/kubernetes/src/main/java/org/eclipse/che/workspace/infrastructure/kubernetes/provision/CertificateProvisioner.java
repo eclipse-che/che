@@ -94,17 +94,24 @@ public class CertificateProvisioner implements ConfigurationProvisioner<Kubernet
         pod.getSpec().getVolumes().add(buildCertSecretVolume(selfSignedCertSecretName));
       }
 
-      for (Container container : pod.getSpec().getContainers()) {
-        Optional<VolumeMount> certVolumeMount =
-            container
-                .getVolumeMounts()
-                .stream()
-                .filter(vm -> vm.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))
-                .findAny();
-        if (!certVolumeMount.isPresent()) {
-          container.getVolumeMounts().add(buildCertVolumeMount());
-        }
+      for (Container container : pod.getSpec().getInitContainers()) {
+        provisionCertVolumeMountIfNeeded(container);
       }
+      for (Container container : pod.getSpec().getContainers()) {
+        provisionCertVolumeMountIfNeeded(container);
+      }
+    }
+  }
+
+  private void provisionCertVolumeMountIfNeeded(Container container) {
+    Optional<VolumeMount> certVolumeMount =
+        container
+            .getVolumeMounts()
+            .stream()
+            .filter(vm -> vm.getName().equals(CHE_SELF_SIGNED_CERT_VOLUME))
+            .findAny();
+    if (!certVolumeMount.isPresent()) {
+      container.getVolumeMounts().add(buildCertVolumeMount());
     }
   }
 

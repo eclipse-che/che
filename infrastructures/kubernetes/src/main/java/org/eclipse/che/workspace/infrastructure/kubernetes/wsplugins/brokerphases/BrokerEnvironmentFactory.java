@@ -49,6 +49,7 @@ import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
 /**
@@ -79,6 +80,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
   private final String unifiedBrokerImage;
   private final String initBrokerImage;
   private final String pluginRegistryUrl;
+  private final CertificateProvisioner certProvisioner;
 
   public BrokerEnvironmentFactory(
       String cheWebsocketEndpoint,
@@ -87,7 +89,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
       String unifiedBrokerImage,
       String initBrokerImage,
-      String pluginRegistryUrl) {
+      String pluginRegistryUrl,
+      CertificateProvisioner certProvisioner) {
     this.cheWebsocketEndpoint = cheWebsocketEndpoint;
     this.brokerPullPolicy = brokerPullPolicy;
     this.authEnableEnvVarProvider = authEnableEnvVarProvider;
@@ -95,6 +98,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
     this.unifiedBrokerImage = unifiedBrokerImage;
     this.initBrokerImage = initBrokerImage;
     this.pluginRegistryUrl = pluginRegistryUrl;
+    this.certProvisioner = certProvisioner;
   }
 
   /**
@@ -167,6 +171,8 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
                     runtimeId.getWorkspaceId(),
                     MoreObjects.firstNonNull(runtimeId.getEnvName(), ""),
                     runtimeId.getOwnerId()),
+                "-cacert",
+                certProvisioner.isConfigured() ? certProvisioner.getCertPath() : "",
                 "--registry-address",
                 Strings.nullToEmpty(pluginRegistryUrl))
             .withImagePullPolicy(brokerPullPolicy)

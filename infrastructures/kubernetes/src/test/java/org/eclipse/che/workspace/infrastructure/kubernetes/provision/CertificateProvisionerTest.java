@@ -124,6 +124,11 @@ public class CertificateProvisionerTest {
     // then
     for (Pod pod : k8sEnv.getPodsCopy().values()) {
       verifyVolumeIsPresent(pod);
+
+      for (Container container : pod.getSpec().getInitContainers()) {
+        verifyVolumeMountIsPresent(container);
+      }
+
       for (Container container : pod.getSpec().getContainers()) {
         verifyVolumeMountIsPresent(container);
       }
@@ -176,6 +181,7 @@ public class CertificateProvisionerTest {
         .withName(podName)
         .endMetadata()
         .withNewSpec()
+        .withInitContainers(new ContainerBuilder().build())
         .withContainers(new ContainerBuilder().build(), new ContainerBuilder().build())
         .endSpec()
         .build();
