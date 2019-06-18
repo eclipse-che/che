@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.opentracing.Tracer;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +36,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesDeployments;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesNamespace;
+import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListener;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.BrokersResult;
@@ -59,9 +61,11 @@ public class DeployBrokerTest {
   @Mock private KubernetesNamespace k8sNamespace;
   @Mock private KubernetesDeployments k8sDeployments;
   @Mock private KubernetesConfigsMaps k8sConfigMaps;
+  @Mock private KubernetesSecrets k8sSecrets;
 
   @Mock private KubernetesEnvironment k8sEnvironment;
   @Mock private ConfigMap configMap;
+  @Mock private Secret tlsSecret;
   private Pod pod;
 
   @Mock private BrokersResult brokersResult;
@@ -90,10 +94,12 @@ public class DeployBrokerTest {
 
     when(k8sNamespace.configMaps()).thenReturn(k8sConfigMaps);
     when(k8sNamespace.deployments()).thenReturn(k8sDeployments);
+    when(k8sNamespace.secrets()).thenReturn(k8sSecrets);
 
     pod = new PodBuilder().withNewMetadata().withName(PLUGIN_BROKER_POD_NAME).endMetadata().build();
     when(k8sEnvironment.getPodsCopy()).thenReturn(ImmutableMap.of(PLUGIN_BROKER_POD_NAME, pod));
     when(k8sEnvironment.getConfigMaps()).thenReturn(ImmutableMap.of("configMap", configMap));
+    when(k8sEnvironment.getSecrets()).thenReturn(ImmutableMap.of("secret", tlsSecret));
 
     when(k8sDeployments.create(any())).thenReturn(pod);
   }
@@ -107,10 +113,12 @@ public class DeployBrokerTest {
     assertSame(result, plugins);
     verify(k8sConfigMaps).create(configMap);
     verify(k8sDeployments).create(pod);
+    verify(k8sSecrets).create(tlsSecret);
 
     verify(k8sDeployments).stopWatch();
     verify(k8sDeployments).delete();
     verify(k8sConfigMaps).delete();
+    verify(k8sSecrets).delete();
   }
 
   @Test
