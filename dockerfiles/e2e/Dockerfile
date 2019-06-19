@@ -11,6 +11,7 @@ ENV LANG=en_US.utf8 \
     FABRIC8_USER_NAME=fabric8
 
 COPY google-chrome.repo /etc/yum.repos.d/google-chrome.repo
+COPY e2e /root/e2e
 RUN yum install --assumeyes epel-release && \
     yum update --assumeyes && \
     yum install --assumeyes google-chrome-stable && \
@@ -30,15 +31,8 @@ RUN yum install --assumeyes epel-release && \
     chromedriver_version=$(curl -s -g https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${chrome_version}) && \
     $(curl -sS -g https://chromedriver.storage.googleapis.com/${chromedriver_version}/chromedriver_linux64.zip > chromedriver_linux64.zip) && \
     unzip chromedriver_linux64.zip && mv chromedriver /usr/bin/chromedriver && chmod +x /usr/bin/chromedriver && rm chromedriver_linux64.zip && \
-    # Clone e2e from eclipse/che repo.
-    cd root && \
-    git init && \
-    git remote add upstream https://github.com/eclipse/che.git && \
-    git config core.sparsecheckout true && \
-    echo "e2e/*" >> .git/info/sparse-checkout && \
-    git pull --depth=1 upstream master && \
     # Download all dependencies for e2e tests
-    cd e2e && \
+    cd /root/e2e && \
     npm --silent i
     
 WORKDIR /root/

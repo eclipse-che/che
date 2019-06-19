@@ -11,14 +11,14 @@ x11vnc -display :1.0 > /dev/null 2>&1 &
 export DISPLAY=:1.0
 
 hostname=$(hostname -I)
-echo "You can wath localy using VNC with IP: $hostname"
+echo "You can watch locally using VNC with IP: $hostname"
 
 if mount | grep 'local_tests'; then
-	echo "The local scripts are mounted. Executing local scripts."
+	echo "The local code is mounted. Executing local code."
 	cd local_tests
 	npm i
 else
-	echo "Executing e2e tests from master branch."
+	echo "Executing e2e tests from an image."
 	cd e2e
 fi
 
