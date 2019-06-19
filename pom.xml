@@ -17,7 +17,7 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>7.0.0-RC-1.1-SNAPSHOT</version>
+        <version>7.0.0-RC-1.1</version>
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
@@ -49,11 +49,11 @@
     </scm>
     <properties>
         <build.info>${project.version}</build.info>
-        <che.dashboard.version>7.0.0-RC-1.1-SNAPSHOT</che.dashboard.version>
-        <che.docs.version>7.0.0-RC-1.1-SNAPSHOT</che.docs.version>
-        <che.lib.version>7.0.0-RC-1.1-SNAPSHOT</che.lib.version>
+        <che.dashboard.version>7.0.0-RC-1.1</che.dashboard.version>
+        <che.docs.version>7.0.0-RC-1.0</che.docs.version>
+        <che.lib.version>7.0.0-RC-1.1</che.lib.version>
         <che.ls.jdt.version>0.0.3</che.ls.jdt.version>
-        <che.version>7.0.0-RC-1.1-SNAPSHOT</che.version>
+        <che.version>7.0.0-RC-1.1</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
