@@ -8,7 +8,7 @@ projects:
       location: 'https://github.com/eclipse/che.git'
 components:
   - type: cheEditor
-    id: eclipse/che-theia/1.0.0
+    id: eclipse/che-theia/next
   - type: chePlugin
     id: eclipse/che-machine-exec-plugin/0.0.1
   - alias: che-dev
