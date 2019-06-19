@@ -18,13 +18,13 @@
     <parent>
         <artifactId>maven-depmgt-pom</artifactId>
         <groupId>org.eclipse.che.depmgt</groupId>
-        <version>7.0.0-RC-2.0-SNAPSHOT</version>
+        <version>7.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>dto-typescript</artifactId>
     <packaging>pom</packaging>
     <name>Che TypeScript DTO</name>
     <properties>
-        <che.version>7.0.0-RC-2.0-SNAPSHOT</che.version>
+        <che.version>7.0.0-SNAPSHOT</che.version>
     </properties>
     <repositories>
         <repository>
