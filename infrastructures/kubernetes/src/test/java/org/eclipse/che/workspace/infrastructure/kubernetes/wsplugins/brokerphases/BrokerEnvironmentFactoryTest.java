@@ -35,6 +35,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVar
 import org.eclipse.che.api.workspace.server.wsplugins.model.PluginFQN;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.brokerphases.BrokerEnvironmentFactory.BrokersConfigs;
 import org.mockito.ArgumentCaptor;
@@ -54,6 +55,7 @@ public class BrokerEnvironmentFactoryTest {
   private static final String IMAGE_PULL_POLICY = "Never";
   private static final String PUSH_ENDPOINT = "http://localhost:8080";
 
+  @Mock private CertificateProvisioner certProvisioner;
   @Mock private AgentAuthEnableEnvVarProvider authEnableEnvVarProvider;
   @Mock private MachineTokenEnvVarProvider machineTokenEnvVarProvider;
   @Mock private RuntimeIdentity runtimeId;
@@ -71,7 +73,8 @@ public class BrokerEnvironmentFactoryTest {
                 machineTokenEnvVarProvider,
                 UNIFIED_BROKER_IMAGE,
                 INIT_IMAGE,
-                DEFAULT_REGISTRY) {
+                DEFAULT_REGISTRY,
+                certProvisioner) {
               @Override
               protected KubernetesEnvironment doCreate(BrokersConfigs brokersConfigs) {
                 return null;
@@ -85,6 +88,7 @@ public class BrokerEnvironmentFactoryTest {
     when(runtimeId.getEnvName()).thenReturn("env");
     when(runtimeId.getOwnerId()).thenReturn("owner");
     when(runtimeId.getWorkspaceId()).thenReturn("wsid");
+    when(certProvisioner.isConfigured()).thenReturn(false);
   }
 
   @Test
@@ -117,11 +121,67 @@ public class BrokerEnvironmentFactoryTest {
           String.format(
               "%s:%s:%s",
               runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()),
+          "-cacert",
+          "",
           "--registry-address",
           DEFAULT_REGISTRY
         });
     assertEquals(Containers.getRamLimit(initContainer), 262144000);
     assertEquals(Containers.getRamLimit(initContainer), 262144000);
+  }
+
+  @Test
+  public void testSelfSignedCertificate() throws Exception {
+    when(certProvisioner.isConfigured()).thenReturn(true);
+    when(certProvisioner.getCertPath()).thenReturn("/tmp/che/cacert");
+    // given
+    Collection<PluginFQN> pluginFQNs = singletonList(new PluginFQN(null, "id"));
+    ArgumentCaptor<BrokersConfigs> captor = ArgumentCaptor.forClass(BrokersConfigs.class);
+
+    // when
+    factory.create(pluginFQNs, runtimeId);
+
+    // then
+    verify(factory).doCreate(captor.capture());
+    BrokersConfigs brokersConfigs = captor.getValue();
+
+    List<Container> initContainers = brokersConfigs.pod.getSpec().getInitContainers();
+    assertEquals(initContainers.size(), 1);
+    Container initContainer = initContainers.get(0);
+    assertEquals(
+        initContainer.getArgs().toArray(),
+        new String[] {
+          "-push-endpoint",
+          PUSH_ENDPOINT,
+          "-runtime-id",
+          String.format(
+              "%s:%s:%s",
+              runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()),
+          "-cacert",
+          "/tmp/che/cacert",
+          "--registry-address",
+          DEFAULT_REGISTRY,
+        });
+
+    List<Container> containers = brokersConfigs.pod.getSpec().getContainers();
+    assertEquals(containers.size(), 1);
+    Container container = containers.get(0);
+    assertEquals(
+        container.getArgs().toArray(),
+        new String[] {
+          "-push-endpoint",
+          PUSH_ENDPOINT,
+          "-runtime-id",
+          String.format(
+              "%s:%s:%s",
+              runtimeId.getWorkspaceId(), runtimeId.getEnvName(), runtimeId.getOwnerId()),
+          "-cacert",
+          "/tmp/che/cacert",
+          "--registry-address",
+          DEFAULT_REGISTRY,
+          "-metas",
+          "/broker-config/config.json",
+        });
   }
 
   @Test
