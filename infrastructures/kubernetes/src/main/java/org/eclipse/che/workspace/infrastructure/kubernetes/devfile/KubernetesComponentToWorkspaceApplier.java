@@ -141,7 +141,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private void applyProjectsVolumes(List<PodData> podsData, Map<String, MachineConfigImpl> machines) {
     for (PodData podData : podsData) {
       for (Container container : podData.getSpec().getContainers()) {
-        String machineName =  container.getName();
+        String machineName =  Names.machineName(podData, container);
         MachineConfigImpl machineConfig = new MachineConfigImpl();
         machineConfig
             .getVolumes()
