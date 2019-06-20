@@ -82,7 +82,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     k8sBasedComponents.add("openshift"); // so that we can work with the petclinic.yaml
     applier =
         new KubernetesComponentToWorkspaceApplier(
-            PROJECT_MOUNT_PATH, k8sRecipeParser, k8sEnvProvisioner, k8sBasedComponents);
+            k8sRecipeParser, k8sEnvProvisioner, PROJECT_MOUNT_PATH, "1Gi", k8sBasedComponents);
 
     workspaceConfig = new WorkspaceConfigImpl();
   }
@@ -194,8 +194,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionProjectVolumesIfSpecifiedFromK8SList()
-      throws Exception {
+  public void shouldProvisionProjectVolumesIfSpecifiedFromK8SList() throws Exception {
     // given
     String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
@@ -213,7 +212,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
     verify(k8sEnvProvisioner).provision(any(), any(), objectsCaptor.capture(), any());
     List<HasMetadata> list = objectsCaptor.getValue();
 
-    //Make sure PVC is created
+    // Make sure PVC is created
     assertTrue(
         list.stream()
             .filter(hasMeta -> hasMeta instanceof PersistentVolumeClaim)
@@ -229,13 +228,24 @@ public class KubernetesComponentToWorkspaceApplierTest {
           continue;
         }
         // Make sure volume is created
-        assertTrue(p.getSpec().getVolumes().stream()
-            .anyMatch(v -> v.getName().equals(PROJECTS_VOLUME_NAME)
-                && v.getPersistentVolumeClaim().getClaimName().equals(PROJECTS_VOLUME_NAME)));
+        assertTrue(
+            p.getSpec()
+                .getVolumes()
+                .stream()
+                .anyMatch(
+                    v ->
+                        v.getName().equals(PROJECTS_VOLUME_NAME)
+                            && v.getPersistentVolumeClaim()
+                                .getClaimName()
+                                .equals(PROJECTS_VOLUME_NAME)));
         for (Container c : p.getSpec().getContainers()) {
-          assertTrue(c.getVolumeMounts().stream()
-              .anyMatch(vm -> vm.getName().equals(PROJECTS_VOLUME_NAME)
-                  && vm.getMountPath().equals(PROJECT_MOUNT_PATH)));
+          assertTrue(
+              c.getVolumeMounts()
+                  .stream()
+                  .anyMatch(
+                      vm ->
+                          vm.getName().equals(PROJECTS_VOLUME_NAME)
+                              && vm.getMountPath().equals(PROJECT_MOUNT_PATH)));
         }
       }
     }

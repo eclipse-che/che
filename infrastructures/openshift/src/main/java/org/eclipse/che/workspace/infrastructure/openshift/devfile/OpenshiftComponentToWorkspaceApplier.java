@@ -26,8 +26,15 @@ public class OpenshiftComponentToWorkspaceApplier extends KubernetesComponentToW
   public OpenshiftComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
+      @Named("che.workspace.projects.storage") String projectFolderPath,
+      @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
       @Named(KUBERNETES_BASED_COMPONENTS_KEY_NAME) Set<String> kubernetesBasedComponentTypes) {
     super(
-        objectsParser, k8sEnvProvisioner, OpenShiftEnvironment.TYPE, kubernetesBasedComponentTypes);
+        objectsParser,
+        k8sEnvProvisioner,
+        OpenShiftEnvironment.TYPE,
+        projectFolderPath,
+        defaultProjectPVCSize,
+        kubernetesBasedComponentTypes);
   }
 }

@@ -20,22 +20,16 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NA
 import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings.KUBERNETES_BASED_COMPONENTS_KEY_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolume;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolumeMount;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimSpec;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimSpecBuilder;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
-import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Volume;
-import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
-import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -69,19 +63,22 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
   private final String environmentType;
   private final String projectFolderPath;
+  private final String defaultProjectPVCSize;
   private final Set<String> kubernetesBasedComponentTypes;
 
   @Inject
   public KubernetesComponentToWorkspaceApplier(
-      @Named("che.workspace.projects.storage") String projectFolderPath,
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
+      @Named("che.workspace.projects.storage") String projectFolderPath,
+      @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
       @Named(KUBERNETES_BASED_COMPONENTS_KEY_NAME) Set<String> kubernetesBasedComponentTypes) {
     this(
         objectsParser,
         k8sEnvProvisioner,
         KubernetesEnvironment.TYPE,
         projectFolderPath,
+        defaultProjectPVCSize,
         kubernetesBasedComponentTypes);
   }
 
@@ -89,12 +86,14 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
       String environmentType,
-      String projectFoldePath,
+      String projectFolderPath,
+      String defaultProjectPVCSize,
       Set<String> kubernetesBasedComponentTypes) {
     this.objectsParser = objectsParser;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
     this.environmentType = environmentType;
-    this.projectFolderPath = projectFoldePath;
+    this.projectFolderPath = projectFolderPath;
+    this.defaultProjectPVCSize = defaultProjectPVCSize;
     this.kubernetesBasedComponentTypes = kubernetesBasedComponentTypes;
   }
 
@@ -147,39 +146,18 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   }
 
   private void applyProjectsVolumes(List<PodData> podsData, List<HasMetadata> componentObjects) {
-
-    ObjectMeta meta = new ObjectMetaBuilder().withName(PROJECTS_VOLUME_NAME).build();
-    PersistentVolumeClaimSpec persistentVolumeClaimSpec =
-        new PersistentVolumeClaimSpecBuilder()
-             .withAccessModes("ReadWriteOnce")
-             .build();
     PersistentVolumeClaim volumeClaim =
-        new PersistentVolumeClaimBuilder()
-            .withMetadata(meta)
-            .withSpec(persistentVolumeClaimSpec)
-            .build();
+        newPVC(PROJECTS_VOLUME_NAME, "ReadWriteOnce", defaultProjectPVCSize);
     componentObjects.add(volumeClaim);
     for (PodData podData : podsData) {
-      PersistentVolumeClaimVolumeSource persistentVolumeClaimVolumeSource =
-          new PersistentVolumeClaimVolumeSourceBuilder()
-              .withClaimName(PROJECTS_VOLUME_NAME)
-              .withNewReadOnly(false)
-              .build();
-      Volume volume = new VolumeBuilder()
-          .withName(PROJECTS_VOLUME_NAME)
-          .withPersistentVolumeClaim(persistentVolumeClaimVolumeSource)
-          .build();
       // skip pods without containers
       if (podData.getSpec() == null) {
         continue;
       }
+      Volume volume = newVolume(PROJECTS_VOLUME_NAME, PROJECTS_VOLUME_NAME);
       podData.getSpec().getVolumes().add(volume);
       for (Container container : podData.getSpec().getContainers()) {
-        VolumeMount volumeMount =
-            new VolumeMountBuilder()
-                .withMountPath(projectFolderPath)
-                .withName(PROJECTS_VOLUME_NAME)
-                .build();
+        VolumeMount volumeMount = newVolumeMount(PROJECTS_VOLUME_NAME, projectFolderPath, null);
         container.getVolumeMounts().add(volumeMount);
       }
     }
