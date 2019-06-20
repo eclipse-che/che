@@ -167,7 +167,6 @@ public class TheiaProjectTree {
   public void openItem(String itemPath) {
     clickOnItem(itemPath);
     waitItemSelected(itemPath);
-    doubleClickOnItem(itemPath);
   }
 
   public boolean isItemVisible(String itemPath) {
