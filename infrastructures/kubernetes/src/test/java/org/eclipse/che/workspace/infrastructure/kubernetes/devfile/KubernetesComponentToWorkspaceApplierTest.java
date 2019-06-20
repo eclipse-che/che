@@ -194,7 +194,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
   }
 
   @Test
-  public void shouldProvisionProjectVolumesIfSpecifiedFromK8SList() throws Exception {
+  public void shouldProvisionProjectVolumesIfSpecifiedIntoK8SList() throws Exception {
     // given
     String yamlRecipeContent = getResource("devfile/petclinic.yaml");
     List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
