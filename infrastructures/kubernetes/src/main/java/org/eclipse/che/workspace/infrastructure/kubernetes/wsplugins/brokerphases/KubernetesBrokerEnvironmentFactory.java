@@ -20,6 +20,7 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.AgentAuthEnableEnv
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.CertificateProvisioner;
 
 /**
  * Extends {@link BrokerEnvironmentFactory} to be used in the kubernetes infrastructure.
@@ -40,7 +41,8 @@ public class KubernetesBrokerEnvironmentFactory
       MachineTokenEnvVarProvider machineTokenEnvVarProvider,
       @Named("che.workspace.plugin_broker.init.image") String initBrokerImage,
       @Named("che.workspace.plugin_broker.unified.image") String unifiedBrokerImage,
-      @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl) {
+      @Nullable @Named("che.workspace.plugin_registry_url") String pluginRegistryUrl,
+      CertificateProvisioner certProvisioner) {
     super(
         cheWebsocketEndpoint,
         brokerPullPolicy,
@@ -48,7 +50,8 @@ public class KubernetesBrokerEnvironmentFactory
         machineTokenEnvVarProvider,
         unifiedBrokerImage,
         initBrokerImage,
-        pluginRegistryUrl);
+        pluginRegistryUrl,
+        certProvisioner);
   }
 
   @Override

@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-plugin-java-plain</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>7.0.0-RC-2.0-SNAPSHOT</version>
+        <version>7.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>che-plugin-java-plain-shared</artifactId>
     <name>Che Plugin :: Java :: Plain :: Shared</name>
