@@ -11,8 +11,13 @@
  */
 package org.eclipse.che.api.workspace.server.devfile;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,6 +25,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -35,6 +43,7 @@ import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityVa
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
@@ -105,6 +114,37 @@ public class DevfileManager {
    */
   public DevfileImpl parseJson(String devfileContent) throws DevfileFormatException {
     return parse(devfileContent, schemaValidator::validateJson);
+  }
+
+  /**
+   * Resolve devfile component references into their reference content.
+   *
+   * @param devfile input devfile
+   * @param fileContentProvider provider to fetch reference content
+   */
+  public void resolveReference(DevfileImpl devfile, FileContentProvider fileContentProvider)
+      throws DevfileException {
+    List<ComponentImpl> toResolve =
+        devfile
+            .getComponents()
+            .stream()
+            .filter(
+                c ->
+                    c.getType().equals(KUBERNETES_COMPONENT_TYPE)
+                        || c.getType().equals(OPENSHIFT_COMPONENT_TYPE))
+            .filter(c -> !isNullOrEmpty(c.getReference()))
+            .collect(Collectors.toList());
+    for (ComponentImpl c : toResolve) {
+      try {
+        c.setReferenceContent(fileContentProvider.fetchContent(c.getReference()));
+      } catch (IOException e) {
+        throw new DevfileException(
+            format(
+                "Unable to resolve reference of component: %s",
+                firstNonNull(c.getAlias(), c.getReference())),
+            e);
+      }
+    }
   }
 
   private DevfileImpl parse(String content, ValidationFunction validationFunction)

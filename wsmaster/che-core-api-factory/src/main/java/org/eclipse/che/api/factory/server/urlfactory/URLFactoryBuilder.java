@@ -31,7 +31,6 @@ import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
@@ -105,12 +104,12 @@ public class URLFactoryBuilder {
     }
     try {
       DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent);
-      WorkspaceConfigImpl wsConfig =
-          devfileManager.createWorkspaceConfig(devfile, fileContentProvider);
+      devfileManager.resolveReference(devfile, fileContentProvider);
+
       FactoryDto factoryDto =
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
-              .withWorkspace(DtoConverter.asDto(wsConfig))
+              .withDevfile(DtoConverter.asDto(devfile))
               .withSource(remoteFactoryUrl.getDevfileFilename());
       return Optional.of(factoryDto);
     } catch (DevfileException e) {

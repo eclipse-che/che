@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import static java.util.stream.Collectors.toCollection;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +41,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Volume;
 /** @author Sergii Leshchenko */
 @Entity(name = "DevfileComponent")
 @Table(name = "devfile_component")
+@JsonInclude(Include.NON_EMPTY)
 public class ComponentImpl implements Component {
 
   @Id
@@ -87,7 +90,7 @@ public class ComponentImpl implements Component {
   private String memoryLimit;
 
   @Column(name = "mount_sources")
-  private boolean mountSources;
+  private Boolean mountSources;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
@@ -160,7 +163,7 @@ public class ComponentImpl implements Component {
       String alias,
       String image,
       String memoryLimit,
-      boolean mountSources,
+      Boolean mountSources,
       List<String> command,
       List<String> args,
       List<? extends Volume> volumes,
@@ -198,7 +201,7 @@ public class ComponentImpl implements Component {
       List<? extends Entrypoint> entrypoints,
       String image,
       String memoryLimit,
-      boolean mountSources,
+      Boolean mountSources,
       List<String> command,
       List<String> args,
       List<? extends Volume> volumes,
@@ -366,11 +369,11 @@ public class ComponentImpl implements Component {
   }
 
   @Override
-  public boolean getMountSources() {
+  public Boolean getMountSources() {
     return mountSources;
   }
 
-  public void setMountSources(boolean mountSources) {
+  public void setMountSources(Boolean mountSources) {
     this.mountSources = mountSources;
   }
 

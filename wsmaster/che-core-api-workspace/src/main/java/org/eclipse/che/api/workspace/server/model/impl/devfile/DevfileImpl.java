@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import static java.util.stream.Collectors.toCollection;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +42,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Project;
 /** @author Sergii Leshchenko */
 @Entity(name = "Devfile")
 @Table(name = "devfile")
+@JsonInclude(Include.NON_EMPTY)
 public class DevfileImpl implements Devfile {
 
   @Id
