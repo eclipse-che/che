@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.devfile;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.lang.String.format;
+import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
@@ -22,13 +23,23 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.Kubern
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimSpec;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimSpecBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSource;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -41,8 +52,6 @@ import org.eclipse.che.api.workspace.server.devfile.DevfileRecipeFormatException
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
-import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -124,29 +133,54 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       componentObjects = SelectorFilter.filter(componentObjects, k8sComponent.getSelector());
     }
 
-    List<PodData> podsData = getPodData(componentObjects);
+    List<PodData> podsData = getPodDatas(componentObjects);
 
     estimateCommandsMachineName(workspaceConfig, k8sComponent, podsData);
 
-    Map<String, MachineConfigImpl> machines = new HashMap<>();
     if (k8sComponent.getMountSources()) {
-      applyProjectsVolumes(podsData, machines);
+      applyProjectsVolumes(podsData, componentObjects);
     }
 
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
 
-    k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, machines);
+    k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, emptyMap());
   }
 
-  private void applyProjectsVolumes(List<PodData> podsData, Map<String, MachineConfigImpl> machines) {
+  private void applyProjectsVolumes(List<PodData> podsData, List<HasMetadata> componentObjects) {
+
+    ObjectMeta meta = new ObjectMetaBuilder().withName(PROJECTS_VOLUME_NAME).build();
+    PersistentVolumeClaimSpec persistentVolumeClaimSpec =
+        new PersistentVolumeClaimSpecBuilder()
+             .withAccessModes("ReadWriteOnce")
+             .build();
+    PersistentVolumeClaim volumeClaim =
+        new PersistentVolumeClaimBuilder()
+            .withMetadata(meta)
+            .withSpec(persistentVolumeClaimSpec)
+            .build();
+    componentObjects.add(volumeClaim);
     for (PodData podData : podsData) {
+      PersistentVolumeClaimVolumeSource persistentVolumeClaimVolumeSource =
+          new PersistentVolumeClaimVolumeSourceBuilder()
+              .withClaimName(PROJECTS_VOLUME_NAME)
+              .withNewReadOnly(false)
+              .build();
+      Volume volume = new VolumeBuilder()
+          .withName(PROJECTS_VOLUME_NAME)
+          .withPersistentVolumeClaim(persistentVolumeClaimVolumeSource)
+          .build();
+      // skip pods without containers
+      if (podData.getSpec() == null) {
+        continue;
+      }
+      podData.getSpec().getVolumes().add(volume);
       for (Container container : podData.getSpec().getContainers()) {
-        String machineName =  Names.machineName(podData, container);
-        MachineConfigImpl machineConfig = new MachineConfigImpl();
-        machineConfig
-            .getVolumes()
-            .put(PROJECTS_VOLUME_NAME, new VolumeImpl().withPath(projectFolderPath));
-        machines.put(machineName, machineConfig);
+        VolumeMount volumeMount =
+            new VolumeMountBuilder()
+                .withMountPath(projectFolderPath)
+                .withName(PROJECTS_VOLUME_NAME)
+                .build();
+        container.getVolumeMounts().add(volumeMount);
       }
     }
   }
@@ -226,7 +260,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     componentCommands.forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
   }
 
-  private List<PodData> getPodData(List<HasMetadata> componentsObjects) {
+  private List<PodData> getPodDatas(List<HasMetadata> componentsObjects) {
     List<PodData> podsData = new ArrayList<>();
 
     componentsObjects
