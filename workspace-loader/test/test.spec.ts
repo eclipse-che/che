@@ -16,12 +16,15 @@
 
 import { WorkspaceLoader } from '../src/workspace-loader';
 import { Loader } from '../src/loader/loader';
+import { che } from '@eclipse-che/api';
+
+// tslint:disable:no-any
 
 describe('Workspace Loader', () => {
 
-    let fakeWorkspaceConfig: che.IWorkspace;
+    let fakeWorkspaceConfig: che.workspace.Workspace;
 
-    beforeEach(function() {
+    beforeEach(function () {
         document.body.innerHTML = `<div id="workspace-loader">
             <div id="workspace-loader-label">Loading...</div>
             <div id="workspace-loader-progress">
@@ -38,32 +41,32 @@ describe('Workspace Loader', () => {
         fakeWorkspaceConfig = {
             status: 'STOPPED',
             links: {
-                ide: "test url"
+                ide: 'test url'
             },
             config: {
-                defaultEnv: "default",
-                "environments": {
-                    "default": {
+                defaultEnv: 'default',
+                'environments': {
+                    'default': {
                         machines: {
                             machine: {
                                 servers: {
                                     server1: {
                                         attributes: {
-                                            type: "ide"
+                                            type: 'ide'
                                         },
-                                        port: 0,
-                                        protocol: ""
+                                        port: '0',
+                                        protocol: ''
                                     }
                                 }
                             },
                         },
                         recipe: {
-                            type: ""
+                            type: ''
                         }
                     }
                 }
             }
-        } as che.IWorkspace;
+        } as che.workspace.Workspace;
     });
 
     it('should have "workspace-loader" in DOM', () => {
@@ -88,70 +91,67 @@ describe('Workspace Loader', () => {
         const loader = new Loader();
         const workspaceLoader = new WorkspaceLoader(loader);
 
-        spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+        spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
 
-        spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-            return new Promise((resolve) => {
+        spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+            new Promise(resolve => {
                 resolve(fakeWorkspaceConfig);
-            });
-        });
+            }));
 
         workspaceLoader.load();
 
         expect(workspaceLoader.getWorkspaceKey).toHaveBeenCalled();
-        expect(workspaceLoader.getWorkspace).toHaveBeenCalledWith("foo/bar");
+        expect(workspaceLoader.getWorkspace).toHaveBeenCalledWith('foo/bar');
     });
 
     describe('if workspace has a preconfigured IDE with query parameters', () => {
-        let ideURL = "ide URL"
-        let workspaceLoader;
+        const ideURL = 'ide URL';
+        let workspaceLoader: WorkspaceLoader;
 
-        beforeEach((done) => {
+        beforeEach(done => {
             const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
 
-            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
-            spyOn(workspaceLoader, 'getQueryString').and.returnValue("?param=value");
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
+            spyOn(workspaceLoader, 'getQueryString').and.returnValue('?param=value');
 
-            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                return new Promise((resolve) => {
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+                new Promise(resolve => {
                     fakeWorkspaceConfig.status = 'RUNNING';
-                    fakeWorkspaceConfig.runtime = { machines: { ide: { servers: { server1: { attributes: { type: "ide" }, url: ideURL } } } } } as any;
+                    fakeWorkspaceConfig.runtime = { machines: { ide: { servers: { server1: { attributes: { type: 'ide' }, url: ideURL } } } } } as any;
                     resolve(fakeWorkspaceConfig);
-                });
-            });
+                }));
 
-            spyOn(workspaceLoader, "openIDE").and.callThrough();
-            spyOn(workspaceLoader, "openURL");
+            spyOn(workspaceLoader, 'openIDE').and.callThrough();
+            spyOn(workspaceLoader, 'openURL');
             workspaceLoader.load().then(done);
         });
 
         it('should call openURL method with correct parameter', () => {
-            expect(workspaceLoader.openURL).toHaveBeenCalledWith(ideURL + "?param=value");
+            expect(workspaceLoader.openURL).toHaveBeenCalledWith(ideURL + '?param=value');
         });
     });
 
     describe('if workspace does not have an IDE server', () => {
-        let workspaceLoader;
+        let workspaceLoader: WorkspaceLoader;
 
-        beforeEach((done) => {
+        beforeEach(done => {
             const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
 
-            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
-            spyOn(workspaceLoader, 'getQueryString').and.returnValue("");
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
+            spyOn(workspaceLoader, 'getQueryString').and.returnValue('');
 
-            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                return new Promise((resolve) => {
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+                new Promise(resolve => {
                     fakeWorkspaceConfig.status = 'RUNNING';
-                    fakeWorkspaceConfig.config.environments["default"].machines = {};
-                    fakeWorkspaceConfig.runtime = {} as che.IWorkspaceRuntime;
+                    fakeWorkspaceConfig.config.environments['default'].machines = {};
+                    fakeWorkspaceConfig.runtime = {} as che.workspace.Runtime;
                     resolve(fakeWorkspaceConfig);
-                });
-            });
+                }));
 
-            spyOn(workspaceLoader, "openIDE").and.callThrough();
-            spyOn(workspaceLoader, "openURL");
+            spyOn(workspaceLoader, 'openIDE').and.callThrough();
+            spyOn(workspaceLoader, 'openURL');
             workspaceLoader.load().then(done);
         });
 
@@ -167,25 +167,24 @@ describe('Workspace Loader', () => {
             const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
 
-            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
 
-            spyOn(workspaceLoader, "connectMasterApi");
+            spyOn(workspaceLoader, 'connectMasterApi');
 
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents");
+            spyOn(workspaceLoader, 'subscribeWorkspaceEvents');
 
-            spyOn(workspaceLoader, "openIDE");
+            spyOn(workspaceLoader, 'openIDE');
         });
 
         describe('and user owns the workspace or has been granted permissions for shared workspace', () => {
 
-            beforeEach((done) => {
-                spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                    return new Promise((resolve) => {
+            beforeEach(done => {
+                spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+                    new Promise(resolve => {
                         fakeWorkspaceConfig.status = 'RUNNING';
-                        fakeWorkspaceConfig.runtime = {} as che.IWorkspaceRuntime;
+                        fakeWorkspaceConfig.runtime = {} as che.workspace.Runtime;
                         resolve(fakeWorkspaceConfig);
-                    });
-                });
+                    }));
 
                 workspaceLoader.load().then(done);
             });
@@ -204,15 +203,14 @@ describe('Workspace Loader', () => {
 
         });
 
-        describe(`and user hasn't been granted permissions for shared workspace`, () => {
+        describe('and user hasn\'t been granted permissions for shared workspace', () => {
 
-            beforeEach((done) => {
-                spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                    return new Promise((resolve) => {
+            beforeEach(done => {
+                spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+                    new Promise(resolve => {
                         fakeWorkspaceConfig.status = 'RUNNING';
                         resolve(fakeWorkspaceConfig);
-                    });
-                });
+                    }));
 
                 workspaceLoader.load().then(done);
             });
@@ -237,40 +235,35 @@ describe('Workspace Loader', () => {
         let statusChangeCallback: Function;
         let workspaceLoadPromise: Promise<any>;
 
-        beforeEach((done) => {
+        beforeEach(done => {
             const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
 
-            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
 
-            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                return new Promise((resolve) => {
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+                new Promise(resolve => {
                     fakeWorkspaceConfig.status = 'STOPPED';
                     resolve(fakeWorkspaceConfig);
-                });
-            });
+                }));
 
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callThrough();
+            spyOn(workspaceLoader, 'subscribeWorkspaceEvents').and.callThrough();
 
-            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
-                return Promise.resolve();
-            });
+            spyOn(workspaceLoader, 'startWorkspace').and.callFake(() => Promise.resolve());
 
-            spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
+            spyOn(workspaceLoader, 'connectMasterApi').and.callFake(() => {
                 done();
                 return Promise.resolve({
                     addListener: () => { },
                     subscribeEnvironmentOutput: () => { },
                     subscribeInstallerOutput: () => { },
-                    subscribeWorkspaceStatus: (workspaceId, callback) => {
+                    subscribeWorkspaceStatus: (_workspaceId, callback) => {
                         statusChangeCallback = callback;
                     }
                 });
             });
 
-            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
-                return Promise.resolve();
-            });
+            spyOn(workspaceLoader, 'openIDE').and.callFake(() => Promise.resolve());
 
             workspaceLoadPromise = workspaceLoader.load();
         });
@@ -291,7 +284,7 @@ describe('Workspace Loader', () => {
 
             beforeEach(() => {
                 statusChangeCallback({ status: 'STARTING' });
-            })
+            });
 
             it('should not open an IDE', () => {
                 expect(workspaceLoader.openIDE).not.toHaveBeenCalled();
@@ -301,14 +294,13 @@ describe('Workspace Loader', () => {
 
                 describe('and user owns workspace or has been granted permissions for shared workspace', () => {
 
-                    beforeEach((done) => {
-                        workspaceLoader.getWorkspace.and.callFake(() => {
-                            return new Promise((resolve) => {
+                    beforeEach(done => {
+                        (workspaceLoader.getWorkspace as any).and.callFake(() =>
+                            new Promise(resolve => {
                                 fakeWorkspaceConfig.status = 'RUNNING';
-                                fakeWorkspaceConfig.runtime = {} as che.IWorkspaceRuntime;
+                                fakeWorkspaceConfig.runtime = {} as che.workspace.Runtime;
                                 resolve(fakeWorkspaceConfig);
-                            });
-                        });
+                            }));
 
                         statusChangeCallback({ status: 'RUNNING' });
 
@@ -321,15 +313,14 @@ describe('Workspace Loader', () => {
 
                 });
 
-                describe(`and user hasn't been granted permissions for shared workspace`, () => {
+                describe('and user hasn\'t been granted permissions for shared workspace', () => {
 
-                    beforeEach((done) => {
-                        workspaceLoader.getWorkspace.and.callFake(() => {
-                            return new Promise((resolve) => {
+                    beforeEach(done => {
+                        (workspaceLoader.getWorkspace as any).and.callFake(() =>
+                            new Promise(resolve => {
                                 fakeWorkspaceConfig.status = 'RUNNING';
                                 resolve(fakeWorkspaceConfig);
-                            });
-                        });
+                            }));
 
                         statusChangeCallback({ status: 'RUNNING' });
 
@@ -349,7 +340,7 @@ describe('Workspace Loader', () => {
 
             describe('then receives an error on websocket', () => {
 
-                beforeEach((done) => {
+                beforeEach(done => {
                     statusChangeCallback({ error: 'Something bad happened.' });
 
                     workspaceLoadPromise.then(done);
@@ -373,38 +364,34 @@ describe('Workspace Loader', () => {
         let workspaceLoader: WorkspaceLoader;
         let workspaceLoadPromise: Promise<void>;
 
-        beforeEach((done) => {
+        beforeEach(done => {
             const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
 
-            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
 
-            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                return new Promise((resolve) => {
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+                new Promise(resolve => {
                     fakeWorkspaceConfig.status = 'STOPPED';
                     resolve(fakeWorkspaceConfig);
-                });
-            });
+                }));
 
-            spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
-                return Promise.resolve({
-                    addListener: () => {},
-                    subscribeEnvironmentOutput: () => {},
-                    subscribeInstallerOutput: () => {},
-                    subscribeWorkspaceStatus: () => {}
-                });
-            });
+            spyOn(workspaceLoader, 'connectMasterApi').and.callFake(() =>
+                Promise.resolve({
+                    addListener: () => { },
+                    subscribeEnvironmentOutput: () => { },
+                    subscribeInstallerOutput: () => { },
+                    subscribeWorkspaceStatus: () => { }
+                }));
 
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callThrough();
+            spyOn(workspaceLoader, 'subscribeWorkspaceEvents').and.callThrough();
 
-            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
+            spyOn(workspaceLoader, 'startWorkspace').and.callFake(() => {
                 done();
                 return Promise.reject();
             });
 
-            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
-                return Promise.resolve();
-            });
+            spyOn(workspaceLoader, 'openIDE').and.callFake(() => Promise.resolve());
 
             workspaceLoadPromise = workspaceLoader.load();
         });
@@ -427,7 +414,7 @@ describe('Workspace Loader', () => {
 
         describe('then the request for starting the workspace fails', () => {
 
-            beforeEach((done) => {
+            beforeEach(done => {
                 workspaceLoadPromise.then(done);
             });
 
@@ -441,53 +428,48 @@ describe('Workspace Loader', () => {
     describe('show error if workspace became stopped on starting', () => {
         let workspaceLoader: WorkspaceLoader;
         const loader = {
-            log: () => { return undefined; },
-            hideLoader: () => {},
-            showReload: () => {},
-            error: () => {},
-            onclickConsole: () => {},
-            onclickReload: () => { return true }
+            log: () => undefined,
+            hideLoader: () => { },
+            showReload: () => { },
+            error: () => { },
+            onclickConsole: () => { },
+            onclickReload: () => true
         };
         let statusChangeCallback: Function;
 
-        beforeEach((done) => {
-            spyOn(loader, "error").and.callThrough();
-            spyOn(loader, "log").and.callThrough();
-            spyOn(loader, "hideLoader").and.callThrough();
-            spyOn(loader, "showReload").and.callThrough();
+        beforeEach(done => {
+            spyOn(loader, 'error').and.callThrough();
+            spyOn(loader, 'log').and.callThrough();
+            spyOn(loader, 'hideLoader').and.callThrough();
+            spyOn(loader, 'showReload').and.callThrough();
 
             workspaceLoader = new WorkspaceLoader(loader);
 
-            spyOn(workspaceLoader, "getWorkspaceKey").and.returnValue("foo/bar");
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
 
-            spyOn(workspaceLoader, "getWorkspace").and.callFake(() => {
-                return new Promise((resolve) => {
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+                new Promise(resolve => {
                     fakeWorkspaceConfig.status = 'STARTING';
                     resolve(fakeWorkspaceConfig);
-                });
-            });
+                }));
 
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callThrough();
+            spyOn(workspaceLoader, 'subscribeWorkspaceEvents').and.callThrough();
 
-            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
-                return Promise.resolve();
-            });
+            spyOn(workspaceLoader, 'startWorkspace').and.callFake(() => Promise.resolve());
 
-            spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
+            spyOn(workspaceLoader, 'connectMasterApi').and.callFake(() => {
                 done();
                 return Promise.resolve({
-                    addListener: () => {},
-                    subscribeEnvironmentOutput: () => {},
-                    subscribeInstallerOutput: () => {},
-                    subscribeWorkspaceStatus: (workspaceId, callback) => {
+                    addListener: () => { },
+                    subscribeEnvironmentOutput: () => { },
+                    subscribeInstallerOutput: () => { },
+                    subscribeWorkspaceStatus: (_workspaceId, callback) => {
                         statusChangeCallback = callback;
                     }
                 });
             });
 
-            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
-                return Promise.resolve();
-            });
+            spyOn(workspaceLoader, 'openIDE').and.callFake(() => Promise.resolve());
 
             workspaceLoader.load();
         });
@@ -510,7 +492,7 @@ describe('Workspace Loader', () => {
 
         describe('then receives workspace stopped event on websocket, when workspace starting', () => {
             beforeEach(() => {
-                statusChangeCallback({ status: 'STOPPED', prevStatus: "STARTING", workspaceId: "someID-bla-bla" });
+                statusChangeCallback({ status: 'STOPPED', prevStatus: 'STARTING', workspaceId: 'someID-bla-bla' });
             });
 
             it('should not open an IDE', () => {
@@ -518,7 +500,7 @@ describe('Workspace Loader', () => {
             });
 
             it('should log error', () => {
-                expect(loader.error).toBeCalledWith("Workspace stopped.");
+                expect(loader.error).toBeCalledWith('Workspace stopped.');
             });
 
             it('should hide loader', () => {
@@ -536,40 +518,36 @@ describe('Workspace Loader', () => {
         let statusChangeCallback: Function;
         let workspaceLoadPromise: Promise<any>;
 
-        beforeEach((done) => {
+        beforeEach(done => {
             const loader = new Loader();
             workspaceLoader = new WorkspaceLoader(loader);
 
-            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue("foo/bar");
+            spyOn(workspaceLoader, 'getWorkspaceKey').and.returnValue('foo/bar');
 
-            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() => {
-                return new Promise((resolve) => {
+            spyOn(workspaceLoader, 'getWorkspace').and.callFake(() =>
+                new Promise(resolve => {
                     fakeWorkspaceConfig.status = 'STOPPING';
                     resolve(fakeWorkspaceConfig);
-                });
-            });
+                }));
 
-            spyOn(workspaceLoader, "subscribeWorkspaceEvents").and.callThrough()
+            spyOn(workspaceLoader, 'subscribeWorkspaceEvents').and.callThrough();
 
-            spyOn(workspaceLoader, "startWorkspace").and.callFake(() => {
-                return Promise.resolve();
-            });
+            spyOn(workspaceLoader, 'startWorkspace').and.callFake(() =>
+                Promise.resolve());
 
-            spyOn(workspaceLoader, "connectMasterApi").and.callFake(() => {
+            spyOn(workspaceLoader, 'connectMasterApi').and.callFake(() => {
                 done();
                 return Promise.resolve({
                     addListener: () => { },
                     subscribeEnvironmentOutput: () => { },
                     subscribeInstallerOutput: () => { },
-                    subscribeWorkspaceStatus: (workspaceId, callback) => {
+                    subscribeWorkspaceStatus: (_workspaceId, callback) => {
                         statusChangeCallback = callback;
                     }
                 });
             });
 
-            spyOn(workspaceLoader, "openIDE").and.callFake(() => {
-                return Promise.resolve();
-            });
+            spyOn(workspaceLoader, 'openIDE').and.callFake(() => Promise.resolve());
 
             workspaceLoadPromise = workspaceLoader.load();
         });
@@ -602,14 +580,13 @@ describe('Workspace Loader', () => {
 
             describe('then becomes RUNNING', () => {
 
-                beforeEach((done) => {
-                    workspaceLoader.getWorkspace.and.callFake(() => {
-                        return new Promise((resolve) => {
+                beforeEach(done => {
+                    (workspaceLoader.getWorkspace as any).and.callFake(() =>
+                        new Promise(resolve => {
                             fakeWorkspaceConfig.status = 'RUNNING';
-                            fakeWorkspaceConfig.runtime = {} as che.IWorkspaceRuntime;
+                            fakeWorkspaceConfig.runtime = {} as che.workspace.Runtime;
                             resolve(fakeWorkspaceConfig);
-                        });
-                    });
+                        }));
 
                     statusChangeCallback({ status: 'RUNNING' });
 

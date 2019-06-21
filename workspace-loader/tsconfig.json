@@ -1,6 +1,7 @@
 {
   "include": [
-    "src"
+    "src",
+    "test"
   ],
   "compilerOptions": {
     "target": "es5",

@@ -19,11 +19,11 @@ import { WorkspaceLoader } from './workspace-loader';
 
 /** Initialize */
 if (document.getElementById('workspace-console')) {
-    new KeycloakLoader().loadKeycloakSettings().catch((error: any) => {
+    new KeycloakLoader().loadKeycloakSettings().catch(error => {
         if (error) {
             console.log(error);
         }
-    }).then((keycloak: any) => {
+    }).then(keycloak => {
         new WorkspaceLoader(new Loader(), keycloak).load();
     });
 }
