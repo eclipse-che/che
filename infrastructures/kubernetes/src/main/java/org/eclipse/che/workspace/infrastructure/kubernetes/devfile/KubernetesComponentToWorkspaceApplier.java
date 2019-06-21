@@ -163,10 +163,6 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     }
 
     for (PodData podData : podsData) {
-      // skip pods without containers
-      if (podData.getSpec() == null) {
-        continue;
-      }
       if (podData
           .getSpec()
           .getVolumes()
