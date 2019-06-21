@@ -66,6 +66,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private final String defaultProjectPVCSize;
   private final Set<String> kubernetesBasedComponentTypes;
   private final String defaultPVCAccessMode;
+  private final String pvcStorageClassName;
 
   @Inject
   public KubernetesComponentToWorkspaceApplier(
@@ -74,6 +75,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
       @Named("che.infra.kubernetes.pvc.access_mode") String defaultPVCAccessMode,
+      @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       @Named(KUBERNETES_BASED_COMPONENTS_KEY_NAME) Set<String> kubernetesBasedComponentTypes) {
     this(
         objectsParser,
@@ -82,6 +84,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         projectFolderPath,
         defaultProjectPVCSize,
         defaultPVCAccessMode,
+        pvcStorageClassName,
         kubernetesBasedComponentTypes);
   }
 
@@ -92,6 +95,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       String projectFolderPath,
       String defaultProjectPVCSize,
       String defaultPVCAccessMode,
+      String pvcStorageClassName,
       Set<String> kubernetesBasedComponentTypes) {
     this.objectsParser = objectsParser;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
@@ -99,6 +103,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
     this.projectFolderPath = projectFolderPath;
     this.defaultProjectPVCSize = defaultProjectPVCSize;
     this.defaultPVCAccessMode = defaultPVCAccessMode;
+    this.pvcStorageClassName = pvcStorageClassName;
     this.kubernetesBasedComponentTypes = kubernetesBasedComponentTypes;
   }
 
@@ -158,7 +163,11 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
                 hasMeta instanceof PersistentVolumeClaim
                     && hasMeta.getMetadata().getName().equals(PROJECTS_VOLUME_NAME))) {
       PersistentVolumeClaim volumeClaim =
-          newPVC(PROJECTS_VOLUME_NAME, defaultPVCAccessMode, defaultProjectPVCSize);
+          newPVC(
+              PROJECTS_VOLUME_NAME,
+              defaultPVCAccessMode,
+              defaultProjectPVCSize,
+              pvcStorageClassName);
       componentObjects.add(volumeClaim);
     }
 
