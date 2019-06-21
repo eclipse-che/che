@@ -14,25 +14,28 @@
 import { WebsocketClient } from './json-rpc/websocket-client';
 import { CheJsonRpcMasterApi, WorkspaceStatusChangedEvent } from './json-rpc/che-json-rpc-master-api';
 import { Loader } from './loader/loader';
+import { che } from '@eclipse-che/api';
+
+// tslint:disable:no-any
 
 const WEBSOCKET_CONTEXT = '/api/websocket';
 
 export class WorkspaceLoader {
 
-    workspace: che.IWorkspace;
+    workspace: che.workspace.Workspace;
     startAfterStopping = false;
 
     constructor(private readonly loader: Loader,
-                private readonly keycloak?: any) {
+        private readonly keycloak?: any) {
         /** Ask dashboard to show the IDE. */
-        window.parent.postMessage("show-ide", "*");
+        window.parent.postMessage('show-ide', '*');
     }
 
     async load(): Promise<void> {
         const workspaceKey = this.getWorkspaceKey();
 
-        if (!workspaceKey || workspaceKey === "") {
-            console.error("Workspace is not defined");
+        if (!workspaceKey || workspaceKey === '') {
+            console.error('Workspace is not defined');
             return;
         }
 
@@ -40,9 +43,8 @@ export class WorkspaceLoader {
             this.workspace = await this.getWorkspace(workspaceKey);
             await this.handleWorkspace();
             await this.openIDE();
-        }
-        catch(err) {
-            if(err) {
+        } catch (err) {
+            if (err) {
                 console.error(err);
                 this.loader.error(err);
             } else {
@@ -81,11 +83,11 @@ export class WorkspaceLoader {
      *
      * @param workspaceId workspace id
      */
-    getWorkspace(workspaceId: string): Promise<che.IWorkspace> {
+    getWorkspace(workspaceId: string): Promise<che.workspace.Workspace> {
         const request = new XMLHttpRequest();
-        request.open("GET", '/api/workspace/' + workspaceId);
-        return this.setAuthorizationHeader(request).then((xhr: XMLHttpRequest) => {
-            return new Promise<che.IWorkspace>((resolve, reject) => {
+        request.open('GET', '/api/workspace/' + workspaceId);
+        return this.setAuthorizationHeader(request).then((xhr: XMLHttpRequest) =>
+            new Promise<che.workspace.Workspace>((resolve, reject) => {
                 xhr.send();
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
@@ -96,30 +98,28 @@ export class WorkspaceLoader {
                     }
                     resolve(JSON.parse(xhr.responseText));
                 };
-            });
-        });
+            }));
     }
 
     /**
      * Start current workspace.
      */
-    startWorkspace(): Promise<che.IWorkspace> {
+    startWorkspace(): Promise<che.workspace.Workspace> {
         const request = new XMLHttpRequest();
-        request.open("POST", `/api/workspace/${this.workspace.id}/runtime`);
-        return this.setAuthorizationHeader(request).then((xhr: XMLHttpRequest) => {
-            return new Promise<che.IWorkspace>((resolve, reject) => {
+        request.open('POST', `/api/workspace/${this.workspace.id}/runtime`);
+        return this.setAuthorizationHeader(request).then((xhr: XMLHttpRequest) =>
+            new Promise<che.workspace.Workspace>((resolve, reject) => {
                 xhr.send();
                 xhr.onreadystatechange = () => {
                     if (xhr.readyState !== 4) { return; }
                     if (xhr.status !== 200) {
-                        const errorMessage = 'Failed to start the workspace: "'  + this.getRequestErrorMessage(xhr) + '"';
+                        const errorMessage = 'Failed to start the workspace: "' + this.getRequestErrorMessage(xhr) + '"';
                         reject(new Error(errorMessage));
                         return;
                     }
                     resolve(JSON.parse(xhr.responseText));
                 };
-            });
-        });
+            }));
     }
 
     getRequestErrorMessage(xhr: XMLHttpRequest): string {
@@ -137,7 +137,7 @@ export class WorkspaceLoader {
             return xhr.statusText;
         }
 
-        return "Unknown error";
+        return 'Unknown error';
     }
 
     /**
@@ -158,23 +158,19 @@ export class WorkspaceLoader {
             } else {
                 resolve();
             }
-        }).then(() => {
-            return this.connectMasterApi();
-        });
+        }).then(() => this.connectMasterApi());
 
         const runningOnConnectionPromise = masterApiConnectionPromise
-            .then((masterApi: CheJsonRpcMasterApi) => {
-                return new Promise((resolve, reject) => {
+            .then((masterApi: CheJsonRpcMasterApi) =>
+                new Promise((resolve, reject) => {
                     masterApi.addListener('open', () => {
                         this.checkWorkspaceRuntime().then(resolve, reject);
                     });
-                });
-            });
+                }));
 
         const runningOnStatusChangePromise = masterApiConnectionPromise
-            .then((masterApi: CheJsonRpcMasterApi) => {
-                return this.subscribeWorkspaceEvents(masterApi);
-            });
+            .then((masterApi: CheJsonRpcMasterApi) =>
+                this.subscribeWorkspaceEvents(masterApi));
 
         return Promise.race([runningOnConnectionPromise, runningOnStatusChangePromise]);
     }
@@ -184,7 +180,7 @@ export class WorkspaceLoader {
      *
      * @param message output message
      */
-    onEnvironmentOutput(message) : void {
+    onEnvironmentOutput(message): void {
         this.loader.log(message);
     }
 
@@ -201,12 +197,12 @@ export class WorkspaceLoader {
     /**
      * Subscribes to the workspace events.
      */
-    subscribeWorkspaceEvents(masterApi: CheJsonRpcMasterApi) : Promise<any> {
+    subscribeWorkspaceEvents(masterApi: CheJsonRpcMasterApi): Promise<any> {
         return new Promise((resolve, reject) => {
             masterApi.subscribeEnvironmentOutput(this.workspace.id,
                 (message: any) => this.onEnvironmentOutput(message.text));
             masterApi.subscribeInstallerOutput(this.workspace.id,
-                 (message: any) => this.onEnvironmentOutput(message.text));
+                (message: any) => this.onEnvironmentOutput(message.text));
             masterApi.subscribeWorkspaceStatus(this.workspace.id,
                 (message: WorkspaceStatusChangedEvent) => {
                     if (message.error) {
@@ -214,7 +210,7 @@ export class WorkspaceLoader {
                     } else if (message.status === 'RUNNING') {
                         this.checkWorkspaceRuntime().then(resolve, reject);
                     } else if (message.status === 'STOPPED') {
-                        if (message.prevStatus == 'STARTING') {
+                        if (message.prevStatus === 'STARTING') {
                             this.loader.error('Workspace stopped.');
                             this.loader.hideLoader();
                             this.loader.showReload();
@@ -229,7 +225,7 @@ export class WorkspaceLoader {
 
     checkWorkspaceRuntime(): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.getWorkspace(this.workspace.id).then((workspace) => {
+            this.getWorkspace(this.workspace.id).then(workspace => {
                 if (workspace.status === 'RUNNING') {
                     if (workspace.runtime) {
                         resolve();
@@ -244,12 +240,12 @@ export class WorkspaceLoader {
     /**
      * Opens IDE for the workspace.
      */
-    openIDE() : void {
-        this.getWorkspace(this.workspace.id).then((workspace) => {
-            const machines = workspace.runtime.machines;
-            for (const machineName in machines) {
-                const servers = machines[machineName].servers;
-                for (const serverId in servers) {
+    openIDE(): void {
+        this.getWorkspace(this.workspace.id).then(workspace => {
+            const machines = workspace.runtime.machines || [];
+            for (const machineName of Object.keys(machines)) {
+                const servers = machines[machineName].servers || [];
+                for (const serverId of Object.keys(servers)) {
                     const attributes = servers[serverId].attributes;
                     if (attributes['type'] === 'ide') {
                         this.openURL(servers[serverId].url + this.getQueryString());
@@ -267,7 +263,7 @@ export class WorkspaceLoader {
      *
      * @param url url to be opened
      */
-    openURL(url) : void {
+    openURL(url: string): void {
         // Preconfigured IDE may use dedicated port. In this case Chrome browser fails
         // with error net::ERR_CONNECTION_REFUSED. Timer helps to open the URL without errors.
         setTimeout(() => {
