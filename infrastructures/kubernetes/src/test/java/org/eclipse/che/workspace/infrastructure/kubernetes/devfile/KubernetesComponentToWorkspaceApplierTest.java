@@ -82,7 +82,12 @@ public class KubernetesComponentToWorkspaceApplierTest {
     k8sBasedComponents.add("openshift"); // so that we can work with the petclinic.yaml
     applier =
         new KubernetesComponentToWorkspaceApplier(
-            k8sRecipeParser, k8sEnvProvisioner, PROJECT_MOUNT_PATH, "1Gi", k8sBasedComponents);
+            k8sRecipeParser,
+            k8sEnvProvisioner,
+            PROJECT_MOUNT_PATH,
+            "1Gi",
+            "ReadWriteOnce",
+            k8sBasedComponents);
 
     workspaceConfig = new WorkspaceConfigImpl();
   }

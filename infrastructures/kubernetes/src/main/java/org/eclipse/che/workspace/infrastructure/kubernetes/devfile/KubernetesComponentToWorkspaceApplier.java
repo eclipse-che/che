@@ -65,6 +65,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private final String projectFolderPath;
   private final String defaultProjectPVCSize;
   private final Set<String> kubernetesBasedComponentTypes;
+  private final String defaultPVCAccessMode;
 
   @Inject
   public KubernetesComponentToWorkspaceApplier(
@@ -72,6 +73,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
+      @Named("che.infra.kubernetes.pvc.access_mode") String defaultPVCAccessMode,
       @Named(KUBERNETES_BASED_COMPONENTS_KEY_NAME) Set<String> kubernetesBasedComponentTypes) {
     this(
         objectsParser,
@@ -79,6 +81,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         KubernetesEnvironment.TYPE,
         projectFolderPath,
         defaultProjectPVCSize,
+        defaultPVCAccessMode,
         kubernetesBasedComponentTypes);
   }
 
@@ -88,12 +91,14 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       String environmentType,
       String projectFolderPath,
       String defaultProjectPVCSize,
+      String defaultPVCAccessMode,
       Set<String> kubernetesBasedComponentTypes) {
     this.objectsParser = objectsParser;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
     this.environmentType = environmentType;
     this.projectFolderPath = projectFolderPath;
     this.defaultProjectPVCSize = defaultProjectPVCSize;
+    this.defaultPVCAccessMode = defaultPVCAccessMode;
     this.kubernetesBasedComponentTypes = kubernetesBasedComponentTypes;
   }
 
@@ -153,7 +158,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
                 hasMeta instanceof PersistentVolumeClaim
                     && hasMeta.getMetadata().getName().equals(PROJECTS_VOLUME_NAME))) {
       PersistentVolumeClaim volumeClaim =
-          newPVC(PROJECTS_VOLUME_NAME, "ReadWriteOnce", defaultProjectPVCSize);
+          newPVC(PROJECTS_VOLUME_NAME, defaultPVCAccessMode, defaultProjectPVCSize);
       componentObjects.add(volumeClaim);
     }
 

@@ -28,6 +28,7 @@ public class OpenshiftComponentToWorkspaceApplier extends KubernetesComponentToW
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
       @Named("che.workspace.projects.storage") String projectFolderPath,
       @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
+      @Named("che.infra.kubernetes.pvc.access_mode") String defaultPVCAccessMode,
       @Named(KUBERNETES_BASED_COMPONENTS_KEY_NAME) Set<String> kubernetesBasedComponentTypes) {
     super(
         objectsParser,
@@ -35,6 +36,7 @@ public class OpenshiftComponentToWorkspaceApplier extends KubernetesComponentToW
         OpenShiftEnvironment.TYPE,
         projectFolderPath,
         defaultProjectPVCSize,
+        defaultPVCAccessMode,
         kubernetesBasedComponentTypes);
   }
 }
