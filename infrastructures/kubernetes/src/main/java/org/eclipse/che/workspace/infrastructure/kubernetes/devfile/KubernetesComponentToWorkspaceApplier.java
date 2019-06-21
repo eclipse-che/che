@@ -146,19 +146,38 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   }
 
   private void applyProjectsVolumes(List<PodData> podsData, List<HasMetadata> componentObjects) {
-    PersistentVolumeClaim volumeClaim =
-        newPVC(PROJECTS_VOLUME_NAME, "ReadWriteOnce", defaultProjectPVCSize);
-    componentObjects.add(volumeClaim);
+    if (componentObjects
+        .stream()
+        .noneMatch(
+            hasMeta ->
+                hasMeta instanceof PersistentVolumeClaim
+                    && hasMeta.getMetadata().getName().equals(PROJECTS_VOLUME_NAME))) {
+      PersistentVolumeClaim volumeClaim =
+          newPVC(PROJECTS_VOLUME_NAME, "ReadWriteOnce", defaultProjectPVCSize);
+      componentObjects.add(volumeClaim);
+    }
+
     for (PodData podData : podsData) {
       // skip pods without containers
       if (podData.getSpec() == null) {
         continue;
       }
-      Volume volume = newVolume(PROJECTS_VOLUME_NAME, PROJECTS_VOLUME_NAME);
-      podData.getSpec().getVolumes().add(volume);
+      if (podData
+          .getSpec()
+          .getVolumes()
+          .stream()
+          .noneMatch(volume -> volume.getName().equals(PROJECTS_VOLUME_NAME))) {
+        Volume volume = newVolume(PROJECTS_VOLUME_NAME, PROJECTS_VOLUME_NAME);
+        podData.getSpec().getVolumes().add(volume);
+      }
       for (Container container : podData.getSpec().getContainers()) {
-        VolumeMount volumeMount = newVolumeMount(PROJECTS_VOLUME_NAME, projectFolderPath, null);
-        container.getVolumeMounts().add(volumeMount);
+        if (container
+            .getVolumeMounts()
+            .stream()
+            .noneMatch(mount -> mount.getName().equals(PROJECTS_VOLUME_NAME))) {
+          VolumeMount volumeMount = newVolumeMount(PROJECTS_VOLUME_NAME, projectFolderPath, null);
+          container.getVolumeMounts().add(volumeMount);
+        }
       }
     }
   }
