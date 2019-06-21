@@ -23,7 +23,7 @@ import org.eclipse.che.commons.lang.Pair;
  *
  * @author Mykhailo Kuznietsov
  */
-public class WorkspaceAgentCorsEnabledEnvVarProvider implements EnvVarProvider {
+public class WorkspaceAgentCorsEnabledEnvVarProvider implements LegacyEnvVarProvider {
 
   private String wsAgentCorsEnabled;
 
