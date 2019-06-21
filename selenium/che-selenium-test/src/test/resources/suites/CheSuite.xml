@@ -34,6 +34,9 @@
           <class name="org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.YamlFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.GolangFileEditingTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitTest"/>
+          <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromZipTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.dashboard.FactoriesListTest"/>
           <class name="org.eclipse.che.selenium.dashboard.workspaces.NewWorkspacePageTest"/>
@@ -222,6 +225,7 @@
           <class name="org.eclipse.che.selenium.refactor.types.TestFailTest"/>
           <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStopStartWsTest"/>
+          <class name="org.eclipse.che.selenium.workspaces.CreateWorkspaceOnDashboardTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
           <class name="org.eclipse.che.selenium.theia.Che7PreviewStackStartTest"/>
