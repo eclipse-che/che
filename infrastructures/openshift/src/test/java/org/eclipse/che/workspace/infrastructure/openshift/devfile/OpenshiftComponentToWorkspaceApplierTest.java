@@ -49,7 +49,13 @@ public class OpenshiftComponentToWorkspaceApplierTest {
     k8sBasedComponents.add(KUBERNETES_COMPONENT_TYPE);
     applier =
         new OpenshiftComponentToWorkspaceApplier(
-            k8sRecipeParser, k8sEnvProvisioner, k8sBasedComponents);
+            k8sRecipeParser,
+            k8sEnvProvisioner,
+            "/projects",
+            "1Gi",
+            "ReadWriteOnce",
+            "",
+            k8sBasedComponents);
 
     workspaceConfig = new WorkspaceConfigImpl();
   }

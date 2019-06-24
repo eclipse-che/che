@@ -22,6 +22,7 @@ components:
       app.kubernetes.io/name: mysql
       app.kubernetes.io/component: database
       app.kubernetes.io/part-of: petclinic
+    mountSources: true
 commands:
   - name: build
     actions:
