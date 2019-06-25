@@ -21,6 +21,14 @@ import org.eclipse.che.commons.lang.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Adds the legacy environment variables to the workspaces that contain some machines with
+ * installers. Because the new (Che 7) workspaces don't use workspaces we can be sure the new
+ * workspaces are never provisioned with legacy env vars (which would make them unable to override
+ * JAVA_OPTS for example).
+ *
+ * @author Sergii Kabashniuk
+ */
 public class LegacyEnvVarEnvironmentProvisioner implements InternalEnvironmentProvisioner {
 
   private static final Logger LOG = LoggerFactory.getLogger(EnvVarEnvironmentProvisioner.class);
@@ -53,6 +61,9 @@ public class LegacyEnvVarEnvironmentProvisioner implements InternalEnvironmentPr
       }
       LOG.info(
           "Environment legacy variables provisioning done for workspace '{}'", id.getWorkspaceId());
+    } else {
+      LOG.debug(
+          "Legacy environment variables not provisioned to workspace '{}'.", id.getWorkspaceId());
     }
   }
 
