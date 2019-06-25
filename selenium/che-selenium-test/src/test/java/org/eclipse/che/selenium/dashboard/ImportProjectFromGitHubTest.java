@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Sources.GITHUB;
 import static org.testng.AssertJUnit.assertTrue;
 
@@ -30,13 +29,13 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -61,15 +60,15 @@ public class ImportProjectFromGitHubTest {
   @Inject private Dashboard dashboard;
   @Inject private Workspaces workspaces;
   @Inject private DefaultTestUser defaultTestUser;
-  @Inject private ProjectExplorer projectExplorer;
   @Inject private NewWorkspace newWorkspace;
-  @Inject private ToastLoader toastLoader;
   @Inject private ProjectSourcePage projectSourcePage;
   @Inject private SeleniumWebDriver seleniumWebDriver;
   @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
   @Inject private TestGitHubRepository testRepo;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
 
   // it is used to read workspace logs on test failure
   private TestWorkspace testWorkspace;
@@ -117,11 +116,16 @@ public class ImportProjectFromGitHubTest {
     // possible to read logs in case of test failure
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
-    seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    toastLoader.waitToastLoaderAndClickStartButton();
-    ide.waitOpenedWorkspaceIsReadyToUse();
-    projectExplorer.waitItem(projectName);
-    projectExplorer.waitDefinedTypeOfFolder(projectName, PROJECT_FOLDER);
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitTheiaIdeTopPanel();
+
+    // wait the project in the tree
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectsRootItem();
+    theiaProjectTree.waitProjectAreaOpened();
+    theiaProjectTree.waitItem(projectName);
   }
 
   private void connectGithubAccount() {

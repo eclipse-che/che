@@ -18,11 +18,18 @@ import static java.util.Collections.emptyMap;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Components.getIdentifiableComponentName;
+import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings.KUBERNETES_BASED_COMPONENTS_KEY_NAME;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newPVC;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolume;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesObjectUtil.newVolumeMount;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.Volume;
+import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,17 +62,29 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
   private final KubernetesRecipeParser objectsParser;
   private final KubernetesEnvironmentProvisioner k8sEnvProvisioner;
   private final String environmentType;
+  private final String projectFolderPath;
+  private final String defaultProjectPVCSize;
   private final Set<String> kubernetesBasedComponentTypes;
+  private final String defaultPVCAccessMode;
+  private final String pvcStorageClassName;
 
   @Inject
   public KubernetesComponentToWorkspaceApplier(
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
+      @Named("che.workspace.projects.storage") String projectFolderPath,
+      @Named("che.workspace.projects.storage.default.size") String defaultProjectPVCSize,
+      @Named("che.infra.kubernetes.pvc.access_mode") String defaultPVCAccessMode,
+      @Named("che.infra.kubernetes.pvc.storage_class_name") String pvcStorageClassName,
       @Named(KUBERNETES_BASED_COMPONENTS_KEY_NAME) Set<String> kubernetesBasedComponentTypes) {
     this(
         objectsParser,
         k8sEnvProvisioner,
         KubernetesEnvironment.TYPE,
+        projectFolderPath,
+        defaultProjectPVCSize,
+        defaultPVCAccessMode,
+        pvcStorageClassName,
         kubernetesBasedComponentTypes);
   }
 
@@ -73,10 +92,18 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       KubernetesRecipeParser objectsParser,
       KubernetesEnvironmentProvisioner k8sEnvProvisioner,
       String environmentType,
+      String projectFolderPath,
+      String defaultProjectPVCSize,
+      String defaultPVCAccessMode,
+      String pvcStorageClassName,
       Set<String> kubernetesBasedComponentTypes) {
     this.objectsParser = objectsParser;
     this.k8sEnvProvisioner = k8sEnvProvisioner;
     this.environmentType = environmentType;
+    this.projectFolderPath = projectFolderPath;
+    this.defaultProjectPVCSize = defaultProjectPVCSize;
+    this.defaultPVCAccessMode = defaultPVCAccessMode;
+    this.pvcStorageClassName = pvcStorageClassName;
     this.kubernetesBasedComponentTypes = kubernetesBasedComponentTypes;
   }
 
@@ -115,11 +142,54 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       componentObjects = SelectorFilter.filter(componentObjects, k8sComponent.getSelector());
     }
 
-    estimateCommandsMachineName(workspaceConfig, k8sComponent, componentObjects);
+    List<PodData> podsData = getPodDatas(componentObjects);
+
+    estimateCommandsMachineName(workspaceConfig, k8sComponent, podsData);
+
+    if (k8sComponent.getMountSources()) {
+      applyProjectsVolumes(podsData, componentObjects);
+    }
 
     applyEntrypoints(k8sComponent.getEntrypoints(), componentObjects);
 
     k8sEnvProvisioner.provision(workspaceConfig, environmentType, componentObjects, emptyMap());
+  }
+
+  private void applyProjectsVolumes(List<PodData> podsData, List<HasMetadata> componentObjects) {
+    if (componentObjects
+        .stream()
+        .noneMatch(
+            hasMeta ->
+                hasMeta instanceof PersistentVolumeClaim
+                    && hasMeta.getMetadata().getName().equals(PROJECTS_VOLUME_NAME))) {
+      PersistentVolumeClaim volumeClaim =
+          newPVC(
+              PROJECTS_VOLUME_NAME,
+              defaultPVCAccessMode,
+              defaultProjectPVCSize,
+              pvcStorageClassName);
+      componentObjects.add(volumeClaim);
+    }
+
+    for (PodData podData : podsData) {
+      if (podData
+          .getSpec()
+          .getVolumes()
+          .stream()
+          .noneMatch(volume -> volume.getName().equals(PROJECTS_VOLUME_NAME))) {
+        Volume volume = newVolume(PROJECTS_VOLUME_NAME, PROJECTS_VOLUME_NAME);
+        podData.getSpec().getVolumes().add(volume);
+      }
+      for (Container container : podData.getSpec().getContainers()) {
+        if (container
+            .getVolumeMounts()
+            .stream()
+            .noneMatch(mount -> mount.getName().equals(PROJECTS_VOLUME_NAME))) {
+          VolumeMount volumeMount = newVolumeMount(PROJECTS_VOLUME_NAME, projectFolderPath, null);
+          container.getVolumeMounts().add(volumeMount);
+        }
+      }
+    }
   }
 
   private String retrieveContent(Component recipeComponent, FileContentProvider fileContentProvider)
@@ -166,7 +236,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
    * <p>Machine name will be set only if the specified recipe objects has the only one container.
    */
   private void estimateCommandsMachineName(
-      WorkspaceConfig workspaceConfig, Component component, List<HasMetadata> componentsObjects) {
+      WorkspaceConfig workspaceConfig, Component component, List<PodData> podsData) {
     List<? extends Command> componentCommands =
         workspaceConfig
             .getCommands()
@@ -183,6 +253,21 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
       return;
     }
 
+    if (podsData.size() != 1) {
+      // many or no pods - can't estimate the name because of ambiguity or lack of information
+      return;
+    }
+
+    PodData pod = podsData.get(0);
+    if (pod.getSpec().getContainers().size() != 1) {
+      // many or no containers - can't estimate the name
+      return;
+    }
+    String machineName = Names.machineName(pod, pod.getSpec().getContainers().get(0));
+    componentCommands.forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+  }
+
+  private List<PodData> getPodDatas(List<HasMetadata> componentsObjects) {
     List<PodData> podsData = new ArrayList<>();
 
     componentsObjects
@@ -196,21 +281,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
         .filter(hasMetadata -> hasMetadata instanceof Deployment)
         .map(hasMetadata -> (Deployment) hasMetadata)
         .forEach(d -> podsData.add(new PodData(d)));
-
-    if (podsData.size() != 1) {
-      // many or no pods - can't estimate the name because of ambiguity or lack of information
-      return;
-    }
-
-    PodData pod = podsData.get(0);
-
-    if (pod.getSpec().getContainers().size() != 1) {
-      // many or no containers - can't estimate the name
-      return;
-    }
-
-    String machineName = Names.machineName(pod, pod.getSpec().getContainers().get(0));
-    componentCommands.forEach(c -> c.getAttributes().put(MACHINE_NAME_ATTRIBUTE, machineName));
+    return podsData;
   }
 
   private List<HasMetadata> unmarshalComponentObjects(

@@ -80,7 +80,7 @@ declare namespace che {
         properties?: any;
         attributes?: {
             [attrName: string]: string | number;
-        };        
+        };
     }
 
     export interface IEnvironmentMachineVolume {

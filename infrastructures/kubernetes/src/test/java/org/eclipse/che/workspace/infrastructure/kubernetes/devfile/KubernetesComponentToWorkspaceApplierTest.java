@@ -20,6 +20,7 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NA
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -33,6 +34,7 @@ import static org.testng.Assert.assertTrue;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesList;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.io.IOException;
 import java.util.HashSet;
@@ -63,6 +65,7 @@ public class KubernetesComponentToWorkspaceApplierTest {
 
   public static final String REFERENCE_FILENAME = "reference.yaml";
   public static final String COMPONENT_NAME = "foo";
+  public static final String PROJECT_MOUNT_PATH = "/projects";
 
   private WorkspaceConfigImpl workspaceConfig;
 
@@ -79,7 +82,13 @@ public class KubernetesComponentToWorkspaceApplierTest {
     k8sBasedComponents.add("openshift"); // so that we can work with the petclinic.yaml
     applier =
         new KubernetesComponentToWorkspaceApplier(
-            k8sRecipeParser, k8sEnvProvisioner, k8sBasedComponents);
+            k8sRecipeParser,
+            k8sEnvProvisioner,
+            PROJECT_MOUNT_PATH,
+            "1Gi",
+            "ReadWriteOnce",
+            "",
+            k8sBasedComponents);
 
     workspaceConfig = new WorkspaceConfigImpl();
   }
@@ -188,6 +197,64 @@ public class KubernetesComponentToWorkspaceApplierTest {
             KubernetesEnvironment.TYPE,
             toK8SList(yamlRecipeContent).getItems(),
             emptyMap());
+  }
+
+  @Test
+  public void shouldProvisionProjectVolumesIfSpecifiedIntoK8SList() throws Exception {
+    // given
+    String yamlRecipeContent = getResource("devfile/petclinic.yaml");
+    List<HasMetadata> k8sList = toK8SList(yamlRecipeContent).getItems();
+    doReturn(k8sList).when(k8sRecipeParser).parse(anyString());
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference(REFERENCE_FILENAME);
+    component.setAlias(COMPONENT_NAME);
+    component.setMountSources(true);
+
+    // when
+    applier.apply(workspaceConfig, component, s -> yamlRecipeContent);
+
+    // then
+    verify(k8sEnvProvisioner).provision(any(), any(), objectsCaptor.capture(), any());
+    List<HasMetadata> list = objectsCaptor.getValue();
+
+    // Make sure PVC is created
+    assertTrue(
+        list.stream()
+            .filter(hasMeta -> hasMeta instanceof PersistentVolumeClaim)
+            .map(o -> (PersistentVolumeClaim) o)
+            .anyMatch(claim -> claim.getMetadata().getName().equals(PROJECTS_VOLUME_NAME)));
+
+    for (HasMetadata o : list) {
+      if (o instanceof Pod) {
+        Pod p = (Pod) o;
+
+        // ignore pods that don't have containers
+        if (p.getSpec() == null) {
+          continue;
+        }
+        // Make sure volume is created
+        assertTrue(
+            p.getSpec()
+                .getVolumes()
+                .stream()
+                .anyMatch(
+                    v ->
+                        v.getName().equals(PROJECTS_VOLUME_NAME)
+                            && v.getPersistentVolumeClaim()
+                                .getClaimName()
+                                .equals(PROJECTS_VOLUME_NAME)));
+        for (Container c : p.getSpec().getContainers()) {
+          assertTrue(
+              c.getVolumeMounts()
+                  .stream()
+                  .anyMatch(
+                      vm ->
+                          vm.getName().equals(PROJECTS_VOLUME_NAME)
+                              && vm.getMountPath().equals(PROJECT_MOUNT_PATH)));
+        }
+      }
+    }
   }
 
   @Test
