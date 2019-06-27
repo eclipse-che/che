@@ -34,3 +34,4 @@ components:
     memoryLimit: 1536M
     command: ['/bin/sh']
     args: ['-c', 'echo', 'hi']
+    mountSources: true

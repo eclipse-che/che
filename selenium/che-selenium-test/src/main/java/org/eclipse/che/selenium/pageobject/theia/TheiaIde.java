@@ -46,6 +46,7 @@ public class TheiaIde {
   }
 
   public interface Locators {
+    String THEIA_CHE_DASHBOARD_XPATH = "//div[@class='che-dashboard']";
     String THEIA_IDE_ID = "theia-app-shell";
     String THEIA_IDE_TOP_PANEL_ID = "theia-top-panel";
     String LOADER_XPATH = "//div[@class='theia-preload theia-hidden']";
@@ -62,6 +63,9 @@ public class TheiaIde {
     String NOTIFICATION_CLOSE_BUTTON =
         "//div[@class='theia-NotificationsContainer']//button[text()='Close']";
   }
+
+  @FindBy(xpath = Locators.THEIA_CHE_DASHBOARD_XPATH)
+  WebElement theiaCheDashboard;
 
   @FindBy(id = Locators.THEIA_IDE_ID)
   WebElement theiaIde;
@@ -83,6 +87,10 @@ public class TheiaIde {
 
   @FindBy(xpath = Locators.ABOUT_DIALOG_OK_BUTTON_XPATH)
   WebElement aboutDialogOkButton;
+
+  public void openNavbarMenu() {
+    seleniumWebDriverHelper.waitAndClick(theiaCheDashboard);
+  }
 
   private String getNotificationEqualsToXpath(String messageText) {
     return format(NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE, messageText);

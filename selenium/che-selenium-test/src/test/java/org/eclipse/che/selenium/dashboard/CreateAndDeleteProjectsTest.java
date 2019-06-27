@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.pageobject.ProjectExplorer.FolderTypes.PROJECT_FOLDER;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.PROJECTS;
@@ -21,21 +20,18 @@ import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.client.TestWorkspaceServiceClient;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
-import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
-import org.eclipse.che.selenium.pageobject.Ide;
-import org.eclipse.che.selenium.pageobject.MavenPluginStatusBar;
-import org.eclipse.che.selenium.pageobject.NotificationsPopupPanel;
-import org.eclipse.che.selenium.pageobject.ProjectExplorer;
-import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
+import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
+import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -53,17 +49,14 @@ public class CreateAndDeleteProjectsTest {
   @Inject private WorkspaceDetails workspaceDetails;
   @Inject private NewWorkspace newWorkspace;
   @Inject private ProjectSourcePage projectSourcePage;
-  @Inject private ProjectExplorer explorer;
   @Inject private SeleniumWebDriver seleniumWebDriver;
-  @Inject private SeleniumWebDriverHelper seleniumWebDriverHelper;
   @Inject private TestWorkspaceServiceClient workspaceServiceClient;
   @Inject private DefaultTestUser defaultTestUser;
-  @Inject private NotificationsPopupPanel notificationsPopupPanel;
-  @Inject private MavenPluginStatusBar mavenPluginStatusBar;
   @Inject private Workspaces workspaces;
-  @Inject private Ide ide;
-  @Inject private ToastLoader toastLoader;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
+  @Inject private TheiaIde theiaIde;
+  @Inject private TheiaProjectTree theiaProjectTree;
+  @Inject private NavigationBar navigationBar;
 
   // it is used to read workspace logs on test failure
   private TestWorkspace testWorkspace;
@@ -84,6 +77,7 @@ public class CreateAndDeleteProjectsTest {
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
+    dashboardWindow = seleniumWebDriver.getWindowHandle();
 
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.selectStack(Stack.JAVA_MAVEN);
@@ -106,25 +100,27 @@ public class CreateAndDeleteProjectsTest {
     testWorkspace = testWorkspaceProvider.getWorkspace(WORKSPACE, defaultTestUser);
 
     // switch to the IDE and wait for workspace is ready to use
-    dashboardWindow = seleniumWebDriverHelper.switchToIdeFrameAndWaitAvailability();
-    toastLoader.waitToastLoaderAndClickStartButton();
-    ide.waitOpenedWorkspaceIsReadyToUse();
+    theiaIde.switchToIdeFrame();
+    theiaIde.waitTheiaIde();
+    theiaIde.waitLoaderInvisibility();
+    theiaIde.waitTheiaIdeTopPanel();
+    theiaProjectTree.waitFilesTab();
 
-    // wait for projects initializing
-    explorer.waitItem(WEB_JAVA_SPRING);
-    explorer.waitItem(CONSOLE_JAVA_SIMPLE);
-    explorer.waitItem(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
-    notificationsPopupPanel.waitPopupPanelsAreClosed();
-    mavenPluginStatusBar.waitClosingInfoPanel();
-    explorer.waitDefinedTypeOfFolder(CONSOLE_JAVA_SIMPLE, PROJECT_FOLDER);
-    explorer.waitDefinedTypeOfFolder(WEB_JAVA_SPRING, PROJECT_FOLDER);
-    notificationsPopupPanel.waitPopupPanelsAreClosed();
+    // wait for projects in the tree
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectsRootItem();
+    theiaProjectTree.waitProjectAreaOpened();
+    theiaProjectTree.waitItem(WEB_JAVA_SPRING);
+    theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
   }
 
   @Test(priority = 1)
   public void deleteProjectsFromDashboardTest() {
+    theiaIde.openNavbarMenu();
     seleniumWebDriver.switchTo().window(dashboardWindow);
+    navigationBar.waitNavigationBar();
     dashboard.selectWorkspacesItemOnDashboard();
+    workspaces.waitAddWorkspaceButton();
     workspaces.selectWorkspaceItemName(WORKSPACE);
     workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
 

@@ -63,6 +63,16 @@ items:
   kind: Pod
   metadata:
     name: withoutLabels
+  spec:
+      containers:
+      - name: server
+        image: test/petclinic
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources:
+          limits:
+            memory: 512Mi
 - kind: Service
   apiVersion: v1
   metadata:
