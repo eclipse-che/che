@@ -43,7 +43,7 @@ export class DevfileRegistry {
   }
 
   fetchDevfiles(location: string): ng.IPromise<Array<IDevfileMetaData>> {
-    let promise = this.$http({ 'method': 'GET', 'url': location + '/devfiles/' });
+    let promise = this.$http({ 'method': 'GET', 'url': location + '/devfiles/index.json' });
     return promise.then((result: any) => {
       return result.data;
     });
