@@ -47,6 +47,11 @@ public class ProjectConfigDtoMerger {
    */
   public FactoryDto merge(FactoryDto factory, Supplier<ProjectConfigDto> configSupplier) {
 
+    if (factory.getWorkspace() == null) {
+      // factory is created with devfile. There is no need to provision projects
+      return factory;
+    }
+
     final List<ProjectConfigDto> projects = factory.getWorkspace().getProjects();
     if (projects == null || projects.isEmpty()) {
       factory.getWorkspace().setProjects(singletonList(configSupplier.get()));

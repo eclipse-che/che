@@ -46,6 +46,7 @@ public interface FactoryDto extends Factory, Hyperlinks {
 
   FactoryDto withDevfile(DevfileDto devfileDto);
 
+  /** because factory DTO may have devfile, in that case, workspace may be optional */
   @Override
   @FactoryParameter(obligation = OPTIONAL)
   WorkspaceConfigDto getWorkspace();

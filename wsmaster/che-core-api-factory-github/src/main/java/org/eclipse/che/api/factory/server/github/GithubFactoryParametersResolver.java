@@ -26,6 +26,7 @@ import org.eclipse.che.api.factory.server.urlfactory.ProjectConfigDtoMerger;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 
 /**
  * Provides Factory Parameters resolver for github repositories.
@@ -91,14 +92,35 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
     final GithubUrl githubUrl = githubUrlParser.parse(factoryParameters.get(URL_PARAMETER_NAME));
 
     // create factory from the following location if location exists, else create default factory
-    return urlFactoryBuilder
-        .createFactoryFromDevfile(
-            githubUrl, fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
-        .orElseGet(
-            () ->
-                urlFactoryBuilder
-                    .createFactoryFromJson(githubUrl)
-                    .orElseGet(
-                        () -> newDto(FactoryDto.class).withV(CURRENT_VERSION).withSource("repo")));
+    FactoryDto factory =
+        urlFactoryBuilder
+            .createFactoryFromDevfile(
+                githubUrl, fileName -> urlFetcher.fetch(githubUrl.rawFileLocation(fileName)))
+            .orElseGet(
+                () ->
+                    urlFactoryBuilder
+                        .createFactoryFromJson(githubUrl)
+                        .orElseGet(
+                            () ->
+                                newDto(FactoryDto.class)
+                                    .withV(CURRENT_VERSION)
+                                    .withSource("repo")));
+
+    // add workspace configuration if not defined
+    if (factory.getWorkspace() == null && factory.getDevfile() == null) {
+      factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
+    }
+
+    // apply merging operation from existing and computed settings if needed
+    // T_O_D_O Should we adapt it to factories with Devfiles?
+    return projectConfigDtoMerger.merge(
+        factory,
+        () -> {
+          // Compute project configuration
+          return newDto(ProjectConfigDto.class)
+              .withSource(githubSourceStorageBuilder.build(githubUrl))
+              .withName(githubUrl.getRepository())
+              .withPath("/".concat(githubUrl.getRepository()));
+        });
   }
 }

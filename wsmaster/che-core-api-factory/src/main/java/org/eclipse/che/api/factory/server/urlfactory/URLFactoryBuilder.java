@@ -33,6 +33,8 @@ import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -135,5 +137,19 @@ public class URLFactoryBuilder {
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class).withName(name).withAttributes(attributes);
+  }
+
+  /**
+   * Help to generate default workspace devfile
+   *
+   * @param name the name of the workspace
+   * @return a workspace devfile
+   */
+  public DevfileDto buildDefaultDevfile(String name) {
+
+    // workspace configuration using the environment
+    return newDto(DevfileDto.class)
+        .withApiVersion("1.0.0")
+        .withMetadata(newDto(MetadataDto.class).withName(name));
   }
 }
