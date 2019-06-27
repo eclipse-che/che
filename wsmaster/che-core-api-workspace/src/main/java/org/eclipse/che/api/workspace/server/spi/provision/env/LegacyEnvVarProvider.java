@@ -11,4 +11,8 @@
  */
 package org.eclipse.che.api.workspace.server.spi.provision.env;
 
+/**
+ * Marker interface for environment variable providers which keeps backward-compatibility with Che 6
+ * workspaces.
+ */
 public interface LegacyEnvVarProvider extends EnvVarProvider {}

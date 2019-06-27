@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Adds the legacy environment variables to the workspaces that contain some machines with
- * installers. Because the new (Che 7) workspaces don't use workspaces we can be sure the new
+ * installers. Because the new (Che 7) workspaces don't use installers we can be sure the new
  * workspaces are never provisioned with legacy env vars (which would make them unable to override
  * JAVA_OPTS for example).
  *
@@ -31,7 +31,8 @@ import org.slf4j.LoggerFactory;
  */
 public class LegacyEnvVarEnvironmentProvisioner implements InternalEnvironmentProvisioner {
 
-  private static final Logger LOG = LoggerFactory.getLogger(EnvVarEnvironmentProvisioner.class);
+  private static final Logger LOG =
+      LoggerFactory.getLogger(LegacyEnvVarEnvironmentProvisioner.class);
 
   private final Set<LegacyEnvVarProvider> envVarProviders;
 
@@ -43,28 +44,28 @@ public class LegacyEnvVarEnvironmentProvisioner implements InternalEnvironmentPr
   @Override
   public void provision(RuntimeIdentity id, InternalEnvironment internalEnvironment)
       throws InfrastructureException {
-    if (hasInstallers(internalEnvironment)) {
-
-      for (EnvVarProvider envVarProvider : envVarProviders) {
-        Pair<String, String> envVar = envVarProvider.get(id);
-        if (envVar != null) {
-          LOG.info(
-              "Provisioning legacy environment variables for workspace '{}' from {} with {} variable",
-              id.getWorkspaceId(),
-              envVarProvider,
-              envVar.first);
-          internalEnvironment
-              .getMachines()
-              .values()
-              .forEach(m -> m.getEnv().putIfAbsent(envVar.first, envVar.second));
-        }
-      }
-      LOG.info(
-          "Environment legacy variables provisioning done for workspace '{}'", id.getWorkspaceId());
-    } else {
+    if (!hasInstallers(internalEnvironment)) {
       LOG.debug(
           "Legacy environment variables not provisioned to workspace '{}'.", id.getWorkspaceId());
+      return;
     }
+
+    for (EnvVarProvider envVarProvider : envVarProviders) {
+      Pair<String, String> envVar = envVarProvider.get(id);
+      if (envVar != null) {
+        LOG.debug(
+            "Provisioning legacy environment variables for workspace '{}' from {} with {} variable",
+            id.getWorkspaceId(),
+            envVarProvider.getClass().getSimpleName(),
+            envVar.first);
+        internalEnvironment
+            .getMachines()
+            .values()
+            .forEach(m -> m.getEnv().putIfAbsent(envVar.first, envVar.second));
+      }
+    }
+    LOG.info(
+        "Environment legacy variables provisioning done for workspace '{}'", id.getWorkspaceId());
   }
 
   private boolean hasInstallers(InternalEnvironment internalEnvironment) {
