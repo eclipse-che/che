@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -140,7 +141,7 @@ public class URLFactoryBuilder {
   }
 
   /**
-   * Help to generate default workspace devfile
+   * Help to generate default workspace devfile. Also initialise project in it
    *
    * @param name the name of the workspace
    * @return a workspace devfile
@@ -149,7 +150,7 @@ public class URLFactoryBuilder {
 
     // workspace configuration using the environment
     return newDto(DevfileDto.class)
-        .withApiVersion("1.0.0")
+        .withApiVersion(CURRENT_API_VERSION)
         .withMetadata(newDto(MetadataDto.class).withName(name));
   }
 }
