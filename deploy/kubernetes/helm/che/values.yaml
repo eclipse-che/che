@@ -67,7 +67,7 @@ global:
     fsGroup: 1724
   postgresDebugLogs: false
 
-#che:
+che: {}
 #  workspace:
 #    devfileRegistryUrl: "https://che-devfile-registry.openshift.io/"
 #    pluginRegistryUrl: "https://che-plugin-registry.openshift.io/v3"
