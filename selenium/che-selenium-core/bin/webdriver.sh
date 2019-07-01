@@ -37,7 +37,7 @@ getRecommendedThreadCount() {
 }
 
 detectDockerInterfaceIp() {
-    docker run --rm --net host eclipse/che-ip:nightly
+    docker run --rm --net host eclipse/che-ip:6.19.0
 }
 
 initVariables() {
