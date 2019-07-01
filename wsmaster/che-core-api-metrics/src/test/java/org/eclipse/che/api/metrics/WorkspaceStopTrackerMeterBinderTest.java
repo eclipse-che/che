@@ -97,7 +97,8 @@ public class WorkspaceStopTrackerMeterBinderTest {
 
     for (WorkspaceStatus from : WorkspaceStatus.values()) {
       for (WorkspaceStatus to : WorkspaceStatus.values()) {
-        if (from == WorkspaceStatus.RUNNING && to == WorkspaceStatus.STOPPING) {
+        if ((from == WorkspaceStatus.RUNNING || from == WorkspaceStatus.STARTING)
+            && to == WorkspaceStatus.STOPPING) {
           continue;
         }
 

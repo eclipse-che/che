@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.metrics;
 
+import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.*;
 import static org.eclipse.che.api.metrics.WorkspaceBinders.withStandardTags;
 import static org.eclipse.che.api.metrics.WorkspaceBinders.workspaceMetric;
 
@@ -23,13 +24,21 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Singleton;
-import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.core.notification.EventService;
 import org.eclipse.che.api.workspace.shared.dto.event.WorkspaceStatusEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** {@link MeterBinder} that is providing metrics about workspace stop time. */
+/**
+ * {@link MeterBinder} that is providing metrics about workspace stop time.
+ *
+ * <p>We're measuring these state transitions:
+ *
+ * <pre>
+ *   RUNNING -> STOPPING -> STOPPED
+ *   STARTING -> STOPPING -> STOPPED
+ * </pre>
+ */
 @Singleton
 public class WorkspaceStopTrackerMeterBinder implements MeterBinder {
 
@@ -65,17 +74,17 @@ public class WorkspaceStopTrackerMeterBinder implements MeterBinder {
   }
 
   private void handleWorkspaceStatusChange(WorkspaceStatusEvent event) {
-    if (event.getPrevStatus() == WorkspaceStatus.RUNNING
-        && event.getStatus() == WorkspaceStatus.STOPPING) {
+    if ((event.getPrevStatus() == RUNNING || event.getPrevStatus() == STARTING)
+        && event.getStatus() == STOPPING) {
       workspaceStopTime.put(event.getWorkspaceId(), System.currentTimeMillis());
-    } else if (event.getPrevStatus() == WorkspaceStatus.STOPPING) {
+    } else if (event.getPrevStatus() == STOPPING) {
       Long stopTime = workspaceStopTime.remove(event.getWorkspaceId());
       if (stopTime == null) {
         LOG.warn("No workspace stop time recorded for workspace {}", event.getWorkspaceId());
         return;
       }
 
-      if (event.getStatus() == WorkspaceStatus.STOPPED) {
+      if (event.getStatus() == STOPPED) {
         stopTimer.record(Duration.ofMillis(System.currentTimeMillis() - stopTime));
       } else {
         LOG.error("Unexpected change of status from STOPPING to {}", event.getStatus());
