@@ -65,9 +65,21 @@
             </dependency>
             <dependency>
                 <groupId>io.tonlabs</groupId>
+                <artifactId>plugin-ton-project-ide</artifactId>
+                <version>${che.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>io.tonlabs</groupId>
+                <artifactId>plugin-ton-project-server</artifactId>
+                <version>${che.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>io.tonlabs</groupId>
                 <artifactId>plugin-ton-project-shared</artifactId>
                 <version>${che.version}</version>
-                <type>jar</type>
+                <type>pom</type>
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
@@ -2054,6 +2066,13 @@
                         <arg>${gwt.compiler.jvmArgs.Xss}</arg>
                         <arg>${gwt.compiler.jvmArgs.Xmx}</arg>
                     </jvmArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
