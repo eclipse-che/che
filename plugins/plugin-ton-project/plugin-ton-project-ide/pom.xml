@@ -14,7 +14,7 @@
     <parent>
         <artifactId>plugin-ton-project</artifactId>
         <groupId>io.tonlabs</groupId>
-        <version>6.19.6-SNAPSHOT</version>
+        <version>6.19.0-SNAPSHOT</version>
     </parent>
     <artifactId>plugin-ton-project-ide</artifactId>
     <packaging>gwt-lib</packaging>
@@ -33,6 +33,11 @@
             <artifactId>guice</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.tonlabs</groupId>
+            <artifactId>plugin-ton-project-shared</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.validation</groupId>
             <artifactId>validation-api</artifactId>
         </dependency>
@@ -47,10 +52,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-ide-app</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.tonlabs</groupId>
-            <artifactId>plugin-ton-project-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.vectomatic</groupId>

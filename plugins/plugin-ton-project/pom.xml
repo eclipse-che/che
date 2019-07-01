@@ -14,13 +14,13 @@
     <parent>
         <artifactId>che-plugin-parent</artifactId>
         <groupId>org.eclipse.che.plugin</groupId>
-        <version>6.19.6-SNAPSHOT</version>
+        <version>6.19.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>plugin-ton-project</artifactId>
     <groupId>io.tonlabs</groupId>
+    <artifactId>plugin-ton-project</artifactId>
     <packaging>pom</packaging>
-    <name>TON Plugins ::  TON Project :: Parent</name>
+    <name>TON Plugins :: TON Project :: Parent</name>
     <modules>
         <module>plugin-ton-project-shared</module>
         <module>plugin-ton-project-server</module>

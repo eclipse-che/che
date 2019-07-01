@@ -39,10 +39,10 @@ init() {
   BOLD='\033[1m'
   UNDERLINE='\033[4m'
 
-  ORGANIZATION="eclipse"
+  ORGANIZATION="tonlabs"
   PREFIX="che"
   TAG="nightly"
-  SKIP_TESTS=false
+  SKIP_TESTS=true
   NAME="che"
   ARGS=""
   OPTIONS=""
@@ -129,7 +129,7 @@ build_image() {
   printf "${BOLD}Building Docker Image ${IMAGE_NAME} from $DIR directory with tag $TAG${NC}\n"
   # Replace macros in Dockerfiles
   cat ${DIR}/${DOCKERFILE} | sed s/\$\{BUILD_ORGANIZATION\}/${ORGANIZATION}/ | sed s/\$\{BUILD_PREFIX\}/${PREFIX}/ | sed s/\$\{BUILD_TAG\}/${TAG}/ > ${DIR}/.Dockerfile
-  cd "${DIR}" && docker build -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} ${BUILD_ARGS} .
+  cd "${DIR}" && docker build --no-cache -f ${DIR}/.Dockerfile -t ${IMAGE_NAME} ${BUILD_ARGS} .
   rm ${DIR}/.Dockerfile
   if [ $? -eq 0 ]; then
     printf "Build of ${BLUE}${IMAGE_NAME} ${GREEN}[OK]${NC}\n"
