@@ -10,12 +10,5 @@
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
-DIR=$(cd "$(dirname "$0")"; pwd)
-# copy user and realm json templates
-cp -r "${DIR}"/../init/modules/postgres/templates/* "${DIR}"
-
 init --name:postgres "$@"
 build
-
-# remove jsons
-rm "${DIR}"/*.erb
