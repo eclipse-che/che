@@ -64,6 +64,12 @@
                 <version>${version.jsr305.plugin}</version>
             </dependency>
             <dependency>
+                <groupId>io.tonlabs</groupId>
+                <artifactId>plugin-ton-project-shared</artifactId>
+                <version>${che.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.tomcat</groupId>
                 <artifactId>tomcat-catalina</artifactId>
                 <version>${org.apache.tomcat.version}</version>
@@ -1990,12 +1996,6 @@
                 <groupId>org.eclipse.che.selenium</groupId>
                 <artifactId>che-selenium-test</artifactId>
                 <version>${che.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.tonlabs</groupId>
-                <artifactId>plugin-ton-project-shared</artifactId>
-                <version>${che.version}</version>
-                <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che.workspace.loader</groupId>
