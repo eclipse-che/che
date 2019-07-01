@@ -1,6 +1,0 @@
-IMAGE_INIT=eclipse/che-init:6.0.0-M3
-IMAGE_CHE=eclipse/che-server:6.0.0-M3
-IMAGE_COMPOSE=docker/compose:1.10.1
-IMAGE_TRAEFIK=traefik:v1.3.0-rc3
-IMAGE_POSTGRES=centos/postgresql-96-centos7:9.6
-IMAGE_KEYCLOACK=jboss/keycloak-openshift:3.3.0.CR2-3
