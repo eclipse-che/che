@@ -58,10 +58,6 @@ public class WorkspaceStopTrackerMeterBinder implements MeterBinder {
         Timer.builder(workspaceMetric("stop.time"))
             .description("The time of workspace stop")
             .tags(withStandardTags("result", "success"))
-            .publishPercentileHistogram()
-            .sla(Duration.ofSeconds(10))
-            .minimumExpectedValue(Duration.ofSeconds(10))
-            .maximumExpectedValue(Duration.ofMinutes(15))
             .register(registry);
 
     // only subscribe to the event once we have the counters ready
