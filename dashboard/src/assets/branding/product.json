@@ -1,19 +1,19 @@
 {
-  "title": "Eclipse Che ",
-  "name": "Eclipse Che",
-  "logoFile": "che-logo.svg",
-  "logoTextFile": "che-logo-text.svg",
-  "favicon": "favicon.ico",
+  "title": "TON Labs. Powered by Eclipse Che ",
+  "name": "TON Labs",
+  "logoFile": "ton-logo.svg",
+  "logoTextFile": "ton-logo-text.svg",
+  "favicon": "favicon.png",
   "loader": "loader.svg",
   "ideResources": "/_app/",
   "websocketContext": "/api/websocket",
   "helpPath": "https://www.eclipse.org/che/",
   "helpTitle": "Community",
-  "supportEmail": "che-dev@eclipse.org",
+  "supportEmail": "cloud-ide@tonlabs.io",
   "oauthDocs": "Configure OAuth in the che.properties file.",
   "workspace": {
-    "priorityStacks": ["Java", "Java-MySQL", "Blank"],
-    "defaultStack": "java-mysql"
+    "priorityStacks": ["ton-llvm-vm"],
+    "defaultStack": "ton-llvm-vm"
   },
   "cli" : {
     "configName" : "che.env",
