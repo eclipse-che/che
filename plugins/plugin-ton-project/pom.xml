@@ -8,27 +8,22 @@
 
     SPDX-License-Identifier: EPL-2.0
 
-    Contributors:
-      Red Hat, Inc. - initial API and implementation
-
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>che-parent</artifactId>
-        <groupId>org.eclipse.che</groupId>
+        <artifactId>che-plugin-parent</artifactId>
+        <groupId>org.eclipse.che.plugin</groupId>
         <version>6.19.6-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>org.eclipse.che.plugin</groupId>
-    <artifactId>che-plugin-parent</artifactId>
+    <artifactId>plugin-ton-project</artifactId>
+    <groupId>io.tonlabs</groupId>
     <packaging>pom</packaging>
-    <name>Che Plugin :: Parent</name>
+    <name>TON Plugins ::  TON Project :: Parent</name>
     <modules>
-        <module>plugin-machine</module>
-        <module>plugin-git</module>
-        <module>plugin-github</module>
-        <module>plugin-cpp</module>
-        <module>plugin-ton-project</module>
+        <module>plugin-ton-project-shared</module>
+        <module>plugin-ton-project-server</module>
+        <module>plugin-ton-project-ide</module>
     </modules>
 </project>
