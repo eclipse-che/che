@@ -21,7 +21,7 @@ import org.eclipse.che.commons.lang.Pair;
  *
  * @author Sergii Leshchenko
  */
-public class AgentAuthEnableEnvVarProvider implements EnvVarProvider {
+public class AgentAuthEnableEnvVarProvider implements LegacyEnvVarProvider {
 
   public static final String CHE_AUTH_ENABLED_ENV = "CHE_AUTH_ENABLED";
 

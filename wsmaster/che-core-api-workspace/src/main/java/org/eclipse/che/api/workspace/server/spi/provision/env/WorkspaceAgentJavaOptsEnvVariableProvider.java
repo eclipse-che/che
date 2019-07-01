@@ -17,7 +17,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.Pair;
 
-public class WorkspaceAgentJavaOptsEnvVariableProvider implements EnvVarProvider {
+public class WorkspaceAgentJavaOptsEnvVariableProvider implements LegacyEnvVarProvider {
 
   /** Env variable for jvm settings */
   public static final String WSAGENT_JAVA_OPTIONS_ENV = "CHE_WORKSPACE_WSAGENT__JAVA__OPTIONS";

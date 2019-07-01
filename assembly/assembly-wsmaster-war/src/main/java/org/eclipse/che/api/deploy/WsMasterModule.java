@@ -62,6 +62,8 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.CheApiInternalEnvV
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.server.spi.provision.env.EnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.JavaOptsEnvVariableProvider;
+import org.eclipse.che.api.workspace.server.spi.provision.env.LegacyEnvVarEnvironmentProvisioner;
+import org.eclipse.che.api.workspace.server.spi.provision.env.LegacyEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MachineTokenEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.MavenOptsEnvVariableProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
@@ -176,6 +178,7 @@ public class WsMasterModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(InstallerConfigProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(EnvVarEnvironmentProvisioner.class);
+    internalEnvironmentProvisioners.addBinding().to(LegacyEnvVarEnvironmentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(ProjectsVolumeForWsAgentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(MachineNameProvisioner.class);
 
@@ -188,16 +191,25 @@ public class WsMasterModule extends AbstractModule {
     envVarProviders.addBinding().to(WorkspaceIdEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceNamespaceNameEnvVarProvider.class);
     envVarProviders.addBinding().to(WorkspaceNameEnvVarProvider.class);
-
-    envVarProviders.addBinding().to(JavaOptsEnvVariableProvider.class);
-    envVarProviders.addBinding().to(MavenOptsEnvVariableProvider.class);
     envVarProviders.addBinding().to(ProjectsRootEnvVariableProvider.class);
-    envVarProviders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
-    envVarProviders.addBinding().to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
 
-    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
-    envVarProviders.addBinding().to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
-    envVarProviders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
+    Multibinder<LegacyEnvVarProvider> legacyEnvVarProviderMultibinders =
+        Multibinder.newSetBinder(binder(), LegacyEnvVarProvider.class);
+    legacyEnvVarProviderMultibinders.addBinding().to(JavaOptsEnvVariableProvider.class);
+    legacyEnvVarProviderMultibinders.addBinding().to(MavenOptsEnvVariableProvider.class);
+
+    legacyEnvVarProviderMultibinders.addBinding().to(AgentAuthEnableEnvVarProvider.class);
+    legacyEnvVarProviderMultibinders
+        .addBinding()
+        .to(WorkspaceAgentJavaOptsEnvVariableProvider.class);
+
+    legacyEnvVarProviderMultibinders
+        .addBinding()
+        .to(WorkspaceAgentCorsAllowedOriginsEnvVarProvider.class);
+    legacyEnvVarProviderMultibinders
+        .addBinding()
+        .to(WorkspaceAgentCorsAllowCredentialsEnvVarProvider.class);
+    legacyEnvVarProviderMultibinders.addBinding().to(WorkspaceAgentCorsEnabledEnvVarProvider.class);
 
     bind(org.eclipse.che.api.workspace.server.bootstrap.InstallerService.class);
     bind(org.eclipse.che.api.workspace.server.event.WorkspaceJsonRpcMessenger.class)
