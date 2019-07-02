@@ -295,21 +295,7 @@ export class Editor {
                 await this.waitBreakpoint(tabTitle, lineNumber);
                 return;
             } catch (err) {
-                if (err instanceof error.StaleElementReferenceError) {
-                    await this.driverHelper.wait(polling);
-                    continue;
-                }
-
-                if (err instanceof error.TimeoutError) {
-                    throw (err);
-                }
-
-                if (err instanceof error.WebDriverError) {
-                    await this.driverHelper.wait(polling);
-                    continue;
-                }
-
-                throw err;
+                // ignore errors
             }
         }
 

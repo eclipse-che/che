@@ -160,7 +160,7 @@ suite.skip('Language server validation', async () => {
     });
 });
 
-suite('Display source code changes in the running application', async () => {
+suite.skip('Display source code changes in the running application', async () => {
     test('Change source code', async () => {
         await projectTree.expandPathAndOpenFile(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
