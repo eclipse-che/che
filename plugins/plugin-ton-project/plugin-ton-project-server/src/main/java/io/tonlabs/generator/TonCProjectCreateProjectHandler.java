@@ -30,7 +30,7 @@ import org.eclipse.che.api.project.server.type.AttributeValue;
  * Generates a new project which contains a package.json with default content and a default
  * person.json file within an myJsonFiles folder.
  */
-public class TonProjectCreateProjectHandler implements CreateProjectHandler {
+public class TonCProjectCreateProjectHandler implements CreateProjectHandler {
 
   @Inject private FsManager fsManager;
 

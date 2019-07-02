@@ -13,7 +13,8 @@ package io.tonlabs.ide.inject;
 
 import com.google.gwt.inject.client.AbstractGinModule;
 import com.google.gwt.inject.client.multibindings.GinMultibinder;
-import io.tonlabs.ide.project.TonProjectWizardRegistrar;
+import io.tonlabs.ide.project.TonCProjectWizardRegistrar;
+import io.tonlabs.ide.project.TonSolProjectWizardRegistrar;
 import org.eclipse.che.ide.api.extension.ExtensionGinModule;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 
@@ -25,6 +26,10 @@ public class TonProjectModule extends AbstractGinModule {
   protected void configure() {
     GinMultibinder.newSetBinder(this.binder(), ProjectWizardRegistrar.class)
         .addBinding()
-        .to(TonProjectWizardRegistrar.class);
+        .to(TonCProjectWizardRegistrar.class);
+
+    GinMultibinder.newSetBinder(this.binder(), ProjectWizardRegistrar.class)
+            .addBinding()
+            .to(TonSolProjectWizardRegistrar.class);
   }
 }

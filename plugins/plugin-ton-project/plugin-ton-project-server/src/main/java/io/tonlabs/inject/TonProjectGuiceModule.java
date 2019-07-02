@@ -15,8 +15,10 @@ import static com.google.inject.multibindings.Multibinder.newSetBinder;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
-import io.tonlabs.generator.TonProjectCreateProjectHandler;
-import io.tonlabs.projecttype.TonProjectProjectType;
+import io.tonlabs.generator.TonCProjectCreateProjectHandler;
+import io.tonlabs.generator.TonSolProjectCreateProjectHandler;
+import io.tonlabs.projecttype.TonCProjectType;
+import io.tonlabs.projecttype.TonSolProjectType;
 import org.eclipse.che.api.project.server.handlers.ProjectHandler;
 import org.eclipse.che.api.project.server.type.ProjectTypeDef;
 import org.eclipse.che.inject.DynaModule;
@@ -29,10 +31,12 @@ public class TonProjectGuiceModule extends AbstractModule {
   protected void configure() {
     Multibinder<ProjectTypeDef> projectTypeDefMultibinder =
         newSetBinder(this.binder(), ProjectTypeDef.class);
-    projectTypeDefMultibinder.addBinding().to(TonProjectProjectType.class);
+    projectTypeDefMultibinder.addBinding().to(TonCProjectType.class);
+    projectTypeDefMultibinder.addBinding().to(TonSolProjectType.class);
 
     Multibinder<ProjectHandler> projectHandlerMultibinder =
         newSetBinder(this.binder(), ProjectHandler.class);
-    projectHandlerMultibinder.addBinding().to(TonProjectCreateProjectHandler.class);
+    projectHandlerMultibinder.addBinding().to(TonCProjectCreateProjectHandler.class);
+    projectHandlerMultibinder.addBinding().to(TonSolProjectCreateProjectHandler.class);
   }
 }
