@@ -106,13 +106,18 @@ suite('Validation of workspace start, build and run', async () => {
     test('Close the terminal running tasks', async () => {
         await terminal.closeTerminalTab('build-file-output');
         await terminal.rejectTerminalProcess('run');
+
+        // ###
+        await driverHelper.getDriver().findElement(By.css('#fkghkjdgfhdkjhgk'));
+        // ###
+
         await terminal.closeTerminalTab('run');
 
         await warningDialog.waitAndCloseIfAppear();
     });
 });
 
-suite('Language server validation', async () => {
+suite.skip('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
