@@ -112,7 +112,7 @@ suite('Validation of workspace start, build and run', async () => {
     });
 });
 
-suite.skip('Language server validation', async () => {
+suite('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
@@ -160,7 +160,7 @@ suite.skip('Language server validation', async () => {
     });
 });
 
-suite.skip('Display source code changes in the running application', async () => {
+suite('Display source code changes in the running application', async () => {
     test('Change source code', async () => {
         await projectTree.expandPathAndOpenFile(pathToChangedJavaFileFolder, changedJavaFileName);
         await editor.waitEditorAvailable(changedJavaFileName);
