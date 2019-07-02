@@ -16,7 +16,6 @@ import { By } from 'selenium-webdriver';
 
 @injectable()
 export class QuickOpenContainer {
-
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     public async waitContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -35,6 +34,10 @@ export class QuickOpenContainer {
         await this.waitContainer(timeout);
         await this.driverHelper.waitAndClick(quickContainerItemLocator, timeout);
         await this.waitContainerDisappearance();
+    }
+
+    public async type(text: string) {
+        await this.driverHelper.enterValue(By.css('.quick-open-input input'), text);
     }
 
 }

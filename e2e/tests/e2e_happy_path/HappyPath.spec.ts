@@ -106,11 +106,6 @@ suite('Validation of workspace start, build and run', async () => {
     test('Close the terminal running tasks', async () => {
         await terminal.closeTerminalTab('build-file-output');
         await terminal.rejectTerminalProcess('run');
-
-        // ###
-        await driverHelper.getDriver().findElement(By.css('#fkghkjdgfhdkjhgk'));
-        // ###
-
         await terminal.closeTerminalTab('run');
 
         await warningDialog.waitAndCloseIfAppear();
@@ -189,6 +184,13 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Run application with changes', async () => {
+        ide.performKeyCombination(Key.F1);
+        await quickOpenContainer.waitContainer();
+
+        await quickOpenContainer.type('>Task: Clear History');
+        await quickOpenContainer.clickOnContainerItem('Task: Clear History');
+        await driverHelper.wait(5000);
+
         // await topMenu.selectOption('Terminal', 'Run Task...');
         // await quickOpenContainer.clickOnContainerItem('che: run');
         await runTask('che: run', 'run');
