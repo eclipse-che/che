@@ -20,7 +20,7 @@ import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { GitHubPlugin } from '../../pageobjects/ide/GitHubPlugin';
 import { TestConstants } from '../../TestConstants';
 import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
-import { By, Key, error } from 'selenium-webdriver';
+import { By, Key } from 'selenium-webdriver';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
@@ -184,16 +184,8 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Run application with changes', async () => {
-        ide.performKeyCombination(Key.F1);
-        await quickOpenContainer.waitContainer();
-
-        await quickOpenContainer.type('>Task: Clear History');
-        await quickOpenContainer.clickOnContainerItem('Task: Clear History');
-        await driverHelper.wait(5000);
-
-        // await topMenu.selectOption('Terminal', 'Run Task...');
-        // await quickOpenContainer.clickOnContainerItem('che: run');
-        await runTask('che: run', 'run');
+        await topMenu.selectOption('Terminal', 'Run Task...');
+        await quickOpenContainer.clickOnContainerItem('che: run-with-changes');
 
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
@@ -214,8 +206,8 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Close running terminal processes and tabs', async () => {
-        await terminal.rejectTerminalProcess('run');
-        await terminal.closeTerminalTab('run');
+        await terminal.rejectTerminalProcess('run-with-changes');
+        await terminal.closeTerminalTab('run-with-changes');
 
         await warningDialog.waitAndCloseIfAppear();
     });
@@ -282,19 +274,19 @@ async function checkJavaPathCompletion() {
     }
 }
 
-async function runTask(taskTitle: string, terminalTabTitle: string) {
-    await topMenu.selectOption('Terminal', 'Run Task...');
-    await quickOpenContainer.clickOnContainerItem(taskTitle);
+// async function runTask(taskTitle: string, terminalTabTitle: string) {
+//     await topMenu.selectOption('Terminal', 'Run Task...');
+//     await quickOpenContainer.clickOnContainerItem(taskTitle);
 
-    try {
-        await terminal.waitTab(terminalTabTitle);
-    } catch (err) {
-        if (!(err instanceof error.TimeoutError)) {
-            throw err;
-        }
+//     try {
+//         await terminal.waitTab(terminalTabTitle);
+//     } catch (err) {
+//         if (!(err instanceof error.TimeoutError)) {
+//             throw err;
+//         }
 
-        await topMenu.selectOption('Terminal', 'Run Task...');
-        await quickOpenContainer.clickOnContainerItem(taskTitle);
-        await terminal.waitTab(terminalTabTitle);
-    }
-}
+//         await topMenu.selectOption('Terminal', 'Run Task...');
+//         await quickOpenContainer.clickOnContainerItem(taskTitle);
+//         await terminal.waitTab(terminalTabTitle);
+//     }
+// }
