@@ -12,7 +12,7 @@
 'use strict';
 
 /**
- * This class is handling the registered oAuth providers.
+ * This class is handling the registered OAuth providers.
  * @author Ann Shumilova
  */
 export class CheOAuthProvider {

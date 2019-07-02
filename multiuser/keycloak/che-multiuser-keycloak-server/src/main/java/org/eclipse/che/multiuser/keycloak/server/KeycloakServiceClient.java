@@ -137,7 +137,7 @@ public class KeycloakServiceClient {
     } catch (BadRequestException e) {
       if (assotiateUserPattern.matcher(e.getMessage()).matches()) {
         // If user has no link with identity provider yet,
-        // we should threat this as unauthorized and send to oAuth login page.
+        // we should threat this as unauthorized and send to OAuth login page.
         throw new UnauthorizedException(e.getMessage());
       }
       throw e;
