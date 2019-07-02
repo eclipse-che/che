@@ -10,11 +10,14 @@
 import * as mocha from 'mocha';
 import { IDriver } from './IDriver';
 import { e2eContainer } from '../inversify.config';
-import { TYPES } from '../inversify.types';
+import { TYPES, CLASSES } from '../inversify.types';
 import * as fs from 'fs';
 import { TestConstants } from '../TestConstants';
+import { logging } from 'selenium-webdriver';
+import { DriverHelper } from '../utils/DriverHelper';
 
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
+const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 
 class CheReporter extends mocha.reporters.Spec {
 
@@ -65,6 +68,8 @@ class CheReporter extends mocha.reporters.Spec {
       const testReportDirPath: string = `${reportDirPath}/${testFullTitle}`;
       const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`;
       const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
+      const browserLogsFileName: string = `${testReportDirPath}/browserlogs-${testTitle}.txt`;
+
 
       // create reporter dir if not exist
       const reportDirExists: boolean = fs.existsSync(reportDirPath);
@@ -91,8 +96,19 @@ class CheReporter extends mocha.reporters.Spec {
       const pageSourceStream = fs.createWriteStream(pageSourceFileName);
       pageSourceStream.write(new Buffer(pageSource));
       pageSourceStream.end();
-    });
 
+      // take browser console logs and write to file
+      const browserLogsEntries: logging.Entry[] = await driverHelper.getDriver().manage().logs().get('browser');
+      let browserLogs: string = '';
+
+      browserLogsEntries.forEach(log => {
+        browserLogs += `\"${log.level}\" \"${log.type}\" \"${log.message}\"\n`;
+      });
+
+      const browserLogsStream = fs.createWriteStream(browserLogsFileName);
+      browserLogsStream.write(new Buffer(browserLogs));
+      browserLogsStream.end();
+    });
   }
 }
 
