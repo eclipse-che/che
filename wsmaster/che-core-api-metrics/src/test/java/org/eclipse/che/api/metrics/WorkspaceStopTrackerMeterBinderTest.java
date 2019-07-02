@@ -30,37 +30,37 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class WorkspaceStartTrackerMeterBinderTest {
+public class WorkspaceStopTrackerMeterBinderTest {
 
   private EventService eventService;
   private MeterRegistry registry;
-  private WorkspaceStartTrackerMeterBinder meterBinder;
-  private Map<String, Long> workspaceStartTime;
+  private WorkspaceStopTrackerMeterBinder meterBinder;
+  private Map<String, Long> workspaceStopTime;
 
   @BeforeMethod
   public void setUp() {
     eventService = new EventService();
     registry = new SimpleMeterRegistry();
-    workspaceStartTime = new ConcurrentHashMap<>();
-    meterBinder = new WorkspaceStartTrackerMeterBinder(eventService, workspaceStartTime);
+    workspaceStopTime = new ConcurrentHashMap<>();
+    meterBinder = new WorkspaceStopTrackerMeterBinder(eventService, workspaceStopTime);
     meterBinder.bindTo(registry);
   }
 
   @Test
-  public void shouldRecordWorkspaceStartTime() {
+  public void shouldRecordWorkspaceStopTime() {
     // given
     // when
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withPrevStatus(WorkspaceStatus.STOPPED)
-            .withStatus(WorkspaceStatus.STARTING)
+            .withPrevStatus(WorkspaceStatus.RUNNING)
+            .withStatus(WorkspaceStatus.STOPPING)
             .withWorkspaceId("id1"));
     // then
-    Assert.assertTrue(workspaceStartTime.containsKey("id1"));
+    Assert.assertTrue(workspaceStopTime.containsKey("id1"));
   }
 
   @Test(dataProvider = "allStatusTransitionsWithoutStarting")
-  public void shouldNotRecordWorkspaceStartTimeForNonStartingStatuses(
+  public void shouldNotRecordWorkspaceStopTimeForNonStoppingStatuses(
       WorkspaceStatus from, WorkspaceStatus to) {
     // given
     // when
@@ -70,79 +70,25 @@ public class WorkspaceStartTrackerMeterBinderTest {
             .withStatus(to)
             .withWorkspaceId("id1"));
     // then
-    Assert.assertTrue(workspaceStartTime.isEmpty());
+    Assert.assertTrue(workspaceStopTime.isEmpty());
   }
 
   @Test
   public void shouldCountSuccessfulStart() {
-
     // given
-    workspaceStartTime.put("id1", System.currentTimeMillis() - 60 * 1000);
+    workspaceStopTime.put("id1", System.currentTimeMillis() - 60 * 1000);
     // when
     eventService.publish(
         DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withPrevStatus(WorkspaceStatus.STARTING)
-            .withStatus(WorkspaceStatus.RUNNING)
+            .withPrevStatus(WorkspaceStatus.STOPPING)
+            .withStatus(WorkspaceStatus.STOPPED)
             .withWorkspaceId("id1"));
 
     // then
 
-    Timer t = registry.find("che.workspace.start.time").tag("result", "success").timer();
+    Timer t = registry.find("che.workspace.stop.time").tag("result", "success").timer();
     Assert.assertEquals(t.count(), 1);
     Assert.assertTrue(t.totalTime(TimeUnit.MILLISECONDS) >= 60 * 1000);
-  }
-
-  @Test
-  public void shouldCountFailedStart() {
-
-    // given
-    workspaceStartTime.put("id1", System.currentTimeMillis() - 60 * 1000);
-    // when
-    eventService.publish(
-        DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withPrevStatus(WorkspaceStatus.STARTING)
-            .withStatus(WorkspaceStatus.STOPPED)
-            .withWorkspaceId("id1"));
-
-    // then
-
-    Timer t = registry.find("che.workspace.start.time").tag("result", "fail").timer();
-    Assert.assertEquals(t.count(), 1);
-    Assert.assertTrue(t.totalTime(TimeUnit.MILLISECONDS) >= 60 * 1000);
-  }
-
-  @Test
-  public void shouldIgnoreNotRecordedStartOnFailedStart() {
-
-    // given
-    // when
-    eventService.publish(
-        DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withPrevStatus(WorkspaceStatus.STARTING)
-            .withStatus(WorkspaceStatus.STOPPED)
-            .withWorkspaceId("id1"));
-
-    // then
-    Timer t = registry.find("che.workspace.start.time").tag("result", "fail").timer();
-    Assert.assertEquals(t.count(), 0);
-  }
-
-  @Test
-  public void shouldIgnoreNotRecordedStartOnSuccessStart() {
-
-    // given
-    // when
-    eventService.publish(
-        DtoFactory.newDto(WorkspaceStatusEvent.class)
-            .withPrevStatus(WorkspaceStatus.STARTING)
-            .withStatus(WorkspaceStatus.STOPPED)
-            .withWorkspaceId("id1"));
-
-    // then
-
-    Timer t = registry.find("che.workspace.start.time").tag("result", "fail").timer();
-
-    Assert.assertEquals(t.count(), 0);
   }
 
   @DataProvider
@@ -151,7 +97,8 @@ public class WorkspaceStartTrackerMeterBinderTest {
 
     for (WorkspaceStatus from : WorkspaceStatus.values()) {
       for (WorkspaceStatus to : WorkspaceStatus.values()) {
-        if (from == WorkspaceStatus.STOPPED && to == WorkspaceStatus.STARTING) {
+        if ((from == WorkspaceStatus.RUNNING || from == WorkspaceStatus.STARTING)
+            && to == WorkspaceStatus.STOPPING) {
           continue;
         }
 
