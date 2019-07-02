@@ -3,7 +3,7 @@ import { CLASSES } from '../../inversify.types';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { TestConstants } from '../../TestConstants';
 import { By, WebElement } from 'selenium-webdriver';
-import { Ide } from './Ide';
+import { Ide, RightToolbarButton } from './Ide';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
@@ -23,11 +23,11 @@ export class GitHubPlugin {
     async openGitHubPluginContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const selectedGitButtonLocator: By = By.xpath(Ide.SELECTED_GIT_BUTTON_XPATH);
 
-        await this.ide.waitGitButton();
+        await this.ide.waitRightToolbarButton(RightToolbarButton.Git, timeout);
         const isButtonEnabled: boolean = await this.driverHelper.waitVisibilityBoolean(selectedGitButtonLocator);
 
         if (!isButtonEnabled) {
-            await this.ide.clickOnGitButton();
+            await this.ide.waitAndClickRightToolbarButton(RightToolbarButton.Git);
         }
 
         await this.waitGitHubContainer(timeout);

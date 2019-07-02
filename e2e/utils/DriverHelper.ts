@@ -158,7 +158,7 @@ export class DriverHelper {
         }
     }
 
-    public async waitDisappearanceTestWithTimeout(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    public async waitDisappearanceWithTimeout(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.getDriver().wait(async () => {
             const isVisible: boolean = await this.isVisible(elementLocator);
 
@@ -232,6 +232,32 @@ export class DriverHelper {
         throw new Error(`Exceeded maximum gettin of the '${attribute}' attribute attempts, from the '${elementLocator}' element`);
     }
 
+    public async waitAndGetCssValue(elementLocator: By,
+        cssAttribute: string,
+        visibilityTimeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
+
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+
+        for (let i = 0; i < attempts; i++) {
+            const element: WebElement = await this.waitVisibility(elementLocator, visibilityTimeout);
+
+            try {
+                const cssAttributeValue = await element.getCssValue(cssAttribute);
+                return cssAttributeValue;
+            } catch (err) {
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling);
+                    continue;
+                }
+
+                throw err;
+            }
+        }
+
+        throw new Error(`Exceeded maximum gettin of the '${cssAttribute}' css attribute attempts, from the '${elementLocator}' element`);
+    }
+
     public async waitAttributeValue(elementLocator: By,
         attribute: string,
         expectedValue: string,
@@ -252,6 +278,29 @@ export class DriverHelper {
 
         for (let i = 0; i < attempts; i++) {
             const element: WebElement = await this.waitVisibility(elementLocator, timeout);
+
+            try {
+                await element.sendKeys(text);
+                return;
+            } catch (err) {
+                if (err instanceof error.StaleElementReferenceError) {
+                    await this.wait(polling);
+                    continue;
+                }
+
+                throw err;
+            }
+        }
+
+        throw new Error(`Exceeded maximum typing attempts, to the '${elementLocator}' element`);
+    }
+
+    public async typeToInvisible(elementLocator: By, text: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
+        const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
+
+        for (let i = 0; i < attempts; i++) {
+            const element: WebElement = await this.waitPresence(elementLocator, timeout);
 
             try {
                 await element.sendKeys(text);
@@ -342,6 +391,18 @@ export class DriverHelper {
 
     public async navigateTo(url: string) {
         await this.driver.navigate().to(url);
+        await this.waitURL(url);
+    }
+
+    public async waitURL(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.getDriver().wait(async () => {
+            const currentUrl: string = await this.getDriver().getCurrentUrl();
+            const urlEquals: boolean = currentUrl === expectedUrl;
+
+            if (urlEquals) {
+                return true;
+            }
+        });
     }
 
     public async scrollTo(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

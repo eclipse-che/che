@@ -1,10 +1,3 @@
-import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
-import { DriverHelper } from '../../utils/DriverHelper';
-import { By } from 'selenium-webdriver';
-import { TestConstants } from '../../TestConstants';
-import { Ide } from './Ide';
-
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
  *
@@ -14,6 +7,12 @@ import { Ide } from './Ide';
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import { injectable, inject } from 'inversify';
+import { CLASSES } from '../../inversify.types';
+import { DriverHelper } from '../../utils/DriverHelper';
+import { By } from 'selenium-webdriver';
+import { TestConstants } from '../../TestConstants';
+import { Ide } from './Ide';
 
 @injectable()
 export class PreviewWidget {
@@ -50,17 +49,29 @@ export class PreviewWidget {
                 return true;
             }
 
-            await this.driverHelper.getDriver().switchTo().defaultContent();
-            await this.ide.waitAndSwitchToIdeFrame();
+            await this.switchBackToIdeFrame();
             await this.refreshPage();
             await this.waitAndSwitchToWidgetFrame();
             await this.driverHelper.wait(polling);
         }, timeout);
     }
 
+    async waitVisibility(element: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitVisibility(element, timeout);
+    }
+
+    async waitAndClick(element: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driverHelper.waitAndClick(element, timeout);
+    }
+
     async refreshPage() {
         const refreshButtonLocator: By = By.css('.theia-mini-browser .theia-mini-browser-refresh');
         await this.driverHelper.waitAndClick(refreshButtonLocator);
+    }
+
+    async switchBackToIdeFrame() {
+        await this.driverHelper.getDriver().switchTo().defaultContent();
+        await this.ide.waitAndSwitchToIdeFrame();
     }
 
 }

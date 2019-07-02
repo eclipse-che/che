@@ -49,8 +49,8 @@ export class NewWorkspace {
     }
 
     async waitPageAbsence(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
-        await this.driverHelper.waitDisappearanceTestWithTimeout(By.css(NewWorkspace.NAME_FIELD_CSS), timeout);
-        await this.driverHelper.waitDisappearanceTestWithTimeout(By.css(NewWorkspace.TITLE_CSS), timeout);
+        await this.driverHelper.waitDisappearanceWithTimeout(By.css(NewWorkspace.NAME_FIELD_CSS), timeout);
+        await this.driverHelper.waitDisappearanceWithTimeout(By.css(NewWorkspace.TITLE_CSS), timeout);
     }
 
     async createWorkspaceAndProceedEditing(workspaceName: string, dataStackId: string, sampleName: string) {
