@@ -29,7 +29,7 @@ public class TonProjectModule extends AbstractGinModule {
         .to(TonCProjectWizardRegistrar.class);
 
     GinMultibinder.newSetBinder(this.binder(), ProjectWizardRegistrar.class)
-            .addBinding()
-            .to(TonSolProjectWizardRegistrar.class);
+        .addBinding()
+        .to(TonSolProjectWizardRegistrar.class);
   }
 }

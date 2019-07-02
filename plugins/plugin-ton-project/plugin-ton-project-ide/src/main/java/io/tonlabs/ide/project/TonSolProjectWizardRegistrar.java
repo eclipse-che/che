@@ -13,13 +13,12 @@ package io.tonlabs.ide.project;
 
 import com.google.inject.Provider;
 import io.tonlabs.shared.Constants;
+import java.util.ArrayList;
+import java.util.List;
+import javax.validation.constraints.NotNull;
 import org.eclipse.che.ide.api.project.MutableProjectConfig;
 import org.eclipse.che.ide.api.project.type.wizard.ProjectWizardRegistrar;
 import org.eclipse.che.ide.api.wizard.WizardPage;
-
-import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.List;
 
 /** The project wizard for creating a new TON C project. */
 public class TonSolProjectWizardRegistrar implements ProjectWizardRegistrar {

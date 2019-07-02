@@ -11,7 +11,13 @@
  */
 package io.tonlabs.generator;
 
+import static io.tonlabs.shared.Constants.TON_SOL_PROJECT_TYPE_ID;
+import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
+
 import com.google.inject.Inject;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 import org.eclipse.che.api.core.ConflictException;
 import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.ServerException;
@@ -19,13 +25,6 @@ import org.eclipse.che.api.fs.server.FsManager;
 import org.eclipse.che.api.fs.server.WsPathUtils;
 import org.eclipse.che.api.project.server.handlers.CreateProjectHandler;
 import org.eclipse.che.api.project.server.type.AttributeValue;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-
-import static io.tonlabs.shared.Constants.TON_SOL_PROJECT_TYPE_ID;
-import static org.eclipse.che.api.fs.server.WsPathUtils.resolve;
 
 /**
  * Generates a new project which contains a package.json with default content and a default
