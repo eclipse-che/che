@@ -72,9 +72,9 @@
                 <groupId>net.ltgt.gwt.maven</groupId>
                 <artifactId>gwt-maven-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
+<!--                <configuration>-->
 <!--                    <moduleName>io.tonlabs.TonProjectExtension</moduleName>-->
-                </configuration>
+<!--                </configuration>-->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
