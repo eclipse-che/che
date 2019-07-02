@@ -28,7 +28,6 @@
         <module>plugin-machine</module>
         <module>plugin-git</module>
         <module>plugin-github</module>
-        <module>plugin-cpp</module>
         <module>plugin-ton-project</module>
     </modules>
 </project>
