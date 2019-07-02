@@ -73,7 +73,7 @@
                 <artifactId>gwt-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <moduleName>io.tonlabs.ide.TonProjectExtension</moduleName>
+                    <moduleName>io.tonlabs.TonProjectExtension</moduleName>
                 </configuration>
             </plugin>
             <plugin>
