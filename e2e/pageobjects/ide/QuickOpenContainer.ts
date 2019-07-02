@@ -33,7 +33,6 @@ export class QuickOpenContainer {
         const quickContainerItemLocator: By = By.xpath(`//div[@class='quick-open-entry']//span[text()='${itemText}']`);
 
         await this.waitContainer(timeout);
-        await this.driverHelper.wait(2000);
         await this.driverHelper.waitAndClick(quickContainerItemLocator, timeout);
         await this.waitContainerDisappearance();
     }

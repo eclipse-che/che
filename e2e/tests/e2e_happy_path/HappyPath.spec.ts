@@ -20,7 +20,7 @@ import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { GitHubPlugin } from '../../pageobjects/ide/GitHubPlugin';
 import { TestConstants } from '../../TestConstants';
 import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
-import { By, Key } from 'selenium-webdriver';
+import { By, Key, error } from 'selenium-webdriver';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
@@ -184,8 +184,9 @@ suite('Display source code changes in the running application', async () => {
     });
 
     test('Run application with changes', async () => {
-        await topMenu.selectOption('Terminal', 'Run Task...');
-        await quickOpenContainer.clickOnContainerItem('che: run');
+        // await topMenu.selectOption('Terminal', 'Run Task...');
+        // await quickOpenContainer.clickOnContainerItem('che: run');
+        await runTask('che: run', 'run');
 
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
@@ -271,5 +272,22 @@ async function checkJavaPathCompletion() {
     if (await ide.isNotificationPresent('Classpath is incomplete. Only syntax errors will be reported')) {
         throw new Error('Known issue: https://github.com/eclipse/che/issues/13427 \n' +
             '\"Java LS \"Classpath is incomplete\" warning when loading petclinic\"');
+    }
+}
+
+async function runTask(taskTitle: string, terminalTabTitle: string) {
+    await topMenu.selectOption('Terminal', 'Run Task...');
+    await quickOpenContainer.clickOnContainerItem(taskTitle);
+
+    try {
+        await terminal.waitTab(terminalTabTitle);
+    } catch (err) {
+        if (!(err instanceof error.TimeoutError)) {
+            throw err;
+        }
+
+        await topMenu.selectOption('Terminal', 'Run Task...');
+        await quickOpenContainer.clickOnContainerItem(taskTitle);
+        await terminal.waitTab(terminalTabTitle);
     }
 }
