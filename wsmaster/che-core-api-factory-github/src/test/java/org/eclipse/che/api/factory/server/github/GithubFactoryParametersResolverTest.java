@@ -17,10 +17,14 @@ import static org.eclipse.che.api.factory.shared.Constants.URL_PARAMETER_NAME;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Map;
@@ -30,6 +34,7 @@ import org.eclipse.che.api.factory.server.urlfactory.RemoteFactoryUrl;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
+import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.mockito.ArgumentCaptor;
@@ -100,23 +105,14 @@ public class GithubFactoryParametersResolverTest {
     assertTrue(accept);
   }
 
-  /** Check that with a simple valid URL github url it works */
   @Test
   public void shouldGenerateDevfileForFactoryWithNoDevfileOrJson() throws Exception {
 
     String githubUrl = "https://github.com/eclipse/che";
 
-    DevfileDto computedDevfile =
-        newDto(DevfileDto.class)
-            .withApiVersion(CURRENT_API_VERSION)
-            .withMetadata(newDto(MetadataDto.class).withName("che"));
-    FactoryDto computedFactory =
-        newDto(FactoryDto.class)
-            .withV(CURRENT_VERSION)
-            .withSource("repo")
-            .withDevfile(computedDevfile);
+    FactoryDto computedFactory = generateDevfileFactory();
 
-    when(urlFactoryBuilder.buildDefaultDevfile(any())).thenReturn(computedDevfile);
+    when(urlFactoryBuilder.buildDefaultDevfile(any())).thenReturn(computedFactory.getDevfile());
 
     when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
         .thenReturn(Optional.empty());
@@ -126,34 +122,72 @@ public class GithubFactoryParametersResolverTest {
     FactoryDto factory =
         githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
-    verify(urlFactoryBuilder).buildDefaultDevfile("che");
+    verify(urlFactoryBuilder).buildDefaultDevfile(eq("che"));
     assertEquals(factory, computedFactory);
   }
 
-  /** Check that with a simple valid URL github url it works */
   @Test
   public void shouldReturnFactoryFromRepositoryWithDevfile() throws Exception {
 
     String githubUrl = "https://github.com/eclipse/che";
 
-    FactoryDto computedFactory = newDto(FactoryDto.class).withV(CURRENT_VERSION);
-    when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
+    FactoryDto computedFactory = generateDevfileFactory();
+
+    when(urlFactoryBuilder.createFactoryFromDevfile(any(RemoteFactoryUrl.class), any()))
         .thenReturn(Optional.of(computedFactory));
 
-    DevfileDto computedDevfile =
-        newDto(DevfileDto.class)
-            .withApiVersion(CURRENT_API_VERSION)
-            .withMetadata(newDto(MetadataDto.class).withName("che"));
-    when(urlFactoryBuilder.buildDefaultDevfile(any())).thenReturn(computedDevfile);
+    FactoryDto factory =
+        githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
+
+    assertNotNull(factory.getDevfile());
+    assertNull(factory.getWorkspace());
+
+    // check we called the builder with the following devfile file
+    verify(urlFactoryBuilder).createFactoryFromDevfile(factoryUrlArgumentCaptor.capture(), any());
+    verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
+    assertEquals(
+        factoryUrlArgumentCaptor.getValue().devfileFileLocation(),
+        "https://raw.githubusercontent.com/eclipse/che/master/devfile.yaml");
+
+    assertEquals(factoryUrlArgumentCaptor.getValue().getDevfileFilename(), "devfile.yaml");
+  }
+
+  @Test
+  public void shouldReturnFactoryFromRepositoryWithFactoryJson() throws Exception {
+
+    String githubUrl = "https://github.com/eclipse/che";
+
+    FactoryDto computedFactory = generateWsConfigFactory();
+
+    when(urlFactoryBuilder.createFactoryFromJson(any(RemoteFactoryUrl.class)))
+        .thenReturn(Optional.of(computedFactory));
 
     githubFactoryParametersResolver.createFactory(singletonMap(URL_PARAMETER_NAME, githubUrl));
 
     // check we called the builder with the following factory json file
     verify(urlFactoryBuilder).createFactoryFromJson(factoryUrlArgumentCaptor.capture());
+    verify(urlFactoryBuilder, never()).buildDefaultDevfile(eq("che"));
     assertEquals(
         factoryUrlArgumentCaptor.getValue().factoryFileLocation(),
         "https://raw.githubusercontent.com/eclipse/che/master/.factory.json");
 
     assertEquals(factoryUrlArgumentCaptor.getValue().getFactoryFilename(), ".factory.json");
+  }
+
+  private FactoryDto generateDevfileFactory() {
+    return newDto(FactoryDto.class)
+        .withV(CURRENT_VERSION)
+        .withSource("repo")
+        .withDevfile(
+            newDto(DevfileDto.class)
+                .withApiVersion(CURRENT_API_VERSION)
+                .withMetadata(newDto(MetadataDto.class).withName("che")));
+  }
+
+  private FactoryDto generateWsConfigFactory() {
+    return newDto(FactoryDto.class)
+        .withV(CURRENT_VERSION)
+        .withSource("repo")
+        .withWorkspace(newDto(WorkspaceConfigDto.class).withName("che"));
   }
 }

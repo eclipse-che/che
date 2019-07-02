@@ -118,7 +118,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
                 .withName(githubUrl.getRepository())
                 .withPath("/".concat(githubUrl.getRepository()));
           });
-    } else {
+    } else if (factory.getDevfile() == null) {
       // initialize default devfile and github project
       factory.setDevfile(urlFactoryBuilder.buildDefaultDevfile(githubUrl.getRepository()));
       factory
@@ -128,7 +128,7 @@ public class GithubFactoryParametersResolver implements FactoryParametersResolve
                   newDto(ProjectDto.class)
                       .withSource(githubSourceStorageBuilder.buildDevfileSource(githubUrl))
                       .withName(githubUrl.getRepository())));
-      return factory;
     }
+    return factory;
   }
 }
