@@ -295,7 +295,8 @@ export class Editor {
                 await this.waitBreakpoint(tabTitle, lineNumber);
                 return;
             } catch (err) {
-                // ignore errors
+                // ignore errors and wait
+                await this.driverHelper.wait(polling);
             }
         }
 
