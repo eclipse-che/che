@@ -9,9 +9,9 @@ FROM library/centos:centos7
 ENV LANG=en_US.utf8 \
     DISPLAY=:99 \
     FABRIC8_USER_NAME=fabric8
-
+    
 COPY google-chrome.repo /etc/yum.repos.d/google-chrome.repo
-COPY e2e /root/e2e
+
 RUN yum install --assumeyes epel-release && \
     yum update --assumeyes && \
     yum install --assumeyes google-chrome-stable && \
@@ -30,12 +30,15 @@ RUN yum install --assumeyes epel-release && \
     chrome_version=$(google-chrome --version | grep -oiE "[0-9]*\.[0-9]*\.[0-9]*") && \
     chromedriver_version=$(curl -s -g https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${chrome_version}) && \
     $(curl -sS -g https://chromedriver.storage.googleapis.com/${chromedriver_version}/chromedriver_linux64.zip > chromedriver_linux64.zip) && \
-    unzip chromedriver_linux64.zip && mv chromedriver /usr/bin/chromedriver && chmod +x /usr/bin/chromedriver && rm chromedriver_linux64.zip && \
-    # Download all dependencies for e2e tests
-    cd /root/e2e && \
+    unzip chromedriver_linux64.zip && mv chromedriver /usr/bin/chromedriver && chmod +x /usr/bin/chromedriver && rm chromedriver_linux64.zip
+    
+COPY e2e/package.json e2e/package-lock.json /root/e2e/
+RUN cd /root/e2e && \
     npm --silent i
     
-WORKDIR /root/
+COPY e2e /root/e2e
 COPY docker-entrypoint.sh /root/
+
+WORKDIR /root/
 
 ENTRYPOINT ["/root/docker-entrypoint.sh"]
