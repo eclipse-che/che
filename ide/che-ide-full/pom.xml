@@ -30,7 +30,6 @@
             <groupId>io.tonlabs</groupId>
             <artifactId>plugin-ton-project-ide</artifactId>
             <version>${project.version}</version>
-            <!--<type>pom</type>-->
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
