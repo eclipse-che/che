@@ -19,7 +19,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
@@ -33,7 +32,6 @@ import org.testng.annotations.Test;
 
 public class WorkspaceStartTrackerMeterBinderTest {
 
-  private Random rnd = new Random();
   private EventService eventService;
   private MeterRegistry registry;
   private WorkspaceStartTrackerMeterBinder meterBinder;

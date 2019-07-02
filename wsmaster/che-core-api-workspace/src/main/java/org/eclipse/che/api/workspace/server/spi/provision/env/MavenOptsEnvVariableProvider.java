@@ -23,7 +23,7 @@ import org.eclipse.che.commons.lang.Pair;
  *
  * @author Yevhenii Voevodin
  */
-public class MavenOptsEnvVariableProvider implements EnvVarProvider {
+public class MavenOptsEnvVariableProvider implements LegacyEnvVarProvider {
 
   private final String javaOpts;
 
