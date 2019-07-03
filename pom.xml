@@ -21,7 +21,7 @@
     </parent>
     <groupId>org.eclipse.che</groupId>
     <artifactId>che-parent</artifactId>
-    <version>6.19.6-SNAPSHOT</version>
+    <version>6.19.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Che Parent</name>
     <modules>
@@ -49,11 +49,11 @@
     </scm>
     <properties>
         <build.info>${project.version}</build.info>
-        <che.dashboard.version>6.19.6-SNAPSHOT</che.dashboard.version>
+        <che.dashboard.version>6.19.0-SNAPSHOT</che.dashboard.version>
         <che.docs.version>6.19.0</che.docs.version>
         <che.lib.version>6.19.0</che.lib.version>
         <che.ls.jdt.version>0.0.3</che.ls.jdt.version>
-        <che.version>6.19.6-SNAPSHOT</che.version>
+        <che.version>6.19.0-SNAPSHOT</che.version>
         <specification.version>1.0-beta2</specification.version>
     </properties>
     <dependencyManagement>
@@ -62,6 +62,21 @@
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>jsr305</artifactId>
                 <version>${version.jsr305.plugin}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tonlabs</groupId>
+                <artifactId>plugin-ton-project-ide</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tonlabs</groupId>
+                <artifactId>plugin-ton-project-server</artifactId>
+                <version>${che.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.tonlabs</groupId>
+                <artifactId>plugin-ton-project-shared</artifactId>
+                <version>${che.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.tomcat</groupId>
@@ -2048,6 +2063,13 @@
                         <arg>${gwt.compiler.jvmArgs.Xss}</arg>
                         <arg>${gwt.compiler.jvmArgs.Xmx}</arg>
                     </jvmArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>

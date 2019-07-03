@@ -1,1 +1,5 @@
-/* Add your branding customizations here. */
+#add-stack-button
+{
+    visibility:hidden !important;
+}
+
