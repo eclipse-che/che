@@ -39,6 +39,15 @@
             "previewUrl": ""
             },
             "type": "custom"
+        },
+        {
+            "commandLine": "cd /home/user/bin/ && sudo ./ton-node --localhost --config dummy",
+            "name": "Start_local_node",
+            "attributes": {
+            "goal": "Run", 
+            "previewUrl": ""
+            },
+            "type": "custom"
         }
     ],
     "projects": [
