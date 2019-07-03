@@ -47,6 +47,19 @@
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-git-ext-git</artifactId>
             <version>${project.version}</version>
+            <type>gwt-lib</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-github-ide</artifactId>
+            <version>${project.version}</version>
+            <type>gwt-lib</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che.plugin</groupId>
+            <artifactId>che-plugin-github-pullrequest</artifactId>
+            <version>${project.version}</version>
+            <type>gwt-lib</type>
         </dependency>
         <!--        <dependency>-->
         <!--            <groupId>org.eclipse.che.plugin</groupId>-->
