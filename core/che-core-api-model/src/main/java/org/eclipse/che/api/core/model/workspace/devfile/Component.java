@@ -90,7 +90,7 @@ public interface Component {
    * optional and applicable only for 'dockerimage' component type. `CHE_PROJECTS_ROOT` environment
    * variable should contains a path where projects sources are mount.
    */
-  boolean getMountSources();
+  Boolean getMountSources();
 
   /**
    * Returns the command to run in the dockerimage component instead of the default one provided in

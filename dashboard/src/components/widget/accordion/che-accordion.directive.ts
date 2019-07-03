@@ -57,8 +57,12 @@ export class CheAccordion implements ng.IDirective {
             continue;
           }
 
-          let siblingBodyEl = siblingEl.find('.che-accordion-body'),
-            siblingBodyHeight = siblingBodyEl[0].clientHeight;
+          let siblingBodyEl = siblingEl.find('.che-accordion-body');
+          if (siblingBodyEl.length === 0) {
+            continue;
+          }
+
+          let siblingBodyHeight = siblingBodyEl[0].clientHeight;
           siblingBodyEl.css('height', siblingBodyHeight);
           panesToClose.push(siblingEl);
         }

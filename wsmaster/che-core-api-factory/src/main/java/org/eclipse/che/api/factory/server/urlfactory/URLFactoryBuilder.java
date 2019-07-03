@@ -13,6 +13,7 @@ package org.eclipse.che.api.factory.server.urlfactory;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
@@ -31,9 +32,10 @@ import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.eclipse.che.dto.server.DtoFactory;
 
 /**
@@ -105,12 +107,12 @@ public class URLFactoryBuilder {
     }
     try {
       DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent);
-      WorkspaceConfigImpl wsConfig =
-          devfileManager.createWorkspaceConfig(devfile, fileContentProvider);
+      devfileManager.resolveReference(devfile, fileContentProvider);
+
       FactoryDto factoryDto =
           newDto(FactoryDto.class)
               .withV(CURRENT_VERSION)
-              .withWorkspace(DtoConverter.asDto(wsConfig))
+              .withDevfile(DtoConverter.asDto(devfile))
               .withSource(remoteFactoryUrl.getDevfileFilename());
       return Optional.of(factoryDto);
     } catch (DevfileException e) {
@@ -136,5 +138,19 @@ public class URLFactoryBuilder {
 
     // workspace configuration using the environment
     return newDto(WorkspaceConfigDto.class).withName(name).withAttributes(attributes);
+  }
+
+  /**
+   * Help to generate default workspace devfile. Also initialise project in it
+   *
+   * @param name the name of the workspace
+   * @return a workspace devfile
+   */
+  public DevfileDto buildDefaultDevfile(String name) {
+
+    // workspace configuration using the environment
+    return newDto(DevfileDto.class)
+        .withApiVersion(CURRENT_API_VERSION)
+        .withMetadata(newDto(MetadataDto.class).withName(name));
   }
 }

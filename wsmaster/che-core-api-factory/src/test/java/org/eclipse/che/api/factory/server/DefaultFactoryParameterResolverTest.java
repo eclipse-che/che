@@ -16,36 +16,23 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.EDITOR_COMP
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
-import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
-import org.eclipse.che.api.workspace.server.devfile.convert.CommandConverter;
-import org.eclipse.che.api.workspace.server.devfile.convert.DefaultEditorProvisioner;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
-import org.eclipse.che.api.workspace.server.devfile.convert.ProjectConverter;
-import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
-import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentProvisioner;
-import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
-import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
@@ -65,7 +52,6 @@ public class DefaultFactoryParameterResolverTest {
           + "  reference: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
-  private ComponentFQNParser componentFQNParser = new ComponentFQNParser(new PluginFQNParser());
 
   @Test
   public void shouldResolveRelativeFiles() throws Exception {
@@ -81,32 +67,8 @@ public class DefaultFactoryParameterResolverTest {
     validators.put(OPENSHIFT_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
 
     DevfileIntegrityValidator integrityValidator = new DevfileIntegrityValidator(validators);
-    Set<ComponentProvisioner> componentProvisioners = new HashSet<>();
-    Map<String, ComponentToWorkspaceApplier> appliers = new HashMap<>();
-    ComponentToWorkspaceApplier applier = mock(ComponentToWorkspaceApplier.class);
-    appliers.put("kubernetes", applier);
 
-    doAnswer(
-            i -> {
-              // in here we mock that the component applier requests the contents of the referenced
-              // local file. That's all we need to happen
-              FileContentProvider p = i.getArgument(2);
-              ComponentImpl component = i.getArgument(1);
-              p.fetchContent(component.getReference());
-              return null;
-            })
-        .when(applier)
-        .apply(any(), any(), any());
-
-    DevfileConverter devfileConverter =
-        new DevfileConverter(
-            new ProjectConverter(),
-            new CommandConverter(),
-            componentProvisioners,
-            appliers,
-            new DefaultEditorProvisioner(null, new String[] {}, componentFQNParser),
-            new URLFetcher());
-
+    DevfileConverter devfileConverter = mock(DevfileConverter.class);
     WorkspaceManager workspaceManager = mock(WorkspaceManager.class);
 
     DevfileManager devfileManager =

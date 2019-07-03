@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.api.workspace.server.devfile;
 
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,6 +34,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
@@ -68,6 +70,7 @@ public class DevfileManagerTest {
   @Mock private DevfileConverter devfileConverter;
   @Mock private WorkspaceManager workspaceManager;
   @Mock private ObjectMapper objectMapper;
+  @Mock private FileContentProvider contentProvider;
 
   @Mock private JsonNode devfileJsonNode;
   private DevfileImpl devfile;
@@ -112,6 +115,44 @@ public class DevfileManagerTest {
     assertNotNull(parsed.getCommands().get(0).getAttributes());
     assertNotNull(parsed.getComponents().get(0).getSelector());
     assertNotNull(parsed.getComponents().get(0).getEndpoints().get(0).getAttributes());
+  }
+
+  @Test
+  public void shouldResolveReferencesIntoReferenceContentForFactories() throws Exception {
+
+    String referenceContent = "my_content_yaml_v3";
+    when(contentProvider.fetchContent(anyString())).thenReturn(referenceContent);
+
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setReference("myfile.yaml");
+    devfile.getComponents().add(component);
+
+    // when
+    devfileManager.resolveReference(devfile, contentProvider);
+
+    // then
+    verify(contentProvider).fetchContent(eq("myfile.yaml"));
+    assertEquals(referenceContent, devfile.getComponents().get(0).getReferenceContent());
+  }
+
+  @Test(
+      expectedExceptions = DevfileException.class,
+      expectedExceptionsMessageRegExp = "Unable to resolve reference of component: test")
+  public void shouldThrowDevfileExceptionWhenReferenceIsNotResolvable() throws Exception {
+
+    when(contentProvider.fetchContent(anyString())).thenThrow(IOException.class);
+
+    ComponentImpl component = new ComponentImpl();
+    component.setType(KUBERNETES_COMPONENT_TYPE);
+    component.setAlias("test");
+    component.setReference("myfile.yaml");
+    devfile.getComponents().add(component);
+
+    // when
+    devfileManager.resolveReference(devfile, contentProvider);
+
+    // then exception is thrown
   }
 
   @Test(

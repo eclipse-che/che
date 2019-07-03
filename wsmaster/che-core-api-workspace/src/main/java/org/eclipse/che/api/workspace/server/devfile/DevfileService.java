@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Example;
 import io.swagger.annotations.ExampleProperty;
 import java.io.IOException;
+import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -41,11 +42,13 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
+import org.eclipse.che.api.workspace.server.WorkspaceService;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 
 @Api(value = "/devfile", description = "Devfile REST API")
 @Path("/devfile")
@@ -95,6 +98,8 @@ public class DevfileService extends Service {
    *
    * @param data devfile content
    * @return created workspace configuration
+   * @deprecated This method of workspace creation is deprecated in favor of {@link
+   *     WorkspaceService#create(DevfileDto, List, Boolean, String)}
    */
   @POST
   @Consumes({"text/yaml", "text/x-yaml", "application/yaml", "application/json"})
@@ -114,6 +119,7 @@ public class DevfileService extends Service {
     @ApiResponse(code = 403, message = "The user does not have access to create a new workspace"),
     @ApiResponse(code = 500, message = "Internal server error occurred")
   })
+  @Deprecated
   public Response createFromYaml(String data)
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {

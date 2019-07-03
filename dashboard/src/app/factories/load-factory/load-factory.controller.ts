@@ -11,6 +11,7 @@
  */
 'use strict';
 import {CheAPI} from '../../../components/api/che-api.factory';
+import {CheWorkspace} from '../../../components/api/workspace/che-workspace.factory';
 import {LoadFactoryService, FactoryLoadingStep} from './load-factory.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {RouteHistory} from '../../../components/routing/route-history.service';
@@ -25,9 +26,10 @@ const WS_AGENT_STEP: number = 4;
  */
 export class LoadFactoryController {
 
-  static $inject = ['cheAPI', 'cheJsonRpcApi', '$route', '$timeout', '$mdDialog', 'loadFactoryService', 'lodash', 'cheNotification', '$location', 'routeHistory', '$window', 'loadFactoryService'];
+  static $inject = ['cheAPI', 'cheWorkspace','cheJsonRpcApi', '$route', '$timeout', '$mdDialog', 'loadFactoryService', 'lodash', 'cheNotification', '$location', 'routeHistory', '$window', 'loadFactoryService'];
 
   private cheAPI: CheAPI;
+  cheWorkspace: CheWorkspace;
   private $timeout: ng.ITimeoutService;
   private $mdDialog: ng.material.IDialogService;
   private loadFactoryService: LoadFactoryService;
@@ -49,6 +51,7 @@ export class LoadFactoryController {
    * Default constructor that is using resource
    */
   constructor(cheAPI: CheAPI,
+              cheWorkspace: CheWorkspace,
               cheJsonRpcApi: CheJsonRpcApi,
               $route: ng.route.IRouteService,
               $timeout: ng.ITimeoutService,
@@ -60,6 +63,7 @@ export class LoadFactoryController {
               routeHistory: RouteHistory,
               $window: ng.IWindowService) {
     this.cheAPI = cheAPI;
+    this.cheWorkspace = cheWorkspace;
     this.$timeout = $timeout;
     this.$mdDialog = $mdDialog;
     this.loadFactoryService = loadFactoryService;
@@ -121,9 +125,9 @@ export class LoadFactoryController {
         }
 
         // check factory contains compatible workspace config:
-        if (!this.factory.workspace || !this.isSupportedVersion()) {
+        if (!(Boolean(this.factory.workspace) !== Boolean(this.factory.devfile)) || !this.isSupportedVersion()) {
           this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
-          this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no compatible workspace config.';
+          this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no compatible workspace config or devfile.';
         } else {
           this.loadFactoryService.goToNextStep();
           this.$timeout(() => {
@@ -272,20 +276,35 @@ export class LoadFactoryController {
    * Create workspace from factory config.
    */
   createWorkspace(): any {
-    let config = this.factory.workspace;
-    // set factory attribute:
-    let attrs = {factoryId: this.factory.id};
-    config.name = this.getWorkspaceName(config.name);
+    if (this.factory.workspace) {
+      let config = this.factory.workspace;
+      // set factory attribute:
+      let attrs = {factoryId: this.factory.id};
+      config.name = this.getWorkspaceName(config.name);
 
-    // todo: fix account when ready:
-    let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
-    creationPromise.then((data: any) => {
-      this.$timeout(() => {
-        this.startWorkspace(data);
-      }, 1000);
-    }, (error: any) => {
-      this.handleError(error);
-    });
+      // todo: fix account when ready:
+      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
+      creationPromise.then((data: any) => {
+        this.$timeout(() => {
+          this.startWorkspace(data);
+        }, 1000);
+      }, (error: any) => {
+        this.handleError(error);
+      });
+    } else if (this.factory.devfile) {
+      let devfile = this.factory.devfile;
+      // set factory attribute:
+      let attrs = {factoryId: this.factory.id};
+
+      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromDevfile(null, devfile, attrs);
+      creationPromise.then((data: any) => {
+        this.$timeout(() => {
+          this.startWorkspace(data);
+        }, 1000);
+      }, (error: any) => {
+        this.handleError(error);
+      });
+    }
   }
 
   /**
@@ -340,7 +359,7 @@ export class LoadFactoryController {
    * @param workspace
    */
   doStartWorkspace(workspace: che.IWorkspace): void {
-    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id, workspace.config.defaultEnv);
+    let startWorkspacePromise = this.cheAPI.getWorkspace().startWorkspace(workspace.id);
     this.loadFactoryService.goToNextStep();
 
     startWorkspacePromise.then((data:  any) => {
@@ -668,7 +687,7 @@ export class LoadFactoryController {
    * @returns {string} IDE application link
    */
   getIDELink() {
-    return '/ide/' + this.workspace.namespace + '/' + this.workspace.config.name;
+    return '/ide/' + this.workspace.namespace + '/' + this.cheWorkspace.getWorkspaceDataManager().getName(this.workspace);
   }
 
   /**
