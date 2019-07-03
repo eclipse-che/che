@@ -29,6 +29,12 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>io.tonlabs</groupId>
+            <artifactId>plugin-ton-project-ide</artifactId>
+            <version>${project.version}</version>
+<!--            <type>gwt-lib</type>-->
+        </dependency>
+        <dependency>
             <groupId>com.google.gwt</groupId>
             <artifactId>gwt-dev</artifactId>
         </dependency>
@@ -47,12 +53,6 @@
 <!--            <artifactId>che-plugin-github-ide</artifactId>-->
 <!--            <version>${project.version}</version>-->
 <!--        </dependency>-->
-        <dependency>
-            <groupId>io.tonlabs</groupId>
-            <artifactId>plugin-ton-project-ide</artifactId>
-            <version>${project.version}</version>
-            <type>gwt-lib</type>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
