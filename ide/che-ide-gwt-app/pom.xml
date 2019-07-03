@@ -39,14 +39,14 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-git-parent</artifactId>
+            <artifactId>che-plugin-git-ext-git</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-github-parent</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.che.plugin</groupId>-->
+<!--            <artifactId>che-plugin-github-ide</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>io.tonlabs</groupId>
             <artifactId>plugin-ton-project</artifactId>
