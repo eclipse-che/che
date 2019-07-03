@@ -53,17 +53,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-debugger-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-ext-dashboard-client</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-gdb-ide</artifactId>
             <type>gwt-lib</type>
         </dependency>
         <dependency>
@@ -163,37 +153,12 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-testing-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-testing-junit-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-testing-phpunit-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-testing-testng-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-web</artifactId>
             <type>gwt-lib</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-yaml-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-zend-debugger-ide</artifactId>
             <type>gwt-lib</type>
         </dependency>
     </dependencies>
