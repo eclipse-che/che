@@ -103,27 +103,7 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-maven-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-nodejs-debugger-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-nodejs-lang-ide</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-orion-compare</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-php-lang-ide</artifactId>
             <type>gwt-lib</type>
         </dependency>
         <dependency>
@@ -154,11 +134,6 @@
         <dependency>
             <groupId>org.eclipse.che.plugin</groupId>
             <artifactId>che-plugin-web-ext-web</artifactId>
-            <type>gwt-lib</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-yaml-ide</artifactId>
             <type>gwt-lib</type>
         </dependency>
     </dependencies>
