@@ -20,7 +20,7 @@ import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { GitHubPlugin } from '../../pageobjects/ide/GitHubPlugin';
 import { TestConstants } from '../../TestConstants';
 import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
-import { By, Key } from 'selenium-webdriver';
+import { By, Key, error } from 'selenium-webdriver';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
@@ -66,7 +66,7 @@ suite('Validation of workspace start, build and run', async () => {
         await driverHelper.navigateTo(workspaceUrl);
     });
 
-    test('The \"https://github.com/eclipse/che/issues/13681\" bug workaround', async () => {
+    test('The \"#13681\" bug workaround', async () => {
         await waitGwtIdeLaunching();
 
         await driverHelper.getDriver().navigate().refresh();
@@ -78,8 +78,6 @@ suite('Validation of workspace start, build and run', async () => {
     });
 
     test('Wait until project is imported', async () => {
-        // await driverHelper.navigateTo(workspaceUrl);
-        // await ide.waitWorkspaceAndIde(namespace, workspaceName);
         await projectTree.openProjectTreeContainer();
         await projectTree.waitProjectImported(projectName, 'src');
         await projectTree.expandItem(`/${projectName}`);
@@ -284,26 +282,15 @@ async function checkJavaPathCompletion() {
 async function waitGwtIdeLaunching(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
     const launchedGwtIdeLocator: By = By.xpath('//div[@id=\'gwt-debug-consolesPanel\']//td[text()=\'Your workspace is ready to be used\']');
 
-    console.log('==>>>  1');
     await ide.waitAndSwitchToIdeFrame(timeout);
-    console.log('==>>>  2');
-    await driverHelper.waitVisibility(launchedGwtIdeLocator, timeout);
-    console.log('==>>>  3');
+    try {
+        await driverHelper.waitVisibility(launchedGwtIdeLocator, timeout);
+    } catch (err) {
+        if (err instanceof error.TimeoutError) {
+            throw new error.TimeoutError('This failure probably happened, because bug #13681 has been fixed. ' +
+                'If that\'s really the case, please remove this workaround too.');
+        }
+
+        throw err;
+    }
 }
-
-// async function runTask(taskTitle: string, terminalTabTitle: string) {
-//     await topMenu.selectOption('Terminal', 'Run Task...');
-//     await quickOpenContainer.clickOnContainerItem(taskTitle);
-
-//     try {
-//         await terminal.waitTab(terminalTabTitle);
-//     } catch (err) {
-//         if (!(err instanceof error.TimeoutError)) {
-//             throw err;
-//         }
-
-//         await topMenu.selectOption('Terminal', 'Run Task...');
-//         await quickOpenContainer.clickOnContainerItem(taskTitle);
-//         await terminal.waitTab(terminalTabTitle);
-//     }
-// }
