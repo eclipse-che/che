@@ -24,9 +24,9 @@ public class TonProjectModule extends AbstractGinModule {
 
   @Override
   protected void configure() {
-    GinMultibinder.newSetBinder(this.binder(), ProjectWizardRegistrar.class)
-        .addBinding()
-        .to(TonCProjectWizardRegistrar.class);
+    //GinMultibinder.newSetBinder(this.binder(), ProjectWizardRegistrar.class)
+    //    .addBinding()
+    //    .to(TonCProjectWizardRegistrar.class);
 
     GinMultibinder.newSetBinder(this.binder(), ProjectWizardRegistrar.class)
         .addBinding()
