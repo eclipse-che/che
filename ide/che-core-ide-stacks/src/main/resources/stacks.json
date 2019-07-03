@@ -4,9 +4,25 @@
   "description": "TON LLVM VM Stack",
   "workspaceConfig": {
     "commands": [
-          "{\"commandLine\":\"cd /home/user/bin\\nsudo killall ton-node\\nsudo rm -rf log\\nsudo rm -rf WC0\\nsudo rm -rf workchains\\nsudo ./ton-node --localhost --config dummy\", \"name\":\"restart_local_node\", \"attributes\":{\"goal\":\"Run\", \"previewUrl\":\"\"}, \"type\":\"custom\"}",
-          "{\"commandLine\":\"cd ${current.project.path}\\ncp /home/user/bin/deploy.sh ${current.project.path}\\ncat | sh deploy.sh ${current.project.path} ${editor.current.file.name} ${editor.current.file.basename} \\nrm deploy.sh\\n\", \"name\":\"Deploy_contract_to_local_node\", \"attributes\":{\"goal\":\"Run\", \"previewUrl\":\"\"}, \"type\":\"custom\"}"
-        ],
+        {
+            "commandLine": "cd /home/user/bin\nsudo killall ton-node\nsudo rm -rf log\nsudo rm -rf WC0\nsudo rm -rf workchains\nsudo ./ton-node --localhost --config dummy", 
+            "name": "restart_local_node", 
+            "attributes": { 
+                "goal":"Run", 
+                "previewUrl": ""
+            }, 
+            "type": "custom"
+        },
+        {
+            "commandLine": "cd ${current.project.path}\ncp /home/user/bin/deploy.sh ${current.project.path}\ncat | sh deploy.sh ${current.project.path} ${editor.current.file.name} ${editor.current.file.basename} \nrm deploy.sh\n", 
+            "name": "Deploy_contract_to_local_node", 
+            "attributes": {
+                "goal": "Run", 
+                "previewUrl": ""
+            }, 
+            "type": "custom"
+        }
+    ],
     "projects": [
         {
             "description": "A basic example of TON contract written in Solidity.",
