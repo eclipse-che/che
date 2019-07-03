@@ -123,9 +123,9 @@ suite('Language server validation', async () => {
         await editor.selectTab(javaFileName);
 
         await ide.checkLsInitializationStart('Starting Java Language Server');
-        await ide.waitStatusBarTextAbcence('Starting Java Language Server', 360000);
+        await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
         await checkJavaPathCompletion();
-        await ide.waitStatusBarTextAbcence('Building workspace', 360000);
+        await ide.waitStatusBarTextAbsence('Building workspace', 360000);
     });
 
     test('Error highlighting', async () => {
@@ -161,7 +161,7 @@ suite('Language server validation', async () => {
         await editor.waitTabFocused(yamlFileName);
         await ide.waitStatusBarContains('Starting Yaml Language Server');
         await ide.waitStatusBarContains('100% Starting Yaml Language Server');
-        await ide.waitStatusBarTextAbcence('Starting Yaml Language Server');
+        await ide.waitStatusBarTextAbsence('Starting Yaml Language Server');
     });
 });
 

@@ -42,32 +42,7 @@ export class Editor {
                 await this.driverHelper.waitVisibility(suggestionLocator, 5000);
                 return true;
             } catch (err) {
-                const isTimeoutError: boolean = err instanceof error.TimeoutError;
-                if (!isTimeoutError) {
-                    throw err;
-                }
-
-                await this.pressEscapeButton(editorTabTitle);
-                await this.waitSuggestionContainerClosed();
-                await this.pressControlSpaceCombination(editorTabTitle);
-            }
-        }, timeout);
-    }
-
-    public async waitHighlightedSuggestion(editorTabTitle: string,
-        suggestionText: string,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-
-        const suggestionLocator: By = this.getSuggestionLineXpathLocator(suggestionText);
-
-        await this.driverHelper.getDriver().wait(async () => {
-            await this.waitSuggestionContainer();
-            try {
-                await this.driverHelper.waitVisibility(suggestionLocator, 5000);
-                return true;
-            } catch (err) {
-                const isTimeoutError: boolean = err instanceof error.TimeoutError;
-                if (!isTimeoutError) {
+                if (!(err instanceof error.TimeoutError)) {
                     throw err;
                 }
 
@@ -115,13 +90,14 @@ export class Editor {
     }
 
     public async selectTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.ide.closeAllNotifications();
         await this.waitTab(tabTitle, timeout);
         await this.clickOnTab(tabTitle, timeout);
         await this.waitTabFocused(tabTitle, timeout);
     }
 
     async closeTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        const tabCloseButtonLocator: By = this.getTabCloseIconLocator(tabTitle);
+        const tabCloseButtonLocator: By = By.xpath(`//div[text()='${tabTitle}']/parent::li//div[contains(@class, 'p-TabBar-tabCloseIcon')]`);
 
         await this.driverHelper.waitAndClick(tabCloseButtonLocator, timeout);
     }
@@ -187,10 +163,7 @@ export class Editor {
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 
-        await this.ide.closeAllNotifications();
-        await this.clickOnTab(editorTabTitle);
-        await this.waitTabFocused(editorTabTitle);
-
+        await this.selectTab(editorTabTitle);
         await this.driverHelper.getDriver().wait(async () => {
             await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, Key.END));
             const editorText: string = await this.getEditorVisibleText(editorTabTitle);
@@ -381,10 +354,6 @@ export class Editor {
 
     private getTabXpathLocator(tabTitle: string): string {
         return `//li[contains(@class, 'p-TabBar-tab')]//div[text()='${tabTitle}']`;
-    }
-
-    private getTabCloseIconLocator(tabTitle: string): By {
-        return By.xpath(`//div[text()='${tabTitle}']/parent::li//div[contains(@class, 'p-TabBar-tabCloseIcon')]`);
     }
 
     private async getErrorInLineLocator(lineNumber: number): Promise<By> {

@@ -132,7 +132,7 @@ export class Ide {
         }, timeout);
     }
 
-    async waitStatusBarTextAbcence(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async waitStatusBarTextAbsence(expectedText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const statusBarLocator: By = By.css('div[id=\'theia-statusBar\']');
 
         // for ensuring that check is not invoked in the gap of status displaying
