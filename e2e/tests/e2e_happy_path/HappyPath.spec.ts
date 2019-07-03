@@ -66,13 +66,20 @@ suite('Validation of workspace start, build and run', async () => {
         await driverHelper.navigateTo(workspaceUrl);
     });
 
-    test('Wait workspace running state', async () => {
+    test('The \"https://github.com/eclipse/che/issues/13681\" bug workaround', async () => {
+        await waitGwtIdeLaunching();
+
+        await driverHelper.getDriver().navigate().refresh();
+        await ide.waitWorkspaceAndIde(namespace, workspaceName);
+    });
+
+    test.skip('Wait workspace running state', async () => {
         await ide.waitWorkspaceAndIde(namespace, workspaceName);
     });
 
     test('Wait until project is imported', async () => {
-        await driverHelper.navigateTo(workspaceUrl);
-        await ide.waitWorkspaceAndIde(namespace, workspaceName);
+        // await driverHelper.navigateTo(workspaceUrl);
+        // await ide.waitWorkspaceAndIde(namespace, workspaceName);
         await projectTree.openProjectTreeContainer();
         await projectTree.waitProjectImported(projectName, 'src');
         await projectTree.expandItem(`/${projectName}`);
@@ -272,6 +279,16 @@ async function checkJavaPathCompletion() {
         throw new Error('Known issue: https://github.com/eclipse/che/issues/13427 \n' +
             '\"Java LS \"Classpath is incomplete\" warning when loading petclinic\"');
     }
+}
+
+async function waitGwtIdeLaunching(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
+    const launchedGwtIdeLocator: By = By.xpath('//div[@id=\'gwt-debug-consolesPanel\']//td[text()=\'Your workspace is ready to be used\']');
+
+    console.log('==>>>  1');
+    await ide.waitAndSwitchToIdeFrame(timeout);
+    console.log('==>>>  2');
+    await driverHelper.waitVisibility(launchedGwtIdeLocator, timeout);
+    console.log('==>>>  3');
 }
 
 // async function runTask(taskTitle: string, terminalTabTitle: string) {
