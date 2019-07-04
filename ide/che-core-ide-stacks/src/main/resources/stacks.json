@@ -87,7 +87,7 @@
             "servers": {},
             "volumes": {},
             "attributes": {
-              "memoryLimitBytes": "314572800"
+              "memoryLimitBytes": "1073741824"
             }
           }
         }
