@@ -57,7 +57,7 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item">
+            <md-list-item flex class="navbar-subsection-item" style="display:none !important">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.factories}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center" id="factories-item">
@@ -67,7 +67,7 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item">
+            <md-list-item flex class="navbar-subsection-item" style="display:none !important">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.administration}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center" id="administration-item">
@@ -76,7 +76,7 @@
                 </div>
               </md-button>
             </md-list-item>
-            <md-list-item flex class="navbar-subsection-item" ng-if="navbarController.isPermissionServiceAvailable && !navbarController.userServices.hasInstallationManagerService && !navbarController.hasPersonalAccount">
+            <md-list-item flex class="navbar-subsection-item" ng-if="navbarController.isPermissionServiceAvailable && !navbarController.userServices.hasInstallationManagerService && !navbarController.hasPersonalAccount" style="display:none !important">
               <md-button nav-bar-selected flex che-reload-href
                          href="{{navbarController.menuItemUrl.organizations}}" layout-align="left">
                 <div class="navbar-item" layout="row" layout-align="start center">
