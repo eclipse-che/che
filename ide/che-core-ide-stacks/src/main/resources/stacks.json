@@ -6,7 +6,7 @@
     "commands": [
         {
             "commandLine": "cat | sh /home/user/bin/deploy_all.sh ${current.project.path}", 
-            "name": "Deploy_ALL_contract_to_local_node", 
+            "name": "Deploy All Contracts", 
             "attributes": {
             "goal": "Run",
             "previewUrl": ""
@@ -15,7 +15,7 @@
         },
         {
             "commandLine": "cat | sh /home/user/bin/deploy_this.sh ${current.project.path} ${editor.current.file.name} ${editor.current.file.basename}",
-            "name": "Deploy_THIS_contract_to_local_node", 
+            "name": "Deploy Selected Contract", 
             "attributes": {
             "goal": "Run",
             "previewUrl": ""
@@ -24,7 +24,7 @@
         },
         {
             "commandLine": "sudo killall ton-node",
-            "name": "Stop_local_node",
+            "name": "Stop Local Node",
             "attributes": {
             "goal": "Run",
             "previewUrl": ""
@@ -33,7 +33,7 @@
         },
         {
             "commandLine": "screen -d -m sh /home/user/bin/restart_node.sh",
-            "name": "Restart_local_node",
+            "name": "Restart Local Node",
             "attributes": {
             "goal": "Run",
             "previewUrl": ""
@@ -42,7 +42,7 @@
         },
         {
             "commandLine": "cd /home/user/bin/ && sudo ./ton-node --localhost --config dummy",
-            "name": "Start_local_node",
+            "name": "Start Local Node",
             "attributes": {
             "goal": "Run", 
             "previewUrl": ""
