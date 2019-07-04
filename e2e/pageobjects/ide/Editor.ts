@@ -262,12 +262,13 @@ export class Editor {
                 await this.waitBreakpoint(tabTitle, lineNumber);
                 return;
             } catch (err) {
+                if (i === attempts - i) {
+                    throw err(`Exceeded maximum breakpoint activation attempts`);
+                }
                 // ignore errors and wait
                 await this.driverHelper.wait(polling);
             }
         }
-
-        throw new Error(`Exceeded maximum breakpoint activation attempts`);
     }
 
     private async getLineYCoordinates(lineNumber: number): Promise<number> {
