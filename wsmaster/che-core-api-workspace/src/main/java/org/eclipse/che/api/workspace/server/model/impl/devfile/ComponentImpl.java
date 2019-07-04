@@ -87,7 +87,7 @@ public class ComponentImpl implements Component {
   private String memoryLimit;
 
   @Column(name = "mount_sources")
-  private boolean mountSources;
+  private Boolean mountSources;
 
   @ElementCollection(fetch = FetchType.EAGER)
   @CollectionTable(
@@ -160,7 +160,7 @@ public class ComponentImpl implements Component {
       String alias,
       String image,
       String memoryLimit,
-      boolean mountSources,
+      Boolean mountSources,
       List<String> command,
       List<String> args,
       List<? extends Volume> volumes,
@@ -198,7 +198,7 @@ public class ComponentImpl implements Component {
       List<? extends Entrypoint> entrypoints,
       String image,
       String memoryLimit,
-      boolean mountSources,
+      Boolean mountSources,
       List<String> command,
       List<String> args,
       List<? extends Volume> volumes,
@@ -366,11 +366,11 @@ public class ComponentImpl implements Component {
   }
 
   @Override
-  public boolean getMountSources() {
+  public Boolean getMountSources() {
     return mountSources;
   }
 
-  public void setMountSources(boolean mountSources) {
+  public void setMountSources(Boolean mountSources) {
     this.mountSources = mountSources;
   }
 

@@ -104,7 +104,7 @@ public final class DtoConverter {
     return workspaceDto;
   }
 
-  private static DevfileDto asDto(Devfile devfile) {
+  public static DevfileDto asDto(Devfile devfile) {
     List<DevfileCommandDto> commands =
         devfile.getCommands().stream().map(DtoConverter::asDto).collect(toList());
     List<ComponentDto> components =

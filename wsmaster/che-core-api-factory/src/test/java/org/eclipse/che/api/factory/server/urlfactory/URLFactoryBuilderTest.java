@@ -14,12 +14,10 @@ package org.eclipse.che.api.factory.server.urlfactory;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.api.factory.shared.Constants.CURRENT_VERSION;
-import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_EDITOR_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -120,8 +118,6 @@ public class URLFactoryBuilderTest {
 
     when(urlFetcher.fetchSafely(anyString())).thenReturn("random_content");
     when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
-    when(devfileManager.createWorkspaceConfig(any(DevfileImpl.class), any()))
-        .thenReturn(workspaceConfigImpl);
 
     FactoryDto factory =
         urlFactoryBuilder
@@ -132,8 +128,6 @@ public class URLFactoryBuilderTest {
                 s -> myLocation + ".list")
             .get();
 
-    WorkspaceConfigDto expectedWorkspaceConfig = asDto(workspaceConfigImpl);
-    assertEquals(factory.getWorkspace(), expectedWorkspaceConfig);
     assertEquals(factory.getSource(), "devfile.yml");
   }
 }

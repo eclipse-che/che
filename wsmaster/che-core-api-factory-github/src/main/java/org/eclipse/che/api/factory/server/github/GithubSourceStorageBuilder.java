@@ -19,6 +19,7 @@ import java.util.Map;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.SourceStorageDto;
+import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
 
 /**
  * Create {@link ProjectConfigDto} object from objects
@@ -34,7 +35,7 @@ public class GithubSourceStorageBuilder {
    * @param githubUrl an instance of {@link GithubUrl}
    * @return newly created source storage DTO object
    */
-  public SourceStorageDto build(GithubUrl githubUrl) {
+  public SourceStorageDto buildWorkspaceConfigSource(GithubUrl githubUrl) {
     // Create map for source storage dto
     Map<String, String> parameters = new HashMap<>(2);
     parameters.put("branch", githubUrl.getBranch());
@@ -46,5 +47,19 @@ public class GithubSourceStorageBuilder {
         .withLocation(githubUrl.repositoryLocation())
         .withType("github")
         .withParameters(parameters);
+  }
+
+  /**
+   * Create SourceStorageDto DTO by using data of a github url
+   *
+   * @param githubUrl an instance of {@link GithubUrl}
+   * @return newly created source DTO object
+   */
+  public SourceDto buildDevfileSource(GithubUrl githubUrl) {
+    // T_O_D_O add keepDir support when Devfile will support it
+    return newDto(SourceDto.class)
+        .withLocation(githubUrl.repositoryLocation())
+        .withType("github")
+        .withBranch(githubUrl.getBranch());
   }
 }

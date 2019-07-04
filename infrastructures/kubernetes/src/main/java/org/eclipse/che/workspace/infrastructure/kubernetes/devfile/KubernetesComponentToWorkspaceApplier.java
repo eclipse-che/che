@@ -146,7 +146,7 @@ public class KubernetesComponentToWorkspaceApplier implements ComponentToWorkspa
 
     estimateCommandsMachineName(workspaceConfig, k8sComponent, podsData);
 
-    if (k8sComponent.getMountSources()) {
+    if (Boolean.TRUE.equals(k8sComponent.getMountSources())) {
       applyProjectsVolumes(podsData, componentObjects);
     }
 

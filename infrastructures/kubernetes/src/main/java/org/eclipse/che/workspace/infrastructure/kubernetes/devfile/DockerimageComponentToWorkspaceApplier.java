@@ -128,7 +128,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
                     .getVolumes()
                     .put(v.getName(), new VolumeImpl().withPath(v.getContainerPath())));
 
-    if (dockerimageComponent.getMountSources()) {
+    if (Boolean.TRUE.equals(dockerimageComponent.getMountSources())) {
       machineConfig
           .getVolumes()
           .put(PROJECTS_VOLUME_NAME, new VolumeImpl().withPath(projectFolderPath));

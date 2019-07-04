@@ -32,10 +32,7 @@ public interface Factory {
   /** Returns creator of this factory instance. */
   Author getCreator();
 
-  /**
-   * Returns a workspace configuration of this factory instance, it is mandatory for every factory
-   * instance.
-   */
+  /** Returns a workspace configuration of this factory instance. */
   WorkspaceConfig getWorkspace();
 
   /** Returns restrictions of this factory instance. */
