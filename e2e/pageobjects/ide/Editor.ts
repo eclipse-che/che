@@ -84,9 +84,6 @@ export class Editor {
         const focusedTabLocator: By = By.xpath(`//li[contains(@class, 'p-TabBar-tab') and contains(@class, 'theia-mod-active')]//div[text()='${tabTitle}']`);
 
         await this.driverHelper.waitVisibility(focusedTabLocator, timeout);
-
-        // wait for increasing stability
-        await this.driverHelper.wait(2000);
     }
 
     public async selectTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -154,7 +151,7 @@ export class Editor {
                 return true;
             }
 
-            this.driverHelper.wait(polling);
+            await this.driverHelper.wait(polling);
         }, timeout);
     }
 
@@ -181,9 +178,6 @@ export class Editor {
     async moveCursorToLineAndChar(editorTabTitle: string, line: number, char: number) {
         // set cursor to the 1:1 position
         await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, Key.HOME));
-
-        // for ensuring that cursor has been set to the 1:1 position
-        await this.driverHelper.wait(1000);
 
         // move cursor to line
         for (let i = 1; i < line; i++) {

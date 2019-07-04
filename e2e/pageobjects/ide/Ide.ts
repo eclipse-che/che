@@ -137,8 +137,6 @@ export class Ide {
 
         // for ensuring that check is not invoked in the gap of status displaying
         for (let i: number = 0; i < 3; i++) {
-            await this.driverHelper.wait(2000);
-
             await this.driverHelper.getDriver().wait(async () => {
                 const elementText: string = await this.driverHelper.waitAndGetText(statusBarLocator, timeout);
 

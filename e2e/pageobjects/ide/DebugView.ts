@@ -26,16 +26,8 @@ export class DebugView {
     async clickOnDebugConfigurationItem(itemText: string) {
         const configurationItemLocator: By = By.xpath(`//select[@class='debug-configuration']//option[text()=\'${itemText}\']`);
 
-        // for ensure that drop-down list has been opened
-        await this.driverHelper.wait(2000);
         await this.driverHelper.waitAndClick(configurationItemLocator);
-
-        // for ensure that item is selected
-        await this.driverHelper.wait(1000);
         await this.ide.performKeyCombination(Key.ESCAPE);
-
-        // for ensure that drop-down list has been closed
-        await this.driverHelper.wait(2000);
     }
 
     async clickOnRunDebugButton() {

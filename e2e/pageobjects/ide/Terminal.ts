@@ -67,14 +67,7 @@ export class Terminal {
 
     async rejectTerminalProcess(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.selectTerminalTab(tabTitle, timeout);
-
-        // for ensure that element is interactable
-        await this.driverHelper.wait(3000);
-
         await this.type(tabTitle, Key.chord(Key.CONTROL, 'c'));
-
-        // for ensure that command performed
-        await this.driverHelper.wait(3000);
     }
 
     private getTerminalTabCssLocator(tabTitle: string): string {
