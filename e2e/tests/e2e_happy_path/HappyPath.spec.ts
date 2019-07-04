@@ -17,7 +17,6 @@ import { TopMenu } from '../../pageobjects/ide/TopMenu';
 import { QuickOpenContainer } from '../../pageobjects/ide/QuickOpenContainer';
 import { Editor } from '../../pageobjects/ide/Editor';
 import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
-import { GitHubPlugin } from '../../pageobjects/ide/GitHubPlugin';
 import { TestConstants } from '../../TestConstants';
 import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
 import { By, Key, error } from 'selenium-webdriver';
@@ -32,7 +31,6 @@ const topMenu: TopMenu = e2eContainer.get(CLASSES.TopMenu);
 const quickOpenContainer: QuickOpenContainer = e2eContainer.get(CLASSES.QuickOpenContainer);
 const editor: Editor = e2eContainer.get(CLASSES.Editor);
 const previewWidget: PreviewWidget = e2eContainer.get(CLASSES.PreviewWidget);
-const githubPlugin: GitHubPlugin = e2eContainer.get(CLASSES.GitHubPlugin);
 const rightToolbar: RightToolbar = e2eContainer.get(CLASSES.RightToolbar);
 const terminal: Terminal = e2eContainer.get(CLASSES.Terminal);
 const debugView: DebugView = e2eContainer.get(CLASSES.DebugView);
@@ -50,7 +48,6 @@ const textForErrorMessageChange: string = 'HHHHHHHHHHHHH';
 const codeNavigationClassName: string = 'SpringApplication.class';
 const pathToYamlFolder: string = projectName;
 const yamlFileName: string = 'devfile.yaml';
-const expectedGithubChanges: string = '_remote.repositories %3F/.m2/repository/antlr/antlr/2.7.7\n' + 'U';
 
 const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
