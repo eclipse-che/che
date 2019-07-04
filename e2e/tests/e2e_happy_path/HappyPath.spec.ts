@@ -265,11 +265,6 @@ suite('Validation of debug functionality', async () => {
         await previewWidget.refreshPage();
         await editor.waitStoppedDebugBreakpoint(javaFileName, 32);
     });
-
-    test.skip('Github plugin initialization', async () => {
-        await githubPlugin.openGitHubPluginContainer();
-        await githubPlugin.waitChangesPresence(expectedGithubChanges);
-    });
 });
 
 async function checkJavaPathCompletion() {
