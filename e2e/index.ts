@@ -1,4 +1,5 @@
-export * from './inversify.config';
+import * as inversifyConfig from './inversify.config';
+export { inversifyConfig };
 export * from './inversify.types';
 export * from './TestConstants';
 export * from './pageobjects/login/ILoginPage';
