@@ -25,9 +25,41 @@
     <packaging>pom</packaging>
     <name>Che Plugin :: Parent</name>
     <modules>
+        <module>plugin-product-info</module>
+        <module>plugin-help</module>
+        <module>plugin-web</module>
         <module>plugin-machine</module>
+        <module>plugin-debugger</module>
+        <module>plugin-java</module>
+        <module>plugin-java-debugger</module>
+        <module>plugin-keybinding-eclipse</module>
+        <module>plugin-maven</module>
+        <module>plugin-gdb</module>
+        <module>plugin-sdk</module>
+        <module>plugin-orion</module>
         <module>plugin-git</module>
         <module>plugin-github</module>
+        <module>plugin-dashboard</module>
+        <module>plugin-gwt</module>
+        <module>plugin-python</module>
+        <module>plugin-cpp</module>
+        <module>plugin-csharp</module>
+        <module>plugin-nodejs</module>
+        <module>plugin-nodejs-debugger</module>
+        <module>plugin-php</module>
+        <module>plugin-languageserver</module>
+        <module>plugin-json</module>
+        <module>plugin-composer</module>
+        <module>plugin-zend-debugger</module>
+        <module>plugin-testing</module>
+        <module>plugin-testing-java</module>
+        <module>plugin-testing-php</module>
+        <module>plugin-pullrequest-parent</module>
+        <module>plugin-yaml</module>
+        <module>plugin-camel</module>
+        <module>plugin-ceylon</module>
+        <module>plugin-clangd</module>
+        <module>plugin-golang</module>
         <module>plugin-ton-project</module>
     </modules>
 </project>
