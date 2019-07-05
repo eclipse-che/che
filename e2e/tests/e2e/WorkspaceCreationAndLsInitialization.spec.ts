@@ -68,7 +68,7 @@ suite('E2E', async () => {
 
         test('Check "Java Language Server" initialization by statusbar', async () => {
             await ide.waitStatusBarContains('Starting Java Language Server');
-            await ide.waitStatusBarTextAbcence('Starting Java Language Server');
+            await ide.waitStatusBarTextAbsence('Starting Java Language Server');
         });
 
         test('Check "Java Language Server" initialization by suggestion invoking', async () => {
