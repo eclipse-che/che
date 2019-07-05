@@ -2,71 +2,71 @@
 * @vparfonov @l0rd @rhopp @nickboldt
 
 # dashboard
-dashboard/** @ashumilova @benoitf
+dashboard/** @ashumilova @benoitf @l0rd @rhopp @nickboldt
 
 # dockerfiles
-dockerfiles/** @benoitf
+dockerfiles/** @benoitf @l0rd @rhopp @nickboldt
 
 # ide
-ide/che-core-ide-stacks/** @ashumilova
+ide/che-core-ide-stacks/** @ashumilova @l0rd @rhopp @nickboldt
 
 # agents
-agents/** @tolusha
+agents/** @tolusha @l0rd @rhopp @nickboldt
 
 # assembly
-assembly/** @skabashnyuk
-assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk
+assembly/** @skabashnyuk @l0rd @rhopp @nickboldt
+assembly/assembly-wsmaster-war/src/main/webapp/WEB-INF/classes/che/** @sleshchenko @ibuziuk @l0rd @rhopp @nickboldt
 
 # core
-core/** @skabashnyuk
+core/** @skabashnyuk @l0rd @rhopp @nickboldt
 
 # workspace runtime infrastructure implementations
-infrastructures/** @sleshchenko @amisevsk @metlos
+infrastructures/** @sleshchenko @amisevsk @metlos @l0rd @rhopp @nickboldt
 
 # multiuser che
-multiuser/api/**  @sleshchenko
-multiuser/integration-tests/**  @mshaposhnik @sleshchenko
-multiuser/keycloak/**  @mshaposhnik
-multiuser/machine-auth/**  @mshaposhnik
-multiuser/permission/**  @sleshchenko
-multiuser/personal-account/**  @sleshchenko
-multiuser/sql-schema/**  @mshaposhnik @sleshchenko
+multiuser/api/**  @sleshchenko @l0rd @rhopp @nickboldt
+multiuser/integration-tests/**  @mshaposhnik @sleshchenko @l0rd @rhopp @nickboldt
+multiuser/keycloak/**  @mshaposhnik @l0rd @rhopp @nickboldt
+multiuser/machine-auth/**  @mshaposhnik @l0rd @rhopp @nickboldt
+multiuser/permission/**  @sleshchenko @l0rd @rhopp @nickboldt
+multiuser/personal-account/**  @sleshchenko @l0rd @rhopp @nickboldt
+multiuser/sql-schema/**  @mshaposhnik @sleshchenko @l0rd @rhopp @nickboldt
 
 # plugins
-plugins/plugin*debugger/** @tolusha
-plugins/plugin-gdb/** @tolusha
-plugins/plugin-docker/** @sleshchenko
-plugins/plugin-java/** @vparfonov
-plugins/plugin-languageserver/** @vparfonov @dkuleshov
-plugins/plugin-maven/** @vparfonov
-plugins/plugin-orion/** @azatsarynnyy
-plugins/plugin-testing*/** @vparfonov
-plugins/plugin-traefik/** @benoitf
+plugins/plugin*debugger/** @tolusha @l0rd @rhopp @nickboldt
+plugins/plugin-gdb/** @tolusha @l0rd @rhopp @nickboldt
+plugins/plugin-docker/** @sleshchenko @l0rd @rhopp @nickboldt
+plugins/plugin-java/** @vparfonov @l0rd @rhopp @nickboldt
+plugins/plugin-languageserver/** @vparfonov @dkuleshov @l0rd @rhopp @nickboldt
+plugins/plugin-maven/** @vparfonov @l0rd @rhopp @nickboldt
+plugins/plugin-orion/** @azatsarynnyy @l0rd @rhopp @nickboldt
+plugins/plugin-testing*/** @vparfonov @l0rd @rhopp @nickboldt
+plugins/plugin-traefik/** @benoitf @l0rd @rhopp @nickboldt
 
 # wsmaster
-wsmaster/** @skabashnyuk
-wsmaster/che-core-api-factory/** @mshaposhnik
-wsmaster/che-core-api-factory-shared/**   @mshaposhnik
-wsmaster/che-core-api-workspace-activity/**   @mshaposhnik
-wsmaster/che-core-api-workspace/**  @sleshchenko @mshaposhnik @metlos
+wsmaster/** @skabashnyuk @l0rd @rhopp @nickboldt
+wsmaster/che-core-api-factory/** @mshaposhnik @l0rd @rhopp @nickboldt
+wsmaster/che-core-api-factory-shared/**   @mshaposhnik @l0rd @rhopp @nickboldt
+wsmaster/che-core-api-workspace-activity/**   @mshaposhnik @l0rd @rhopp @nickboldt
+wsmaster/che-core-api-workspace/**  @sleshchenko @mshaposhnik @metlos @l0rd @rhopp @nickboldt
 
 # wsagent
-wsagent/activity/** @skabashnyuk
-wsagent/agent/** @tolusha
-wsagent/che-core-api-debug*/** @tolusha
-wsagent/che-core-api-languageserver*/** @vparfonov @dkuleshov
-wsagent/che-core-api-testing*/** @vparfonov
-wsagent/che-wsagent-core/** @skabashnyuk
-wsagent/wsagent-local/** @skabashnyuk
-wsagent/che-core-api-project/src/main/java/org/eclipse/che/api/search/server/** @skabashnyuk
-wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabashnyuk
+wsagent/activity/** @skabashnyuk @l0rd @rhopp @nickboldt
+wsagent/agent/** @tolusha @l0rd @rhopp @nickboldt
+wsagent/che-core-api-debug*/** @tolusha @l0rd @rhopp @nickboldt
+wsagent/che-core-api-languageserver*/** @vparfonov @dkuleshov @l0rd @rhopp @nickboldt
+wsagent/che-core-api-testing*/** @vparfonov @l0rd @rhopp @nickboldt
+wsagent/che-wsagent-core/** @skabashnyuk @l0rd @rhopp @nickboldt
+wsagent/wsagent-local/** @skabashnyuk @l0rd @rhopp @nickboldt
+wsagent/che-core-api-project/src/main/java/org/eclipse/che/api/search/server/** @skabashnyuk @l0rd @rhopp @nickboldt
+wsagent/che-core-api-project/src/test/java/org/eclipse/che/api/search/** @skabashnyuk @l0rd @rhopp @nickboldt
 
 # deploy
-deploy/** @l0rd @sleshchenko
-deploy/openshift/templates/monitoring/** @skabashnyuk @metlos
+deploy/** @sleshchenko @l0rd @rhopp @nickboldt
+deploy/openshift/templates/monitoring/** @skabashnyuk @metlos @l0rd @rhopp @nickboldt
 
 # selenium tests
-selenium/** @musienko-maxim @dmytro-ndp @Ohrimenko1988
+selenium/** @musienko-maxim @dmytro-ndp @Ohrimenko1988 @l0rd @rhopp @nickboldt
 
 # e2e tests
-e2e/**  @musienko-maxim @Ohrimenko1988 @rhopp
+e2e/**  @musienko-maxim @Ohrimenko1988 @l0rd @rhopp @nickboldt
