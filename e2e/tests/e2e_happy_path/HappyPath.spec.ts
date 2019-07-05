@@ -70,10 +70,6 @@ suite('Validation of workspace start, build and run', async () => {
         await ide.waitWorkspaceAndIde(namespace, workspaceName);
     });
 
-    test.skip('Wait workspace running state', async () => {
-        await ide.waitWorkspaceAndIde(namespace, workspaceName);
-    });
-
     test('Wait until project is imported', async () => {
         await projectTree.openProjectTreeContainer();
         await projectTree.waitProjectImported(projectName, 'src');
