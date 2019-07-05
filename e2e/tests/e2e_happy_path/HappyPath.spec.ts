@@ -63,10 +63,7 @@ suite('Validation of workspace start, build and run', async () => {
         await driverHelper.navigateTo(workspaceUrl);
     });
 
-    test('The \"#13681\" bug workaround', async () => {
-        await waitGwtIdeLaunching();
-
-        await driverHelper.getDriver().navigate().refresh();
+    test('Wait workspace running state', async () => {
         await ide.waitWorkspaceAndIde(namespace, workspaceName);
     });
 
