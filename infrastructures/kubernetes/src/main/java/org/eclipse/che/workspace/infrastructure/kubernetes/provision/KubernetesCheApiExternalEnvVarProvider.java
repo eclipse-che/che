@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
@@ -28,8 +30,14 @@ public class KubernetesCheApiExternalEnvVarProvider implements CheApiExternalEnv
   private final String cheServerEndpoint;
 
   @Inject
-  public KubernetesCheApiExternalEnvVarProvider(@Named("che.api") String cheServerEndpoint) {
-    this.cheServerEndpoint = cheServerEndpoint;
+  public KubernetesCheApiExternalEnvVarProvider(
+      @Named("che.api") String cheServerEndpoint,
+      @Named("che.api.external") String cheServerExternalEndpoint) {
+    if (isNullOrEmpty(cheServerExternalEndpoint)) {
+      this.cheServerEndpoint = cheServerEndpoint;
+    } else {
+      this.cheServerEndpoint = cheServerExternalEndpoint;
+    }
   }
 
   @Override
