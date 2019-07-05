@@ -1,0 +1,3 @@
+package r;
+class A {
+}

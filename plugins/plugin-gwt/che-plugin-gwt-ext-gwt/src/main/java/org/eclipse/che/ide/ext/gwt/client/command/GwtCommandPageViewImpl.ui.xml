@@ -1,0 +1,76 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.gwt.client.GwtLocalizationConstants'/>
+    <ui:style>
+        .commandLineField {
+            color: #dbdbdb;
+            border: 1px solid #191c1e;
+            border-radius: 1px;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.19) inset, 0px 1px 0px 0px rgba(223, 223, 223, 0.4);
+            font-size: 12px;
+            padding-left: 8px;
+            height: 20px;
+        }
+
+        .commandLineLabel {
+            position: relative;
+            line-height: 29px;
+        }
+
+        .mainPanel {
+            margin: 15px;
+        }
+
+        .floatLeft {
+            float: left;
+        }
+
+        .floatRight {
+            float: right;
+        }
+
+        .hint {
+            color: gray;
+            line-height: 20px;
+        }
+
+        .marginBottom {
+            margin-bottom: 7px !important;
+        }
+    </ui:style>
+
+    <g:FlowPanel debugId="gwtPageView-mainPanel" addStyleNames="{style.mainPanel}">
+        <g:FlowPanel height="60px">
+            <g:Label text="Working directory" addStyleNames="{style.commandLineLabel} {style.floatLeft}"/>
+            <g:TextBox width="100%" ui:field="workingDirectory" debugId="gwtPageView-workingDirectory"
+                       addStyleNames="{style.commandLineField} {style.floatRight}"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="80px">
+            <g:Label text="{locale.gwtCommandPageViewGwtModuleText}"
+                     addStyleNames="{style.commandLineLabel} {style.floatLeft}"/>
+            <g:TextBox width="100%" ui:field="gwtModule" debugId="gwtPageView-gwtModule"
+                       addStyleNames="{style.commandLineField} {style.floatRight} {style.marginBottom}"/>
+            <g:Label width="100%" text="{locale.gwtCommandPageViewGwtModuleHint}"
+                     addStyleNames="{style.hint} {style.floatRight}"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="60px">
+            <g:Label text="{locale.gwtCommandPageViewCodeServerAddressText}"
+                     addStyleNames="{style.commandLineLabel} {style.floatLeft}"/>
+            <g:TextBox width="100%" ui:field="codeServerAddress" debugId="gwtPageView-codeServerAddress"
+                       addStyleNames="{style.commandLineField} {style.floatRight}"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

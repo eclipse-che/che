@@ -1,0 +1,63 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+  xmlns:g="urn:import:com.google.gwt.user.client.ui">
+  <ui:style>
+    @eval progressColor org.eclipse.che.ide.api.theme.Style.theme.loaderProgressStatusColor();
+
+    .progressChild {
+      margin-bottom: 10px;
+      width: 100%;
+      height: 40px;
+    }
+
+    .operationLabel {
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .progressContainer {
+      height: 10px;
+      padding: 2px;
+      border: solid black 1px;
+    }
+
+    .progress {
+      border-radius: 4px;
+      height: 10px;
+      display: block;
+      left: 0;
+      top: 19px;
+      background: -webkit-linear-gradient(left, #4b6cb7, progressColor); /*Chrome, Safari*/
+      background: -moz-linear-gradient(left, #4b6cb7, progressColor); /*Fx (3.6 -15)*/
+      background: linear-gradient(left, #4b6cb7, progressColor);
+    }
+
+    .mainPanel svg > path {
+      fill: inherit !important;
+    }
+  </ui:style>
+
+  <g:FlowPanel addStyleNames="{style.progressChild}">
+    <g:Label ui:field="operationLabel" addStyleNames="{style.operationLabel}"/>
+
+    <g:SimplePanel addStyleNames="{style.progressContainer}" ui:field="progressContainer">
+      <g:SimplePanel ui:field="progress" addStyleNames="{style.progress}"/>
+    </g:SimplePanel>
+  </g:FlowPanel>
+
+</ui:UiBinder>

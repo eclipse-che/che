@@ -1,0 +1,76 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+@external .leftToolbarPart, watchExpressionsPanel, toolbarActionGroupPanel
+
+.selectConfigurationBox:first-child > .selectConfigurationsBoxIconPanel:first-child {
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+
+.selectConfigurationBox:first-child > .selectConfigurationsBoxIconPanel:first-child + div {
+    font-family: textFieldFontFamily;
+    color: selectCommandActionColor;
+    font-size: textFieldFontSize;
+}
+
+.selectConfigurationBox:first-child > .selectConfigurationsBoxIconPanel:first-child + div:hover {
+    color: selectCommandActionHoverColor;
+}
+
+.selectConfigurationBox {
+    height: 100%;
+    min-width: 168px;
+    white-space: nowrap;
+    margin: 0 !important;
+    display: inline-block;
+}
+
+.watchExpressionsPanel {
+}
+
+.watchExpressionsPanel .leftToolbarPart {
+    margin: 0;
+    float: none;
+    height: auto;
+    display: table;
+}
+
+.watchExpressionsPanel .leftToolbarPart .toolbarActionGroupPanel {
+    margin: 0;
+}
+
+.selectConfigurationsBoxIconPanel {
+    float: left;
+    width: 40px;
+    height: 100%;
+    margin-top: auto;
+    line-height: 24px;
+    background-color: selectCommandActionIconBackgroundColor;
+}
+
+.selectConfigurationBox .selectConfigurationsBoxIconPanel + div {
+    float: left;
+    text-align: left;
+    min-width: 138px;
+    padding: 0 5px 0 5px;
+    display: inline-block;
+}
+
+.selectConfigurationsBoxIconPanel svg {
+    max-width: 22px;
+    max-height: 22px;
+    fill: selectCommandActionIconColor;
+}
+
+.selectConfigurationsBoxIconPanel svg path {
+    fill: selectCommandActionIconColor !important;
+}

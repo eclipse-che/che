@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg version="1.1" id="openDeclaration" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+     width="16px" height="16px" viewBox="7 7 18 18" enable-background="new 0 0 32 32" xml:space="preserve">
+    <g>
+        <path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" d="M21.641,22.313 M16,16"/>
+        	<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" d="M22.751,24h-9.668c-0.068,0-0.128-0.024-0.177-0.073l-3.834-3.854
+        		C9.024,20.025,9,19.966,9,19.897V8.25C9,8.113,9.113,8,9.25,8h13.501C22.888,8,23,8.112,23,8.25v15.5
+        		C23,23.888,22.888,24,22.751,24L22.751,24z M13.5,18c-0.207,0-0.4,0.063-0.561,0.173h0.639c0.689,0,1.25,0.56,1.25,1.249V20h3.673
+        		c0.55,0,0.999-0.45,0.999-1v-0.001c0-0.55-0.449-0.999-0.999-0.999H13.5L13.5,18z M13.5,12c-0.55,0-1,0.45-1,1v0c0,0.55,0.45,1,1,1
+        		h5.001c0.55,0,0.999-0.45,0.999-1v0c0-0.55-0.449-1-0.999-1H13.5L13.5,12z M13.5,15c-0.55,0-1,0.45-1,1v0c0,0.55,0.45,1,1,1h5.001
+        		c0.55,0,0.999-0.449,0.999-1v0c0-0.55-0.449-1-0.999-1H13.5L13.5,15z M13.828,22H21V10H11v9.173h2.578
+        		c0.138,0,0.25,0.112,0.25,0.249V22z"/>
+    </g>
+</svg>

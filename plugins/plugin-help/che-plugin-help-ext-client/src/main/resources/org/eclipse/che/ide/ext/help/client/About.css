@@ -1,0 +1,52 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+@eval logoFill org.eclipse.che.ide.api.theme.Style.getLogoFill();
+
+.emptyBorder {
+    margin: 6px;
+}
+
+.label {
+    font-size: 11px;
+    font-weight: bold;
+    width: 100%;
+    font-size: fontSize;
+    font-family: outputFontFamily;
+    color: outputLinkColor;
+}
+
+.spacing {
+    margin-top: 10px;
+}
+
+.value {
+    font-size: 11px;
+    margin-top: 6px;
+    width: 100%;
+}
+
+.mainText {
+    font-family: mainFontFamily;
+    text-align: center;
+}
+
+.logo g {
+    fill: logoFill;
+}
+
+.label:hover {
+    text-decoration: underline;
+}
+
+.debugSummaryTextArea {
+    font-family: editorFontFamily;
+}

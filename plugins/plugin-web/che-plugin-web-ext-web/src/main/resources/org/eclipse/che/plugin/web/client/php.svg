@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="phpFile" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+     width="16px" height="16px" viewBox="7 7 18 18" enable-background="new 0 0 32 32" xml:space="preserve">
+    <g>
+            <path fill-rule="evenodd" clip-rule="evenodd" fill="#9A5CFF" d="M12.978,14.27l0.516,6.885c0,0.284,0.248,0.427,0.516,0.427
+                    c1.166,0,1.815-0.003,2.98,0v-1.487c0-0.825,0.675-1.5,1.499-1.5h0.001c0.825,0,1.499,0.675,1.499,1.5v1.495
+                    c1.171,0.003,1.845-0.008,3.016-0.008c0.267,0,0.498-0.16,0.498-0.427L24,16.475c0-1.903-1.156-3.556-2.81-4.178
+                    c0.037,0.196,0.071,0.374,0.089,0.587c0.071,1.084-0.337,2.168-1.102,2.916c-0.676,0.676-1.564,1.048-2.524,1.048
+                    c-0.054,0-0.09,0-0.143,0c-0.995-0.035-1.92-0.444-2.631-1.155c-0.195-0.195-0.195-0.516,0-0.711c0.195-0.195,0.516-0.195,0.711,0
+                    c0.533,0.534,1.227,0.854,1.973,0.872c0.748,0.036,1.423-0.231,1.938-0.747c0.552-0.551,0.854-1.351,0.8-2.152
+                    c-0.035-0.675-0.303-1.208-0.782-1.563C17.065,9.469,8,10.057,8,16.034v0.818c0,0.267,0.231,0.427,0.533,0.427h0.96
+                    c0.267,0,0.497-0.23,0.497-0.515c0-1.174,1.032-2.507,2.4-2.507C12.575,14.256,12.771,14.261,12.978,14.27z"/>
+    </g>
+</svg>

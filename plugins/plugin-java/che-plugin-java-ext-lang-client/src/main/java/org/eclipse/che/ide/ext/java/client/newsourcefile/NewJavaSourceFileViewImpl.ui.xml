@@ -1,0 +1,42 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:style>
+        .border {
+            margin: 6px;
+        }
+
+        .topBorder {
+            margin-top: 6px;
+        }
+
+        .errorHint {
+            color: red;
+            height: 12px;
+        }
+    </ui:style>
+    <g:DockLayoutPanel unit="PX" width="350px" height="115px" addStyleNames="{style.border}" debugId="newJavaSourceFileView-mainForm">
+        <g:center>
+            <g:FlowPanel>
+                <g:Label text="Name:" width="100%"/>
+                <g:TextBox ui:field="nameField" width="98%" debugId="newJavaSourceFileView-nameField"/>
+                <g:Label ui:field="errorHintField" addStyleNames="{style.errorHint}"/>
+                <g:Label text="Type:" width="100%" addStyleNames="{style.topBorder}"/>
+                <g:ListBox ui:field="typeField" width="100%" debugId="newJavaSourceFileView-typeField"/>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

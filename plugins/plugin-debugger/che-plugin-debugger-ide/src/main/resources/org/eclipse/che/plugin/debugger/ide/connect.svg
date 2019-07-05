@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg width="10px" height="7px" viewBox="0 0 10 7" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-27.000000, -614.000000)">
+            <g transform="translate(23.000000, 570.000000)">
+                <g transform="translate(4.000000, 44.000000)">
+                    <path d="M9.7975,3.07890625 L4.5775,0.0583333333 C4.51375,0.021875 4.448125,0 4.373125,0 C4.16875,0 4.001875,0.1640625 4.001875,0.364583333 L4,0.364583333 L4,6.63541667 L4.001875,6.63541667 C4.001875,6.8359375 4.16875,7 4.373125,7 C4.45,7 4.51375,6.97447917 4.583125,6.93802083 L9.7975,3.92109375 C9.92125,3.82083333 10,3.66953125 10,3.5 C10,3.33046875 9.92125,3.18098958 9.7975,3.07890625 L9.7975,3.07890625 Z" fill="#4EABFF"></path>
+                    <rect fill="#808080" x="0" y="1" width="3" height="1" rx="0.300000012"></rect>
+                    <rect fill="#808080" x="0" y="3" width="3" height="1" rx="0.300000012"></rect>
+                    <rect fill="#808080" x="0" y="5" width="3" height="1" rx="0.300000012"></rect>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

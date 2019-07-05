@@ -1,0 +1,70 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+@def menuListBorderPx 1px;
+@eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
+
+.listBase {
+    background: textFieldBackgroundColor;
+    border: 1px solid textFieldBorderColor;
+    outline: none;
+    white-space: nowrap;
+}
+
+.listContainer {
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.listItem {
+    padding:0;
+    color: textFieldColor;
+    font-size: textFieldFontSize;
+    font-family: textFieldFontFamily;
+    cursor: default;
+    margin: 0;
+    border-left: 1px solid textFieldBackgroundColor;
+}
+
+.listItem[selected] {
+    color: mainMenuFontColor;
+
+    -moz-transition: background 0s;
+    -webkit-transition: background 0s;
+    transition: background 0s;
+    background: completionPopupSelectedItemBackgroundColor !important;
+    border-left: 1px solid #4EABFF;
+}
+
+.listItem:hover {
+    border-left: 1px solid #4EABFF;
+    background-color: completionPopupSelectedItemBackgroundColor;
+}
+
+.search-match {
+    background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    color: findResultsTextColor;
+    border-radius: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
+}
+
+.listItem:hover::after {
+    content: "";
+    width: 1px;
+    height: 20px;
+    position: absolute;
+    left: 0;
+}
+
+.groupSeparator{
+    border-top: 1px solid textFieldBorderColor;
+}

@@ -1,0 +1,89 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant'/>
+    <ui:style>
+        .inputField {
+            height: 90px;
+            margin-bottom: 5px;
+        }
+
+        .inputContainer {
+            float: left;
+            width: 380px;
+        }
+
+        .commandLineLabel {
+            position: relative;
+            line-height: 29px;
+        }
+
+        .selectionField {
+            width: 70% !important;
+        }
+
+        .mainPanel {
+            margin: 15px;
+        }
+
+        .browseButton {
+            height: 24px;
+        }
+
+        .floatLeft {
+            float: left;
+        }
+
+        .floatRight {
+            float: right;
+        }
+
+        .infoLabel {
+            color: orange;
+        }
+    </ui:style>
+
+    <g:FlowPanel debugId="mavenPageView-mainPanel" addStyleNames="{style.mainPanel}">
+        <g:FlowPanel height="60px">
+            <g:Label width="100%" text="{locale.labelMainClass}" addStyleNames="{style.commandLineLabel} {style.floatLeft}"/>
+
+            <g:FlowPanel addStyleNames="{style.inputContainer}">
+                <g:FlowPanel width="300px" addStyleNames="{style.floatLeft}">
+                    <g:TextBox ui:field="mainClass"
+                               enabled="false"
+                               debugId="javaPageView-mainClass"
+                               addStyleNames="{style.selectionField} {style.floatLeft}"/>
+                </g:FlowPanel>
+
+                <g:Button ui:field="browseMainClass"
+                          text="{locale.browseBtn}"
+                          debugId="browse-button-id"
+                          addStyleNames="{style.browseButton} {style.floatRight}"/>
+            </g:FlowPanel>
+        </g:FlowPanel>
+
+        <g:FlowPanel height="150px">
+            <g:Label text="{locale.commandLine}"
+                     addStyleNames="{style.commandLineLabel} {style.floatLeft}"/>
+
+            <g:TextArea ui:field="commandLine"
+                        enabled="false"
+                        debugId="javaPageView-commandLine"
+                        addStyleNames="{style.inputField} {style.floatRight}"/>
+
+            <g:Label text="{locale.commandLineDescription}" addStyleNames="{style.infoLabel}"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

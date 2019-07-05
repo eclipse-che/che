@@ -1,0 +1,37 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="locale" type="org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant"/>
+
+    <ui:style field="style">
+        .main {
+            width: 400px;
+            height: 450px;
+        }
+
+        .label {
+            float: right;
+            margin-bottom: 1px;
+            text-align: end;
+            width: 100%;
+            border-top: 1px solid;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel addStyleNames="{style.main}" unit="PX" ui:field="treeContainer" debugId="file-structure-mainPanel">
+        <g:south size="20"><g:Label ui:field="showInheritedLabel" addStyleNames="{style.label}"/></g:south>
+    </g:DockLayoutPanel>
+
+</ui:UiBinder>

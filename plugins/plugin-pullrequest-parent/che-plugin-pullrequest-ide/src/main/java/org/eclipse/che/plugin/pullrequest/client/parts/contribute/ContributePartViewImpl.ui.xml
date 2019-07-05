@@ -1,0 +1,213 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:my='urn:import:org.eclipse.che.plugin.pullrequest.client.dialogs.paste'
+             xmlns:svg='urn:import:org.vectomatic.dom.svg.ui'
+             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
+
+    <ui:with type="org.eclipse.che.plugin.pullrequest.client.ContributeMessages" field="messages"/>
+    <ui:with type="org.eclipse.che.plugin.pullrequest.client.ContributeResources" field="resources"/>
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
+        .panel {
+            font-size: 9pt;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .border {
+            border-top: 1px solid textFieldBorderColor;
+            margin-bottom: 5px;
+        }
+
+        .section {
+            display: flex;
+            flex-direction: column;
+            padding: 5px 5px 5px 0;
+        }
+
+        .section > * {
+            margin-left: 20px;
+        }
+
+        .section .title {
+            position: relative;
+            top: 0;
+            font-size: 9pt;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: mainFontColor;
+            margin-left: 10px;
+        }
+
+        .section button {
+            height: 25px;
+            padding: 0 20px;
+        }
+
+        .fieldItem {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            margin-bottom: 7px;
+            overflow: visible;
+        }
+
+        .fieldItem .field {
+            flex-grow: 1;
+        }
+
+        .fieldItem .field span {
+            display: inherit;
+        }
+
+        .horizontal {
+            color: mainFontColor;
+            display: inline-block;
+            text-align: left;
+            height: 18px;
+            width: literal("calc(100% - 20px)");
+        }
+
+        .link {
+            color: outputLinkColor !important;
+            text-decoration: underline;
+        }
+
+        .horizontal .field {
+            color: inherit;
+            width: inherit;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .icon {
+            display: inline-block;
+            text-decoration: none;
+            text-align: center;
+            line-height: 18px;
+            margin-right: 5px;
+            width: 15px;
+            float: left;
+            color: inherit;
+        }
+
+        .fieldItem .label {
+            float: left;
+            display: flex;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .fixed-textarea {
+            overflow: scroll;
+            resize: none;
+        }
+
+        .contributeButton {
+            align-self: flex-end;
+        }
+
+        .statusMessage {
+            margin-top: 1em;
+            margin-bottom: 1em;
+            align-self: center;
+            width: auto;
+            line-height: 15px;
+            display: inline-box;
+            white-space: pre-wrap;
+            word-break:  normal;
+        }
+
+        .section.repository {
+            background: inherit;
+        }
+
+        .branchField {
+            display: flex;
+        }
+
+        .branchField svg {
+            flex-shrink: 0;
+        }
+
+        .repository .fieldItem .field {
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .section.newContribution button {
+            align-self: center;
+            margin-top: 1em;
+        }
+    </ui:style>
+    <g:FlowPanel>
+        <g:ScrollPanel ui:field="contributePanel">
+            <g:HTMLPanel addStyleNames="{style.panel}" debugId="contribute-pull-request-panel">
+                <div class="{style.section} {style.repository}">
+                    <g:Label addStyleNames="{style.title}" text="{messages.contributePartRepositorySectionTitle}"/>
+                    <div class="{style.fieldItem} {style.horizontal}">
+                        <i class="fa fa-link {style.icon} {style.link}"></i>
+                        <g:Anchor ui:field="repositoryUrl" addStyleNames="{style.field} {style.link}" target="_blank"/>
+                    </div>
+                    <div class="{style.fieldItem} {style.horizontal}">
+                        <i class="fa fa-code-fork {style.icon}"></i>
+                        <g:Label ui:field="contributeToBranch" addStyleNames="{style.field}"/>
+                    </div>
+                    <div class="{style.fieldItem} {style.horizontal}">
+                        <i class="fa fa-bookmark {style.icon}"></i>
+                        <g:Label ui:field="projectName" addStyleNames="{style.field}"/>
+                    </div>
+                </div>
+                <div class="{style.section} {style.border}">
+                    <g:Label addStyleNames="{style.title}" text="{messages.contributePartConfigureContributionSectionTitle}"/>
+                    <div class="{style.fieldItem}">
+                        <g:Label addStyleNames="{style.label}"
+                                 text="{messages.contributePartConfigureContributionSectionContributionBranchNameLabel}"/>
+                        <div class="{style.branchField}">
+                            <che:CustomListBox ui:field="contributionBranchName"
+                                               addStyleNames="{style.field} {resources.contributeCss.inputField}"/>
+                            <svg:SVGPushButton ui:field="refreshContributionBranchNameListButton" resource="{resources.refreshIcon}"/>
+                        </div>
+                    </div>
+                    <div class="{style.fieldItem}">
+                        <g:Label addStyleNames="{style.label}"
+                                 text="{messages.contributePartConfigureContributionSectionContributionTitleLabel}"/>
+                        <my:PasteAwareTextBox ui:field="contributionTitle" addStyleNames="{style.field} {resources.contributeCss.inputField}"/>
+                    </div>
+                    <div class="{style.fieldItem}">
+                        <g:Label addStyleNames="{style.label}"
+                                 text="{messages.contributePartConfigureContributionSectionContributionCommentLabel}"/>
+                        <g:TextArea height="60px" ui:field="contributionComment"
+                                    addStyleNames="{style.field} {resources.contributeCss.inputField} {style.fixed-textarea}"/>
+                    </div>
+                    <g:Button width="104px" addStyleNames="{style.contributeButton} {resources.contributeCss.blueButton}"
+                              ui:field="contributeButton"
+                              text="{messages.contributePartConfigureContributionSectionButtonContributeText}"/>
+                </div>
+                <g:FlowPanel ui:field="statusSection" addStyleNames="{style.section} {style.border}" debugId="statusSection">
+                    <g:Label addStyleNames="{style.title}" text="{messages.contributePartStatusSectionTitle}"/>
+                    <g:InlineLabel ui:field="statusSectionMessage" addStyleNames="{style.statusMessage}" debugId="statusSectionMessage"/>
+                </g:FlowPanel>
+                <g:HTMLPanel ui:field="newContributionSection" addStyleNames="{style.section} {style.newContribution} {style.border}">
+                    <g:Button ui:field="openPullRequestOnVcsHostButton" addStyleNames="{resources.contributeCss.openOnVcsButton}"/>
+                    <g:Button ui:field="newContributionButton" addStyleNames="{resources.contributeCss.blueButton}"
+                              text="{messages.contributePartNewContributionSectionButtonNewText}"/>
+                </g:HTMLPanel>
+            </g:HTMLPanel>
+        </g:ScrollPanel>
+        <g:FlowPanel ui:field="stubPanel" width="100%" height="100%"/>
+    </g:FlowPanel>
+</ui:UiBinder>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard">
+            <g id="outline" transform="translate(2.000000, 2.000000)">
+                <g id="Group">
+                    <g>
+                        <g>
+                            <rect id="Rectangle-54" fill="#FFFFFF" x="0" y="0" width="2.76923077" height="2.76923077"></rect>
+                            <path d="M5.07692308,6 L11.5384615,6" id="Line" stroke="#FFFFFF"></path>
+                            <path d="M5.07692308,1.38461538 L11.5384615,1.38461538" id="Line-Copy-4" stroke="#FFFFFF"></path>
+                            <path d="M5.07692308,10.6153846 L11.5384615,10.6153846" id="Line-Copy-3" stroke="#FFFFFF"></path>
+                            <rect id="Rectangle-54-Copy" fill="#FFFFFF" x="0" y="4.61538462" width="2.76923077" height="2.76923077"></rect>
+                            <rect id="Rectangle-54-Copy-2" fill="#FFFFFF" x="0" y="9.23076923" width="2.76923077" height="2.76923077"></rect>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

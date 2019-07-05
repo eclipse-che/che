@@ -1,0 +1,53 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant'/>
+
+    <ui:style>
+        .emptyBorder {
+            margin: 6px;
+        }
+
+        .spacing {
+            margin-bottom: 10px;
+        }
+
+        .errorMsg {
+            color: red;
+        }
+    </ui:style>
+    <g:DockLayoutPanel unit="PX" width="350px" height="300px" addStyleNames="{style.emptyBorder}">
+        <g:north size="125.0">
+            <g:DockLayoutPanel unit="PX" width="100%" height="100%" styleName="{style.spacing}">
+                <g:north size="20.0">
+                    <g:Label text="{locale.formatterPreferencesLabel}"/>
+                </g:north>
+                <g:north size="30.0">
+                    <g:SimplePanel ui:field="targetPanel"/>
+                </g:north>
+                <g:center size="25.0">
+                    <g:FormPanel ui:field="uploadForm" debugId="import-from-config-uploadForm"/>
+                </g:center>
+                <g:south size="20.0">
+                    <g:Label ui:field="errorMessage" text="" styleName="{style.errorMsg}"/>
+                </g:south>
+                <g:south size="25.0">
+                    <g:Button ui:field="importButton" text="{locale.formatterPreferencesImportButton}" width="70px" height="25px"/>
+                </g:south>
+            </g:DockLayoutPanel>
+        </g:north>
+    </g:DockLayoutPanel>
+
+</ui:UiBinder>

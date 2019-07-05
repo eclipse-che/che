@@ -1,0 +1,151 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.plugin.debugger.ide.DebuggerLocalizationConstant'/>
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
+        .mainPanel > div:first-child + div {
+            border-right: 1px solid popupBorderColor;
+        }
+
+        .namePanel input,
+        .configurationPagePanel input,
+        .configurationPagePanel textarea {
+            font-size: 12px;
+            box-shadow: none;
+            border-radius: 0;
+            padding-left: 5px;
+            padding-right: 5px;
+            border-color: textFieldBorderColor !important;
+            width: literal("calc(100% - 12px)") !important;
+        }
+
+        .namePanel input,
+        .configurationPagePanel input {
+            margin-bottom: 15px;
+            height: 20px;
+        }
+
+        .namePanel {
+            min-height: 60px;
+            width: 100%;
+        }
+
+        .configurationPagePanel > div {
+            margin: 0;
+        }
+
+        .configurationPagePanel > div div {
+            display: inline-block;
+            line-height: inherit;
+            width: 100%;
+        }
+
+        .title {
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .title,
+        .label {
+            margin-top: 0;
+            margin-left: 0;
+        }
+
+        .leftPart {
+            border: 1px solid popupBorderColor;
+            margin: 12px 10px 10px 10px;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .rightPart {
+            margin: 10px;
+        }
+
+        .categories {
+            border-top: 1px solid popupBorderColor;
+        }
+
+        .categories div > span {
+            float: none;
+        }
+
+        .categories div > span + div {
+            float: left;
+            width: inherit;
+        }
+
+        .categories div > span + div svg {
+            height: 9px;
+            width: 9px;
+        }
+
+        .filter {
+            line-height: 29px;
+            text-align: end;
+        }
+
+        .filter input {
+            border-color: textFieldBorderColor !important;
+            min-height: 20px;
+            margin: 0 3px 0 3px;
+            width: literal("calc(100% - 18px)");
+            -moz-user-select: text;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        .overFooter {
+            float: right;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+
+        .overFooter button {
+            margin-right: 6px;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PX" width="780px" height="440px" addStyleNames="{style.mainPanel}">
+        <g:west size="380">
+            <g:DockLayoutPanel unit="PX" addStyleNames="{style.leftPart}">
+                <g:north size="30">
+                    <g:FlowPanel addStyleNames="{style.filter}">
+                        <g:TextBox ui:field="filterInputField" tabIndex="0"/>
+                    </g:FlowPanel>
+                </g:north>
+                <g:center>
+                    <g:SimplePanel ui:field="categoriesPanel" addStyleNames="{style.categories}" debugId="debugConfigurationTypesPanel"/>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:west>
+        <g:center>
+            <g:FlowPanel addStyleNames="{style.rightPart}">
+                <g:FlowPanel>
+                    <g:Label width="200px" text="{locale.editConfigurationsViewHeader}" addStyleNames="{style.title}"/>
+                </g:FlowPanel>
+                <g:FlowPanel ui:field="namePanel" addStyleNames="{style.namePanel}">
+                    <g:Label width="50px" text="{locale.editConfigurationsViewNameText}" addStyleNames="{style.label}"/>
+                    <g:TextBox width="100%" height="14px" ui:field="configurationName" tabIndex="0"/>
+                </g:FlowPanel>
+                <g:SimplePanel ui:field="contentPanel" addStyleNames="{style.configurationPagePanel}"/>
+                <g:FlowPanel ui:field="overFooter" addStyleNames="{style.overFooter}"/>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

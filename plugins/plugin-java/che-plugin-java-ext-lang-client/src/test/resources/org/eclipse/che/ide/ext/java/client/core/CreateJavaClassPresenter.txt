@@ -1,0 +1,1025 @@
+====
+    Copyright (c) 2012-2014 Red Hat, Inc.
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v1.0
+    which accompanies this distribution, and is available at
+    http://www.eclipse.org/legal/epl-v10.html
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+====
+package org.eclipse.che.ide.editor.java.client.create;
+
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.user.client.ui.HasValue;
+
+import org.eclipse.che.gwtframework.commons.exception.ExceptionThrownEvent;
+import org.eclipse.che.gwtframework.commons.rest.copy.AsyncRequestCallback;
+import org.eclipse.che.gwtframework.commons.rest.copy.MimeType;
+import org.eclipse.che.gwtframework.commons.rest.copy.ServerException;
+import org.eclipse.che.gwtframework.ui.client.component.ListGrid;
+import org.eclipse.che.ide.client.framework.editor.event.EditorActiveFileChangedEvent;
+import org.eclipse.che.ide.client.framework.editor.event.EditorActiveFileChangedHandler;
+import org.eclipse.che.ide.client.framework.event.OpenFileEvent;
+import org.eclipse.che.ide.client.framework.module.IDE;
+import org.eclipse.che.ide.client.framework.navigation.event.GoToFolderEvent;
+import org.eclipse.che.ide.client.framework.navigation.event.ItemsSelectedEvent;
+import org.eclipse.che.ide.client.framework.navigation.event.ItemsSelectedHandler;
+import org.eclipse.che.ide.client.framework.project.ProjectClosedEvent;
+import org.eclipse.che.ide.client.framework.project.ProjectClosedHandler;
+import org.eclipse.che.ide.client.framework.project.ProjectOpenedEvent;
+import org.eclipse.che.ide.client.framework.project.ProjectOpenedHandler;
+import org.eclipse.che.ide.client.framework.ui.api.IsView;
+import org.eclipse.che.ide.client.framework.ui.api.event.ViewClosedEvent;
+import org.eclipse.che.ide.client.framework.ui.api.event.ViewClosedHandler;
+import org.eclipse.che.ide.editor.api.codeassitant.Token;
+import org.eclipse.che.ide.editor.api.codeassitant.TokenProperties;
+import org.eclipse.che.ide.editor.codeassistant.util.ModifierHelper;
+import org.eclipse.che.ide.editor.java.client.CreateJavaClassEvent;
+import org.eclipse.che.ide.editor.java.client.CreateJavaClassHandler;
+import org.eclipse.che.ide.editor.java.client.JavaEditorExtension;
+import org.eclipse.che.ide.editor.java.client.codeassistant.services.JavaCodeAssistantService;
+import org.eclipse.che.ide.editor.java.client.codeassistant.services.marshal.JavaClass;
+import org.eclipse.che.ide.editor.java.client.model.ShortTypeInfo;
+import org.eclipse.che.ide.editor.java.client.model.TypeSelectedCallback;
+import org.eclipse.che.ide.editor.java.client.model.Types;
+import org.eclipse.che.ide.vfs.client.VirtualFileSystem;
+import org.eclipse.che.ide.vfs.client.marshal.FileUnmarshaller;
+import org.eclipse.che.ide.vfs.client.marshal.FolderUnmarshaller;
+import org.eclipse.che.ide.vfs.client.marshal.ItemUnmarshaller;
+import org.eclipse.che.ide.vfs.client.model.FileModel;
+import org.eclipse.che.ide.vfs.client.model.FolderModel;
+import org.eclipse.che.ide.vfs.client.model.ItemWrapper;
+import org.eclipse.che.ide.vfs.client.model.ProjectModel;
+import org.eclipse.che.ide.vfs.shared.Folder;
+import org.eclipse.che.ide.vfs.shared.Item;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+/**
+ * @author <a href="mailto:evidolob@exoplatform.com">Evgen Vidolob</a>
+ * @version ${Id}:  Dec 1, 2011 4:47:35 PM evgen $
+ *
+ */
+public class CreateJavaClassPresenter implements CreateJavaClassHandler, ViewClosedHandler, ItemsSelectedHandler,
+   ProjectOpenedHandler, ProjectClosedHandler, EditorActiveFileChangedHandler
+{
+   /**
+    * 
+    */
+   private static final String AUTO_GENERATED_METHOD_STUB = "// TODO Auto-generated method stub\n";
+
+   public interface Display extends IsView
+   {
+      String ID = "ideCreateJavaClass";
+
+      HasClickHandlers getCancelButton();
+
+      HasClickHandlers getCreateButton();
+
+      HasValue<String> getSourceFolderText();
+
+      HasValue<String> getPackageText();
+
+      HasValue<String> getNameText();
+
+      HasValue<Boolean> getPublicRadio();
+
+      HasValue<Boolean> getDefaultRadio();
+
+      HasValue<Boolean> getAbstract();
+
+      HasValue<Boolean> getFinal();
+
+      HasValue<String> getSuperClassText();
+
+      HasClickHandlers getBrowseClassesButton();
+
+      ListGrid<ShortTypeInfo> getInterfaceList();
+
+      HasClickHandlers getAddInterfaceButton();
+
+      HasClickHandlers getRemoveInterfaceButton();
+
+      HasValue<Boolean> getConstructors();
+
+      HasValue<Boolean> getMethods();
+
+      void setCreateButtonEnabled(boolean enabled);
+
+      void setDescriptionLabelText(String text);
+
+      void setRemoveInterfaceButtonEnabled(boolean enabled);
+   }
+
+   /**
+    * Default Maven 'sourceDirectory' value
+    */
+   private static final String DEFAULT_SOURCE_FOLDER = "src/main/java";
+
+   private static final String OBJECT_FQN = "java.lang.Object";
+
+   private Display display;
+
+   private Item selectedItem;
+
+   private ProjectModel currentProject;
+
+   private Set<String> imports = new HashSet<String>();
+
+   private String sourcePath;
+
+   private HandlerRegistration fileOpenedHandler;
+
+   private String str = "   ";
+
+   private List<ShortTypeInfo> interfaces;
+
+   private static Set<String> defaultImports = new HashSet<String>();
+
+   static
+   {
+
+      defaultImports.add("java.lang.Object");
+      defaultImports.add("java.lang.Boolean");
+      defaultImports.add("java.lang.Character");
+      defaultImports.add("java.lang.Class");
+      defaultImports.add("java.lang.ClassLoader");
+      defaultImports.add("java.lang.Compiler");
+      defaultImports.add("java.lang.Enum");
+      defaultImports.add("java.lang.Math");
+      defaultImports.add("java.lang.Number");
+      defaultImports.add("java.lang.Byte");
+      defaultImports.add("java.lang.Double");
+      defaultImports.add("java.lang.Float");
+      defaultImports.add("java.lang.Integer");
+      defaultImports.add("java.lang.Long");
+      defaultImports.add("java.lang.Short");
+      defaultImports.add("java.lang.Package");
+      defaultImports.add("java.lang.RuntimePermission");
+      defaultImports.add("java.lang.Process");
+      defaultImports.add("java.lang.ProcessBuilder");
+      defaultImports.add("java.lang.Runtime");
+      defaultImports.add("java.lang.SecurityManager");
+      defaultImports.add("java.lang.StackTraceElement");
+      defaultImports.add("java.lang.StrictMath");
+      defaultImports.add("java.lang.String");
+      defaultImports.add("java.lang.StringBuffer");
+      defaultImports.add("java.lang.StringBuilder");
+      defaultImports.add("java.lang.System");
+      defaultImports.add("java.lang.Thread");
+      defaultImports.add("java.lang.ThreadGroup");
+      defaultImports.add("java.lang.ThreadLocal");
+      defaultImports.add("java.lang.InheritableThreadLocal");
+      defaultImports.add("java.lang.Throwable");
+      defaultImports.add("java.lang.Error");
+      defaultImports.add("java.lang.AssertionError");
+      defaultImports.add("java.lang.LinkageError");
+      defaultImports.add("java.lang.ClassCircularityError");
+      defaultImports.add("java.lang.ClassFormatError");
+      defaultImports.add("java.lang.UnsupportedClassVersionError");
+      defaultImports.add("java.lang.ExceptionInInitializerError");
+      defaultImports.add("java.lang.IncompatibleClassChangeError");
+      defaultImports.add("java.lang.AbstractMethodError");
+      defaultImports.add("java.lang.IllegalAccessError");
+      defaultImports.add("java.lang.InstantiationError");
+      defaultImports.add("java.lang.NoSuchFieldError");
+      defaultImports.add("java.lang.NoSuchMethodError");
+      defaultImports.add("java.lang.NoClassDefFoundError");
+      defaultImports.add("java.lang.UnsatisfiedLinkError");
+      defaultImports.add("java.lang.VerifyError");
+      defaultImports.add("java.lang.ThreadDeath");
+      defaultImports.add("java.lang.VirtualMachineError");
+      defaultImports.add("java.lang.InternalError");
+      defaultImports.add("java.lang.OutOfMemoryError");
+      defaultImports.add("java.lang.StackOverflowError");
+      defaultImports.add("java.lang.UnknownError");
+      defaultImports.add("java.lang.Exception");
+      defaultImports.add("java.lang.ClassNotFoundException");
+      defaultImports.add("java.lang.CloneNotSupportedException");
+      defaultImports.add("java.lang.IllegalAccessException");
+      defaultImports.add("java.lang.InstantiationException");
+      defaultImports.add("java.lang.InterruptedException");
+      defaultImports.add("java.lang.NoSuchFieldException");
+      defaultImports.add("java.lang.NoSuchMethodException");
+      defaultImports.add("java.lang.RuntimeException");
+      defaultImports.add("java.lang.ArithmeticException");
+      defaultImports.add("java.lang.ArrayStoreException");
+      defaultImports.add("java.lang.ClassCastException");
+      defaultImports.add("java.lang.EnumConstantNotPresentException");
+      defaultImports.add("java.lang.IllegalArgumentException");
+      defaultImports.add("java.lang.IllegalThreadStateException");
+      defaultImports.add("java.lang.NumberFormatException");
+      defaultImports.add("java.lang.IllegalMonitorStateException");
+      defaultImports.add("java.lang.IllegalStateException");
+      defaultImports.add("java.lang.IndexOutOfBoundsException");
+      defaultImports.add("java.lang.ArrayIndexOutOfBoundsException");
+      defaultImports.add("java.lang.StringIndexOutOfBoundsException");
+      defaultImports.add("java.lang.NegativeArraySizeException");
+      defaultImports.add("java.lang.NullPointerException");
+      defaultImports.add("java.lang.SecurityException");
+      defaultImports.add("java.lang.TypeNotPresentException");
+      defaultImports.add("java.lang.UnsupportedOperationException");
+      defaultImports.add("java.lang.Void");
+      defaultImports.add("java.lang.Appendable");
+      defaultImports.add("java.lang.CharSequence");
+      defaultImports.add("java.lang.Cloneable");
+      defaultImports.add("java.lang.Comparable");
+      defaultImports.add("java.lang.Iterable");
+      defaultImports.add("java.lang.Readable");
+      defaultImports.add("java.lang.Runnable");
+      defaultImports.add("java.lang.Deprecated");
+      defaultImports.add("java.lang.Override");
+      defaultImports.add("java.lang.SuppressWarnings");
+      defaultImports.add("int");
+      defaultImports.add("void");
+      defaultImports.add("boolean");
+      defaultImports.add("byte");
+      defaultImports.add("short");
+      defaultImports.add("long");
+      defaultImports.add("float");
+      defaultImports.add("double");
+      defaultImports.add("char");
+
+      // interfaces
+      defaultImports.add("java.lang.Thread.UncaughtExceptionHandler");
+   }
+
+   /**
+    * 
+    */
+   public CreateJavaClassPresenter()
+   {
+      IDE.addHandler(CreateJavaClassEvent.TYPE, this);
+      IDE.addHandler(ViewClosedEvent.TYPE, this);
+      IDE.addHandler(ItemsSelectedEvent.TYPE, this);
+      IDE.addHandler(ProjectOpenedEvent.TYPE, this);
+      IDE.addHandler(ProjectClosedEvent.TYPE, this);
+   }
+
+   /**
+    * @see org.eclipse.che.ide.editor.java.client.CreateJavaClassHandler#onCreateJavaClass(org.eclipse.che.ide.editor.java.client.CreateJavaClassEvent)
+    */
+   @Override
+   public void onCreateJavaClass(CreateJavaClassEvent event)
+   {
+      if (display == null)
+      {
+         display = GWT.create(Display.class);
+         bind();
+      }
+      IDE.getInstance().openView(display.asView());
+   }
+
+   /**
+    * 
+    */
+   private void bind()
+   {
+      display.getCancelButton().addClickHandler(new ClickHandler()
+      {
+
+         @Override
+         public void onClick(ClickEvent event)
+         {
+            IDE.getInstance().closeView(Display.ID);
+         }
+      });
+
+      display.getCreateButton().addClickHandler(new ClickHandler()
+      {
+
+         @Override
+         public void onClick(ClickEvent event)
+         {
+            createClass();
+         }
+      });
+
+      display.getBrowseClassesButton().addClickHandler(new ClickHandler()
+      {
+
+         @Override
+         public void onClick(ClickEvent event)
+         {
+            new TypeSearchPresenter(JavaEditorExtension.MESSAGES.searchTypeSuperClass(), Types.CLASS, currentProject
+               .getId(), new TypeSelectedCallback()
+            {
+
+               @Override
+               public void typeSelected(ShortTypeInfo type)
+               {
+                  if (type == null)
+                     return;
+
+                  display.getSuperClassText().setValue(type.getQualifiedName());
+               }
+            });
+         }
+      });
+
+      display.getAddInterfaceButton().addClickHandler(new ClickHandler()
+      {
+
+         @Override
+         public void onClick(ClickEvent event)
+         {
+            new TypeSearchPresenter(JavaEditorExtension.MESSAGES.searchTypeInterfaces(), Types.INTERFACE,
+               currentProject.getId(), new TypeSelectedCallback()
+               {
+
+                  @Override
+                  public void typeSelected(ShortTypeInfo type)
+                  {
+                     if (type == null)
+                        return;
+
+                     List<ShortTypeInfo> value = display.getInterfaceList().getValue();
+                     if (value == null)
+                        value = new ArrayList<ShortTypeInfo>();
+
+                     value.add(type);
+                     display.getInterfaceList().setValue(value);
+                     display.setRemoveInterfaceButtonEnabled(true);
+                  }
+               });
+         }
+      });
+
+      display.getRemoveInterfaceButton().addClickHandler(new ClickHandler()
+      {
+
+         @Override
+         public void onClick(ClickEvent event)
+         {
+            List<ShortTypeInfo> selectedItems = display.getInterfaceList().getSelectedItems();
+            List<ShortTypeInfo> items = display.getInterfaceList().getValue();
+            items.removeAll(selectedItems);
+            display.getInterfaceList().setValue(items);
+            if (items.isEmpty())
+               display.setRemoveInterfaceButtonEnabled(false);
+         }
+      });
+
+      display.getFinal().addValueChangeHandler(new ValueChangeHandler<Boolean>()
+      {
+
+         @Override
+         public void onValueChange(ValueChangeEvent<Boolean> event)
+         {
+            validate();
+         }
+      });
+
+      display.getAbstract().addValueChangeHandler(new ValueChangeHandler<Boolean>()
+      {
+
+         @Override
+         public void onValueChange(ValueChangeEvent<Boolean> event)
+         {
+            validate();
+         }
+      });
+
+      display.getNameText().addValueChangeHandler(new ValueChangeHandler<String>()
+      {
+
+         @Override
+         public void onValueChange(ValueChangeEvent<String> event)
+         {
+            validate();
+         }
+      });
+
+      display.getPackageText().addValueChangeHandler(new ValueChangeHandler<String>()
+      {
+
+         @Override
+         public void onValueChange(ValueChangeEvent<String> event)
+         {
+            validate();
+         }
+      });
+
+      if (selectedItem != null)
+      {
+         sourcePath =
+            currentProject.hasProperty("sourceFolder") ? (String)currentProject.getPropertyValue("sourceFolder")
+               : DEFAULT_SOURCE_FOLDER;
+
+         Folder parentFolder = null;
+         if (selectedItem instanceof FileModel)
+         {
+            parentFolder = ((FileModel)selectedItem).getParent();
+         }
+         else if (selectedItem instanceof FolderModel)
+         {
+            parentFolder = (Folder)selectedItem;
+         }
+         else
+         {
+            parentFolder = (Folder)selectedItem;
+         }
+
+         validateParentFolder(sourcePath, parentFolder);
+
+      }
+
+      display.getSuperClassText().setValue(OBJECT_FQN);
+      display.setCreateButtonEnabled(false);
+      display.setRemoveInterfaceButtonEnabled(false);
+      validate();
+      display.getP   
+   }
+
+   /**
+    * 
+    */
+   private void validateParentFolder(final String sourcePath, Folder parentFolder)
+   {
+      String packageText = "";
+      final String absSrcPath = currentProject.getPath() + "/" + sourcePath;
+      display.getSourceFolderText().setValue(currentProject.getName() + "/" + sourcePath);
+      if (parentFolder.getPath().startsWith(absSrcPath))
+      {
+         if (parentFolder.getPath().equals(absSrcPath))
+         {
+            display.getPackageText().setValue("");
+         }
+         else
+         {
+            String pack =
+               parentFolder.getPath().substring((currentProject.getPath() + "/" + sourcePath + "/").length());
+            packageText = pack.replaceAll("/", ".");;
+            display.getPackageText().setValue(packageText);
+         }
+      }
+      else
+      {
+         display.getPackageText().setValue("");
+      }
+      
+   }
+
+   /**
+    * 
+    */
+   private void validate()
+   {
+      if (display.getFinal().getValue() && display.getAbstract().getValue())
+      {
+         display.setCreateButtonEnabled(false);
+         display.setDescriptionLabelText(JavaEditorExtension.MESSAGES.abstractFinalError());
+         return;
+      }
+
+      if (display.getNameText().getValue() == null || display.getNameText().getValue().isEmpty())
+      {
+         display.setCreateButtonEnabled(false);
+         display.setDescriptionLabelText(JavaEditorExtension.MESSAGES.nameError());
+         return;
+      }
+
+      if (display.getPackageText().getValue() == null || display.getPackageText().getValue().isEmpty())
+      {
+         display.setCreateButtonEnabled(false);
+         display.setDescriptionLabelText(JavaEditorExtension.MESSAGES.packageError());
+         return;
+      }
+
+      display.setDescriptionLabelText(JavaEditorExtension.MESSAGES.createJCLabelDesciption());
+      display.setCreateButtonEnabled(true);
+   }
+
+   /**
+    * 
+    */
+   private void createClass()
+   {
+      imports.clear();
+
+      String packageDeclaration = "package " + display.getPackageText().getValue() + ";\n\n";
+      StringBuilder content = new StringBuilder(packageDeclaration);
+
+      String superFqn = null;
+      if (!display.getSuperClassText().getValue().equals(OBJECT_FQN))
+      {
+         superFqn = display.getSuperClassText().getValue();
+         insetImport(content, packageDeclaration, superFqn);
+      }
+      content.append("\n\n");
+      if (display.getPublicRadio().getValue())
+      {
+         content.append("public ");
+      }
+
+      if (display.getFinal().getValue())
+      {
+         content.append("final ");
+      }
+
+      if (display.getFinal().getValue())
+      {
+         content.append("abstract ");
+      }
+
+      content.append("class ").append(display.getNameText().getValue());
+
+      if (superFqn != null)
+      {
+         content.append(" extends ").append(superFqn.substring(superFqn.lastIndexOf('.') + 1));
+      }
+      else
+         superFqn = OBJECT_FQN;
+
+      if (display.getInterfaceList().getValue() != null && !display.getInterfaceList().getValue().isEmpty())
+      {
+         content.append(" implements ");
+
+         for (Iterator<ShortTypeInfo> iterator = display.getInterfaceList().getValue().iterator(); iterator.hasNext();)
+         {
+            ShortTypeInfo type = iterator.next();
+            content.append(type.getName());
+            insetImport(content, packageDeclaration, type.getQualifiedName());
+            if (iterator.hasNext())
+               content.append(", ");
+         }
+      }
+
+      content.append("\n{\n\n");
+      loadSuperClassInfo(superFqn, display.getNameText().getValue(), packageDeclaration, content);
+
+      //      doCreateFile(content.toString());
+   }
+
+   /**
+    * @param superFqn
+    * @param content 
+    */
+   private void loadSuperClassInfo(String superFqn, final String className, final String packageDeclaration,
+      final StringBuilder content)
+   {
+      JavaCodeAssistantService.get().getClassDescription(superFqn, currentProject.getId(),
+         new org.eclipse.che.gwtframework.commons.rest.AsyncRequestCallback<JavaClass>()
+         {
+
+            @Override
+            protected void onSuccess(JavaClass result)
+            {
+               if (display.getConstructors().getValue())
+               {
+                  generateConstructors(className, packageDeclaration, content, result);
+               }
+
+               if (display.getMethods().getValue())
+               {
+                  generateAbstractMethods(packageDeclaration, content, result);
+                  if (display.getInterfaceList().getValue() != null && !display.getInterfaceList().getValue().isEmpty())
+                  {
+                     interfaces = display.getInterfaceList().getValue();
+                     loadInterfacesDescription(packageDeclaration, content);
+                     return;
+                  }
+               }
+
+               content.append("}");
+               doCreateFolders(content.toString());
+            }
+
+            /**
+             * @see org.eclipse.che.gwtframework.commons.rest.AsyncRequestCallback#onFailure(java.lang.Throwable)
+             */
+            @Override
+            protected void onFailure(Throwable exception)
+            {
+               content.append("}");
+               doCreateFolders(content.toString());
+            }
+         });
+   }
+
+   /**
+    * 
+    */
+   private void loadInterfacesDescription(final String packageDeclaration, final StringBuilder content)
+   {
+      if (interfaces.isEmpty())
+      {
+         content.append("}");
+         doCreateFolders(content.toString());
+         return;
+      }
+
+      final ShortTypeInfo info = interfaces.iterator().next();
+      JavaCodeAssistantService.get().getClassDescription(info.getQualifiedName(), currentProject.getId(),
+         new org.eclipse.che.gwtframework.commons.rest.AsyncRequestCallback<JavaClass>()
+         {
+
+            @Override
+            protected void onSuccess(JavaClass result)
+            {
+               generateAbstractMethods(packageDeclaration, content, result);
+               interfaces.remove(info);
+               loadInterfacesDescription(packageDeclaration, content);
+            }
+         });
+   }
+
+   /**
+    * @param value
+    * @return
+    */
+   private List<String> parseParameters(String value)
+   {
+      List<String> params = new ArrayList<String>();
+      value = value.substring(1);
+      value = value.substring(0, value.length() - 1);
+
+      if (value.isEmpty())
+         return params;
+
+      String[] split = value.split(", ");
+
+      params.addAll(Arrays.asList(split));
+
+      return params;
+   }
+
+   private void insetImport(StringBuilder builder, String packageDec, String fqn)
+   {
+      if (fqn.contains("<"))
+      {
+         fqn = fqn.substring(0, fqn.indexOf("<"));
+      }
+      if (fqn.contains("["))
+         fqn = fqn.substring(0, fqn.indexOf("["));
+
+      //skip inserting fqn if is generic type i.e. 'T' or 'E'... 
+      if (fqn.length() == 1)
+         return;
+      if (!imports.contains(fqn) && !defaultImports.contains(fqn))
+      {
+         imports.add(fqn);
+         int i = builder.indexOf(packageDec);
+         builder.insert(i + packageDec.length(), "import " + fqn + ";\n");
+      }
+   }
+
+   private void doCreateFolders(final String content)
+   {
+      String pack = display.getPackageText().getValue();
+      pack = pack.replaceAll("\\.", "/");
+      final FolderModel newFolder = new FolderModel(sourcePath + "/" + pack, new FolderModel(currentProject));
+      try
+      {
+         VirtualFileSystem.getInstance().createFolder(currentProject,
+            new AsyncRequestCallback<FolderModel>(new FolderUnmarshaller(newFolder))
+            {
+
+               @Override
+               protected void onSuccess(FolderModel result)
+               {
+                  doCreateFile(content, result);
+               }
+
+               @Override
+               protected void onFailure(Throwable exception)
+               {
+                  if (exception instanceof ServerException)
+                  {
+                     ServerException se = (ServerException)exception;
+                     if (se.getHTTPStatus() == 400)
+                     {
+                        getFolder(newFolder.getPath(), content);
+                        return;
+                     }
+
+                  }
+
+                  IDE.fireEvent(new ExceptionThrownEvent(exception));
+               }
+            });
+      }
+      catch (RequestException e)
+      {
+         IDE.fireEvent(new ExceptionThrownEvent(e));
+      }
+   }
+
+   /**
+    * @param path
+    */
+   private void getFolder(final String path, final String content)
+   {
+      try
+      {
+         VirtualFileSystem.getInstance().getItemByPath(path,
+            new AsyncRequestCallback<ItemWrapper>(new ItemUnmarshaller(new ItemWrapper()))
+            {
+
+               @Override
+               protected void onSuccess(ItemWrapper result)
+               {
+                  if (result.getItem() instanceof FolderModel)
+                  {
+                     doCreateFile(content, (FolderModel)result.getItem());
+                  }
+                  else
+                     IDE.fireEvent(new ExceptionThrownEvent(path + " not a folder"));
+               }
+
+               @Override
+               protected void onFailure(Throwable exception)
+               {
+                  IDE.fireEvent(new ExceptionThrownEvent(exception));
+               }
+            });
+      }
+      catch (RequestException e)
+      {
+         IDE.fireEvent(new ExceptionThrownEvent(e));
+      }
+   }
+
+   /**
+    * @param content
+    * @param result
+    */
+   private void doCreateFile(String content, final FolderModel parent)
+   {
+      FileModel file =
+         new FileModel(display.getNameText().getValue() + ".java", MimeType.APPLICATION_JAVA, content, new FolderModel(
+            parent));
+      file.setProject(currentProject);
+      try
+      {
+         VirtualFileSystem.getInstance().createFile(parent,
+            new AsyncRequestCallback<FileModel>(new FileUnmarshaller(file))
+            {
+
+               @Override
+               protected void onSuccess(FileModel result)
+               {
+                  IDE.getInstance().closeView(Display.ID);
+                  result.setProject(currentProject);
+                  fileOpenedHandler = IDE.addHandler(EditorActiveFileChangedEvent.TYPE, CreateJavaClassPresenter.this);
+                  IDE.fireEvent(new OpenFileEvent(result));
+
+               }
+
+               @Override
+               protected void onFailure(Throwable exception)
+               {
+                  IDE.fireEvent(new ExceptionThrownEvent(exception));
+               }
+            });
+      }
+      catch (RequestException e)
+      {
+         IDE.fireEvent(new ExceptionThrownEvent(e));
+      }
+   }
+
+   /**
+    * @see org.eclipse.che.ide.client.framework.ui.api.event.ViewClosedHandler#onViewClosed(org.eclipse.che.ide.client.framework.ui.api.event.ViewClosedEvent)
+    */
+   @Override
+   public void onViewClosed(ViewClosedEvent event)
+   {
+      if (event.getView().getId().equals(Display.ID))
+      {
+         display = null;
+      }
+   }
+
+   /**
+    * @see org.eclipse.che.ide.client.framework.navigation.event.ItemsSelectedHandler#onItemsSelected(org.eclipse.che.ide.client.framework.navigation.event.ItemsSelectedEvent)
+    */
+   @Override
+   public void onItemsSelected(ItemsSelectedEvent event)
+   {
+      if (!event.getSelectedItems().isEmpty())
+         selectedItem = event.getSelectedItems().get(0);
+      else
+         selectedItem = null;
+   }
+
+   /**
+    * @see org.eclipse.che.ide.client.framework.project.ProjectOpenedHandler#onProjectOpened(org.eclipse.che.ide.client.framework.project.ProjectOpenedEvent)
+    */
+   @Override
+   public void onProjectOpened(ProjectOpenedEvent event)
+   {
+      currentProject = event.getProject();
+   }
+
+   /**
+    * @see org.eclipse.che.ide.client.framework.project.ProjectClosedHandler#onProjectClosed(org.eclipse.che.ide.client.framework.project.ProjectClosedEvent)
+    */
+   @Override
+   public void onProjectClosed(ProjectClosedEvent event)
+   {
+      currentProject = null;
+   }
+
+   private void generateAbstractMethods(final String packageDeclaration, final StringBuilder content,
+      JavaClass superClass)
+   {
+      for (Token t : superClass.getAbstractMethods())
+      {
+         String value = t.getProperty(TokenProperties.GENERIC_PARAMETER_TYPES).isStringProperty().stringValue();
+         List<String> parameters = parseParameters(value);
+         content.append(str).append("@Override").append("\n").append(str);
+
+         int modifier = t.getProperty(TokenProperties.MODIFIERS).isNumericProperty().numericValue().intValue();
+         content.append(modifierstoString(modifier)).append(" ");
+         String returnType = t.getProperty(TokenProperties.RETURN_TYPE).isStringProperty().stringValue();
+         insetImport(content, packageDeclaration, t.getProperty(TokenProperties.GENERIC_RETURN_TYPE).isStringProperty()
+            .stringValue());
+         content.append(returnType).append(" ");
+         content.append(t.getName());
+         content.append("(");
+         int i = 0;
+         for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext();)
+         {
+            String fqn = iterator.next();
+
+            if (fqn.contains("."))
+            {
+               insetImport(content, packageDeclaration, fqn);
+               content.append(fqn.substring(fqn.lastIndexOf('.') + 1));
+            }
+            else
+               content.append(fqn);
+            String param = "arg" + i;
+            content.append(" ").append(param);
+            i++;
+
+            if (iterator.hasNext())
+               content.append(", ");
+         }
+         content.append(")");
+         if (t.hasProperty(TokenProperties.GENERIC_EXCEPTIONTYPES))
+         {
+            String[] ex =
+               (String[])t.getProperty(TokenProperties.GENERIC_EXCEPTIONTYPES).isObjectProperty().objectValue();
+            if (ex.length > 0)
+            {
+               content.append(" throws ");
+               List<String> list = Arrays.asList(ex);
+               for (Iterator<String> iterator = list.iterator(); iterator.hasNext();)
+               {
+                  String fqn = iterator.next();
+                  insetImport(content, packageDeclaration, fqn);
+                  content.append(fqn.substring(fqn.lastIndexOf(".") + 1));
+                  if (iterator.hasNext())
+                     content.append(", ");
+               }
+            }
+         }
+         content.append("\n").append(str).append("{\n");
+         content.append(str).append(str).append(AUTO_GENERATED_METHOD_STUB).append(str).append("}\n\n");
+      }
+   }
+
+   /**
+    * @param className
+    * @param packageDeclaration
+    * @param content
+    * @param superClass
+    */
+   private void generateConstructors(final String className, final String packageDeclaration,
+      final StringBuilder content, JavaClass superClass)
+   {
+
+      for (Token t : superClass.getPublicConstructors())
+      {
+         //if super class has more than 1 constructor, skip default object constructor
+         if (superClass.getPublicConstructors().size() > 1
+            && t.getProperty(TokenProperties.DECLARING_CLASS).isStringProperty().stringValue().equals(OBJECT_FQN))
+         {
+            continue;
+         }
+         String value = t.getProperty(TokenProperties.GENERIC_PARAMETER_TYPES).isStringProperty().stringValue();
+         List<String> parameters = parseParameters(value);
+
+         content.append(str).append("public ").append(className);
+         content.append("(");
+         List<String> params = new ArrayList<String>();
+         int i = 0;
+         for (Iterator<String> iterator = parameters.iterator(); iterator.hasNext();)
+         {
+            String fqn = iterator.next();
+
+            if (fqn.contains("."))
+            {
+               insetImport(content, packageDeclaration, fqn);
+               content.append(fqn.substring(fqn.lastIndexOf('.') + 1));
+            }
+            else
+               content.append(fqn);
+            String param = "arg" + i;
+            content.append(" ").append(param);
+            params.add(param);
+            i++;
+
+            if (iterator.hasNext())
+               content.append(", ");
+         }
+         content.append(")");
+         if (t.hasProperty(TokenProperties.GENERIC_EXCEPTIONTYPES))
+         {
+            String[] ex =
+               (String[])t.getProperty(TokenProperties.GENERIC_EXCEPTIONTYPES).isObjectProperty().objectValue();
+            if (ex.length > 0)
+            {
+               content.append(" throws ");
+               List<String> list = Arrays.asList(ex);
+               for (Iterator<String> iterator = list.iterator(); iterator.hasNext();)
+               {
+                  String fqn = iterator.next();
+                  insetImport(content, packageDeclaration, fqn);
+                  content.append(fqn.substring(fqn.lastIndexOf(".") + 1));
+                  if (iterator.hasNext())
+                     content.append(", ");
+               }
+            }
+         }
+         content.append("\n").append(str).append("{\n");
+         content.append(str).append(str).append("super(");
+         for (Iterator<String> iterator = params.iterator(); iterator.hasNext();)
+         {
+            content.append(iterator.next());
+            if (iterator.hasNext())
+               content.append(", ");
+         }
+         content.append(");\n").append(str).append(str).append(AUTO_GENERATED_METHOD_STUB).append(str).append("}\n\n");
+      }
+   }
+
+   /**
+    * Convert int modifier to string of Java modifiers.
+    * <b>This method skip 'abstract' modifier!<br>
+    * For full version of method see {@link ModifierHelper#toString(int)}
+    * </b> 
+    * @param mod
+    * @return
+    */
+   private String modifierstoString(int mod)
+   {
+      StringBuffer sb = new StringBuffer();
+      int len;
+
+      if ((mod & ModifierHelper.PUBLIC) != 0)
+         sb.append("public ");
+      if ((mod & ModifierHelper.PROTECTED) != 0)
+         sb.append("protected ");
+      if ((mod & ModifierHelper.PRIVATE) != 0)
+         sb.append("private ");
+
+      /* Canonical order */
+      if ((mod & ModifierHelper.STATIC) != 0)
+         sb.append("static ");
+      if ((mod & ModifierHelper.FINAL) != 0)
+         sb.append("final ");
+      if ((mod & ModifierHelper.TRANSIENT) != 0)
+         sb.append("transient ");
+      if ((mod & ModifierHelper.VOLATILE) != 0)
+         sb.append("volatile ");
+      if ((mod & ModifierHelper.SYNCHRONIZED) != 0)
+         sb.append("synchronized ");
+      if ((mod & ModifierHelper.NATIVE) != 0)
+         sb.append("native ");
+      if ((mod & ModifierHelper.STRICT) != 0)
+         sb.append("strictfp ");
+      if ((mod & ModifierHelper.INTERFACE) != 0)
+         sb.append("interface ");
+
+      if ((len = sb.length()) > 0) /* trim trailing space */
+         return sb.toString().substring(0, len - 1);
+      return "";
+   }
+
+   /**
+    * @see org.eclipse.che.ide.client.framework.editor.event.EditorActiveFileChangedHandler#onEditorActiveFileChanged(org.eclipse.che.ide.client.framework.editor.event.EditorActiveFileChangedEvent)
+    */
+   @Override
+   public void onEditorActiveFileChanged(EditorActiveFileChangedEvent event)
+   {
+      fileOpenedHandler.removeHandler();
+      IDE.fireEvent(new GoToFolderEvent());
+   }
+
+}

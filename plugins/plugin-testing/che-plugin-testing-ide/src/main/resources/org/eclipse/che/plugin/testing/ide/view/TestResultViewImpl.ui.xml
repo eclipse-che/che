@@ -1,0 +1,24 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <g:SplitLayoutPanel width="100%" height="100%" ui:field="splitLayoutPanel">
+        <g:west size="400">
+            <g:FlowPanel ui:field="navigationPanel" debugId="test-tree-navigation-panel"/>
+        </g:west>
+    </g:SplitLayoutPanel>
+
+</ui:UiBinder>

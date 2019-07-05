@@ -1,0 +1,188 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css" type="org.eclipse.che.plugin.maven.client.wizard.MavenPageViewImpl.Style">
+
+        .field {
+            color: #dbdbdb;
+            border: 1px solid #191c1e;
+            border-radius: 1px;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.19) inset, 0px 1px 0px 0px rgba(223, 223, 223, 0.4);
+            font-size: 12px;
+            padding-left: 8px;
+            height: 20px;
+        }
+
+        .projectNamePosition {
+            position: relative;
+            line-height: 29px;
+            margin-left: 20px;
+            display: inline-block;
+
+        }
+
+        .spaceRight {
+            margin-right: 8px;
+            margin-top: 1px;
+        }
+
+        .mainDoc {
+            margin: 15px;
+        }
+
+        .mainDoc div {
+            overflow: visible !important;
+        }
+
+        .inputError {
+            border-color: #ffe400;
+            box-shadow: 0 0 5px #ffe400;
+        }
+
+        .checkBoxPosition {
+            position: relative;
+            top: 5px;
+        }
+
+        .tooltipButton,
+        .tooltipButton:hover,
+        .tooltipButton:focus {
+            margin-left: 7px;
+            border-radius: 10px;
+            box-shadow: none;
+            padding: 0px;
+        }
+
+        .tooltipButton::before {
+            content: "?";
+            margin-left: 1px;
+            font-weight: bold;
+        }
+
+        .tooltip > span {
+            position: absolute;
+            color: mainFontColor;
+            border: 1px solid tabBorderColor;
+            background: textFieldBackgroundColor;
+            white-space: nowrap;
+            font-family: mainFontFamily;
+            font-size: smallFontSize;
+            font-weight: normal;
+            text-align: left;
+            padding: 3px 15px;
+            line-height: normal;
+            left: 550px;
+            top: 0;
+            height: 15px;
+            display: none;
+        }
+
+        .tooltip:hover > span {
+            display: inline;
+        }
+
+        .tooltip > span:hover {
+            pointer-events: none;
+        }
+
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PX" debugId="mavenPageView-mainPanel" addStyleNames="{style.mainDoc}">
+        <g:north size="50">
+            <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                <g:west size="138">
+                    <g:FlowPanel>
+                        <g:CheckBox ui:field="generateFromArchetype" debugId="mavenPageView-generateFromArchetype"
+                                    addStyleNames="{style.checkBoxPosition}"/>
+                        <g:Label ui:field="archetypeLabel" text="From Archetype:" addStyleNames="{style.projectNamePosition}"/>
+                    </g:FlowPanel>
+                </g:west>
+                <g:center>
+                    <g:SimplePanel addStyleNames="{style.spaceRight}">
+                        <che:CustomListBox ui:field="archetypeField" selectedIndex="1"
+                                           debugId="mavenPageView-archetypeField" width="511px" height="29px"
+                                           addStyleNames="{style.field}"/>
+                    </g:SimplePanel>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:north>
+        <g:north size="50">
+            <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                <g:west size="138">
+                    <g:FlowPanel>
+                        <g:Label text="Artifact ID:" addStyleNames="{style.projectNamePosition}"/>
+                    </g:FlowPanel>
+                </g:west>
+                <g:center>
+                    <g:FlowPanel addStyleNames="{style.spaceRight}">
+                        <g:TextBox width="500px" ui:field="artifactId" debugId="mavenPageView-artifactId" addStyleNames="{style.field}"/>
+                        <g:Button pixelSize="20, 20" ui:field="artifactIdTooltipButton"
+                                  debugId="mavenPageView-artifactIdTooltipButton"
+                                  addStyleNames="{style.tooltipButton}"/>
+                    </g:FlowPanel>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:north>
+        <g:north size="50">
+            <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                <g:west size="138">
+                    <g:FlowPanel>
+                        <g:Label text="Group ID:" addStyleNames="{style.projectNamePosition}"/>
+                    </g:FlowPanel>
+                </g:west>
+                <g:center>
+                    <g:FlowPanel addStyleNames="{style.spaceRight}">
+                        <g:TextBox width="500px" ui:field="groupId" debugId="mavenPageView-groupId" addStyleNames="{style.field}"/>
+                        <g:Button pixelSize="20, 20" ui:field="groupIdTooltipButton" debugId="mavenPageView-groupIdTooltipButton"
+                                  addStyleNames="{style.tooltipButton}"/>
+                    </g:FlowPanel>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:north>
+        <g:north size="50">
+            <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                <g:west size="138">
+                    <g:FlowPanel>
+                        <g:Label text="Version:" addStyleNames="{style.projectNamePosition}"/>
+                    </g:FlowPanel>
+                </g:west>
+                <g:center>
+                    <g:SimplePanel addStyleNames="{style.spaceRight}">
+                        <g:TextBox width="500px" ui:field="versionField" debugId="mavenPageView-version" addStyleNames="{style.field}">
+                            1.0-SNAPSHOT
+                        </g:TextBox>
+                    </g:SimplePanel>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:north>
+        <g:north size="50">
+            <g:DockLayoutPanel unit="PX" width="100%" height="100%">
+                <g:west size="138">
+                    <g:FlowPanel>
+                        <g:Label ui:field="packagingLabel" text="Packaging:" addStyleNames="{style.projectNamePosition}"/>
+                    </g:FlowPanel>
+                </g:west>
+                <g:center>
+                    <g:SimplePanel addStyleNames="{style.spaceRight}">
+                        <che:CustomListBox ui:field="packagingField" selectedIndex="0"
+                                           debugId="mavenPageView-packagingField" width="511px" height="29px"
+                                           addStyleNames="{style.field}"/>
+                    </g:SimplePanel>
+                </g:center>
+            </g:DockLayoutPanel>
+        </g:north>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

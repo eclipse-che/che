@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32px"
+	 height="32px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
+<g id="Template">
+	<g>
+		<path id="_x3C_Path_x3E__1_" fill-rule="evenodd" clip-rule="evenodd" fill="#808080" d="M9.25,8h13.501
+			C22.888,8,23,8.112,23,8.25v15.5c0,0.138-0.112,0.25-0.249,0.25H9.25C9.112,24,9,23.888,9,23.75V8.25C9,8.112,9.112,8,9.25,8
+			L9.25,8z M11,10v12h10.001V10H11z"/>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="#E0B91D" d="M12.25,11h7.5c0.138,0,0.25,0.112,0.25,0.25v1.5
+			c0,0.138-0.112,0.25-0.25,0.25h-7.5C12.112,13,12,12.888,12,12.75v-1.5C12,11.112,12.112,11,12.25,11z"/>
+		<path id="_x3C_Path_x3E_" fill-rule="evenodd" clip-rule="evenodd" fill="#3193D4" d="M12.25,18.501h5.5
+			c0.138,0,0.25,0.112,0.25,0.249v0.501c0,0.138-0.112,0.25-0.25,0.25h-5.5c-0.138,0-0.25-0.112-0.25-0.25V18.75
+			C12,18.613,12.112,18.501,12.25,18.501L12.25,18.501z M12.25,14h5.5c0.138,0,0.25,0.112,0.25,0.25v0.5
+			c0,0.138-0.112,0.25-0.25,0.25h-5.5C12.112,15,12,14.888,12,14.75v-0.5C12,14.113,12.112,14,12.25,14L12.25,14z M12.25,15.5h3.501
+			c0.137,0,0.249,0.112,0.249,0.25v0.5c0,0.138-0.112,0.25-0.249,0.25H12.25c-0.138,0-0.25-0.113-0.25-0.25v-0.5
+			C12,15.613,12.112,15.5,12.25,15.5L12.25,15.5z M12.25,17.001h7.5c0.138,0,0.25,0.112,0.25,0.249v0.501
+			c0,0.138-0.112,0.25-0.25,0.25h-7.5c-0.138,0-0.25-0.112-0.25-0.25V17.25C12,17.113,12.112,17.001,12.25,17.001z"/>
+	</g>
+</g>
+</svg>

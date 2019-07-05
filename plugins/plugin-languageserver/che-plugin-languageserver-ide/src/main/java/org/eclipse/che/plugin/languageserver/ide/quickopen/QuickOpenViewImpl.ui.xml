@@ -1,0 +1,54 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:style>
+
+        @eval windowContentBackground org.eclipse.che.ide.api.theme.Style.getWindowContentBackground();
+
+        .noborder {
+            border: none!important;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: windowContentBackground!important;
+        }
+
+        .noborder * {
+            overflow: visible!important;
+        }
+
+        .noborder tr > td:last-child {
+            padding-right: 0px;
+        }
+
+    </ui:style>
+
+    <g:DockLayoutPanel ui:field="layoutPanel" unit="PX" width="402px" height="200px" debugId="quickBoxForm">
+
+        <g:center>
+            <g:TextBox ui:field="nameField" width="390px" height="18px" debugId="quickBoxNameField"/>
+        </g:center>
+
+        <g:south size="172">
+            <g:FlowPanel ui:field="actionsPanel">
+                <g:HTML ui:field="actionsContainer" styleName="{style.noborder}" debugId="quickBoxActionsContainer"/>
+            </g:FlowPanel>
+        </g:south>
+
+    </g:DockLayoutPanel>
+
+</ui:UiBinder>

@@ -1,0 +1,21 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field='resources' type='org.eclipse.che.ide.ext.help.client.AboutResources'/>
+    <g:FlowPanel width="270px" height="165px">
+        <g:TextArea width="265px" height="150px" addStyleNames="{resources.aboutCss.debugSummaryTextArea}" ui:field="buildDetails"/>
+    </g:FlowPanel>
+</ui:UiBinder>

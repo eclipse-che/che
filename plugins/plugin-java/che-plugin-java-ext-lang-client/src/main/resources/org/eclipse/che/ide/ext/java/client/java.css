@@ -1,0 +1,103 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+@eval errorColor org.eclipse.che.ide.api.theme.Style.getErrorColor();
+@eval disableTextColor org.eclipse.che.ide.api.theme.Style.getEditorInfoTextColor();
+@eval findResultsTextColor org.eclipse.che.ide.api.theme.Style.theme.findResultsTextColor();
+@eval progressColor org.eclipse.che.ide.api.theme.Style.theme.loaderProgressStatusColor();
+@eval projectExplorerPresentableTextShadow org.eclipse.che.ide.api.theme.Style.theme.projectExplorerPresentableTextShadow();
+
+.exo-autocomplete-fqn {
+    color: gray;
+}
+
+.exo-codeassistant-counter {
+    color: #326EED;
+}
+
+.overview-mark-error,
+.overview-mark-warning, .overview-mark-task {
+    margin-top: 6px;
+    border-width: 1px;
+    border-style: solid;
+    cursor: pointer;
+    left: 1px;
+    right: 2px;
+    height: 3px;
+    position: absolute;
+}
+
+.overview-mark-error {
+    background-color: #DB4C29;
+    border: 0;
+}
+
+.overview-mark-task {
+    background-color: #a5c5e4;
+    border-color: #2c92f8;
+}
+
+.overview-mark-warning {
+    background-color: #EFD746;
+    border: 0;
+}
+
+.mark-element svg {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    margin-left: 2px;
+    margin-top: 2px;
+}
+
+.mark-element {
+    position: absolute;
+}
+
+.error-border {
+    border-bottom: 1px solid errorColor !important;
+}
+
+.presentable-text-container {
+    white-space: nowrap;
+    vertical-align: middle;
+    display: inline-block;
+    margin-top: -10px;
+    font-size: 1em;
+    padding-left: 2px;
+    text-shadow: projectExplorerPresentableTextShadow;
+}
+
+.search-match {
+    background: linear-gradient(to bottom, #c1be9e 6%, #B89C07 64%);
+    color: findResultsTextColor;
+    border-radius: 2px;
+    padding-right: 2px;
+    padding-left: 2px;
+}
+
+
+.progressContainer {
+    height: 10px;
+    padding: 2px;
+    border: solid black 1px;
+}
+
+.progress {
+    border-radius: 4px;
+    height: 10px;
+    display: block;
+    left: 0;
+    top: 19px;
+    background: -webkit-linear-gradient(left, #4b6cb7, progressColor); /*Chrome, Safari*/
+    background: -moz-linear-gradient(left, #4b6cb7, progressColor); /*Fx (3.6 -15)*/
+    background: linear-gradient(left, #4b6cb7, progressColor);
+}

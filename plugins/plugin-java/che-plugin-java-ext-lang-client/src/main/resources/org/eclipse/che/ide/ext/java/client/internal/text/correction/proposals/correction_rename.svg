@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32px"
+	 height="32px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
+<g id="Layer_1">
+</g>
+<g id="Layer_1_1_">
+</g>
+<g id="Layer_1_2_">
+</g>
+<g id="Layer_1_3_">
+</g>
+<g id="Layer_1_4_">
+</g>
+<g id="Layer_1_5_">
+</g>
+<g id="Layer_1_6_">
+</g>
+<g id="Layer_1_7_">
+</g>
+<g id="Layer_1_8_">
+</g>
+<g id="Layer_1_9_">
+</g>
+<g id="Layer_1_10_">
+</g>
+<g id="Layer_1_11_">
+</g>
+<g id="Layer_1_12_">
+</g>
+<g id="Layer_1_13_">
+</g>
+<g id="Layer_1_14_">
+</g>
+<g id="Layer_1_15_">
+</g>
+<g id="Layer_1_16_">
+</g>
+<g id="Layer_1_17_">
+</g>
+<g id="Layer_1_18_">
+</g>
+<g id="Layer_1_19_">
+</g>
+<g id="Layer_1_20_">
+</g>
+<g id="Layer_1_21_">
+</g>
+<g id="Layer_1_22_">
+</g>
+<g id="Layer_1_23_">
+</g>
+<g id="Layer_1_24_">
+</g>
+<g id="Layer_1_25_">
+</g>
+<g id="Layer_1_26_">
+</g>
+<g id="Layer_1_27_">
+</g>
+<g id="Layer_1_28_">
+</g>
+<g id="Layer_1_29_">
+</g>
+<g id="Layer_1_30_">
+</g>
+<g id="Layer_1_31_">
+</g>
+<g id="Layer_1_32_">
+</g>
+<g id="Layer_1_33_">
+</g>
+<g id="Layer_1_34_">
+</g>
+<g id="Layer_1_35_">
+</g>
+<g id="Layer_1_36_">
+</g>
+<g id="Layer_1_37_">
+</g>
+<g id="Layer_1_38_">
+</g>
+<g id="Layer_1_39_">
+	<g>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="#808080" d="M8.219,11.5h1.97v1.75H9.75v3.5h0.438v1.75h-1.97
+			c-0.12,0-0.218-0.099-0.218-0.219v-6.563C8.001,11.598,8.099,11.5,8.219,11.5L8.219,11.5z M12.813,11.5h8.969
+			c0.12,0,0.219,0.098,0.219,0.218v3.621C21.759,15.123,21.446,15,21.12,15c-0.333,0-0.637,0.125-0.87,0.33V13.25h-7.438V11.5
+			L12.813,11.5z M14.778,18.5h-1.966v-1.75h5.035C16.626,16.97,15.487,17.473,14.778,18.5z"/>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="#3193D4" d="M11.938,8.875v12.25h1.968c0.12,0,0.219,0.098,0.219,0.218v0.438
+			c0,0.12-0.099,0.218-0.219,0.218c-1.604,0-3.208,0-4.812,0c-0.121,0-0.22-0.098-0.22-0.218v-0.438c0-0.12,0.099-0.218,0.22-0.218
+			h1.969V8.875H9.095c-0.121,0-0.22-0.098-0.22-0.218V8.218C8.875,8.098,8.974,8,9.095,8c1.604,0,3.208,0,4.812,0
+			c0.12,0,0.219,0.098,0.219,0.218v0.438c0,0.12-0.099,0.218-0.219,0.218H11.938z"/>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="#72AD42" d="M24,18.881c0-0.086-0.034-0.165-0.096-0.226l-2.559-2.56
+			C21.286,16.036,21.205,16,21.12,16c-0.175,0-0.319,0.146-0.319,0.321v1.279h-1.12c-1.64,0-3.679,0.29-4.371,2.015
+			c-0.208,0.529-0.264,1.104-0.264,1.664c0,0.7,0.35,1.616,0.633,2.255c0.055,0.115,0.109,0.274,0.185,0.381
+			c0.034,0.05,0.07,0.085,0.139,0.085c0.1,0,0.159-0.08,0.159-0.176c0-0.079-0.02-0.169-0.025-0.25
+			c-0.015-0.204-0.023-0.41-0.023-0.614c0-2.385,1.414-2.8,3.568-2.8h1.12v1.279c0,0.175,0.145,0.321,0.319,0.321
+			c0.085,0,0.166-0.036,0.226-0.096l2.559-2.56C23.966,19.046,24,18.966,24,18.881z"/>
+	</g>
+</g>
+<g id="Layer_1_40_">
+</g>
+<g id="Layer_1_41_">
+</g>
+</svg>

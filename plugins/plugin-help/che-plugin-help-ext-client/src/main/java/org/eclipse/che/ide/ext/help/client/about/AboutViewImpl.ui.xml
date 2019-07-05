@@ -1,0 +1,32 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field='res' type='org.eclipse.che.ide.ext.help.client.AboutResources'/>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.help.client.about.AboutLocalizationConstant'/>
+    <ui:with field='buildDetailsLocale' type='org.eclipse.che.ide.ext.help.client.about.info.BuildDetailsLocalizationConstant'/>
+
+    <g:DockLayoutPanel unit="PX" width="270px" height="135px" addStyleNames="{res.aboutCss.emptyBorder}">
+        <g:north size="70">
+            <g:FlowPanel ui:field="logoPanel" addStyleNames="{res.aboutCss.logo}"/>
+        </g:north>
+        <g:center>
+            <g:FlowPanel addStyleNames="{res.aboutCss.spacing} {res.aboutCss.mainText}">
+                <g:Label ui:field="version" addStyleNames="{res.aboutCss.value}"/>
+                <g:Anchor ui:field="buildDetailsAnchor" addStyleNames="{res.aboutCss.label}" text="{buildDetailsLocale.title}"/>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder> 

@@ -1,0 +1,33 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'
+             xmlns:che='urn:import:org.eclipse.che.ide.ui.listbox'>
+    <ui:with field='locale' type='org.eclipse.che.plugin.jdb.ide.JavaDebuggerLocalizationConstant'/>
+
+    <ui:style>
+        .label {
+            margin-bottom: 15px;
+        }
+    </ui:style>
+
+    <g:FlowPanel debugId="javaDebugConfigurationPageView-mainPanel">
+        <g:Label text="{locale.javaDebugConfigurationPageViewNotice}" addStyleNames="{style.label}"/>
+        <g:CheckBox ui:field="devHost" text="{locale.javaDebugConfigurationPageViewDevHostCheckbox}"/>
+        <g:Label text="{locale.javaDebugConfigurationPageViewHostLabel}"/>
+        <g:TextBox ui:field="host"/>
+        <g:Label text="{locale.javaDebugConfigurationPageViewPortLabel}"/>
+        <che:CustomComboBox ui:field="port"/>
+    </g:FlowPanel>
+</ui:UiBinder>

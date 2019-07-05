@@ -1,0 +1,25 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+.dashboardArrow {
+    position: absolute;
+    cursor: pointer;
+    outline: none;
+    width: 24px;
+    height: 16px;
+    top: 9px;
+    background-color: #fcc13d ;
+    color: #f1f1f1!important;
+    font-size: 8px;
+    padding: 0px;
+    line-height: 16px;
+    text-align: center;
+}

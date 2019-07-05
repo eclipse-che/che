@@ -1,0 +1,125 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+@url findIcon findIcon;
+@eval categoryHeaderButtonHoverColor org.eclipse.che.ide.api.theme.Style.theme.categoryHeaderButtonHoverColor();
+@eval categoryHeaderButtonColor org.eclipse.che.ide.api.theme.Style.theme.categoryHeaderButtonColor();
+@eval categoryElementButtonHoverColor org.eclipse.che.ide.api.theme.Style.theme.categoryElementButtonHoverColor();
+@eval categoryElementButtonColor org.eclipse.che.ide.api.theme.Style.theme.categoryElementButtonColor();
+@eval categorySelectElementBackgroundColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementBackgroundColor();
+@eval categorySelectElementColor org.eclipse.che.ide.api.theme.Style.theme.categorySelectElementColor();
+
+.hintLabel {
+    color: textFieldColor;
+    font-size: largeLabel;
+    font-weight: bold;
+}
+
+.categoryHeader svg {
+    width: 15px;
+    height: 15px;
+}
+
+.categoryHeader span {
+    display: inline;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.categoryHeader span:first-child {
+    text-align: center;
+    height: 100%;
+}
+
+.categoryHeader span:first-child svg {
+    vertical-align: middle;
+    margin: 0 2px 3px 0;
+    fill: blueIconColor;
+    stroke: blueIconColor;
+}
+
+.categoryHeader span:last-child,
+.categorySubElementHeader .buttonArea > span {
+    display: inline-block;
+    height: 100%;
+    width: 25px;
+    float: right;
+    cursor: pointer;
+    text-align: center;
+}
+
+.categoryHeader span:last-child svg,
+.categorySubElementHeader .buttonArea svg {
+    width: 14px;
+    height: 14px;
+    margin-top: -2px;
+    vertical-align: middle;
+    fill: categoryHeaderButtonColor;
+    stroke: categoryHeaderButtonColor;
+}
+
+.categoryHeader span:last-child:hover svg,
+.categorySubElementHeader .buttonArea span:hover > svg {
+    fill: categoryHeaderButtonHoverColor;
+    stroke: categoryHeaderButtonHoverColor;
+}
+
+.categorySubElementHeader {
+    position: relative;
+    padding-right: 5px;
+    margin-right: 0;
+    font-weight: bold;
+}
+
+div.categorySubElementHeader[selected] {
+    background: categorySelectElementBackgroundColor;
+    color: categorySelectElementColor;
+}
+
+div.categorySubElementHeader[selected] .buttonArea {
+    display: inline;
+}
+
+div.categorySubElementHeader[selected] .buttonArea svg {
+    opacity: 1;
+    fill: categoryElementButtonColor;
+    stroke: categoryElementButtonColor;
+}
+
+div.categorySubElementHeader[selected] .buttonArea span:hover > svg {
+    fill: categoryElementButtonHoverColor;
+    stroke: categoryElementButtonHoverColor;
+}
+
+.buttonArea {
+    display: none;
+    float: right;
+}
+
+input.filterPlaceholder::-webkit-input-placeholder {
+    font-weight: bold;
+    padding-left: literal("calc(50% - 15px)");
+    color: placeholderColor;
+    background-image: findIcon;
+    background-repeat: no-repeat;
+    background-position: literal("calc(50% - 25px)") center;
+    background-size: contain;
+}
+
+input.filterPlaceholder::-moz-placeholder {
+    font-weight: bold;
+    text-align: center;
+    color: placeholderColor;
+    background-image: findIcon;
+    background-repeat: no-repeat;
+    background-position: literal("calc(50% - 25px)") center;
+    background-size: contain;
+}

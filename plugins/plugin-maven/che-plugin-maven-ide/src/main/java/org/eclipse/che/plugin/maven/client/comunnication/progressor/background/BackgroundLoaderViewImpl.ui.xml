@@ -1,0 +1,44 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field='resources'
+             type='org.eclipse.che.plugin.maven.client.comunnication.progressor.background.BackgroundLoaderViewImpl.Resources'/>
+    <ui:style>
+
+        .mainPanel {
+            height: 100%;
+            min-width: 454px;
+            display: inline-block;
+            margin: 0 !important;
+        }
+
+        .mainPanel svg > path {
+            fill: inherit !important;
+        }
+    </ui:style>
+
+    <g:FlowPanel ui:field="mainPanel" addStyleNames="{style.mainPanel}">
+        <g:SimplePanel ui:field="iconLoader" addStyleNames="{resources.css.iconLoader}" debugId="loaderView-iconPanel"/>
+
+        <g:Label ui:field="status" addStyleNames="{resources.css.statusLabel}"/>
+
+        <g:SimplePanel ui:field="progressContainer" addStyleNames="{resources.css.progressContainer}">
+            <g:SimplePanel ui:field="progress" addStyleNames="{resources.css.progressBar}"/>
+        </g:SimplePanel>
+
+        <g:SimplePanel ui:field="iconClose" addStyleNames="{resources.css.iconClose}" debugId="iconClose"/>
+    </g:FlowPanel>
+</ui:UiBinder>

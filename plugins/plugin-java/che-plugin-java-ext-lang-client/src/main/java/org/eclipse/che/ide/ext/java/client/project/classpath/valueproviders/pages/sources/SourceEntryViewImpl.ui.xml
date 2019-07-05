@@ -1,0 +1,53 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant'/>
+    <ui:with field="styles" type="org.eclipse.che.ide.ext.java.client.project.classpath.ProjectClasspathResources.ClasspathStyles"/>
+    <ui:style>
+        .label {
+            width: 100%;
+            font-size: 13px;
+            margin-top: 0;
+            margin-left: 0;
+        }
+
+        .buttonsPanel {
+            margin: 10px 12px 0;
+        }
+
+        .btn {
+            width: 85px;
+            height: 28px;
+            margin-bottom: 10px;
+            padding-left: 0;
+            padding-right: 0;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PX" width="380px" height="420px">
+        <g:north size="30">
+            <g:Label text="{locale.sourceTitle}" addStyleNames="{style.label}"/>
+        </g:north>
+        <g:center>
+            <g:FlowPanel ui:field="sourcePanel" addStyleNames="{styles.classpathEntryCategory}" debugId="page-sources"/>
+        </g:center>
+        <g:east size="100">
+            <g:FlowPanel ui:field="buttonsPanel" addStyleNames="{style.buttonsPanel}" debugId="source-buttons-panel">
+                <g:Button ui:field="addSourceBtn" text="{locale.buttonAddFolder}" addStyleNames="{style.btn}" debugId="add-source-btn"/>
+            </g:FlowPanel>
+        </g:east>
+    </g:DockLayoutPanel>
+
+</ui:UiBinder>

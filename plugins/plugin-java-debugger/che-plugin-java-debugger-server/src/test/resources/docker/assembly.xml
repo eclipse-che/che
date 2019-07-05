@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<assembly>
+    <files>
+        <file>
+            <source>${project.build.testOutputDirectory}/testclasses/BreakpointsTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.testOutputDirectory}/testclasses/BreakpointsByConditionTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+       <file>
+            <source>${project.build.testOutputDirectory}/testclasses/SuspendPolicyTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.testOutputDirectory}/testclasses/ThreadDumpTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.testOutputDirectory}/testclasses/StackFrameDumpTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.testOutputDirectory}/testclasses/GetValueTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.testOutputDirectory}/testclasses/EvaluateExpressionTest.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.testOutputDirectory}/testclasses/HelloWorld.java</source>
+            <outputDirectory>./org/eclipse</outputDirectory>
+        </file>
+        <file>
+            <source>${project.build.testOutputDirectory}/docker/entrypoint.sh</source>
+            <outputDirectory>.</outputDirectory>
+        </file>
+    </files>
+</assembly>

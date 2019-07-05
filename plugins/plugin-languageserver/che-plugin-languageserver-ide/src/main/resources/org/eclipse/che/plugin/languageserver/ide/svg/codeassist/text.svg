@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="7 7 18 18" enable-background="new 0 0 32 32" xml:space="preserve">
+<g id="Empty_file">
+</g>
+<g id="XML">
+</g>
+<g id="CSS">
+</g>
+<g id="LESS">
+</g>
+<g id="HTML">
+</g>
+<g id="Java_file">
+</g>
+<g id="Java_Script">
+</g>
+<g id="JSP">
+</g>
+<g id="JSF">
+</g>
+<g id="JSON">
+</g>
+<g id="pom">
+</g>
+<g id="Bower_file">
+</g>
+<g id="SQL_file">
+</g>
+<g id="Cofeescript_file">
+</g>
+<g id="Dockerfile">
+</g>
+<g id="C_x2B__x2B__file">
+</g>
+<g id="Gulp_file">
+</g>
+<g id="C_header_file">
+</g>
+<g id="Npm_file">
+</g>
+<g id="Image_file">
+</g>
+<g id="PHP_file">
+</g>
+<g id="Text_file">
+	<path fill-rule="evenodd" clip-rule="evenodd" fill="#4D4D4D" d="M8.25,8h13.5C21.888,8,22,8.112,22,8.25v1.5
+		C22,9.888,21.888,10,21.75,10H8.25C8.112,10,8,9.888,8,9.75v-1.5C8,8.112,8.112,8,8.25,8L8.25,8z M8.25,22h13.5
+		c0.138,0,0.25,0.112,0.25,0.25v1.5c0,0.138-0.112,0.25-0.25,0.25H8.25C8.112,24,8,23.888,8,23.75v-1.5C8,22.112,8.112,22,8.25,22
+		L8.25,22z M8.249,18.5H23.75c0.138,0,0.25,0.112,0.25,0.25v1.5c0,0.138-0.112,0.25-0.25,0.25H8.249C8.112,20.5,8,20.388,8,20.25
+		v-1.5C8,18.612,8.112,18.5,8.249,18.5L8.249,18.5z M8.25,15h13.5c0.138,0,0.25,0.112,0.25,0.25v1.501C22,16.888,21.888,17,21.75,17
+		H8.25C8.112,17,8,16.888,8,16.751V15.25C8,15.112,8.112,15,8.25,15L8.25,15z M8.25,11.5h11.5c0.138,0,0.25,0.112,0.25,0.25v1.5
+		c0,0.138-0.112,0.25-0.25,0.25H8.25C8.112,13.5,8,13.388,8,13.25v-1.5C8,11.612,8.112,11.5,8.25,11.5z"/>
+</g>
+<g id="favicon">
+</g>
+<g id="Gruntfile">
+</g>
+<g id="License">
+</g>
+<g id="Markdown">
+</g>
+<g id="Mustache">
+</g>
+<g id="Procfile">
+</g>
+<g id="Python">
+</g>
+<g id="React">
+</g>
+<g id="Ruby">
+</g>
+<g id="Sass">
+</g>
+<g id="Push_remote_repository">
+</g>
+<g id="Pull_from_remote_repository">
+</g>
+<g id="Fetch_from_remote_repository">
+</g>
+<g id="View_diff">
+</g>
+<g id="Change_credentials">
+</g>
+<g id="Create_patch">
+</g>
+</svg>

@@ -1,0 +1,57 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+.overview-mark-error,
+.overview-mark-warning, .overview-mark-task {
+    margin-top: 6px;
+    border-width: 1px;
+    border-style: solid;
+    cursor: pointer;
+    left: 1px;
+    right: 2px;
+    height: 3px;
+    position: absolute;
+}
+
+.overview-mark-error {
+    background-color: #DB4C29;
+    border: 0;
+}
+
+.overview-mark-task {
+    background-color: #a5c5e4;
+    border-color: #2c92f8;
+}
+
+.overview-mark-warning {
+    background-color: #EFD746;
+    border: 0;
+}
+
+.mark-element svg {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    margin-left: 2px;
+    margin-top: 2px;
+}
+
+.mark-element {
+    position: absolute;
+}
+
+.codeassistant-detail {
+    color: completionPopupItemSubtitleTextColor;
+}
+
+.codeassistant-highlight {
+    color: completionPopupItemHighlightTextColor;
+}

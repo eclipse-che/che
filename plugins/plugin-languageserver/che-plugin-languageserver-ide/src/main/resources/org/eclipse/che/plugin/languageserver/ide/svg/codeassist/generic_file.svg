@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="16px" height="16px" viewBox="7 7 18 18" enable-background="new 0 0 32 32" xml:space="preserve">
+<g id="Layer_1">
+</g>
+<g id="Layer_1_1_">
+</g>
+<g id="Layer_1_2_">
+</g>
+<g id="Layer_1_3_">
+	<g>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="#3193D4" d="M12,20.579v-0.501c0-0.138,0.112-0.25,0.25-0.25h4.673
+			c0.138,0,0.25,0.112,0.25,0.25v0.501c0,0.137-0.112,0.249-0.25,0.249H12.25C12.112,20.828,12,20.716,12,20.579L12,20.579z
+			 M12,12.578v-0.5c0-0.138,0.112-0.25,0.25-0.25h4.673c0.138,0,0.25,0.112,0.25,0.25v0.5c0,0.138-0.112,0.25-0.25,0.25H12.25
+			C12.112,12.828,12,12.716,12,12.578L12,12.578z M12,14.578v-0.5c0-0.137,0.112-0.25,0.25-0.25h7.5c0.138,0,0.25,0.112,0.25,0.25
+			v0.5c0,0.138-0.112,0.25-0.25,0.25h-7.5C12.112,14.828,12,14.716,12,14.578L12,14.578z M12,16.578v-0.5
+			c0-0.137,0.112-0.25,0.25-0.25h7.5c0.138,0,0.25,0.112,0.25,0.25v0.5c0,0.138-0.112,0.25-0.25,0.25h-7.5
+			C12.112,16.828,12,16.716,12,16.578L12,16.578z M12,18.578v-0.5c0-0.138,0.112-0.25,0.25-0.25h7.5c0.138,0,0.25,0.112,0.25,0.25
+			v0.5c0,0.138-0.112,0.25-0.25,0.25h-7.5C12.112,18.828,12,18.716,12,18.578z"/>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="#808080" d="M9.25,8h9.667c0.069,0,0.129,0.025,0.178,0.074l3.833,3.853
+			C22.976,11.975,23,12.035,23,12.103V23.75c0,0.138-0.112,0.25-0.25,0.25H9.25C9.112,24,9,23.888,9,23.75V8.25
+			C9,8.112,9.112,8,9.25,8L9.25,8z M18.173,10L11,10v12h10v-9.172h-2.578c-0.137,0-0.249-0.112-0.249-0.25V10z"/>
+	</g>
+</g>
+<g id="Layer_1_4_">
+</g>
+<g id="Layer_1_5_">
+</g>
+<g id="Layer_1_6_">
+</g>
+<g id="Layer_1_7_">
+</g>
+<g id="Layer_1_8_">
+</g>
+<g id="Layer_1_9_">
+</g>
+<g id="Layer_1_10_">
+</g>
+<g id="Layer_1_11_">
+</g>
+<g id="Layer_1_12_">
+</g>
+<g id="Layer_1_13_">
+</g>
+<g id="Layer_1_14_">
+</g>
+<g id="Layer_1_15_">
+</g>
+<g id="Layer_1_16_">
+</g>
+<g id="Layer_1_17_">
+</g>
+<g id="Layer_1_18_">
+</g>
+<g id="Layer_1_19_">
+</g>
+<g id="Layer_1_20_">
+</g>
+<g id="Layer_1_21_">
+</g>
+<g id="Layer_1_22_">
+</g>
+<g id="Layer_1_23_">
+</g>
+<g id="Layer_1_24_">
+</g>
+<g id="Layer_1_25_">
+</g>
+<g id="Layer_1_26_">
+</g>
+<g id="Layer_1_27_">
+</g>
+<g id="Layer_1_28_">
+</g>
+<g id="Layer_1_29_">
+</g>
+<g id="Layer_1_30_">
+</g>
+<g id="Layer_1_31_">
+</g>
+<g id="Layer_1_32_">
+</g>
+<g id="Layer_1_33_">
+</g>
+<g id="Layer_1_34_">
+</g>
+<g id="Layer_1_35_">
+</g>
+<g id="Layer_1_36_">
+</g>
+<g id="Layer_1_37_">
+</g>
+<g id="Layer_1_38_">
+</g>
+<g id="Layer_1_39_">
+</g>
+<g id="Layer_1_40_">
+</g>
+<g id="Layer_1_41_">
+</g>
+</svg>

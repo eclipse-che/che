@@ -1,0 +1,98 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.plugin.java.plain.client.PlainJavaLocalizationConstant'/>
+
+    <ui:style src="org/eclipse/che/ide/api/ui/style.css">
+
+        .field {
+            color: #dbdbdb;
+            border: 1px solid #191c1e;
+            border-radius: 1px;
+            box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.19) inset, 0px 1px 0px 0px rgba(223, 223, 223, 0.4);
+            font-size: 12px;
+            padding-left: 8px;
+            width: 500px;
+            height: 20px;
+        }
+
+        .tooltip > span {
+            position: absolute;
+            color: mainFontColor;
+            border: 1px solid tabBorderColor;
+            background: textFieldBackgroundColor;
+            white-space: nowrap;
+            font-family: mainFontFamily;
+            font-size: smallFontSize;
+            font-weight: normal;
+            text-align: left;
+            padding: 3px 15px;
+            line-height: normal;
+            left: 550px;
+            top: 0;
+            height: 15px;
+            display: none;
+        }
+
+        .tooltip:hover > span {
+            display: inline;
+        }
+
+        .tooltip > span:hover {
+            pointer-events: none;
+        }
+
+        .main-panel {
+            width: 100%;
+            height: 450px;
+        }
+
+        .attribute-name {
+            width: 90px;
+            float: left;
+            line-height: 25px;
+        }
+
+        .attribute-container {
+            height: 60px;
+            margin-top: 20px;
+        }
+
+        .margin {
+            margin-left: 20px;
+        }
+
+        .button {
+            width: 80px;
+            height: 25px;
+            position: absolute;
+        }
+
+    </ui:style>
+
+    <g:FlowPanel addStyleNames="{style.main-panel}">
+        <g:FlowPanel addStyleNames="{style.attribute-container}">
+            <g:Label text="{locale.sourceFolderAttribute}" addStyleNames="{style.attribute-name} {style.margin}"/>
+            <g:TextBox ui:field="sourceFolderField" debugId="mavenPageView-version" addStyleNames="{style.field} {style.margin}"/>
+            <g:Button text="{locale.browseButton}" ui:field="browseSourceBtn" addStyleNames="{style.margin} {style.button}"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel ui:field="libraryFolderContainer" addStyleNames="{style.attribute-container}">
+            <g:Label text="{locale.libraryFolderAttribute}" addStyleNames="{style.attribute-name} {style.margin}"/>
+            <g:TextBox ui:field="libFolderField" enabled="false" debugId="mavenPageView-version" addStyleNames="{style.field} {style.margin}"/>
+            <g:Button text="{locale.browseButton}" ui:field="browseLibBtn" addStyleNames="{style.margin} {style.button}"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

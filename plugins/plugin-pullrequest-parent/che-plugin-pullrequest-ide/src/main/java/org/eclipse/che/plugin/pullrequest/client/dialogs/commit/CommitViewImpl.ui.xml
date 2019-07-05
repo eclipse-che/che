@@ -1,0 +1,45 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with field="messages" type="org.eclipse.che.plugin.pullrequest.client.ContributeMessages"/>
+
+    <ui:style>
+        .border {
+            margin: 15px;
+        }
+
+        .margin {
+            margin-bottom: 5px;
+        }
+    </ui:style>
+
+    <g:DockLayoutPanel unit="PX" width="360px" height="210px" addStyleNames="{style.border}">
+        <g:north size="84">
+            <g:FlowPanel>
+                <g:Label text="{messages.commitDialogMessage}" addStyleNames="{style.margin}"/>
+                <g:CheckBox ui:field="includeUntracked" text="{messages.commitDialogCheckBoxIncludeUntracked}"
+                            addStyleNames="{style.margin}"/>
+            </g:FlowPanel>
+        </g:north>
+        <g:center>
+            <g:FlowPanel>
+                <g:Label text="{messages.commitDialogDescriptionTitle}" width="100%" addStyleNames="{style.margin}"/>
+                <g:TextArea ui:field="commitDescription" width="350px" height="100px"/>
+            </g:FlowPanel>
+        </g:center>
+    </g:DockLayoutPanel>
+</ui:UiBinder>

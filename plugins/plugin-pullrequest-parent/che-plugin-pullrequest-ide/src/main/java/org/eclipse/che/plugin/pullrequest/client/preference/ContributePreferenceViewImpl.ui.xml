@@ -1,0 +1,38 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+
+    <ui:with type="org.eclipse.che.plugin.pullrequest.client.ContributeMessages" field="localizationConstants"/>
+    <ui:style>
+        .main {
+        width: 100%;
+        height: 25px;
+        margin-top: 5px;
+        margin-left: 5px;
+        }
+        .leftAlign {
+        float: left;
+        }
+        .rightAlign {
+        float: right;
+        }
+    </ui:style>
+
+    <g:FlowPanel addStyleNames="{style.main}">
+        <g:Label text="{localizationConstants.contributePreferencesActivateByProjectSelectionLabel}" addStyleNames="{style.leftAlign}"/>
+        <g:CheckBox ui:field="activateByProjectSelection" debugId="preferences-git-contribute-activateByProjectSelection" addStyleNames="{style.rightAlign}"/>
+    </g:FlowPanel>
+
+</ui:UiBinder>

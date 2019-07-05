@@ -1,0 +1,66 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="locale" type="org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant"/>
+
+    <ui:style>
+        .main {
+            width: 515px;
+            margin-top: 5px;
+            margin-left: 5px;
+        }
+
+        .label {
+            float: left;
+            margin-left: 6px;
+            margin-top: 6px;
+            margin-right: 10px;
+        }
+
+        .errorPanelHeight {
+            float: left;
+            width: 100%;
+            height: 60px;
+        }
+
+        .radioButtonsPanel {
+            font-family: "Open Sans", sans-serif;
+            font-size: 11px;
+            margin-bottom: 10px;
+            margin-top: 10px;
+            margin-left: 5px;
+        }
+    </ui:style>
+
+    <g:FlowPanel addStyleNames="{style.main}">
+        <g:Label text="{locale.renameStrategy}"/>
+
+        <g:FlowPanel addStyleNames="{style.radioButtonsPanel}">
+            <g:RadioButton name="strategy" text="{locale.renameFindExactNames}"
+                           ui:field="findExactNames" debugId="rename-find-exact-names" tabIndex="4"/>
+            <g:RadioButton name="strategy" text="{locale.renameFindEmbeddedNames}"
+                           ui:field="findEmbeddedNames" debugId="rename-find-embedded-names" tabIndex="3"/>
+            <g:RadioButton name="strategy" text="{locale.renameFindNameSuffixes}"
+                           ui:field="findNameSuffixes" debugId="rename-find-name-suffixes" tabIndex="2"/>
+        </g:FlowPanel>
+
+        <g:FlowPanel addStyleNames="{style.errorPanelHeight}">
+            <g:SimplePanel ui:field="icon"/>
+            <g:Label text="{locale.renameStrategyWarningLabel}" ui:field="errorLabel" addStyleNames="{style.label}"/>
+        </g:FlowPanel>
+
+    </g:FlowPanel>
+
+</ui:UiBinder>

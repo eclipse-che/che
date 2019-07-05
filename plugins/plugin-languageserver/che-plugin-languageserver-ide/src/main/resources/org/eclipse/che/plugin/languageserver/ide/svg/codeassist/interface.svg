@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg version="1.1" id="interface" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="32px" height="32px" viewBox="0 0 32 32" enable-background="new 0 0 32 32" xml:space="preserve">
+<g>
+	<path fill-rule="evenodd" clip-rule="evenodd" fill="#9A5CFF" d="M16,24c4.406,0,8-3.594,8-8c0-4.406-3.594-8-8-8
+		c-4.406,0-8,3.594-8,8C8,20.406,11.594,24,16,24z"/>
+	<path fill-rule="evenodd" clip-rule="evenodd" fill="#FFFFFF" d="M15.25,12h1.501C16.888,12,17,12.112,17,12.25v7.5
+		c0,0.138-0.112,0.25-0.249,0.25H15.25C15.112,20,15,19.888,15,19.75v-7.5C15,12.112,15.112,12,15.25,12z"/>
+</g>
+</svg>

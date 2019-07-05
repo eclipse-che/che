@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="32px" height="32px" viewBox="6 6 20 20">
+	<g>
+		<polygon fill-rule="evenodd" clip-rule="evenodd" fill="#CF405F" points="8.001,13.657 8.001,8 10.829,10.828 		"/>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="#808080" d="M10.985,13.5h12.016c0.55,0,1-0.45,1-1v0c0-0.55-0.45-1-1-1
+			H12.985L10.985,13.5L10.985,13.5z M12.829,10h10.172c0.55,0,1-0.45,1-1v0c0-0.55-0.45-1-1-1H10.829L12.829,10z"/>
+		<path fill-rule="evenodd" clip-rule="evenodd" fill="#3193D4" class="blueColored" d="M9,17h14.001c0.55,0,1-0.449,1-1v0c0-0.55-0.45-1-1-1H9
+			c-0.55,0-0.999,0.45-0.999,1v0C8.001,16.551,8.45,17,9,17L9,17z M9,24h14.001c0.55,0,1-0.45,1-1l0,0c0-0.55-0.45-1-1-1H9
+			c-0.55,0-0.999,0.45-0.999,1l0,0C8.001,23.55,8.45,24,9,24L9,24z M9,20.5h14.001c0.55,0,1-0.449,1-1l0,0c0-0.55-0.45-1-1-1H9
+			c-0.55,0-0.999,0.45-0.999,1l0,0C8.001,20.051,8.45,20.5,9,20.5z"/>
+	</g>
+</svg>

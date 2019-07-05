@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32px"
+	 height="32px" viewBox="0 0 20 20" xml:space="preserve">
+	<g>
+		<path d="M10,0.833333333 C15.0616667,0.833333333 19.1666667,4.93666667 19.1666667,10 C19.1666667,15.0633333 15.0616667,19.1666667 10,19.1666667 C4.93666667,19.1666667 0.833333333,15.0633333 0.833333333,10 C0.833333333,4.93666667 4.93666667,0.833333333 10,0.833333333 L10,0.833333333 L10,0.833333333 Z M10,4.16666667 C6.77833333,4.16666667 4.16666667,6.77833333 4.16666667,10 C4.16666667,13.2216667 6.77833333,15.8333333 10,15.8333333 C13.2216667,15.8333333 15.8333333,13.2216667 15.8333333,10 C15.8333333,6.77833333 13.2216667,4.16666667 10,4.16666667 L10,4.16666667 Z" fill="#808080"></path>
+            <path d="M12.2983333,6.525 C12.765,6.835 13.1666667,7.23666667 13.475,7.70333333 L11.1783333,10 L13.475,12.2983333 C13.165,12.765 12.765,13.1666667 12.2983333,13.4766667 L10,11.1783333 L7.70166667,13.4766667 C7.235,13.1666667 6.83333333,12.765 6.52333333,12.2983333 L8.82166667,10 L6.52333333,7.70333333 C6.835,7.235 7.235,6.835 7.70166667,6.525 L10,8.82166667 L12.2983333,6.525 L12.2983333,6.525 Z" fill="#CF405F" class="redColored"></path>
+	</g>
+</svg>

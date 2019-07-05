@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder" xmlns:g="urn:import:com.google.gwt.user.client.ui">
+
+    <ui:with field='messages' type='org.eclipse.che.ide.ui.UILocalizationConstant'/>
+
+    <ui:style field="style" type="org.eclipse.che.plugin.languageserver.ide.window.dialog.MessageDialogFooter.MessageFooterStyle">
+        .button-block {
+            display: flex;
+            display: -webkit-flex;
+
+            flex-flow: row;
+            -webkit-flex-flow: row;
+
+            justify-content: flex-end;
+            -webkit-justify-content: flex-end;
+
+            align-items: center;
+            -webkit-align-items: center;
+
+            min-width: fill-available;
+            min-width: -webkit-fill-available;
+            min-width: -moz-fill-available;
+
+            min-height: fill-available;
+            min-height: -webkit-fill-available;
+            min-height: -moz-fill-available;
+        }
+
+        .action-button {
+            margin-right: 1em;
+        }
+    </ui:style>
+
+    <g:HTMLPanel addStyleNames="{style.button-block}">
+    </g:HTMLPanel>
+</ui:UiBinder>

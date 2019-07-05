@@ -1,0 +1,96 @@
+/**
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+.blueButton {
+    background: primaryButtonBackground;
+    border: 1px solid primaryButtonBorderColor;
+    color: primaryButtonFontColor;
+    width: 166px;
+}
+
+.openOnVcsButton {
+    width: 166px;
+}
+
+.blueButton:hover {
+    background-color: primaryButtonHoverBackground;
+    border: 1px solid primaryButtonHoverBorderColor;
+    color: primaryButtonHoverFontColor;
+}
+
+.blueButton[disabled], .blueButton[disabled]:hover {
+    background: primaryButtonDisabledBackground;
+    border: 1px solid primaryButtonDisabledBorderColor;
+    color: primaryButtonDisabledFontColor;
+}
+
+.errorMessage {
+    color: error;
+}
+
+.checkIcon {
+    color: selectionBackground;
+}
+
+.errorIcon {
+    color: errorColor;
+}
+
+.inputError {
+    border-bottom: 1px solid errorColor;
+}
+
+.inputField {
+    resize: none;
+}
+
+.statusSteps {
+    display: flex;
+    flex-direction: column;
+}
+
+.stepLabel {
+    display: flex;
+    justify-content: flex-end;
+    align-self: center;
+    flex-grow: 2;
+    flex-shrink: 0;
+}
+
+.stepLabel i {
+    width: 20px;
+    font-size: largeFontSize;
+    margin-bottom: 5px;
+}
+
+.stepLabelRow {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 1em;
+    height: 24px;
+}
+
+.statusIndexStepLabel {
+    color: mainFontColor;
+    border: none;
+    border-radius: 5px;
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    margin-left: 0px;
+    margin-right: 8px;
+    background-color: selectionBackground;
+}
+
+.statusTitleStepLabel {
+    align-self: center;
+    flex-shrink: 0;
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="32px"
+        height="32px"
+        viewBox="6 6 20 20">
+    <g
+            id="g297"
+            transform="rotate(-89.862171,15.998626,15.999955)">
+        <path
+                class="blueColored"
+                d="m 16.92255,10.37409 0.0203,8.437476 1.874995,-0.0045 -2.805729,2.819247 -2.819258,-2.805726 1.874995,-0.0045 -0.01804,-7.499989 c -2e-6,0 -0.0057,-0.937478 0.935269,-0.939747 z"
+                id="path293"
+                style="clip-rule:evenodd;fill:#3193d4;fill-rule:evenodd"/>
+    </g>
+    <path
+            id="rect309"
+            transform="matrix(0.625,0,0,0.625,6,6)"
+            style="fill:#808080;fill-opacity:1;stroke-width:0.75590551;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers stroke fill"
+            d="m 17,2.5 v 2 h 2 c 2,0 2,1.5 2,1.5 v 4 l 2,2 V 6 c 0,0 0,-1.5 2,-1.5 h 2 v -2 h -3 c -2,0 -2,2 -2,2 0,0 0,-2 -2,-2 z"/>
+    <path
+            id="rect309-3"
+            style="fill:#808080;fill-opacity:1;stroke-width:0.47244096;stroke-miterlimit:4;stroke-dasharray:none;paint-order:markers stroke fill"
+            d="m 22.875,24.4375 v -1.25 h -1.25 c -1.25,0 -1.25,-1.25 -1.25,-1.25 V 18.5 l -1.25,1.25 v 2.1875 c 0,0 0,1.25 -1.25,1.25 h -1.25 v 1.25 H 18.5 c 1.25,0 1.25,-1.25 1.25,-1.25 0,0 0,1.25 1.25,1.25 z"/>
+</svg>

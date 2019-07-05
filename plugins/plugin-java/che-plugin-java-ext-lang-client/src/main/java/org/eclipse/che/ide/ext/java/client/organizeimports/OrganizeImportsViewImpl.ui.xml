@@ -1,0 +1,34 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g="urn:import:com.google.gwt.user.client.ui">
+    <ui:with field="locale" type="org.eclipse.che.ide.ext.java.client.JavaLocalizationConstant"/>
+
+    <ui:style>
+        .main {
+            width: 515px;
+            float: left;
+            height: 200px;
+        }
+    </ui:style>
+
+    <g:SimplePanel addStyleNames="{style.main}">
+        <g:ScrollPanel width="100%" height="100%">
+
+            <g:VerticalPanel ui:field="container" width="100%" height="100%"/>
+
+        </g:ScrollPanel>
+    </g:SimplePanel>
+
+</ui:UiBinder>

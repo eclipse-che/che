@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg width="224px" height="224px" viewBox="0 0 224 224" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <title>warning-icon</title>
+    <defs></defs>
+    <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <path d="M112.001087,0 C50.1442226,0 0,50.1439223 0,112.000544 C0,173.856078 50.1442226,224 112.001087,224 C173.856321,224 224,173.856078 224,112.000544 C224,50.1439223 173.855777,0 112.001087,0 L112.001087,0 Z M95,38 L128,38 L128,139 L95,139 L95,38 L95,38 Z M112,191 C102.058632,191 94,182.941066 94,173 C94,163.058934 102.058632,155 112,155 C121.941368,155 130,163.058934 130,173 C130,182.941066 121.941368,191 112,191 L112,191 Z"
+              id="warning-icon" fill="#F6D423"></path>
+    </g>
+</svg>

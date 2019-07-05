@@ -1,0 +1,54 @@
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    <ui:with field='locale' type='org.eclipse.che.plugin.maven.client.MavenLocalizationConstant'/>
+    <ui:style>
+        .argumentsField {
+            padding-left: 8px;
+            height: 20px;
+        }
+
+        .argumentsLabel {
+            position: relative;
+            line-height: 29px;
+        }
+
+        .mainPanel {
+            margin: 15px;
+        }
+
+        .floatLeft {
+            float: left;
+        }
+
+        .floatRight {
+            float: right;
+        }
+    </ui:style>
+
+    <g:FlowPanel debugId="mavenPageView-mainPanel" addStyleNames="{style.mainPanel}">
+        <g:FlowPanel height="60px">
+            <g:Label text="Working directory" addStyleNames="{style.argumentsLabel} {style.floatLeft}"/>
+            <g:TextBox width="440px" ui:field="workingDirectory" debugId="mavenPageView-workingDirectory"
+                       addStyleNames="{style.argumentsField} {style.floatRight}"/>
+        </g:FlowPanel>
+        <g:FlowPanel height="60px">
+            <g:Label text="{locale.mavenCommandPageViewArgumentsText}"
+                     addStyleNames="{style.argumentsLabel} {style.floatLeft}"/>
+            <g:TextBox width="440px" ui:field="arguments" debugId="mavenPageView-arguments"
+                       addStyleNames="{style.argumentsField} {style.floatRight}"/>
+        </g:FlowPanel>
+    </g:FlowPanel>
+</ui:UiBinder>

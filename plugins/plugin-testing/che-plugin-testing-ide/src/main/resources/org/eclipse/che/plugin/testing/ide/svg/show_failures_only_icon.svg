@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<svg
+   xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+   width="16"
+   height="16"
+   viewBox="0 0 32 32"
+   version="1.1"
+   id="show_failures_only_icon">
+  <path
+     style="fill:#ff0000;fill-rule:evenodd;fill-opacity:1;stroke:#565656;stroke-opacity:1;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+     id="path3"
+     d="m 19.661016,0.94814034 c 6.290593,0 11.390843,5.10024916 11.390843,11.39084166 0,6.290593 -5.10025,11.390843 -11.390843,11.390843 -6.290593,0 -11.3908418,-5.10025 -11.3908418,-11.390843 0,-6.2905925 5.1002488,-11.39084166 11.3908418,-11.39084166 l 0,0 z m 0,3.79599816 c -4.193253,0 -7.594844,3.401591 -7.594844,7.5948435 0,4.193253 3.401591,7.594844 7.594844,7.594844 4.193254,0 7.594844,-3.401591 7.594844,-7.594844 0,-4.1932525 -3.40159,-7.5948435 -7.594844,-7.5948435 z" />
+  <path
+     style="fill:#ff0000;fill-rule:evenodd;fill-opacity:1;stroke:#565656;stroke-opacity:1;stroke-width:0.2;stroke-miterlimit:4;stroke-dasharray:none"
+     id="path3-5"
+     d="m 12.474576,8.2701739 c 6.290593,0 11.390843,5.1002491 11.390843,11.3908421 0,6.290593 -5.10025,11.390844 -11.390843,11.390844 -6.2905932,0 -11.3908432,-5.100251 -11.3908432,-11.390844 0,-6.290593 5.10025,-11.3908421 11.3908432,-11.3908421 l 0,0 z m 0,3.7959981 c -4.1932532,0 -7.5948442,3.401591 -7.5948442,7.594844 0,4.193253 3.401591,7.594844 7.5948442,7.594844 4.193254,0 7.594844,-3.401591 7.594844,-7.594844 0,-4.193253 -3.40159,-7.594844 -7.594844,-7.594844 z" />
+</svg>

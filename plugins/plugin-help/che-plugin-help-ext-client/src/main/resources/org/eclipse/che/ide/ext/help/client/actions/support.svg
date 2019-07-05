@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+
+    Copyright (c) 2012-2018 Red Hat, Inc.
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+    Contributors:
+      Red Hat, Inc. - initial API and implementation
+
+-->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="512px" height="512px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">
+<path id="book-12-icon" d="M282.655,389.151c-11.47,0-20.773-9.303-20.773-20.777c0-11.469,9.304-20.768,20.773-20.768
+	c11.473,0,20.772,9.299,20.772,20.768C303.428,379.849,294.128,389.151,282.655,389.151z M280.824,199.089
+	c41.294,0,59.859,27.655,59.859,53.59c0,41.277-41.696,48.449-41.696,75.07v3.738c0,0-31.145,0-34.243,0v-3.738
+	c0-10.572,1.542-24.138,13.819-35.931c12.277-11.794,27.619-21.536,27.619-36.271c0-16.288-11.304-24.904-25.557-24.904
+	c-23.75,0-25.301,24.631-25.887,30.055h-33.306C222.321,235.014,233.177,199.089,280.824,199.089z M124,122.528
+	c-23.611,0-23.611-34.528,0-34.528c16.904,0,324,0,324,0V50H114c-27.613,0-50,22.386-50,50v312c0,27.614,22.387,50,50,50h334
+	V122.528C443.018,122.528,143.098,122.528,124,122.528z M408,422H155.527V163.098H408V422z"/>
+</svg>
