@@ -19,7 +19,7 @@ import { Editor } from '../../pageobjects/ide/Editor';
 import { PreviewWidget } from '../../pageobjects/ide/PreviewWidget';
 import { TestConstants } from '../../TestConstants';
 import { RightToolbar } from '../../pageobjects/ide/RightToolbar';
-import { By, Key, error } from 'selenium-webdriver';
+import { By, Key } from 'selenium-webdriver';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
@@ -261,21 +261,5 @@ async function checkJavaPathCompletion() {
     if (await ide.isNotificationPresent('Classpath is incomplete. Only syntax errors will be reported')) {
         throw new Error('Known issue: https://github.com/eclipse/che/issues/13427 \n' +
             '\"Java LS \"Classpath is incomplete\" warning when loading petclinic\"');
-    }
-}
-
-async function waitGwtIdeLaunching(timeout: number = TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT) {
-    const launchedGwtIdeLocator: By = By.xpath('//div[@id=\'gwt-debug-consolesPanel\']//td[text()=\'Your workspace is ready to be used\']');
-
-    await ide.waitAndSwitchToIdeFrame(timeout);
-    try {
-        await driverHelper.waitVisibility(launchedGwtIdeLocator, timeout);
-    } catch (err) {
-        if (err instanceof error.TimeoutError) {
-            throw new error.TimeoutError('This failure probably happened, because bug #13681 has been fixed. ' +
-                'If that\'s really the case, please remove this workaround too.');
-        }
-
-        throw err;
     }
 }
