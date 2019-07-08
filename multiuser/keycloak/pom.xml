@@ -25,7 +25,6 @@
     <name>Che Multiuser :: Keycloak Integration Parent</name>
     <modules>
         <module>che-multiuser-keycloak-shared</module>
-        <module>che-multiuser-keycloak-ide</module>
         <module>che-multiuser-keycloak-server</module>
         <module>che-multiuser-keycloak-token-provider</module>
     </modules>

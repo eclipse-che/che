@@ -26,7 +26,6 @@
     <modules>
         <module>che-multiuser-machine-authentication-shared</module>
         <module>che-multiuser-machine-authentication</module>
-        <module>che-multiuser-machine-authentication-ide</module>
         <module>che-multiuser-machine-authentication-agent</module>
     </modules>
 </project>

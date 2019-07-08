@@ -27,19 +27,12 @@
     <modules>
         <module>core</module>
         <module>wsmaster</module>
-        <module>wsagent</module>
         <module>multiuser</module>
-        <module>ide</module>
-        <module>agents</module>
         <module>infrastructures</module>
-        <module>plugins</module>
-        <module>ide/che-ide-core</module>
-        <module>ide/che-ide-full</module>
-        <module>ide/che-ide-gwt-app</module>
         <module>dashboard</module>
         <module>workspace-loader</module>
         <module>assembly</module>
-        <module>selenium</module>
+        <!--module>selenium</module-->
     </modules>
     <scm>
         <connection>scm:git:git@github.com:eclipse/che.git</connection>
