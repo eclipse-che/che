@@ -95,6 +95,8 @@ spec:
         - mountPath: /opt/jboss/keycloak/standalone/log
           name: keycloak-log
       restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
       serviceAccountName: che-keycloak
       volumes:
       - name: keycloak-data
