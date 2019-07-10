@@ -77,7 +77,7 @@ public abstract class ServerChecker {
   public void checkOnce(Consumer<String> readinessHandler) throws InfrastructureException {
     if (!isAvailable()) {
       throw new InfrastructureException(
-          String.format("Server '%s' in machine '%s' not available.", serverRef, machineName));
+          String.format("Server '%s' in container '%s' not available.", serverRef, machineName));
     }
     readinessHandler.accept(serverRef);
   }
@@ -119,7 +119,8 @@ public abstract class ServerChecker {
       if (isTimedOut()) {
         reportFuture.completeExceptionally(
             new InfrastructureException(
-                String.format("Server '%s' in '%s' is not available.", serverRef, machineName)));
+                String.format(
+                    "Server '%s' in container '%s' not available.", serverRef, machineName)));
       } else if (isAvailable()) {
         currentNumberOfSequentialSuccessfulPings++;
         if (currentNumberOfSequentialSuccessfulPings == successThreshold) {
