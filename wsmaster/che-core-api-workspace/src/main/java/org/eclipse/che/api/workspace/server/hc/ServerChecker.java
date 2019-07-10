@@ -120,7 +120,7 @@ public abstract class ServerChecker {
         reportFuture.completeExceptionally(
             new InfrastructureException(
                 String.format(
-                    "Server '%s' in machine '%s' not available.", serverRef, machineName)));
+                    "Server '%s' in '%s' is not available.", serverRef, machineName)));
       } else if (isAvailable()) {
         currentNumberOfSequentialSuccessfulPings++;
         if (currentNumberOfSequentialSuccessfulPings == successThreshold) {
