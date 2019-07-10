@@ -119,8 +119,7 @@ public abstract class ServerChecker {
       if (isTimedOut()) {
         reportFuture.completeExceptionally(
             new InfrastructureException(
-                String.format(
-                    "Server '%s' in '%s' is not available.", serverRef, machineName)));
+                String.format("Server '%s' in '%s' is not available.", serverRef, machineName)));
       } else if (isAvailable()) {
         currentNumberOfSequentialSuccessfulPings++;
         if (currentNumberOfSequentialSuccessfulPings == successThreshold) {

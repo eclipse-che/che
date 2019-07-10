@@ -77,7 +77,8 @@ public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironmen
           brokerEnvironment.getMachines().get(Names.machineName(brokerPod, container));
       if (brokerMachine == null) {
         throw new InfrastructureException(
-            String.format("Could not find appropriate place for broker container %s", container.getName()));
+            String.format(
+                "Could not find appropriate place for broker container %s", container.getName()));
       }
       workspaceEnvironment
           .getMachines()
