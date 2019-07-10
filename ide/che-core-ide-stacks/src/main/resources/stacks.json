@@ -5,6 +5,15 @@
   "workspaceConfig": {
     "commands": [
         {
+            "commandLine": "cat | sh /home/user/bin/deploy_c.sh ${current.project.path} ${editor.current.file.name} ${editor.current.file.basename}",
+            "name": "Deploy C contract",
+            "attributes": {
+            "goal": "Run",
+            "previewUrl": ""
+            },
+            "type": "custom"
+        },
+        {
             "commandLine": "cat | sh /home/user/bin/deploy_all.sh ${current.project.path}", 
             "name": "Deploy All Contracts", 
             "attributes": {
