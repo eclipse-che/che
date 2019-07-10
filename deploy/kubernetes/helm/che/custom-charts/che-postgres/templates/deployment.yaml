@@ -13,6 +13,8 @@ kind: Deployment
 metadata:
   creationTimestamp: null
   labels:
+    app: che
+    component: postgres
     io.kompose.service: postgres
   name: postgres
 spec:
@@ -20,6 +22,8 @@ spec:
   template:
     metadata:
       labels:
+        app: che
+        component: postgres
         io.kompose.service: postgres
     spec:
       securityContext:
