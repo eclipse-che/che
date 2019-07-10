@@ -540,7 +540,7 @@ Che server debug: ${CHE_DEBUG_SERVER}
 Image: ${CHE_IMAGE_REPO}
 Pull policy: ${IMAGE_PULL_POLICY}
 Update strategy: ${UPDATE_STRATEGY}
-Setup OpenShift oAuth: ${SETUP_OCP_OAUTH}
+Setup OpenShift OAuth: ${SETUP_OCP_OAUTH}
 Enable Jaeger based tracing: ${CHE_TRACING_ENABLED}
 Enable metrics collection: ${CHE_METRICS_ENABLED}
 Environment variables:
@@ -580,8 +580,8 @@ ${CHE_VAR_ARRAY}"
       wait_for_keycloak
 
       if [ "${SETUP_OCP_OAUTH}" == "true" ]; then
-        printInfo "Registering oAuth client in OpenShift"
-        # register oAuth client in OpenShift
+        printInfo "Registering OAuth client in OpenShift"
+        # register OAuth client in OpenShift
         printInfo "Logging as \"system:admin\""
         $OC_BINARY login -u "system:admin"
         KEYCLOAK_ROUTE=$($OC_BINARY get route/keycloak --namespace=${CHE_OPENSHIFT_PROJECT} -o=jsonpath={'.spec.host'})
@@ -592,7 +592,7 @@ ${CHE_VAR_ARRAY}"
           -p OCP_OAUTH_CLIENT_SECRET=${OCP_OAUTH_CLIENT_SECRET} | oc apply -f -
 
         # register OpenShift Identity Provider in Keycloak
-        printInfo "Registering oAuth client in Keycloak"
+        printInfo "Registering OAuth client in Keycloak"
         printInfo "Logging as \"${OPENSHIFT_USERNAME}\""
         $OC_BINARY login -u "${OPENSHIFT_USERNAME}" -p "${OPENSHIFT_PASSWORD}"
         KEYCLOAK_POD_NAME=$(${OC_BINARY} get pod --namespace=${CHE_OPENSHIFT_PROJECT} -l app=keycloak --no-headers | awk '{print $1}')
@@ -609,7 +609,7 @@ ${CHE_VAR_ARRAY}"
           -s config.defaultScope="user:full" \
           --no-config --server http://localhost:8080/auth --user ${KEYCLOAK_USER} --password ${KEYCLOAK_PASSWORD} --realm master
 
-        # setup Che variables related to oAuth identity provider
+        # setup Che variables related to OAuth identity provider
         CHE_INFRA_OPENSHIFT_PROJECT=
         CHE_INFRA_OPENSHIFT_OAUTH__IDENTITY__PROVIDER=${OCP_IDENTITY_PROVIDER_ID}
       fi

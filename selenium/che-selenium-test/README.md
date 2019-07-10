@@ -64,7 +64,7 @@ export OPENSHIFT_TOKEN=<openshift_web_console_bearer_auth_token>
 export OPENSHIFT_CHE_NAMESPACE=<namespace_of_eclipse_che_deployed_on_openshift>
 export OPENSHIFT_URL=<url_of_openshift_web_console>
 ```
-where `OPENSHIFT_TOKEN` is optional and is aimed to replace username/password when OpenShift is configured with oAuth. 
+where `OPENSHIFT_TOKEN` is optional and is aimed to replace username/password when OpenShift is configured with OAuth. 
 
 
 Default values:

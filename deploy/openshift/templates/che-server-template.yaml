@@ -321,11 +321,11 @@ parameters:
   value: 'true'
 - name: CHE_OAUTH_GITHUB_CLIENTID
   displayName: GitHub Client ID
-  description: GitHub oAuth app client ID. Applicable to Che single user only!
+  description: GitHub OAuth app client ID. Applicable to Che single user only!
   value: ''
 - name: CHE_OAUTH_GITHUB_CLIENTSECRET
   displayName: GitHub Client Secret
-  description: GitHub oAuth app client servet. Applicable to Che single user only!
+  description: GitHub OAuth app client servet. Applicable to Che single user only!
   value: ''
 - name: CHE_WORKSPACE_PLUGIN__REGISTRY__URL
   displayName: Eclipse Che plugin registry URL
