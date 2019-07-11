@@ -111,12 +111,11 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
 
           k8sEnv.getSecrets().put(secret.getMetadata().getName(), secret);
 
-          if (!sshPairs.isEmpty()) {
-            k8sEnv
-                .getPodsData()
-                .values()
-                .forEach(p -> addSshKeySecret(secret.getMetadata().getName(), p.getSpec()));
-          }
+          k8sEnv
+              .getPodsData()
+              .values()
+              .forEach(p -> addSshKeySecret(secret.getMetadata().getName(), p.getSpec()));
+
           sshConfig.append(buildConfig(sshPair.getName()));
         }
 
@@ -184,7 +183,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
   }
 
   /**
-   * @param host the host of the host
+   * @param host the host of version control service (e.g. github.com, gitlab.com and etc)
    * @return the ssh configuration which include host of host and identity file location
    *     <p>Example of provided configuration:
    *     <p>host github.com HostName github.com IdentityFile /etc/ssh/github-com/ssh-privatekey
