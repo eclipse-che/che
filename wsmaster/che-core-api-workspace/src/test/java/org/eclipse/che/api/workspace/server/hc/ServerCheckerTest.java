@@ -108,7 +108,7 @@ public class ServerCheckerTest {
       assertTrue(e.getCause() instanceof InfrastructureException);
       assertEquals(
           e.getCause().getMessage(),
-          format("Server '%s' in machine '%s' not available.", SERVER_REF, MACHINE_NAME));
+          format("Server '%s' in container '%s' not available.", SERVER_REF, MACHINE_NAME));
     }
   }
 
