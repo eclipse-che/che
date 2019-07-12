@@ -16,7 +16,6 @@ import {EnvironmentManager} from '../../../components/api/environment/environmen
 import {IEnvironmentManagerMachine} from '../../../components/api/environment/environment-manager-machine';
 import {CreateWorkspaceSvc} from './create-workspace.service';
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
-import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {RandomSvc} from '../../../components/utils/random.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {
@@ -174,7 +173,7 @@ export class CreateWorkspaceController {
     this.$timeout(() => {
       this.hideLoader = true;
     }, 10);
-    this.selectedDevfile = devfile
+    this.selectedDevfile = devfile;
   }
 
   /**
@@ -298,8 +297,9 @@ export class CreateWorkspaceController {
    */
   createWorkspace(): ng.IPromise<che.IWorkspace> {
     // update workspace name
-    this.selectedDevfile.metadata.name = this.workspaceName;
-    return this.createWorkspaceSvc.createWorkspaceFromDevfile(this.selectedDevfile, null);
+    let devfileSource = angular.copy(this.selectedDevfile);
+    devfileSource.metadata.name = this.workspaceName;
+    return this.createWorkspaceSvc.createWorkspaceFromDevfile(devfileSource, null);
   }
 
   /**

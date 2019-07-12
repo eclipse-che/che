@@ -34,7 +34,9 @@ export class ProjectSourceSelector implements ng.IDirective {
 
   bindToController: boolean = true;
 
-  scope = {};
+  scope = {
+    devfile: '='
+  };
 
   private $timeout: ng.ITimeoutService;
 
@@ -47,43 +49,56 @@ export class ProjectSourceSelector implements ng.IDirective {
 
   link($scope: IProjectSourceSelectorScope, $element: ng.IAugmentedJQuery): void {
     $scope.updateWidget = (activeButtonId: string, scrollToBottom: boolean) => {
-      this.$timeout(() => {
-        const popover = $element.find('.project-source-selector-popover'),
-              arrow = popover.find('.arrow'),
-              selectButton = $element.find(`#${activeButtonId} button`);
-        if (!selectButton || !selectButton.length) {
-          popover.removeAttr('style');
-          arrow.removeAttr('style');
-          return;
-        }
-        const widgetHeight = $element.height();
-        const top = selectButton.position().top + (selectButton.height() / 2);
-
-        const popoverHeight = popover.height();
-        if (popoverHeight < top) {
-          if ((top + popoverHeight / 2) < widgetHeight) {
-            popover.attr('style', `top: ${top - (popoverHeight / 2 + 8)}px;`);
-            arrow.attr('style', 'top: 50%;');
-          } else {
-            popover.attr('style', `top: ${top - popoverHeight}px;`);
-            arrow.attr('style', `top: ${popoverHeight}px;`);
-          }
-        } else {
-          popover.attr('style', 'top: 0px;');
-          arrow.attr('style', `top: ${top}px;`);
-        }
-
-        if (scrollToBottom === false) {
-          return;
-        }
-
-        // scroll to bottom of the page
-        // to make 'Create' button visible
-        const mdContent = $element.closest('md-content'),
-              mdContentHeight = mdContent.height();
-        mdContent.scrollTop(mdContentHeight);
-      });
+      let timeoutPeriod = 0;
+      this.updateWidget($element, activeButtonId, scrollToBottom, timeoutPeriod);
+      
     };
+  }
+
+  private updateWidget($element: ng.IAugmentedJQuery, activeButtonId: string, scrollToBottom: boolean, timeoutPeriod: number): void {
+    this.$timeout(() => {
+      const popover = $element.find('.project-source-selector-popover'),
+            arrow = popover.find('.arrow'),
+            selectButton = $element.find(`#${activeButtonId} button`);
+      if (!selectButton || !selectButton.length) {
+        popover.removeAttr('style');
+        arrow.removeAttr('style');
+        return;
+      }
+      const widgetHeight = $element.height();
+      const top = selectButton.position().top + (selectButton.height() / 2);
+      const popoverHeight = popover.height();
+
+      // With popover height lower than zero - wait to be drawn:
+      if (popoverHeight <= 0) {
+        timeoutPeriod = 500;
+        this.updateWidget($element, activeButtonId, scrollToBottom, timeoutPeriod);
+        return;
+      }
+
+      if (popoverHeight < top) {
+        if ((top + popoverHeight / 2) < widgetHeight) {
+          popover.attr('style', `top: ${top - (popoverHeight / 2 + 8)}px;`);
+          arrow.attr('style', 'top: 50%;');
+        } else {
+          popover.attr('style', `top: ${top - popoverHeight}px;`);
+          arrow.attr('style', `top: ${popoverHeight}px;`);
+        }
+      } else {
+        popover.attr('style', 'top: 0px;');
+        arrow.attr('style', `top: ${top}px;`);
+      }
+
+      if (scrollToBottom === false) {
+        return;
+      }
+
+      // scroll to bottom of the page
+      // to make 'Create' button visible
+      const mdContent = $element.closest('md-content'),
+            mdContentHeight = mdContent.height();
+      mdContent.scrollTop(mdContentHeight);
+    }, timeoutPeriod);
   }
 
 }

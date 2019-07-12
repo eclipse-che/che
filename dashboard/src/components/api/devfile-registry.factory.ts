@@ -17,6 +17,7 @@ export interface IDevfileMetaData {
   globalMemoryLimit: string;
   icon: string;
   links: any;
+  tags: Array<string>;
 }
 
 

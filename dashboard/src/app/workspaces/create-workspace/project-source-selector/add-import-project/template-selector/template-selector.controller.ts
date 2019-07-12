@@ -12,7 +12,6 @@
 'use strict';
 
 import {TemplateSelectorSvc} from './template-selector.service';
-import {StackSelectorSvc} from '../../../stack-selector/stack-selector.service';
 import {ProjectSource} from '../../project-source.enum';
 import {AddImportProjectService} from '../add-import-project.service';
 
@@ -23,7 +22,7 @@ import {AddImportProjectService} from '../add-import-project.service';
  */
 export class TemplateSelectorController {
 
-  static $inject = ['$filter', '$scope', 'addImportProjectService', 'templateSelectorSvc', 'stackSelectorSvc', 'cheListHelperFactory'];
+  static $inject = ['$filter', '$scope', 'addImportProjectService', 'templateSelectorSvc', 'cheListHelperFactory'];
 
   /**
    * Filter service.
@@ -34,10 +33,6 @@ export class TemplateSelectorController {
    */
   private templateSelectorSvc: TemplateSelectorSvc;
   /**
-   * Stack selector service.
-   */
-  private stackSelectorSvc: StackSelectorSvc;
-  /**
    * Service for project adding and importing.
    */
   private addImportProjectService: AddImportProjectService;
@@ -45,10 +40,8 @@ export class TemplateSelectorController {
    * Helper for lists.
    */
   private cheListHelper: che.widget.ICheListHelper;
-  /**
-   * The list of tags of selected stack.
-   */
-  private stackTags: string[];
+
+  private devfile: che.IWorkspaceDevfile;
   /**
    * Sorted list of all templates.
    */
@@ -66,30 +59,31 @@ export class TemplateSelectorController {
    * Default constructor that is using resource injection
    */
   constructor($filter: ng.IFilterService, $scope: ng.IScope, addImportProjectService: AddImportProjectService, templateSelectorSvc: TemplateSelectorSvc,
-     stackSelectorSvc: StackSelectorSvc, cheListHelperFactory: che.widget.ICheListHelperFactory) {
+    cheListHelperFactory: che.widget.ICheListHelperFactory) {
 
     this.$filter = $filter;
     this.templateSelectorSvc = templateSelectorSvc;
-    this.stackSelectorSvc = stackSelectorSvc;
     this.addImportProjectService = addImportProjectService;
 
     const helperId = 'template-selector';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
+    
+    $scope.$watch(() => {
+      return this.devfile;
+    }, () => {
+      if (!this.devfile) {
+        return;
+      }
+      let projects = this.devfile.projects ? this.devfile.projects : [];
+      this.allTemplates = this.$filter('orderBy')(projects, ['name']);
+      this.filterAndSortTemplates();
+    }, true);
+    
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });
 
-    this.filteredTemplates = [];
     this.selectedTemplates = this.templateSelectorSvc.getTemplates();
-
-    this.allTemplates = this.$filter('orderBy')(this.templateSelectorSvc.getAllTemplates(), ['projectType', 'displayName']);
-    this.filterAndSortTemplates();
-
-    const actionOnStackChanged = () => {
-      this.onStackChanged();
-    };
-    this.stackSelectorSvc.subscribe(actionOnStackChanged);
-    this.onStackChanged();
 
     const actionOnPublish = (source: ProjectSource) => {
       this.onAddImportProjectServicePublish(source);
@@ -98,23 +92,7 @@ export class TemplateSelectorController {
 
     $scope.$on('$destroy', () => {
       this.addImportProjectService.unsubscribe(actionOnPublish);
-      this.stackSelectorSvc.unsubscribe(actionOnStackChanged);
     });
-  }
-
-  /**
-   * Callback which is called when stack is selected.
-   */
-  onStackChanged(): void {
-    const stackId = this.stackSelectorSvc.getStackId();
-    if (!stackId) {
-      return;
-    }
-
-    const stack = this.stackSelectorSvc.getStackById(stackId);
-    this.stackTags = stack ? stack.tags : [];
-
-    this.filterAndSortTemplates();
   }
 
   /**
@@ -138,17 +116,7 @@ export class TemplateSelectorController {
    * Filters templates by tags and sort them by project type and template name.
    */
   filterAndSortTemplates(): void {
-    const stackTags = !this.stackTags ? [] : this.stackTags.map((tag: string) => tag.toLowerCase());
-
-    if (stackTags.length === 0) {
-      this.filteredTemplates = angular.copy(this.allTemplates);
-    } else {
-      this.filteredTemplates = this.allTemplates.filter((template: che.IProjectTemplate) => {
-        const templateTags = template.tags.map((tag: string) => tag.toLowerCase());
-        return stackTags.some((tag: string) => templateTags.indexOf(tag) > -1);
-      });
-    }
-
+    this.filteredTemplates = angular.copy(this.allTemplates);
     this.cheListHelper.setList(this.filteredTemplates, 'name');
     this.selectedTemplates.forEach((template: che.IProjectTemplate) => {
       this.cheListHelper.itemsSelectionStatus[template.name] = true;

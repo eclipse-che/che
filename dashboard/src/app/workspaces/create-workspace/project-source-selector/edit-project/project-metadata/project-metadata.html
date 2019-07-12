@@ -19,20 +19,6 @@
       <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
     </che-input-box>
 
-    <!-- Project description -->
-    <che-input-box che-form="projectMetadataController.projectForm"
-                   che-name="projectDescription"
-                   che-label-name="Description"
-                   che-place-holder="Description of the project"
-                   aria-label="Description of the project"
-                   ng-model="projectMetadataController.template.description"
-                   ng-model-options="{allowInvalid: true}"
-                   che-on-change="projectMetadataController.onDescriptionChanged($value)"
-                   ng-maxlength="256">
-      <div ng-message="maxlength">The name has to be less than 128 characters long.</div>
-      <div ng-message="md-maxlength">The name has to be less than 128 characters long.</div>
-    </che-input-box>
-
     <!-- Git URL -->
     <div ng-if="projectMetadataController.template.source.type==='git'">
       <che-input-box che-form="projectMetadataController.projectForm"
