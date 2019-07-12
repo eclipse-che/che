@@ -28,6 +28,9 @@ export class ProjectSourceSelectorController {
    * Directive's scope.
    */
   private $scope: IProjectSourceSelectorScope;
+  private devfileProjectsCopy: Array<any>;
+  private devfileProjects: Array<any>;
+  private devfile: che.IWorkspaceDevfile;
   /**
    * Project selector service.
    */
@@ -68,8 +71,37 @@ export class ProjectSourceSelectorController {
   constructor($scope: IProjectSourceSelectorScope, projectSourceSelectorService: ProjectSourceSelectorService) {
     this.$scope = $scope;
     this.projectSourceSelectorService = projectSourceSelectorService;
-
     this.actionType = ActionType;
+    this.devfileProjectsCopy = null;
+    
+
+    $scope.$watch(() => {
+      return this.devfile;
+    }, () => {
+      if (!this.devfile) {
+        return;
+      }
+      this.devfileProjects = angular.copy(this.devfile.projects);
+      if (this.devfileProjectsCopy && this.devfileProjectsCopy !== this.devfileProjects) {
+        this.devfileProjectsCopy.forEach((project: any) => {
+          this.projectSourceSelectorService.removeProjectTemplate(project.name);
+        });
+        this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
+        this.updateData({buttonState: true, actionType: ActionType.ADD_PROJECT});
+      }
+
+      if (this.devfileProjects && this.devfileProjects.length > 0) {
+        this.devfileProjects.forEach((project: any) => {
+          this.projectSourceSelectorService.addProjectTemplate(project);
+        });
+    
+        // update list of templates to redraw the projects section
+        this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
+        this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: this.devfileProjects[0]});
+      }
+
+      this.devfileProjectsCopy = angular.copy(this.devfileProjects);
+    }, true);
 
     $scope.$watch('$destroy', () => {
       this.projectSourceSelectorService.clearTemplatesList();
@@ -94,7 +126,6 @@ export class ProjectSourceSelectorController {
 
     // update list of templates to redraw the projects section
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-
     this.updateData({buttonState: true, actionType: ActionType.EDIT_PROJECT, template: projectTemplate});
   }
 
@@ -106,7 +137,6 @@ export class ProjectSourceSelectorController {
 
     // update list of templates to redraw the projects section
     this.projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
-
     this.updateData({buttonState: true, actionType: ActionType.ADD_PROJECT});
   }
 
@@ -149,7 +179,7 @@ export class ProjectSourceSelectorController {
 
     this.activeActionType = actionType;
     this.selectedProjectTemplate = angular.copy(template);
-
+    
     this.$scope.updateWidget(this.activeButtonId, this.scrollToBottom);
     this.scrollToBottom = false;
   }

@@ -28,7 +28,6 @@ export class SelectTemplateController {
   projectsOrderBy: string;
 
   private $mdDialog: ng.material.IDialogService;
-  private templates: Array<che.IProject>;
   private callbackController: StackController;
 
   /**
@@ -36,11 +35,6 @@ export class SelectTemplateController {
    */
   constructor(cheAPI: CheAPI, $mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
-
-    this.templates = cheAPI.getProjectTemplate().getAllProjectTemplates();
-    if (!this.templates.length) {
-      cheAPI.getProjectTemplate().fetchTemplates();
-    }
 
     this.projectsOrderBy = 'displayName';
     this.selectedTemplates = [];

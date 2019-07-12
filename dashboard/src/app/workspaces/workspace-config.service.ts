@@ -108,7 +108,6 @@ export class WorkspaceConfigService {
       namespaceIdDefer.promise,
       workspacesDefer.promise,
       this.stackSelectorSvc.getOrFetchStacks(),
-      this.templateSelectorSvc.getOrFetchTemplates(),
       githubRepositoriesPromise
     ]);
   }
