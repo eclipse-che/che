@@ -25,18 +25,8 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-ide-war</artifactId>
-            <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-workspace-loader-war</artifactId>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-wsagent-server</artifactId>
-            <type>tar.gz</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
