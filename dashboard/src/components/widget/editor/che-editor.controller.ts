@@ -93,7 +93,7 @@ export class CheEditorController {
           //to avoid Ctrl+Z clear the content
           editor.getDoc().clearHistory();
           editor.refresh();
-        }, 2500);
+        }, 1000);
         const doc = editor.getDoc();
         this.setEditorValue = (content: string) => {
           doc.setValue(content);
