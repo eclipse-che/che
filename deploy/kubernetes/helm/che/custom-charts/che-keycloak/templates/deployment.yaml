@@ -96,7 +96,12 @@ spec:
           name: keycloak-log
       restartPolicy: Always
       securityContext:
+        # `fsGroup`, `runAsGroup`, and `runAsUser` must be
+        # same values that `USER` in the container image.
         fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+        runAsNonRoot: true
       serviceAccountName: che-keycloak
       volumes:
       - name: keycloak-data
