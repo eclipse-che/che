@@ -25,6 +25,11 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>
+            <artifactId>assembly-root-war</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-workspace-loader-war</artifactId>
             <type>war</type>
         </dependency>

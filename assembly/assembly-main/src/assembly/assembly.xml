@@ -33,6 +33,15 @@
             <useProjectArtifact>false</useProjectArtifact>
             <unpack>false</unpack>
             <outputDirectory>tomcat/webapps</outputDirectory>
+            <outputFileNameMapping>ROOT.war</outputFileNameMapping>
+            <includes>
+                <include>org.eclipse.che:assembly-root-war</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <unpack>false</unpack>
+            <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>api.war</outputFileNameMapping>
             <includes>
                 <include>org.eclipse.che:assembly-wsmaster-war</include>

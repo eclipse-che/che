@@ -78,7 +78,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.che</groupId>
-                <artifactId>assembly-ide-war</artifactId>
+                <artifactId>assembly-root-war</artifactId>
                 <version>${che.version}</version>
                 <type>war</type>
             </dependency>
