@@ -16,7 +16,6 @@ import {FactoryConfig} from './factories/factories-config';
 import {ComponentsConfig} from '../components/components-config';
 import {AdminsConfig} from './admin/admin-config';
 import {AdministrationConfig} from './administration/administration-config';
-import {DiagnosticsConfig} from './diagnostics/diagnostics-config';
 import {CheColorsConfig} from './colors/che-color.constant';
 import {CheOutputColorsConfig} from './colors/che-output-colors.constant';
 import {CheCountriesConfig} from './constants/che-countries.constant';
@@ -477,7 +476,6 @@ new ComponentsConfig(instanceRegister);
 new AdminsConfig(instanceRegister);
 new AdministrationConfig(instanceRegister);
 new IdeConfig(instanceRegister);
-new DiagnosticsConfig(instanceRegister);
 
 new NavbarConfig(instanceRegister);
 new WorkspacesConfig(instanceRegister);

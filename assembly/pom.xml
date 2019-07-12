@@ -25,6 +25,7 @@
     <name>Che IDE :: Parent</name>
     <modules>
         <module>assembly-wsmaster-war</module>
+        <module>assembly-root-war</module>
         <module>assembly-workspace-loader-war</module>
         <module>assembly-main</module>
     </modules>

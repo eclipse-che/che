@@ -24,8 +24,6 @@
     <a class="che-footer-button-blue che-footer-button" id="footer-support" ng-if="cheFooterController.supportHelpPath && cheFooterController.supportHelpTitle"
        ng-href="{{cheFooterController.supportHelpPath}}" target="_blank">{{cheFooterController.supportHelpTitle}}</a>
 
-    <a class="che-footer-button-blue che-footer-button" id="footer-diagnostics" ng-href="#/diagnostic">Diagnostics</a>
-
     <a ng-repeat="link in cheFooterController.links" class="che-footer-button-blue che-footer-button" ng-href="{{link.location}}" target="_blank">{{link.title}}</a>
   </div>
 
