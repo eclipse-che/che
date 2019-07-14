@@ -6,7 +6,7 @@
     "commands": [
         {
             "commandLine": "cat | sh /home/user/bin/deploy_all.sh ${current.project.path}", 
-            "name": "Deploy All .sol Contracts", 
+            "name": "Deploy All Contracts", 
             "attributes": {
             "goal": "Run",
             "previewUrl": ""
