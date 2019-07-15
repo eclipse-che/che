@@ -47,11 +47,11 @@ import org.slf4j.LoggerFactory;
  * href="https://kubernetes.io/docs/concepts/configuration/secret">Kubernetes Secrets</a> on each
  * workspace containers. <br>
  * <strong>How it works</strong> <br>
- * When starting a workspace, we will grep all SSH Keys registered for VCS and create K8s Secret the
- * to them. Then secrets will be mounted on each container by path
+ * When starting a workspace, we will fetch all SSH Keys registered for VCS and create K8s Secret
+ * for them. Then secrets will be mounted on each container by path
  * '/etc/ssh/{sshKeyName}/ssh-privatekey' as a file. <a
  * href=https://github.com/kubernetes/kubernetes/blob/7693a1d5fe2a35b6e2e205f03ae9b3eddcdabc6b/pkg/apis/core/types.go#L4458">Secret
- * Type for SSH keys</a> Also will be created and mounted ConfigMap with SSH settings to the
+ * Type for SSH keys</a> also will be created and mounted ConfigMap with SSH settings to the
  * '/etc/ssh/ssh_config'.
  *
  * @author Vitalii Parfonov
@@ -85,58 +85,52 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
   @Traced
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
-
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
-
-    StringBuilder sshConfig = new StringBuilder();
-    Map<String, String> map = new HashMap<>();
 
     try {
       List<SshPairImpl> sshPairs = sshManager.getPairs(identity.getOwnerId(), "vcs");
-      if (!sshPairs.isEmpty()) {
-        for (SshPair sshPair : sshPairs) {
-          if (isNullOrEmpty(sshPair.getName()) || isNullOrEmpty(sshPair.getPrivateKey())) {
-            continue;
-          }
-          Secret secret =
-              new SecretBuilder()
-                  .addToData(
-                      SSH_PRIVATE_KEY,
-                      Base64.getEncoder().encodeToString(sshPair.getPrivateKey().getBytes()))
-                  .withType(SECRET_TYPE_SSH)
-                  .withNewMetadata()
-                  .withName(getValidNameForSecret(sshPair.getName()))
-                  .endMetadata()
-                  .build();
-
-          k8sEnv.getSecrets().put(secret.getMetadata().getName(), secret);
-
-          k8sEnv
-              .getPodsData()
-              .values()
-              .forEach(p -> addSshKeySecret(secret.getMetadata().getName(), p.getSpec()));
-
-          sshConfig.append(buildConfig(sshPair.getName()));
-        }
-
-        map.put(SSH_CONFIG, sshConfig.toString());
-        ConfigMap configMap =
-            new ConfigMapBuilder()
-                .withNewMetadata()
-                .withName("sshconfigmap")
-                .endMetadata()
-                .withData(map)
-                .build();
-
-        k8sEnv.getConfigMaps().put(configMap.getMetadata().getName(), configMap);
-        k8sEnv.getPodsData().values().forEach(p -> addConfigFile(p.getSpec()));
+      if (sshPairs.isEmpty()) {
+        return;
       }
+
+      StringBuilder sshConfigData = new StringBuilder();
+
+      for (SshPair sshPair : sshPairs) {
+        doProvisionSshKey(sshPair, k8sEnv);
+
+        sshConfigData.append(buildConfig(sshPair.getName()));
+      }
+
+      doProvisionSshConfig(sshConfigData.toString(), k8sEnv);
     } catch (ServerException e) {
-      LOG.warn("Unable get SSH Keys ", e);
+      LOG.warn("Unable get SSH Keys. Cause: %s", e.getMessage(), e);
     }
   }
 
-  private void addSshKeySecret(String secretName, PodSpec podSpec) {
+  private void doProvisionSshKey(SshPair sshPair, KubernetesEnvironment k8sEnv) {
+    if (isNullOrEmpty(sshPair.getName()) || isNullOrEmpty(sshPair.getPrivateKey())) {
+      return;
+    }
+    Secret secret =
+        new SecretBuilder()
+            .addToData(
+                SSH_PRIVATE_KEY,
+                Base64.getEncoder().encodeToString(sshPair.getPrivateKey().getBytes()))
+            .withType(SECRET_TYPE_SSH)
+            .withNewMetadata()
+            .withName(getValidNameForSecret(sshPair.getName()))
+            .endMetadata()
+            .build();
+
+    k8sEnv.getSecrets().put(secret.getMetadata().getName(), secret);
+
+    k8sEnv
+        .getPodsData()
+        .values()
+        .forEach(p -> mountSshKeySecret(secret.getMetadata().getName(), p.getSpec()));
+  }
+
+  private void mountSshKeySecret(String secretName, PodSpec podSpec) {
     podSpec
         .getVolumes()
         .add(
@@ -158,13 +152,31 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         });
   }
 
-  private void addConfigFile(PodSpec podSpec) {
+  private void doProvisionSshConfig(String sshConfig, KubernetesEnvironment k8sEnv) {
+    Map<String, String> sshConfigData = new HashMap<>();
+    sshConfigData.put(SSH_CONFIG, sshConfig);
+    String sshConfigMapName = "sshconfigmap";
+    ConfigMap configMap =
+        new ConfigMapBuilder()
+            .withNewMetadata()
+            .withName(sshConfigMapName)
+            .endMetadata()
+            .withData(sshConfigData)
+            .build();
+
+    k8sEnv.getConfigMaps().put(configMap.getMetadata().getName(), configMap);
+    k8sEnv.getPodsData().values().forEach(p -> mountConfigFile(p.getSpec(), sshConfigMapName));
+  }
+
+  private void mountConfigFile(PodSpec podSpec, String sshConfigMapName) {
+    String configMapVolumeName = "ssshkeyconfigvolume";
     podSpec
         .getVolumes()
         .add(
             new VolumeBuilder()
-                .withName("configvolume")
-                .withConfigMap(new ConfigMapVolumeSourceBuilder().withName("sshconfigmap").build())
+                .withName(configMapVolumeName)
+                .withConfigMap(
+                    new ConfigMapVolumeSourceBuilder().withName(sshConfigMapName).build())
                 .build());
 
     List<Container> containers = podSpec.getContainers();
@@ -172,7 +184,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         container -> {
           VolumeMount volumeMount =
               new VolumeMountBuilder()
-                  .withName("configvolume")
+                  .withName(configMapVolumeName)
                   .withMountPath(SSH_CONFIG_PATH)
                   .withSubPath(SSH_CONFIG)
                   .withReadOnly(false)
@@ -183,35 +195,34 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
   }
 
   /**
+   * Returns the ssh configuration entry which includes host and identity file location
+   *
+   * <p>Example of provided configuration:
+   *
+   * <pre>
+   * host github.com
+   * HostName github.com
+   * IdentityFile /etc/ssh/github-com/ssh-privatekey
+   * </pre>
+   *
    * @param host the host of version control service (e.g. github.com, gitlab.com and etc)
-   * @return the ssh configuration which include host of host and identity file location
-   *     <p>Example of provided configuration:
-   *     <p>host github.com HostName github.com IdentityFile /etc/ssh/github-com/ssh-privatekey
+   * @return the ssh configuration which include host and identity file location
    */
   private String buildConfig(@NotNull String host) {
-    String validName = getValidNameForSecret(host);
-    StringBuilder stringBuilder = new StringBuilder();
-    stringBuilder
-        .append("host ")
-        .append(host)
-        .append("\n")
-        .append("HostName ")
-        .append(host)
-        .append("\nIdentityFile ")
-        .append(SSH_BASE_CONFIG_PATH)
-        .append(validName)
-        .append("/")
-        .append(SSH_PRIVATE_KEY)
-        .append("\n");
-    return stringBuilder.toString();
+    return "host "
+        + host
+        + "\n"
+        + "HostName "
+        + host
+        + "\nIdentityFile "
+        + SSH_BASE_CONFIG_PATH
+        + getValidNameForSecret(host)
+        + "/"
+        + SSH_PRIVATE_KEY
+        + "\n";
   }
 
-  /**
-   * Check is given name available for secret name
-   *
-   * @param name
-   * @return
-   */
+  /** Returns a valid secret name for the specified string value. */
   private String getValidNameForSecret(@NotNull String name) {
     return name.replace(".", "-");
   }
