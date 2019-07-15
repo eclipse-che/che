@@ -87,7 +87,7 @@ export class ProjectMetadataController {
   }
 
   /**
-   * Restores project's name, description and source location from original state.
+   * Restores project's name and source location from original state.
    */
   onEditProjectServicePublish(): void {
     this.template = angular.copy(this.origTemplate);
@@ -101,16 +101,6 @@ export class ProjectMetadataController {
    */
   onNameChanged(name: string): void {
     this.template.name = name;
-    this.projectMetadataService.onMetadataChanged(this.template);
-  }
-
-  /**
-   * Callback which is called when description is changed.
-   *
-   * @param {string} description the project's description
-   */
-  onDescriptionChanged(description: string): void {
-    this.template.description = description;
     this.projectMetadataService.onMetadataChanged(this.template);
   }
 

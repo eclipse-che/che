@@ -66,14 +66,6 @@ export class CheAPIBuilder {
   }
 
   /***
-   * The Che Project Template builder
-   * @returns {CheProjectTemplateBuilder}
-   */
-  getProjectTemplateBuilder() {
-    return new CheProjectTemplateBuilder();
-  }
-
-  /***
    * The Che Project Type builder
    * @returns {CheProjectTypeBuilder}
    */

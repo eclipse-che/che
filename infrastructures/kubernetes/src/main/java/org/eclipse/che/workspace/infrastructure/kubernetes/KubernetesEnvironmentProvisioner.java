@@ -30,6 +30,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ProxySettin
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.SecurityContextProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.ServiceAccountProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.UniqueNamesProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.provision.VcsSshKeysProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.env.EnvVarsConverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.limits.ram.RamLimitRequestProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.provision.restartpolicy.RestartPolicyRewriter;
@@ -71,6 +72,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
     private final ProxySettingsProvisioner proxySettingsProvisioner;
     private final ServiceAccountProvisioner serviceAccountProvisioner;
     private final CertificateProvisioner certificateProvisioner;
+    private final VcsSshKeysProvisioner vcsSshKeysProvisioner;
 
     @Inject
     public KubernetesEnvironmentProvisionerImpl(
@@ -89,7 +91,8 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
         ImagePullSecretProvisioner imagePullSecretProvisioner,
         ProxySettingsProvisioner proxySettingsProvisioner,
         ServiceAccountProvisioner serviceAccountProvisioner,
-        CertificateProvisioner certificateProvisioner) {
+        CertificateProvisioner certificateProvisioner,
+        VcsSshKeysProvisioner vcsSshKeysProvisioner) {
       this.pvcEnabled = pvcEnabled;
       this.volumesStrategy = volumesStrategy;
       this.uniqueNamesProvisioner = uniqueNamesProvisioner;
@@ -106,6 +109,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       this.proxySettingsProvisioner = proxySettingsProvisioner;
       this.serviceAccountProvisioner = serviceAccountProvisioner;
       this.certificateProvisioner = certificateProvisioner;
+      this.vcsSshKeysProvisioner = vcsSshKeysProvisioner;
     }
 
     @Traced
@@ -144,6 +148,7 @@ public interface KubernetesEnvironmentProvisioner<T extends KubernetesEnvironmen
       proxySettingsProvisioner.provision(k8sEnv, identity);
       serviceAccountProvisioner.provision(k8sEnv, identity);
       certificateProvisioner.provision(k8sEnv, identity);
+      vcsSshKeysProvisioner.provision(k8sEnv, identity);
       LOG.debug("Provisioning Kubernetes environment done for workspace '{}'", workspaceId);
     }
   }

@@ -12,7 +12,6 @@
 'use strict';
 import {ConfirmDialogService} from '../../../../components/service/confirm-dialog/confirm-dialog.service';
 import {CheAPI} from '../../../../components/api/che-api.factory';
-import {StackSelectorSvc} from '../../create-workspace/stack-selector/stack-selector.service';
 import {RandomSvc} from '../../../../components/utils/random.service';
 import {WorkspaceDetailsProjectsService} from './workspace-details-projects.service';
 import {WorkspaceDetailsService} from '../workspace-details.service';
@@ -30,7 +29,7 @@ import {WorkspaceDataManager} from '../../../../components/api/workspace/workspa
  */
 export class WorkspaceDetailsProjectsCtrl {
 
-  static $inject = ['cheAPI', '$mdDialog', 'confirmDialogService', '$scope', 'cheListHelperFactory', 'stackSelectorSvc', 'randomSvc', 'createWorkspaceSvc', 'workspaceDetailsService', 'workspaceDetailsProjectsService'];
+  static $inject = ['cheAPI', '$mdDialog', 'confirmDialogService', '$scope', 'cheListHelperFactory', 'randomSvc', 'createWorkspaceSvc', 'workspaceDetailsService', 'workspaceDetailsProjectsService'];
 
   /**
    * Material design Dialog service.
@@ -44,10 +43,6 @@ export class WorkspaceDetailsProjectsCtrl {
    * List helper.
    */
   private cheListHelper: che.widget.ICheListHelper;
-  /**
-   * Stack selector service.
-   */
-  private stackSelectorSvc: StackSelectorSvc;
   /**
    * Generator for random strings.
    */
@@ -86,14 +81,12 @@ export class WorkspaceDetailsProjectsCtrl {
               confirmDialogService: ConfirmDialogService,
               $scope: ng.IScope,
               cheListHelperFactory: che.widget.ICheListHelperFactory,
-              stackSelectorSvc: StackSelectorSvc,
               randomSvc: RandomSvc,
               createWorkspaceSvc: CreateWorkspaceSvc,
               workspaceDetailsService: WorkspaceDetailsService,
               workspaceDetailsProjectsService: WorkspaceDetailsProjectsService) {
     this.$mdDialog = $mdDialog;
     this.confirmDialogService = confirmDialogService;
-    this.stackSelectorSvc = stackSelectorSvc;
     this.randomSvc = randomSvc;
     this.workspaceDetailsProjectsService = workspaceDetailsProjectsService;
     this.createWorkspaceSvc = createWorkspaceSvc;
@@ -151,7 +144,6 @@ export class WorkspaceDetailsProjectsCtrl {
       return;
     }
     this.workspaceDetails = workspaceDetails;
-    this.stackSelectorSvc.setStackId(this.workspaceDetails.attributes.stackId);
     this.projects = this.workspaceDataManager.getProjects(this.workspaceDetails);
     this.cheListHelper.setList(this.projects, 'name');
   }
@@ -183,7 +175,6 @@ export class WorkspaceDetailsProjectsCtrl {
         // update name, displayName and path
         const newName = this.getUniqueName(origName);
         projectTemplate.name = newName;
-        projectTemplate.displayName = newName;
         projectTemplate.path = '/' +  newName.replace(/[^\w-_]/g, '_');
       }
 

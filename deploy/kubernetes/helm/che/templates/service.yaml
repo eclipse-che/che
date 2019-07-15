@@ -12,6 +12,7 @@ kind: Service
 metadata:
   labels:
     app: che
+    component: che
   name: che-host
 spec:
   ports:
@@ -25,3 +26,4 @@ spec:
     targetPort: 8087
   selector:
     app: che
+    component: che

@@ -13,7 +13,6 @@
 
 import {CheAPI} from './che-api.factory';
 import {CheWorkspace} from './workspace/che-workspace.factory';
-import {CheProjectTemplate} from './che-project-template.factory';
 import {CheFactory} from './che-factory.factory';
 import {CheStack} from './che-stack.factory';
 import {CheWebsocket} from './che-websocket.factory';
@@ -49,7 +48,6 @@ export class ApiConfig {
 
   constructor(register: che.IRegisterService) {
     register.factory('cheWorkspace', CheWorkspace);
-    register.factory('cheProjectTemplate', CheProjectTemplate);
     register.factory('cheFactory', CheFactory);
     register.factory('cheProfile', CheProfile);
     register.factory('chePreferences', ChePreferences);

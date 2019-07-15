@@ -16,7 +16,6 @@ import {CheProfile} from './che-profile.factory';
 import {CheFactory} from './che-factory.factory';
 import {CheFactoryTemplate} from './che-factory-template.factory';
 import {ChePreferences} from './che-preferences.factory';
-import {CheProjectTemplate} from './che-project-template.factory';
 import {CheService} from './che-service.factory';
 import {CheStack} from './che-stack.factory';
 import {CheOAuthProvider} from './che-o-auth-provider.factory';
@@ -32,14 +31,12 @@ import {CheUser} from './che-user.factory';
 export class CheAPI {
 
   static $inject = ['cheWorkspace', 'cheFactory', 'cheFactoryTemplate',
-               'cheProfile', 'chePreferences', 'cheProjectTemplate',
-              'cheService', 'cheStack', 'cheOAuthProvider', 'cheAgent',
+               'cheProfile', 'chePreferences', 'cheService', 'cheStack', 'cheOAuthProvider', 'cheAgent',
             'cheSsh', 'cheUser', 'chePermissions', 'cheOrganization'];
 
   private cheWorkspace: CheWorkspace;
   private cheProfile: CheProfile;
   private chePreferences: ChePreferences;
-  private cheProjectTemplate: CheProjectTemplate;
   private cheFactory: CheFactory;
   private cheFactoryTemplate: CheFactoryTemplate;
   private cheService: CheService;
@@ -55,15 +52,13 @@ export class CheAPI {
    * Default constructor that is using resource
    */
   constructor(cheWorkspace: CheWorkspace, cheFactory: CheFactory, cheFactoryTemplate: CheFactoryTemplate,
-              cheProfile: CheProfile, chePreferences: ChePreferences, cheProjectTemplate: CheProjectTemplate,
-              cheService: CheService, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent,
+              cheProfile: CheProfile, chePreferences: ChePreferences, cheService: CheService, cheStack: CheStack, cheOAuthProvider: CheOAuthProvider, cheAgent: CheAgent,
               cheSsh: CheSsh, cheUser: CheUser, chePermissions: che.api.IChePermissions, cheOrganization: che.api.ICheOrganization) {
     this.cheWorkspace = cheWorkspace;
     this.cheProfile = cheProfile;
     this.cheFactory = cheFactory;
     this.cheFactoryTemplate = cheFactoryTemplate;
     this.chePreferences = chePreferences;
-    this.cheProjectTemplate = cheProjectTemplate;
     this.cheService = cheService;
     this.cheStack = cheStack;
     this.cheOAuthProvider = cheOAuthProvider;
@@ -104,14 +99,6 @@ export class CheAPI {
    */
   getPreferences(): ChePreferences {
     return this.chePreferences;
-  }
-
-  /**
-   * The Che Project Template API
-   * @returns {CheProjectTemplate}
-   */
-  getProjectTemplate(): CheProjectTemplate {
-    return this.cheProjectTemplate;
   }
 
   /**

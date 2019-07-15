@@ -89,15 +89,10 @@ export class ProjectSourceSelectorService {
     const origName = projectTemplate.name;
 
     if (this.isProjectTemplateNameUnique(origName) === false) {
-      // update name, displayName and path
+      // update name and path
       const newName = this.getUniqueName(origName);
       projectTemplate.name = newName;
-      projectTemplate.displayName = newName;
       projectTemplate.path = '/' +  newName.replace(/[^\w-_]/g, '_');
-    }
-
-    if (!projectTemplate.type && projectTemplate.projectType) {
-      projectTemplate.type = projectTemplate.projectType;
     }
 
     this.projectTemplates.push(projectTemplate);

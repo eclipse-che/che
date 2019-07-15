@@ -12,6 +12,7 @@ kind: ConfigMap
 metadata:
   labels:
     app: che
+    component: che
   name: che
 data:
   CHE_HOST: {{ template "cheHost" . }}
