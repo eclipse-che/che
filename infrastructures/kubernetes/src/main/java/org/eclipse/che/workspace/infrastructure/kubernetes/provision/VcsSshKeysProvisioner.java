@@ -45,14 +45,20 @@ import org.slf4j.LoggerFactory;
 /**
  * This class allows mount user SSH Keys as <a
  * href="https://kubernetes.io/docs/concepts/configuration/secret">Kubernetes Secrets</a> on each
- * workspace containers. <br>
- * <strong>How it works</strong> <br>
- * When starting a workspace, we will fetch all SSH Keys registered for VCS and create K8s Secret
- * for them. Then secrets will be mounted on each container by path
- * '/etc/ssh/{sshKeyName}/ssh-privatekey' as a file. <a
- * href=https://github.com/kubernetes/kubernetes/blob/7693a1d5fe2a35b6e2e205f03ae9b3eddcdabc6b/pkg/apis/core/types.go#L4458">Secret
- * Type for SSH keys</a> also will be created and mounted ConfigMap with SSH settings to the
- * '/etc/ssh/ssh_config'.
+ * workspace container.<br>
+ *
+ * <p><strong>How it works:</strong>
+ *
+ * <ul>
+ *   <li>all SSH Keys registered for VCS are fetched;
+ *   <li>create K8s Secrets with <a
+ *       href=https://github.com/kubernetes/kubernetes/blob/7693a1d5fe2a35b6e2e205f03ae9b3eddcdabc6b/pkg/apis/core/types.go#L4458">SSH
+ *       Key type</a> for each of SSH keys;
+ *   <li>secrets are mounted on each container by path '/etc/ssh/{sshKeyName}/ssh-privatekey' as a
+ *       file;
+ *   <li>ConfigMap with SSH settings is created and mounted to container by path
+ *       '/etc/ssh/ssh_config'.
+ * </ul>
  *
  * @author Vitalii Parfonov
  */
