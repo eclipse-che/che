@@ -50,7 +50,7 @@ export class Dashboard {
 
     async openDashboard() {
           await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
-          this.waitPage();
+          await this.waitPage();
 
     }
 
