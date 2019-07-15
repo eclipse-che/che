@@ -48,8 +48,8 @@ export class Dashboard {
         await this.workspaces.waitWorkspaceListItemAbcence(workspaceName);
     }
 
-    async openDashboard(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
-          await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL + '/dashboard/');
+    async openDashboard() {
+          await this.driverHelper.getDriver().navigate().to(TestConstants.TS_SELENIUM_BASE_URL);
           this.waitPage();
 
     }
