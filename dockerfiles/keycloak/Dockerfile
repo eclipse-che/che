@@ -16,7 +16,7 @@ RUN ln -s /opt/jboss/tools/docker-entrypoint.sh && \
     theme-resources/resources/realm-identity-provider-openshift-v4.html theme-resources/resources/realm-identity-provider-openshift-v4-ext.html
 
 USER root
-RUN chgrp -R 0 /scripts && \
+RUN chown -R 1000:0 /scripts && \
     chmod -R g+rwX /scripts
 
-USER 1000
+USER 1000:1000

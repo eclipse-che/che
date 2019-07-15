@@ -83,7 +83,7 @@ export class CheAPI {
   }
 
   /**
-   * The Che oAuth Provider API
+   * The Che OAuth Provider API
    * @returns {CheOAuthProvider}
    */
   getOAuthProvider(): CheOAuthProvider {

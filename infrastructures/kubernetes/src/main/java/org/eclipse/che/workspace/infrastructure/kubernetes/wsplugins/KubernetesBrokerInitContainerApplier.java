@@ -77,7 +77,9 @@ public class KubernetesBrokerInitContainerApplier<E extends KubernetesEnvironmen
           brokerEnvironment.getMachines().get(Names.machineName(brokerPod, container));
       if (brokerMachine == null) {
         throw new InfrastructureException(
-            String.format("Could not find machine for broker container %s", container.getName()));
+            String.format(
+                "Could not retrieve the specification of the plugin broker container %s",
+                container.getName()));
       }
       workspaceEnvironment
           .getMachines()

@@ -10,7 +10,7 @@ projects:
 components:
   - type: kubernetes
     alias: petclinic-web
-    reference: https://raw.githubusercontent.com/eclipse/che/selen-happy-4/e2e/files/happy-path/containers-happy-path.yaml
+    reference: https://raw.githubusercontent.com/eclipse/che/master/e2e/files/happy-path/containers-happy-path.yaml
     selector:
       app.kubernetes.io/component: webapp
     entrypoints:
@@ -19,7 +19,7 @@ components:
         args: ["-f", "/dev/null"]
   - type: kubernetes
     alias: petclinic-db
-    reference: https://raw.githubusercontent.com/eclipse/che/selen-happy-4/e2e/files/happy-path/containers-happy-path.yaml
+    reference: https://raw.githubusercontent.com/eclipse/che/master/e2e/files/happy-path/containers-happy-path.yaml
     selector:
       app.kubernetes.io/component: database
   - type: dockerimage
@@ -32,8 +32,6 @@ components:
         value: /home/user/.m2
     memoryLimit: 4Gi
     mountSources: true
-  - type: cheEditor
-    id: eclipse/che-theia/next
   - type: chePlugin
     id: redhat/java/latest
   - type: chePlugin
