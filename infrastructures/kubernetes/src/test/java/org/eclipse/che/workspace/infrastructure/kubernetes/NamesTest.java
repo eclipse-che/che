@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes;
 
 import static org.testng.Assert.assertEquals;
 
+import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import java.util.Map;
 import org.testng.annotations.Test;
@@ -52,5 +53,23 @@ public class NamesTest {
     assertEquals("machine1", annos.get("che.container.1.machine"));
     assertEquals("container2", annos.get("che.container.2.name"));
     assertEquals("machine2", annos.get("che.container.2.machine"));
+  }
+
+  @Test
+  public void shouldReadMachineName() {
+    // given
+    ObjectMeta metaData = new ObjectMeta();
+    Container container1 = new Container();
+    container1.setName("container1");
+    Container container2 = new Container();
+    container2.setName("container2");
+
+    // when
+    Names.putMachineName(metaData, container1.getName(), "machine1");
+    Names.putMachineName(metaData, container2.getName(), "machine2");
+
+    // then
+    assertEquals(Names.machineName(metaData, container1), "machine1");
+    assertEquals(Names.machineName(metaData, container2), "machine2");
   }
 }
