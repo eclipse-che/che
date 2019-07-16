@@ -11,20 +11,17 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert;
 
-import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
-
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
-import java.util.HashMap;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPoint;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
@@ -67,14 +64,11 @@ public class DockerImageEnvironmentConverter {
 
     applyEntryPoint(machine, container);
 
-    final Map<String, String> annotations = new HashMap<>();
-    annotations.put(format(MACHINE_NAME_ANNOTATION_FMT, CONTAINER_NAME), machineName);
-
     final Pod pod =
         new PodBuilder()
             .withNewMetadata()
             .withName(POD_NAME)
-            .withAnnotations(annotations)
+            .withAnnotations(Names.createMachineNameAnnotations(CONTAINER_NAME, machineName))
             .endMetadata()
             .withNewSpec()
             .withContainers(container.build())

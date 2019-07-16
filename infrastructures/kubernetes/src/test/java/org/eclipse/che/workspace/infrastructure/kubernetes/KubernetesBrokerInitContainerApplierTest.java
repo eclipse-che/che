@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.createMachineNameAnnotations;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.testng.Assert.assertEquals;
@@ -59,17 +59,15 @@ public class KubernetesBrokerInitContainerApplierTest {
   private static final String WORKSPACE_MACHINE_NAME = "workspaceMachine";
   private static final String WORKSPACE_CONTAINER_NAME = "workspaceContainer";
   private static final Map<String, String> workspacePodAnnotations =
-      ImmutableMap.of(
-          String.format(MACHINE_NAME_ANNOTATION_FMT, WORKSPACE_CONTAINER_NAME),
-          WORKSPACE_MACHINE_NAME);
+      createMachineNameAnnotations(WORKSPACE_CONTAINER_NAME, WORKSPACE_MACHINE_NAME);
 
   private static final String BROKER_POD_NAME = "brokerPod";
   private static final String BROKER_MACHINE_NAME = "brokerMachine";
   private static final String BROKER_CONTAINER_NAME = "brokerContainer";
   private static final String BROKER_CONFIGMAP_NAME = "brokerConfigMap";
   private static final Map<String, String> brokerPodAnnotations =
-      ImmutableMap.of(
-          String.format(MACHINE_NAME_ANNOTATION_FMT, BROKER_CONTAINER_NAME), BROKER_MACHINE_NAME);
+      createMachineNameAnnotations(BROKER_CONTAINER_NAME, BROKER_MACHINE_NAME);
+
   private static final Map<String, String> brokerConfigMapData =
       ImmutableMap.of("brokerConfigKey", "brokerConfigValue");
 
