@@ -10,7 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IPlugin, PluginRegistry} from '../../../../components/api/plugin-registry.factory';
+import {IPlugin, PluginRegistry, IPluginRow} from '../../../../components/api/plugin-registry.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 
@@ -36,7 +36,7 @@ export class WorkspaceEditorsController {
   isLoading: boolean;
 
   editorOrderBy = 'displayName';
-  editors: Array<IPlugin> = [];
+  editors: Map<string, IPluginRow> = new Map(); // the key is publisher/name
   selectedEditor: string = '';
   editorFilter: any;
 
@@ -80,14 +80,26 @@ export class WorkspaceEditorsController {
    * Loads the list of plugins from registry.
    */
   loadPlugins(): void {
-    this.editors = [];
+    this.editors = new Map();
     this.isLoading = true;
-    this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPlugin>) => {
+    this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPluginRow>) => {
       this.isLoading = false;
-      result.forEach((item: IPlugin) => {
+      result.forEach((item: IPluginRow) => {
         if (item.type === EDITOR_TYPE) {
-          this.editors.push(item);
-        };
+
+          // since plugin registry returns an array of plugins/editors with a single version we need to unite the editor versions into one
+          const pluginID = `${item.publisher}/${item.name}`;
+
+          item.selected = 'latest'; // set the default selected to latest
+
+          if (this.editors.has(pluginID)) {
+            const foundPlugin = this.editors.get(pluginID);
+            foundPlugin.versions.push(item.version);
+          } else {
+            item.versions = [item.version];
+            this.editors.set(pluginID, item);
+          }
+        }
       });
 
       this.updateEditors();
@@ -112,12 +124,39 @@ export class WorkspaceEditorsController {
    *
    * @param {IPlugin} plugin
    */
-  updateEditor(plugin: IPlugin): void {
+  updateEditor(plugin: IPluginRow): void {
     if (plugin.type === EDITOR_TYPE) {
-      this.selectedEditor = plugin.isEnabled ? plugin.id : '';
+      const pluginID = `${plugin.publisher}/${plugin.name}`;
+      const pluginIDWithVersion = `${plugin.publisher}/${plugin.name}/${plugin.selected}`;
+
+      this.selectedEditor = plugin.isEnabled ? pluginIDWithVersion : '';
+
+      this.editors.get(pluginID).selected = plugin.selected;
+      this.editors.get(pluginID).id = pluginIDWithVersion;
+
       this.cheWorkspace.getWorkspaceDataManager().setEditor(this.workspace, this.selectedEditor);
     }
-    
+
+    this.onChange();
+  }
+
+  /**
+   * Update the selected editor version when the editor version dropdown is changed
+   *
+   * @param {IPlugin} plugin
+   */
+  updateSelectedEditorVersion(plugin: IPluginRow): void {
+    if (plugin.type === EDITOR_TYPE) {
+      const pluginID = `${plugin.publisher}/${plugin.name}`;
+
+      // create a plugin id with the newly selected version
+      const pluginIDWithVersion = `${pluginID}/${plugin.selected}`;
+
+      this.editors.get(pluginID).selected = plugin.selected;
+      this.editors.get(pluginID).id = pluginIDWithVersion;
+
+      this.cheWorkspace.getWorkspaceDataManager().setEditor(this.workspace, pluginIDWithVersion);
+    }
     this.onChange();
   }
 
@@ -128,11 +167,18 @@ export class WorkspaceEditorsController {
     this.selectedEditor = this.cheWorkspace.getWorkspaceDataManager().getEditor(this.workspace);
 
     // check each editor's enabled state:
-    this.editors.forEach((editor: IPlugin) => {
+    this.editors.forEach((editor: IPluginRow) => {
       editor.isEnabled = this.isEditorEnabled(editor);
+      if (editor.id === this.selectedEditor) {
+
+        // this.selectedEditor is in the form publisher/name/pluginVersion
+        const editorSep = this.selectedEditor.split('/');
+        const pluginVersion = editorSep[2];
+        editor.selected = pluginVersion;
+      }
     });
 
-    this.cheListHelper.setList(this.editors, 'name');
+    this.cheListHelper.setList(Array.from(this.editors.values()), 'name');
   }
 
   /**
