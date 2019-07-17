@@ -45,7 +45,9 @@ suite('E2E', async () => {
         });
 
         test('Create and open workspace', async () => {
-            await newWorkspace.createAndRunWorkspace(namespace, workspaceName, 'Java Maven', sampleName);
+            await newWorkspace.typeWorkspaceName(workspaceName);
+            await newWorkspace.selectStack('Java Maven');
+            await newWorkspace.clickOnCreateAndOpenButton();
         });
     });
 
@@ -68,7 +70,7 @@ suite('E2E', async () => {
 
         test('Check "Java Language Server" initialization by statusbar', async () => {
             await ide.waitStatusBarContains('Starting Java Language Server');
-            await ide.waitStatusBarTextAbsence('Starting Java Language Server');
+            await ide.waitStatusBarTextAbsence('Starting Java Language Server', 60000);
         });
 
         test('Check "Java Language Server" initialization by suggestion invoking', async () => {
