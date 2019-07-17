@@ -40,4 +40,4 @@ mvn $CLEAN_GOAL dependency:unpack-dependencies \
 chmod +x target/bin/webdriver.sh
 
 #(target/bin/webdriver.sh "$TESTS_SCOPE" $@)
-(target/bin/webdriver.sh --include-tests-under-repair --include-flaky-tests "$TESTS_SCOPE" $@)
+(target/bin/webdriver.sh --include-flaky-tests "$TESTS_SCOPE" $@)

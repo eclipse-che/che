@@ -30,7 +30,6 @@
       <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitTest"/>
       <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
       <class name="org.eclipse.che.selenium.dashboard.RenameWorkspaceTest"/>
-      <class name="org.eclipse.che.selenium.dashboard.StacksListTest"/>
     </classes>
   </test>
 </suite>
