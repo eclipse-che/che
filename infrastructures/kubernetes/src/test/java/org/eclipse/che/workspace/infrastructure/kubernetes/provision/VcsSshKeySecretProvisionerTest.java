@@ -62,7 +62,8 @@ public class VcsSshKeySecretProvisionerTest {
 
   @BeforeMethod
   public void setup() {
-    when(runtimeIdentity.getOwnerId()).thenReturn("someuser");
+    when(runtimeIdentity.getOwnerId()).thenReturn(someUser);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
     k8sEnv = KubernetesEnvironment.builder().build();
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -102,9 +103,9 @@ public class VcsSshKeySecretProvisionerTest {
 
     Map<String, ConfigMap> configMaps = k8sEnv.getConfigMaps();
     assertNotNull(configMaps);
-    assertTrue(configMaps.containsKey("sshconfigmap"));
+    assertTrue(configMaps.containsKey("wksp-sshconfigmap"));
 
-    ConfigMap sshConfigMap = configMaps.get("sshconfigmap");
+    ConfigMap sshConfigMap = configMaps.get("wksp-sshconfigmap");
     assertNotNull(sshConfigMap);
 
     Map<String, String> mapData = sshConfigMap.getData();
