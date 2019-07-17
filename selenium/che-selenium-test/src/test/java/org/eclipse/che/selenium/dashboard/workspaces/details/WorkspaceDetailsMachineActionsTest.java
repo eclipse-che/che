@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
-import static org.eclipse.che.selenium.core.TestGroup.DOCKER;
 import static org.eclipse.che.selenium.core.TestGroup.K8S;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.TestGroup.OSIO;
@@ -107,19 +106,9 @@ public class WorkspaceDetailsMachineActionsTest {
     checkEditOfMachineName(IMAGE_NAME);
   }
 
-  @Test(groups = DOCKER)
-  public void checkEditMachineNameDocker() {
-    checkEditOfMachineName("FROM " + IMAGE_NAME + "\n");
-  }
-
   @Test(groups = {OPENSHIFT, K8S, OSIO})
   public void checkRamSectionOpenshift() {
     checkRamSection(IMAGE_NAME);
-  }
-
-  @Test(groups = {DOCKER})
-  public void checkRamSectionDocker() {
-    checkRamSection("FROM " + IMAGE_NAME + "\n");
   }
 
   private void checkEditOfMachineName(String expectedRecipeText) {
