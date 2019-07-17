@@ -74,7 +74,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
 
   private static final String SSH_BASE_CONFIG_PATH = "/etc/ssh/";
 
-  private final String SSH_CONFIG_MAP = "-sshconfigmap";
+  private final String SSH_CONFIG_MAP_NAME_SUFFIX = "-sshconfigmap";
 
   private static final String SSH_CONFIG = "ssh_config";
 
@@ -109,7 +109,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         sshConfigData.append(buildConfig(sshPair.getName()));
       }
 
-      String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP;
+      String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
       doProvisionSshConfig(sshConfigMapName, sshConfigData.toString(), k8sEnv);
     } catch (ServerException e) {
       LOG.warn("Unable get SSH Keys. Cause: %s", e.getMessage(), e);
