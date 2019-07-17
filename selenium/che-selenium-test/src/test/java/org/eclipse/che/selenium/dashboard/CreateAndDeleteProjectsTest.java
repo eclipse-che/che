@@ -13,7 +13,6 @@ package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.PROJECTS;
 
 import com.google.inject.Inject;
@@ -40,7 +39,7 @@ import org.testng.annotations.Test;
 public class CreateAndDeleteProjectsTest {
 
   private static final String WORKSPACE = generate("workspace", 4);
-  private static final String SECOND_WEB_JAVA_SPRING_PROJECT_NAME = WEB_JAVA_SPRING + "-1";
+  private static final String SECOND_CONSOLE_JAVA_SIMPLE_PROJECT_NAME = CONSOLE_JAVA_SIMPLE + "-1";
 
   private String dashboardWindow;
 
@@ -82,16 +81,11 @@ public class CreateAndDeleteProjectsTest {
     // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
     newWorkspace.selectStack(Stack.JAVA_MAVEN);
     newWorkspace.typeWorkspaceName(WORKSPACE);
+    projectSourcePage.waitCreatedProjectButton(CONSOLE_JAVA_SIMPLE);
 
-    // create 'web-java-spring' and 'console-java-simple' projects
+    // create 'console-java-simple-1' project
     projectSourcePage.clickOnAddOrImportProjectButton();
-    projectSourcePage.selectSample(WEB_JAVA_SPRING);
     projectSourcePage.selectSample(CONSOLE_JAVA_SIMPLE);
-    projectSourcePage.clickOnAddProjectButton();
-
-    // create 'web-java-spring-1' project
-    projectSourcePage.clickOnAddOrImportProjectButton();
-    projectSourcePage.selectSample(WEB_JAVA_SPRING);
     projectSourcePage.clickOnAddProjectButton();
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
@@ -110,8 +104,8 @@ public class CreateAndDeleteProjectsTest {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
     theiaProjectTree.waitProjectAreaOpened();
-    theiaProjectTree.waitItem(WEB_JAVA_SPRING);
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
+    theiaProjectTree.waitItem(SECOND_CONSOLE_JAVA_SIMPLE_PROJECT_NAME);
   }
 
   @Test(priority = 1)
@@ -124,20 +118,16 @@ public class CreateAndDeleteProjectsTest {
     workspaces.selectWorkspaceItemName(WORKSPACE);
     workspaceDetails.selectTabInWorkspaceMenu(PROJECTS);
 
-    deleteProject(WEB_JAVA_SPRING);
-
-    workspaceProjects.waitProjectIsPresent(SECOND_WEB_JAVA_SPRING_PROJECT_NAME);
-
     deleteProject(CONSOLE_JAVA_SIMPLE);
+
+    workspaceProjects.waitProjectIsPresent(SECOND_CONSOLE_JAVA_SIMPLE_PROJECT_NAME);
   }
 
   private void deleteProject(String projectName) {
     workspaceProjects.waitProjectIsPresent(projectName);
-
     workspaceProjects.clickOnCheckbox(projectName);
     workspaceProjects.clickOnDeleteButton();
     workspaceDetails.clickOnDeleteButtonInDialogWindow();
-
     workspaceProjects.waitProjectIsNotPresent(projectName);
   }
 }
