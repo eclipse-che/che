@@ -1,5 +1,5 @@
 {
-  "name": "e2e",
+  "name": "che-e2e",
   "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
@@ -7,7 +7,8 @@
     "test": "npm run lint && npm run tsc && mocha --opts mocha.opts",
     "test-happy-path": "npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
     "lint": "tslint --fix -p .",
-    "tsc": "tsc -p ."
+    "tsc": "tsc -p .",
+    "publish-with-tag": "./publish.sh"
   },
   "author": "Ihor Okhrimenko (iokhrime@redhat.com)",
   "license": "ISC",
