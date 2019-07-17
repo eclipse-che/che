@@ -30,12 +30,17 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
 import org.openqa.selenium.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithSpecificBranchTest {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DirectUrlFactoryWithSpecificBranchTest.class);
+
   private static final String SECOND_BRANCH_NAME = "contrib";
 
   @Inject
@@ -66,6 +71,11 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
   @AfterClass
   public void deleteTestBranch() throws Exception {
+    if (testFactoryWithSpecificBranch == null) {
+      LOG.warn("It was impossible to remove factory.");
+      return;
+    }
+
     testFactoryWithSpecificBranch.delete();
   }
 
