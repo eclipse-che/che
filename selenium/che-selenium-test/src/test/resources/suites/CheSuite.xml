@@ -27,7 +27,6 @@
           <class name="org.eclipse.che.selenium.dashboard.organization.UserEmptyOrganizationTest"/>
           <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithRootFolderTest"/>
           <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranchTest"/>
-          <class name="org.eclipse.che.selenium.dashboard.CreateStackTest"/>
           <class name="org.eclipse.che.selenium.theia.TheiaBuildPluginTest"/>
           <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStopStartWsTest"/>
@@ -38,9 +37,6 @@
           <class name="org.eclipse.che.selenium.workspaces.WorkspaceFromOfficialUbuntuImageStartTest"/>
           <class name="org.eclipse.che.selenium.workspaces.CheckStoppingWsByTimeoutTest"/>
           <class name="org.eclipse.che.selenium.dashboard.AccountTest"/>
-
-          <!-- Next tests can unexpectedly affect on other tests and so should be executed at the end -->
-          <class name="org.eclipse.che.selenium.dashboard.StacksListTest"/>
         </classes>
     </test>
 
