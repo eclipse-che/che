@@ -56,12 +56,11 @@ public class DirectUrlFactoryWithRootFolderTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (testFactoryWithRootFolder == null) {
-      LOG.warn("It was impossible to remove factory.");
-      return;
+    try {
+      testFactoryWithRootFolder.delete();
+    } catch (Exception e) {
+      LOG.warn("It was impossible to remove factory.", e);
     }
-
-    testFactoryWithRootFolder.delete();
   }
 
   @Test

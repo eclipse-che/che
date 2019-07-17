@@ -71,12 +71,11 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
   @AfterClass
   public void deleteTestBranch() throws Exception {
-    if (testFactoryWithSpecificBranch == null) {
-      LOG.warn("It was impossible to remove factory.");
-      return;
+    try {
+      testFactoryWithSpecificBranch.delete();
+    } catch (Exception e) {
+      LOG.warn("It was impossible to remove factory.", e);
     }
-
-    testFactoryWithSpecificBranch.delete();
   }
 
   @Test

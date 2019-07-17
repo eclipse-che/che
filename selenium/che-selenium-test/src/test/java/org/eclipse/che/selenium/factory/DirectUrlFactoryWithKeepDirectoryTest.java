@@ -56,12 +56,11 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    if (testFactoryWithKeepDir == null) {
-      LOG.warn("It was impossible to remove factory.");
-      return;
+    try {
+      testFactoryWithKeepDir.delete();
+    } catch (Exception e) {
+      LOG.warn("It was impossible to remove factory.", e);
     }
-
-    testFactoryWithKeepDir.delete();
   }
 
   @Test
