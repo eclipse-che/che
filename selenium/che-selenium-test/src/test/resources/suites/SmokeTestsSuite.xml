@@ -18,7 +18,6 @@
        thread-count="4">
     <test name="all">
         <classes>
-            <class name="org.eclipse.che.selenium.factory.CreateNamedFactoryFromDashboardTest"/>
         </classes>
     </test>
 </suite>
