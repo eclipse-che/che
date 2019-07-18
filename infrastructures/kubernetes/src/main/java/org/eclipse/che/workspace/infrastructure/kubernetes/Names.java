@@ -19,6 +19,8 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.Pod;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
@@ -163,62 +165,40 @@ public class Names {
     return NameGenerator.generate(prefix, GENERATED_PART_SIZE);
   }
 
+  @Nullable
   private static String findMachineName(Map<String, String> annotations, String containerName) {
     if (annotations == null) {
       return null;
     }
 
-    for (Map.Entry<String, String> e : annotations.entrySet()) {
-      String key = e.getKey();
-
-      if (!key.startsWith(CONTAINER_META_PREFIX)) {
-        continue;
-      }
-
-      if (!key.endsWith(CONTAINER_META_NAME_SUFFIX)) {
-        continue;
-      }
-
-      if (!containerName.equals(e.getValue())) {
-        continue;
-      }
-
-      String index =
-          key.substring(
-              CONTAINER_META_PREFIX.length(), key.length() - CONTAINER_META_NAME_SUFFIX.length());
-
-      String machineNameKey = CONTAINER_META_PREFIX + index + CONTAINER_META_MACHINE_SUFFIX;
-
-      return annotations.get(machineNameKey);
-    }
-
-    return null;
+    return annotations
+        .entrySet()
+        .stream()
+        // find the annotation that maps the container
+        .filter(e -> isContainerMetaAnnotationKey(e.getKey()))
+        .filter(e -> containerName.equals(e.getValue()))
+        // construct the annotation key for the annotation that contains the machine name
+        .map(Entry::getKey)
+        .map(Names::getStringIndexFromContainerMetaAnnotationKey)
+        .map(index -> CONTAINER_META_PREFIX + index + CONTAINER_META_MACHINE_SUFFIX)
+        // look for the annotation of the machine name
+        .map(annotations::get)
+        .findFirst()
+        .orElse(null);
   }
 
   private static int maxContainerMetaIndex(Map<String, String> annotations) {
-    int max = 0;
-
     if (annotations == null) {
-      return max;
+      return 0;
     }
 
-    for (String key : annotations.keySet()) {
-      if (!(key.startsWith(CONTAINER_META_PREFIX) && key.endsWith(CONTAINER_META_NAME_SUFFIX))) {
-        continue;
-      }
-
-      String idxStr =
-          key.substring(
-              CONTAINER_META_PREFIX.length(), key.length() - CONTAINER_META_NAME_SUFFIX.length());
-
-      int idx = Integer.parseInt(idxStr);
-
-      if (max < idx) {
-        max = idx;
-      }
-    }
-
-    return max;
+    return annotations
+        .keySet()
+        .stream()
+        .filter(Names::isContainerMetaAnnotationKey)
+        .mapToInt(Names::getIndexFromContainerMetaAnnotationKey)
+        .max()
+        .orElse(0);
   }
 
   private static int findContainerIndex(Map<String, String> annotations, String containerName) {
@@ -226,19 +206,28 @@ public class Names {
       return -1;
     }
 
-    for (Map.Entry<String, String> e : annotations.entrySet()) {
-      String key = e.getKey();
-      if (key.startsWith(CONTAINER_META_PREFIX)
-          && key.endsWith(CONTAINER_META_NAME_SUFFIX)
-          && containerName.equals(e.getValue())) {
-        String idxStr =
-            key.substring(
-                CONTAINER_META_PREFIX.length(), key.length() - CONTAINER_META_NAME_SUFFIX.length());
+    return annotations
+        .entrySet()
+        .stream()
+        .filter(e -> isContainerMetaAnnotationKey(e.getKey()))
+        .filter(e -> containerName.equals(e.getValue()))
+        .mapToInt(e -> getIndexFromContainerMetaAnnotationKey(e.getKey()))
+        .findFirst()
+        .orElse(-1);
+  }
 
-        return Integer.parseInt(idxStr);
-      }
-    }
+  private static boolean isContainerMetaAnnotationKey(String annotationKey) {
+    return annotationKey.startsWith(CONTAINER_META_PREFIX)
+        && annotationKey.endsWith(CONTAINER_META_NAME_SUFFIX);
+  }
 
-    return -1;
+  private static String getStringIndexFromContainerMetaAnnotationKey(String annotationKey) {
+    return annotationKey.substring(
+        CONTAINER_META_PREFIX.length(),
+        annotationKey.length() - CONTAINER_META_NAME_SUFFIX.length());
+  }
+
+  private static int getIndexFromContainerMetaAnnotationKey(String annotationKey) {
+    return Integer.parseInt(getStringIndexFromContainerMetaAnnotationKey(annotationKey));
   }
 }
