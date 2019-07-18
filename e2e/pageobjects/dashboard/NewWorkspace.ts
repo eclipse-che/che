@@ -60,11 +60,9 @@ export class NewWorkspace {
         await this.workspaceDetails.waitPage(workspaceName);
     }
 
-    async createAndOpenWorksapce(workspaceName: string, dataStackId: string) {
+    async createAndOpenWorkspace(workspaceName: string, dataStackId: string) {
         await this.prepareWorkspace(workspaceName, dataStackId);
         await this.clickOnCreateAndOpenButton();
-
-        await this.workspaceDetails.waitPage(workspaceName);
     }
 
     async confirmProjectAdding(sampleName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

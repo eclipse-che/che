@@ -45,9 +45,7 @@ suite('E2E', async () => {
         });
 
         test('Create and open workspace', async () => {
-            await newWorkspace.typeWorkspaceName(workspaceName);
-            await newWorkspace.selectStack('Java Maven');
-            await newWorkspace.clickOnCreateAndOpenButton();
+            await newWorkspace.createAndOpenWorkspace(workspaceName, 'Java Maven');
         });
     });
 
