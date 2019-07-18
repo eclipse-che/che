@@ -32,7 +32,6 @@
           <class name="org.eclipse.che.selenium.languageserver.TypeScriptEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ClangFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.ApacheCamelFileEditingTest"/>
-          <class name="org.eclipse.che.selenium.languageserver.YamlFileEditingTest"/>
           <class name="org.eclipse.che.selenium.languageserver.GolangFileEditingTest"/>
           <class name="org.eclipse.che.selenium.dashboard.CreateAndDeleteProjectsTest"/>
           <class name="org.eclipse.che.selenium.dashboard.ImportMavenProjectFromGitTest"/>
