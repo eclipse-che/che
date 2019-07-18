@@ -99,7 +99,7 @@ public class VcsSshKeySecretProvisionerTest {
     verify(podSpec, times(4)).getVolumes();
     verify(podSpec, times(4)).getContainers();
 
-    Secret secret = k8sEnv.getSecrets().get(keyName1);
+    Secret secret = k8sEnv.getSecrets().get("wksp-" + keyName1);
     assertNotNull(secret);
     assertEquals(secret.getType(), "kubernetes.io/ssh-auth");
 
@@ -126,5 +126,7 @@ public class VcsSshKeySecretProvisionerTest {
 
     assertTrue(sshConfig.contains("host github.com"));
     assertTrue(sshConfig.contains("IdentityFile /etc/ssh/github-com/ssh-privatekey"));
+
+    System.out.println(">>>>>>>>>>>>>  " + sshConfig);
   }
 }
