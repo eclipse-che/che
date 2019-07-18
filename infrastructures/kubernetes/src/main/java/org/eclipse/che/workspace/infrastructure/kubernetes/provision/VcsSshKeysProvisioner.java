@@ -210,22 +210,28 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
    *
    * <pre>
    * host github.com
-   * HostName github.com
    * IdentityFile /etc/ssh/github-com/ssh-privatekey
    * </pre>
    *
-   * @param host the host of version control service (e.g. github.com, gitlab.com and etc)
+   * or
+   *
+   * <pre>
+   * host *
+   * IdentityFile /etc/ssh/default-123456/ssh-privatekey
+   * </pre>
+   *
+   * @param name the of key given during generate for vcs service we will consider it as host of
+   *     version control service (e.g. github.com, gitlab.com and etc) if name starts from
+   *     "default-{anyString}" it will be replaced on wildcard "*" host name
    * @return the ssh configuration which include host and identity file location
    */
-  private String buildConfig(@NotNull String host) {
+  private String buildConfig(@NotNull String name) {
+    String host = name.startsWith("default-") ? "*" : name;
     return "host "
-        + host
-        + "\n"
-        + "HostName "
         + host
         + "\nIdentityFile "
         + SSH_BASE_CONFIG_PATH
-        + getValidNameForSecret(host)
+        + getValidNameForSecret(name)
         + "/"
         + SSH_PRIVATE_KEY
         + "\n";
