@@ -224,9 +224,9 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
    * @param name the of key given during generate for vcs service we will consider it as host of
    *     version control service (e.g. github.com, gitlab.com and etc) if name starts from
    *     "default-{anyString}" it will be replaced on wildcard "*" host name. Name with format
-   *     "default-{anyString}" will be generated on client side by Theia SSH Plugin, if user don't
+   *     "default-{anyString}" will be generated on client side by Theia SSH Plugin, if user doesn't
    *     provide own name. Details see here:
-   *     https://github.com/eclipse/che/issues/13494#issuecomment-512761661. Note: behavior can me
+   *     https://github.com/eclipse/che/issues/13494#issuecomment-512761661. Note: behavior can be
    *     improved in 7.x releases after 7.0.0
    * @return the ssh configuration which include host and identity file location
    */
