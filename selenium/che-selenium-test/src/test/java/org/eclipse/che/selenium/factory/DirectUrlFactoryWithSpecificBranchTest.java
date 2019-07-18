@@ -73,7 +73,8 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   public void factoryWithDirectUrlWithSpecificBranch() {
     String repositoryName = testAuxiliaryRepo.getName();
     final String wsTheiaIdeTerminalTitle = "theia-ide terminal 0";
-    List<String> expectedItemsAfterCloning = Arrays.asList("my-lib", "my-webapp", "src", "pom.xml");
+    List<String> expectedItemsAfterCloning =
+        Arrays.asList("my-lib", "my-webapp", "my-lib/src", "pom.xml");
 
     testFactoryWithSpecificBranch.authenticateAndOpen();
 
@@ -95,22 +96,25 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
     expectedItemsAfterCloning.forEach(
         name -> {
-          theiaProjectTree.isItemVisible(repositoryName + "/" + name);
+          theiaProjectTree.waitItem(repositoryName + "/" + name);
         });
 
     // check specific branch
-    openTerminalByProposal("theia-ide");
-    theiaTerminal.waitTab(wsTheiaIdeTerminalTitle);
-    theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
-    theiaTerminal.performCommand("cd " + repositoryName);
+    openTerminalByProposal();
+
+    theiaTerminal.performCommand("cd /projects/" + repositoryName);
     theiaTerminal.performCommand("git status");
     theiaTerminal.waitTerminalOutput("On branch " + SECOND_BRANCH_NAME, 0);
   }
 
-  private void openTerminalByProposal(String proposalText) {
+  private void openTerminalByProposal() {
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, "`");
-    theiaProposalForm.waitProposal(proposalText);
-    theiaProposalForm.clickOnProposal(proposalText);
+    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, "`");
+
+    theiaProposalForm.waitForm();
+    theiaProposalForm.enterTextToSearchField("theia-ide");
+    theiaIde.pressKeyCombination(Keys.ENTER);
+
     theiaProposalForm.waitFormDisappearance();
   }
 }
