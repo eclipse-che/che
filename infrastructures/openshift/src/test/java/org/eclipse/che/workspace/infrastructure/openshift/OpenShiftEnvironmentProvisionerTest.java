@@ -103,7 +103,8 @@ public class OpenShiftEnvironmentProvisionerTest {
             imagePullSecretProvisioner,
             proxySettingsProvisioner,
             serviceAccountProvisioner,
-            certificateProvisioner);
+            certificateProvisioner,
+            vcsSshKeysProvisioner);
   }
 
   @Test
@@ -128,6 +129,7 @@ public class OpenShiftEnvironmentProvisionerTest {
     provisionOrder.verify(proxySettingsProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(serviceAccountProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verify(certificateProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
+    provisionOrder.verify(vcsSshKeysProvisioner).provision(eq(osEnv), eq(runtimeIdentity));
     provisionOrder.verifyNoMoreInteractions();
   }
 }
