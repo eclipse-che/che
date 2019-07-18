@@ -12,7 +12,7 @@ kind: Ingress
 metadata:
   name: che-devfile-registry
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.cheDevfileRegistry.ingress.class }}
+    kubernetes.io/ingress.class: "nginx"
 spec:
   rules:
   - host: {{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
@@ -22,9 +22,9 @@ spec:
         backend:
           serviceName: che-devfile-registry
           servicePort: 8080
-{{- if .Values.cheDevfileRegistry.ingressSecretName }}
+{{- if .Values.global.tls.enabled }}
   tls:
   - hosts:
     - {{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
-    secretName: {{ .Values.cheDevfileRegistry.ingressSecretName }}
+    secretName: {{ .Values.global.tls.secretName }}
 {{- end -}}

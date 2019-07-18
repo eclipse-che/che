@@ -12,6 +12,3 @@ chePluginRegistry:
   imagePullPolicy: Always
   memoryLimit: 32Mi
   memoryRequests: 16Mi
-  #ingressSecretName: che-tls
-  ingress:
-    class: 'nginx'
