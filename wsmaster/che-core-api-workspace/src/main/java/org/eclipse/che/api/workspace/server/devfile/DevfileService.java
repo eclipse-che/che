@@ -120,7 +120,7 @@ public class DevfileService extends Service {
           BadRequestException {
 
     throw new BadRequestException(
-        "This is an outdated method please use /api/workspace/devfile to create a new workspace");
+        "This method is deprecated and may be removed at any time. Please use /api/workspace/devfile to create a new workspace");
   }
 
   /**
@@ -154,6 +154,6 @@ public class DevfileService extends Service {
       throws NotFoundException, ServerException, BadRequestException, ConflictException,
           JsonProcessingException {
     throw new BadRequestException(
-        "This is an outdated method please use /api/workspace/devfile to create a new workspace");
+        "This method is deprecated and may be removed at any time. Please use /api/workspace/devfile to create a new workspace");
   }
 }
