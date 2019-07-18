@@ -85,13 +85,13 @@ data:
 {{- if .Values.workspaceDefaultRamLimit }}
   CHE_WORKSPACE_DEFAULT_MEMORY_LIMIT_MB: {{ .Values.workspaceDefaultRamLimit }}
 {{- end }}
-{{- if .Values.cheDevfileRegistry.url }}
-  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ .Values.cheDevfileRegistry.url | quote }}
+{{- if .Values.che.workspace.devfileRegistryUrl }}
+  CHE_WORKSPACE_DEVFILE__REGISTRY__URL: {{ .Values.che.workspace.devfileRegistryUrl | quote }}
 {{- else if .Values.cheDevfileRegistry.deploy }}
   CHE_WORKSPACE_DEVFILE__REGISTRY__URL: http://{{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
 {{- end }}
-{{- if .Values.chePluginRegistry.url }}
-  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ .Values.chePluginRegistry.url | quote }}
+{{- if .Values.che.workspace.pluginRegistryUrl }}
+  CHE_WORKSPACE_PLUGIN__REGISTRY__URL: {{ .Values.che.workspace.pluginRegistryUrl | quote }}
 {{- else if .Values.chePluginRegistry.deploy }}
   CHE_WORKSPACE_PLUGIN__REGISTRY__URL: http://{{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}/v3
 {{- end }}

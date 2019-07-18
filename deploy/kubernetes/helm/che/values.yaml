@@ -69,15 +69,16 @@ global:
   cheDevfileRegistryUrlFormat: "che-devfile-registry-%s.%s"
   chePluginRegistryUrlFormat: "che-plugin-registry-%s.%s"
 
-che: {}
+che:
+  workspace: {}
+#    devfileRegistryUrl: "https://che-devfile-registry.openshift.io/"
+#    pluginRegistryUrl: "https://che-plugin-registry.openshift.io/v3"
 
 cheDevfileRegistry:
   deploy: true
-  #url: "https://che-devfile-registry.openshift.io/"
 
 chePluginRegistry:
   deploy: true
-  #url: "https://che-plugin-registry.openshift.io/v3"
 
 prometheus:
   alertmanager:
