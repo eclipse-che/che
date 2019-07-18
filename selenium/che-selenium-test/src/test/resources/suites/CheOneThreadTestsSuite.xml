@@ -34,6 +34,7 @@
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
             <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectoryTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
         </classes>
     </test>
 </suite>

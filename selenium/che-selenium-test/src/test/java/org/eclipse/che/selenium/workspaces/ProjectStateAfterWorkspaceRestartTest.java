@@ -33,7 +33,8 @@ import org.openqa.selenium.TimeoutException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Aleksandr Shmaraev on 10.03.16 TODO rewrite to use che7 workspace */
+/** @author Aleksandr Shmaraev on 10.03.16 * */
+/** TODO rewrite to use che7 workspace */
 @Test(groups = UNDER_REPAIR)
 public class ProjectStateAfterWorkspaceRestartTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 4);
