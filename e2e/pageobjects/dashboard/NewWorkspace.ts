@@ -39,8 +39,8 @@ export class NewWorkspace {
         @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil,
         @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails) { }
 
-    async createAndRunWorkspace(namespace: string, workspaceName: string, dataStackId: string, sampleName: string) {
-        await this.prepareWorkspace(workspaceName, dataStackId, sampleName);
+    async createAndRunWorkspace(namespace: string, workspaceName: string, dataStackId: string) {
+        await this.prepareWorkspace(workspaceName, dataStackId);
         await this.clickOnCreateAndOpenButton();
 
         await this.waitPageAbsence();
@@ -53,15 +53,15 @@ export class NewWorkspace {
         await this.driverHelper.waitDisappearanceWithTimeout(By.css(NewWorkspace.TITLE_CSS), timeout);
     }
 
-    async createWorkspaceAndProceedEditing(workspaceName: string, dataStackId: string, sampleName: string) {
-        await this.prepareWorkspace(workspaceName, dataStackId, sampleName);
+    async createWorkspaceAndProceedEditing(workspaceName: string, dataStackId: string) {
+        await this.prepareWorkspace(workspaceName, dataStackId);
         await this.selectCreateWorkspaceAndProceedEditing();
 
         await this.workspaceDetails.waitPage(workspaceName);
     }
 
-    async createAndOpenWorksapce(workspaceName: string, dataStackId: string, sampleName: string) {
-        await this.prepareWorkspace(workspaceName, dataStackId, sampleName);
+    async createAndOpenWorksapce(workspaceName: string, dataStackId: string) {
+        await this.prepareWorkspace(workspaceName, dataStackId);
         await this.clickOnCreateAndOpenButton();
 
         await this.workspaceDetails.waitPage(workspaceName);
@@ -189,12 +189,9 @@ export class NewWorkspace {
         return `div.devfile-selector-item-selected[data-devfile-id='${dataStackId}']`;
     }
 
-    private async prepareWorkspace(workspaceName: string, dataStackId: string, sampleName: string) {
+    private async prepareWorkspace(workspaceName: string, dataStackId: string) {
         await this.typeWorkspaceName(workspaceName);
         await this.selectStack(dataStackId);
-        await this.clickOnAddOrImportProjectButton();
-        await this.enableSampleCheckbox(sampleName);
-        await this.confirmProjectAdding(sampleName);
     }
 
 }
