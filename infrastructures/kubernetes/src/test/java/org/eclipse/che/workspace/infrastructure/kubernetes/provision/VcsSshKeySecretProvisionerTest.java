@@ -84,17 +84,22 @@ public class VcsSshKeySecretProvisionerTest {
 
   @Test
   public void addSshKeysConfigInPod() throws Exception {
-    String keyName = UUID.randomUUID().toString();
+    String keyName1 = UUID.randomUUID().toString();
+    String keyName2 = "default-" + UUID.randomUUID().toString();
+    String keyName3 = "github.com";
     when(sshManager.getPairs(someUser, "vcs"))
         .thenReturn(
-            ImmutableList.of(new SshPairImpl(someUser, "vcs", keyName, "public", "private")));
+            ImmutableList.of(
+                new SshPairImpl(someUser, "vcs", keyName1, "public", "private"),
+                new SshPairImpl(someUser, "vcs", keyName2, "public", "private"),
+                new SshPairImpl(someUser, "vcs", keyName3, "public", "private")));
 
     vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    verify(podSpec, times(2)).getVolumes();
-    verify(podSpec, times(2)).getContainers();
+    verify(podSpec, times(4)).getVolumes();
+    verify(podSpec, times(4)).getContainers();
 
-    Secret secret = k8sEnv.getSecrets().get(keyName);
+    Secret secret = k8sEnv.getSecrets().get("wksp-" + keyName1);
     assertNotNull(secret);
     assertEquals(secret.getType(), "kubernetes.io/ssh-auth");
 
@@ -113,8 +118,13 @@ public class VcsSshKeySecretProvisionerTest {
     assertTrue(mapData.containsKey("ssh_config"));
 
     String sshConfig = mapData.get("ssh_config");
-    assertTrue(sshConfig.contains("host " + keyName));
-    assertTrue(sshConfig.contains("HostName " + keyName));
-    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName + "/ssh-privatekey"));
+    assertTrue(sshConfig.contains("host " + keyName1));
+    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName1 + "/ssh-privatekey"));
+
+    assertTrue(sshConfig.contains("host *"));
+    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName2 + "/ssh-privatekey"));
+
+    assertTrue(sshConfig.contains("host github.com"));
+    assertTrue(sshConfig.contains("IdentityFile /etc/ssh/github-com/ssh-privatekey"));
   }
 }
