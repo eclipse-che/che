@@ -11,5 +11,5 @@
 base_dir=$(cd "$(dirname "$0")"; pwd)
 . "${base_dir}"/../build.include
 
-init --name:wait-endpoint "$@"
+init --name:endpoint-watcher "$@"
 build
