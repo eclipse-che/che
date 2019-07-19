@@ -56,12 +56,10 @@
       <devfile-selector on-devfile-select="createWorkspaceController.onDevfileSelected(devfile)">
       </devfile-selector>
     </che-label-container>
-
     <!-- Project source selector -->
     <che-label-container che-label-name="Projects">
-      <project-source-selector></project-source-selector>
+      <project-source-selector devfile="createWorkspaceController.selectedDevfile"></project-source-selector>
     </che-label-container>
-
     <che-label-container>
       <che-button-save-flat class="create-workspace-footer-button"
                             name="saveButton"

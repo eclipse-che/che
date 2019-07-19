@@ -12,6 +12,7 @@ kind: Deployment
 metadata:
   labels:
     app: che
+    component: che
   name: che
 spec:
   replicas: 1
@@ -25,6 +26,7 @@ spec:
     metadata:
       labels:
         app: che
+        component: che
     spec:
       securityContext:
         fsGroup: {{ .Values.global.securityContext.fsGroup }}

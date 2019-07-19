@@ -13,6 +13,7 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     app: che
+    component: che
   name: che-data-volume
 spec:
   accessModes:

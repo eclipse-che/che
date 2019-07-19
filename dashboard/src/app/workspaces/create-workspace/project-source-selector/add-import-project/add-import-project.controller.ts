@@ -27,6 +27,7 @@ export class AddImportProjectController {
    * Project selector service.
    */
   private addImportProjectService: AddImportProjectService;
+
   /**
    * Project source selector service.
    */
@@ -46,6 +47,7 @@ export class AddImportProjectController {
   /* tslint:disable */
   private isProjectNameUnique: (data: {name: string}) => boolean;
   /* tslint:enable */
+  private devfile: che.IWorkspaceDevfile;
   /**
    * Callback provided by parent controller.
    */
@@ -60,7 +62,7 @@ export class AddImportProjectController {
 
     this.projectSource = ProjectSource;
 
-    this.activeProjectSource = ProjectSource.SAMPLES;
+    this.activeProjectSource = this.devfile ? ProjectSource.SAMPLES : ProjectSource.GIT;
     this.sourceChanged();
 
     $scope.$on('$destroy', () => {
