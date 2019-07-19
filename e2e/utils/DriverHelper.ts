@@ -390,8 +390,12 @@ export class DriverHelper {
     }
 
     public async navigateTo(url: string) {
-        await this.driver.navigate().to(url);
+        await this.navigateToUrl(url);
         await this.waitURL(url);
+    }
+
+    public async navigateToUrl(url: string) {
+        await this.driver.navigate().to(url);
     }
 
     public async waitURL(expectedUrl: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

@@ -6,6 +6,7 @@
   "scripts": {
     "test": "npm run lint && npm run tsc && mocha --opts mocha.opts",
     "test-happy-path": "npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
+    "test-che-install": "npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."
   },
