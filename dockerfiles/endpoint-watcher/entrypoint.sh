@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Copyright (c) 2012-2019 Red Hat, Inc.
 # This program and the accompanying materials are made
@@ -17,7 +17,7 @@ if [ -z "$ENDPOINT" ]; then
     exit 1
 fi
 
-adresses_length=0;.
+adresses_length=0;
 until [ $adresses_length -gt 0 ]; do
     echo "waiting for $ENDPOINT to be ready...";
     sleep 2;
