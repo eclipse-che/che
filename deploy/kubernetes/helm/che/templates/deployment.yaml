@@ -33,7 +33,7 @@ spec:
       initContainers:
 {{- if .Values.global.multiuser }}
       - name: wait-for-postgres
-        image: mshaposh/che-init:latest
+        image: eclipse/che-wait-endpoint:nightly
         env:
           - name: POD_NAMESPACE
             valueFrom:
@@ -45,7 +45,7 @@ spec:
 #wait for keycloak if in multiuser mode and .Values.customOidcProvider was not defined
 {{- if (and .Values.global.multiuser (not .Values.customOidcProvider)) }}
       - name: wait-for-keycloak
-        image: mshaposh/che-init:latest
+        image: eclipse/che-wait-endpoint:nightly
         env:
           - name: POD_NAMESPACE
             valueFrom:
