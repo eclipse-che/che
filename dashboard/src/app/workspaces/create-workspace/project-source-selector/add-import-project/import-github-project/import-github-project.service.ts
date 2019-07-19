@@ -346,13 +346,7 @@ export class ImportGithubProjectService implements IEditingProgress {
       const props = {} as che.IProjectTemplate;
 
       const name = repository.owner.login + '-' + repository.name;
-      const path = '/' +  name.replace(/[^\w-_]/g, '_');
       props.name = name;
-      props.displayName = name;
-      props.description = repository.description || '';
-      props.path = path;
-      props.category = '';
-
       props.source = {
         type: 'git',
         location: repository.clone_url
