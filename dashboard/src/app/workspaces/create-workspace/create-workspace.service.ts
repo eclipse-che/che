@@ -12,7 +12,6 @@
 'use strict';
 
 import {NamespaceSelectorSvc} from './namespace-selector/namespace-selector.service';
-import {StackSelectorSvc} from './stack-selector/stack-selector.service';
 import {ProjectSourceSelectorService} from './project-source-selector/project-source-selector.service';
 import {CheNotification} from '../../../components/notification/che-notification.factory';
 import {ConfirmDialogService} from '../../../components/service/confirm-dialog/confirm-dialog.service';
@@ -25,7 +24,7 @@ import {CheWorkspace} from '../../../components/api/workspace/che-workspace.fact
  */
 export class CreateWorkspaceSvc {
 
-  static $inject = ['$location', '$log', '$q', 'cheWorkspace', 'namespaceSelectorSvc', 'stackSelectorSvc', 'projectSourceSelectorService', 'cheNotification', 'confirmDialogService', '$document'];
+  static $inject = ['$location', '$log', '$q', 'cheWorkspace', 'namespaceSelectorSvc', 'projectSourceSelectorService', 'cheNotification', 'confirmDialogService', '$document'];
 
   /**
    * Location service.
@@ -52,10 +51,6 @@ export class CreateWorkspaceSvc {
    */
   private projectSourceSelectorService: ProjectSourceSelectorService;
   /**
-   * Stack selector service.
-   */
-  private stackSelectorSvc: StackSelectorSvc;
-  /**
    * The list of workspaces by namespace.
    */
   private workspacesByNamespace: {
@@ -77,13 +72,12 @@ export class CreateWorkspaceSvc {
   /**
    * Default constructor that is using resource injection
    */
-  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, stackSelectorSvc: StackSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, $document: ng.IDocumentService) {
+  constructor($location: ng.ILocationService, $log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, projectSourceSelectorService: ProjectSourceSelectorService, cheNotification: CheNotification, confirmDialogService: ConfirmDialogService, $document: ng.IDocumentService) {
     this.$location = $location;
     this.$log = $log;
     this.$q = $q;
     this.cheWorkspace = cheWorkspace;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
-    this.stackSelectorSvc = stackSelectorSvc;
     this.projectSourceSelectorService = projectSourceSelectorService;
     this.cheNotification = cheNotification;
     this.confirmDialogService = confirmDialogService;
@@ -189,27 +183,39 @@ export class CreateWorkspaceSvc {
     });
   }
 
-  createWorkspaceFromDevfile(workspaceDevfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
+  createWorkspaceFromDevfile(sourceDevfile: che.IWorkspaceDevfile, attributes: any): ng.IPromise<che.IWorkspace> {
     const namespaceId = this.namespaceSelectorSvc.getNamespaceId(),
           projectTemplates = this.projectSourceSelectorService.getProjectTemplates();
 
     let projects = [];
+    let noProjectsFromDevfile = true;
     projectTemplates.forEach((template: che.IProjectTemplate) => {
       let project = {
-        name: template.displayName,
+        name: template.name,
         source: {
           type: template.source.type,
           location: template.source.location
         }
       };
-      projects.push(project);
-    });      
+      
+      sourceDevfile.projects.forEach((project) => {
+        if (project.name === template.name) {
+          noProjectsFromDevfile = false;
+        }
+      });
 
+      projects.push(project);
+    });     
+    
     return this.checkEditingProgress().then(() => {
-      workspaceDevfile.projects = projects;
-     //TODO waits for fix https://github.com/eclipse/che/issues/13514
-     //this.addProjectCommands({devfile: workspaceDevfile}, projectTemplates);
-      return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, workspaceDevfile, attributes).then((workspace: che.IWorkspace) => {
+      sourceDevfile.projects = projects;
+
+      // If no projects defined in devfile were added - remove the commands from devfile as well:
+      if (noProjectsFromDevfile) {
+        sourceDevfile.commands = [];
+      }
+      
+      return this.cheWorkspace.createWorkspaceFromDevfile(namespaceId, sourceDevfile, attributes).then((workspace: che.IWorkspace) => {
         return this.cheWorkspace.fetchWorkspaces().then(() => this.cheWorkspace.getWorkspaceById(workspace.id));
       })
       .then((workspace: che.IWorkspace) => {

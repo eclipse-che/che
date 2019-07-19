@@ -47,9 +47,8 @@ export class ProjectMetadataService implements IEditingProgress {
     }
 
     const sameName = this.origProjectTemplate.name.trim() === this.projectTemplate.name.trim(),
-          sameDescription = this.origProjectTemplate.description.trim() === this.projectTemplate.description.trim(),
           sameSourceLocation =  this.origProjectTemplate.source.location.trim() === this.projectTemplate.source.location.trim();
-    if (sameName && sameDescription && sameSourceLocation) {
+    if (sameName && sameSourceLocation) {
       return null;
     }
 
@@ -74,7 +73,6 @@ export class ProjectMetadataService implements IEditingProgress {
    * @return {che.IProjectTemplate}
    */
   getProjectTemplate(): che.IProjectTemplate {
-    this.projectTemplate.displayName = this.projectTemplate.name;
     this.projectTemplate.path = '/' +  this.projectTemplate.name.replace(/[^\w-_]/g, '_');
 
     return this.projectTemplate;

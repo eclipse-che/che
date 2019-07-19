@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.selenium.dashboard;
 
-import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.WEB_JAVA_SPRING;
+import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -39,11 +39,8 @@ public class CreateWorkspaceTest {
   private static final String WS_NAME_TOO_LONG =
       ("The name has to be less than 100 characters long.");
 
-  private String projectName = WEB_JAVA_SPRING;
+  private String projectName = CONSOLE_JAVA_SIMPLE;
   private String newProjectName = projectName + "-1";
-  private String projectDescription =
-      "A basic example using Spring servlets. The app returns values entered into a submit form.";
-  private String newProjectDescription = "This is " + projectDescription;
 
   @Inject private Dashboard dashboard;
   @Inject private NewWorkspace newWorkspace;
@@ -66,9 +63,7 @@ public class CreateWorkspaceTest {
   public void checkWorkspaceName() {
     newWorkspace.typeWorkspaceName(TOO_SHORT_WORKSPACE_NAME);
     newWorkspace.waitErrorMessage(WS_NAME_TOO_SHORT);
-
     newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
-
     newWorkspace.typeWorkspaceName(TOO_LONG_WORKSPACE_NAME);
     newWorkspace.waitErrorMessage(WS_NAME_TOO_LONG);
     newWorkspace.waitBottomCreateWorkspaceButtonDisabled();
@@ -76,43 +71,31 @@ public class CreateWorkspaceTest {
     // type valid names and check that the Create button is enabled
     newWorkspace.typeWorkspaceName(MIN_VALID_WORKSPACE_NAME);
     newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
-
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
     newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
-
     newWorkspace.typeWorkspaceName(MAX_VALID_WORKSPACE_NAME);
     newWorkspace.waitBottomCreateWorkspaceButtonEnabled();
   }
 
   @Test
   public void checkProjectSourcePage() {
-    // add a project from the 'web-java-spring' sample
+    // add a project from the 'console-java-simple' sample
     newWorkspace.selectStack(Stack.JAVA_MAVEN);
-    projectSourcePage.clickOnAddOrImportProjectButton();
-    projectSourcePage.selectSample(projectName);
-    projectSourcePage.clickOnAddProjectButton();
+    projectSourcePage.waitOpened();
     projectSourcePage.waitCreatedProjectButton(projectName);
-    projectSourcePage.clickOnCreateProjectButton(projectName);
 
     // change the added project's name and cancel changes
     assertEquals(projectSourcePage.getProjectName(), projectName);
-    assertEquals(projectSourcePage.getProjectDescription(), projectDescription);
     projectSourcePage.changeProjectName(newProjectName);
-    projectSourcePage.changeProjectDescription(newProjectDescription);
-    assertEquals(projectSourcePage.getProjectDescription(), newProjectDescription);
     assertEquals(projectSourcePage.getProjectName(), newProjectName);
     projectSourcePage.clickOnCancelChangesButton();
     assertEquals(projectSourcePage.getProjectName(), projectName);
-    assertEquals(projectSourcePage.getProjectDescription(), projectDescription);
     projectSourcePage.waitCreatedProjectButton(projectName);
 
     // change the added project's name and description
     projectSourcePage.changeProjectName(newProjectName);
-    projectSourcePage.changeProjectDescription(newProjectDescription);
-    assertEquals(projectSourcePage.getProjectDescription(), newProjectDescription);
     assertEquals(projectSourcePage.getProjectName(), newProjectName);
     projectSourcePage.clickOnSaveChangesButton();
-    assertEquals(projectSourcePage.getProjectDescription(), newProjectDescription);
     assertEquals(projectSourcePage.getProjectName(), newProjectName);
     projectSourcePage.waitCreatedProjectButton(newProjectName);
 
