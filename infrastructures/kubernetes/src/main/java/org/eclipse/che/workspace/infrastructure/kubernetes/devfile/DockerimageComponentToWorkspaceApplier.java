@@ -259,8 +259,10 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
 
     if (imageName.length() > Names.MAX_CONTAINER_NAME_LENGTH) {
       throw new DevfileException(
-          "The image name is longer than 63 characters and as such cannot be used as a container"
-              + " name. Please provide an alias for it.");
+          format(
+              "The image name '%s' is longer than 63 characters and as such cannot be used as a container"
+                  + " name. Please provide an alias for the component with that image.",
+              imageName));
     }
 
     // the name needs to be both a valid k8s label and a valid machine name.
