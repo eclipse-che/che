@@ -11,16 +11,14 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes;
 
+import static java.lang.String.format;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 
 import com.google.common.collect.Maps;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.Pod;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
@@ -31,22 +29,14 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  */
 public class Names {
 
+  public static final int MAX_CONTAINER_NAME_LENGTH = 63; // K8S container name limit
+
   private static final char WORKSPACE_ID_PREFIX_SEPARATOR = '.';
 
   private static final int GENERATED_PART_SIZE = 8;
 
-  private static final String CONTAINER_META_PREFIX = "che.container.";
-  private static final String CONTAINER_META_NAME_SUFFIX = ".name";
-  private static final String CONTAINER_META_MACHINE_SUFFIX = ".machine";
-
-  /**
-   * Returns machine name for the specified container in the specified pod.
-   *
-   * <p>This is a convenience method for {@link #machineName(ObjectMeta, Container)}
-   */
-  public static String machineName(Pod pod, Container container) {
-    return machineName(pod.getMetadata(), container);
-  }
+  private static final String CONTAINER_DISPLAY_NAMES_FMT =
+      "org.eclipse.che.container.display-name/%s";
 
   /**
    * Returns machine name for the specified container in the specified pod.
@@ -110,20 +100,7 @@ public class Names {
 
   private static void putMachineName(
       Map<String, String> annotations, String containerName, String machineName) {
-
-    int containerIdx = findContainerIndex(annotations, containerName);
-    if (containerIdx >= 0) {
-      String machineNameKey = CONTAINER_META_PREFIX + containerIdx + CONTAINER_META_MACHINE_SUFFIX;
-      annotations.put(machineNameKey, machineName);
-    } else {
-      int currentMaxIdx = maxContainerMetaIndex(annotations);
-      int newIdx = currentMaxIdx + 1;
-      String containerKey = CONTAINER_META_PREFIX + newIdx + CONTAINER_META_NAME_SUFFIX;
-      String machineNameKey = CONTAINER_META_PREFIX + newIdx + CONTAINER_META_MACHINE_SUFFIX;
-
-      annotations.put(containerKey, containerName);
-      annotations.put(machineNameKey, machineName);
-    }
+    annotations.put(format(CONTAINER_DISPLAY_NAMES_FMT, containerName), machineName);
   }
 
   /**
@@ -143,7 +120,17 @@ public class Names {
     final Map<String, String> annotations = podMeta.getAnnotations();
     final String machineName;
     final String containerName = container.getName();
-    if ((machineName = findMachineName(annotations, containerName)) != null) {
+
+    if (containerName != null && containerName.length() > MAX_CONTAINER_NAME_LENGTH) {
+      throw new IllegalArgumentException(
+          format(
+              "The container name exceeds the allowed limit of %s characters.",
+              MAX_CONTAINER_NAME_LENGTH));
+    }
+
+    if (annotations != null
+        && (machineName = annotations.get(format(CONTAINER_DISPLAY_NAMES_FMT, containerName)))
+            != null) {
       return machineName;
     }
 
@@ -163,71 +150,5 @@ public class Names {
   /** Returns randomly generated name with given prefix. */
   public static String generateName(String prefix) {
     return NameGenerator.generate(prefix, GENERATED_PART_SIZE);
-  }
-
-  @Nullable
-  private static String findMachineName(Map<String, String> annotations, String containerName) {
-    if (annotations == null) {
-      return null;
-    }
-
-    return annotations
-        .entrySet()
-        .stream()
-        // find the annotation that maps the container
-        .filter(e -> isContainerMetaAnnotationKey(e.getKey()))
-        .filter(e -> containerName.equals(e.getValue()))
-        // construct the annotation key for the annotation that contains the machine name
-        .map(Entry::getKey)
-        .map(Names::getStringIndexFromContainerMetaAnnotationKey)
-        .map(index -> CONTAINER_META_PREFIX + index + CONTAINER_META_MACHINE_SUFFIX)
-        // look for the annotation of the machine name
-        .map(annotations::get)
-        .findFirst()
-        .orElse(null);
-  }
-
-  private static int maxContainerMetaIndex(Map<String, String> annotations) {
-    if (annotations == null) {
-      return 0;
-    }
-
-    return annotations
-        .keySet()
-        .stream()
-        .filter(Names::isContainerMetaAnnotationKey)
-        .mapToInt(Names::getIndexFromContainerMetaAnnotationKey)
-        .max()
-        .orElse(0);
-  }
-
-  private static int findContainerIndex(Map<String, String> annotations, String containerName) {
-    if (annotations == null) {
-      return -1;
-    }
-
-    return annotations
-        .entrySet()
-        .stream()
-        .filter(e -> isContainerMetaAnnotationKey(e.getKey()))
-        .filter(e -> containerName.equals(e.getValue()))
-        .mapToInt(e -> getIndexFromContainerMetaAnnotationKey(e.getKey()))
-        .findFirst()
-        .orElse(-1);
-  }
-
-  private static boolean isContainerMetaAnnotationKey(String annotationKey) {
-    return annotationKey.startsWith(CONTAINER_META_PREFIX)
-        && annotationKey.endsWith(CONTAINER_META_NAME_SUFFIX);
-  }
-
-  private static String getStringIndexFromContainerMetaAnnotationKey(String annotationKey) {
-    return annotationKey.substring(
-        CONTAINER_META_PREFIX.length(),
-        annotationKey.length() - CONTAINER_META_NAME_SUFFIX.length());
-  }
-
-  private static int getIndexFromContainerMetaAnnotationKey(String annotationKey) {
-    return Integer.parseInt(getStringIndexFromContainerMetaAnnotationKey(annotationKey));
   }
 }
