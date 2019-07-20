@@ -36,6 +36,8 @@ spec:
             value: postgres
       containers:
       - env:
+        - name: DB_VENDOR
+          value: POSTGRES
         - name: DB_ADDR
           value: postgres
         - name: DB_PORT
