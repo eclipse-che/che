@@ -38,6 +38,8 @@ objects:
                 fieldPath: metadata.namespace
           - name: PROXY_ADDRESS_FORWARDING
             value: "true"
+          - name: DB_VENDOR
+            value: POSTGRES
           - name: DB_ADDR
             value: postgres
           - name: DB_PORT
