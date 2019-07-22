@@ -11,14 +11,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    app: che-plugin-registry
-  name: che-plugin-registry
+    app: che
+    component: plugin-registry
+  name: plugin-registry
 spec:
   replicas: 1
   revisionHistoryLimit: 2
   selector:
     matchLabels:
-      app: che-plugin-registry
+      app: che
+      component: plugin-registry
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -27,7 +29,8 @@ spec:
   template:
     metadata:
       labels:
-        app: che-plugin-registry
+        app: che
+        component: plugin-registry
     spec:
       containers:
       - image: {{ .Values.chePluginRegistry.image }}
