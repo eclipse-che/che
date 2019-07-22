@@ -40,7 +40,7 @@ spec:
         - containerPort: 8080
         livenessProbe:
           httpGet:
-            path: /plugins/
+            path: /v3/plugins/
             port: 8080
             scheme: HTTP
           initialDelaySeconds: 30
@@ -48,7 +48,7 @@ spec:
           timeoutSeconds: 3
         readinessProbe:
           httpGet:
-            path: /plugins/
+            path: /v3/plugins/
             port: 8080
             scheme: HTTP
           initialDelaySeconds: 3
