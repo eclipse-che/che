@@ -8,7 +8,7 @@
 #
 
 cheDevfileRegistry:
-  image: quay.io/openshiftio/che-devfile-registry
+  image: quay.io/eclipse/che-devfile-registry:nightly
   imagePullPolicy: Always
   memoryLimit: 32Mi
   memoryRequests: 16Mi
