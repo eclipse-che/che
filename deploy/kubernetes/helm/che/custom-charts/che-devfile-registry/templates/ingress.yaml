@@ -10,7 +10,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: che-devfile-registry
+  name: devfile-registry
   annotations:
     kubernetes.io/ingress.class: "nginx"
 spec:
@@ -20,7 +20,7 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: che-devfile-registry
+          serviceName: devfile-registry
           servicePort: 8080
 {{- if .Values.global.tls.enabled }}
   tls:

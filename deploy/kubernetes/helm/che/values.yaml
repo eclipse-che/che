@@ -66,8 +66,8 @@ global:
     runAsUser: 1724
     fsGroup: 1724
   postgresDebugLogs: false
-  cheDevfileRegistryUrlFormat: "che-devfile-registry-%s.%s"
-  chePluginRegistryUrlFormat: "che-plugin-registry-%s.%s"
+  cheDevfileRegistryUrlFormat: "devfile-registry-%s.%s"
+  chePluginRegistryUrlFormat: "plugin-registry-%s.%s"
 
 che:
   workspace: {}

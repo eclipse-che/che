@@ -11,12 +11,14 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: che-plugin-registry
-  name: che-plugin-registry
+    app: che
+    component: plugin-registry
+  name: plugin-registry
 spec:
   ports:
     - protocol: TCP
       port: 8080
       targetPort: 8080
   selector:
-    app: che-plugin-registry
+    app: che
+    component: plugin-registry
