@@ -26,13 +26,14 @@ spec:
     spec:
       initContainers:
       - name: wait-for-postgres
-        image: alpine:3.5
-        command: ["sh", "-c", "apk --no-cache add curl jq ; adresses_length=0; until [ $adresses_length -gt 0 ]; do echo waiting for postgres to be ready...; sleep 2; endpoints=`curl -s --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -H \"Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)\"     https://kubernetes.default/api/v1/namespaces/$POD_NAMESPACE/endpoints/postgres`; adresses_length=`echo $endpoints | jq -r \".subsets[]?.addresses // [] | length\"`; done;"]
+        image: eclipse/che-endpoint-watcher:nightly
         env:
           - name: POD_NAMESPACE
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: ENDPOINT
+            value: postgres
       containers:
       - env:
         - name: POSTGRES_PORT_5432_TCP_ADDR
