@@ -275,11 +275,6 @@ init() {
     rm -rf "${CHE_DATA}"/stacks
   fi
 
-  # replace samples.json each run to make sure that we are using corrent samples from the assembly.
-  # also it allows users to store their own samples which should not be touched by us.
-  mkdir -p "${CHE_DATA}"/templates
-  rm -rf "${CHE_DATA}"/templates/samples.json
-  cp -rf "${CHE_HOME}"/templates/* "${CHE_DATA}"/templates
 
   # A che property, which names the Docker network used for che + ws to communicate
   if [ -z "$CHE_DOCKER_NETWORK" ]; then

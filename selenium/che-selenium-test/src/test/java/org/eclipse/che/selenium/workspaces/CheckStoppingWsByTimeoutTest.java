@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.workspaces;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.utils.WaitUtils.sleepQuietly;
 import static org.testng.Assert.assertEquals;
 
@@ -30,6 +31,8 @@ import org.eclipse.che.selenium.pageobject.ToastLoader;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/** TODO rewrite to use che7 workspace */
+@Test(groups = UNDER_REPAIR)
 public class CheckStoppingWsByTimeoutTest {
 
   private static int TOASTLOADER_WIDGET_LATENCY_TIMEOUT_IN_MILLISEC = 20000;

@@ -66,11 +66,19 @@ global:
     runAsUser: 1724
     fsGroup: 1724
   postgresDebugLogs: false
+  cheDevfileRegistryUrlFormat: "devfile-registry-%s.%s"
+  chePluginRegistryUrlFormat: "plugin-registry-%s.%s"
 
-che: {}
-#  workspace:
+che:
+  workspace: {}
 #    devfileRegistryUrl: "https://che-devfile-registry.openshift.io/"
 #    pluginRegistryUrl: "https://che-plugin-registry.openshift.io/v3"
+
+cheDevfileRegistry:
+  deploy: true
+
+chePluginRegistry:
+  deploy: true
 
 prometheus:
   alertmanager:

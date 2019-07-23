@@ -25,7 +25,7 @@
     <dependencies>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-ide-war</artifactId>
+            <artifactId>assembly-root-war</artifactId>
             <type>war</type>
         </dependency>
         <dependency>
@@ -35,41 +35,8 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che</groupId>
-            <artifactId>assembly-wsagent-server</artifactId>
-            <type>tar.gz</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
             <artifactId>assembly-wsmaster-war</artifactId>
             <type>war</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>bootstrapper</artifactId>
-            <type>zip</type>
-            <classifier>linux_amd64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>exec-agent</artifactId>
-            <type>tar.gz</type>
-            <classifier>linux_amd64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che</groupId>
-            <artifactId>terminal-agent</artifactId>
-            <type>tar.gz</type>
-            <classifier>linux_amd64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-stacks</artifactId>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-ide-templates</artifactId>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.dashboard</groupId>
@@ -90,17 +57,6 @@
             <groupId>org.eclipse.che.lib</groupId>
             <artifactId>che-tomcat8-slf4j-logback</artifactId>
             <type>zip</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.ls.jdt</groupId>
-            <artifactId>jdt.ls.extension.product</artifactId>
-            <type>tar.gz</type>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.plugin</groupId>
-            <artifactId>che-plugin-sdk-tools</artifactId>
-            <type>jar</type>
-            <classifier>jar-with-dependencies</classifier>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
