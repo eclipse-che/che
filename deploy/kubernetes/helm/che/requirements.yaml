@@ -8,6 +8,14 @@
 #
 
 dependencies:
+  - name: che-devfile-registry
+    repository: file://./custom-charts/che-devfile-registry/
+    version: 0.0.1
+    condition: cheDevfileRegistry.deploy
+  - name: che-plugin-registry
+    repository: file://./custom-charts/che-plugin-registry/
+    version: 0.0.1
+    condition: chePluginRegistry.deploy
   - name: che-postgres
     repository: file://./custom-charts/che-postgres/
     version: 1.0.0
