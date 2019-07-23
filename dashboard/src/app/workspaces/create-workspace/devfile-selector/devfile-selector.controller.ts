@@ -33,14 +33,28 @@ export class DevfileSelectorController {
   constructor(devfileRegistry: DevfileRegistry, cheWorkspace: CheWorkspace) {
     this.devfileRegistry = devfileRegistry;
     this.cheWorkspace = cheWorkspace;
+    this.devfiles = [];
     this.loadDevfiles();
   }
 
   loadDevfiles(): void {
-    let location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
-    this.devfileRegistry.fetchDevfiles(location).then((data: Array<IDevfileMetaData>) => {
-      this.devfiles = data;
+    const location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
+    const urls = location.split(" ");
 
+    let promises = [];
+    
+    for (const url of urls) {
+      promises.push(this.devfileRegistry.fetchDevfiles(url).then((data: Array<IDevfileMetaData>) => {
+        if (data && data.length > 0) {
+          data.forEach((devfile)=> {
+            // Set the origin url as the location
+            devfile.location = url;
+            this.devfiles.push(devfile);
+          });
+        }
+      }));
+    }
+    Promise.all(promises).then(() => {
       if (this.devfiles && this.devfiles.length > 0) {
         this.devfileOnClick(this.devfiles[0]);
       }
@@ -49,14 +63,12 @@ export class DevfileSelectorController {
 
   devfileOnClick(devfile: any): void {
     this.selectedDevfile = devfile;
-    
-    let location = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
 
-    let devfileContent = this.devfileRegistry.getDevfile(location, devfile.links.self);
+    let devfileContent = this.devfileRegistry.getDevfile(devfile.location, devfile.links.self);
     if (devfileContent) {
       this.onDevfileSelect({devfile: devfileContent});
     } else {
-      this.devfileRegistry.fetchDevfile(location, devfile.links.self).then((devfileContent: che.IWorkspaceDevfile) => {
+      this.devfileRegistry.fetchDevfile(devfile.location, devfile.links.self).then((devfileContent: che.IWorkspaceDevfile) => {
         this.onDevfileSelect({devfile: devfileContent});
       });
     }
