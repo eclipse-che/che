@@ -149,7 +149,7 @@ suite('Language server validation', async () => {
 
 
         console.log('============>>>>>  4');
-        await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
+        await ide.waitStatusBarTextAbsence('Starting Java Language Server', 600000);
         console.log('============>>>>>  5');
         await checkJavaPathCompletion();
         console.log('============>>>>>  6');
