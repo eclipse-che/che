@@ -37,10 +37,22 @@ global:
   ingressAnnotationsPrefix: "nginx."
   # options: default-host, single-host, multi-host
   serverStrategy: multi-host
+
+  ## Allows to enable and configure TLS
   tls:
     enabled: false
+    ## Secret name that will be used in Che Ingresses for setting TLS up
+    ## Note the helm chart does not create this secret and
+    ## it MUST be pre-created in the configured Che namespace
     secretName: che-tls
+
     useSelfSignedCerts: false
+    ## Name of a secret that contains `ca.crt` entry with public key
+    ## that will be used for checking server certificate
+    ## Note the helm chart does now create this secret and
+    ## it MUST be pre-created in the configured Che namespace
+    selfSingedCertSecretName: self-signed-cert
+
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"
