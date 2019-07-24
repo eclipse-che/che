@@ -111,7 +111,8 @@ suite('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
-        await ide.waitStatusBarTextAbsence('Starting Java Language Server', 600000);
+
+        await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
         await checkJavaPathCompletion();
         await ide.waitStatusBarTextAbsence('Building workspace', 360000);
     });
@@ -208,28 +209,18 @@ suite('Display source code changes in the running application', async () => {
 
 suite('Validation of debug functionality', async () => {
     test('Open file and activate breakpoint', async () => {
-        console.log('============>>>>>  1');
         await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
-        console.log('============>>>>>  2');
         await editor.selectTab(javaFileName);
-        console.log('============>>>>>  3');
         await editor.moveCursorToLineAndChar(javaFileName, 34, 1);
-        console.log('============>>>>>  4');
         await editor.activateBreakpoint(javaFileName, 32);
-        console.log('============>>>>>  5');
     });
 
     test('Launch debug', async () => {
-        console.log('============>>>>>  1');
         await topMenu.selectOption('Terminal', 'Run Task...');
-        console.log('============>>>>>  2');
         await quickOpenContainer.clickOnContainerItem('che: run-debug');
 
-        console.log('============>>>>>  3');
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
-        console.log('============>>>>>  4');
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
-        console.log('============>>>>>  5');
     });
 
     test('Check content of the launched application', async () => {
@@ -237,52 +228,31 @@ suite('Validation of debug functionality', async () => {
     });
 
     test('Open debug configuration file', async () => {
-        console.log('============>>>>>  1');
         await topMenu.selectOption('Debug', 'Open Configurations');
-        console.log('============>>>>>  2');
         await editor.waitEditorAvailable('launch.json');
-        console.log('============>>>>>  3');
         await editor.selectTab('launch.json');
-        console.log('============>>>>>  4');
     });
 
     test('Add debug configuration options', async () => {
-        console.log('============>>>>>  1');
         await editor.moveCursorToLineAndChar('launch.json', 5, 22);
-        console.log('============>>>>>  2');
         await editor.performKeyCombination('launch.json', Key.chord(Key.CONTROL, Key.SPACE));
-        console.log('============>>>>>  3');
         await editor.clickOnSuggestion('Java: Launch Program in Current File');
-        console.log('============>>>>>  4');
         await editor.waitTabWithUnsavedStatus('launch.json');
-        console.log('============>>>>>  5');
         await editor.waitText('launch.json', '\"name\": \"Debug (Launch) - Current File\"');
-        console.log('============>>>>>  6');
         await editor.performKeyCombination('launch.json', Key.chord(Key.CONTROL, 's'));
-        console.log('============>>>>>  7');
         await editor.waitTabWithSavedStatus('launch.json');
-        console.log('============>>>>>  8');
     });
 
     test('Run debug and check application stop in the breakpoint', async () => {
-        console.log('============>>>>>  1');
         await editor.selectTab(javaFileName);
-        console.log('============>>>>>  2');
         await topMenu.selectOption('View', 'Debug');
-        console.log('============>>>>>  3');
         await ide.waitRightToolbarButton(RightToolbarButton.Debug);
-        console.log('============>>>>>  4');
         await debugView.clickOnDebugConfigurationDropDown();
-        console.log('============>>>>>  5');
         await debugView.clickOnDebugConfigurationItem('Debug (Launch) - Current File');
-        console.log('============>>>>>  6');
         await debugView.clickOnRunDebugButton();
 
-        console.log('============>>>>>  7');
         await previewWidget.refreshPage();
-        console.log('============>>>>>  8');
         await editor.waitStoppedDebugBreakpoint(javaFileName, 32);
-        console.log('============>>>>>  9');
     });
 });
 
