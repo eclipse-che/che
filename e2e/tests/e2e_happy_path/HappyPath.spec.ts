@@ -72,14 +72,6 @@ suite('Validation of workspace start, build and run', async () => {
         await projectTree.openProjectTreeContainer();
         console.log('============>>>>>  2');
         await projectTree.waitProjectImported(projectName, 'src');
-
-
-        // ----------------------------
-        await driverHelper.getDriver().navigate().refresh();
-        await ide.waitAndSwitchToIdeFrame();
-        // ----------------------------
-
-
         console.log('============>>>>>  3');
         await projectTree.expandItem(`/${projectName}`);
         console.log('============>>>>>  4');
