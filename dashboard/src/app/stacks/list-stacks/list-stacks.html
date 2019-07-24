@@ -19,17 +19,6 @@
 <md-content md-scroll-y flex layout="column" md-theme="maincontent-theme" class=stacks-list-content>
   <md-progress-linear md-mode="indeterminate" class="stacks-list-progress"
                       ng-show="listStacksController.isLoading"></md-progress-linear>
-  <div class="apply-filter-to-selected-column"
-       uib-tooltip="Choose a column to apply a filter"
-       tooltip-append-to-body="true">
-    <select ng-model="listStacksController.searchBy"
-            ng-change="listStacksController.updateFilters()"
-            class="che-list-item-details">
-      <option value="displayName">Name</option>
-      <option value="description">Description</option>
-      <option value="globalMemoryLimit">Required memory</option>
-    </select>
-  </div>
   <che-list-header che-input-placeholder="Search"
                    che-search-model="listStacksController.stackFilter.name"
                    che-on-search-change="listStacksController.onSearchChanged(str)"

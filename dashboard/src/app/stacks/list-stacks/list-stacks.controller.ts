@@ -61,7 +61,9 @@ export class ListStacksController {
     });
 
     this.orderBy = DEFAULT_COLUMN;
-    this.searchBy = DEFAULT_COLUMN;
+
+    // todo remove this after cheListHelper improvement
+    this.searchBy = 'tmpFilterColumn';
 
     this.loadDevfiles();
   }
@@ -73,6 +75,10 @@ export class ListStacksController {
       const devfileMetaDatas = data.map((devfileMetaData: IDevfileMetaData) => {
         const globalMemoryLimit = this.$filter('changeMemoryUnit')(devfileMetaData.globalMemoryLimit, ['MB','GB']);
         devfileMetaData.globalMemoryLimit = globalMemoryLimit;
+
+        // todo remove this after cheListHelper improvement
+        devfileMetaData[this.searchBy]= `${devfileMetaData.displayName} ${devfileMetaData.description} ${globalMemoryLimit}`;
+
         return devfileMetaData;
       });
       this.cheListHelper.setList(devfileMetaDatas, DEFAULT_COLUMN);
