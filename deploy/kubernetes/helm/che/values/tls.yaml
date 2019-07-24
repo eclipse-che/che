@@ -10,8 +10,6 @@
 # Currently, TLS support is enabled only for single-host deployments
 
 global:
-  ingressDomain: <your.k8s.com>
-  serverStrategy: single-host
   tls:
     enabled: true
     useCertManager: true
