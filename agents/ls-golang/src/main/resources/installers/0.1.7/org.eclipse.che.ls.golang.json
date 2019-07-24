@@ -1,8 +1,0 @@
-{
-  "id": "org.eclipse.che.ls.golang",
-  "version": "0.1.7",
-  "name": "Golang language server",
-  "description": "Go intellisense",
-  "dependencies": [],
-  "properties": {}
-}

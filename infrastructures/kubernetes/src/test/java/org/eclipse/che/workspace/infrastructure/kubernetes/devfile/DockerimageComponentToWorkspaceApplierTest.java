@@ -17,7 +17,6 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABL
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier.CHE_COMPONENT_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,6 +53,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.MachineConfigsValidator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -122,12 +122,11 @@ public class DockerimageComponentToWorkspaceApplierTest {
     assertFalse(deploymentSelector.isEmpty());
     assertTrue(podMeta.getLabels().entrySet().containsAll(deploymentSelector.entrySet()));
 
-    Map<String, String> annotations = podMeta.getAnnotations();
-    assertEquals(annotations.get(String.format(MACHINE_NAME_ANNOTATION_FMT, "jdk")), "jdk");
-
     Container container = podTemplate.getSpec().getContainers().get(0);
     assertEquals(container.getName(), "jdk");
     assertEquals(container.getImage(), "eclipse/ubuntu_jdk8:latest");
+
+    assertEquals(Names.machineName(podMeta, container), "jdk");
   }
 
   @Test
@@ -163,14 +162,12 @@ public class DockerimageComponentToWorkspaceApplierTest {
     assertFalse(deploymentSelector.isEmpty());
     assertTrue(podMeta.getLabels().entrySet().containsAll(deploymentSelector.entrySet()));
 
-    Map<String, String> annotations = podMeta.getAnnotations();
-    assertEquals(
-        annotations.get(String.format(MACHINE_NAME_ANNOTATION_FMT, "eclipse-ubuntu_jdk8-latest")),
-        "eclipse-ubuntu_jdk8-latest");
-
     Container container = podTemplate.getSpec().getContainers().get(0);
     assertEquals(container.getName(), "eclipse-ubuntu_jdk8-latest");
     assertEquals(container.getImage(), "eclipse/ubuntu_jdk8:latest");
+
+    assertEquals(
+        Names.machineName(podTemplate.getMetadata(), container), "eclipse-ubuntu_jdk8-latest");
   }
 
   @Test

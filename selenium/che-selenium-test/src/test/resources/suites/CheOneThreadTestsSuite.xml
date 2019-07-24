@@ -32,13 +32,9 @@
             <class name="org.eclipse.che.selenium.dashboard.organization.ShareWorkspaceOwnerTest"/>
             <class name="org.eclipse.che.selenium.dashboard.organization.SystemAdminOrganizationTest"/>
             <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromDashboardTest"/>
-            <class name="org.eclipse.che.selenium.git.AuthorizeOnGithubFromPreferencesTest"/>
-            <class name="org.eclipse.che.selenium.git.CheckoutToRemoteBranchTest"/>
-            <class name="org.eclipse.che.selenium.git.PullRequestPluginTest"/>
-            <class name="org.eclipse.che.selenium.git.PullRequestPluginWithForkTest"/>
-            <class name="org.eclipse.che.selenium.git.PushingChangesTest"/>
             <class name="org.eclipse.che.selenium.dashboard.ImportProjectFromGitHubTest"/>
             <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithKeepDirectoryTest"/>
+            <class name="org.eclipse.che.selenium.dashboard.workspaces.WorkspacesListTest"/>
         </classes>
     </test>
 </suite>

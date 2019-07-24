@@ -202,7 +202,9 @@ public final class DtoConverter {
         .withComponent(action.getComponent())
         .withType(action.getType())
         .withWorkdir(action.getWorkdir())
-        .withCommand(action.getCommand());
+        .withCommand(action.getCommand())
+        .withReference(action.getReference())
+        .withReferenceContent(action.getReferenceContent());
   }
 
   /** Converts {@link WorkspaceConfig} to {@link WorkspaceConfigDto}. */

@@ -1,8 +1,0 @@
-{
-  "id": "org.eclipse.che.ls.js-ts",
-  "version": "1.0.1",
-  "name": "TypeScript language server",
-  "description": "TypeScript intellisense",
-  "dependencies": [],
-  "properties": {}
-}

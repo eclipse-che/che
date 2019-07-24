@@ -68,13 +68,7 @@ export class ImportGitProjectService implements IEditingProgress {
     const props = {} as che.IProjectTemplate;
     const regExpExecArray = /.*\/([^\/]+?)(?:.git)?$/i.exec(this._location);
     const name = angular.isArray(regExpExecArray) && regExpExecArray.length > 1 ? regExpExecArray[1] : 'new-project';
-    const path = '/' +  name.replace(/[^\w-_]/g, '_');
     props.name = name;
-    props.displayName = name;
-    props.description = '';
-    props.path = path;
-    props.category = '';
-
     props.source = {
       type: 'git',
       location: this._location

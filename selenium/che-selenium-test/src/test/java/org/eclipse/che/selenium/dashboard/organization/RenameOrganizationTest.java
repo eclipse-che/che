@@ -36,7 +36,7 @@ import org.testng.annotations.Test;
  *
  * @author Ann Shumilova
  */
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class RenameOrganizationTest {
   private static final String NEW_PARENT_ORG_NAME = generate("new-parent-", 5);
   private static final String NEW_CHILD_ORG_NAME = generate("new-child-", 5);

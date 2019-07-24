@@ -190,21 +190,13 @@ export class CreateWorkspaceSvc {
     let projects = [];
     let noProjectsFromDevfile = true;
     projectTemplates.forEach((template: che.IProjectTemplate) => {
-      let project = {
-        name: template.name,
-        source: {
-          type: template.source.type,
-          location: template.source.location
-        }
-      };
-      
       sourceDevfile.projects.forEach((project) => {
         if (project.name === template.name) {
           noProjectsFromDevfile = false;
         }
       });
 
-      projects.push(project);
+      projects.push(template);
     });     
     
     return this.checkEditingProgress().then(() => {

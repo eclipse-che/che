@@ -1,8 +1,0 @@
-{
-  "id": "org.eclipse.che.ls.vue",
-  "version": "1.0.0",
-  "name": "VueJS Language Server",
-  "description": "VueJS Intellisense",
-  "dependencies": [],
-  "properties": {}
-}
