@@ -40,10 +40,14 @@ if [ "${CHE_SELF__SIGNED__CERT}" != "" ]; then
     /opt/jboss/keycloak/bin/jboss-cli.sh --file=/scripts/cli/add_openshift_certificate.cli && rm -rf /opt/jboss/keycloak/standalone/configuration/standalone_xml_history
 fi
 
+# POSTGRES_PORT is assigned by Kubernetes controller
+# and it isn't fit to docker-entrypoin.sh.
+unset POSTGRES_PORT
+
 echo "Starting Keycloak server..."
 
-/opt/jboss/keycloak/bin/standalone.sh -Dkeycloak.migration.action=import \
-                                      -Dkeycloak.migration.provider=dir \
-                                      -Dkeycloak.migration.strategy=IGNORE_EXISTING \
-                                      -Dkeycloak.migration.dir=/scripts/ \
-                                      -Djboss.bind.address=0.0.0.0
+exec /opt/jboss/docker-entrypoint.sh -Dkeycloak.migration.action=import \
+                                     -Dkeycloak.migration.provider=dir \
+                                     -Dkeycloak.migration.strategy=IGNORE_EXISTING \
+                                     -Dkeycloak.migration.dir=/scripts/ \
+                                     -Djboss.bind.address=0.0.0.0
