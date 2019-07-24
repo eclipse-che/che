@@ -11,7 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
-import static org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.K8sContainerResolver.MAX_CONTAINER_NAME_LENGTH;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.Names.MAX_CONTAINER_NAME_LENGTH;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertEqualsNoOrder;
 import static org.testng.Assert.assertTrue;

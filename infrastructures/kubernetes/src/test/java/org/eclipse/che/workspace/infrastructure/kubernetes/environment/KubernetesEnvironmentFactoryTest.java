@@ -11,12 +11,10 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_CODE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Warnings.INGRESSES_IGNORED_WARNING_MESSAGE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.PodMerger.DEPLOYMENT_NAME_LABEL;
@@ -64,6 +62,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.api.workspace.server.spi.environment.MemoryAttributeProvisioner;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -476,8 +475,7 @@ public class KubernetesEnvironmentFactoryTest {
     when(containerMock.getName()).thenReturn(containerName);
     when(containerMock.getResources()).thenReturn(resourcesMock);
     when(metadataMock.getAnnotations())
-        .thenReturn(
-            ImmutableMap.of(format(MACHINE_NAME_ANNOTATION_FMT, containerName), machineName));
+        .thenReturn(Names.createMachineNameAnnotations(containerName, machineName));
     when(specMock.getContainers()).thenReturn(ImmutableList.of(containerMock));
     return new PodData(specMock, metadataMock);
   }

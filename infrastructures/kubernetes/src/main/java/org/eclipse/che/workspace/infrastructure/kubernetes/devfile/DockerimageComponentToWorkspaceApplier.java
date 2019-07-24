@@ -20,7 +20,6 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.DISCOVERABL
 import static org.eclipse.che.api.workspace.server.devfile.Constants.DOCKERIMAGE_COMPONENT_TYPE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PUBLIC_ENDPOINT_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.PROJECTS_VOLUME_NAME;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
@@ -51,6 +50,7 @@ import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.VolumeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 
@@ -202,7 +202,7 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
         .withNewMetadata()
         .withName(name)
         .addToLabels(CHE_COMPONENT_NAME_LABEL, name)
-        .addToAnnotations(format(MACHINE_NAME_ANNOTATION_FMT, name), name)
+        .addToAnnotations(Names.createMachineNameAnnotations(name, name))
         .endMetadata()
         .withNewSpec()
         .withContainers(container)
@@ -255,6 +255,14 @@ public class DockerimageComponentToWorkspaceApplier implements ComponentToWorksp
   static String toMachineName(String imageName) throws DevfileException {
     if (imageName.isEmpty()) {
       return imageName;
+    }
+
+    if (imageName.length() > Names.MAX_CONTAINER_NAME_LENGTH) {
+      throw new DevfileException(
+          format(
+              "The image name '%s' is longer than 63 characters and as such cannot be used as a container"
+                  + " name. Please provide an alias for the component with that image.",
+              imageName));
     }
 
     // the name needs to be both a valid k8s label and a valid machine name.
