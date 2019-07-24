@@ -15,12 +15,9 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,6 +27,7 @@ import com.jayway.restassured.response.Response;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
+import org.eclipse.che.api.core.rest.ApiExceptionMapper;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
@@ -55,6 +53,10 @@ public class DevfileServiceTest {
 
   @Mock private DevfileManager devfileManager;
   @Mock private URLFetcher urlFetcher;
+
+  @SuppressWarnings("unused") // is declared for deploying by everrest-assured
+  private ApiExceptionMapper exceptionMapper;
+
   private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
   private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
@@ -89,8 +91,6 @@ public class DevfileServiceTest {
         Files.readFile(getClass().getClassLoader().getResourceAsStream("devfile/devfile.yaml"));
     DevfileImpl devfile = createDevfile(yamlContent);
     WorkspaceImpl ws = createWorkspace(WorkspaceStatus.STOPPED);
-    when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
-    when(devfileManager.createWorkspace(any(DevfileImpl.class), any())).thenReturn(ws);
     final Response response =
         given()
             .auth()
@@ -100,9 +100,8 @@ public class DevfileServiceTest {
             .when()
             .post(SECURE_PATH + "/devfile");
 
-    assertEquals(response.getStatusCode(), 201);
-    verify(devfileManager).createWorkspace(captor.capture(), any());
-    assertEquals(devfile, captor.getValue());
+    assertEquals(response.getStatusCode(), 400);
+    verifyNoMoreInteractions(devfileManager);
   }
 
   private DevfileImpl createDevfile(String yamlContent) throws IOException {
@@ -122,9 +121,8 @@ public class DevfileServiceTest {
             .when()
             .get(SECURE_PATH + "/devfile/ws123456");
 
-    assertEquals(response.getStatusCode(), 200);
-    DevfileImpl devFile = objectMapper.readValue(response.getBody().asString(), DevfileImpl.class);
-    assertNotNull(devFile);
+    assertEquals(response.getStatusCode(), 400);
+    verifyNoMoreInteractions(devfileManager);
   }
 
   private WorkspaceImpl createWorkspace(WorkspaceStatus status)

@@ -29,7 +29,6 @@ import org.eclipse.che.api.core.ApiException;
 import org.eclipse.che.api.core.rest.HttpJsonRequestFactory;
 import org.eclipse.che.api.core.rest.HttpJsonResponse;
 import org.eclipse.che.dto.server.JsonStringMapImpl;
-import org.eclipse.che.plugin.github.shared.GitHubKey;
 import org.slf4j.Logger;
 
 /** @author Mihail Kuznyetsov. */

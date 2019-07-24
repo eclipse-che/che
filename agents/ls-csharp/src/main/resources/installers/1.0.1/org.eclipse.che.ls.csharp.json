@@ -1,8 +1,0 @@
-{
-  "id": "org.eclipse.che.ls.csharp",
-  "version": "1.0.1",
-  "name": "C# language server",
-  "description": "C# intellisense",
-  "dependencies": [],
-  "properties": {}
-}

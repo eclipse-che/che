@@ -12,8 +12,6 @@
 package org.eclipse.che.api.workspace.server.devfile;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.eclipse.che.api.workspace.server.DtoConverter.asDto;
-import static org.eclipse.che.api.workspace.server.WorkspaceKeyValidator.validateKey;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,10 +41,7 @@ import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.core.rest.Service;
 import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.WorkspaceService;
-import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 
@@ -124,16 +119,8 @@ public class DevfileService extends Service {
       throws ServerException, ConflictException, NotFoundException, ValidationException,
           BadRequestException {
 
-    WorkspaceImpl workspace;
-    try {
-      DevfileImpl devfile = devfileManager.parseYaml(data);
-      workspace = devfileManager.createWorkspace(devfile, urlFileContentProvider);
-    } catch (DevfileException e) {
-      throw new BadRequestException(e.getMessage());
-    }
-    return Response.status(201)
-        .entity(asDto(workspace).withLinks(linksGenerator.genLinks(workspace, getServiceContext())))
-        .build();
+    throw new BadRequestException(
+        "This method is deprecated and may be removed at any time. Please use /api/workspace/devfile to create a new workspace");
   }
 
   /**
@@ -166,9 +153,7 @@ public class DevfileService extends Service {
           String key)
       throws NotFoundException, ServerException, BadRequestException, ConflictException,
           JsonProcessingException {
-    validateKey(key);
-    return Response.ok()
-        .entity(objectMapper.writeValueAsString(devfileManager.exportWorkspace(key)))
-        .build();
+    throw new BadRequestException(
+        "This method is deprecated and may be removed at any time. Please use /api/workspace/devfile to create a new workspace");
   }
 }

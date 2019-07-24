@@ -1,8 +1,0 @@
-{
-  "id": "org.eclipse.che.ls.python",
-  "version": "1.0.3",
-  "name": "Python language server",
-  "description": "Python intellisense",
-  "dependencies": [],
-  "properties": {}
-}
