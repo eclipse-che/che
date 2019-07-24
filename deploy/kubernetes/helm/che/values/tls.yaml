@@ -12,6 +12,4 @@
 global:
   tls:
     enabled: true
-    useCertManager: true
-    useStaging: false
     secretName: che-tls

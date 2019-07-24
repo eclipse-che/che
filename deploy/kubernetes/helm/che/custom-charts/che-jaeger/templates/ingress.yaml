@@ -20,7 +20,6 @@ metadata:
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout: "3600"
 {{- if .Values.global.tls.enabled }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect: "true"
-    kubernetes.io/tls-acme: "true"
 {{- else }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect: "false"
 {{- end }}
@@ -39,4 +38,3 @@ spec:
           backend:
               serviceName: jaeger-query
               servicePort: 16686
-

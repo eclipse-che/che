@@ -39,11 +39,8 @@ global:
   serverStrategy: multi-host
   tls:
     enabled: false
-    useCertManager: true
-    useStaging: true
     secretName: che-tls
     useSelfSignedCerts: false
-    email: user@example.com
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"
