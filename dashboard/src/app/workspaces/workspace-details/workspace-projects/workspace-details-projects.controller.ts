@@ -170,12 +170,10 @@ export class WorkspaceDetailsProjectsCtrl {
 
     projectTemplates.forEach((projectTemplate: che.IProjectTemplate) => {
       const origName = projectTemplate.name;
-
       if (this.isProjectNameUnique(origName) === false) {
         // update name, displayName and path
         const newName = this.getUniqueName(origName);
         projectTemplate.name = newName;
-        projectTemplate.path = '/' +  newName.replace(/[^\w-_]/g, '_');
       }
 
       if (!projectTemplate.type && projectTemplate.projectType) {
