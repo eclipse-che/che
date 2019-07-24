@@ -12,7 +12,6 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.LocalObjectReference;
@@ -85,11 +84,7 @@ public class PodMerger {
         }
 
         // store original recipe machine name
-        basePodMeta
-            .getAnnotations()
-            .put(
-                format(MACHINE_NAME_ANNOTATION_FMT, containerName),
-                Names.machineName(podMeta, container));
+        Names.putMachineName(basePodMeta, containerName, Names.machineName(podMeta, container));
 
         baseSpec.getContainers().add(container);
       }

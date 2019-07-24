@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
-import org.eclipse.che.agent.exec.client.ExecAgentClientFactory;
 import org.eclipse.che.api.core.notification.RemoteSubscriptionStorage;
 import org.eclipse.che.api.core.rest.CheJsonProvider;
 import org.eclipse.che.api.core.rest.MessageBodyAdapter;
@@ -99,8 +98,6 @@ import org.eclipse.che.security.PBKDF2PasswordEncryptor;
 import org.eclipse.che.security.PasswordEncryptor;
 import org.eclipse.che.security.oauth.EmbeddedOAuthAPI;
 import org.eclipse.che.security.oauth.OAuthAPI;
-import org.eclipse.che.workspace.infrastructure.docker.DockerInfraModule;
-import org.eclipse.che.workspace.infrastructure.docker.local.LocalDockerModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfraModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructure;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -172,7 +169,6 @@ public class WsMasterModule extends AbstractModule {
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
-    install(new FactoryModuleBuilder().build(ExecAgentClientFactory.class));
 
     Multibinder<InternalEnvironmentProvisioner> internalEnvironmentProvisioners =
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
@@ -289,9 +285,6 @@ public class WsMasterModule extends AbstractModule {
       install(new OpenShiftInfraModule());
     } else if (KubernetesInfrastructure.NAME.equals(infrastructure)) {
       install(new KubernetesInfraModule());
-    } else {
-      install(new LocalDockerModule());
-      install(new DockerInfraModule());
     }
     install(new CheJsonRpcWebSocketConfigurationModule());
 

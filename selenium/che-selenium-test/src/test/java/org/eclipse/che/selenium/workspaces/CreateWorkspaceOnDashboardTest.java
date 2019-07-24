@@ -94,8 +94,8 @@ public class CreateWorkspaceOnDashboardTest {
     theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, Keys.LEFT_SHIFT, "p");
     theiaProposalForm.waitForm();
     theiaProposalForm.enterTextToSearchField(">clo");
-    theiaProposalForm.waitProposal("Git: Clone...");
-    theiaProposalForm.clickOnProposal("Git: Clone...");
+    theiaProposalForm.waitProposal("Git: Clone");
+    theiaProposalForm.clickOnProposal("Git: Clone");
     theiaProposalForm.enterTextToSearchField(WEB_JAVA_SPRING_SAMPLE_URL);
     seleniumWebDriverHelper.pressEnter();
     theiaProjectTree.waitItem(PROJECT_NAME);

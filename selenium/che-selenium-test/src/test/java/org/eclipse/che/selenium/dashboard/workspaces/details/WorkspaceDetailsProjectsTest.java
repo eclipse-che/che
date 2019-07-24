@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.PROJECTS;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects.BottomButton.APPLY_BUTTON;
@@ -37,6 +38,8 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+/** TODO rewrite to use che7 workspace */
+@Test(groups = UNDER_REPAIR)
 public class WorkspaceDetailsProjectsTest {
   private static final String PROJECT_NAME = NameGenerator.generate("wsDetails", 4);
   private static final String PROJECT_FOR_SEARCHING_NAME = NameGenerator.generate("searchWs", 4);
