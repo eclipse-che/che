@@ -66,7 +66,6 @@ export class Ide {
         await this.waitNotification(notificationText, timeout);
         await this.clickOnNotificationButton(notificationText, 'Open Link');
 
-
         try {
             await this.waitNotificationDisappearance(notificationText);
         } catch (err) {
