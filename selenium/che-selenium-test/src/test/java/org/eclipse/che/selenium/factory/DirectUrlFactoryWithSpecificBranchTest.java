@@ -111,6 +111,7 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     // check specific branch
     openTerminalByProposal();
 
+    theiaTerminal.clickOnTerminal(0);
     theiaTerminal.performCommand("cd /projects/" + repositoryName);
     theiaTerminal.performCommand("git status");
     theiaTerminal.waitTerminalOutput("On branch " + SECOND_BRANCH_NAME, 0);
