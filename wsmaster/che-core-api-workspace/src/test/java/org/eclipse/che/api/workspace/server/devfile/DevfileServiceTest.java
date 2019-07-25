@@ -15,16 +15,12 @@ import static com.jayway.restassured.RestAssured.given;
 import static org.everrest.assured.JettyHttpServer.*;
 import static org.testng.Assert.assertEquals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.jayway.restassured.response.Response;
 import org.eclipse.che.api.core.rest.ApiExceptionMapper;
-import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
 import org.everrest.assured.EverrestJetty;
-import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Listeners;
@@ -33,16 +29,10 @@ import org.testng.annotations.Test;
 @Listeners({EverrestJetty.class, MockitoTestNGListener.class})
 public class DevfileServiceTest {
 
-  @Mock private WorkspaceLinksGenerator linksGenerator;
-
-  @Mock private DevfileManager devfileManager;
-  @Mock private URLFetcher urlFetcher;
-
   @SuppressWarnings("unused") // is declared for deploying by everrest-assured
   private ApiExceptionMapper exceptionMapper;
 
   private DevfileSchemaProvider schemaProvider = new DevfileSchemaProvider();
-  private ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
 
   private static final Subject SUBJECT = new SubjectImpl("user", "user123", "token", false);
 
@@ -51,8 +41,7 @@ public class DevfileServiceTest {
 
   @BeforeMethod
   public void initService() {
-    this.devFileService =
-        new DevfileService(linksGenerator, schemaProvider, devfileManager, urlFetcher);
+    this.devFileService = new DevfileService(schemaProvider);
   }
 
   @Test

@@ -13,8 +13,6 @@ package org.eclipse.che.api.workspace.server.devfile;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -27,30 +25,19 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.rest.Service;
-import org.eclipse.che.api.workspace.server.WorkspaceLinksGenerator;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 
 @Api(value = "/devfile", description = "Devfile REST API")
 @Path("/devfile")
 public class DevfileService extends Service {
 
-  private WorkspaceLinksGenerator linksGenerator;
+  public static final String GET_SCHEMA_METHOD = "getSchema";
+
   private DevfileSchemaProvider schemaCachedProvider;
-  private ObjectMapper objectMapper;
-  private DevfileManager devfileManager;
-  private URLFileContentProvider urlFileContentProvider;
 
   @Inject
-  public DevfileService(
-      WorkspaceLinksGenerator linksGenerator,
-      DevfileSchemaProvider schemaCachedProvider,
-      DevfileManager devfileManager,
-      URLFetcher urlFetcher) {
-    this.linksGenerator = linksGenerator;
+  public DevfileService(DevfileSchemaProvider schemaCachedProvider) {
     this.schemaCachedProvider = schemaCachedProvider;
-    this.devfileManager = devfileManager;
-    this.objectMapper = new ObjectMapper(new YAMLFactory());
-    this.urlFileContentProvider = new URLFileContentProvider(null, urlFetcher);
   }
 
   /**
