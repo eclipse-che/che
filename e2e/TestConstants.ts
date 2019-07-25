@@ -85,35 +85,38 @@ export const TestConstants = {
     TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',
 
     /**
-     * Name of namespace created for 'Install Che' on OCP 4.x by OperatorHub UI
+     * Name of namespace created for 'Install Che' on OCP 4.x by OperatorHub UI.
      */
     TS_INSTALL_CHE_PROJECT_NAME: process.env.TS_INSTALL_CHE_PROJECT_NAME || 'test-che-operator',
 
     /**
-     * Username used to log in MultiUser Che
+     * Username used to log in MultiUser Che.
      */
     TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_USERNAME || 'admin',
 
     /**
-     * Password used to log in MultiUser Che
+     * Password used to log in MultiUser Che.
      */
     TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || 'admin',
 
     /**
-     * Url of console OpenShift 4.x
+     * Url of console OpenShift 4.x.
      */
     TS_SELENIUM_OPENSHIFT4_URL: process.env.TS_SELENIUM_OPENSHIFT4_URL || 'https://console-openshift-console.apps.crw.codereadyqe.com',
 
     /**
-     * Username used to log in OCP 4.x
+     * Username used to log in OCP 4.x.
      */
     TS_SELENIUM_OPENSHIFT4_USERNAME: process.env.TS_SELENIUM_OPENSHIFT4_USERNAME || 'kubeadmin',
 
     /**
-     * Password used to log in OCP 4.x
+     * Password used to log in OCP 4.x.
      */
     TS_SELENIUM_OPENSHIFT4_PASSWORD: process.env.TS_SELENIUM_OPENSHIFT4_PASSWORD || 'oc3U8-PcnHi-HWYKf-c4xNi',
 
+    /**
+     * Log into CHE in MultiUser mode, "false" by default.
+     */
     TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true'
 
 };
