@@ -180,11 +180,14 @@ suite('Display source code changes in the running application', async () => {
     test('Run application with changes', async () => {
         await runTask('che: run-with-changes');
 
+        ide.sleep(20000);
+
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
 
     test('Check changes are displayed', async () => {
+        ide.sleep(20000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
         await previewWidget.waitAndSwitchToWidgetFrame();
         await previewWidget.waitAndClick(SpringAppLocators.springMenuButtonLocator);
@@ -217,11 +220,14 @@ suite('Validation of debug functionality', async () => {
     test('Launch debug', async () => {
         await runTask('che: run-debug');
 
+        ide.sleep(20000);
+
         await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
         await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
     });
 
     test('Check content of the launched application', async () => {
+        ide.sleep(20000);
         await previewWidget.waitContentAvailable(SpringAppLocators.springErrorMessageLocator, 60000, 10000);
     });
 

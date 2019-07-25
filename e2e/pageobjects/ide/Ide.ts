@@ -69,6 +69,10 @@ export class Ide {
         }, timeout);
     }
 
+    async sleep(timeout: number) {
+        await this.driverHelper.wait(timeout);
+    }
+
     async waitNotificationAndConfirm(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.waitNotificationAndClickOnButton(notificationText, 'yes', timeout);
     }
