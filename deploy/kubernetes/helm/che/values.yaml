@@ -27,7 +27,6 @@ cheKeycloakClientId: "che-public"
 #workspaceSidecarDefaultRamLimit: ""
 
 global:
-  cheNamespace: ""
   multiuser: false
   #  This value can be passed if custom Oidc provider is used, and there is no need to deploy keycloak in multiuser mode
   #  default (if empty) is true
