@@ -182,13 +182,16 @@ export class Ide {
         for (let i = 1; i <= notificationsCapacity; i++) {
             const notificationLocator: By = By.xpath('//div[@class=\'theia-Notification\']//button[text()=\'Close\']');
 
-            const isElementVisible: boolean = await this.driverHelper.isVisible(notificationLocator);
+            try {
+                await this.driverHelper.waitAndClick(notificationLocator);
+            } catch (err) {
+                if (err instanceof error.TimeoutError) {
+                    console.log(`The '${notificationLocator}' element is not visible and can't be clicked`);
+                    continue;
+                }
 
-            if (!isElementVisible) {
-                continue;
+                throw err;
             }
-
-            await this.driverHelper.waitAndClick(notificationLocator);
         }
     }
 

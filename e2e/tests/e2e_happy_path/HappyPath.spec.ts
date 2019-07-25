@@ -118,9 +118,9 @@ suite('Language server validation', async () => {
     });
 
     test('Error highlighting', async () => {
-        await editor.type(javaFileName, 'textForErrorHighlighting', 30);
+        await editor.type(javaFileName, 'error', 30);
         await editor.waitErrorInLine(30);
-        await editor.performKeyCombination(javaFileName, Key.chord(Key.CONTROL, 'z'));
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
         await editor.waitErrorInLineDisappearance(30);
     });
 
