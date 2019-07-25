@@ -58,7 +58,7 @@ const SpringAppLocators = {
 };
 
 
-suite('Validation of workspace start, build and run', async () => {
+suite('Validation of workspace start', async () => {
     test('Open workspace', async () => {
         await driverHelper.navigateTo(workspaceUrl);
     });
@@ -72,45 +72,14 @@ suite('Validation of workspace start, build and run', async () => {
         await projectTree.waitProjectImported(projectName, 'src');
         await projectTree.expandItem(`/${projectName}`);
     });
-
-    test('Build application', async () => {
-        await topMenu.selectOption('Terminal', 'Run Task...');
-        await quickOpenContainer.clickOnContainerItem('che: build-file-output');
-
-        await projectTree.expandPathAndOpenFile(projectName, 'build-output.txt');
-        await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 180000, 5000);
-    });
-
-    test('Run application', async () => {
-        await topMenu.selectOption('Terminal', 'Run Task...');
-        await quickOpenContainer.clickOnContainerItem('che: run');
-
-        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
-        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
-    });
-
-    test('Check the running application', async () => {
-        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
-    });
-
-    test('Close preview widget', async () => {
-        await rightToolbar.clickOnToolIcon('Preview');
-        await previewWidget.waitPreviewWidgetAbsence();
-    });
-
-    test('Close the terminal running tasks', async () => {
-        await terminal.closeTerminalTab('build-file-output');
-        await terminal.rejectTerminalProcess('run');
-        await terminal.closeTerminalTab('run');
-
-        await warningDialog.waitAndCloseIfAppear();
-    });
 });
 
 suite('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
+
+        await ide.checkLsInitializationStart('Starting Java Language Server');
 
         await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
         await checkJavaPathCompletion();
@@ -151,6 +120,41 @@ suite('Language server validation', async () => {
         await ide.waitStatusBarContains('Starting Yaml Language Server');
         await ide.waitStatusBarContains('100% Starting Yaml Language Server');
         await ide.waitStatusBarTextAbsence('Starting Yaml Language Server');
+    });
+});
+
+suite('Validation of workspace build and run', async () => {
+    test('Build application', async () => {
+        await topMenu.selectOption('Terminal', 'Run Task...');
+        await quickOpenContainer.clickOnContainerItem('che: build-file-output');
+
+        await projectTree.expandPathAndOpenFile(projectName, 'build-output.txt');
+        await editor.followAndWaitForText('build-output.txt', '[INFO] BUILD SUCCESS', 180000, 5000);
+    });
+
+    test('Run application', async () => {
+        await topMenu.selectOption('Terminal', 'Run Task...');
+        await quickOpenContainer.clickOnContainerItem('che: run');
+
+        await ide.waitNotificationAndConfirm('A new process is now listening on port 8080', 120000);
+        await ide.waitNotificationAndOpenLink('Redirect is now enabled on port 8080', 120000);
+    });
+
+    test('Check the running application', async () => {
+        await previewWidget.waitContentAvailable(SpringAppLocators.springTitleLocator, 60000, 10000);
+    });
+
+    test('Close preview widget', async () => {
+        await rightToolbar.clickOnToolIcon('Preview');
+        await previewWidget.waitPreviewWidgetAbsence();
+    });
+
+    test('Close the terminal running tasks', async () => {
+        await terminal.closeTerminalTab('build-file-output');
+        await terminal.rejectTerminalProcess('run');
+        await terminal.closeTerminalTab('run');
+
+        await warningDialog.waitAndCloseIfAppear();
     });
 });
 
