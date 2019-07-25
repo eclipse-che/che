@@ -31,11 +31,20 @@ import { RightToolbar } from './pageobjects/ide/RightToolbar';
 import { Terminal } from './pageobjects/ide/Terminal';
 import { DebugView } from './pageobjects/ide/DebugView';
 import { WarningDialog } from './pageobjects/ide/WarningDialog';
+import { MultiUserLoginPage } from './pageobjects/login/MultiUserLoginPage';
+import { TestConstants } from './TestConstants';
+import { OpenShiftLoginPage } from './pageobjects/openshift/OpenShiftLoginPage';
+import { OpenShiftConsole4x } from './pageobjects/openshift/OpenShiftConsole4x';
 
 const e2eContainer = new Container();
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
-e2eContainer.bind<ILoginPage>(TYPES.LoginPage).to(SingleUserLoginPage).inSingletonScope();
+
+if (TestConstants.TS_SELENIUM_MULTIUSER) {
+    e2eContainer.bind<ILoginPage>(TYPES.LoginPage).to(MultiUserLoginPage).inSingletonScope();
+} else {
+    e2eContainer.bind<ILoginPage>(TYPES.LoginPage).to(SingleUserLoginPage).inSingletonScope();
+}
 
 e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper).inSingletonScope();
 e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard).inSingletonScope();
@@ -55,5 +64,7 @@ e2eContainer.bind<RightToolbar>(CLASSES.RightToolbar).to(RightToolbar).inSinglet
 e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal).inSingletonScope();
 e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView).inSingletonScope();
 e2eContainer.bind<WarningDialog>(CLASSES.WarningDialog).to(WarningDialog).inSingletonScope();
+e2eContainer.bind<OpenShiftLoginPage>(CLASSES.OpenShiftLoginPage).to(OpenShiftLoginPage).inSingletonScope();
+e2eContainer.bind<OpenShiftConsole4x>(CLASSES.OpenShiftConsole4x).to(OpenShiftConsole4x).inSingletonScope();
 
 export { e2eContainer };

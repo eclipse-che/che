@@ -92,26 +92,28 @@ export const TestConstants = {
     /**
      * Username used to log in MultiUser Che
      */
-    TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_USERNAME || 'che',
+    TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_USERNAME || 'admin',
 
     /**
      * Password used to log in MultiUser Che
      */
-    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
+    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || 'admin',
 
     /**
      * Url of console OpenShift 4.x
      */
-    TS_SELENIUM_OPENSHIFT4_URL: process.env.TS_SELENIUM_OPENSHIFT4_URL || '',
+    TS_SELENIUM_OPENSHIFT4_URL: process.env.TS_SELENIUM_OPENSHIFT4_URL || 'https://console-openshift-console.apps.crw.codereadyqe.com',
 
     /**
      * Username used to log in OCP 4.x
      */
-    TS_SELENIUM_OPENSHIFT4_USERNAME: process.env.TS_SELENIUM_OPENSHIFT4_USERNAME || '',
+    TS_SELENIUM_OPENSHIFT4_USERNAME: process.env.TS_SELENIUM_OPENSHIFT4_USERNAME || 'kubeadmin',
 
     /**
      * Password used to log in OCP 4.x
      */
-    TS_SELENIUM_OPENSHIFT4_PASSWORD: process.env.TS_SELENIUM_OPENSHIFT4_PASSWORD || ''
+    TS_SELENIUM_OPENSHIFT4_PASSWORD: process.env.TS_SELENIUM_OPENSHIFT4_PASSWORD || 'oc3U8-PcnHi-HWYKf-c4xNi',
+
+    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true'
 
 };

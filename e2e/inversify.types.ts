@@ -1,3 +1,4 @@
+
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
  *
@@ -31,7 +32,9 @@ const CLASSES = {
     RightToolbar: 'RightToolbar',
     Terminal: 'Terminal',
     DebugView: 'DebugView',
-    WarningDialog: 'WarningDialog'
+    WarningDialog: 'WarningDialog',
+    OpenShiftLoginPage: 'OpenShiftLoginPage',
+    OpenShiftConsole4x: 'OpenShiftConsole4x'
 };
 
 export { TYPES, CLASSES };
