@@ -54,9 +54,9 @@
   <che-list ng-show="listOrganizationWorkspacesController.cheListHelper.visibleItemsNumber > 0">
     <che-list-item
       ng-repeat="workspace in listOrganizationWorkspacesController.cheListHelper.getVisibleItems() | orderBy:[listOrganizationWorkspacesController.workspaceOrderBy, 'config.name']"
-      flex ng-mouseover="hover=true" ng-mouseout="hover=false">
+      flex ng-mouseover="hover=true" ng-mouseout="hover=false" ng-init="workspaceName = listOrganizationWorkspacesController.getWorkspaceName(workspace)">
       <div flex="100"
-           id="ws-name-{{workspace.config.name}}"
+           id="ws-name-{{workspaceName}}"
            data-ws-status="{{workspace.status}}"
            layout="row"
            layout-align="start stretch"
@@ -67,7 +67,7 @@
           <che-list-item-checked
             ng-model="listOrganizationWorkspacesController.cheListHelper.itemsSelectionStatus[workspace.id]"
             ng-show="('RUNNING' === workspace.status || 'STOPPED' === workspace.status)"
-            che-aria-label-checkbox="Workspace {{workspace.config.name}}"
+            che-aria-label-checkbox="Workspace {{workspaceName}}"
             ng-click="listOrganizationWorkspacesController.cheListHelper.updateBulkSelectionStatus()"></che-list-item-checked>
         </div>
         <div flex
@@ -83,11 +83,11 @@
             <span class="che-xs-header noselect" hide-gt-xs>Name</span>
             <div layout="row" flex>
               <workspace-status-indicator flex="none" che-status="listOrganizationWorkspacesController.getWorkspaceStatus(workspace.id)"></workspace-status-indicator>
-              <div class="workspace-name-clip" id="ws-full-name-{{workspace.namespace}}/{{workspace.config.name}}">
+              <div class="workspace-name-clip" id="ws-full-name-{{workspace.namespace}}/{{workspaceName}}">
             <span
               uib-tooltip="{{'RUNNING' === workspace.status ? 'Running' : 'Last modified: ' + (workspace.attributes.updated | amTimeAgo)}}"
               class="che-hover">
-              <che-clip-the-middle>{{workspace.namespace}}/{{workspace.config.name}}</che-clip-the-middle>
+              <che-clip-the-middle>{{workspace.namespace}}/{{workspaceName}}</che-clip-the-middle>
             </span>
               </div>
             </div>
@@ -122,7 +122,7 @@
                  ng-if="listOrganizationWorkspacesController.isSupported(workspace) === true">
               <che-workspace-status workspace-id="workspace.id"
                                     name="workspace-stop-start-button"></che-workspace-status>
-              <a href="#/workspace/{{workspace.namespace}}/{{workspace.config.name}}?tab=Config"
+              <a href="#/workspace/{{workspace.namespace}}/{{workspaceName}}?tab=Config"
                  name="configure-workspace-button"
                  uib-tooltip="Configure workspace">
                 <span class="fa fa-cog"></span>
