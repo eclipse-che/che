@@ -233,7 +233,7 @@ public abstract class BrokerEnvironmentFactory<E extends KubernetesEnvironment> 
       configMapVolume = brokerConfig.configMapVolume;
     }
     brokerConfig.container = newContainer(runtimeId, envVars, image, configMapVolume);
-    brokerConfig.machineName = Names.machineName(pod, brokerConfig.container);
+    brokerConfig.machineName = Names.machineName(pod.getMetadata(), brokerConfig.container);
     brokerConfig.machineConfig = new InternalMachineConfig();
     brokerConfig
         .machineConfig

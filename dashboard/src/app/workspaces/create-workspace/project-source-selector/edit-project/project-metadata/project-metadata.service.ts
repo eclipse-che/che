@@ -73,8 +73,6 @@ export class ProjectMetadataService implements IEditingProgress {
    * @return {che.IProjectTemplate}
    */
   getProjectTemplate(): che.IProjectTemplate {
-    this.projectTemplate.path = '/' +  this.projectTemplate.name.replace(/[^\w-_]/g, '_');
-
     return this.projectTemplate;
   }
 

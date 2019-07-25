@@ -27,6 +27,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
 import org.eclipse.che.api.workspace.server.wsplugins.model.EnvVar;
 import org.eclipse.che.commons.lang.NameGenerator;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.Containers;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
 
@@ -37,8 +38,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSize;
  * @author Oleksandr Garagatyi
  */
 public class K8sContainerResolver {
-
-  static final int MAX_CONTAINER_NAME_LENGTH = 63; // K8S container name limit
 
   private final String imagePullPolicy;
   private final CheContainer cheContainer;
@@ -111,6 +110,6 @@ public class K8sContainerResolver {
 
   private String buildContainerName(String cheContainerName) {
     String uniqueName = NameGenerator.generate(cheContainerName, 3).toLowerCase();
-    return uniqueName.substring(0, min(uniqueName.length(), MAX_CONTAINER_NAME_LENGTH));
+    return uniqueName.substring(0, min(uniqueName.length(), Names.MAX_CONTAINER_NAME_LENGTH));
   }
 }
