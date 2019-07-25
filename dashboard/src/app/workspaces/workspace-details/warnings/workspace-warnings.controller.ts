@@ -32,7 +32,7 @@ export class WorkspaceWarningsController {
   constructor() {
     this.warnings = [];
 
-    if (this.workspace && this.workspace.runtime) {
+    if (this.workspace && this.workspace.runtime && this.workspace.runtime.warnings) {
       this.warnings = this.warnings.concat(this.workspace.runtime.warnings);
     }
   }
