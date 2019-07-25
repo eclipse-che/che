@@ -99,8 +99,8 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaProjectTree.waitProjectsRootItem();
 
     theiaProjectTree.waitItem(repositoryName);
-    theiaProjectTree.openItem(repositoryName);
-    theiaProjectTree.openItem(repositoryName + "/my-lib");
+    theiaProjectTree.expandItem(repositoryName);
+    theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
     expectedItemsAfterCloning.forEach(

@@ -98,7 +98,7 @@ public class DirectUrlFactoryWithRootFolderTest {
     theiaProjectTree.clickOnFilesTab();
     theiaProjectTree.waitProjectsRootItem();
     theiaProjectTree.waitItem(repositoryName);
-    theiaProjectTree.openItem(repositoryName);
+    theiaProjectTree.expandItem(repositoryName);
 
     expectedItemsAfterCloning.forEach(
         name -> {
