@@ -1,5 +1,684 @@
 # Change Log
 
+## [7.0.0-rc-4.0](https://github.com/eclipse/che/tree/7.0.0-rc-4.0) (2019-07-25)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-rc-3.0...7.0.0-rc-4.0)
+
+**Merged pull requests:**
+
+- RELEASE: Set next development version [\#14026](https://github.com/eclipse/che/pull/14026) ([vparfonov](https://github.com/vparfonov))
+- \[TS\_SELENIUM\] Resolve problem with notifications interaction \(bug \#13864\) [\#14019](https://github.com/eclipse/che/pull/14019) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Avoid using unsupported project's properties [\#13998](https://github.com/eclipse/che/pull/13998) ([ashumilova](https://github.com/ashumilova))
+- \[TS SELENIUM\] Fix the \#13865 issue \(Happy Path test is sometimes failing on "Error highlighting" step\) [\#13987](https://github.com/eclipse/che/pull/13987) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Add missing reference and referenceContent for action in DtoConverter [\#13957](https://github.com/eclipse/che/pull/13957) ([sleshchenko](https://github.com/sleshchenko))
+- Remove the "npm" dependency vulnerability [\#13948](https://github.com/eclipse/che/pull/13948) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Store github token in session storage, remove on logout [\#13947](https://github.com/eclipse/che/pull/13947) ([ashumilova](https://github.com/ashumilova))
+- Fix project clonePath is not considered on workspace creation [\#13923](https://github.com/eclipse/che/pull/13923) ([ashumilova](https://github.com/ashumilova))
+- Set wildcard '\*' host name if key name start from 'default-' according to the the https://github.com/eclipse/che/issues/13494\#issuecomment-512761661 [\#13901](https://github.com/eclipse/che/pull/13901) ([vparfonov](https://github.com/vparfonov))
+-  Add custom image with all required packages for init containers [\#13900](https://github.com/eclipse/che/pull/13900) ([mshaposhnik](https://github.com/mshaposhnik))
+- Helm chart deploy registries [\#13890](https://github.com/eclipse/che/pull/13890) ([sparkoo](https://github.com/sparkoo))
+- Adapt Java selenium e2e tests to Openshift OAuth v4 [\#13887](https://github.com/eclipse/che/pull/13887) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- \[TS-SELENIUM\] Adapt WorkspaceCreationAndLsInitialization test according workspace creation from Dashboard changes [\#13885](https://github.com/eclipse/che/pull/13885) ([SkorikSergey](https://github.com/SkorikSergey))
+- Selenium: Correct the e2e selenium tests related to changes on dashboard [\#13884](https://github.com/eclipse/che/pull/13884) ([artaleks9](https://github.com/artaleks9))
+- Mount the SSH keys as secrets in all workspace containers: OpenShift Env [\#13883](https://github.com/eclipse/che/pull/13883) ([vparfonov](https://github.com/vparfonov))
+- Set default version of Che Theia image [\#13879](https://github.com/eclipse/che/pull/13879) ([vparfonov](https://github.com/vparfonov))
+- Make name for SSH Key Config Map unique [\#13877](https://github.com/eclipse/che/pull/13877) ([vparfonov](https://github.com/vparfonov))
+- Deprecate /api/devfile REST API [\#13868](https://github.com/eclipse/che/pull/13868) ([skabashnyuk](https://github.com/skabashnyuk))
+- Store the container-machine mapping predictably [\#13858](https://github.com/eclipse/che/pull/13858) ([metlos](https://github.com/metlos))
+- \[TS-SELENIUM\] Fix HappyPath Java language server validation [\#13851](https://github.com/eclipse/che/pull/13851) ([SkorikSergey](https://github.com/SkorikSergey))
+- Stabilize part for waiting Dashboard in WorkspaceCreationAndLsInitialization test  [\#13850](https://github.com/eclipse/che/pull/13850) ([musienko-maxim](https://github.com/musienko-maxim))
+- \[TS-SELENIUM\] Fix containers-happy-path.yaml reference url [\#13831](https://github.com/eclipse/che/pull/13831) ([SkorikSergey](https://github.com/SkorikSergey))
+- Adapt project selector widget to manage projects from devfile [\#13825](https://github.com/eclipse/che/pull/13825) ([ashumilova](https://github.com/ashumilova))
+- Remove Diagnostics widget on UD [\#13815](https://github.com/eclipse/che/pull/13815) ([akurinnoy](https://github.com/akurinnoy))
+- fix\(helm\): Keep helm labels sync with che-operator so chectl is able to deploy multiuser without errors [\#13812](https://github.com/eclipse/che/pull/13812) ([benoitf](https://github.com/benoitf))
+- Mount the SSH keys as secrets in all workspace containers [\#13809](https://github.com/eclipse/che/pull/13809) ([vparfonov](https://github.com/vparfonov))
+- Update the use of Machines in Che [\#13808](https://github.com/eclipse/che/pull/13808) ([skabashnyuk](https://github.com/skabashnyuk))
+- \[TS-SELENIUM\] Update HappyPath test according to fixed bug [\#13802](https://github.com/eclipse/che/pull/13802) ([SkorikSergey](https://github.com/SkorikSergey))
+- Add `securityContext.fsGroup`. [\#13798](https://github.com/eclipse/che/pull/13798) ([monaka](https://github.com/monaka))
+- \[keycloak\] Rename environment variables. [\#13791](https://github.com/eclipse/che/pull/13791) ([monaka](https://github.com/monaka))
+- Initial cleanup of che6 legacy code [\#13788](https://github.com/eclipse/che/pull/13788) ([skabashnyuk](https://github.com/skabashnyuk))
+- Update CODEOWNERS for the endgame [\#13786](https://github.com/eclipse/che/pull/13786) ([l0rd](https://github.com/l0rd))
+- fix \#13660 - Replace mentions of 'oAuth', by more accurate 'OAuth'. \(See https://oauth.net/\) [\#13664](https://github.com/eclipse/che/pull/13664) ([themr0c](https://github.com/themr0c))
+
+## [7.0.0-rc-3.0](https://github.com/eclipse/che/tree/7.0.0-rc-3.0) (2019-07-05)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-RC-1.1...7.0.0-rc-3.0)
+
+**Merged pull requests:**
+
+- chore\(github\): Update issue template to have several choices [\#13777](https://github.com/eclipse/che/pull/13777) ([benoitf](https://github.com/benoitf))
+- RELEASE: Set next development version [\#13711](https://github.com/eclipse/che/pull/13711) ([vparfonov](https://github.com/vparfonov))
+- Revert "Fix handling of error status of a workspace " [\#13699](https://github.com/eclipse/che/pull/13699) ([akurinnoy](https://github.com/akurinnoy))
+- \[E2E\] Change export logic [\#13697](https://github.com/eclipse/che/pull/13697) ([Katka92](https://github.com/Katka92))
+- Set default Che Theia vesrsion to 7.0.0-rc-3.0 [\#13696](https://github.com/eclipse/che/pull/13696) ([vparfonov](https://github.com/vparfonov))
+- Updating codeowners for Che 7 endgame code reviews [\#13684](https://github.com/eclipse/che/pull/13684) ([l0rd](https://github.com/l0rd))
+- \[Selenium\] Adapt selenium tests from ocpoauth package [\#13663](https://github.com/eclipse/che/pull/13663) ([SkorikSergey](https://github.com/SkorikSergey))
+- Set version 7.0.0-rc-3.0-SNAPSHOT \(rc in lowercase\) [\#13655](https://github.com/eclipse/che/pull/13655) ([vparfonov](https://github.com/vparfonov))
+- Remove Docker CLI and images parts of the CLI [\#13652](https://github.com/eclipse/che/pull/13652) ([benoitf](https://github.com/benoitf))
+- Set new version 7.0.0-RC-3.0-SNAPSHOT [\#13651](https://github.com/eclipse/che/pull/13651) ([vparfonov](https://github.com/vparfonov))
+- modify url to get index.json [\#13645](https://github.com/eclipse/che/pull/13645) ([tobespc](https://github.com/tobespc))
+- Workspace termination time metrics [\#13635](https://github.com/eclipse/che/pull/13635) ([sparkoo](https://github.com/sparkoo))
+- \[TS-SELENIUM\] Cover the "Use Java IDE features and the inner loop" step from "Happy path" scenario [\#13615](https://github.com/eclipse/che/pull/13615) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Deploy legacy variable only for che6 workspaces [\#13612](https://github.com/eclipse/che/pull/13612) ([skabashnyuk](https://github.com/skabashnyuk))
+- Fix the deployment failure with default `values.yaml`. [\#13598](https://github.com/eclipse/che/pull/13598) ([monaka](https://github.com/monaka))
+- Support mountSources for K8S/OS components in devfile [\#13595](https://github.com/eclipse/che/pull/13595) ([mshaposhnik](https://github.com/mshaposhnik))
+- Selenium: Update the E2E selenium tests according to the changes on dashboard [\#13589](https://github.com/eclipse/che/pull/13589) ([artaleks9](https://github.com/artaleks9))
+- Deprecate workspaces with Devfile stored as workspace config [\#13588](https://github.com/eclipse/che/pull/13588) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Fix editor version in Che Devfile [\#13572](https://github.com/eclipse/che/pull/13572) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Upgrade dashboard dependencies [\#13571](https://github.com/eclipse/che/pull/13571) ([evidolob](https://github.com/evidolob))
+- Add dockerfile to execute E2E Che 7 typescript tests. [\#13542](https://github.com/eclipse/che/pull/13542) ([Katka92](https://github.com/Katka92))
+- Apply TS formatter and linter to workspace-loader [\#13532](https://github.com/eclipse/che/pull/13532) ([akurinnoy](https://github.com/akurinnoy))
+
+## [7.0.0-RC-1.1](https://github.com/eclipse/che/tree/7.0.0-RC-1.1) (2019-06-19)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-RC-2.0...7.0.0-RC-1.1)
+
+**Merged pull requests:**
+
+- Make Che Plugin Broker use self-signed certificate [\#13565](https://github.com/eclipse/che/pull/13565) ([sleshchenko](https://github.com/sleshchenko))
+- RELEASE: Set next development version [\#13564](https://github.com/eclipse/che/pull/13564) ([vparfonov](https://github.com/vparfonov))
+
+## [7.0.0-RC-2.0](https://github.com/eclipse/che/tree/7.0.0-RC-2.0) (2019-06-19)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-RC-1.0...7.0.0-RC-2.0)
+
+**Merged pull requests:**
+
+- Fix the startup failure on the non-root runtime. [\#13573](https://github.com/eclipse/che/pull/13573) ([monaka](https://github.com/monaka))
+- Allow registry passwords longer than 128 chars [\#13569](https://github.com/eclipse/che/pull/13569) ([johnmcollier](https://github.com/johnmcollier))
+- Update Openshift v4 provider download URL [\#13567](https://github.com/eclipse/che/pull/13567) ([davidfestal](https://github.com/davidfestal))
+- Operator-related fix and openshift v4 support [\#13554](https://github.com/eclipse/che/pull/13554) ([davidfestal](https://github.com/davidfestal))
+- \#13547 fix typo gralde [\#13550](https://github.com/eclipse/che/pull/13550) ([nickboldt](https://github.com/nickboldt))
+- Change plugin registry to v3 [\#13548](https://github.com/eclipse/che/pull/13548) ([nickboldt](https://github.com/nickboldt))
+- Add creation of k8s secrets during deploying of broker [\#13546](https://github.com/eclipse/che/pull/13546) ([sleshchenko](https://github.com/sleshchenko))
+- \[E2E\] Update typescript tests according to workspace creation changes [\#13544](https://github.com/eclipse/che/pull/13544) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Fix handling of error status of a workspace  [\#13535](https://github.com/eclipse/che/pull/13535) ([akurinnoy](https://github.com/akurinnoy))
+- Remove non-null constraints from some devfile fields; [\#13516](https://github.com/eclipse/che/pull/13516) ([mshaposhnik](https://github.com/mshaposhnik))
+- Do not serialize DTO fields with empty or null objects and arrays [\#13515](https://github.com/eclipse/che/pull/13515) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Use the metadata.name instead of name. [\#13513](https://github.com/eclipse/che/pull/13513) ([metlos](https://github.com/metlos))
+- Use memory limit provided by meta.yaml in apache-camel stack [\#13505](https://github.com/eclipse/che/pull/13505) ([svor](https://github.com/svor))
+- Polishing of monitoring dashboards [\#13501](https://github.com/eclipse/che/pull/13501) ([skabashnyuk](https://github.com/skabashnyuk))
+- \[E2E typescript\] Fix plugins adding [\#13496](https://github.com/eclipse/che/pull/13496) ([Katka92](https://github.com/Katka92))
+- K8s-like devfile naming [\#13490](https://github.com/eclipse/che/pull/13490) ([metlos](https://github.com/metlos))
+- \[TS-SELENIUM\] Cover the "Start a Workspace from a devfile" step from "Happy path" scenario [\#13479](https://github.com/eclipse/che/pull/13479) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Add devfile validation to /workspace/devfile endpoint [\#13472](https://github.com/eclipse/che/pull/13472) ([metlos](https://github.com/metlos))
+- Create workspace from devfile [\#13469](https://github.com/eclipse/che/pull/13469) ([ashumilova](https://github.com/ashumilova))
+- Selenium: remove selenium tests that check Che 6 compatible factories from CheSuite test suite [\#13468](https://github.com/eclipse/che/pull/13468) ([SkorikSergey](https://github.com/SkorikSergey))
+- Initialize the empty binding for allowed environment type upgrades in k8s infrastructure [\#13466](https://github.com/eclipse/che/pull/13466) ([metlos](https://github.com/metlos))
+- Rework dynamodule exclusion regexps to match nested WARs as well [\#13464](https://github.com/eclipse/che/pull/13464) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- RELEASE: Set next development version [\#13460](https://github.com/eclipse/che/pull/13460) ([vparfonov](https://github.com/vparfonov))
+- Adding owners for `e2e` directory. [\#13457](https://github.com/eclipse/che/pull/13457) ([rhopp](https://github.com/rhopp))
+- \[E2E tests\] Changes needed to reuse the tests [\#13456](https://github.com/eclipse/che/pull/13456) ([Katka92](https://github.com/Katka92))
+- Attempt to create the che project multiple times if it was previously deleted. [\#13443](https://github.com/eclipse/che/pull/13443) ([metlos](https://github.com/metlos))
+- Add possibility to specify reference or registry url for chePlugin/cheEditor type components [\#13297](https://github.com/eclipse/che/pull/13297) ([mshaposhnik](https://github.com/mshaposhnik))
+- Decoupled monitoring configuration and deployment [\#13152](https://github.com/eclipse/che/pull/13152) ([skabashnyuk](https://github.com/skabashnyuk))
+
+## [7.0.0-RC-1.0](https://github.com/eclipse/che/tree/7.0.0-RC-1.0) (2019-06-03)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.5...7.0.0-RC-1.0)
+
+**Merged pull requests:**
+
+- Make workspace start errors more Che7 friendly [\#13462](https://github.com/eclipse/che/pull/13462) ([skabashnyuk](https://github.com/skabashnyuk))
+- Enable to set URLs for custom registries. [\#13455](https://github.com/eclipse/che/pull/13455) ([monaka](https://github.com/monaka))
+- Add -Duser.home parameter to maven opts in java-maven stack [\#13453](https://github.com/eclipse/che/pull/13453) ([amisevsk](https://github.com/amisevsk))
+- Fix handling no-environment in workspace config, introduced in Che7 [\#13450](https://github.com/eclipse/che/pull/13450) ([ashumilova](https://github.com/ashumilova))
+- CHE-12918 add checks for incompatible factories [\#13446](https://github.com/eclipse/che/pull/13446) ([olexii4](https://github.com/olexii4))
+- Change version of redhat-java plugin to latest in stacks [\#13440](https://github.com/eclipse/che/pull/13440) ([svor](https://github.com/svor))
+- Add PHP and PHP + MySQL Che-7 stacks with samples [\#13434](https://github.com/eclipse/che/pull/13434) ([svor](https://github.com/svor))
+- Integrate Che Server with Devfile Registry [\#13430](https://github.com/eclipse/che/pull/13430) ([sleshchenko](https://github.com/sleshchenko))
+- Merge api-devfile and api-workspace together [\#13417](https://github.com/eclipse/che/pull/13417) ([metlos](https://github.com/metlos))
+
+## [6.19.5](https://github.com/eclipse/che/tree/6.19.5) (2019-05-29)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.4...6.19.5)
+
+**Merged pull requests:**
+
+- Fix templates for helm 2.14.0 \(validating option is enabled\) [\#13432](https://github.com/eclipse/che/pull/13432) ([benoitf](https://github.com/benoitf))
+- Used latest keycloak 6.0.1 [\#13429](https://github.com/eclipse/che/pull/13429) ([skabashnyuk](https://github.com/skabashnyuk))
+- \[deploy/helm\] backport changes from chectl for templates [\#13425](https://github.com/eclipse/che/pull/13425) ([benoitf](https://github.com/benoitf))
+- switch to RC version scheme [\#13424](https://github.com/eclipse/che/pull/13424) ([riuvshin](https://github.com/riuvshin))
+- Fix handling supported versions based on the devfile introduction [\#13418](https://github.com/eclipse/che/pull/13418) ([ashumilova](https://github.com/ashumilova))
+- Fix loader animation on factory loading page [\#13415](https://github.com/eclipse/che/pull/13415) ([akurinnoy](https://github.com/akurinnoy))
+- Add an ability to disable waiting for PVCs to become bound [\#13409](https://github.com/eclipse/che/pull/13409) ([sleshchenko](https://github.com/sleshchenko))
+- Add successful stopped workspaces metric [\#13404](https://github.com/eclipse/che/pull/13404) ([mkuznyetsov](https://github.com/mkuznyetsov))
+- Remove dummy workspace config if devfile is present [\#13403](https://github.com/eclipse/che/pull/13403) ([sleshchenko](https://github.com/sleshchenko))
+- Add preferences for chePlugin components in Devfile [\#13341](https://github.com/eclipse/che/pull/13341) ([sleshchenko](https://github.com/sleshchenko))
+
+## [6.19.4](https://github.com/eclipse/che/tree/6.19.4) (2019-05-23)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-5.0...6.19.4)
+
+**Merged pull requests:**
+
+- RELEASE: Update CHANGELOG [\#13400](https://github.com/eclipse/che/pull/13400) ([riuvshin](https://github.com/riuvshin))
+- Restore account linking on newest keycloak versions [\#13398](https://github.com/eclipse/che/pull/13398) ([mshaposhnik](https://github.com/mshaposhnik))
+- Fix selenium tests [\#13371](https://github.com/eclipse/che/pull/13371) ([tolusha](https://github.com/tolusha))
+
+## [7.0.0-beta-5.0](https://github.com/eclipse/che/tree/7.0.0-beta-5.0) (2019-05-22)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-4.0...7.0.0-beta-5.0)
+
+**Merged pull requests:**
+
+- Fix docker build status test [\#13386](https://github.com/eclipse/che/pull/13386) ([danix800](https://github.com/danix800))
+- CHE-13381 remove checking for a machine recipe fields which is not ma… [\#13382](https://github.com/eclipse/che/pull/13382) ([olexii4](https://github.com/olexii4))
+- RELEASE: Set next development version [\#13377](https://github.com/eclipse/che/pull/13377) ([riuvshin](https://github.com/riuvshin))
+- Set memory limit for node debug sidecar containers [\#13370](https://github.com/eclipse/che/pull/13370) ([tolusha](https://github.com/tolusha))
+- Add Apache Camel stack and sample [\#13361](https://github.com/eclipse/che/pull/13361) ([tolusha](https://github.com/tolusha))
+- CHE-13358:Update dashboard dev image. [\#13359](https://github.com/eclipse/che/pull/13359) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- remove @riuvshin and @eivantsov as mandatory... [\#13352](https://github.com/eclipse/che/pull/13352) ([nickboldt](https://github.com/nickboldt))
+- Revert to OCP 3.9 [\#13351](https://github.com/eclipse/che/pull/13351) ([dmytro-ndp](https://github.com/dmytro-ndp))
+- Add tslint to e2e tests [\#13350](https://github.com/eclipse/che/pull/13350) ([Katka92](https://github.com/Katka92))
+- Fix printing of runtime output during factory accepting [\#13332](https://github.com/eclipse/che/pull/13332) ([sleshchenko](https://github.com/sleshchenko))
+- Null workspace config on update if devfile is present [\#13330](https://github.com/eclipse/che/pull/13330) ([sleshchenko](https://github.com/sleshchenko))
+- Fix recovery of Devfile based workspaces [\#13321](https://github.com/eclipse/che/pull/13321) ([sleshchenko](https://github.com/sleshchenko))
+- Add copying of selector field on component copy creation [\#13314](https://github.com/eclipse/che/pull/13314) ([sleshchenko](https://github.com/sleshchenko))
+- Make dashboard devfile working again. [\#13310](https://github.com/eclipse/che/pull/13310) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Added devfile.yaml for workspace-loader [\#13305](https://github.com/eclipse/che/pull/13305) ([akurinnoy](https://github.com/akurinnoy))
+- Update theia dev stack to use latest dev image. [\#13296](https://github.com/eclipse/che/pull/13296) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Add CHE-7 stack for C\# with samples [\#13294](https://github.com/eclipse/che/pull/13294) ([svor](https://github.com/svor))
+- fix gwt-ide loader to not to fail if workspace runtime is missed [\#13292](https://github.com/eclipse/che/pull/13292) ([akurinnoy](https://github.com/akurinnoy))
+- Remove @garagatyi from code owners [\#13288](https://github.com/eclipse/che/pull/13288) ([garagatyi](https://github.com/garagatyi))
+- CHE-12917 Added an indicator to notify that the CHE 6 workspaces will not work anymore [\#13284](https://github.com/eclipse/che/pull/13284) ([olexii4](https://github.com/olexii4))
+- \[Selenium\] update selenium tests from factory and stack packages [\#13283](https://github.com/eclipse/che/pull/13283) ([SkorikSergey](https://github.com/SkorikSergey))
+- CHE-12063: Fix WorkspaceLoader hanging when Che Server is unreachable [\#13282](https://github.com/eclipse/che/pull/13282) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- RELEASE: Update CHANGELOG [\#13277](https://github.com/eclipse/che/pull/13277) ([riuvshin](https://github.com/riuvshin))
+- Content references in actions for editor specific action definitions. [\#13273](https://github.com/eclipse/che/pull/13273) ([metlos](https://github.com/metlos))
+- RELEASE: Set next development version [\#13264](https://github.com/eclipse/che/pull/13264) ([riuvshin](https://github.com/riuvshin))
+- Add stub for WorkspaceConfig if workspace is created with Devfile [\#13243](https://github.com/eclipse/che/pull/13243) ([sleshchenko](https://github.com/sleshchenko))
+- Update default Theia IDE version to 'next' [\#13235](https://github.com/eclipse/che/pull/13235) ([sleshchenko](https://github.com/sleshchenko))
+- \[ TS-SELENIUM \] Investigating new typescript related test framework [\#13200](https://github.com/eclipse/che/pull/13200) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+
+## [7.0.0-beta-4.0](https://github.com/eclipse/che/tree/7.0.0-beta-4.0) (2019-05-03)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.3...7.0.0-beta-4.0)
+
+**Merged pull requests:**
+
+- Configure new plugin registry and broker [\#13311](https://github.com/eclipse/che/pull/13311) ([amisevsk](https://github.com/amisevsk))
+- Fix the creation of a usable machine name from the dockerimage [\#13266](https://github.com/eclipse/che/pull/13266) ([metlos](https://github.com/metlos))
+- Change default plugin registry image [\#13252](https://github.com/eclipse/che/pull/13252) ([garagatyi](https://github.com/garagatyi))
+- Fix the machine naming of a dockerimage without alias. [\#13251](https://github.com/eclipse/che/pull/13251) ([metlos](https://github.com/metlos))
+- \[typescript dto\] Keep in sync the file with current che version [\#13240](https://github.com/eclipse/che/pull/13240) ([benoitf](https://github.com/benoitf))
+- Switch to Justify json schema validator [\#13231](https://github.com/eclipse/che/pull/13231) ([mshaposhnik](https://github.com/mshaposhnik))
+- Use alias in devfile.yaml and remove component names. [\#13228](https://github.com/eclipse/che/pull/13228) ([metlos](https://github.com/metlos))
+- Update broker version to bugfix release [\#13215](https://github.com/eclipse/che/pull/13215) ([garagatyi](https://github.com/garagatyi))
+- Do not inherit pod name by plugins machines [\#13214](https://github.com/eclipse/che/pull/13214) ([sleshchenko](https://github.com/sleshchenko))
+- Avoid redirection loop in case if gwt-ide loaded in the sidecar [\#13205](https://github.com/eclipse/che/pull/13205) ([skabashnyuk](https://github.com/skabashnyuk))
+- Adapt UD and wsmaster to new plugin notation [\#13204](https://github.com/eclipse/che/pull/13204) ([garagatyi](https://github.com/garagatyi))
+- Make possible to set memory limit for sidecar plugins [\#13202](https://github.com/eclipse/che/pull/13202) ([mshaposhnik](https://github.com/mshaposhnik))
+- Add devfile support in UD [\#13198](https://github.com/eclipse/che/pull/13198) ([ashumilova](https://github.com/ashumilova))
+- \[Cypress\] Change workspace details tabs list according to UI changes  [\#13196](https://github.com/eclipse/che/pull/13196) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Notify user about workspace 'stopped event' if previous state was 'starting.' [\#13192](https://github.com/eclipse/che/pull/13192) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- Make reference of kubernetes component optional if referenceContent is provided [\#13191](https://github.com/eclipse/che/pull/13191) ([sleshchenko](https://github.com/sleshchenko))
+- Added an ability to use Devfile as workspace configuration as an alternative to WorkspaceConfig [\#13185](https://github.com/eclipse/che/pull/13185) ([sleshchenko](https://github.com/sleshchenko))
+- Make it possible to update and stop a workspace [\#13181](https://github.com/eclipse/che/pull/13181) ([vitaliy-guliy](https://github.com/vitaliy-guliy))
+- Add option to specify additional cluster role for workspaces. [\#13178](https://github.com/eclipse/che/pull/13178) ([johnmcollier](https://github.com/johnmcollier))
+- Update CONTRIBUTING.md [\#13177](https://github.com/eclipse/che/pull/13177) ([bmicklea](https://github.com/bmicklea))
+- Add Che7 Go stack and samples [\#13176](https://github.com/eclipse/che/pull/13176) ([tolusha](https://github.com/tolusha))
+- Fix filter of the plugins list [\#13174](https://github.com/eclipse/che/pull/13174) ([ashumilova](https://github.com/ashumilova))
+- Remove outdated devfile plans [\#13172](https://github.com/eclipse/che/pull/13172) ([skabashnyuk](https://github.com/skabashnyuk))
+- Rename component "name" to "alias" [\#13166](https://github.com/eclipse/che/pull/13166) ([metlos](https://github.com/metlos))
+- Add yarn.lock to UD sources jar [\#13162](https://github.com/eclipse/che/pull/13162) ([garagatyi](https://github.com/garagatyi))
+- Ignore `.theia/` directories. [\#13161](https://github.com/eclipse/che/pull/13161) ([monaka](https://github.com/monaka))
+- Refocused README on Kube capabilities [\#13159](https://github.com/eclipse/che/pull/13159) ([bmicklea](https://github.com/bmicklea))
+- Set proper Java Options in Che 7 maven and gradle stacks \(JDK 11\) [\#13158](https://github.com/eclipse/che/pull/13158) ([l0rd](https://github.com/l0rd))
+- Revert a part of 2a18d4d2. \(applyed by \#13105\) [\#13140](https://github.com/eclipse/che/pull/13140) ([monaka](https://github.com/monaka))
+- Support error messages in plain text. [\#13138](https://github.com/eclipse/che/pull/13138) ([monaka](https://github.com/monaka))
+- Add machine token support for GWT-IDE [\#13137](https://github.com/eclipse/che/pull/13137) ([monaka](https://github.com/monaka))
+- Add Django sample [\#13135](https://github.com/eclipse/che/pull/13135) ([tolusha](https://github.com/tolusha))
+- Fix typo OpenJKD -\> OpenJDK [\#13134](https://github.com/eclipse/che/pull/13134) ([apupier](https://github.com/apupier))
+- Add an ability to enable ephemeral mode with devfile [\#13129](https://github.com/eclipse/che/pull/13129) ([sleshchenko](https://github.com/sleshchenko))
+- Use random ingress/route name for Che-generated ingresses/routes [\#13126](https://github.com/eclipse/che/pull/13126) ([metlos](https://github.com/metlos))
+- Made Devfile part of a workspace [\#13122](https://github.com/eclipse/che/pull/13122) ([sleshchenko](https://github.com/sleshchenko))
+- Database model and scripts for devfile [\#13111](https://github.com/eclipse/che/pull/13111) ([mshaposhnik](https://github.com/mshaposhnik))
+
+## [6.19.3](https://github.com/eclipse/che/tree/6.19.3) (2019-04-11)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-3.0...6.19.3)
+
+**Merged pull requests:**
+
+- RELEASE: Update CHANGELOG [\#13120](https://github.com/eclipse/che/pull/13120) ([riuvshin](https://github.com/riuvshin))
+- Add option to enable Postgres debug logs in the Che Helm chart [\#13093](https://github.com/eclipse/che/pull/13093) ([johnmcollier](https://github.com/johnmcollier))
+- Fix licence year for some files. [\#13082](https://github.com/eclipse/che/pull/13082) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+
+## [7.0.0-beta-3.0](https://github.com/eclipse/che/tree/7.0.0-beta-3.0) (2019-04-10)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-2.0...7.0.0-beta-3.0)
+
+**Merged pull requests:**
+
+- Dashboard: Created tests + refactoring of last workspaces [\#13175](https://github.com/eclipse/che/pull/13175) ([ljelinkova](https://github.com/ljelinkova))
+- Fix invalid return types. [\#13105](https://github.com/eclipse/che/pull/13105) ([monaka](https://github.com/monaka))
+- RELEASE: Set next development version [\#13102](https://github.com/eclipse/che/pull/13102) ([riuvshin](https://github.com/riuvshin))
+- Allow calling workspace/settings method with machine token [\#13100](https://github.com/eclipse/che/pull/13100) ([skabashnyuk](https://github.com/skabashnyuk))
+- \[Cypress\] Update "ProjectTree.waitProjectImported" method according to the "Cypress" principles [\#13097](https://github.com/eclipse/che/pull/13097) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Selenium: update expected stacks list on NewWorkspacePageTest selenium test [\#13077](https://github.com/eclipse/che/pull/13077) ([SkorikSergey](https://github.com/SkorikSergey))
+- Add python stack and hello-world sample [\#13071](https://github.com/eclipse/che/pull/13071) ([tolusha](https://github.com/tolusha))
+- Remove installers and tools pages, rename machines to containers [\#13070](https://github.com/eclipse/che/pull/13070) ([ashumilova](https://github.com/ashumilova))
+- Remove refspec and add more fine-grained checkout-after-clone control [\#13069](https://github.com/eclipse/che/pull/13069) ([metlos](https://github.com/metlos))
+- \[Cypress\] Update the "WorkspaceCreationAndLanguageServerInitialization.spec.ts" cypress test according to the dashboard changes [\#13068](https://github.com/eclipse/che/pull/13068) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Fix validation devfile for components with id like gist url. [\#13056](https://github.com/eclipse/che/pull/13056) ([AndrienkoAleksandr](https://github.com/AndrienkoAleksandr))
+- \[docker\] Add yarn to build image as yarn is now used to build dashboard [\#13052](https://github.com/eclipse/che/pull/13052) ([benoitf](https://github.com/benoitf))
+- Selenium: update dashboard selenium tests according to adding Java Maven and Java Gradle stacks [\#13049](https://github.com/eclipse/che/pull/13049) ([SkorikSergey](https://github.com/SkorikSergey))
+- Used manually written Devfile POJOs instead of generated ones. [\#13048](https://github.com/eclipse/che/pull/13048) ([sleshchenko](https://github.com/sleshchenko))
+- Use a default message of original exception does not have any [\#13043](https://github.com/eclipse/che/pull/13043) ([sleshchenko](https://github.com/sleshchenko))
+- Fixed NPE during provisioning of selector for Deployments [\#13041](https://github.com/eclipse/che/pull/13041) ([sleshchenko](https://github.com/sleshchenko))
+- \[Cypress\] Use an "Electron" browser for "headless" mode [\#13039](https://github.com/eclipse/che/pull/13039) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- \[Cypress\] Rework "cypress-tests" module with using "InversifyJS" library [\#13036](https://github.com/eclipse/che/pull/13036) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Fix che-in-che devfile to use reference [\#13035](https://github.com/eclipse/che/pull/13035) ([mshaposhnik](https://github.com/mshaposhnik))
+- Remove plugins and editors from workspace creation page [\#13033](https://github.com/eclipse/che/pull/13033) ([ashumilova](https://github.com/ashumilova))
+- Fix message in load factory [\#13032](https://github.com/eclipse/che/pull/13032) ([qurben](https://github.com/qurben))
+- \[Cypress\] Change sample project used in "WorkspaceCreationAndLanguageServerInitialization.spec.ts" cypress test [\#13031](https://github.com/eclipse/che/pull/13031) ([Ohrimenko1988](https://github.com/Ohrimenko1988))
+- Update Devfile doc with default editor info [\#13029](https://github.com/eclipse/che/pull/13029) ([sleshchenko](https://github.com/sleshchenko))
+
+## [7.0.0-beta-2.0](https://github.com/eclipse/che/tree/7.0.0-beta-2.0) (2019-03-20)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.2...7.0.0-beta-2.0)
+
+## [6.19.2](https://github.com/eclipse/che/tree/6.19.2) (2019-03-15)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.1...6.19.2)
+
+## [6.19.1](https://github.com/eclipse/che/tree/6.19.1) (2019-03-12)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-1.0...6.19.1)
+
+## [7.0.0-beta-1.0](https://github.com/eclipse/che/tree/7.0.0-beta-1.0) (2019-02-27)
+[Full Changelog](https://github.com/eclipse/che/compare/6.19.0...7.0.0-beta-1.0)
+
+## [6.19.0](https://github.com/eclipse/che/tree/6.19.0) (2019-02-27)
+[Full Changelog](https://github.com/eclipse/che/compare/6.18.2...6.19.0)
+
+## [6.18.2](https://github.com/eclipse/che/tree/6.18.2) (2019-02-14)
+[Full Changelog](https://github.com/eclipse/che/compare/6.18.1...6.18.2)
+
+## [6.18.1](https://github.com/eclipse/che/tree/6.18.1) (2019-02-12)
+[Full Changelog](https://github.com/eclipse/che/compare/6.18.0...6.18.1)
+
+## [6.18.0](https://github.com/eclipse/che/tree/6.18.0) (2019-02-06)
+[Full Changelog](https://github.com/eclipse/che/compare/6.17.1...6.18.0)
+
+## [6.17.1](https://github.com/eclipse/che/tree/6.17.1) (2019-01-22)
+[Full Changelog](https://github.com/eclipse/che/compare/6.17.0...6.17.1)
+
+## [6.17.0](https://github.com/eclipse/che/tree/6.17.0) (2019-01-18)
+[Full Changelog](https://github.com/eclipse/che/compare/6.16.0...6.17.0)
+
+## [6.16.0](https://github.com/eclipse/che/tree/6.16.0) (2018-12-26)
+[Full Changelog](https://github.com/eclipse/che/compare/6.15.0...6.16.0)
+
+## [6.15.0](https://github.com/eclipse/che/tree/6.15.0) (2018-12-05)
+[Full Changelog](https://github.com/eclipse/che/compare/6.14.2...6.15.0)
+
+## [6.14.2](https://github.com/eclipse/che/tree/6.14.2) (2018-11-23)
+[Full Changelog](https://github.com/eclipse/che/compare/6.14.1...6.14.2)
+
+## [6.14.1](https://github.com/eclipse/che/tree/6.14.1) (2018-11-16)
+[Full Changelog](https://github.com/eclipse/che/compare/6.14.0...6.14.1)
+
+## [6.14.0](https://github.com/eclipse/che/tree/6.14.0) (2018-11-14)
+[Full Changelog](https://github.com/eclipse/che/compare/6.13.1...6.14.0)
+
+## [6.13.1](https://github.com/eclipse/che/tree/6.13.1) (2018-11-08)
+[Full Changelog](https://github.com/eclipse/che/compare/6.13.0...6.13.1)
+
+## [6.13.0](https://github.com/eclipse/che/tree/6.13.0) (2018-10-24)
+[Full Changelog](https://github.com/eclipse/che/compare/6.12.2...6.13.0)
+
+## [6.12.2](https://github.com/eclipse/che/tree/6.12.2) (2018-10-16)
+[Full Changelog](https://github.com/eclipse/che/compare/6.12.1...6.12.2)
+
+## [6.12.1](https://github.com/eclipse/che/tree/6.12.1) (2018-10-08)
+[Full Changelog](https://github.com/eclipse/che/compare/6.12.0...6.12.1)
+
+## [6.12.0](https://github.com/eclipse/che/tree/6.12.0) (2018-10-05)
+[Full Changelog](https://github.com/eclipse/che/compare/6.11.1...6.12.0)
+
+## [6.11.1](https://github.com/eclipse/che/tree/6.11.1) (2018-09-20)
+[Full Changelog](https://github.com/eclipse/che/compare/6.11.0...6.11.1)
+
+## [6.11.0](https://github.com/eclipse/che/tree/6.11.0) (2018-09-12)
+[Full Changelog](https://github.com/eclipse/che/compare/6.10.0...6.11.0)
+
+## [6.10.0](https://github.com/eclipse/che/tree/6.10.0) (2018-08-21)
+[Full Changelog](https://github.com/eclipse/che/compare/6.9.0...6.10.0)
+
+## [6.9.0](https://github.com/eclipse/che/tree/6.9.0) (2018-08-02)
+[Full Changelog](https://github.com/eclipse/che/compare/6.8.0...6.9.0)
+
+## [6.8.0](https://github.com/eclipse/che/tree/6.8.0) (2018-07-10)
+[Full Changelog](https://github.com/eclipse/che/compare/6.7.1...6.8.0)
+
+## [6.7.1](https://github.com/eclipse/che/tree/6.7.1) (2018-06-27)
+[Full Changelog](https://github.com/eclipse/che/compare/6.7.0...6.7.1)
+
+## [6.7.0](https://github.com/eclipse/che/tree/6.7.0) (2018-06-20)
+[Full Changelog](https://github.com/eclipse/che/compare/6.6.2...6.7.0)
+
+## [6.6.2](https://github.com/eclipse/che/tree/6.6.2) (2018-06-14)
+[Full Changelog](https://github.com/eclipse/che/compare/6.6.1...6.6.2)
+
+## [6.6.1](https://github.com/eclipse/che/tree/6.6.1) (2018-06-13)
+[Full Changelog](https://github.com/eclipse/che/compare/6.5.3...6.6.1)
+
+## [6.5.3](https://github.com/eclipse/che/tree/6.5.3) (2018-06-06)
+[Full Changelog](https://github.com/eclipse/che/compare/6.5.2...6.5.3)
+
+## [6.5.2](https://github.com/eclipse/che/tree/6.5.2) (2018-05-31)
+[Full Changelog](https://github.com/eclipse/che/compare/6.6.0...6.5.2)
+
+## [6.6.0](https://github.com/eclipse/che/tree/6.6.0) (2018-05-30)
+[Full Changelog](https://github.com/eclipse/che/compare/6.5.1...6.6.0)
+
+## [6.5.1](https://github.com/eclipse/che/tree/6.5.1) (2018-05-24)
+[Full Changelog](https://github.com/eclipse/che/compare/6.5.0...6.5.1)
+
+## [6.5.0](https://github.com/eclipse/che/tree/6.5.0) (2018-05-10)
+[Full Changelog](https://github.com/eclipse/che/compare/6.4.1...6.5.0)
+
+## [6.4.1](https://github.com/eclipse/che/tree/6.4.1) (2018-04-26)
+[Full Changelog](https://github.com/eclipse/che/compare/6.4.0...6.4.1)
+
+## [6.4.0](https://github.com/eclipse/che/tree/6.4.0) (2018-04-18)
+[Full Changelog](https://github.com/eclipse/che/compare/6.3.0...6.4.0)
+
+## [6.3.0](https://github.com/eclipse/che/tree/6.3.0) (2018-03-28)
+[Full Changelog](https://github.com/eclipse/che/compare/6.2.0...6.3.0)
+
+## [6.2.0](https://github.com/eclipse/che/tree/6.2.0) (2018-03-07)
+[Full Changelog](https://github.com/eclipse/che/compare/6.1.1...6.2.0)
+
+## [6.1.1](https://github.com/eclipse/che/tree/6.1.1) (2018-02-26)
+[Full Changelog](https://github.com/eclipse/che/compare/5.22.2...6.1.1)
+
+## [5.22.2](https://github.com/eclipse/che/tree/5.22.2) (2018-02-22)
+[Full Changelog](https://github.com/eclipse/che/compare/6.1.0...5.22.2)
+
+## [6.1.0](https://github.com/eclipse/che/tree/6.1.0) (2018-02-14)
+[Full Changelog](https://github.com/eclipse/che/compare/6.0.0...6.1.0)
+
+## [6.0.0](https://github.com/eclipse/che/tree/6.0.0) (2018-01-31)
+[Full Changelog](https://github.com/eclipse/che/compare/5.22.1...6.0.0)
+
+## [5.22.1](https://github.com/eclipse/che/tree/5.22.1) (2018-01-11)
+[Full Changelog](https://github.com/eclipse/che/compare/6.0.0-M4...5.22.1)
+
+## [6.0.0-M4](https://github.com/eclipse/che/tree/6.0.0-M4) (2018-01-03)
+[Full Changelog](https://github.com/eclipse/che/compare/6.0.0-M3...6.0.0-M4)
+
+## [6.0.0-M3](https://github.com/eclipse/che/tree/6.0.0-M3) (2017-12-14)
+[Full Changelog](https://github.com/eclipse/che/compare/5.22.0...6.0.0-M3)
+
+## [5.22.0](https://github.com/eclipse/che/tree/5.22.0) (2017-12-13)
+[Full Changelog](https://github.com/eclipse/che/compare/5.21.1...5.22.0)
+
+## [5.21.1](https://github.com/eclipse/che/tree/5.21.1) (2017-12-07)
+[Full Changelog](https://github.com/eclipse/che/compare/6.0.0-M2...5.21.1)
+
+## [6.0.0-M2](https://github.com/eclipse/che/tree/6.0.0-M2) (2017-11-23)
+[Full Changelog](https://github.com/eclipse/che/compare/5.21.0...6.0.0-M2)
+
+## [5.21.0](https://github.com/eclipse/che/tree/5.21.0) (2017-11-22)
+[Full Changelog](https://github.com/eclipse/che/compare/5.20.1...5.21.0)
+
+## [5.20.1](https://github.com/eclipse/che/tree/5.20.1) (2017-11-16)
+[Full Changelog](https://github.com/eclipse/che/compare/5.18.1...5.20.1)
+
+## [5.18.1](https://github.com/eclipse/che/tree/5.18.1) (2017-11-03)
+[Full Changelog](https://github.com/eclipse/che/compare/6.0.0-M1...5.18.1)
+
+## [6.0.0-M1](https://github.com/eclipse/che/tree/6.0.0-M1) (2017-11-02)
+[Full Changelog](https://github.com/eclipse/che/compare/5.20.0...6.0.0-M1)
+
+## [5.20.0](https://github.com/eclipse/che/tree/5.20.0) (2017-10-31)
+[Full Changelog](https://github.com/eclipse/che/compare/5.19.0...5.20.0)
+
+## [5.19.0](https://github.com/eclipse/che/tree/5.19.0) (2017-10-14)
+[Full Changelog](https://github.com/eclipse/che/compare/5.18.0...5.19.0)
+
+## [5.18.0](https://github.com/eclipse/che/tree/5.18.0) (2017-09-20)
+[Full Changelog](https://github.com/eclipse/che/compare/5.17.0...5.18.0)
+
+## [5.17.0](https://github.com/eclipse/che/tree/5.17.0) (2017-08-23)
+[Full Changelog](https://github.com/eclipse/che/compare/5.16.0...5.17.0)
+
+## [5.16.0](https://github.com/eclipse/che/tree/5.16.0) (2017-08-09)
+[Full Changelog](https://github.com/eclipse/che/compare/5.15.0...5.16.0)
+
+## [5.15.0](https://github.com/eclipse/che/tree/5.15.0) (2017-07-19)
+[Full Changelog](https://github.com/eclipse/che/compare/5.14.0...5.15.0)
+
+## [5.14.0](https://github.com/eclipse/che/tree/5.14.0) (2017-06-29)
+[Full Changelog](https://github.com/eclipse/che/compare/5.13.0...5.14.0)
+
+## [5.13.0](https://github.com/eclipse/che/tree/5.13.0) (2017-06-21)
+[Full Changelog](https://github.com/eclipse/che/compare/5.12.0...5.13.0)
+
+## [5.12.0](https://github.com/eclipse/che/tree/5.12.0) (2017-06-14)
+[Full Changelog](https://github.com/eclipse/che/compare/5.11.2...5.12.0)
+
+## [5.11.2](https://github.com/eclipse/che/tree/5.11.2) (2017-05-29)
+[Full Changelog](https://github.com/eclipse/che/compare/5.11.1...5.11.2)
+
+## [5.11.1](https://github.com/eclipse/che/tree/5.11.1) (2017-05-26)
+[Full Changelog](https://github.com/eclipse/che/compare/5.11.0...5.11.1)
+
+## [5.11.0](https://github.com/eclipse/che/tree/5.11.0) (2017-05-24)
+[Full Changelog](https://github.com/eclipse/che/compare/5.10.0...5.11.0)
+
+## [5.10.0](https://github.com/eclipse/che/tree/5.10.0) (2017-05-10)
+[Full Changelog](https://github.com/eclipse/che/compare/5.9.1...5.10.0)
+
+## [5.9.1](https://github.com/eclipse/che/tree/5.9.1) (2017-04-27)
+[Full Changelog](https://github.com/eclipse/che/compare/5.9.0...5.9.1)
+
+## [5.9.0](https://github.com/eclipse/che/tree/5.9.0) (2017-04-25)
+[Full Changelog](https://github.com/eclipse/che/compare/Docker...5.9.0)
+
+## [Docker](https://github.com/eclipse/che/tree/Docker) (2017-04-24)
+[Full Changelog](https://github.com/eclipse/che/compare/5.8.1...Docker)
+
+## [5.8.1](https://github.com/eclipse/che/tree/5.8.1) (2017-04-22)
+[Full Changelog](https://github.com/eclipse/che/compare/5.8.0...5.8.1)
+
+## [5.8.0](https://github.com/eclipse/che/tree/5.8.0) (2017-04-13)
+[Full Changelog](https://github.com/eclipse/che/compare/5.7.2...5.8.0)
+
+## [5.7.2](https://github.com/eclipse/che/tree/5.7.2) (2017-04-10)
+[Full Changelog](https://github.com/eclipse/che/compare/5.7.1...5.7.2)
+
+## [5.7.1](https://github.com/eclipse/che/tree/5.7.1) (2017-04-08)
+[Full Changelog](https://github.com/eclipse/che/compare/5.7.0...5.7.1)
+
+## [5.7.0](https://github.com/eclipse/che/tree/5.7.0) (2017-04-06)
+[Full Changelog](https://github.com/eclipse/che/compare/5.6.0...5.7.0)
+
+## [5.6.0](https://github.com/eclipse/che/tree/5.6.0) (2017-03-30)
+[Full Changelog](https://github.com/eclipse/che/compare/5.5.0...5.6.0)
+
+## [5.5.0](https://github.com/eclipse/che/tree/5.5.0) (2017-03-15)
+[Full Changelog](https://github.com/eclipse/che/compare/5.4.1...5.5.0)
+
+## [5.4.1](https://github.com/eclipse/che/tree/5.4.1) (2017-03-06)
+[Full Changelog](https://github.com/eclipse/che/compare/5.4.0...5.4.1)
+
+## [5.4.0](https://github.com/eclipse/che/tree/5.4.0) (2017-03-02)
+[Full Changelog](https://github.com/eclipse/che/compare/5.3.1...5.4.0)
+
+## [5.3.1](https://github.com/eclipse/che/tree/5.3.1) (2017-02-21)
+[Full Changelog](https://github.com/eclipse/che/compare/5.3.0...5.3.1)
+
+## [5.3.0](https://github.com/eclipse/che/tree/5.3.0) (2017-02-17)
+[Full Changelog](https://github.com/eclipse/che/compare/5.2.2...5.3.0)
+
+## [5.2.2](https://github.com/eclipse/che/tree/5.2.2) (2017-02-03)
+[Full Changelog](https://github.com/eclipse/che/compare/5.2.1...5.2.2)
+
+## [5.2.1](https://github.com/eclipse/che/tree/5.2.1) (2017-02-02)
+[Full Changelog](https://github.com/eclipse/che/compare/5.2.0...5.2.1)
+
+## [5.2.0](https://github.com/eclipse/che/tree/5.2.0) (2017-02-01)
+[Full Changelog](https://github.com/eclipse/che/compare/5.1.2...5.2.0)
+
+## [5.1.2](https://github.com/eclipse/che/tree/5.1.2) (2017-01-24)
+[Full Changelog](https://github.com/eclipse/che/compare/5.1.1...5.1.2)
+
+## [5.1.1](https://github.com/eclipse/che/tree/5.1.1) (2017-01-20)
+[Full Changelog](https://github.com/eclipse/che/compare/5.1.0...5.1.1)
+
+## [5.1.0](https://github.com/eclipse/che/tree/5.1.0) (2017-01-18)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.1...5.1.0)
+
+## [5.0.1](https://github.com/eclipse/che/tree/5.0.1) (2017-01-12)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0...5.0.1)
+
+## [5.0.0](https://github.com/eclipse/che/tree/5.0.0) (2017-01-06)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M9...5.0.0)
+
+## [5.0.0-M9](https://github.com/eclipse/che/tree/5.0.0-M9) (2016-12-22)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M8...5.0.0-M9)
+
+## [5.0.0-M8](https://github.com/eclipse/che/tree/5.0.0-M8) (2016-12-07)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M7-artik...5.0.0-M8)
+
+## [5.0.0-M7-artik](https://github.com/eclipse/che/tree/5.0.0-M7-artik) (2016-11-11)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M7...5.0.0-M7-artik)
+
+## [5.0.0-M7](https://github.com/eclipse/che/tree/5.0.0-M7) (2016-11-10)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M6...5.0.0-M7)
+
+## [5.0.0-M6](https://github.com/eclipse/che/tree/5.0.0-M6) (2016-10-26)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M5...5.0.0-M6)
+
+## [5.0.0-M5](https://github.com/eclipse/che/tree/5.0.0-M5) (2016-10-07)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M4...5.0.0-M5)
+
+## [5.0.0-M4](https://github.com/eclipse/che/tree/5.0.0-M4) (2016-09-29)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M3...5.0.0-M4)
+
+## [5.0.0-M3](https://github.com/eclipse/che/tree/5.0.0-M3) (2016-09-26)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M2...5.0.0-M3)
+
+## [5.0.0-M2](https://github.com/eclipse/che/tree/5.0.0-M2) (2016-09-20)
+[Full Changelog](https://github.com/eclipse/che/compare/5.0.0-M1...5.0.0-M2)
+
+## [5.0.0-M1](https://github.com/eclipse/che/tree/5.0.0-M1) (2016-09-14)
+[Full Changelog](https://github.com/eclipse/che/compare/4.7.2...5.0.0-M1)
+
+## [4.7.2](https://github.com/eclipse/che/tree/4.7.2) (2016-09-09)
+[Full Changelog](https://github.com/eclipse/che/compare/4.7.1...4.7.2)
+
+## [4.7.1](https://github.com/eclipse/che/tree/4.7.1) (2016-09-08)
+[Full Changelog](https://github.com/eclipse/che/compare/4.8.0-artik...4.7.1)
+
+## [4.8.0-artik](https://github.com/eclipse/che/tree/4.8.0-artik) (2016-08-31)
+[Full Changelog](https://github.com/eclipse/che/compare/4.7.0...4.8.0-artik)
+
+## [4.7.0](https://github.com/eclipse/che/tree/4.7.0) (2016-08-29)
+[Full Changelog](https://github.com/eclipse/che/compare/4.7.0-RC1...4.7.0)
+
+## [4.7.0-RC1](https://github.com/eclipse/che/tree/4.7.0-RC1) (2016-08-16)
+[Full Changelog](https://github.com/eclipse/che/compare/4.7.0-artik...4.7.0-RC1)
+
+## [4.7.0-artik](https://github.com/eclipse/che/tree/4.7.0-artik) (2016-08-15)
+[Full Changelog](https://github.com/eclipse/che/compare/4.6.2...4.7.0-artik)
+
+## [4.6.2](https://github.com/eclipse/che/tree/4.6.2) (2016-08-11)
+[Full Changelog](https://github.com/eclipse/che/compare/4.6.1...4.6.2)
+
+## [4.6.1](https://github.com/eclipse/che/tree/4.6.1) (2016-08-04)
+[Full Changelog](https://github.com/eclipse/che/compare/4.6.0...4.6.1)
+
+## [4.6.0](https://github.com/eclipse/che/tree/4.6.0) (2016-08-01)
+[Full Changelog](https://github.com/eclipse/che/compare/4.5.1...4.6.0)
+
+## [4.5.1](https://github.com/eclipse/che/tree/4.5.1) (2016-07-19)
+[Full Changelog](https://github.com/eclipse/che/compare/4.5.0...4.5.1)
+
+## [4.5.0](https://github.com/eclipse/che/tree/4.5.0) (2016-07-18)
+[Full Changelog](https://github.com/eclipse/che/compare/4.4.2-artik...4.5.0)
+
+## [4.4.2-artik](https://github.com/eclipse/che/tree/4.4.2-artik) (2016-07-12)
+[Full Changelog](https://github.com/eclipse/che/compare/4.4.2...4.4.2-artik)
+
+## [4.4.2](https://github.com/eclipse/che/tree/4.4.2) (2016-07-06)
+[Full Changelog](https://github.com/eclipse/che/compare/4.4.1...4.4.2)
+
+## [4.4.1](https://github.com/eclipse/che/tree/4.4.1) (2016-07-05)
+[Full Changelog](https://github.com/eclipse/che/compare/4.4.0...4.4.1)
+
+## [4.4.0](https://github.com/eclipse/che/tree/4.4.0) (2016-06-28)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.5...4.4.0)
+
+## [4.3.5](https://github.com/eclipse/che/tree/4.3.5) (2016-06-24)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.4...4.3.5)
+
+## [4.3.4](https://github.com/eclipse/che/tree/4.3.4) (2016-06-22)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.3...4.3.4)
+
+## [4.3.3](https://github.com/eclipse/che/tree/4.3.3) (2016-06-17)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.2...4.3.3)
+
+## [4.3.2](https://github.com/eclipse/che/tree/4.3.2) (2016-06-14)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.1...4.3.2)
+
+## [4.3.1](https://github.com/eclipse/che/tree/4.3.1) (2016-06-14)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.0...4.3.1)
+
+## [4.3.0](https://github.com/eclipse/che/tree/4.3.0) (2016-06-13)
+[Full Changelog](https://github.com/eclipse/che/compare/4.3.0-RC1...4.3.0)
+
+## [4.3.0-RC1](https://github.com/eclipse/che/tree/4.3.0-RC1) (2016-06-04)
+[Full Changelog](https://github.com/eclipse/che/compare/4.2.3...4.3.0-RC1)
+
+## [4.2.3](https://github.com/eclipse/che/tree/4.2.3) (2016-05-25)
+[Full Changelog](https://github.com/eclipse/che/compare/4.2.2...4.2.3)
+
+## [4.2.2](https://github.com/eclipse/che/tree/4.2.2) (2016-05-12)
+[Full Changelog](https://github.com/eclipse/che/compare/4.2.1...4.2.2)
+
+## [4.2.1](https://github.com/eclipse/che/tree/4.2.1) (2016-04-27)
+[Full Changelog](https://github.com/eclipse/che/compare/4.2.0...4.2.1)
+
+## [4.2.0](https://github.com/eclipse/che/tree/4.2.0) (2016-04-25)
+[Full Changelog](https://github.com/eclipse/che/compare/4.1.1...4.2.0)
+
+## [4.1.1](https://github.com/eclipse/che/tree/4.1.1) (2016-04-15)
+[Full Changelog](https://github.com/eclipse/che/compare/4.1.0...4.1.1)
+
+## [4.1.0](https://github.com/eclipse/che/tree/4.1.0) (2016-04-08)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.1...4.1.0)
+
+## [4.0.1](https://github.com/eclipse/che/tree/4.0.1) (2016-03-29)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0...4.0.1)
+
+## [4.0.0](https://github.com/eclipse/che/tree/4.0.0) (2016-03-29)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC14...4.0.0)
+
+## [4.0.0-RC14](https://github.com/eclipse/che/tree/4.0.0-RC14) (2016-03-23)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC13...4.0.0-RC14)
+
+## [4.0.0-RC13](https://github.com/eclipse/che/tree/4.0.0-RC13) (2016-03-09)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC12...4.0.0-RC13)
+
+## [4.0.0-RC12](https://github.com/eclipse/che/tree/4.0.0-RC12) (2016-03-06)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC11...4.0.0-RC12)
+
+## [4.0.0-RC11](https://github.com/eclipse/che/tree/4.0.0-RC11) (2016-03-03)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC10...4.0.0-RC11)
+
+## [4.0.0-RC10](https://github.com/eclipse/che/tree/4.0.0-RC10) (2016-03-02)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC9...4.0.0-RC10)
+
+## [4.0.0-RC9](https://github.com/eclipse/che/tree/4.0.0-RC9) (2016-03-01)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC8...4.0.0-RC9)
+
+## [4.0.0-RC8](https://github.com/eclipse/che/tree/4.0.0-RC8) (2016-02-28)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC7...4.0.0-RC8)
+
+## [4.0.0-RC7](https://github.com/eclipse/che/tree/4.0.0-RC7) (2016-02-25)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC6...4.0.0-RC7)
+
+## [4.0.0-RC6](https://github.com/eclipse/che/tree/4.0.0-RC6) (2016-02-20)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC5...4.0.0-RC6)
+
+## [4.0.0-RC5](https://github.com/eclipse/che/tree/4.0.0-RC5) (2016-02-18)
+[Full Changelog](https://github.com/eclipse/che/compare/4.0.0-RC4...4.0.0-RC5)
+
+## [4.0.0-RC4](https://github.com/eclipse/che/tree/4.0.0-RC4) (2016-02-15)
+[Full Changelog](https://github.com/eclipse/che/compare/7.0.0-rc-2.0...4.0.0-RC4)
+
+
 ## [7.0.0-beta-5.0](https://github.com/eclipse/che/tree/7.0.0-beta-5.0) (2019-05-22)
 [Full Changelog](https://github.com/eclipse/che/compare/7.0.0-beta-4.0...7.0.0-beta-5.0)
 
