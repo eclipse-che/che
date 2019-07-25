@@ -48,11 +48,35 @@ export class Ide {
     async waitNotificationAndConfirm(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.waitNotification(notificationText, timeout);
         await this.clickOnNotificationButton(notificationText, 'yes');
+
+        try {
+            await this.waitNotificationDisappearance(notificationText);
+        } catch (err) {
+            if (err instanceof error.TimeoutError) {
+                await this.clickOnNotificationButton(notificationText, 'yes');
+                await this.waitNotificationDisappearance(notificationText);
+                return;
+            }
+
+            throw err;
+        }
     }
 
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.waitNotification(notificationText, timeout);
         await this.clickOnNotificationButton(notificationText, 'Open Link');
+
+        try {
+            await this.waitNotificationDisappearance(notificationText);
+        } catch (err) {
+            if (err instanceof error.TimeoutError) {
+                await this.clickOnNotificationButton(notificationText, 'Open Link');
+                await this.waitNotificationDisappearance(notificationText);
+                return;
+            }
+
+            throw err;
+        }
     }
 
     async isNotificationPresent(notificationText: string): Promise<boolean> {
