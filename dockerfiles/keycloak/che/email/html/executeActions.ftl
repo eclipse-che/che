@@ -1,6 +1,6 @@
 <html>
 <head>
-${msg("robotoFontIncludeStyle")}
+${msg("robotoFontIncludeStyle")?no_esc}
 </head>
 <body style="${msg("mailBodyStyle")}">
     <#assign letterTitle=msg("executeActionsTitle")>
@@ -8,7 +8,7 @@ ${msg("robotoFontIncludeStyle")}
 
     <div style="${msg("mailContentStyle")}">
         <p>${msg("executeActionsLetterText", realmName)}</p>
-        ${msg("button", msg('executeActionsButtonText'), link)}
+        ${msg("button", msg('executeActionsButtonText'), link)?no_esc}
         <p>${msg("emailLinkExpirationText", linkExpiration)}</p>
     </div>
 
