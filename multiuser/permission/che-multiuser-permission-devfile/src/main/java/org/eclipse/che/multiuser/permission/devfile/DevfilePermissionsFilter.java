@@ -14,8 +14,6 @@ package org.eclipse.che.multiuser.permission.devfile;
 import javax.inject.Inject;
 import javax.ws.rs.Path;
 import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.core.NotFoundException;
-import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.devfile.DevfileService;
 import org.eclipse.che.everrest.CheMethodInvokerFilter;
@@ -27,6 +25,8 @@ import org.everrest.core.resource.GenericResourceMethod;
 @Path("/devfile{path:(/.*)?}")
 public class DevfilePermissionsFilter extends CheMethodInvokerFilter {
 
+  public static final String GET_SCHEMA_METHOD = "getSchema";
+
   private final WorkspaceManager workspaceManager;
 
   @Inject
@@ -36,11 +36,11 @@ public class DevfilePermissionsFilter extends CheMethodInvokerFilter {
 
   @Override
   protected void filter(GenericResourceMethod genericResourceMethod, Object[] arguments)
-      throws ForbiddenException, NotFoundException, ServerException {
+      throws ForbiddenException {
     final String methodName = genericResourceMethod.getMethod().getName();
     switch (methodName) {
         // public methods
-      case "getSchema":
+      case GET_SCHEMA_METHOD:
         return;
       default:
         throw new ForbiddenException("The user does not have permission to perform this operation");

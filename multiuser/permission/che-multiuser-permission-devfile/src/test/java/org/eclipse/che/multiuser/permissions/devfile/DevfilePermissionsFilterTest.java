@@ -63,7 +63,7 @@ public class DevfilePermissionsFilterTest {
 
     // then
     assertEquals(collect.size(), 1);
-    assertTrue(collect.contains(DevfileService.GET_SCHEMA_METHOD));
+    assertTrue(collect.contains(DevfilePermissionsFilter.GET_SCHEMA_METHOD));
   }
 
   @Test

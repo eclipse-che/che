@@ -31,8 +31,6 @@ import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider
 @Path("/devfile")
 public class DevfileService extends Service {
 
-  public static final String GET_SCHEMA_METHOD = "getSchema";
-
   private DevfileSchemaProvider schemaCachedProvider;
 
   @Inject
