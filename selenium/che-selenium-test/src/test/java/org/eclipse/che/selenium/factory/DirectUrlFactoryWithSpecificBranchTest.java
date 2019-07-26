@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
+import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -29,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
-import org.openqa.selenium.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -109,22 +109,6 @@ public class DirectUrlFactoryWithSpecificBranchTest {
         });
 
     // check specific branch
-    openTerminalByProposal();
-
-    theiaTerminal.clickOnTerminal(0);
-    theiaTerminal.performCommand("cd /projects/" + repositoryName);
-    theiaTerminal.performCommand("git status");
-    theiaTerminal.waitTerminalOutput("On branch " + SECOND_BRANCH_NAME, 0);
-  }
-
-  private void openTerminalByProposal() {
-    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, "`");
-    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, "`");
-
-    theiaProposalForm.waitForm();
-    theiaProposalForm.enterTextToSearchField("theia-ide");
-    theiaIde.pressKeyCombination(Keys.ENTER);
-
-    theiaProposalForm.waitFormDisappearance();
+    assertEquals(theiaIde.getBranchName(), SECOND_BRANCH_NAME);
   }
 }
