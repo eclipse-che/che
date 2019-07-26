@@ -45,12 +45,9 @@ global:
     ## it MUST be pre-created in the configured Che namespace
     secretName: che-tls
 
+    ## If self-signed certificate is enabled
+    ## then certificate from `tls.secretName` will be propagated to Che components' trust stores
     useSelfSignedCerts: false
-    ## Name of a secret that contains `ca.crt` entry with public key
-    ## that will be used for checking server certificate
-    ## Note the helm chart does now create this secret and
-    ## it MUST be pre-created in the configured Che namespace
-    selfSingedCertSecretName: self-signed-cert
 
   gitHubClientID: ""
   gitHubClientSecret: ""
