@@ -124,7 +124,7 @@ export class WorkspaceDataManager {
       workspace.config.projects.push(projectTemplate);
     } else if (workspace.devfile) {
       let project = {
-        name: projectTemplate.displayName,
+        name: projectTemplate.name,
         source: {
           type: projectTemplate.source.type,
           location: projectTemplate.source.location

@@ -30,7 +30,7 @@ interface IBranding {
     name?: string;
   };
   docs?: {
-    stack?: string;
+    devfile?: string;
     workspace?: string;
     factory?: string;
     organization?: string;
@@ -59,7 +59,7 @@ const DEFAULT_IDE_RESOURCES_PATH = '/_app/';
 const DEFAULT_OAUTH_DOCS = 'Configure OAuth in the che.properties file.';
 const DEFAULT_CLI_NAME = 'che.env';
 const DEFAULT_CLI_CONFIG_NAME = 'CHE';
-const DEFAULT_DOCS_STACK = '/docs/getting-started/runtime-stacks/index.html';
+const DEFAULT_DOCS_DEVFILE = '/docs/che-7/using-developer-environments-workspaces.html#making-a-workspace-portable-using-a-devfile_using-developer-environments-workspaces';
 const DEFAULT_DOCS_WORKSPACE = '/docs/getting-started/intro/index.html';
 const DEFAULT_DOCS_ORGANIZATION = '/docs/organizations.html';
 const DEFAULT_DOCS_FACTORY = '/docs/factories-getting-started.html';
@@ -287,11 +287,11 @@ export class CheBranding {
 
   /**
    * Returns object with docs URLs.
-   * @returns {{stack: string, workspace: string, factory: string, organization: string, general: string}}
+   * @returns {{devfile: string, workspace: string, factory: string, organization: string, general: string}}
    */
-  getDocs(): { stack: string; workspace: string; factory: string; organization: string; general: string } {
+  getDocs(): { devfile: string; workspace: string; factory: string; organization: string; general: string } {
     return {
-      stack: this.brandingData.docs && this.brandingData.docs.stack ? this.brandingData.docs.stack : DEFAULT_DOCS_STACK,
+      devfile: this.brandingData.devfile && this.brandingData.docs.devfile ? this.brandingData.docs.devfile : DEFAULT_DOCS_DEVFILE,
       workspace: this.brandingData.docs && this.brandingData.docs.workspace ? this.brandingData.docs.workspace : DEFAULT_DOCS_WORKSPACE,
       factory: this.brandingData.docs && this.brandingData.docs.factory ? this.brandingData.docs.factory : DEFAULT_DOCS_FACTORY,
       organization: this.brandingData.docs && this.brandingData.docs.organization ? this.brandingData.docs.organization : DEFAULT_DOCS_ORGANIZATION,
