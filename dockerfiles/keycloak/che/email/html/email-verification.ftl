@@ -8,7 +8,7 @@ ${msg("robotoFontIncludeStyle")}
 
     <div style="${msg("mailContentStyle")}">
         <p>${msg("emailVerificationLetterText")}</p>
-        ${msg("button", msg('emailVerificationButtonText'), link)}
+        ${msg("button", msg('emailVerificationButtonText'), link)?no_esc}
         <p>${msg("emailLinkExpirationText", linkExpiration)}</p>
     </div>
 
