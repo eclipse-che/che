@@ -92,12 +92,12 @@ export const TestConstants = {
     /**
      * Username used to log in MultiUser Che.
      */
-    TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_CHE_USERNAME || '',
+    TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_USERNAME || 'che',
 
     /**
      * Password used to log in MultiUser Che.
      */
-    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_CHE_PASSWORD || '',
+    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
 
     /**
      * Url of console OpenShift 4.x.
