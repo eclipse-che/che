@@ -23,6 +23,7 @@ Che is composed of multiple sub projects. For each projects we provide a *CONTRI
 - [redhat-developer/devfile](https://github.com/redhat-developer/devfile): Contribute to the devfile documentation: https://redhat-developer.github.io/devfile/
 - [che-plugin-broker](https://github.com/eclipse/che-plugin-broker): The workspace microservice that is in charge of analyzing, preparing and installing the workspace components defined in a Devfile.
 - [che-operator](https://github.com/eclipse/che-operator): Che operator to deploy, update and manage K8S/OpenShift resources of Che.
+- [che-docs](https://github.com/eclipse/che-docs): Eclipse Che documentation https://www.eclipse.org/che/docs/ source code.
 - [che-website](https://github.com/eclipse/che-website): https://eclipse.org/che website source code.
 - [che-workspace-client](https://github.com/eclipse/che-workspace-client): JS library to interact with a che-server.
 - [che-machine-exec](https://github.com/eclipse/che-machine-exec): Interface to execute tasks and terminals on other containers within a workspace.
