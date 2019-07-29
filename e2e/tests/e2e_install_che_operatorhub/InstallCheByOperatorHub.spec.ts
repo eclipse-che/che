@@ -10,32 +10,20 @@
 
 import { e2eContainer } from '../../inversify.config';
 import { ILoginPage } from '../../pageobjects/login/ILoginPage';
-import { DriverHelper } from '../../utils/DriverHelper';
+import { ILoginPageOcp } from '../../pageobjects/openshift/ILoginPageOcp';
 import { CLASSES, TYPES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, Key } from 'selenium-webdriver';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { OpenShiftLoginPage } from '../../pageobjects/openshift/OpenShiftLoginPage';
 import { OpenShiftConsole4x } from '../../pageobjects/openshift/OpenShiftConsole4x';
 
 const loginPage: ILoginPage = e2eContainer.get<ILoginPage>(TYPES.LoginPage);
-const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const ocpLoginPage: ILoginPageOcp = e2eContainer.get<ILoginPageOcp>(TYPES.OcpLoginPage);
 const openShiftLogin: OpenShiftLoginPage = e2eContainer.get(CLASSES.OpenShiftLoginPage);
 const openShiftConsole: OpenShiftConsole4x = e2eContainer.get(CLASSES.OpenShiftConsole4x);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const projectName: string = TestConstants.TS_INSTALL_CHE_PROJECT_NAME;
-
-const overviewCsvCheOperatorLocator: By = By.xpath('//h2[@class=\'co-section-heading\' and text()=\'ClusterServiceVersion Overview\']');
-const createNewCheClusterLinkLocator: By = By.xpath('//div[contains(@class, \'ClusterServiceVersion\')]//a[text()=\' Create New\']');
-const createCheClusterYamlLocator: By = By.xpath('//h1[text()=\'Create Che Cluster\']');
-const fieldOpenShiftOAuthLocator: By = By.xpath('//div[@class=\'ace_gutter-cell \' and text()=\'19\']');
-const createCheClusterButtonLocator: By = By.xpath('//button[@id=\'save-changes\' and text()=\'Create\']');
-const resourceCheClustersTitleLocator: By = By.xpath('//span[@id=\'resource-title\' and text()=\'Che Clusters\']');
-const resourceCheClustersTimestampLocator: By = By.xpath('//div[contains(@class, \'timestamp\')]/div[text()=\'a minute ago\']');
-const cheClusterResourceNameLocator: By = By.xpath('//a[contains(@class, \'resource-name\') and text()=\'eclipse-che\']');
-const cheClusterOverviewExpandButtonLocator: By = By.xpath('//label[@class=\'btn compaction-btn btn-default\']');
-const keycloakAdminUrlLocator: By = By.partialLinkText(`keycloak-${projectName}`);
-const eclipseCheUrlLocator: By = By.partialLinkText(`che-${projectName}`);
+const channelName = TestConstants.TS_OCP_UPDATE_CHANNEL_OPERATOR;
 
 suite('E2E', async () => {
 
@@ -43,13 +31,9 @@ suite('E2E', async () => {
         test('Open login page', async () => {
             await openShiftLogin.openLoginPageOpenShift();
             await openShiftLogin.waitOpenShiftLoginPage();
-            await openShiftLogin.clickOnLoginWitnKubeAdmin();
         });
         test('Log into OCP 4.x', async () => {
-            await openShiftLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OPENSHIFT4_USERNAME);
-            await openShiftLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OPENSHIFT4_PASSWORD);
-            await openShiftLogin.clickOnLoginButton();
-            await openShiftLogin.waitDisappearanceLoginPageOpenShift();
+            ocpLoginPage.login();
         });
     });
 
@@ -66,6 +50,7 @@ suite('E2E', async () => {
         });
         test('Select a namespace and subscribe Eclipse Che Operator', async () => {
             await openShiftConsole.waitCreateOperatorSubscriptionPage();
+            await openShiftConsole.selectUpdateChannelOnSubscriptionPage(channelName);
             await openShiftConsole.clickOnDropdownNamespaceListOnSubscriptionPage();
             await openShiftConsole.waitListBoxNamespacesOnSubscriptionPage();
             await openShiftConsole.selectDefinedNamespaceOnSubscriptionPage(projectName);
@@ -73,6 +58,7 @@ suite('E2E', async () => {
         });
         test('Wait the Subscription Overview', async () => {
             await openShiftConsole.waitSubscriptionOverviewPage();
+            await openShiftConsole.waitChannelNameOnSubscriptionOverviewPage(channelName);
             await openShiftConsole.waitUpgradeStatusOnSubscriptionOverviewPage();
             await openShiftConsole.waitCatalogSourceNameOnSubscriptionOverviewPage(projectName);
         });
@@ -91,38 +77,37 @@ suite('E2E', async () => {
     suite('Create new Eclipse Che cluster', async () => {
         test('Click on the logo-name Eclipse Che operator', async () => {
             await openShiftConsole.clickOnEclipseCheOperatorLogoName();
-            await driverHelper.waitVisibility(overviewCsvCheOperatorLocator);
+            await openShiftConsole.waitOverviewCsvEclipseCheOperator();
         });
         test('Click on the Create New, wait CSV yaml', async () => {
-            await driverHelper.waitAndClick(createNewCheClusterLinkLocator);
-            await driverHelper.waitVisibility(createCheClusterYamlLocator);
+            await openShiftConsole.clickCreateNewCheClusterLink();
+            await openShiftConsole.waitCreateCheClusterYaml();
         });
         test('Change value of OpenShiftOauth field', async () => {
-            await driverHelper.waitAndClick(fieldOpenShiftOAuthLocator);
-            await driverHelper.getAction().sendKeys(Key.DELETE.toString()).sendKeys(Key.ENTER.toString()).sendKeys(Key.UP.toString()).perform();
-            await driverHelper.getAction().sendKeys('    openShiftoAuth: false');
+            await openShiftConsole.selectOpenShiftOAuthFieldInYaml();
+            await openShiftConsole.changeValueOpenShiftOAuthField();
         });
         test('Create Che Cluster ', async () => {
-            await driverHelper.waitAndClick(createCheClusterButtonLocator);
-            await driverHelper.waitVisibility(resourceCheClustersTitleLocator);
-            await driverHelper.waitVisibility(resourceCheClustersTimestampLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
-            await driverHelper.waitAndClick(cheClusterResourceNameLocator);
+            await openShiftConsole.clickOnCreateCheClusterButton();
+            await openShiftConsole.waitResourcesCheClusterTitle();
+            await openShiftConsole.waitResourcesCheClusterTimestamp();
+            await openShiftConsole.clickOnCheClusterResourcesName();
         });
     });
 
     suite('Check the Eclipse Che is ready', async () => {
         test('Wait Keycloak Admin Console URL', async () => {
-            await driverHelper.waitAndClick(cheClusterOverviewExpandButtonLocator);
-            await driverHelper.waitVisibility(keycloakAdminUrlLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+            await openShiftConsole.clickCheClusterOverviewExpandButton();
+            await openShiftConsole.waitKeycloakAdminConsoleUrl(projectName);
         });
         test('Wait Eclipse Che URL', async () => {
-            await driverHelper.waitVisibility(eclipseCheUrlLocator, TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+            await openShiftConsole.waitEclipseCheUrl(projectName);
         });
     });
 
     suite('Log into Eclipse Che', async () => {
         test('Click on the Eclipse Che URL ', async () => {
-            await driverHelper.waitAndClick(eclipseCheUrlLocator);
+            await openShiftConsole.clickOnEclipseCHeUrl(projectName);
         });
         test('Login to Eclipse Che', async () => {
             await loginPage.login();
