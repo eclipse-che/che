@@ -87,6 +87,7 @@ public class CreateAndDeleteProjectsTest {
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectSourcePage.selectSample(CONSOLE_JAVA_SIMPLE);
     projectSourcePage.clickOnAddProjectButton();
+    projectSourcePage.waitCreatedProjectButton(SECOND_CONSOLE_JAVA_SIMPLE_PROJECT_NAME);
 
     newWorkspace.clickOnCreateButtonAndOpenInIDE();
     // store info about created workspace to make SeleniumTestHandler.captureTestWorkspaceLogs()

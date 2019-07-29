@@ -15,6 +15,7 @@ import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
+import static org.testng.AssertJUnit.assertEquals;
 
 import com.google.inject.Inject;
 import com.google.inject.name.Named;
@@ -29,7 +30,6 @@ import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProposalForm;
 import org.eclipse.che.selenium.pageobject.theia.TheiaTerminal;
-import org.openqa.selenium.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
@@ -82,7 +82,8 @@ public class DirectUrlFactoryWithSpecificBranchTest {
   public void factoryWithDirectUrlWithSpecificBranch() {
     String repositoryName = testAuxiliaryRepo.getName();
     final String wsTheiaIdeTerminalTitle = "theia-ide terminal 0";
-    List<String> expectedItemsAfterCloning = Arrays.asList("my-lib", "my-webapp", "src", "pom.xml");
+    List<String> expectedItemsAfterCloning =
+        Arrays.asList("my-lib", "my-webapp", "my-lib/src", "pom.xml");
 
     testFactoryWithSpecificBranch.authenticateAndOpen();
 
@@ -98,28 +99,16 @@ public class DirectUrlFactoryWithSpecificBranchTest {
     theiaProjectTree.waitProjectsRootItem();
 
     theiaProjectTree.waitItem(repositoryName);
-    theiaProjectTree.openItem(repositoryName);
-    theiaProjectTree.openItem(repositoryName + "/my-lib");
+    theiaProjectTree.expandItem(repositoryName);
+    theiaProjectTree.expandItem(repositoryName + "/my-lib");
     theiaProjectTree.waitItem(repositoryName + "/my-lib/src");
 
     expectedItemsAfterCloning.forEach(
         name -> {
-          theiaProjectTree.isItemVisible(repositoryName + "/" + name);
+          theiaProjectTree.waitItem(repositoryName + "/" + name);
         });
 
     // check specific branch
-    openTerminalByProposal("theia-ide");
-    theiaTerminal.waitTab(wsTheiaIdeTerminalTitle);
-    theiaTerminal.clickOnTab(wsTheiaIdeTerminalTitle);
-    theiaTerminal.performCommand("cd " + repositoryName);
-    theiaTerminal.performCommand("git status");
-    theiaTerminal.waitTerminalOutput("On branch " + SECOND_BRANCH_NAME, 0);
-  }
-
-  private void openTerminalByProposal(String proposalText) {
-    theiaIde.pressKeyCombination(Keys.LEFT_CONTROL, "`");
-    theiaProposalForm.waitProposal(proposalText);
-    theiaProposalForm.clickOnProposal(proposalText);
-    theiaProposalForm.waitFormDisappearance();
+    assertEquals(theiaIde.getBranchName(), SECOND_BRANCH_NAME);
   }
 }

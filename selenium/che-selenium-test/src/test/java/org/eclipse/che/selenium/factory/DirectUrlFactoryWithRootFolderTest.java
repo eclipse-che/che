@@ -90,19 +90,19 @@ public class DirectUrlFactoryWithRootFolderTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
-
-    theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitProjectsRootItem();
     theiaIde.waitNotificationEqualsTo("Che Workspace: Finished cloning projects.");
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
+    theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectsRootItem();
     theiaProjectTree.waitItem(repositoryName);
+    theiaProjectTree.expandItem(repositoryName);
 
     expectedItemsAfterCloning.forEach(
         name -> {
-          theiaProjectTree.isItemVisible(repositoryName + "/" + name);
+          theiaProjectTree.waitItem(repositoryName + "/" + name);
         });
   }
 }

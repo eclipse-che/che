@@ -63,6 +63,23 @@ export class DevfileRegistry {
     return this.devfilesMap.get(location + link);
   }
 
+  selfLinkToDevfileId(selfLink: string): string {
+      const regExpExecArray = /^\/devfiles\/([A-Za-z0-9_\-]+)\/devfile.yaml$/i.exec(selfLink);
+      if (regExpExecArray !== null) {
+         return regExpExecArray[1];
+      }
+
+      return selfLink;
+  }
+
+  devfileIdToSelfLink(devfileId: string): string {
+      if (/^[A-Za-z0-9_\-]+$/i.test(devfileId)) {
+        return `/devfiles/${devfileId}/devfile.yaml`;
+      }
+
+      return devfileId;
+  }
+
   private devfileYamlToJson(yaml: string): che.IWorkspaceDevfile {
     try {
       return jsyaml.load(yaml);
