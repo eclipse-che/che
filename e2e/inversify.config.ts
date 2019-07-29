@@ -33,8 +33,10 @@ import { DebugView } from './pageobjects/ide/DebugView';
 import { WarningDialog } from './pageobjects/ide/WarningDialog';
 import { MultiUserLoginPage } from './pageobjects/login/MultiUserLoginPage';
 import { TestConstants } from './TestConstants';
+import { ILoginPageOcp } from './pageobjects/openshift/ILoginPageOcp';
 import { OpenShiftLoginPage } from './pageobjects/openshift/OpenShiftLoginPage';
 import { OpenShiftConsole4x } from './pageobjects/openshift/OpenShiftConsole4x';
+import { OpenShiftLoginByTempAdmin } from './pageobjects/openshift/OpenShiftLoginByTempAdmin';
 
 const e2eContainer = new Container();
 
@@ -46,6 +48,7 @@ if (TestConstants.TS_SELENIUM_MULTIUSER) {
     e2eContainer.bind<ILoginPage>(TYPES.LoginPage).to(SingleUserLoginPage).inSingletonScope();
 }
 
+e2eContainer.bind<ILoginPageOcp>(TYPES.OcpLoginPage).to(OpenShiftLoginByTempAdmin);
 e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper).inSingletonScope();
 e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard).inSingletonScope();
 e2eContainer.bind<Workspaces>(CLASSES.Workspaces).to(Workspaces).inSingletonScope();

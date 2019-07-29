@@ -11,7 +11,8 @@
 
 const TYPES = {
     Driver: Symbol.for('Driver'),
-    LoginPage: Symbol.for('LoginPage')
+    LoginPage: Symbol.for('LoginPage'),
+    OcpLoginPage: Symbol.for('OcpLoginPage')
 };
 
 const CLASSES = {
