@@ -60,6 +60,7 @@ If you are interested in fixing issues and contributing directly to the code bas
 - :ok_hand: Review [source code changes](https://github.com/eclipse/che/pulls)
 - :pencil: [Improve docs](https://github.com/eclipse/che-docs)
 - :building_construction: [Che architecture (to be provided soon)]()
+- :octocat: [Che repositories](https://github.com/eclipse/che/blob/readme-che-wip/CONTRIBUTING.md#other-che-repositories)
 - :sparkles: [Good first issue for new contributors](https://github.com/eclipse/che/wiki/Labels#new-contributors)
 
 
