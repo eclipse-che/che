@@ -92,17 +92,17 @@ export const TestConstants = {
     /**
      * Username used to log in MultiUser Che.
      */
-    TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_USERNAME || 'admin',
+    TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_CHE_USERNAME || '',
 
     /**
      * Password used to log in MultiUser Che.
      */
-    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || 'admin',
+    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_CHE_PASSWORD || '',
 
     /**
      * Url of console OpenShift 4.x.
      */
-    TS_SELENIUM_OPENSHIFT4_URL: process.env.TS_SELENIUM_OPENSHIFT4_URL || 'https://console-openshift-console.apps.crw.codereadyqe.com',
+    TS_SELENIUM_OPENSHIFT4_URL: process.env.TS_SELENIUM_OPENSHIFT4_URL || '',
 
     /**
      * Username used to log in OCP 4.x.
@@ -112,11 +112,20 @@ export const TestConstants = {
     /**
      * Password used to log in OCP 4.x.
      */
-    TS_SELENIUM_OPENSHIFT4_PASSWORD: process.env.TS_SELENIUM_OPENSHIFT4_PASSWORD || 'oc3U8-PcnHi-HWYKf-c4xNi',
+    TS_SELENIUM_OPENSHIFT4_PASSWORD: process.env.TS_SELENIUM_OPENSHIFT4_PASSWORD || '',
 
     /**
      * Log into CHE in MultiUser mode, "false" by default.
      */
-    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true'
+    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
 
+    /**
+     * Log into OCP by common user (not temporary admin user), "false" by default.
+     */
+    TS_OCP_LOGIN_PAGE_OAUTH: process.env.TS_OCP_LOGIN_PAGE_OAUTH === 'true',
+
+    /**
+     * Update Channel name on 'Create Operator Subscription' page on OCP 4.x, "nightly" or "stable".
+     */
+    TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly'
 };
