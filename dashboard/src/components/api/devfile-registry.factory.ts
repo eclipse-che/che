@@ -19,6 +19,7 @@ export interface IDevfileMetaData {
   icon: string;
   links: any;
   tags: Array<string>;
+  location: string;
 }
 
 enum MemoryUnit { 'B', 'Ki', 'Mi', 'Gi' }
