@@ -28,7 +28,7 @@ Che is composed of multiple sub projects. For each projects we provide a *CONTRI
 - [che-machine-exec](https://github.com/eclipse/che-machine-exec): Interface to execute tasks and terminals on other containers within a workspace.
 
 ## Devfile to contribute
-Each devfile could be run on any Che instances. Beware that each of them may need a certain amount of memory.
+We are trying to provide a devfile for each areas where you could contribute. Each devfile could be run on any Che instances to setup a *ready-to-code* developer environment. Beware that each of them may need a certain amount of memory.
 Devfile could be launched through a factory or [chectl](https://github.com/che-incubator/chectl) cli.
 
 ```bash
