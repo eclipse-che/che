@@ -31,7 +31,8 @@ const CLASSES = {
     RightToolbar: 'RightToolbar',
     Terminal: 'Terminal',
     DebugView: 'DebugView',
-    WarningDialog: 'WarningDialog'
+    WarningDialog: 'WarningDialog',
+    ScreenCatcher: 'ScreenCatcher'
 };
 
 export { TYPES, CLASSES };

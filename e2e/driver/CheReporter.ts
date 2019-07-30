@@ -15,9 +15,11 @@ import * as fs from 'fs';
 import { TestConstants } from '../TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
+import { ScreenCatcher } from '../utils/ScreenCatcher';
 
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 
 class CheReporter extends mocha.reporters.Spec {
 
@@ -49,6 +51,18 @@ class CheReporter extends mocha.reporters.Spec {
 ########################################################
       `;
       console.log(launchInformation);
+    });
+
+    runner.on('test', async function (test: mocha.Test) {
+      const testTitle: string = test.title.replace(/\s/g, '_');
+
+      await screenCatcher.catchMethodScreen(testTitle);
+    });
+
+    runner.on('test end', async function (test: mocha.Test) {
+      const testTitle: string = test.title.replace(/\s/g, '_');
+
+      await screenCatcher.catchMethodScreen(testTitle, false);
     });
 
     runner.on('end', async function (test: mocha.Test) {

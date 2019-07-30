@@ -31,6 +31,7 @@ import { RightToolbar } from './pageobjects/ide/RightToolbar';
 import { Terminal } from './pageobjects/ide/Terminal';
 import { DebugView } from './pageobjects/ide/DebugView';
 import { WarningDialog } from './pageobjects/ide/WarningDialog';
+import { ScreenCatcher } from './utils/ScreenCatcher';
 
 const e2eContainer = new Container();
 
@@ -55,5 +56,6 @@ e2eContainer.bind<RightToolbar>(CLASSES.RightToolbar).to(RightToolbar).inSinglet
 e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal).inSingletonScope();
 e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView).inSingletonScope();
 e2eContainer.bind<WarningDialog>(CLASSES.WarningDialog).to(WarningDialog).inSingletonScope();
+e2eContainer.bind<ScreenCatcher>(CLASSES.ScreenCatcher).to(ScreenCatcher).inSingletonScope();
 
 export { e2eContainer };
