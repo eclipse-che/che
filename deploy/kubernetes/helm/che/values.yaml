@@ -27,7 +27,6 @@ cheKeycloakClientId: "che-public"
 #workspaceSidecarDefaultRamLimit: ""
 
 global:
-  cheNamespace: ""
   multiuser: false
   #  This value can be passed if custom Oidc provider is used, and there is no need to deploy keycloak in multiuser mode
   #  default (if empty) is true
@@ -37,13 +36,19 @@ global:
   ingressAnnotationsPrefix: "nginx."
   # options: default-host, single-host, multi-host
   serverStrategy: multi-host
+
+  ## Allows to enable and configure TLS
   tls:
     enabled: false
-    useCertManager: true
-    useStaging: true
+    ## Secret name that will be used in Che Ingresses for setting TLS up
+    ## Note the helm chart does not create this secret and
+    ## it MUST be pre-created in the configured Che namespace
     secretName: che-tls
+
+    ## If self-signed certificate is enabled
+    ## then certificate from `tls.secretName` will be propagated to Che components' trust stores
     useSelfSignedCerts: false
-    email: user@example.com
+
   gitHubClientID: ""
   gitHubClientSecret: ""
   pvcClaim: "1Gi"

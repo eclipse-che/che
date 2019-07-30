@@ -30,9 +30,6 @@ metadata:
 {{- else }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect: "false"
 {{- end }}
-{{- if and .Values.global.tls .Values.global.tls.enabled .Values.global.tls.useCertManager }}
-    certmanager.k8s.io/cluster-issuer: "letsencrypt"
-{{- end }}
 spec:
 {{- if .Values.global.tls.enabled }}
   tls:

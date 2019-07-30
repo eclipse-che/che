@@ -72,13 +72,35 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+        {{- if .Values.global.tls.enabled }}
+
+        # If self-signed-cert is used then configure Che Server with certificate content
+        # to propagate it to trust store
         {{- if .Values.global.tls.useSelfSignedCerts }}
         - name: CHE_SELF__SIGNED__CERT
           valueFrom:
             secretKeyRef:
-              key: ca.crt
-              name: self-signed-certificate
+              key: tls.crt
+              name: {{ .Values.global.tls.secretName  }}
               optional: false
+        {{- end }}
+
+        # If workspaces are created in different namespace than Che Server's one
+        # then configure Che Server to propagate TLS secret to workspaces' namespaces
+        {{- if ne .Release.Namespace .Values.global.cheWorkspacesNamespace }}
+        - name: "CHE_INFRA_KUBERNETES_TLS__CERT"
+          valueFrom:
+            secretKeyRef:
+              key: tls.crt
+              name: {{ .Values.global.tls.secretName  }}
+              optional: false
+        - name: "CHE_INFRA_KUBERNETES_TLS__KEY"
+          valueFrom:
+            secretKeyRef:
+              key: tls.key
+              name: {{ .Values.global.tls.secretName  }}
+              optional: false
+        {{- end }}
         {{- end }}
         image: {{ .Values.cheImage }}
         imagePullPolicy: {{ .Values.cheImagePullPolicy }}
