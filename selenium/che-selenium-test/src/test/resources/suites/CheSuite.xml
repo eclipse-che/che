@@ -35,7 +35,6 @@
           <class name="org.eclipse.che.selenium.factory.DirectUrlFactoryWithSpecificBranchTest"/>
           <class name="org.eclipse.che.selenium.theia.TheiaBuildPluginTest"/>
           <class name="org.eclipse.che.selenium.swagger.SwaggerTest"/>
-          <class name="org.eclipse.che.selenium.workspaces.CreateWorkspaceOnDashboardTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRefreshTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterRenameWorkspaceTest"/>
           <class name="org.eclipse.che.selenium.workspaces.ProjectStateAfterWorkspaceRestartTest"/>
