@@ -26,7 +26,7 @@ import java.util.Objects;
 public class PluginFQN {
 
   private URI registry;
-  private String id;
+  protected String id;
   private String reference;
 
   public PluginFQN(URI registry, String id) {

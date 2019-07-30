@@ -39,6 +39,7 @@ public class ExtendedPluginFQN extends PluginFQN {
     this.publisher = publisher;
     this.name = name;
     this.version = version;
+    this.id = String.format("%s/%s/%s", publisher, name, version);
   }
 
   public ExtendedPluginFQN(String reference) {
