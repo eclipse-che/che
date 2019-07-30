@@ -1,6 +1,6 @@
 <html>
 <head>
-${msg("robotoFontIncludeStyle")}
+${msg("robotoFontIncludeStyle")?no_esc}
 </head>
 <body style="${msg("mailBodyStyle")}">
     <#assign letterTitle=msg("emailVerificationTitle")>
@@ -8,7 +8,7 @@ ${msg("robotoFontIncludeStyle")}
 
     <div style="${msg("mailContentStyle")}">
         <p>${msg("emailVerificationLetterText")}</p>
-        ${msg("button", msg('emailVerificationButtonText'), link)}
+        ${msg("button", msg('emailVerificationButtonText'), link)?no_esc}
         <p>${msg("emailLinkExpirationText", linkExpiration)}</p>
     </div>
 
