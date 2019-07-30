@@ -67,83 +67,35 @@ suite('Validation of workspace start', async () => {
         await ide.waitWorkspaceAndIde(namespace, workspaceName);
     });
 
-    suite('Wait until project is imported', async () => {
-        test('Open project tree container', async () => {
-            await projectTree.openProjectTreeContainer();
-        });
-
-        test('Wait project imported', async () => {
-            await projectTree.waitProjectImported(projectName, 'src');
-        });
-
-        test('Expand item', async () => {
-            await projectTree.expandItem(`/${projectName}`);
-        });
+    test('Wait until project is imported', async () => {
+        await projectTree.openProjectTreeContainer();
+        await projectTree.waitProjectImported(projectName, 'src');
+        await projectTree.expandItem(`/${projectName}`);
     });
 });
 
 suite('Language server validation', async () => {
-    suite('Java LS initialization', async () => {
-        test(`Expand path '${pathToJavaFolder}' and open file '${javaFileName}'`, async () => {
-            await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
-
-        });
-
-        test(`Select '${javaFileName}' editor tab`, async () => {
-            await editor.selectTab(javaFileName);
-        });
-
-        test(`Check java language server initialization start`, async () => {
-            await ide.checkLsInitializationStart('Starting Java Language Server');
-        });
-
-        test(`Check java language server initialization finish`, async () => {
-            await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
-        });
-
-        test(`Check java path completion`, async () => {
-            await checkJavaPathCompletion();
-        });
-
-        test(`Check java language server build completion`, async () => {
-            await ide.waitStatusBarTextAbsence('Building workspace', 360000);
-        });
+    test('Java LS initialization', async () => {
+        await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
+        await editor.selectTab(javaFileName);
+        await ide.checkLsInitializationStart('Starting Java Language Server');
+        await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
+        await checkJavaPathCompletion();
+        await ide.waitStatusBarTextAbsence('Building workspace', 360000);
     });
 
-    suite('Error highlighting', async () => {
-        test(`Type error text`, async () => {
-            await editor.type(javaFileName, 'error', 30);
-        });
-
-        test(`Wait error in line`, async () => {
-            await editor.waitErrorInLine(30);
-        });
-
-        test(`Delete error text`, async () => {
-            await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
-        });
-
-        test(`Wait error disappearance`, async () => {
-            await editor.waitErrorInLineDisappearance(30);
-        });
+    test('Error highlighting', async () => {
+        await editor.type(javaFileName, 'error', 30);
+        await editor.waitErrorInLine(30);
+        await editor.performKeyCombination(javaFileName, Key.chord(Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE, Key.BACK_SPACE));
+        await editor.waitErrorInLineDisappearance(30);
     });
 
-    suite('Autocomplete', async () => {
-        test(`Move cursor to line and char`, async () => {
-            await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
-        });
-
-        test(`Press control space combination`, async () => {
-            await editor.pressControlSpaceCombination(javaFileName);
-        });
-
-        test(`Wait suggestion container`, async () => {
-            await editor.waitSuggestionContainer();
-        });
-
-        test(`Wait suggestion`, async () => {
-            await editor.waitSuggestion(javaFileName, 'SpringApplication - org.springframework.boot');
-        });
+    test('Autocomplete', async () => {
+        await editor.moveCursorToLineAndChar(javaFileName, 32, 17);
+        await editor.pressControlSpaceCombination(javaFileName);
+        await editor.waitSuggestionContainer();
+        await editor.waitSuggestion(javaFileName, 'SpringApplication - org.springframework.boot');
     });
 
     test('Suggestion', async () => {
