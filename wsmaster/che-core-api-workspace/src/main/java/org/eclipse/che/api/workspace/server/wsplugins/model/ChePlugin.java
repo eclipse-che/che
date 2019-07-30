@@ -56,7 +56,7 @@ public class ChePlugin {
     if (!isNullOrEmpty(id)) {
       return id;
     } else if (!isNullOrEmpty(publisher) && !isNullOrEmpty(name) && !isNullOrEmpty(version)) {
-      return String.format("%s/%s/%s", publisher, name, version);
+      return publisher + "/" + name + "/" + version;
     } else {
       return null;
     }
