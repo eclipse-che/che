@@ -8,6 +8,6 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-export interface ILoginPage {
+export interface ICheLoginPage {
     login(): void;
 }

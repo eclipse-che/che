@@ -11,8 +11,8 @@
 
 const TYPES = {
     Driver: Symbol.for('Driver'),
-    LoginPage: Symbol.for('LoginPage'),
-    OcpLoginPage: Symbol.for('OcpLoginPage')
+    CheLogin: Symbol.for('CheLogin'),
+    OcpLogin: Symbol.for('OcpLogin')
 };
 
 const CLASSES = {
@@ -34,8 +34,8 @@ const CLASSES = {
     Terminal: 'Terminal',
     DebugView: 'DebugView',
     WarningDialog: 'WarningDialog',
-    OpenShiftLoginPage: 'OpenShiftLoginPage',
-    OpenShiftConsole4x: 'OpenShiftConsole4x'
+    OcpLoginPage: 'OcpLoginPage',
+    OcpWebConsolePage: 'OcpWebConsolePage'
 };
 
 export { TYPES, CLASSES };

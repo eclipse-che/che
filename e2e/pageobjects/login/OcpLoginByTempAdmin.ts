@@ -8,26 +8,26 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { ILoginPageOcp } from './ILoginPageOcp';
+import { IOcpLoginPage } from './IOcpLoginPage';
 import { injectable, inject } from 'inversify';
-import { OpenShiftLoginPage } from './OpenShiftLoginPage';
+import { OcpLoginPage } from '../openshift/OcpLoginPage';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 
 @injectable()
-export class OpenShiftLoginByTempAdmin implements ILoginPageOcp {
+export class OcpLoginByTempAdmin implements IOcpLoginPage {
 
     constructor(
-        @inject(CLASSES.OpenShiftLoginPage) private readonly openShiftLogin: OpenShiftLoginPage) { }
+        @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage) { }
 
     async login() {
         if (TestConstants.TS_OCP_LOGIN_PAGE_OAUTH) {
-            await this.openShiftLogin.clickOnLoginWitnKubeAdmin();
+            await this.ocpLogin.clickOnLoginWitnKubeAdmin();
         }
 
-        await this.openShiftLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OPENSHIFT4_USERNAME);
-        await this.openShiftLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OPENSHIFT4_PASSWORD);
-        await this.openShiftLogin.clickOnLoginButton();
-        await this.openShiftLogin.waitDisappearanceLoginPageOpenShift();
+        await this.ocpLogin.enterUserNameOpenShift(TestConstants.TS_SELENIUM_OCP_USERNAME);
+        await this.ocpLogin.enterPasswordOpenShift(TestConstants.TS_SELENIUM_OCP_PASSWORD);
+        await this.ocpLogin.clickOnLoginButton();
+        await this.ocpLogin.waitDisappearanceLoginPageOpenShift();
     }
 }

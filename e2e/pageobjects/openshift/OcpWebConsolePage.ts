@@ -15,7 +15,7 @@ import { TestConstants } from '../../TestConstants';
 import { By, Key } from 'selenium-webdriver';
 
 @injectable()
-export class OpenShiftConsole4x {
+export class OcpWebConsolePage {
 
     private static readonly CHE_OPERATOR_LOGO_NAME: string = '//h1[contains(@class, \'logo__name__clusterserviceversion\') and text()=\'Eclipse Che\']';
     private static readonly ECLIPSE_CHE_PREFIX_URL: string = 'che-';
@@ -99,15 +99,15 @@ export class OpenShiftConsole4x {
     }
 
     async waitEclipseCheOperatorLogoName () {
-        await this.driverHelper.waitVisibility(By.xpath(OpenShiftConsole4x.CHE_OPERATOR_LOGO_NAME));
+        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.CHE_OPERATOR_LOGO_NAME));
     }
 
     async waitStatusInstalledEclipseCheOperator () {
-        await this.driverHelper.waitVisibility(By.xpath('//div[@class=\'row co-resource-list__item\']//span[text()=\'InstallSucceeded\']'));
+        await this.driverHelper.waitVisibility(By.xpath('//div[@class=\'row co-resource-list__item\']//span[text()=\'InstallSucceeded\']'), TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnEclipseCheOperatorLogoName () {
-        await this.driverHelper.waitAndClick(By.xpath(OpenShiftConsole4x.CHE_OPERATOR_LOGO_NAME));
+        await this.driverHelper.waitAndClick(By.xpath(OcpWebConsolePage.CHE_OPERATOR_LOGO_NAME));
     }
 
     async waitOverviewCsvEclipseCheOperator () {
@@ -155,10 +155,10 @@ export class OpenShiftConsole4x {
     }
 
     async waitEclipseCheUrl (projectName: string) {
-        await this.driverHelper.waitVisibility(By.partialLinkText(`${OpenShiftConsole4x.ECLIPSE_CHE_PREFIX_URL}--${projectName}`), TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+        await this.driverHelper.waitVisibility(By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`), TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
     }
 
     async clickOnEclipseCHeUrl (projectName: string) {
-        await this.driverHelper.waitAndClick(By.partialLinkText(`${OpenShiftConsole4x.ECLIPSE_CHE_PREFIX_URL}-${projectName}`));
+        await this.driverHelper.waitAndClick(By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`));
     }
 }

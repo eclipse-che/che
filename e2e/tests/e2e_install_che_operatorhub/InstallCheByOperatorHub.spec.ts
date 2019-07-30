@@ -9,109 +9,121 @@
  **********************************************************************/
 
 import { e2eContainer } from '../../inversify.config';
-import { ILoginPage } from '../../pageobjects/login/ILoginPage';
-import { ILoginPageOcp } from '../../pageobjects/openshift/ILoginPageOcp';
+import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
+import { IOcpLoginPage } from '../../pageobjects/login/IOcpLoginPage';
 import { CLASSES, TYPES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
-import { OpenShiftLoginPage } from '../../pageobjects/openshift/OpenShiftLoginPage';
-import { OpenShiftConsole4x } from '../../pageobjects/openshift/OpenShiftConsole4x';
+import { OcpLoginPage } from '../../pageobjects/openshift/OcpLoginPage';
+import { OcpWebConsolePage } from '../../pageobjects/openshift/OcpWebConsolePage';
 
-const loginPage: ILoginPage = e2eContainer.get<ILoginPage>(TYPES.LoginPage);
-const ocpLoginPage: ILoginPageOcp = e2eContainer.get<ILoginPageOcp>(TYPES.OcpLoginPage);
-const openShiftLogin: OpenShiftLoginPage = e2eContainer.get(CLASSES.OpenShiftLoginPage);
-const openShiftConsole: OpenShiftConsole4x = e2eContainer.get(CLASSES.OpenShiftConsole4x);
+const cheLogin: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
+const ocpLogin: IOcpLoginPage = e2eContainer.get<IOcpLoginPage>(TYPES.OcpLogin);
+const ocpLoginPage: OcpLoginPage = e2eContainer.get(CLASSES.OcpLoginPage);
+const ocpWebConsole: OcpWebConsolePage = e2eContainer.get(CLASSES.OcpWebConsolePage);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const projectName: string = TestConstants.TS_INSTALL_CHE_PROJECT_NAME;
 const channelName = TestConstants.TS_OCP_UPDATE_CHANNEL_OPERATOR;
 
 suite('E2E', async () => {
 
-    suite('Go to OCP 4.x and wait console OpenShift', async () => {
+    suite('Go to OCP and wait console OpenShift', async () => {
         test('Open login page', async () => {
-            await openShiftLogin.openLoginPageOpenShift();
-            await openShiftLogin.waitOpenShiftLoginPage();
+            await ocpLoginPage.openLoginPageOpenShift();
+            await ocpLoginPage.waitOpenShiftLoginPage();
         });
-        test('Log into OCP 4.x', async () => {
-            ocpLoginPage.login();
+        test('Log into OCP', async () => {
+            ocpLogin.login();
         });
     });
 
     suite('Subscribe Eclipse Che Operator to defined namespace', async () => {
         test('Open Catalog, select OperatorHub', async () => {
-            await openShiftConsole.waitNavpanelOpenShift();
-            await openShiftConsole.clickOnCatalogListNavPanelOpenShift();
-            await openShiftConsole.clickOnOperatorHubItemNavPanel();
-            await openShiftConsole.waitOperatorHubMainPage();
+            await ocpWebConsole.waitNavpanelOpenShift();
+            await ocpWebConsole.clickOnCatalogListNavPanelOpenShift();
+            await ocpWebConsole.clickOnOperatorHubItemNavPanel();
+            await ocpWebConsole.waitOperatorHubMainPage();
         });
+
+
         test('Select eclipse Che Operator and install it', async () => {
-            await openShiftConsole.clickOnEclipseCheOperatorIcon();
-            await openShiftConsole.clickOnInstallEclipseCheButton();
+            await ocpWebConsole.clickOnEclipseCheOperatorIcon();
+            await ocpWebConsole.clickOnInstallEclipseCheButton();
         });
+
         test('Select a namespace and subscribe Eclipse Che Operator', async () => {
-            await openShiftConsole.waitCreateOperatorSubscriptionPage();
-            await openShiftConsole.selectUpdateChannelOnSubscriptionPage(channelName);
-            await openShiftConsole.clickOnDropdownNamespaceListOnSubscriptionPage();
-            await openShiftConsole.waitListBoxNamespacesOnSubscriptionPage();
-            await openShiftConsole.selectDefinedNamespaceOnSubscriptionPage(projectName);
-            await openShiftConsole.clickOnSubscribeButtonOnSubscriptionPage();
+            await ocpWebConsole.waitCreateOperatorSubscriptionPage();
+            await ocpWebConsole.selectUpdateChannelOnSubscriptionPage(channelName);
+            await ocpWebConsole.clickOnDropdownNamespaceListOnSubscriptionPage();
+            await ocpWebConsole.waitListBoxNamespacesOnSubscriptionPage();
+            await ocpWebConsole.selectDefinedNamespaceOnSubscriptionPage(projectName);
+            await ocpWebConsole.clickOnSubscribeButtonOnSubscriptionPage();
         });
+
         test('Wait the Subscription Overview', async () => {
-            await openShiftConsole.waitSubscriptionOverviewPage();
-            await openShiftConsole.waitChannelNameOnSubscriptionOverviewPage(channelName);
-            await openShiftConsole.waitUpgradeStatusOnSubscriptionOverviewPage();
-            await openShiftConsole.waitCatalogSourceNameOnSubscriptionOverviewPage(projectName);
+            await ocpWebConsole.waitSubscriptionOverviewPage();
+            await ocpWebConsole.waitChannelNameOnSubscriptionOverviewPage(channelName);
+            await ocpWebConsole.waitUpgradeStatusOnSubscriptionOverviewPage();
+            await ocpWebConsole.waitCatalogSourceNameOnSubscriptionOverviewPage(projectName);
         });
     });
 
     suite('Wait the Eclipse Che operator is represented by CSV', async () => {
         test('Select the Installed Operators in the nav panel', async () => {
-            await openShiftConsole.selectInstalledOperatorsOnNavPanel();
+            await ocpWebConsole.selectInstalledOperatorsOnNavPanel();
         });
+
         test('Wait installed Eclipse Che operator', async () => {
-            await openShiftConsole.waitEclipseCheOperatorLogoName();
-            await openShiftConsole.waitStatusInstalledEclipseCheOperator();
+            await ocpWebConsole.waitEclipseCheOperatorLogoName();
+            await ocpWebConsole.waitStatusInstalledEclipseCheOperator();
         });
     });
 
     suite('Create new Eclipse Che cluster', async () => {
         test('Click on the logo-name Eclipse Che operator', async () => {
-            await openShiftConsole.clickOnEclipseCheOperatorLogoName();
-            await openShiftConsole.waitOverviewCsvEclipseCheOperator();
+            await ocpWebConsole.clickOnEclipseCheOperatorLogoName();
+            await ocpWebConsole.waitOverviewCsvEclipseCheOperator();
         });
+
+
         test('Click on the Create New, wait CSV yaml', async () => {
-            await openShiftConsole.clickCreateNewCheClusterLink();
-            await openShiftConsole.waitCreateCheClusterYaml();
+            await ocpWebConsole.clickCreateNewCheClusterLink();
+            await ocpWebConsole.waitCreateCheClusterYaml();
         });
+
         test('Change value of OpenShiftOauth field', async () => {
-            await openShiftConsole.selectOpenShiftOAuthFieldInYaml();
-            await openShiftConsole.changeValueOpenShiftOAuthField();
+            await ocpWebConsole.selectOpenShiftOAuthFieldInYaml();
+            await ocpWebConsole.changeValueOpenShiftOAuthField();
         });
+
         test('Create Che Cluster ', async () => {
-            await openShiftConsole.clickOnCreateCheClusterButton();
-            await openShiftConsole.waitResourcesCheClusterTitle();
-            await openShiftConsole.waitResourcesCheClusterTimestamp();
-            await openShiftConsole.clickOnCheClusterResourcesName();
+            await ocpWebConsole.clickOnCreateCheClusterButton();
+            await ocpWebConsole.waitResourcesCheClusterTitle();
+            await ocpWebConsole.waitResourcesCheClusterTimestamp();
+            await ocpWebConsole.clickOnCheClusterResourcesName();
         });
     });
 
     suite('Check the Eclipse Che is ready', async () => {
         test('Wait Keycloak Admin Console URL', async () => {
-            await openShiftConsole.clickCheClusterOverviewExpandButton();
-            await openShiftConsole.waitKeycloakAdminConsoleUrl(projectName);
+            await ocpWebConsole.clickCheClusterOverviewExpandButton();
+            await ocpWebConsole.waitKeycloakAdminConsoleUrl(projectName);
         });
+
         test('Wait Eclipse Che URL', async () => {
-            await openShiftConsole.waitEclipseCheUrl(projectName);
+            await ocpWebConsole.waitEclipseCheUrl(projectName);
         });
     });
 
     suite('Log into Eclipse Che', async () => {
         test('Click on the Eclipse Che URL ', async () => {
-            await openShiftConsole.clickOnEclipseCHeUrl(projectName);
+            await ocpWebConsole.clickOnEclipseCHeUrl(projectName);
         });
+
         test('Login to Eclipse Che', async () => {
-            await loginPage.login();
+            await cheLogin.login();
         });
+
         test('Wait Eclipse Che dashboard', async () => {
             await dashboard.waitPage();
         });

@@ -2,7 +2,7 @@ import * as inversifyConfig from './inversify.config';
 export { inversifyConfig };
 export * from './inversify.types';
 export * from './TestConstants';
-export * from './pageobjects/login/ILoginPage';
+export * from './pageobjects/login/ICheLoginPage';
 export * from './driver/IDriver';
 export * from './utils/DriverHelper';
 export * from './pageobjects/dashboard/Dashboard';

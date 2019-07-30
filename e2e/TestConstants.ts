@@ -85,7 +85,7 @@ export const TestConstants = {
     TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',
 
     /**
-     * Name of namespace created for 'Install Che' on OCP 4.x by OperatorHub UI.
+     * Name of namespace created for 'Install Che' on OCP by OperatorHub UI.
      */
     TS_INSTALL_CHE_PROJECT_NAME: process.env.TS_INSTALL_CHE_PROJECT_NAME || 'test-che-operator',
 
@@ -100,19 +100,14 @@ export const TestConstants = {
     TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
 
     /**
-     * Url of console OpenShift 4.x.
+     * Username used to log in OCP.
      */
-    TS_SELENIUM_OPENSHIFT4_URL: process.env.TS_SELENIUM_OPENSHIFT4_URL || '',
+    TS_SELENIUM_OCP_USERNAME: process.env.TS_SELENIUM_OCP_USERNAME || 'kubeadmin',
 
     /**
-     * Username used to log in OCP 4.x.
+     * Password used to log in OCP.
      */
-    TS_SELENIUM_OPENSHIFT4_USERNAME: process.env.TS_SELENIUM_OPENSHIFT4_USERNAME || 'kubeadmin',
-
-    /**
-     * Password used to log in OCP 4.x.
-     */
-    TS_SELENIUM_OPENSHIFT4_PASSWORD: process.env.TS_SELENIUM_OPENSHIFT4_PASSWORD || '',
+    TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',
 
     /**
      * Log into CHE in MultiUser mode, "false" by default.
@@ -125,7 +120,7 @@ export const TestConstants = {
     TS_OCP_LOGIN_PAGE_OAUTH: process.env.TS_OCP_LOGIN_PAGE_OAUTH === 'true',
 
     /**
-     * Update Channel name on 'Create Operator Subscription' page on OCP 4.x, "nightly" or "stable".
+     * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
      */
     TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly'
 };

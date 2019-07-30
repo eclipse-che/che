@@ -15,7 +15,7 @@ import { TestConstants } from '../../TestConstants';
 import { By } from 'selenium-webdriver';
 
 @injectable()
-export class OpenShiftLoginPage {
+export class OcpLoginPage {
 
     private static readonly LOGIN_PAGE_OPENSHIFT: string = '//div[contains(@class, \'login\')]';
 
@@ -23,11 +23,11 @@ export class OpenShiftLoginPage {
     @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async openLoginPageOpenShift () {
-        await this.driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_OPENSHIFT4_URL);
+        await this.driverHelper.navigateToUrl(TestConstants.TS_SELENIUM_BASE_URL);
     }
 
     async waitOpenShiftLoginPage () {
-        await this.driverHelper.waitVisibility(By.xpath(OpenShiftLoginPage.LOGIN_PAGE_OPENSHIFT));
+        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
     }
 
     async clickOnLoginWitnKubeAdmin () {
@@ -47,6 +47,6 @@ export class OpenShiftLoginPage {
     }
 
     async waitDisappearanceLoginPageOpenShift () {
-        await this.driverHelper.waitDisappearance(By.xpath(OpenShiftLoginPage.LOGIN_PAGE_OPENSHIFT));
+        await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
     }
 }

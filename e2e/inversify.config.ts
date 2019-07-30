@@ -12,7 +12,8 @@ import { IDriver } from './driver/IDriver';
 import { TYPES, CLASSES } from './inversify.types';
 import { ChromeDriver } from './driver/ChromeDriver';
 import { DriverHelper } from './utils/DriverHelper';
-import { ILoginPage } from './pageobjects/login/ILoginPage';
+import { ICheLoginPage } from './pageobjects/login/ICheLoginPage';
+import { IOcpLoginPage } from './pageobjects/login/IOcpLoginPage';
 import { SingleUserLoginPage } from './pageobjects/login/SingleUserLoginPage';
 import { Dashboard } from './pageobjects/dashboard/Dashboard';
 import { Workspaces } from './pageobjects/dashboard/Workspaces';
@@ -33,22 +34,22 @@ import { DebugView } from './pageobjects/ide/DebugView';
 import { WarningDialog } from './pageobjects/ide/WarningDialog';
 import { MultiUserLoginPage } from './pageobjects/login/MultiUserLoginPage';
 import { TestConstants } from './TestConstants';
-import { ILoginPageOcp } from './pageobjects/openshift/ILoginPageOcp';
-import { OpenShiftLoginPage } from './pageobjects/openshift/OpenShiftLoginPage';
-import { OpenShiftConsole4x } from './pageobjects/openshift/OpenShiftConsole4x';
-import { OpenShiftLoginByTempAdmin } from './pageobjects/openshift/OpenShiftLoginByTempAdmin';
+import { OcpLoginPage } from './pageobjects/openshift/OcpLoginPage';
+import { OcpWebConsolePage } from './pageobjects/openshift/OcpWebConsolePage';
+import { OcpLoginByTempAdmin } from './pageobjects/login/OcpLoginByTempAdmin';
 
 const e2eContainer = new Container();
 
 e2eContainer.bind<IDriver>(TYPES.Driver).to(ChromeDriver).inSingletonScope();
 
+e2eContainer.bind<IOcpLoginPage>(TYPES.OcpLogin).to(OcpLoginByTempAdmin).inSingletonScope();
+
 if (TestConstants.TS_SELENIUM_MULTIUSER) {
-    e2eContainer.bind<ILoginPage>(TYPES.LoginPage).to(MultiUserLoginPage).inSingletonScope();
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(MultiUserLoginPage).inSingletonScope();
 } else {
-    e2eContainer.bind<ILoginPage>(TYPES.LoginPage).to(SingleUserLoginPage).inSingletonScope();
+    e2eContainer.bind<ICheLoginPage>(TYPES.CheLogin).to(SingleUserLoginPage).inSingletonScope();
 }
 
-e2eContainer.bind<ILoginPageOcp>(TYPES.OcpLoginPage).to(OpenShiftLoginByTempAdmin);
 e2eContainer.bind<DriverHelper>(CLASSES.DriverHelper).to(DriverHelper).inSingletonScope();
 e2eContainer.bind<Dashboard>(CLASSES.Dashboard).to(Dashboard).inSingletonScope();
 e2eContainer.bind<Workspaces>(CLASSES.Workspaces).to(Workspaces).inSingletonScope();
@@ -67,7 +68,7 @@ e2eContainer.bind<RightToolbar>(CLASSES.RightToolbar).to(RightToolbar).inSinglet
 e2eContainer.bind<Terminal>(CLASSES.Terminal).to(Terminal).inSingletonScope();
 e2eContainer.bind<DebugView>(CLASSES.DebugView).to(DebugView).inSingletonScope();
 e2eContainer.bind<WarningDialog>(CLASSES.WarningDialog).to(WarningDialog).inSingletonScope();
-e2eContainer.bind<OpenShiftLoginPage>(CLASSES.OpenShiftLoginPage).to(OpenShiftLoginPage).inSingletonScope();
-e2eContainer.bind<OpenShiftConsole4x>(CLASSES.OpenShiftConsole4x).to(OpenShiftConsole4x).inSingletonScope();
+e2eContainer.bind<OcpLoginPage>(CLASSES.OcpLoginPage).to(OcpLoginPage).inSingletonScope();
+e2eContainer.bind<OcpWebConsolePage>(CLASSES.OcpWebConsolePage).to(OcpWebConsolePage).inSingletonScope();
 
 export { e2eContainer };
