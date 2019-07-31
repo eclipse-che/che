@@ -97,6 +97,11 @@ export const TestConstants = {
     /**
      * Delay between screenshots catching in the milliseconds for the execution screencast.
      */
-    TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: Number(process.env.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS) || 2000
+    TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: Number(process.env.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS) || 2000,
+
+    /**
+     * Path to folder with tests execution report.
+     */
+    TS_SELENIUM_REPORT_FOLDER: process.env.TS_SELENIUM_REPORT_FOLDER || './report',
 
 };

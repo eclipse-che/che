@@ -11,14 +11,14 @@ import * as fs from 'fs';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../inversify.types';
 import { DriverHelper } from './DriverHelper';
+import { TestConstants } from '..';
 
 @injectable()
 export class ScreenCatcher {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number, createFolder: boolean = true) {
-        const reportDir: string = `./report`;
-        const executionScreenCastDir = `${reportDir}/executionScreencast`;
+        const executionScreenCastDir = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
         const screenshotDir: string = `${executionScreenCastDir}/${methodIndex}-${methodName}`;
         const screenshotPath: string = `${screenshotDir}/${screenshotIndex}-${methodName}.png`;
 
@@ -27,8 +27,8 @@ export class ScreenCatcher {
             return;
         }
 
-        if (!fs.existsSync(reportDir)) {
-            fs.mkdirSync(reportDir);
+        if (!fs.existsSync(TestConstants.TS_SELENIUM_REPORT_FOLDER)) {
+            fs.mkdirSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
         }
 
         if (!fs.existsSync(executionScreenCastDir)) {

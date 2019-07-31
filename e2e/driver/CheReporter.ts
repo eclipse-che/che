@@ -12,6 +12,7 @@ import { IDriver } from './IDriver';
 import { e2eContainer } from '../inversify.config';
 import { TYPES, CLASSES } from '../inversify.types';
 import * as fs from 'fs';
+import * as rm from 'rimraf';
 import { TestConstants } from '../TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
@@ -47,10 +48,14 @@ class CheReporter extends mocha.reporters.Spec {
       TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: ${TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME}
       TS_SELENIUM_USERNAME: ${TestConstants.TS_SELENIUM_USERNAME}
       TS_SELENIUM_PASSWORD: ${TestConstants.TS_SELENIUM_PASSWORD}
+      TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: ${TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS}
+      TS_SELENIUM_REPORT_FOLDER: ${TestConstants.TS_SELENIUM_REPORT_FOLDER}
 
 ########################################################
       `;
       console.log(launchInformation);
+
+      rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
     });
 
     runner.on('test', async function (test: mocha.Test) {
@@ -59,7 +64,8 @@ class CheReporter extends mocha.reporters.Spec {
       let iterationIndex: number = 1;
 
       while (!(test.state === 'passed' || test.state === 'failed')) {
-        // create folder for keeping method screenshots only when first screenshot catched
+        // create folder for keeping method screenshots
+        // only when first screenshot catched
         const createFolder: boolean = (iterationIndex === 1);
 
         await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex, createFolder);
@@ -85,22 +91,20 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('fail', async function (test: mocha.Test) {
-
-      const reportDirPath: string = './report';
       const testFullTitle: string = test.fullTitle().replace(/\s/g, '_');
       const testTitle: string = test.title.replace(/\s/g, '_');
 
-      const testReportDirPath: string = `${reportDirPath}/${testFullTitle}`;
+      const testReportDirPath: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/${testFullTitle}`;
       const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`;
       const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
       const browserLogsFileName: string = `${testReportDirPath}/browserlogs-${testTitle}.txt`;
 
 
       // create reporter dir if not exist
-      const reportDirExists: boolean = fs.existsSync(reportDirPath);
+      const reportDirExists: boolean = fs.existsSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
 
       if (!reportDirExists) {
-        fs.mkdirSync(reportDirPath);
+        fs.mkdirSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
       }
 
       // create dir for failed test report if not exist
