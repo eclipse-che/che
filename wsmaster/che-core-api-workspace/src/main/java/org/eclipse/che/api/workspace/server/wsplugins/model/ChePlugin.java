@@ -11,8 +11,6 @@
  */
 package org.eclipse.che.api.workspace.server.wsplugins.model;
 
-import static com.google.common.base.Strings.isNullOrEmpty;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
@@ -53,13 +51,7 @@ public class ChePlugin {
   }
 
   public String getId() {
-    if (!isNullOrEmpty(id)) {
-      return id;
-    } else if (!isNullOrEmpty(publisher) && !isNullOrEmpty(name) && !isNullOrEmpty(version)) {
-      return publisher + "/" + name + "/" + version;
-    } else {
-      return null;
-    }
+    return id;
   }
 
   public void setId(String id) {
