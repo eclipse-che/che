@@ -14,22 +14,17 @@ import { DriverHelper } from './DriverHelper';
 
 @injectable()
 export class ScreenCatcher {
-    private screenshotIndex: number;
-    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) {
-        this.screenshotIndex = 1;
-    }
+    constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async catchMethodScreen(methodName: string, startMethodScreenshot: boolean = true) {
-        const screenshotIndex: number = this.screenshotIndex;
+    async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number, createFolder: boolean = true) {
         const reportDir: string = `./report`;
         const executionScreenCastDir = `${reportDir}/executionScreencast`;
-        const screenshotDir: string = `${executionScreenCastDir}/${screenshotIndex}-${methodName}`;
+        const screenshotDir: string = `${executionScreenCastDir}/${methodIndex}-${methodName}`;
+        const screenshotPath: string = `${screenshotDir}/${screenshotIndex}-${methodName}.png`;
 
-        let screenshotPath: string = `${screenshotDir}/${methodName}-begin.png`;
-
-        if (!startMethodScreenshot) {
-            this.iterateScreenshotIndex();
-            screenshotPath = `${screenshotDir}/${methodName}-finish.png`;
+        if (!createFolder) {
+            await this.catcheScreen(screenshotPath);
+            return;
         }
 
         if (!fs.existsSync(reportDir)) {
@@ -44,7 +39,7 @@ export class ScreenCatcher {
             fs.mkdirSync(screenshotDir);
         }
 
-        this.catcheScreen(screenshotPath);
+        await this.catcheScreen(screenshotPath);
     }
 
     async catcheScreen(screenshotPath: string) {
@@ -52,10 +47,6 @@ export class ScreenCatcher {
         const screenshotStream = fs.createWriteStream(screenshotPath);
         screenshotStream.write(new Buffer(screenshot, 'base64'));
         screenshotStream.end();
-    }
-
-    private iterateScreenshotIndex() {
-        this.screenshotIndex = this.screenshotIndex + 1;
     }
 
 }

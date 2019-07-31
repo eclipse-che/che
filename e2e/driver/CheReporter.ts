@@ -20,9 +20,9 @@ import { ScreenCatcher } from '../utils/ScreenCatcher';
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
+let methodIndex: number = 0;
 
 class CheReporter extends mocha.reporters.Spec {
-
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
 
@@ -54,15 +54,26 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('test', async function (test: mocha.Test) {
-      const testTitle: string = test.title.replace(/\s/g, '_');
+      methodIndex = methodIndex + 1;
+      const currentMethodIndex: number = methodIndex;
+      let iterationIndex: number = 1;
 
-      await screenCatcher.catchMethodScreen(testTitle);
+      while (!(test.state === 'passed' || test.state === 'failed')) {
+        // create folder for keeping method screenshots only when first screenshot catched
+        const createFolder: boolean = (iterationIndex === 1);
+
+        await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex, createFolder);
+        iterationIndex = iterationIndex + 1;
+
+        await driverHelper.wait(TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS);
+      }
     });
 
     runner.on('test end', async function (test: mocha.Test) {
-      const testTitle: string = test.title.replace(/\s/g, '_');
+      const currentMethodIndex: number = methodIndex;
+      let iterationIndex: number = 10000;
 
-      await screenCatcher.catchMethodScreen(testTitle, false);
+      await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex, false);
     });
 
     runner.on('end', async function (test: mocha.Test) {

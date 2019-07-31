@@ -92,6 +92,11 @@ export const TestConstants = {
     /**
      * Password used to log in MultiUser Che
      */
-    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || ''
+    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
+
+    /**
+     * Delay between screenshots catching in the milliseconds for the execution screencast.
+     */
+    TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: Number(process.env.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS) || 2000
 
 };
