@@ -64,11 +64,7 @@ class CheReporter extends mocha.reporters.Spec {
       let iterationIndex: number = 1;
 
       while (!(test.state === 'passed' || test.state === 'failed')) {
-        // create folder for keeping method screenshots
-        // only when first screenshot catched
-        const createFolder: boolean = (iterationIndex === 1);
-
-        await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex, createFolder);
+        await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
         iterationIndex = iterationIndex + 1;
 
         await driverHelper.wait(TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS);
@@ -79,7 +75,7 @@ class CheReporter extends mocha.reporters.Spec {
       const currentMethodIndex: number = methodIndex;
       let iterationIndex: number = 10000;
 
-      await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex, false);
+      await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
     });
 
     runner.on('end', async function (test: mocha.Test) {

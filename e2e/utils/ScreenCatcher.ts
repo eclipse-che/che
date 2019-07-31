@@ -17,15 +17,9 @@ import { TestConstants } from '..';
 export class ScreenCatcher {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
-    async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number, createFolder: boolean = true) {
+    async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number) {
         const executionScreenCastDir = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
         const screenshotDir: string = `${executionScreenCastDir}/${methodIndex}-${methodName}`;
-        const screenshotPath: string = `${screenshotDir}/${screenshotIndex}-${methodName}.png`;
-
-        if (!createFolder) {
-            await this.catcheScreen(screenshotPath);
-            return;
-        }
 
         if (!fs.existsSync(TestConstants.TS_SELENIUM_REPORT_FOLDER)) {
             fs.mkdirSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
@@ -38,6 +32,10 @@ export class ScreenCatcher {
         if (!fs.existsSync(screenshotDir)) {
             fs.mkdirSync(screenshotDir);
         }
+
+        const date: Date = new Date();
+        const timeStamp: string = `(${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}:${date.getMilliseconds()})`;
+        const screenshotPath: string = `${screenshotDir}/${screenshotIndex}-${methodName}-${timeStamp}.png`;
 
         await this.catcheScreen(screenshotPath);
     }
