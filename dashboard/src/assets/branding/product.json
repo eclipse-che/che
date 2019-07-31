@@ -24,6 +24,7 @@
     "workspace" : "/docs/what-are-workspaces.html",
     "factory" : "/docs/factories-getting-started.html",
     "organization": "/docs/organizations.html",
+    "converting": "/docs/che-7/converting-a-che-6-workspace-to-a-che-7-devfile.html",
     "general": "/docs"
   }
 }

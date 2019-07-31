@@ -64,7 +64,7 @@ export class WorkspaceItemCtrl {
     this.supportedRecipeTypeIssue = $sce.trustAsHtml('Current infrastructure doesn\'t support this workspace recipe type.');
 
     this.supportedVersionTypeIssue = $sce.trustAsHtml(`This workspace is using old definition format which is not compatible anymore. 
-          Please follow the <a href="${cheBranding.getDocs().workspace}" target="_blank">documentation</a>
+          Please follow the <a href="${cheBranding.getDocs().converting}" target="_blank">documentation</a>
           to update the definition of the workspace and benefits from the latest capabilities.`);
   }
 
