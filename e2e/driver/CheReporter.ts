@@ -22,6 +22,7 @@ const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 let methodIndex: number = 0;
+let deleteScreencast: boolean = true;
 
 class CheReporter extends mocha.reporters.Spec {
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
@@ -50,6 +51,8 @@ class CheReporter extends mocha.reporters.Spec {
       TS_SELENIUM_PASSWORD: ${TestConstants.TS_SELENIUM_PASSWORD}
       TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: ${TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS}
       TS_SELENIUM_REPORT_FOLDER: ${TestConstants.TS_SELENIUM_REPORT_FOLDER}
+      TS_SELENIUM_EXECUTION_SCREENCAST: ${TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST}
+      DELETE_SCREENCAST_IF_TEST_PASS: ${TestConstants.DELETE_SCREENCAST_IF_TEST_PASS}
 
 ########################################################
       `;
@@ -59,6 +62,10 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('test', async function (test: mocha.Test) {
+      if (!TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
+        return;
+      }
+
       methodIndex = methodIndex + 1;
       const currentMethodIndex: number = methodIndex;
       let iterationIndex: number = 1;
@@ -72,6 +79,10 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('test end', async function (test: mocha.Test) {
+      if (!TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
+        return;
+      }
+
       const currentMethodIndex: number = methodIndex;
       let iterationIndex: number = 10000;
 
@@ -79,6 +90,10 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('end', async function (test: mocha.Test) {
+      if (deleteScreencast && TestConstants.DELETE_SCREENCAST_IF_TEST_PASS) {
+        rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+      }
+
       // ensure that fired events done
       await driver.get().sleep(5000);
 
@@ -87,6 +102,9 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('fail', async function (test: mocha.Test) {
+      // raise flag for keeping the screencast
+      deleteScreencast = false;
+
       const testFullTitle: string = test.fullTitle().replace(/\s/g, '_');
       const testTitle: string = test.title.replace(/\s/g, '_');
 
