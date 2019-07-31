@@ -81,28 +81,33 @@
            class="workspace-item-actions">
         <span class="che-xs-header noselect" hide-gt-xs>Actions</span>
 
-        <div class="che-list-actions"
-             ng-if="workspaceItemCtrl.isSupported === true">
-          <che-workspace-status workspace-id="workspaceItemCtrl.workspace.id"
+        <div class="che-list-actions">
+          <che-workspace-status ng-if="workspaceItemCtrl.isSupported"
+                                workspace-id="workspaceItemCtrl.workspace.id"
                                 name="workspace-stop-start-button"
                                 is-request-pending="workspaceItemCtrl.isRequestPending"></che-workspace-status>
-          <a href="#/workspace/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspaceName}}?tab=Config"
+          <a href="#/workspace/{{workspaceItemCtrl.workspace.namespace}}/{{workspaceItemCtrl.workspaceName}}?tab={{workspaceItemCtrl.workspace.devfile ? 'Devfile':'Config'}}"
              name="configure-workspace-button"
              uib-tooltip="Configure workspace">
             <span class="fa fa-cog"></span>
           </a>
-          <span ng-click="workspaceItemCtrl.redirectToWorkspaceDetails('Projects');" uib-tooltip="Add project">
+          <span ng-if="workspaceItemCtrl.isSupported"
+                ng-click="workspaceItemCtrl.redirectToWorkspaceDetails('Projects');"
+                uib-tooltip="Add project">
             <span class="fa fa-plus-square-o" name="add-project-button"></span>
           </span>
+          <span ng-if="!workspaceItemCtrl.isSupported"
+                class="workspace-item-not-supported"
+                tabindex="-1"
+                id="{{workspaceItemCtrl.workspace.id}}-item-error"
+                ng-mouseover="workspaceItemCtrl.setTemporaryFocus();"
+                ng-click="workspaceItemCtrl.resetBlurTimeout();"
+                tooltip-trigger="focus"
+                tooltip-append-to-body="true"
+                uib-tooltip-html="workspaceItemCtrl.workspaceSupportIssues">
+               <span>Not compatible</span><span class="fa fa-warning"></span>
+          </span>
         </div>
-        <div class="che-list-item-secondary workspace-item-not-supported"
-             ng-if="workspaceItemCtrl.isSupported === false">
-          <div>
-            <span>Not compatible</span>
-            <span class="che-list-actions"><i class="fa fa-question-circle" uib-tooltip="{{workspaceItemCtrl.workspaceSupportIssues}}"></i></span>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>

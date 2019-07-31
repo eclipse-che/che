@@ -13,9 +13,7 @@ package org.eclipse.che.api.workspace.server.devfile;
 
 import com.google.inject.Binder;
 import com.google.inject.multibindings.MapBinder;
-import com.google.inject.multibindings.Multibinder;
 import java.util.function.Consumer;
-import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentProvisioner;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
 
@@ -53,24 +51,6 @@ public class DevfileBindings {
       Binder baseBinder, Consumer<MapBinder<String, ComponentIntegrityValidator>> binder) {
     binder.accept(
         MapBinder.newMapBinder(baseBinder, String.class, ComponentIntegrityValidator.class));
-  }
-
-  /**
-   * Binds {@link ComponentProvisioner} implementations to be used in the {@link
-   * org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter}.
-   *
-   * @param baseBinder the binder available in the Guice module calling this method
-   * @param impls the classes to register as component provisioners
-   */
-  @SafeVarargs
-  public static void addComponentProvisioners(
-      Binder baseBinder, Class<? extends ComponentProvisioner>... impls) {
-    Multibinder<ComponentProvisioner> binder =
-        Multibinder.newSetBinder(baseBinder, ComponentProvisioner.class);
-
-    for (Class<? extends ComponentProvisioner> i : impls) {
-      binder.addBinding().to(i);
-    }
   }
 
   private DevfileBindings() {}

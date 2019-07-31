@@ -42,9 +42,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesEnvironment
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
-import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier;
-import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings;
@@ -180,9 +178,6 @@ public class OpenShiftInfraModule extends AbstractModule {
               .addBinding(OPENSHIFT_COMPONENT_TYPE)
               .to(OpenshiftComponentToWorkspaceApplier.class);
         });
-
-    DevfileBindings.addComponentProvisioners(
-        binder(), KubernetesComponentProvisioner.class, DockerimageComponentProvisioner.class);
 
     KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBindings(
         binder(), KubernetesEnvironment.TYPE, OpenShiftEnvironment.TYPE);
