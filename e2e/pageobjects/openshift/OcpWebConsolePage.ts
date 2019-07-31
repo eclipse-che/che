@@ -17,85 +17,94 @@ import { By, Key } from 'selenium-webdriver';
 @injectable()
 export class OcpWebConsolePage {
 
-    private static readonly CHE_OPERATOR_LOGO_NAME: string = '//h1[contains(@class, \'logo__name__clusterserviceversion\') and text()=\'Eclipse Che\']';
+    private static readonly CHE_OPERATOR_LOGO_NAME: string = '//h1[text()=\'Eclipse Che\']';
     private static readonly ECLIPSE_CHE_PREFIX_URL: string = 'che-';
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitNavpanelOpenShift () {
-        await this.driverHelper.waitVisibility(By.xpath('//nav[@class=\'pf-c-nav\']'));
+        const navPanelOpenShiftLocator: By = By.css('nav[class=pf-c-nav]');
+        await this.driverHelper.waitVisibility(navPanelOpenShiftLocator);
     }
 
     async clickOnCatalogListNavPanelOpenShift () {
-        await this.driverHelper.waitAndClick(By.xpath('//a[text()=\'Catalog\']'));
+        const catalogListLocator: By = By.xpath('//a[text()=\'Catalog\']');
+        await this.driverHelper.waitAndClick(catalogListLocator);
     }
 
     async clickOnOperatorHubItemNavPanel () {
-        await this.driverHelper.waitAndClick(By.xpath('//a[text()=\'OperatorHub\']'));
+        const operatorHubItemLocator: By = By.xpath('//a[text()=\'OperatorHub\']');
+        await this.driverHelper.waitAndClick(operatorHubItemLocator);
     }
 
     async waitOperatorHubMainPage () {
-        await this.driverHelper.waitVisibility(By.xpath('//span[@id=\'resource-title\' and text()=\'OperatorHub\']'));
+        const catalogOperatorHubPageLocator: By = By.xpath('//span[@id=\'resource-title\' and text()=\'OperatorHub\']');
+        await this.driverHelper.waitVisibility(catalogOperatorHubPageLocator);
     }
 
     async clickOnEclipseCheOperatorIcon () {
-        await this.driverHelper.waitAndClick(By.xpath('//a[contains(@data-test, \'eclipse-che-preview\')]'));
+        const catalogEclipseCheOperatorTitleLocator: By = By.css('a[data-test^=eclipse-che-preview-openshift]');
+        await this.driverHelper.waitAndClick(catalogEclipseCheOperatorTitleLocator);
     }
     async clickOnInstallEclipseCheButton () {
-        await this.driverHelper.waitAndClick(By.xpath('//button[text()=\'Install\']'));
-    }
-
-    async selectStableUpdateChannel () {
-        await this.driverHelper.waitAndClick(By.xpath('//input[@type=\'radio\' and @value=\'stable\']'));
-    }
-
-    async selectNightltyUpdateChannel () {
-        await this.driverHelper.waitAndClick(By.xpath('//input[@type=\'radio\' and @value=\'nightly\']'));
-    }
-
-    async selectUpdateChannelOnSubscriptionPage (channelName: string) {
-        await this.driverHelper.waitAndClick(By.xpath(`//input[@type=\'radio\' and @value=\'${channelName}\']`));
+        const installEclipsCheOperatorButtonLocator: By = By.xpath('//button[text()=\'Install\']');
+        await this.driverHelper.waitAndClick(installEclipsCheOperatorButtonLocator);
     }
 
     async waitCreateOperatorSubscriptionPage () {
-        await this.driverHelper.waitVisibility(By.xpath('//h1[text()=\'Create Operator Subscription\']'));
+        const createOperatorSubscriptionPageLocator: By = By.xpath('//h1[text()=\'Create Operator Subscription\']');
+        await this.driverHelper.waitVisibility(createOperatorSubscriptionPageLocator);
+    }
+
+    async selectUpdateChannelOnSubscriptionPage (channelName: string) {
+        const updateChannelOperatorLocator: By = By.css(`input[value=${channelName}]`);
+        await this.driverHelper.waitAndClick(updateChannelOperatorLocator);
     }
 
     async clickOnDropdownNamespaceListOnSubscriptionPage () {
-        await this.driverHelper.waitAndClick(By.xpath('//button[@id=\'dropdown-selectbox\']'));
+        const selectNamespaceLocator: By = By.id('dropdown-selectbox');
+        await this.driverHelper.waitAndClick(selectNamespaceLocator);
     }
 
     async waitListBoxNamespacesOnSubscriptionPage () {
-        await this.driverHelper.waitVisibility(By.xpath('//ul[@role=\'listbox\' and contains(@class, \'dropdown-menu\')]'));
+        const listBoxNamespaceLocator: By = By.css('ul[class^=dropdown-menu]');
+        await this.driverHelper.waitVisibility(listBoxNamespaceLocator);
     }
 
     async selectDefinedNamespaceOnSubscriptionPage (projectName: string) {
-        await this.driverHelper.waitAndClick(By.xpath(`//a[@id=\'${projectName}-Project-link\']`));
+        const namespaceItemInDropDownLocator: By = By.id(`${projectName}-Project-link`);
+        await this.driverHelper.waitAndClick(namespaceItemInDropDownLocator);
     }
 
     async clickOnSubscribeButtonOnSubscriptionPage () {
-        await this.driverHelper.waitAndClick(By.xpath('//button[text()=\'Subscribe\']'));
+        const subscribeOperatorButtonLocator: By = By.xpath('//button[text()=\'Subscribe\']');
+        await this.driverHelper.waitAndClick(subscribeOperatorButtonLocator);
     }
 
     async waitSubscriptionOverviewPage () {
-        await this.driverHelper.waitVisibility(By.xpath('//h2[text()=\'Subscription Overview\']'));
+        const subscriptionOverviewPageLocator: By = By.xpath('//h2[text()=\'Subscription Overview\']');
+        await this.driverHelper.waitVisibility(subscriptionOverviewPageLocator);
     }
 
     async waitChannelNameOnSubscriptionOverviewPage (channelName: string) {
-        await this.driverHelper.waitVisibility(By.xpath(`//button[contains(@class, 'btn-link') and text()='${channelName}']`));
+        const channelNameOnSubscriptionOverviewLocator: By = By.xpath(`//button[@type='button' and text()='${channelName}']`);
+        await this.driverHelper.waitVisibility(channelNameOnSubscriptionOverviewLocator);
     }
 
     async waitUpgradeStatusOnSubscriptionOverviewPage () {
-        await this.driverHelper.waitVisibility(By.xpath('//span[text()=\' Up to date\']'), TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+        const upgradeStatuslocator: By = By.xpath('//span[text()=\' Up to date\']');
+        await this.driverHelper.waitVisibility(upgradeStatuslocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async waitCatalogSourceNameOnSubscriptionOverviewPage (projectName: string) {
-        await this.driverHelper.waitVisibility(By.xpath(`//a[contains(@title, \'${projectName}\')]`));
+        const catalogSourceNameLolcator: By = By.css(`a[title=\'installed-custom-${projectName}\']`);
+        await this.driverHelper.waitVisibility(catalogSourceNameLolcator);
     }
 
     async selectInstalledOperatorsOnNavPanel () {
-        await this.driverHelper.waitAndClick(By.xpath('//a[contains(@class, \'pf-c-nav\') and text()=\'Installed Operators\']'));
+        const installedOperatorsItemNavPanelLocator: By = By.xpath('//a[text()=\'Installed Operators\']');
+        await this.driverHelper.waitAndClick(installedOperatorsItemNavPanelLocator);
     }
 
     async waitEclipseCheOperatorLogoName () {
@@ -103,7 +112,8 @@ export class OcpWebConsolePage {
     }
 
     async waitStatusInstalledEclipseCheOperator () {
-        await this.driverHelper.waitVisibility(By.xpath('//div[@class=\'row co-resource-list__item\']//span[text()=\'InstallSucceeded\']'), TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+        const statusInstalledCheOperatorLocator: By = By.xpath('//span[text()=\'InstallSucceeded\']');
+        await this.driverHelper.waitVisibility(statusInstalledCheOperatorLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
 
     async clickOnEclipseCheOperatorLogoName () {
@@ -111,19 +121,22 @@ export class OcpWebConsolePage {
     }
 
     async waitOverviewCsvEclipseCheOperator () {
-        await this.driverHelper.waitVisibility(By.xpath('//h2[@class=\'co-section-heading\' and text()=\'ClusterServiceVersion Overview\']'));
+        await this.driverHelper.waitVisibility(By.xpath(OcpWebConsolePage.CHE_OPERATOR_LOGO_NAME));
     }
 
     async clickCreateNewCheClusterLink () {
-        await this.driverHelper.waitAndClick(By.xpath('//div[contains(@class, \'ClusterServiceVersion\')]//a[text()=\' Create New\']'));
+        const createNewCheLusterLinkLocator: By = By.xpath('//a[text()=\' Create New\']');
+        await this.driverHelper.waitAndClick(createNewCheLusterLinkLocator);
     }
 
     async waitCreateCheClusterYaml () {
-        await this.driverHelper.waitVisibility(By.xpath('//h1[text()=\'Create Che Cluster\']'));
+        const createCheClusterYamlLocator: By = By.xpath('//h1[text()=\'Create Che Cluster\']');
+        await this.driverHelper.waitVisibility(createCheClusterYamlLocator);
     }
 
-    async selectOpenShiftOAuthFieldInYaml () {
-        await this.driverHelper.waitAndClick(By.xpath(`//div[@class=\'ace_gutter-cell \' and text()=\'21\']`));
+    async selectOpenShiftOAuthFieldInYaml (line: string) {
+        const openShiftOAuthFieldLocator: By = By.xpath(`//div[@class=\'ace_gutter-cell \' and text()=\'${line}\']`);
+        await this.driverHelper.waitAndClick(openShiftOAuthFieldLocator);
     }
 
     async changeValueOpenShiftOAuthField () {
@@ -132,33 +145,41 @@ export class OcpWebConsolePage {
     }
 
     async clickOnCreateCheClusterButton () {
-        await this.driverHelper.waitAndClick(By.xpath('//button[@id=\'save-changes\' and text()=\'Create\']'));
+        const createCheClusterButtonLocator: By = By.id('save-changes');
+        await this.driverHelper.waitAndClick(createCheClusterButtonLocator);
     }
 
     async waitResourcesCheClusterTitle () {
-        await this.driverHelper.waitVisibility(By.xpath('//span[@id=\'resource-title\' and text()=\'Che Clusters\']'));
+        const resourcesCheClusterTitleLocator: By = By.id('resource-title');
+        await this.driverHelper.waitVisibility(resourcesCheClusterTitleLocator);
     }
 
     async waitResourcesCheClusterTimestamp () {
-        await this.driverHelper.waitVisibility(By.xpath('//div[contains(@class, \'timestamp\')]/div[text()=\'a minute ago\']'), TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
+        const resourcesCheClusterTimestampLocator: By = By.xpath('//div[contains(@class, \'timestamp\')]/div[text()=\'a minute ago\']');
+        await this.driverHelper.waitVisibility(resourcesCheClusterTimestampLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
     async clickOnCheClusterResourcesName () {
-        await this.driverHelper.waitAndClick(By.xpath('//a[contains(@class, \'resource-name\') and text()=\'eclipse-che\']'));
+        const cheClusterResourcesNameLocator: By = By.css('a[class=co-resource-item__resource-name]');
+        await this.driverHelper.waitAndClick(cheClusterResourcesNameLocator);
     }
 
     async clickCheClusterOverviewExpandButton () {
-        await this.driverHelper.waitAndClick(By.xpath('//label[@class=\'btn compaction-btn btn-default\']'));
+        const cheClusterOverviewExpandButton: By = By.css('label[class=\'btn compaction-btn btn-default\']');
+        await this.driverHelper.waitAndClick(cheClusterOverviewExpandButton);
     }
 
     async waitKeycloakAdminConsoleUrl (projectName: string) {
-        await this.driverHelper.waitVisibility(By.partialLinkText(`keycloak-${projectName}`), TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+        const keyCloakAdminWebConsoleUrl: By = By.partialLinkText(`keycloak-${projectName}`);
+        await this.driverHelper.waitVisibility(keyCloakAdminWebConsoleUrl, TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
     }
 
     async waitEclipseCheUrl (projectName: string) {
-        await this.driverHelper.waitVisibility(By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`), TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+        const eclipseCheUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`);
+        await this.driverHelper.waitVisibility(eclipseCheUrlLocator, TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
     }
 
     async clickOnEclipseCHeUrl (projectName: string) {
-        await this.driverHelper.waitAndClick(By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`));
+        const eclipseCheUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`);
+        await this.driverHelper.waitAndClick(eclipseCheUrlLocator);
     }
 }

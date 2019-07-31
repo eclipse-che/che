@@ -24,6 +24,7 @@ const ocpWebConsole: OcpWebConsolePage = e2eContainer.get(CLASSES.OcpWebConsoleP
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const projectName: string = TestConstants.TS_INSTALL_CHE_PROJECT_NAME;
 const channelName = TestConstants.TS_OCP_UPDATE_CHANNEL_OPERATOR;
+const openShiftOAuthLine = '21';
 
 suite('E2E', async () => {
 
@@ -92,7 +93,7 @@ suite('E2E', async () => {
         });
 
         test('Change value of OpenShiftOauth field', async () => {
-            await ocpWebConsole.selectOpenShiftOAuthFieldInYaml();
+            await ocpWebConsole.selectOpenShiftOAuthFieldInYaml(openShiftOAuthLine);
             await ocpWebConsole.changeValueOpenShiftOAuthField();
         });
 

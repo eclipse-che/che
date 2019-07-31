@@ -21,7 +21,7 @@ export class OcpLoginByTempAdmin implements IOcpLoginPage {
         @inject(CLASSES.OcpLoginPage) private readonly ocpLogin: OcpLoginPage) { }
 
     async login() {
-        if (TestConstants.TS_OCP_LOGIN_PAGE_OAUTH) {
+        if (TestConstants.TS_OCP_LOGIN_PAGE_HTPASW) {
             await this.ocpLogin.clickOnLoginWitnKubeAdmin();
         }
 

@@ -17,7 +17,7 @@ import { By } from 'selenium-webdriver';
 @injectable()
 export class OcpLoginPage {
 
-    private static readonly LOGIN_PAGE_OPENSHIFT: string = '//div[contains(@class, \'login\')]';
+    private static readonly LOGIN_PAGE_OPENSHIFT: string = 'div[class=container]';
 
     constructor(
     @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
@@ -27,11 +27,12 @@ export class OcpLoginPage {
     }
 
     async waitOpenShiftLoginPage () {
-        await this.driverHelper.waitVisibility(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
+        await this.driverHelper.waitVisibility(By.css(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
     }
 
     async clickOnLoginWitnKubeAdmin () {
-        await this.driverHelper.waitAndClick(By.xpath('//a[@title=\'Log in with kube:admin\']'));
+        const loginWithKubeAdminLocator: By = By.css('a[title=\'Log in with kube:admin\']');
+        await this.driverHelper.waitAndClick(loginWithKubeAdminLocator);
     }
 
     async enterUserNameOpenShift (userName: string) {
@@ -43,10 +44,11 @@ export class OcpLoginPage {
     }
 
     async clickOnLoginButton () {
-        await this.driverHelper.waitAndClick(By.xpath('//button[text()=\'Log In\']'));
+        const loginButtonlocator: By = By.css('button[type=submit]');
+        await this.driverHelper.waitAndClick(loginButtonlocator);
     }
 
     async waitDisappearanceLoginPageOpenShift () {
-        await this.driverHelper.waitDisappearance(By.xpath(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
+        await this.driverHelper.waitDisappearance(By.css(OcpLoginPage.LOGIN_PAGE_OPENSHIFT));
     }
 }

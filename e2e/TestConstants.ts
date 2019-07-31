@@ -115,9 +115,9 @@ export const TestConstants = {
     TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
 
     /**
-     * Log into OCP by common user (not temporary admin user), "false" by default.
+     * Log into OCP if configured an HTPasswd identity provider, "false" by default.
      */
-    TS_OCP_LOGIN_PAGE_OAUTH: process.env.TS_OCP_LOGIN_PAGE_OAUTH === 'true',
+    TS_OCP_LOGIN_PAGE_HTPASW: process.env.TS_OCP_LOGIN_PAGE_HTPASW === 'true',
 
     /**
      * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
