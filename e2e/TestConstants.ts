@@ -30,6 +30,11 @@ export const TestConstants = {
     TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_RESOLUTION_HEIGHT) || 1080,
 
     /**
+     * Timeout in milliseconds waiting for install Eclipse Che by OperatorHub UI, "360 000" by default.
+     */
+    TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 360000,
+
+    /**
      * Timeout in milliseconds waiting for workspace start, "240 000" by default.
      */
     TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 240000,
