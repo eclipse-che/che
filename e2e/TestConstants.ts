@@ -110,6 +110,26 @@ export const TestConstants = {
     TS_SELENIUM_OCP_USERNAME: process.env.TS_SELENIUM_OCP_USERNAME || 'kubeadmin',
 
     /**
+     * Delay between screenshots catching in the milliseconds for the execution screencast.
+     */
+    TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: Number(process.env.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS) || 2000,
+
+    /**
+     * Path to folder with tests execution report.
+     */
+    TS_SELENIUM_REPORT_FOLDER: process.env.TS_SELENIUM_REPORT_FOLDER || './report',
+
+    /**
+     * Enable or disable storing of execution screencast, "true" by default.
+     */
+    TS_SELENIUM_EXECUTION_SCREENCAST: process.env.TS_SELENIUM_EXECUTION_SCREENCAST !== 'false',
+
+    /**
+     * Delete screencast after execution if all tests passed, "true" by default.
+     */
+    DELETE_SCREENCAST_IF_TEST_PASS: process.env.DELETE_SCREENCAST_IF_TEST_PASS !== 'false',
+
+    /**
      * Password used to log in OCP.
      */
     TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',

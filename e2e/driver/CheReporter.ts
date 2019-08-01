@@ -12,15 +12,19 @@ import { IDriver } from './IDriver';
 import { e2eContainer } from '../inversify.config';
 import { TYPES, CLASSES } from '../inversify.types';
 import * as fs from 'fs';
+import * as rm from 'rimraf';
 import { TestConstants } from '../TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
+import { ScreenCatcher } from '../utils/ScreenCatcher';
 
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
+const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
+let methodIndex: number = 0;
+let deleteScreencast: boolean = true;
 
 class CheReporter extends mocha.reporters.Spec {
-
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
     super(runner, options);
 
@@ -45,10 +49,44 @@ class CheReporter extends mocha.reporters.Spec {
       TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: ${TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME}
       TS_SELENIUM_USERNAME: ${TestConstants.TS_SELENIUM_USERNAME}
       TS_SELENIUM_PASSWORD: ${TestConstants.TS_SELENIUM_PASSWORD}
+      TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: ${TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS}
+      TS_SELENIUM_REPORT_FOLDER: ${TestConstants.TS_SELENIUM_REPORT_FOLDER}
+      TS_SELENIUM_EXECUTION_SCREENCAST: ${TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST}
+      DELETE_SCREENCAST_IF_TEST_PASS: ${TestConstants.DELETE_SCREENCAST_IF_TEST_PASS}
 
 ########################################################
       `;
       console.log(launchInformation);
+
+      rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+    });
+
+    runner.on('test', async function (test: mocha.Test) {
+      if (!TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
+        return;
+      }
+
+      methodIndex = methodIndex + 1;
+      const currentMethodIndex: number = methodIndex;
+      let iterationIndex: number = 1;
+
+      while (!(test.state === 'passed' || test.state === 'failed')) {
+        await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
+        iterationIndex = iterationIndex + 1;
+
+        await driverHelper.wait(TestConstants.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS);
+      }
+    });
+
+    runner.on('test end', async function (test: mocha.Test) {
+      if (!TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
+        return;
+      }
+
+      const currentMethodIndex: number = methodIndex;
+      let iterationIndex: number = 10000;
+
+      await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
     });
 
     runner.on('end', async function (test: mocha.Test) {
@@ -57,25 +95,31 @@ class CheReporter extends mocha.reporters.Spec {
 
       // close driver
       await driver.get().quit();
+
+      // delete screencast folder if conditions matched
+      if (deleteScreencast && TestConstants.DELETE_SCREENCAST_IF_TEST_PASS) {
+        rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+      }
     });
 
     runner.on('fail', async function (test: mocha.Test) {
+      // raise flag for keeping the screencast
+      deleteScreencast = false;
 
-      const reportDirPath: string = './report';
       const testFullTitle: string = test.fullTitle().replace(/\s/g, '_');
       const testTitle: string = test.title.replace(/\s/g, '_');
 
-      const testReportDirPath: string = `${reportDirPath}/${testFullTitle}`;
+      const testReportDirPath: string = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/${testFullTitle}`;
       const screenshotFileName: string = `${testReportDirPath}/screenshot-${testTitle}.png`;
       const pageSourceFileName: string = `${testReportDirPath}/pagesource-${testTitle}.html`;
       const browserLogsFileName: string = `${testReportDirPath}/browserlogs-${testTitle}.txt`;
 
 
       // create reporter dir if not exist
-      const reportDirExists: boolean = fs.existsSync(reportDirPath);
+      const reportDirExists: boolean = fs.existsSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
 
       if (!reportDirExists) {
-        fs.mkdirSync(reportDirPath);
+        fs.mkdirSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
       }
 
       // create dir for failed test report if not exist

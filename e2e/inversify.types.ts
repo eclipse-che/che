@@ -34,6 +34,7 @@ const CLASSES = {
     Terminal: 'Terminal',
     DebugView: 'DebugView',
     WarningDialog: 'WarningDialog',
+    ScreenCatcher: 'ScreenCatcher',
     OcpLoginPage: 'OcpLoginPage',
     OcpWebConsolePage: 'OcpWebConsolePage'
 };
