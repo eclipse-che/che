@@ -30,6 +30,11 @@ export const TestConstants = {
     TS_SELENIUM_RESOLUTION_HEIGHT: Number(process.env.TS_SELENIUM_RESOLUTION_HEIGHT) || 1080,
 
     /**
+     * Timeout in milliseconds waiting for install Eclipse Che by OperatorHub UI, "480 000" by default.
+     */
+    TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 480000,
+
+    /**
      * Timeout in milliseconds waiting for workspace start, "240 000" by default.
      */
     TS_SELENIUM_START_WORKSPACE_TIMEOUT: Number(process.env.TS_SELENIUM_START_WORKSPACE_TIMEOUT) || 240000,
@@ -85,13 +90,42 @@ export const TestConstants = {
     TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME: process.env.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAME || 'petclinic-dev-environment',
 
     /**
-     * Username used to log in MultiUser Che
+     * Name of namespace created for 'Install Che' on OCP by OperatorHub UI.
+     */
+    TS_INSTALL_CHE_PROJECT_NAME: process.env.TS_INSTALL_CHE_PROJECT_NAME || 'test-che-operator',
+
+    /**
+     * Username used to log in MultiUser Che.
      */
     TS_SELENIUM_USERNAME: process.env.TS_SELENIUM_USERNAME || 'che',
 
     /**
-     * Password used to log in MultiUser Che
+     * Password used to log in MultiUser Che.
      */
-    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || ''
+    TS_SELENIUM_PASSWORD: process.env.TS_SELENIUM_PASSWORD || '',
 
+    /**
+     * Username used to log in OCP.
+     */
+    TS_SELENIUM_OCP_USERNAME: process.env.TS_SELENIUM_OCP_USERNAME || 'kubeadmin',
+
+    /**
+     * Password used to log in OCP.
+     */
+    TS_SELENIUM_OCP_PASSWORD: process.env.TS_SELENIUM_OCP_PASSWORD || '',
+
+    /**
+     * Log into CHE in MultiUser mode, "false" by default.
+     */
+    TS_SELENIUM_MULTIUSER: process.env.TS_SELENIUM_MULTIUSER === 'true',
+
+    /**
+     * Log into OCP if configured an HTPasswd identity provider, "false" by default.
+     */
+    TS_OCP_LOGIN_PAGE_HTPASW: process.env.TS_OCP_LOGIN_PAGE_HTPASW === 'true',
+
+    /**
+     * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
+     */
+    TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly'
 };
