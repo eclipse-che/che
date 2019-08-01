@@ -389,7 +389,7 @@ export class DriverHelper {
         await this.driver.navigate().refresh();
     }
 
-    public async navigateTo(url: string) {
+    public async navigateAndWaitToUrl(url: string) {
         await this.navigateToUrl(url);
         await this.waitURL(url);
     }
