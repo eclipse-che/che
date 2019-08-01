@@ -112,5 +112,5 @@ export const TestConstants = {
     /**
      * Delete screencast after execution if all tests passed, "true" by default.
      */
-    DELETE_SCREENCAST_IF_TEST_PASS: process.env.CLEAR_SCREENCAST_IF_TEST_PASS !== 'false'
+    DELETE_SCREENCAST_IF_TEST_PASS: process.env.DELETE_SCREENCAST_IF_TEST_PASS !== 'false'
 };
