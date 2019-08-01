@@ -38,9 +38,9 @@ Here you can find links on how to get started with Eclipse Che:
 
 ### Using Eclipse Che
 Here you can find references to useful documentation and hands-on guides to learn how to get the most of Eclipse Che:
-- [Customize Che workspaces for your projects](https://www.eclipse.org/che/docs/che-7/using-developer-environments-workspaces.html#starting-a-workspace-with-a-devfile_making-a-workspace-portable-using-a-devfile)
-- [Run VSCode Extensions in Che workspaces (to be provided soon)]()
-- [Configure Che for your teams (to be provided soon)]()
+- [Customize Che workspaces for your projects](https://www.eclipse.org/che/docs/che-7/using-developer-environments-workspaces.html#configuring-a-che-workspace-using-a-devfile_using-developer-environments-workspaces)
+- [Run VSCode Extensions in Che workspaces](https://www.eclipse.org/che/docs/che-7/extending-che.html#using-a-visual-studio-code-extension-in-che_extending-che)
+- [Configure Che for your teams](https://www.eclipse.org/che/docs/che-7/customizing-registries.html)
 
 
 ### Feedback and Community
@@ -59,16 +59,16 @@ If you are interested in fixing issues and contributing directly to the code bas
 - :checkered_flag: [Development workflows](./CONTRIBUTING.md)
 - :ok_hand: Review [source code changes](https://github.com/eclipse/che/pulls)
 - :pencil: [Improve docs](https://github.com/eclipse/che-docs)
-- :building_construction: [Che architecture (to be provided soon)]()
+- :building_construction: [Che architecture](https://www.eclipse.org/che/docs/che-7/che-architecture.html)
 - :octocat: [Che repositories](https://github.com/eclipse/che/blob/readme-che-wip/CONTRIBUTING.md#other-che-repositories)
 - :sparkles: [Good first issue for new contributors](https://github.com/eclipse/che/wiki/Labels#new-contributors)
 
 
 #### Extending Eclipse Che
 - [Add a new language support. (to be provided soon)]()
-- [Package your favorite VSCode extensions and make them available in Che.(to be provided soon)]()
-- [Write your own VSCode extension that runs on a dedicated side car container.(to be provided soon)]()
-- [Build and package your custom Che-Theia editor with your extensions and plugins.(to be provided soon)]()
+- [Package your favorite VSCode extensions and make them available in Che.](https://www.eclipse.org/che/docs/che-7/extending-che.html#publishing-a-vs-code-extension-into-the-che-plug-in-registry_using-a-visual-studio-code-extension-in-che)
+- [Write your own VSCode extension that runs on a dedicated side car container.](https://www.eclipse.org/che/docs/che-7/extending-che.html#che-theia-plug-in-lifecycle_what-is-a-che-theia-plug-in)
+- [Build and package your custom Che-Theia editor with your extensions and plugins.](https://www.eclipse.org/che/docs/che-7/extending-che.html#using-alternative-ides-in-che_extending-che)
 
 ### Roadmap
 We maintain the [Che roadmap](https://github.com/eclipse/che/wiki/Roadmap) in the open way. We welcome anyone to ask question and contribute to the roadmap by joining our [community meetings](https://github.com/eclipse/che/wiki/Che-Dev-Meetings).
