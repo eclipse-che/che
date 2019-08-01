@@ -90,15 +90,16 @@ class CheReporter extends mocha.reporters.Spec {
     });
 
     runner.on('end', async function (test: mocha.Test) {
-      if (deleteScreencast && TestConstants.DELETE_SCREENCAST_IF_TEST_PASS) {
-        rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
-      }
-
       // ensure that fired events done
       await driver.get().sleep(5000);
 
       // close driver
       await driver.get().quit();
+
+      // delete screencast folder if conditions matched
+      if (deleteScreencast && TestConstants.DELETE_SCREENCAST_IF_TEST_PASS) {
+        rm.sync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
+      }
     });
 
     runner.on('fail', async function (test: mocha.Test) {
