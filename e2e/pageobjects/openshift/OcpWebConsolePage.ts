@@ -170,12 +170,12 @@ export class OcpWebConsolePage {
 
     async waitKeycloakAdminConsoleUrl (projectName: string) {
         const keyCloakAdminWebConsoleUrl: By = By.partialLinkText(`keycloak-${projectName}`);
-        await this.driverHelper.waitVisibility(keyCloakAdminWebConsoleUrl, TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+        await this.driverHelper.waitVisibility(keyCloakAdminWebConsoleUrl, TestConstants.TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT);
     }
 
     async waitEclipseCheUrl (projectName: string) {
         const eclipseCheUrlLocator: By = By.partialLinkText(`${OcpWebConsolePage.ECLIPSE_CHE_PREFIX_URL}${projectName}`);
-        await this.driverHelper.waitVisibility(eclipseCheUrlLocator, TestConstants.TS_SELENIUM_START_WORKSPACE_TIMEOUT);
+        await this.driverHelper.waitVisibility(eclipseCheUrlLocator, TestConstants.TS_SELENIUM_INSTALL_ECLIPSE_CHE_TIMEOUT);
     }
 
     async clickOnEclipseCHeUrl (projectName: string) {
