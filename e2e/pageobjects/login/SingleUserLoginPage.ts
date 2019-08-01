@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 import 'reflect-metadata';
-import { ILoginPage } from './ILoginPage';
+import { ICheLoginPage } from './ICheLoginPage';
 import { injectable, inject } from 'inversify';
 import { ThenableWebDriver } from 'selenium-webdriver';
 import { TYPES, CLASSES } from '../../inversify.types';
@@ -17,7 +17,7 @@ import { TestConstants } from '../../TestConstants';
 import { Dashboard } from '../dashboard/Dashboard';
 
 @injectable()
-export class SingleUserLoginPage implements ILoginPage {
+export class SingleUserLoginPage implements ICheLoginPage {
     constructor(
         @inject(TYPES.Driver) private readonly driver: IDriver,
         @inject(CLASSES.Dashboard) private readonly dashboard: Dashboard) { }
