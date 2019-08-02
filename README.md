@@ -54,7 +54,7 @@ We love to hear from users and developers. Here are the various ways to get in t
 
 ### Contributing
 If you are interested in fixing issues and contributing directly to the code base:
-- :bug: [Submitting bugs](https://github.com/eclipse/che/wiki/Submitting-Bugs-and-Suggestions)
+- :bug: [Submitting bugs](https://github.com/eclipse/che/issues/new/choose)
 - :page_facing_up: [Contributor license agreement](https://github.com/eclipse/che/wiki/Eclipse-Contributor-Agreement)
 - :checkered_flag: [Development workflows](./CONTRIBUTING.md)
 - :ok_hand: Review [source code changes](https://github.com/eclipse/che/pulls)
