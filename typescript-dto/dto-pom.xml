@@ -79,11 +79,6 @@
                     </dependency>
                     <dependency>
                         <groupId>org.eclipse.che.core</groupId>
-                        <artifactId>che-core-api-project-templates-shared</artifactId>
-                        <version>${che.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.eclipse.che.core</groupId>
                         <artifactId>che-core-api-ssh-shared</artifactId>
                         <version>${che.version}</version>
                     </dependency>
