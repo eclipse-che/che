@@ -45,7 +45,7 @@ export class OcpWebConsolePage {
 
     async clickOnEclipseCheOperatorIcon () {
         const catalogEclipseCheOperatorTitleLocator: By = By.css('a[data-test^=eclipse-che-preview-openshift]');
-        await this.driverHelper.waitAndClick(catalogEclipseCheOperatorTitleLocator);
+        await this.driverHelper.waitAndClick(catalogEclipseCheOperatorTitleLocator, TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT);
     }
     async clickOnInstallEclipseCheButton () {
         const installEclipsCheOperatorButtonLocator: By = By.xpath('//button[text()=\'Install\']');
