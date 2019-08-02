@@ -30,7 +30,7 @@
   <kubernetes.KUBE_PING
     labels="app=che" />
 
-  <MERGE2 min_interval="10000"
+  <MERGE3 min_interval="10000"
     max_interval="30000"/>
   <FD_SOCK/>
   <FD timeout="3000" max_tries="3"/>
@@ -38,7 +38,6 @@
   <BARRIER/>
   <pbcast.NAKACK2 use_mcast_xmit="false"
     discard_delivered_msgs="true"/>
-  <UNICAST/>
   <pbcast.STABLE stability_delay="1000" desired_avg_gossip="50000"
     max_bytes="4M"/>
   <pbcast.GMS print_local_addr="true" join_timeout="3000"

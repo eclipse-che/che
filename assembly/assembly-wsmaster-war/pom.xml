@@ -353,7 +353,7 @@
         </dependency>
         <dependency>
             <groupId>org.jgroups.kubernetes</groupId>
-            <artifactId>kubernetes</artifactId>
+            <artifactId>jgroups-kubernetes</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -441,7 +441,7 @@
                                 <dep>org.eclipse.che.multiuser:che-multiuser-keycloak-token-provider</dep>
                                 <dep>org.eclipse.persistence:org.eclipse.persistence.extension</dep>
                                 <dep>org.eclipse.persistence:org.eclipse.persistence.jpa</dep>
-                                <dep>org.jgroups.kubernetes:kubernetes</dep>
+                                <dep>org.jgroups.kubernetes:jgroups-kubernetes</dep>
                                 <dep>org.postgresql:postgresql</dep>
                                 <dep>com.google.guava:guava</dep>
                                 <dep>org.everrest:everrest-core</dep>
