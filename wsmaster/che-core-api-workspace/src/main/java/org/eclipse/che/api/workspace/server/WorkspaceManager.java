@@ -48,6 +48,7 @@ import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityVa
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
@@ -70,6 +71,9 @@ import org.slf4j.LoggerFactory;
 public class WorkspaceManager {
 
   private static final Logger LOG = LoggerFactory.getLogger(WorkspaceManager.class);
+
+  private static final int WORKSPACE_NAME_CONFLICT_SUFFIX_MAX = 99;
+  private static final String WORKSPACE_NAME_CONFLICT_SUFFIX_SEPARATOR = "_";
 
   private final WorkspaceDao workspaceDao;
   private final WorkspaceRuntimes runtimes;
@@ -165,8 +169,17 @@ public class WorkspaceManager {
       throw new ValidationException(e.getMessage(), e);
     }
 
-    WorkspaceImpl workspace =
-        doCreateWorkspace(devfile, accountManager.getByName(namespace), attributes, false);
+    WorkspaceImpl workspace;
+    try {
+      workspace =
+          doCreateWorkspace(devfile, accountManager.getByName(namespace), attributes, false);
+    } catch (ConflictException cex) {
+      // try again with suffixed name
+      Devfile uniqueNameDevfile = findWorkspaceUniqueName(namespace, devfile);
+      workspace =
+          doCreateWorkspace(
+              uniqueNameDevfile, accountManager.getByName(namespace), attributes, false);
+    }
     TracingTags.WORKSPACE_ID.set(workspace.getId());
     return workspace;
   }
@@ -592,5 +605,44 @@ public class WorkspaceManager {
       wsName = key.substring(lastSlashIndex + 1);
     }
     return workspaceDao.get(wsName, namespace);
+  }
+
+  /**
+   * Takes devfile and return new instance with unique name.
+   *
+   * <p>New name is composed as [name]_[#] <br>
+   * where `name` is {@link Devfile#getName()} <br>
+   * `_` is {@link WorkspaceManager#WORKSPACE_NAME_CONFLICT_SUFFIX_SEPARATOR}<br>
+   * `#` is first free workspace name number up to {@link
+   * WorkspaceManager#WORKSPACE_NAME_CONFLICT_SUFFIX_MAX}
+   *
+   * <p>Method does not modify or create elements in database.
+   *
+   * @return new devfile with unique name
+   * @throws ServerException rethrow from {@link WorkspaceManager#getWorkspace(String, String)}
+   */
+  private Devfile findWorkspaceUniqueName(String namespace, Devfile devfile)
+      throws ServerException, ConflictException {
+    DevfileImpl newDevfile = new DevfileImpl(devfile);
+    MetadataImpl newMetadata = new MetadataImpl(devfile.getMetadata());
+
+    String baseName = devfile.getMetadata().getName();
+    String candidateName = baseName;
+    try {
+      int counter = 1;
+      do {
+        getWorkspace(candidateName, namespace);
+        candidateName = baseName + WORKSPACE_NAME_CONFLICT_SUFFIX_SEPARATOR + counter;
+        counter++;
+      } while (counter < WORKSPACE_NAME_CONFLICT_SUFFIX_MAX);
+      throw new ConflictException(
+          format(
+              "Workspace with name '%s' including '_[1-%d]' in namespace '%s' already exists.",
+              baseName, WORKSPACE_NAME_CONFLICT_SUFFIX_MAX, namespace));
+    } catch (NotFoundException nfe) {
+      newMetadata.setName(candidateName);
+      newDevfile.setMetadata(newMetadata);
+      return newDevfile;
+    }
   }
 }

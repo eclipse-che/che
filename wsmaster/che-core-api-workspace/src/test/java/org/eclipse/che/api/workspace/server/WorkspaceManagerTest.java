@@ -87,6 +87,7 @@ import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceDto;
@@ -116,6 +117,7 @@ public class WorkspaceManagerTest {
   private static final String USER_ID = "user123";
   private static final String NAMESPACE_1 = "namespace/test1";
   private static final String NAMESPACE_2 = "namespace/test2";
+  private static final String DEVFILE_WSNAME = "testDevfileName";
 
   @Mock private WorkspaceDao workspaceDao;
   @Mock private WorkspaceRuntimes runtimes;
@@ -175,6 +177,67 @@ public class WorkspaceManagerTest {
     assertEquals(workspace.getStatus(), STOPPED);
     assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
     verify(workspaceDao).create(workspace);
+  }
+
+  @Test
+  public void createsWorkspaceFromDevfile() throws Exception {
+    final Devfile devfile = createTestDevfile();
+
+    final WorkspaceImpl workspace =
+        workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
+
+    assertNotNull(workspace);
+    assertFalse(isNullOrEmpty(workspace.getId()));
+    assertEquals(workspace.getNamespace(), NAMESPACE_1);
+    assertEquals(workspace.getName(), DEVFILE_WSNAME);
+    assertEquals(workspace.getDevfile(), devfile);
+    assertFalse(workspace.isTemporary());
+    assertEquals(workspace.getStatus(), STOPPED);
+    assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
+    verify(workspaceDao).create(workspace);
+  }
+
+  @Test
+  public void createsWorkspaceFromDevfileWhenNameConflict() throws Exception {
+    final Devfile devfile = createTestDevfile();
+    WorkspaceImpl expectedWorkspace = new WorkspaceImpl();
+    expectedWorkspace.setDevfile(new DevfileImpl(devfile));
+
+    final DevfileImpl expectedDevfile = new DevfileImpl(devfile);
+    expectedDevfile.getMetadata().setName(expectedDevfile.getName() + "_1");
+
+    lenient()
+        .when(workspaceDao.create(any(WorkspaceImpl.class)))
+        .thenThrow(ConflictException.class)
+        .thenReturn(expectedWorkspace);
+    lenient()
+        .when(workspaceDao.get(eq(devfile.getName()), anyString()))
+        .thenReturn(new WorkspaceImpl());
+    lenient()
+        .when(workspaceDao.get(eq(devfile.getName() + "_1"), anyString()))
+        .thenThrow(NotFoundException.class);
+
+    final WorkspaceImpl workspace =
+        workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
+
+    assertNotNull(workspace);
+    assertFalse(isNullOrEmpty(workspace.getId()));
+    assertEquals(workspace.getNamespace(), NAMESPACE_1);
+    assertEquals(workspace.getName(), expectedDevfile.getName());
+    assertEquals(workspace.getDevfile(), expectedDevfile);
+    assertFalse(workspace.isTemporary());
+    assertEquals(workspace.getStatus(), STOPPED);
+    assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
+    verify(workspaceDao).create(workspace);
+  }
+
+  @Test(expectedExceptions = ConflictException.class)
+  public void failsWhenCreateFromDevfileAndNoFreeNameSuffixLeft() throws Exception {
+    lenient()
+        .when(workspaceDao.create(any(WorkspaceImpl.class)))
+        .thenThrow(ConflictException.class);
+
+    workspaceManager.createWorkspace(createTestDevfile(), NAMESPACE_1, null, null);
   }
 
   @Test
@@ -735,6 +798,17 @@ public class WorkspaceManagerTest {
         .setEnvironments(singletonMap("dev-env", environment))
         .setCommands(asList(createCommand(), createCommand()))
         .build();
+  }
+
+  private static Devfile createTestDevfile() {
+    DevfileImpl devfile = new DevfileImpl();
+    devfile.setApiVersion("1.0.0");
+
+    MetadataImpl metadata = new MetadataImpl();
+    metadata.setName(DEVFILE_WSNAME);
+    devfile.setMetadata(metadata);
+
+    return devfile;
   }
 
   private Pair<String, Environment> getDefaultEnvironment(Workspace workspace) {
