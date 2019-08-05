@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
@@ -41,4 +42,23 @@ public interface ExternalServerExposerStrategy<T extends KubernetesEnvironment> 
       String serviceName,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers);
+
+  /**
+   * Sometimes, the exposer needs to modify the path contained in the object exposing the server
+   * (ingress or route). Namely, this is needed to make the URL rewriting work for single-host
+   * strategy where the path needs to contain a regular expression match group to retain some of the
+   * path.
+   *
+   * <p>This method reverts such mangling and returns to the user a path that can be used by the
+   * HTTP clients.
+   *
+   * @param exposingObject a Kubernetes object in charge of actual exposure of the server (i.e.
+   *     ingress or route)
+   * @param path the path contained within the configuration of the object that needs to be
+   *     demangled
+   * @return the path demangled such that it can be used in an externally reachable URL
+   */
+  default String demanglePath(HasMetadata exposingObject, String path) {
+    return path;
+  }
 }

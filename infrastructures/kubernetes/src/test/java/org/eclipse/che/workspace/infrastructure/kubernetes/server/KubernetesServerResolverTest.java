@@ -20,6 +20,7 @@ import static org.testng.Assert.assertTrue;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.extensions.HTTPIngressRuleValue;
@@ -37,6 +38,8 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.testng.annotations.Test;
 
 /**
@@ -54,7 +57,7 @@ public class KubernetesServerResolverTest {
 
   @Test
   public void
-      testResolvingServersWhenThereIsNoTheCorrespondingServiceAndingressForTheSpecifiedMachine() {
+      testResolvingServersWhenThereIsNoTheCorrespondingServiceAndIngressForTheSpecifiedMachine() {
     // given
     Service nonMatchedByPodService =
         createService("nonMatched", "foreignMachine", CONTAINER_PORT, null);
@@ -65,7 +68,10 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(singletonList(nonMatchedByPodService), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopExternalServerExposureStrategy<>(),
+            singletonList(nonMatchedByPodService),
+            singletonList(ingress));
 
     // when
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
@@ -75,15 +81,16 @@ public class KubernetesServerResolverTest {
   }
 
   @Test
-  public void testResolvingServersWhenThereIsMatchedingressForTheSpecifiedMachine() {
+  public void testResolvingServersWhenThereIsMatchedIngressForTheSpecifiedMachine() {
     Ingress ingress =
         createIngress(
             "matched",
             "machine",
-            Pair.of("http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
+            Pair.of("http-server", new ServerConfigImpl("3054", "http", "/api/", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopExternalServerExposureStrategy<>(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -91,7 +98,7 @@ public class KubernetesServerResolverTest {
     assertEquals(
         resolved.get("http-server"),
         new ServerImpl()
-            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api")
+            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api/")
             .withStatus(ServerStatus.UNKNOWN)
             .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
@@ -105,7 +112,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", null, ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopExternalServerExposureStrategy<>(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -113,7 +121,7 @@ public class KubernetesServerResolverTest {
     assertEquals(
         resolved.get("http-server"),
         new ServerImpl()
-            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX)
+            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/")
             .withStatus(ServerStatus.UNKNOWN)
             .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
@@ -127,7 +135,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopExternalServerExposureStrategy<>(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -135,13 +144,13 @@ public class KubernetesServerResolverTest {
     assertEquals(
         resolved.get("http-server"),
         new ServerImpl()
-            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX)
+            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/")
             .withStatus(ServerStatus.UNKNOWN)
             .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
 
   @Test
-  public void testResolvingServersWhenThereIsMatchedingressForMachineAndServerPathIsRelative() {
+  public void testResolvingServersWhenThereIsMatchedIngressForMachineAndServerPathIsRelative() {
     Ingress ingress =
         createIngress(
             "matched",
@@ -149,7 +158,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopExternalServerExposureStrategy<>(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -157,7 +167,7 @@ public class KubernetesServerResolverTest {
     assertEquals(
         resolved.get("http-server"),
         new ServerImpl()
-            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api")
+            .withUrl("http://" + INGRESS_IP + INGRESS_RULE_PATH_PREFIX + "/api/")
             .withStatus(ServerStatus.UNKNOWN)
             .withAttributes(defaultAttributeAnd(Constants.SERVER_PORT_ATTRIBUTE, "3054")));
   }
@@ -173,7 +183,8 @@ public class KubernetesServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(singletonList(service), emptyList());
+        new KubernetesServerResolver(
+            new NoopExternalServerExposureStrategy<>(), singletonList(service), emptyList());
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -197,7 +208,8 @@ public class KubernetesServerResolverTest {
                 "http-server", new ServerConfigImpl("3054/udp", "xxx", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(singletonList(service), emptyList());
+        new KubernetesServerResolver(
+            new NoopExternalServerExposureStrategy<>(), singletonList(service), emptyList());
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -270,5 +282,16 @@ public class KubernetesServerResolverTest {
     HashMap<String, String> attributes = new HashMap<>(ATTRIBUTES_MAP);
     attributes.put(key, value);
     return attributes;
+  }
+
+  private static final class NoopExternalServerExposureStrategy<T extends KubernetesEnvironment>
+      implements ExternalServerExposerStrategy<T> {
+    @Override
+    public void expose(
+        T k8sEnv,
+        String machineName,
+        String serviceName,
+        ServicePort servicePort,
+        Map<String, ServerConfig> externalServers) {}
   }
 }

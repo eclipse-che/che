@@ -31,7 +31,12 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerResolver;
+import org.mockito.Mock;
+import org.mockito.testng.MockitoTestNGListener;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 /**
@@ -39,11 +44,14 @@ import org.testng.annotations.Test;
  *
  * @author Sergii Leshchenko
  */
+@Listeners(MockitoTestNGListener.class)
 public class OpenShiftServerResolverTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final int CONTAINER_PORT = 3054;
   private static final String ROUTE_HOST = "localhost";
+
+  @Mock private ExternalServerExposerStrategy<OpenShiftEnvironment> exposer;
 
   @Test
   public void
@@ -59,7 +67,8 @@ public class OpenShiftServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
 
     OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(singletonList(nonMatchedByPodService), singletonList(route));
+        new OpenShiftServerResolver(
+            exposer, singletonList(nonMatchedByPodService), singletonList(route));
 
     // when
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
@@ -78,7 +87,7 @@ public class OpenShiftServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", "/api", ATTRIBUTES_MAP)));
 
     OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(emptyList(), singletonList(route));
+        new OpenShiftServerResolver(exposer, emptyList(), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -101,7 +110,7 @@ public class OpenShiftServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", null, ATTRIBUTES_MAP)));
 
     OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(emptyList(), singletonList(route));
+        new OpenShiftServerResolver(exposer, emptyList(), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -123,7 +132,7 @@ public class OpenShiftServerResolverTest {
             singletonMap("http-server", new ServerConfigImpl("3054", "http", "", ATTRIBUTES_MAP)));
 
     OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(emptyList(), singletonList(route));
+        new OpenShiftServerResolver(exposer, emptyList(), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -146,7 +155,7 @@ public class OpenShiftServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(emptyList(), singletonList(route));
+        new OpenShiftServerResolver(exposer, emptyList(), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -171,7 +180,7 @@ public class OpenShiftServerResolverTest {
     Route route = createRoute("matched", "machine", null);
 
     OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(singletonList(service), singletonList(route));
+        new OpenShiftServerResolver(exposer, singletonList(service), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -196,7 +205,7 @@ public class OpenShiftServerResolverTest {
     Route route = createRoute("matched", "machine", null);
 
     OpenShiftServerResolver serverResolver =
-        new OpenShiftServerResolver(singletonList(service), singletonList(route));
+        new OpenShiftServerResolver(exposer, singletonList(service), singletonList(route));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 

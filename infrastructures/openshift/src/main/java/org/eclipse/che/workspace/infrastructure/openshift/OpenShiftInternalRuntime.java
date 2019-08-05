@@ -38,6 +38,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.Kubernet
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -73,6 +74,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner,
+      ExternalServerExposerStrategy<OpenShiftEnvironment> serverExposerStrategy,
       RuntimeHangingDetector runtimeHangingDetector,
       Tracer tracer,
       @Assisted OpenShiftRuntimeContext context,
@@ -95,6 +97,7 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
         internalEnvironmentProvisioners,
         kubernetesEnvironmentProvisioner,
         toolingProvisioner,
+        serverExposerStrategy,
         runtimeHangingDetector,
         tracer,
         context,
@@ -115,7 +118,8 @@ public class OpenShiftInternalRuntime extends KubernetesInternalRuntime<OpenShif
 
     listenEvents();
 
-    doStartMachine(new OpenShiftServerResolver(createdServices, createdRoutes));
+    doStartMachine(
+        new OpenShiftServerResolver(externalServerExposerStrategy, createdServices, createdRoutes));
   }
 
   @Traced

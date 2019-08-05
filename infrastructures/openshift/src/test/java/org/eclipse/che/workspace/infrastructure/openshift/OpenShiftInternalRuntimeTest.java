@@ -80,6 +80,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesD
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesSecrets;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesServices;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -145,6 +146,7 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner;
   @Mock private SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
+  @Mock private ExternalServerExposerStrategy<OpenShiftEnvironment> serverExposerStrategy;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
   @Mock(answer = Answers.RETURNS_MOCKS)
@@ -182,6 +184,7 @@ public class OpenShiftInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
+            serverExposerStrategy,
             runtimeHangingDetector,
             tracer,
             context,

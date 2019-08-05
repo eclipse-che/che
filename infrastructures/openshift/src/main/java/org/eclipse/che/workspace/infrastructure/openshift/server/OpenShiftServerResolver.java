@@ -22,6 +22,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.RuntimeServerBuilder;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
 
 /**
  * Helps to resolve {@link ServerImpl servers} by machine name according to specified {@link Route
@@ -39,8 +40,9 @@ public class OpenShiftServerResolver extends KubernetesServerResolver {
 
   private final Multimap<String, Route> routes;
 
-  public OpenShiftServerResolver(List<Service> services, List<Route> routes) {
-    super(services, Collections.emptyList());
+  public OpenShiftServerResolver(
+      ExternalServerExposerStrategy<?> demangler, List<Service> services, List<Route> routes) {
+    super(demangler, services, Collections.emptyList());
 
     this.routes = ArrayListMultimap.create();
     for (Route route : routes) {
