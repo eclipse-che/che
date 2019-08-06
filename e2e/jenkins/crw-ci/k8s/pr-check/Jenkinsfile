@@ -1,0 +1,127 @@
+#!groovy
+
+pipeline {
+    agent { label 'codenvy-slave9' }
+
+    options {
+        timestamps()
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+                artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
+    }
+
+    environment {
+        PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
+        JENKINS_BUILD = "true"
+    }
+
+    parameters {
+        string(name: 'param1',
+                defaultValue: '',
+                description: '')
+    }
+
+    stages {
+        stage("Prepare workspace") {
+            failFast true
+
+            parallel {
+                stage("Cleanup") {
+                    steps {
+                        script() {
+                            sh """
+                                sudo rm -rf ${WORKSPACE}/e2e/report/*
+                                /usr/local/bin/minikube delete 
+                            """
+                        }
+                    }
+                }
+
+                stage("Get sources") {
+                    steps {
+                        checkout([$class                           : 'GitSCM',
+                                  branches                         : [[name: "${sha1}"]],
+                                  doGenerateSubmoduleConfigurations: false,
+                                  extensions                       : [[$class           : 'RelativeTargetDirectory',
+                                                                       relativeTargetDir: 'che']],
+                                  userRemoteConfigs                : [[url: 'https://github.com/eclipse/che.git']]])
+                    }
+                }
+
+                stage("Start Kubernetes") {
+                    steps {
+                        script {
+                            echo "action"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage("Prapare codebase") {
+            failFast true
+
+            parallel {
+                stage("Download chectl") {
+                    steps {
+                        script {
+                            echo "action"
+                        }
+                    }
+                }
+
+                stage("Build Che") {
+                    steps {
+                        script {
+                            echo "action"
+                        }
+                    }
+                }
+
+            }
+        }
+
+        stage("Push Che artifacts") {
+            steps {
+                script {
+                    echo "action"
+                }
+            }
+        }
+
+        stage("Start Che") {
+            steps {
+                script {
+                    echo "action"
+                }
+            }
+        }
+
+        stage("Create ws from devfile") {
+            steps {
+                script {
+                    echo "action"
+                }
+            }
+        }
+
+        stage("Run Happy path tests against Che on Kubernetes") {
+            steps {
+                script {
+                    echo "action"
+                }
+            }
+
+        }
+    }
+
+    post {
+        always {
+            script {
+                // it's impossible to use 'when' in the global post block
+                if (currentBuild.currentResult != 'ABORTED') {
+                    echo "post"
+                }
+            }
+        }
+    }
+}
