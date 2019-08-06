@@ -14,6 +14,7 @@
 apiVersion: 1.0.0
 metadata:
   name: petclinic-dev-environment
+  generateName: petclinic-
 projects:
   - name: petclinic
     source:
