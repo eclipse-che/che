@@ -22,6 +22,9 @@ public class MetadataImpl implements Metadata {
   @Column(name = "meta_name")
   private String name;
 
+  @Column(name = "meta_generate_name")
+  private String generateName;
+
   public MetadataImpl() {}
 
   public MetadataImpl(String name) {
@@ -30,11 +33,17 @@ public class MetadataImpl implements Metadata {
 
   public MetadataImpl(Metadata metadata) {
     this.name = metadata.getName();
+    this.generateName = metadata.getGenerateName();
   }
 
   @Override
   public String getName() {
     return name;
+  }
+
+  @Override
+  public String getGenerateName() {
+    return generateName;
   }
 
   public void setName(String name) {
