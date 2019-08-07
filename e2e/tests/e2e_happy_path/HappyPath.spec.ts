@@ -237,8 +237,8 @@ suite('Validation of debug functionality', async () => {
         await editor.clickOnSuggestion('Java: Launch Program in Current File');
         await editor.waitTabWithUnsavedStatus('launch.json');
         await editor.waitText('launch.json', '\"name\": \"Debug (Launch) - Current File\"');
-        await editor.performKeyCombination('launch.json', Key.chord(Key.CONTROL, 's'));
-        await editor.waitTabWithSavedStatus('launch.json');
+
+        await editor.saveChanges('launch.json');
     });
 
     test('Run debug and check application stop in the breakpoint', async () => {
@@ -289,8 +289,7 @@ async function checkJavaPathCompletion() {
         await editor.performKeyCombination(classPathFilename, Key.DELETE);
 
         await editor.type(classPathFilename, classpathText, 1);
-        await editor.performKeyCombination(classPathFilename, Key.chord(Key.CONTROL, 's'));
-        await editor.waitTabWithSavedStatus(classPathFilename);
+        await editor.saveChanges(classPathFilename);
     }
 
 }

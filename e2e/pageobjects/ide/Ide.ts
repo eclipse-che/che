@@ -66,7 +66,7 @@ export class Ide {
 
                 await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
-        });
+        }, timeout);
     }
 
     async waitNotificationAndConfirm(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
