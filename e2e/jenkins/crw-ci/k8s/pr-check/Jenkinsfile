@@ -9,13 +9,11 @@ pipeline {
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
     }
 
-    // triggers { cron("@midnight") }
-
     environment {
         PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
         JENKINS_BUILD = "true"
 
-        DEVFILE_URL = "${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml"
+        DEVFILE_URL = "${WORKSPACE}/che/e2e/files/happy-path/happy-path-workspace.yaml"
         SUCCESS_THRESHOLD = 5
 
         CHE_IMAGE_REPO = "maxura/che-server"
@@ -30,12 +28,9 @@ pipeline {
                 stage("Cleanup") {
                     steps {
                         script() {
-                            sh "env"
+                            cleanWs notFailBuild: true
 
-                            sh """
-        sudo rm -rf ${WORKSPACE}/e2e/report/*
-        /usr/local/bin/minikube delete 
-    """
+                            sh "/usr/local/bin/minikube delete"
                         }
                     }
                 }
@@ -61,9 +56,8 @@ pipeline {
                     steps {
                         script {
                             sh """
-  wget --no-verbose https://github.com/che-incubator/chectl/releases/latest/download/chectl-linux
-  sudo mv chectl-linux /usr/local/bin/chectl
-  sudo chmod +x /usr/local/bin/chectl
+  wget --no-verbose https://github.com/che-incubator/chectl/releases/latest/download/chectl-linux -O ${WORKSPACE}/chectl
+  sudo chmod +x ${WORKSPACE}/chectl
 """
                         }
                     }
@@ -97,7 +91,7 @@ pipeline {
             }
         }
 
-        stage("Push Che artifacts") {
+        stage("Push Che artifacts to docker.io") {
             steps {
                 withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     script {
@@ -113,15 +107,15 @@ pipeline {
             }
         }
 
-        stage("Start Che") {
+        stage("Start Single Che") {
             steps {
                 script {
                     sh """
-  /usr/local/bin/chectl server:start \\
-   --k8spodreadytimeout=180000 \\
-   -t=${WORKSPACE}/deploy/ \\
-   --listr-renderer=verbose \\
-   --cheimage=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+  ${WORKSPACE}/chectl server:start \\
+    --k8spodreadytimeout=180000 \\
+    -t=${WORKSPACE}/che/deploy/ \\
+    --listr-renderer=verbose \\
+    --cheimage=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
 """
 
                     // wait che-server to be available
@@ -157,18 +151,15 @@ pipeline {
             }
         }
 
-        stage("Create ws from devfile") {
+        stage("Create test workspace") {
             steps {
                 script {
-                    sh """
-  /usr/local/bin/chectl workspace:start --devfile=$DEVFILE_URL
-  kubectl get configmaps --namespace=che che -o yaml
-"""
+                    sh "/usr/local/bin/chectl workspace:start --devfile=$DEVFILE_URL"
                 }
             }
         }
 
-        stage("Run Happy path tests against Che on Kubernetes") {
+        stage("Run E2E Happy path tests") {
             steps {
                 script {
                     // TODO switch to eclipse/che-e2e image
@@ -208,22 +199,24 @@ pipeline {
             script {
                 // it's impossible to use 'when' in the global post block
                 if (currentBuild.currentResult != 'ABORTED') {
-                    // stop_minikube
                     sh """
+  kubectl get configmaps --namespace=che che -o yaml || true
+  
   /usr/local/bin/minikube stop || true
-"""
 
-                    sh """
-sudo umount \$(mount | grep "kubelet" | awk '{if(NR>0) print \$3}') || true
-sudo rm -rf `sudo find /tmp -name 'hostpath-provisioner' 2>/dev/null` || true
+  sudo umount \$(mount | grep "kubelet" | awk '{if(NR>0) print \$3}') || true
+  sudo rm -rf `sudo find /tmp -name 'hostpath-provisioner' 2>/dev/null` || true
 
-docker volume rm \$(docker volume ls -q -f dangling=true) || true
+  docker volume rm \$(docker volume ls -q -f dangling=true) || true
 """
                 }
+
+                archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/che/e2e/report/**"
             }
 
-            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/che/e2e/report/**"
+            cleanWs notFailBuild: true
         }
+
     }
 
 }
