@@ -114,6 +114,7 @@ export class Editor {
 
     async saveChanges(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.getDriver().wait(async () => {
+            await this.selectTab(editorTabTitle);
             await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, 's'));
 
             try {
