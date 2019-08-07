@@ -23,6 +23,7 @@ import { By, Key, error } from 'selenium-webdriver';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { DebugView } from '../../pageobjects/ide/DebugView';
 import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
+import * as fs from 'fs';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -42,6 +43,7 @@ const workspaceName: string = TestConstants.TS_SELENIUM_HAPPY_PATH_WORKSPACE_NAM
 const workspaceUrl: string = `${TestConstants.TS_SELENIUM_BASE_URL}/dashboard/#/ide/${namespace}/${workspaceName}`;
 const pathToJavaFolder: string = `${projectName}/src/main/java/org/springframework/samples/petclinic`;
 const pathToChangedJavaFileFolder: string = `${projectName}/src/main/java/org/springframework/samples/petclinic/system`;
+const classPathFilename: string = '.classpath';
 const javaFileName: string = 'PetClinicApplication.java';
 const changedJavaFileName: string = 'CrashController.java';
 const textForErrorMessageChange: string = 'HHHHHHHHHHHHH';
@@ -60,7 +62,7 @@ const SpringAppLocators = {
 
 suite('Validation of workspace start', async () => {
     test('Open workspace', async () => {
-        await driverHelper.navigateTo(workspaceUrl);
+        await driverHelper.navigateAndWaitToUrl(workspaceUrl);
     });
 
     test('Wait workspace running state', async () => {
@@ -78,9 +80,7 @@ suite('Language server validation', async () => {
     test('Java LS initialization', async () => {
         await projectTree.expandPathAndOpenFile(pathToJavaFolder, javaFileName);
         await editor.selectTab(javaFileName);
-
         await ide.checkLsInitializationStart('Starting Java Language Server');
-
         await ide.waitStatusBarTextAbsence('Starting Java Language Server', 360000);
         await checkJavaPathCompletion();
         await ide.waitStatusBarTextAbsence('Building workspace', 360000);
@@ -254,13 +254,6 @@ suite('Validation of debug functionality', async () => {
     });
 });
 
-async function checkJavaPathCompletion() {
-    if (await ide.isNotificationPresent('Classpath is incomplete. Only syntax errors will be reported')) {
-        throw new Error('Known issue: https://github.com/eclipse/che/issues/13427 \n' +
-            '\"Java LS \"Classpath is incomplete\" warning when loading petclinic\"');
-    }
-}
-
 async function runTask(task: string) {
     await topMenu.selectOption('Terminal', 'Run Task...');
     try {
@@ -275,4 +268,29 @@ async function runTask(task: string) {
     }
 
     await quickOpenContainer.clickOnContainerItem(task);
+}
+
+async function checkJavaPathCompletion() {
+    if (await ide.isNotificationPresent('Classpath is incomplete. Only syntax errors will be reported')) {
+        const classpathText: string = fs.readFileSync('./files/happy-path/petclinic-classpath.txt', 'utf8');
+        const workaroundReportText: string = '\n############################## \n\n' +
+            'Known issue: https://github.com/eclipse/che/issues/13427 \n' +
+            '\"Java LS \"Classpath is incomplete\" warning when loading petclinic\" \n' +
+            '\".classpath\" will be configured with next settings: \n\n' +
+            classpathText + '\n' +
+            '############################## \n';
+
+        console.log(workaroundReportText);
+
+        await projectTree.expandPathAndOpenFile(projectName, classPathFilename);
+        await editor.waitEditorAvailable(classPathFilename);
+
+        await editor.type(classPathFilename, Key.chord(Key.CONTROL, 'a'), 1);
+        await editor.performKeyCombination(classPathFilename, Key.DELETE);
+
+        await editor.type(classPathFilename, classpathText, 1);
+        await editor.performKeyCombination(classPathFilename, Key.chord(Key.CONTROL, 's'));
+        await editor.waitTabWithSavedStatus(classPathFilename);
+    }
+
 }

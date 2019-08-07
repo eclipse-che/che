@@ -11,7 +11,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, WebElement, error } from 'selenium-webdriver';
+import { By, WebElement, error, until } from 'selenium-webdriver';
 import { TestWorkspaceUtil, WorkspaceStatus } from '../../utils/workspace/TestWorkspaceUtil';
 
 export enum RightToolbarButton {
@@ -45,38 +45,36 @@ export class Ide {
         await this.driverHelper.waitVisibility(notificationLocator, timeout);
     }
 
-    async waitNotificationAndConfirm(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        await this.waitNotification(notificationText, timeout);
-        await this.clickOnNotificationButton(notificationText, 'yes');
+    async waitNotificationAndClickOnButton(notificationText: string,
+        buttonText: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
 
-        try {
-            await this.waitNotificationDisappearance(notificationText);
-        } catch (err) {
-            if (err instanceof error.TimeoutError) {
-                await this.clickOnNotificationButton(notificationText, 'yes');
+        await this.driverHelper.getDriver().wait(async () => {
+            await this.waitNotification(notificationText, timeout);
+            await this.clickOnNotificationButton(notificationText, buttonText);
+
+            try {
                 await this.waitNotificationDisappearance(notificationText);
-                return;
-            }
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
 
-            throw err;
-        }
+                console.log(`After clicking on "${buttonText}" button of the notification with text "${notificationText}" \n` +
+                    'it is still visible (issue #14121), try again.');
+
+                await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+            }
+        });
+    }
+
+    async waitNotificationAndConfirm(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.waitNotificationAndClickOnButton(notificationText, 'yes', timeout);
     }
 
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        await this.waitNotification(notificationText, timeout);
-        await this.clickOnNotificationButton(notificationText, 'Open Link');
-
-        try {
-            await this.waitNotificationDisappearance(notificationText);
-        } catch (err) {
-            if (err instanceof error.TimeoutError) {
-                await this.clickOnNotificationButton(notificationText, 'Open Link');
-                await this.waitNotificationDisappearance(notificationText);
-                return;
-            }
-
-            throw err;
-        }
+        await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
     async isNotificationPresent(notificationText: string): Promise<boolean> {
@@ -244,4 +242,5 @@ export class Ide {
     private getNotificationXpathLocator(notificationText: string): string {
         return `//div[@class='theia-Notification' and contains(@id,'${notificationText}')]`;
     }
+
 }

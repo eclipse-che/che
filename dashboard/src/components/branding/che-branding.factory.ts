@@ -35,6 +35,7 @@ interface IBranding {
     factory?: string;
     organization?: string;
     general?: string;
+    converting?: string;
   };
   workspace?: {
     priorityStacks?: Array<string>;
@@ -64,6 +65,7 @@ const DEFAULT_DOCS_WORKSPACE = '/docs/getting-started/intro/index.html';
 const DEFAULT_DOCS_ORGANIZATION = '/docs/organizations.html';
 const DEFAULT_DOCS_FACTORY = '/docs/factories-getting-started.html';
 const DEFAULT_DOCS_GENERAL = '/docs';
+const DEFAULT_DOCS_CONVERTING = '/docs/che-7/converting-a-che-6-workspace-to-a-che-7-devfile.html';
 const DEFAULT_WORKSPACE_PRIORITY_STACKS = ['Java', 'Java-MySQL', 'Blank'];
 const DEFAULT_WORKSPACE_DEFAULT_STACK = 'java-mysql';
 const DEFAULT_WORKSPACE_CREATION_LINK = '#/create-workspace';
@@ -287,15 +289,16 @@ export class CheBranding {
 
   /**
    * Returns object with docs URLs.
-   * @returns {{devfile: string, workspace: string, factory: string, organization: string, general: string}}
+   * @returns {{devfile: string, workspace: string, factory: string, organization: string, general: string, converting: string}}
    */
-  getDocs(): { devfile: string; workspace: string; factory: string; organization: string; general: string } {
+  getDocs(): { devfile: string; workspace: string; factory: string; organization: string; general: string, converting: string} {
     return {
-      devfile: this.brandingData.devfile && this.brandingData.docs.devfile ? this.brandingData.docs.devfile : DEFAULT_DOCS_DEVFILE,
+      devfile: this.brandingData.docs && this.brandingData.docs.devfile ? this.brandingData.docs.devfile : DEFAULT_DOCS_DEVFILE,
       workspace: this.brandingData.docs && this.brandingData.docs.workspace ? this.brandingData.docs.workspace : DEFAULT_DOCS_WORKSPACE,
       factory: this.brandingData.docs && this.brandingData.docs.factory ? this.brandingData.docs.factory : DEFAULT_DOCS_FACTORY,
       organization: this.brandingData.docs && this.brandingData.docs.organization ? this.brandingData.docs.organization : DEFAULT_DOCS_ORGANIZATION,
-      general: this.brandingData.docs && this.brandingData.docs.general ? this.brandingData.docs.general : DEFAULT_DOCS_GENERAL
+      general: this.brandingData.docs && this.brandingData.docs.general ? this.brandingData.docs.general : DEFAULT_DOCS_GENERAL,
+      converting: this.brandingData.docs && this.brandingData.docs.converting ? this.brandingData.docs.converting : DEFAULT_DOCS_CONVERTING
     };
   }
 

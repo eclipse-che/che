@@ -10,7 +10,7 @@
 
 import { e2eContainer } from '../../inversify.config';
 import { TYPES, CLASSES } from '../../inversify.types';
-import { ILoginPage } from '../../pageobjects/login/ILoginPage';
+import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { NameGenerator } from '../../utils/NameGenerator';
 import { NewWorkspace } from '../../pageobjects/dashboard/NewWorkspace';
@@ -24,7 +24,7 @@ const sampleName: string = 'console-java-simple';
 const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
 
-const loginPage: ILoginPage = e2eContainer.get<ILoginPage>(TYPES.LoginPage);
+const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
