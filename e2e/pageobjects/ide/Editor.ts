@@ -124,6 +124,7 @@ export class Editor {
 
             try {
                 await this.waitTabWithSavedStatus(editorTabTitle, TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+                return true;
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
                     throw err;
