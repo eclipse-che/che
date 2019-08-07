@@ -20,7 +20,6 @@ import static org.testng.Assert.assertTrue;
 import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServiceBuilder;
-import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.api.model.ServicePortBuilder;
 import io.fabric8.kubernetes.api.model.extensions.HTTPIngressPath;
 import io.fabric8.kubernetes.api.model.extensions.HTTPIngressRuleValue;
@@ -38,8 +37,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerPathDemangler;
 import org.testng.annotations.Test;
 
 /**
@@ -69,9 +67,7 @@ public class KubernetesServerResolverTest {
 
     KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(
-            new NoopExternalServerExposureStrategy<>(),
-            singletonList(nonMatchedByPodService),
-            singletonList(ingress));
+            new NoopPathDemangler(), singletonList(nonMatchedByPodService), singletonList(ingress));
 
     // when
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
@@ -89,8 +85,7 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "/api/", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(
-            new NoopExternalServerExposureStrategy<>(), emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(new NoopPathDemangler(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -112,8 +107,7 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", null, ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(
-            new NoopExternalServerExposureStrategy<>(), emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(new NoopPathDemangler(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -135,8 +129,7 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(
-            new NoopExternalServerExposureStrategy<>(), emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(new NoopPathDemangler(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -158,8 +151,7 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(
-            new NoopExternalServerExposureStrategy<>(), emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(new NoopPathDemangler(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -183,8 +175,7 @@ public class KubernetesServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(
-            new NoopExternalServerExposureStrategy<>(), singletonList(service), emptyList());
+        new KubernetesServerResolver(new NoopPathDemangler(), singletonList(service), emptyList());
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -208,8 +199,7 @@ public class KubernetesServerResolverTest {
                 "http-server", new ServerConfigImpl("3054/udp", "xxx", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(
-            new NoopExternalServerExposureStrategy<>(), singletonList(service), emptyList());
+        new KubernetesServerResolver(new NoopPathDemangler(), singletonList(service), emptyList());
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -284,14 +274,9 @@ public class KubernetesServerResolverTest {
     return attributes;
   }
 
-  private static final class NoopExternalServerExposureStrategy<T extends KubernetesEnvironment>
-      implements ExternalServerExposerStrategy<T> {
-    @Override
-    public void expose(
-        T k8sEnv,
-        String machineName,
-        String serviceName,
-        ServicePort servicePort,
-        Map<String, ServerConfig> externalServers) {}
+  private static final class NoopPathDemangler extends ExternalServerPathDemangler {
+    NoopPathDemangler() {
+      super("%s");
+    }
   }
 }

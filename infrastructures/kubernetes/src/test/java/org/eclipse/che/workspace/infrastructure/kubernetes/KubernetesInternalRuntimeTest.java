@@ -126,7 +126,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerPathDemangler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -196,7 +197,8 @@ public class KubernetesInternalRuntimeTest {
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private KubernetesServerResolver kubernetesServerResolver;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
-  @Mock private ExternalServerExposerStrategy<KubernetesEnvironment> serverExposerStrategy;
+  @Mock private ExternalServerExposer<KubernetesEnvironment> serverExposer;
+  @Mock private ExternalServerPathDemangler pathDemangler;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
   @Mock
@@ -262,7 +264,8 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
-            serverExposerStrategy,
+            serverExposer,
+            pathDemangler,
             runtimeHangingDetector,
             tracer,
             context,

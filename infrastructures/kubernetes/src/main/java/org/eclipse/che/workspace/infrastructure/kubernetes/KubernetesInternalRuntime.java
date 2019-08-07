@@ -85,7 +85,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesN
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerPathDemangler;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.UnrecoverablePodEventListenerFactory;
@@ -119,7 +120,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
   private final Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners;
   private final KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner;
   private final SidecarToolingProvisioner<E> toolingProvisioner;
-  protected final ExternalServerExposerStrategy<E> externalServerExposerStrategy;
+  protected final ExternalServerExposer<E> externalServerExposer;
+  protected final ExternalServerPathDemangler externalServerPathDemangler;
   private final RuntimeHangingDetector runtimeHangingDetector;
   protected final Tracer tracer;
 
@@ -142,7 +144,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
       Set<InternalEnvironmentProvisioner> internalEnvironmentProvisioners,
       KubernetesEnvironmentProvisioner<E> kubernetesEnvironmentProvisioner,
       SidecarToolingProvisioner<E> toolingProvisioner,
-      ExternalServerExposerStrategy<E> externalServerExposerStrategy,
+      ExternalServerExposer<E> externalServerExposer,
+      ExternalServerPathDemangler externalServerPathDemangler,
       RuntimeHangingDetector runtimeHangingDetector,
       Tracer tracer,
       @Assisted KubernetesRuntimeContext<E> context,
@@ -164,7 +167,8 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     this.toolingProvisioner = toolingProvisioner;
     this.kubernetesEnvironmentProvisioner = kubernetesEnvironmentProvisioner;
     this.internalEnvironmentProvisioners = internalEnvironmentProvisioners;
-    this.externalServerExposerStrategy = externalServerExposerStrategy;
+    this.externalServerExposer = externalServerExposer;
+    this.externalServerPathDemangler = externalServerPathDemangler;
     this.runtimeHangingDetector = runtimeHangingDetector;
     this.startSynchronizer = startSynchronizerFactory.create(context.getIdentity());
     this.tracer = tracer;
@@ -649,8 +653,7 @@ public class KubernetesInternalRuntime<E extends KubernetesEnvironment>
     listenEvents();
 
     final KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(
-            externalServerExposerStrategy, createdServices, readyIngresses);
+        new KubernetesServerResolver(externalServerPathDemangler, createdServices, readyIngresses);
 
     doStartMachine(serverResolver);
   }

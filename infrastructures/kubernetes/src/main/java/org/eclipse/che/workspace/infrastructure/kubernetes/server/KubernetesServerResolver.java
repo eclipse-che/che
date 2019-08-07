@@ -24,7 +24,7 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerPathDemangler;
 
 /**
  * Helps to resolve {@link ServerImpl servers} by machine name according to specified {@link Ingress
@@ -41,10 +41,10 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
 public class KubernetesServerResolver {
   private final Multimap<String, Service> services;
   private final Multimap<String, Ingress> ingresses;
-  private ExternalServerExposerStrategy<?> demangler;
+  private ExternalServerPathDemangler demangler;
 
   public KubernetesServerResolver(
-      ExternalServerExposerStrategy<?> demangler, List<Service> services, List<Ingress> ingresses) {
+      ExternalServerPathDemangler demangler, List<Service> services, List<Ingress> ingresses) {
     this.demangler = demangler;
     this.services = ArrayListMultimap.create();
     for (Service service : services) {

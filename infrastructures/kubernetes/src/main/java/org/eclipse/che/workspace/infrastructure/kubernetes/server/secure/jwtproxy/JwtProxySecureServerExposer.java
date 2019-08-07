@@ -20,7 +20,7 @@ import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyProvisionerFactory;
 
@@ -29,7 +29,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
  *
  * <p>To expose secure servers it provisions JwtProxy objects into environment with {@link
  * JwtProxyProvisioner}. Then JwtProxy service port is made public accessible by {@link
- * ExternalServerExposerStrategy<T>}.
+ * ExternalServerExposer<T>}.
  *
  * <p>In this way, requests to exposed secure servers will be routed via JwtProxy pod that is added
  * one per workspace. And it will be impossible to requests secure servers if there is no machine
@@ -41,13 +41,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtprox
 public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
     implements SecureServerExposer<T> {
 
-  private final ExternalServerExposerStrategy<T> exposerStrategy;
+  private final ExternalServerExposer<T> exposer;
   private final JwtProxyProvisioner proxyProvisioner;
 
   @VisibleForTesting
   JwtProxySecureServerExposer(
-      JwtProxyProvisioner jwtProxyProvisioner, ExternalServerExposerStrategy<T> exposerStrategy) {
-    this.exposerStrategy = exposerStrategy;
+      JwtProxyProvisioner jwtProxyProvisioner, ExternalServerExposer<T> exposer) {
+    this.exposer = exposer;
     this.proxyProvisioner = jwtProxyProvisioner;
   }
 
@@ -55,8 +55,8 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
   public JwtProxySecureServerExposer(
       @Assisted RuntimeIdentity identity,
       JwtProxyProvisionerFactory jwtProxyProvisionerFactory,
-      ExternalServerExposerStrategy<T> exposerStrategy) {
-    this.exposerStrategy = exposerStrategy;
+      ExternalServerExposer<T> exposer) {
+    this.exposer = exposer;
     this.proxyProvisioner = jwtProxyProvisionerFactory.create(identity);
   }
 
@@ -76,7 +76,7 @@ public class JwtProxySecureServerExposer<T extends KubernetesEnvironment>
             servicePort.getProtocol(),
             secureServers);
 
-    exposerStrategy.expose(
+    exposer.expose(
         k8sEnv, machineName, proxyProvisioner.getServiceName(), exposedServicePort, secureServers);
   }
 }
