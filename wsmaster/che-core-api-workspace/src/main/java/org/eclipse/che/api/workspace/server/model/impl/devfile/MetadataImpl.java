@@ -59,16 +59,24 @@ public class MetadataImpl implements Metadata {
       return false;
     }
     MetadataImpl metadata = (MetadataImpl) o;
-    return name.equals(metadata.name);
+    return Objects.equals(name, metadata.name)
+        && Objects.equals(generateName, metadata.generateName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name);
+    return Objects.hash(name, generateName);
   }
 
   @Override
   public String toString() {
-    return "MetadataImpl{'name='" + name + '\'' + '}';
+    return "MetadataImpl{"
+        + "name='"
+        + name
+        + '\''
+        + ", generateName='"
+        + generateName
+        + '\''
+        + '}';
   }
 }

@@ -23,6 +23,7 @@ import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl.WorkspaceImplBuilder;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.MultiuserJpaWorkspaceDao;
@@ -60,19 +61,22 @@ public class MultiuserJpaWorkspaceDaoTest {
         };
 
     account = new AccountImpl("account1", "accountName", "test");
+    WorkspaceImplBuilder wsBuilder = WorkspaceImpl.builder().setAccount(account);
 
     workspaces =
         new WorkspaceImpl[] {
-          new WorkspaceImpl(
-              "ws1",
-              account,
-              new WorkspaceConfigImpl("wrksp1", "", "cfg1", null, null, null, null)),
-          new WorkspaceImpl(
-              "ws2",
-              account,
-              new WorkspaceConfigImpl("wrksp2", "", "cfg2", null, null, null, null)),
-          new WorkspaceImpl(
-              "ws3", account, new WorkspaceConfigImpl("wrksp3", "", "cfg3", null, null, null, null))
+          wsBuilder
+              .setId("ws1")
+              .setConfig(new WorkspaceConfigImpl("wrksp1", "", "cfg1", null, null, null, null))
+              .build(),
+          wsBuilder
+              .setId("ws2")
+              .setConfig(new WorkspaceConfigImpl("wrksp2", "", "cfg2", null, null, null, null))
+              .build(),
+          wsBuilder
+              .setId("ws3")
+              .setConfig(new WorkspaceConfigImpl("wrksp3", "", "cfg3", null, null, null, null))
+              .build()
         };
     Injector injector = Guice.createInjector(new WorkspaceTckModule());
     manager = injector.getInstance(EntityManager.class);

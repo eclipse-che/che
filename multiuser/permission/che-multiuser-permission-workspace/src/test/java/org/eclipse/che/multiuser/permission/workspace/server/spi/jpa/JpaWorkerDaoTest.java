@@ -72,7 +72,7 @@ public class JpaWorkerDaoTest {
 
     final Account account = new AccountImpl("accountId", "namespace", "test");
     final WorkspaceImpl workspace =
-        WorkspaceImpl.builder().setId("workspaceId").setAccount(account).build();
+        WorkspaceImpl.builder().setId("workspaceId").setAccount(account).setName("wsname").build();
 
     // Persist the account
     manager.getTransaction().begin();

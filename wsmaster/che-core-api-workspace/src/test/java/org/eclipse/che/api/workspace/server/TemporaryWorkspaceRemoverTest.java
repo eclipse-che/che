@@ -77,7 +77,7 @@ public class TemporaryWorkspaceRemoverTest {
 
   @Test(dataProvider = "activeWorkspaceStatuses")
   public void shouldNotRemoveActiveWorkspace(WorkspaceStatus status) throws Exception {
-    WorkspaceImpl workspace = WorkspaceImpl.builder().setId("ws123").build();
+    WorkspaceImpl workspace = WorkspaceImpl.builder().setId("ws123").setName("ws123").build();
     when(workspaceDao.getWorkspaces(eq(true), anyInt(), anyLong()))
         .thenReturn(new Page<>(singletonList(workspace), 0, 1, 1));
     doReturn(status).when(runtimes).getStatus("ws123");

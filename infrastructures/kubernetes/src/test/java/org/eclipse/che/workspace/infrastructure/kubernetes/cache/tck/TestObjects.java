@@ -38,17 +38,19 @@ public class TestObjects {
   }
 
   public static WorkspaceImpl createWorkspace() {
-    return new WorkspaceImpl(
-        generate("wsId", 8),
-        createAccount(),
-        new WorkspaceConfigImpl(
-            generate("wsName", 8),
-            "description",
-            "defEnv",
-            emptyList(),
-            emptyList(),
-            emptyMap(),
-            emptyMap()));
+    return WorkspaceImpl.builder()
+        .setId(generate("wsId", 8))
+        .setAccount(createAccount())
+        .setConfig(
+            new WorkspaceConfigImpl(
+                generate("wsName", 8),
+                "description",
+                "defEnv",
+                emptyList(),
+                emptyList(),
+                emptyMap(),
+                emptyMap()))
+        .build();
   }
 
   public static KubernetesRuntimeState createRuntimeState(WorkspaceImpl workspace) {

@@ -62,8 +62,11 @@ public class RemoveWorkersBeforeWorkspaceRemovedEventSubscriberTest {
         };
 
     workspace =
-        new WorkspaceImpl(
-            "ws1", account, new WorkspaceConfigImpl("", "", "cfg1", null, null, null, null));
+        WorkspaceImpl.builder()
+            .setId("ws1")
+            .setAccount(account)
+            .setConfig(new WorkspaceConfigImpl("", "", "cfg1", null, null, null, null))
+            .build();
 
     workers =
         new WorkerImpl[] {

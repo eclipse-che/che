@@ -212,11 +212,19 @@ public final class TestObjectsFactory {
   }
 
   public static WorkspaceImpl createWorkspaceWithConfig(String id, Account account) {
-    return new WorkspaceImpl(id, account, createWorkspaceConfig(id));
+    return WorkspaceImpl.builder()
+        .setId(id)
+        .setAccount(account)
+        .setConfig(createWorkspaceConfig(id))
+        .build();
   }
 
   public static WorkspaceImpl createWorkspaceWithDevfile(String id, Account account) {
-    return new WorkspaceImpl(id, account, createDevfile(id));
+    return WorkspaceImpl.builder()
+        .setId(id)
+        .setAccount(account)
+        .setDevfile(createDevfile(id))
+        .build();
   }
 
   public static SshPairImpl createSshPair(String owner, String service, String name) {

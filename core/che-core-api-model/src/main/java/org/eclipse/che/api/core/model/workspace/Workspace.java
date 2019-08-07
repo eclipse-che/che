@@ -29,6 +29,9 @@ public interface Workspace {
   /** Returns the identifier of this workspace instance. It is mandatory and unique. */
   String getId();
 
+  /** Returns name of the workspace instance. */
+  String getName();
+
   /**
    * Returns the namespace of the current workspace instance. Workspace name is unique for
    * workspaces in the same namespace.

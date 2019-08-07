@@ -33,6 +33,7 @@ import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.Page;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl.WorkspaceImplBuilder;
 import org.eclipse.che.multiuser.resource.api.type.WorkspaceResourceType;
 import org.eclipse.che.multiuser.resource.model.Resource;
 import org.mockito.InjectMocks;
@@ -89,13 +90,12 @@ public class WorkspaceResourceUsageTrackerTest {
     when(accountManager.getById(any())).thenReturn(account);
     when(account.getName()).thenReturn("testAccount");
 
+    WorkspaceImplBuilder wsBuilder = WorkspaceImpl.builder();
+
     when(workspaceManager.getByNamespace(anyString(), anyBoolean(), anyInt(), anyLong()))
         .thenReturn(
             new Page<>(
-                Arrays.asList(new WorkspaceImpl(), new WorkspaceImpl(), new WorkspaceImpl()),
-                0,
-                3,
-                3));
+                Arrays.asList(wsBuilder.build(), wsBuilder.build(), wsBuilder.build()), 0, 3, 3));
 
     Optional<Resource> usedWorkspacesOpt =
         workspaceResourceUsageTracker.getUsedResource("account123");

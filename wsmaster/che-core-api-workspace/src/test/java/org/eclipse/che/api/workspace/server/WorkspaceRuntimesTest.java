@@ -141,7 +141,7 @@ public class WorkspaceRuntimesTest {
       expectedExceptionsMessageRegExp =
           "Workspace 'account:ws' doesn't contain environment 'non-existing'")
   public void throwsNotFoundExceptionWhenStartWorkspaceWithNotExistingEnv() throws Exception {
-    final WorkspaceImpl workspace = new WorkspaceImpl();
+    final WorkspaceImpl workspace = WorkspaceImpl.builder().build();
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
     workspace.setAccount(new AccountImpl("acc123", "account", "any"));
     workspace.setConfig(config);
@@ -488,8 +488,7 @@ public class WorkspaceRuntimesTest {
   @Test
   public void shouldInjectRuntime() throws Exception {
     // given
-    WorkspaceImpl workspace = new WorkspaceImpl();
-    workspace.setId("ws123");
+    WorkspaceImpl workspace = WorkspaceImpl.builder().setId("ws123").build();
     when(statuses.get("ws123")).thenReturn(WorkspaceStatus.RUNNING);
 
     ImmutableMap<String, Machine> machines =
@@ -543,8 +542,7 @@ public class WorkspaceRuntimesTest {
     doReturn(ImmutableSet.of(identity)).when(infrastructure).getIdentities();
 
     // when
-    WorkspaceImpl workspace = new WorkspaceImpl();
-    workspace.setId("workspace123");
+    WorkspaceImpl workspace = WorkspaceImpl.builder().setId("workspace123").build();
     runtimes.injectRuntime(workspace);
 
     // then
@@ -555,8 +553,7 @@ public class WorkspaceRuntimesTest {
   @Test
   public void shouldNotInjectRuntimeIfThereIsNoCachedStatus() throws Exception {
     // when
-    WorkspaceImpl workspace = new WorkspaceImpl();
-    workspace.setId("workspace123");
+    WorkspaceImpl workspace = WorkspaceImpl.builder().setId("workspace123").build();
     runtimes.injectRuntime(workspace);
 
     // then
@@ -579,8 +576,7 @@ public class WorkspaceRuntimesTest {
     doThrow(new InfrastructureException("error")).when(infrastructure).prepare(eq(identity), any());
 
     // when
-    WorkspaceImpl workspace = new WorkspaceImpl();
-    workspace.setId("workspace123");
+    WorkspaceImpl workspace = WorkspaceImpl.builder().setId("workspace123").build();
     runtimes.injectRuntime(workspace);
 
     // then

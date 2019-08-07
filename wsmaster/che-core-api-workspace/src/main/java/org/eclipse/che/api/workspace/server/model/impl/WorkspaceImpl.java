@@ -78,6 +78,10 @@ public class WorkspaceImpl implements Workspace {
     return new WorkspaceImplBuilder();
   }
 
+  public static WorkspaceImplBuilder builder(WorkspaceImpl workspace) {
+    return new WorkspaceImplBuilder(workspace);
+  }
+
   @Id
   @Column(name = "id")
   private String id;
@@ -116,38 +120,9 @@ public class WorkspaceImpl implements Workspace {
 
   public WorkspaceImpl() {}
 
-  public WorkspaceImpl(String id, Account account, WorkspaceConfig config) {
-    this(id, account, config, null, null, false, null);
-  }
-
-  public WorkspaceImpl(String id, Account account, Devfile devfile) {
-    this(id, account, devfile, null, null, false, null);
-  }
-
   public WorkspaceImpl(
       String id,
-      Account account,
-      WorkspaceConfig config,
-      Runtime runtime,
-      Map<String, String> attributes,
-      boolean isTemporary,
-      WorkspaceStatus status) {
-    this(id, account, config, null, runtime, attributes, isTemporary, status);
-  }
-
-  public WorkspaceImpl(
-      String id,
-      Account account,
-      Devfile devfile,
-      Runtime runtime,
-      Map<String, String> attributes,
-      boolean isTemporary,
-      WorkspaceStatus status) {
-    this(id, account, null, devfile, runtime, attributes, isTemporary, status);
-  }
-
-  public WorkspaceImpl(
-      String id,
+      String name,
       Account account,
       WorkspaceConfig config,
       Devfile devfile,
@@ -156,6 +131,7 @@ public class WorkspaceImpl implements Workspace {
       boolean isTemporary,
       WorkspaceStatus status) {
     this.id = id;
+    this.name = name;
     if (account != null) {
       this.account = new AccountImpl(account);
     }
@@ -187,6 +163,7 @@ public class WorkspaceImpl implements Workspace {
   public WorkspaceImpl(Workspace workspace, Account account) {
     this(
         workspace.getId(),
+        workspace.getName(),
         account,
         workspace.getConfig(),
         workspace.getDevfile(),
@@ -217,15 +194,20 @@ public class WorkspaceImpl implements Workspace {
     return null;
   }
 
-  /** Returns the name of workspace. It can be stored by workspace config or devfile. */
   public String getName() {
-    if (devfile != null) {
+    if (name != null) {
+      return name;
+    } else if (devfile != null) { // if not, try devfile
       return devfile.getMetadata().getName();
-    } else if (config != null) {
+    } else if (config != null) { // last try from workspace config
       return config.getName();
     } else {
       return null;
     }
+  }
+
+  public void setName(String name) {
+    this.name = name;
   }
 
   public void setAccount(AccountImpl account) {
@@ -387,6 +369,7 @@ public class WorkspaceImpl implements Workspace {
   public static class WorkspaceImplBuilder {
 
     private String id;
+    private String name;
     private Account account;
     private boolean isTemporary;
     private WorkspaceStatus status;
@@ -395,13 +378,46 @@ public class WorkspaceImpl implements Workspace {
     private Runtime runtime;
     private Map<String, String> attributes;
 
+    private WorkspaceImplBuilder() {}
+
+    private WorkspaceImplBuilder(WorkspaceImpl workspace) {
+      this.id = workspace.getId();
+      this.name = workspace.getName();
+      this.account = workspace.getAccount();
+      this.isTemporary = workspace.isTemporary();
+      this.status = workspace.getStatus();
+      this.config = workspace.getConfig();
+      this.runtime = workspace.getRuntime();
+      this.attributes = workspace.getAttributes();
+    }
+
     public WorkspaceImpl build() {
+      final String finalName;
+
       return new WorkspaceImpl(
-          id, account, config, devfile, runtime, attributes, isTemporary, status);
+          id, resolveName(), account, config, devfile, runtime, attributes, isTemporary, status);
+    }
+
+    private String resolveName() {
+      if (name != null) {
+        return name;
+      } else {
+        if (devfile != null) {
+          return devfile.getName();
+        } else if (config != null) {
+          return config.getName();
+        }
+      }
+      return null;
     }
 
     public WorkspaceImplBuilder generateId() {
       id = NameGenerator.generate("workspace", 16);
+      return this;
+    }
+
+    public WorkspaceImplBuilder setName(String name) {
+      this.name = name;
       return this;
     }
 

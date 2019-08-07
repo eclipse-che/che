@@ -282,12 +282,8 @@ public class WorkspaceActivityDaoTest {
 
   private static WorkspaceImpl createWorkspace(String id, AccountImpl account, String name) {
     final WorkspaceConfigImpl wCfg = createWorkspaceConfig(name);
-    // Workspace
-    final WorkspaceImpl workspace = new WorkspaceImpl();
-    workspace.setId(id);
-    workspace.setAccount(account);
     wCfg.setName(name);
-    workspace.setConfig(wCfg);
-    return workspace;
+    // Workspace
+    return WorkspaceImpl.builder().setId(id).setAccount(account).setConfig(wCfg).build();
   }
 }

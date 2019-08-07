@@ -28,6 +28,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl.WorkspaceImplBuilder;
 import org.eclipse.che.commons.test.tck.TckListener;
 import org.eclipse.che.commons.test.tck.repository.TckRepository;
 import org.eclipse.che.commons.test.tck.repository.TckRepositoryException;
@@ -82,20 +83,21 @@ public class WorkerDaoTest {
 
     AccountImpl account = new AccountImpl("account1", "accountName", "test");
     accountRepository.createAll(Collections.singletonList(account));
+    WorkspaceImplBuilder wsBuilder = WorkspaceImpl.builder().setAccount(account);
     workspaceRepository.createAll(
         Arrays.asList(
-            new WorkspaceImpl(
-                "ws0",
-                account,
-                new WorkspaceConfigImpl("ws-name0", "", "cfg0", null, null, null, null)),
-            new WorkspaceImpl(
-                "ws1",
-                account,
-                new WorkspaceConfigImpl("ws-name1", "", "cfg1", null, null, null, null)),
-            new WorkspaceImpl(
-                "ws2",
-                account,
-                new WorkspaceConfigImpl("ws-name2", "", "cfg2", null, null, null, null))));
+            wsBuilder
+                .setId("ws0")
+                .setConfig(new WorkspaceConfigImpl("ws-name0", "", "cfg0", null, null, null, null))
+                .build(),
+            wsBuilder
+                .setId("ws1")
+                .setConfig(new WorkspaceConfigImpl("ws-name1", "", "cfg1", null, null, null, null))
+                .build(),
+            wsBuilder
+                .setId("ws2")
+                .setConfig(new WorkspaceConfigImpl("ws-name2", "", "cfg2", null, null, null, null))
+                .build()));
 
     workerRepository.createAll(
         Stream.of(workers).map(WorkerImpl::new).collect(Collectors.toList()));

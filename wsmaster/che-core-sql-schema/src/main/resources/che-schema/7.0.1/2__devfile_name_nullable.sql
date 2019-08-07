@@ -11,3 +11,5 @@
 --
 
 ALTER TABLE devfile ALTER COLUMN meta_name DROP NOT NULL;
+ALTER TABLE workspace ALTER COLUMN name SET NOT NULL;
+CREATE UNIQUE INDEX index_che_workspace_name_account ON workspace (name, accountid);

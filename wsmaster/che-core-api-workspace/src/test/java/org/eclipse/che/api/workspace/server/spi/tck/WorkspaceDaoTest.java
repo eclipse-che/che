@@ -632,7 +632,7 @@ public class WorkspaceDaoTest {
     final WorkspaceImpl workspace2 = workspaces[1];
 
     workspace1.getConfig().setName(workspace2.getName());
-
+    workspace1.setName(workspace2.getName());
     workspaceDao.update(workspace1);
   }
 
@@ -645,6 +645,7 @@ public class WorkspaceDaoTest {
     final WorkspaceImpl workspace2 = workspaces[DEVFILE_WORKSPACE_INDEX];
 
     workspace2.getDevfile().setName(workspace1.getConfig().getName());
+    workspace2.setName(workspace1.getConfig().getName());
     workspace2.setAccount(workspace1.getAccount());
 
     workspaceDao.update(workspace2);
@@ -818,37 +819,34 @@ public class WorkspaceDaoTest {
   public static WorkspaceImpl createWorkspaceFromConfig(
       String id, AccountImpl account, String name) {
     final WorkspaceConfigImpl wCfg = createWorkspaceConfig(name);
-    // Workspace
-    final WorkspaceImpl workspace = new WorkspaceImpl();
-    workspace.setId(id);
-    workspace.setAccount(account);
     wCfg.setName(name);
-    workspace.setConfig(wCfg);
-    workspace.setAttributes(
-        new HashMap<>(
-            ImmutableMap.of(
-                "attr1", "value1",
-                "attr2", "value2",
-                "attr3", "value3")));
-    workspace.setConfig(wCfg);
-    return workspace;
+    // Workspace
+    return WorkspaceImpl.builder()
+        .setId(id)
+        .setAccount(account)
+        .setConfig(wCfg)
+        .setAttributes(
+            new HashMap<>(
+                ImmutableMap.of(
+                    "attr1", "value1",
+                    "attr2", "value2",
+                    "attr3", "value3")))
+        .build();
   }
 
   public static WorkspaceImpl createWorkspaceFromDevfile(
       String id, AccountImpl account, String name) {
-    final DevfileImpl devfile = createDevfile(name);
-    // Workspace
-    final WorkspaceImpl workspace = new WorkspaceImpl();
-    workspace.setId(id);
-    workspace.setAccount(account);
-    workspace.setDevfile(devfile);
-    workspace.setAttributes(
-        new HashMap<>(
-            ImmutableMap.of(
-                "attr1", "value1",
-                "attr2", "value2",
-                "attr3", "value3")));
-    return workspace;
+    return WorkspaceImpl.builder()
+        .setId(id)
+        .setAccount(account)
+        .setDevfile(createDevfile(name))
+        .setAttributes(
+            new HashMap<>(
+                ImmutableMap.of(
+                    "attr1", "value1",
+                    "attr2", "value2",
+                    "attr3", "value3")))
+        .build();
   }
 
   private static DevfileImpl createDevfile(String name) {
