@@ -197,8 +197,6 @@ pipeline {
     post {
         always {
             script {
-                // it's impossible to use 'when' in the global post block
-                if (currentBuild.currentResult != 'ABORTED') {
                     sh """
   kubectl get configmaps --namespace=che che -o yaml || true
   
@@ -209,11 +207,9 @@ pipeline {
 
   docker volume rm \$(docker volume ls -q -f dangling=true) || true
 """
-                }
-
-                archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/che/e2e/report/**"
             }
 
+            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/che/e2e/report/**"
             cleanWs notFailBuild: true
         }
 
