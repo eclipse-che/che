@@ -30,6 +30,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ObjectConverter;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
@@ -85,6 +86,7 @@ public class WorkspaceTckModule extends TckModule {
                 org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+            .addEntityClass(ObjectConverter.class)
             .setExceptionHandler(H2ExceptionHandler.class)
             .build());
     bind(DBInitializer.class).asEagerSingleton();

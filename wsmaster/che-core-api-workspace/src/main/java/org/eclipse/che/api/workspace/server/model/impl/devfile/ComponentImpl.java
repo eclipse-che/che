@@ -21,6 +21,7 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -54,8 +55,9 @@ public class ComponentImpl implements Component {
       name = "devfile_component_preferences",
       joinColumns = @JoinColumn(name = "devfile_component_id"))
   @MapKeyColumn(name = "preference_key")
+  @Convert(converter = ObjectConverter.class)
   @Column(name = "preference")
-  private Map<String, String> preferences;
+  private Map<String, Object> preferences;
 
   @Column(name = "alias")
   private String alias;
@@ -190,7 +192,7 @@ public class ComponentImpl implements Component {
       String type,
       String alias,
       String id,
-      Map<String, String> preferences,
+      Map<String, Object> preferences,
       String registryUrl,
       String reference,
       String referenceContent,
@@ -294,14 +296,14 @@ public class ComponentImpl implements Component {
     this.registryUrl = registryUrl;
   }
 
-  public Map<String, String> getPreferences() {
+  public Map<String, Object> getPreferences() {
     if (preferences == null) {
       preferences = new HashMap<>();
     }
     return preferences;
   }
 
-  public void setPreferences(Map<String, String> preferences) {
+  public void setPreferences(Map<String, Object> preferences) {
     this.preferences = preferences;
   }
 

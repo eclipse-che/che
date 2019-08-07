@@ -49,11 +49,11 @@ public interface ComponentDto extends Component {
   ComponentDto withRegistryUrl(String registryUrl);
 
   @Override
-  Map<String, String> getPreferences();
+  Map<String, Object> getPreferences();
 
-  void setPreferences(Map<String, String> preferences);
+  void setPreferences(Map<String, Object> preferences);
 
-  ComponentDto withPreferences(Map<String, String> preferences);
+  ComponentDto withPreferences(Map<String, Object> preferences);
 
   @Override
   String getReference();

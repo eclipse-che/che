@@ -18,11 +18,9 @@ import static org.eclipse.che.api.core.model.workspace.config.Command.PLUGIN_ATT
 import static org.eclipse.che.api.workspace.server.devfile.Constants.COMPONENT_ALIAS_COMMAND_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGINS_COMPONENTS_ALIASES_WORKSPACE_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
-import static org.eclipse.che.api.workspace.shared.Constants.PLUGIN_PREFERENCE_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE;
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 
-import java.util.Map.Entry;
 import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.devfile.Component;
 import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
@@ -99,14 +97,15 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
     }
 
-    for (Entry<String, String> preference : pluginComponent.getPreferences().entrySet()) {
-      workspaceConfig
-          .getAttributes()
-          .put(
-              format(
-                  PLUGIN_PREFERENCE_ATTR_TEMPLATE, fqn.getPublisherAndName(), preference.getKey()),
-              preference.getValue());
-    }
+    //    for (Entry<String, Object> preference : pluginComponent.getPreferences().entrySet()) {
+    //      workspaceConfig
+    //          .getAttributes()
+    //          .put(
+    //              format(
+    //                  PLUGIN_PREFERENCE_ATTR_TEMPLATE, fqn.getPublisherAndName(),
+    // preference.getKey()),
+    //              preference.getValue());
+    //    }
 
     for (CommandImpl command : workspaceConfig.getCommands()) {
       String commandComponent = command.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE);

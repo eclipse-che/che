@@ -132,6 +132,7 @@ public class JpaWorkspaceDaoTest {
 
     // make conflict update
     workspace2.getDevfile().setName(workspace1.getDevfile().getName());
+    workspace2.getDevfile().setName(workspace1.getDevfile().getName());
     manager.getTransaction().begin();
     manager.merge(workspace2);
     manager.getTransaction().commit();

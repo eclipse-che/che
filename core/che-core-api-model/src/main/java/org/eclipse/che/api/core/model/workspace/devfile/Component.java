@@ -32,7 +32,7 @@ public interface Component {
    * Returns the preferences of the plugin. Example value of preference: {@code java.home:
    * /home/user/jdk11}
    */
-  Map<String, String> getPreferences();
+  Map<String, Object> getPreferences();
 
   /**
    * For 'kubernetes' and 'openshift' components types, returns absolute or devfile-relative
