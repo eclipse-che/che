@@ -72,7 +72,7 @@ data:
 {{- else }}
   CHE_INFRA_KUBERNETES_INGRESS_ANNOTATIONS__JSON: '{"kubernetes.io/ingress.class": "nginx", "{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/rewrite-target": "/$1","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/ssl-redirect": "false","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout": "3600","{{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout": "3600"}'
 {{- end }}
-  CHE_INFRA_KUBERNETES_INGRESS_PATH__TRANSFORM: '%s/(.*)'
+  CHE_INFRA_KUBERNETES_INGRESS_PATH__TRANSFORM: '%s(.*)'
   CHE_INFRA_KUBERNETES_SERVER__STRATEGY: {{ .Values.global.serverStrategy }}
   CHE_LOGGER_CONFIG: {{ .Values.global.log.loggerConfig | quote}}
   CHE_LOGS_APPENDERS_IMPL: {{ .Values.global.log.appenderName }}

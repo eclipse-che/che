@@ -70,7 +70,9 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
     }
 
     return bld.withPath(
-            String.format(pathTransformFmt, strategy.getIngressPath(serviceName, servicePort)))
+            String.format(
+                pathTransformFmt,
+                ensureEndsWithSlash(strategy.getIngressPath(serviceName, servicePort))))
         .withName(strategy.getIngressName(serviceName, servicePort))
         .withMachineName(machineName)
         .withServiceName(serviceName)
@@ -78,5 +80,13 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
         .withServicePort(servicePort.getName())
         .withServers(ingressesServers)
         .build();
+  }
+
+  private static String ensureEndsWithSlash(String path) {
+    if (path.charAt(path.length() - 1) == '/') {
+      return path;
+    } else {
+      return path + '/';
+    }
   }
 }
