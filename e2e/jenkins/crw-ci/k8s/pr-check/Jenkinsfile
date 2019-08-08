@@ -29,8 +29,6 @@ pipeline {
                 stage("Cleanup") {
                     steps {
                         script() {
-                            cleanWs notFailBuild: true
-
                             sh "/usr/local/bin/minikube delete"
                         }
                     }
