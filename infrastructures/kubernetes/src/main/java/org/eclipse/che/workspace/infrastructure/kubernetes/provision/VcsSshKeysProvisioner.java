@@ -120,6 +120,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
     if (isNullOrEmpty(sshPair.getName()) || isNullOrEmpty(sshPair.getPrivateKey())) {
       return;
     }
+    String validNameForSecret = getValidNameForSecret(sshPair.getName());
     Secret secret =
         new SecretBuilder()
             .addToData(
@@ -127,7 +128,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
                 Base64.getEncoder().encodeToString(sshPair.getPrivateKey().getBytes()))
             .withType(SECRET_TYPE_SSH)
             .withNewMetadata()
-            .withName(wsId + "-" + getValidNameForSecret(sshPair.getName()))
+            .withName(wsId + "-" + validNameForSecret)
             .endMetadata()
             .build();
 
@@ -137,7 +138,8 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         .getPodsData()
         .values()
         .forEach(
-            p -> mountSshKeySecret(secret.getMetadata().getName(), sshPair.getName(), p.getSpec()));
+            p ->
+                mountSshKeySecret(secret.getMetadata().getName(), validNameForSecret, p.getSpec()));
   }
 
   private void mountSshKeySecret(String secretName, String sshKeyName, PodSpec podSpec) {
