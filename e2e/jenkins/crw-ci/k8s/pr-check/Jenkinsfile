@@ -14,7 +14,7 @@ pipeline {
         PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
         JENKINS_BUILD = "true"
 
-        DEVFILE_URL = "${WORKSPACE}/che/e2e/files/happy-path/happy-path-workspace.yaml"
+        DEVFILE_URL = "${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml"
         SUCCESS_THRESHOLD = 5
 
         CHE_IMAGE_REPO = "maxura/che-server"
@@ -22,27 +22,10 @@ pipeline {
     }
 
     stages {
-        stage("Prepare codebase") {
-            failFast true
-
-            parallel {
-                stage("Cleanup") {
-                    steps {
-                        script() {
-                            sh "/usr/local/bin/minikube delete"
-                        }
-                    }
-                }
-
-                stage("Get sources") {
-                    steps {
-                        checkout([$class                           : 'GitSCM',
-                                  branches                         : [[name: "*/${ghprbSourceBranch}"]],
-                                  doGenerateSubmoduleConfigurations: false,
-                                  extensions                       : [[$class           : 'RelativeTargetDirectory',
-                                                                       relativeTargetDir: 'che']],
-                                  userRemoteConfigs                : [[url: "https://github.com/${ghprbGhRepository}.git"]]])
-                    }
+        stage("Cleanup") {
+            steps {
+                script() {
+                    sh "/usr/local/bin/minikube delete"
                 }
             }
         }
@@ -83,7 +66,7 @@ pipeline {
                 stage("Build Che") {
                     steps {
                         script {
-                            sh "mvn clean install -f ${WORKSPACE}/che/pom.xml"
+                            sh "mvn clean install -f ${WORKSPACE}/pom.xml"
                         }
                     }
                 }
@@ -95,7 +78,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
                     script {
                         sh """
-  ${WORKSPACE}/che/dockerfiles/che/build.sh --organization:maxura --tag:${CHE_IMAGE_TAG} --dockerfile:Dockerfile
+  ${WORKSPACE}/dockerfiles/che/build.sh --organization:maxura --tag:${CHE_IMAGE_TAG} --dockerfile:Dockerfile
   docker tag ${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
   docker login -u maxura -p ${maxura_docker_password}
   docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
@@ -112,7 +95,7 @@ pipeline {
                     sh """
   ${WORKSPACE}/chectl server:start \\
     --k8spodreadytimeout=180000 \\
-    -t=${WORKSPACE}/che/deploy/ \\
+    -t=${WORKSPACE}/deploy/ \\
     --listr-renderer=verbose \\
     --cheimage=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
 """
@@ -171,7 +154,7 @@ pipeline {
 //   -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
 //   -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
 //   -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
-//   -v ${WORKSPACE}/che/e2e:/root/local_tests:Z \\
+//   -v ${WORKSPACE}/e2e:/root/local_tests:Z \\
 //   eclipse/che-e2e:nightly
 //"""
 
@@ -208,7 +191,7 @@ pipeline {
 """
             }
 
-            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/che/e2e/report/**"
+            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/e2e/report/**"
             cleanWs notFailBuild: true
         }
 
