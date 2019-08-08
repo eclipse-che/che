@@ -29,11 +29,7 @@ export class WorkspaceDataManager {
    * @param workspace workspace name
    */
   getName(workspace: che.IWorkspace): string {
-    if (workspace.config) {
-      return workspace.config.name;
-    } else if (workspace.devfile) {
-      return workspace.devfile.metadata.name;
-    }
+    return workspace.name
   }
 
   /**
@@ -43,11 +39,7 @@ export class WorkspaceDataManager {
    * @param name workspace name
    */
   setName(workspace: che.IWorkspace, name: string): void {
-    if (workspace.config) {
-      workspace.config.name = name;
-    } else if (workspace.devfile) {
-      workspace.devfile.metadata.name = name;
-    }
+    workspace.name = name;
   }
 
   /**

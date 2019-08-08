@@ -22,5 +22,10 @@ public interface MetadataDto extends Metadata {
 
   void setName(String name);
 
+  @Override
+  String getGenerateName();
+
   MetadataDto withName(String name);
+
+  MetadataDto withGenerateName(String generateName);
 }

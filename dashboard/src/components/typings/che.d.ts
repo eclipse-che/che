@@ -285,6 +285,7 @@ declare namespace che {
 
   export interface IWorkspace {
     id?: string;
+    name?: string;
     projects?: any;
     links?: {
       ide?: string
