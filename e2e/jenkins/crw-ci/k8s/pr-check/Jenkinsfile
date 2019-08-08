@@ -192,7 +192,7 @@ pipeline {
             }
 
             archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/e2e/report/**"
-            cleanWs notFailBuild: true
+            cleanWs notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true
         }
 
     }
