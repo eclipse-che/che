@@ -13,7 +13,7 @@ import { injectable } from 'inversify';
 @injectable()
 export class Logger {
     methodLevel(text: string) {
-        console.log(`------> ${text}`);
+        console.log(`                    ------> ${text}`);
     }
 
     innerMethodLevel(text: string) {
