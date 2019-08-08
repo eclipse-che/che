@@ -88,7 +88,7 @@ public class DevfileConverter {
    * @throws DevfileRecipeFormatException when content of the file specified in recipe type
    *     component is empty or its format is invalid
    */
-  public WorkspaceConfigImpl devFileToWorkspaceConfig(
+  WorkspaceConfigImpl devFileToWorkspaceConfig(
       DevfileImpl devfile, FileContentProvider contentProvider) throws DevfileException {
     checkArgument(devfile != null, "Devfile must not be null");
     checkArgument(contentProvider != null, "Content provider must not be null");
@@ -102,7 +102,9 @@ public class DevfileConverter {
 
     WorkspaceConfigImpl config = new WorkspaceConfigImpl();
 
-    config.setName(devfile.getName());
+    if (devfile.getName() != null) {
+      config.setName(devfile.getName());
+    }
 
     for (Command command : devfile.getCommands()) {
       CommandImpl com = commandConverter.toWorkspaceCommand(command, contentProvider);
