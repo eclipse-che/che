@@ -13,7 +13,7 @@ import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { Ide, RightToolbarButton } from './Ide';
 import { TestConstants } from '../../TestConstants';
-import { By } from 'selenium-webdriver';
+import { By, error } from 'selenium-webdriver';
 import { Editor } from './Editor';
 
 @injectable()
@@ -175,7 +175,7 @@ export class ProjectTree {
             return;
         }
 
-        throw new Error('Exceeded the maximum number of checking attempts, project has not been imported');
+        throw new error.TimeoutError('Exceeded the maximum number of checking attempts, project has not been imported');
     }
 
     private getItemCss(itemPath: string): string {

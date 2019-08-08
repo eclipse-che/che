@@ -1,4 +1,4 @@
-import { injectable } from "inversify";
+import { injectable } from 'inversify';
 
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
