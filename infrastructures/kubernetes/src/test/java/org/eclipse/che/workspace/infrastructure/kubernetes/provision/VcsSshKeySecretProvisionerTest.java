@@ -20,12 +20,14 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.Secret;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
@@ -124,12 +126,20 @@ public class VcsSshKeySecretProvisionerTest {
 
     String sshConfig = mapData.get("ssh_config");
     assertTrue(sshConfig.contains("host " + keyName1));
-    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName1 + "/ssh-privatekey"));
+    assertTrue(
+        sshConfig.contains("IdentityFile /etc/ssh/" + getSha256(keyName1) + "/ssh-privatekey"));
 
     assertTrue(sshConfig.contains("host *"));
-    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName2 + "/ssh-privatekey"));
+    assertTrue(
+        sshConfig.contains("IdentityFile /etc/ssh/" + getSha256(keyName2) + "/ssh-privatekey"));
 
-    assertTrue(sshConfig.contains("host github.com"));
-    assertTrue(sshConfig.contains("IdentityFile /etc/ssh/github-com/ssh-privatekey"));
+    assertTrue(sshConfig.contains("host " + keyName3));
+    assertTrue(
+        sshConfig.contains("IdentityFile /etc/ssh/" + getSha256(keyName3) + "/ssh-privatekey"));
+  }
+
+  /** Returns a sha256-hashed string value. */
+  private String getSha256(String value) {
+    return Hashing.sha256().hashString(value, StandardCharsets.UTF_8).toString();
   }
 }

@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 
+import com.google.common.hash.Hashing;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
 import io.fabric8.kubernetes.api.model.ConfigMapVolumeSourceBuilder;
@@ -24,6 +25,7 @@ import io.fabric8.kubernetes.api.model.SecretVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -139,10 +141,11 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         .values()
         .forEach(
             p ->
-                mountSshKeySecret(secret.getMetadata().getName(), validNameForSecret, p.getSpec()));
+                mountSshKeySecret(
+                    secret.getMetadata().getName(), getSha256(sshPair.getName()), p.getSpec()));
   }
 
-  private void mountSshKeySecret(String secretName, String sshKeyName, PodSpec podSpec) {
+  private void mountSshKeySecret(String secretName, String sshKeyNameHashed, PodSpec podSpec) {
     podSpec
         .getVolumes()
         .add(
@@ -158,7 +161,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
                   .withName(secretName)
                   .withNewReadOnly(false)
                   .withReadOnly(false)
-                  .withMountPath(SSH_BASE_CONFIG_PATH + sshKeyName)
+                  .withMountPath(SSH_BASE_CONFIG_PATH + sshKeyNameHashed)
                   .build();
           container.getVolumeMounts().add(volumeMount);
         });
@@ -238,7 +241,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         + host
         + "\nIdentityFile "
         + SSH_BASE_CONFIG_PATH
-        + getValidNameForSecret(name)
+        + getSha256(name)
         + "/"
         + SSH_PRIVATE_KEY
         + "\n";
@@ -247,5 +250,10 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
   /** Returns a valid secret name for the specified string value. */
   private String getValidNameForSecret(@NotNull String name) {
     return name.replace(".", "-");
+  }
+
+  /** Returns a sha256-hashed string value. */
+  private String getSha256(@NotNull String value) {
+    return Hashing.sha256().hashString(value, StandardCharsets.UTF_8).toString();
   }
 }
