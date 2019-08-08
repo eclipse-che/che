@@ -180,8 +180,11 @@ pipeline {
 
     post {
         always {
+            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/e2e/report/**"
+
             script {
-                    sh """
+                sh "sudo rm -rf ${WORKSPACE}/e2e"
+                sh """
                       kubectl get configmaps --namespace=che che -o yaml || true
                       
                       /usr/local/bin/minikube stop || true
@@ -193,7 +196,6 @@ pipeline {
                     """
             }
 
-            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/e2e/report/**"
             cleanWs notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true
         }
 
