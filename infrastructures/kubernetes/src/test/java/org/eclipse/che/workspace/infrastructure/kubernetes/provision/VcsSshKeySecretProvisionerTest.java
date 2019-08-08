@@ -124,7 +124,7 @@ public class VcsSshKeySecretProvisionerTest {
     assertTrue(sshConfig.contains("host *"));
     assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName2 + "/ssh-privatekey"));
 
-    assertTrue(sshConfig.contains("host github.com"));
-    assertTrue(sshConfig.contains("IdentityFile /etc/ssh/github-com/ssh-privatekey"));
+    assertTrue(sshConfig.contains("host " + keyName3));
+    assertTrue(sshConfig.contains("IdentityFile /etc/ssh/" + keyName3 + "/ssh-privatekey"));
   }
 }

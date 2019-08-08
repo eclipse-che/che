@@ -236,7 +236,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         + host
         + "\nIdentityFile "
         + SSH_BASE_CONFIG_PATH
-        + getValidNameForSecret(name)
+        + name
         + "/"
         + SSH_PRIVATE_KEY
         + "\n";
