@@ -180,10 +180,9 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/e2e/report/**"
+            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/e2e/report/**/*.*"
 
             script {
-                sh "sudo rm -rf ${WORKSPACE}/e2e"
                 sh """
                       kubectl get configmaps --namespace=che che -o yaml || true
                       
@@ -194,6 +193,8 @@ pipeline {
                     
                       docker volume rm \$(docker volume ls -q -f dangling=true) || true
                     """
+
+                sh "sudo rm -rf ${WORKSPACE}/e2e"
             }
 
             cleanWs notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true
