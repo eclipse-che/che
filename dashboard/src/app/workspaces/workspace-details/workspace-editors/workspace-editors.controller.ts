@@ -169,12 +169,11 @@ export class WorkspaceEditorsController {
     // check each editor's enabled state:
     this.editors.forEach((editor: IPluginRow) => {
       editor.isEnabled = this.isEditorEnabled(editor);
-      if (editor.id === this.selectedEditor) {
+      if (editor.isEnabled) {
 
         // this.selectedEditor is in the form publisher/name/pluginVersion
-        const editorSep = this.selectedEditor.split('/');
-        const pluginVersion = editorSep[2];
-        editor.selected = pluginVersion;
+        const { publisher, name, version } = this.splitEditorId(this.selectedEditor);
+        editor.selected = version;
       }
     });
 
@@ -187,6 +186,21 @@ export class WorkspaceEditorsController {
    * @returns {boolean} the editor's enabled state
    */
   private isEditorEnabled(editor: IPlugin): boolean {
-    return editor.id === this.selectedEditor;
+    const partialId = `${editor.publisher}/${editor.name}/`;
+    return this.selectedEditor && this.selectedEditor.indexOf(partialId) !== -1;
   }
+
+  /**
+   * Splits an editor ID by a separator (slash)
+   * @param id a string in form `${publisher}/${name}` or `${publisher}/${name}/${version}`
+   */
+  private splitEditorId(id: string): { publisher: string, name: string, version?: string } {
+    const parts = id.split('/');
+    return {
+      publisher: parts[0],
+      name: parts[1],
+      version: parts[2]
+    };
+  }
+
 }

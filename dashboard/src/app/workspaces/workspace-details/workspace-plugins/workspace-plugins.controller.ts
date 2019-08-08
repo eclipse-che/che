@@ -108,11 +108,8 @@ export class WorkspacePluginsController {
       this.selectedPlugins.forEach(plugin => {
         // a selected plugin is in the form publisher/name/version
         // find the currently selected ones and set them along with their id
-        const pluginSep = plugin.split('/');
-        const published = pluginSep[0];
-        const name = pluginSep[1];
-        const version = pluginSep[2];
-        const pluginID = `${published}/${name}`;
+        const {publisher, name, version} = this.splitPluginId(plugin);
+        const pluginID = `${publisher}/${name}`;
 
         if (this.plugins.has(pluginID)) {
           const foundPlugin = this.plugins.get(pluginID);
@@ -196,18 +193,41 @@ export class WorkspacePluginsController {
   private updatePlugins(): void {
     this.selectedPlugins = this.cheWorkspace.getWorkspaceDataManager().getPlugins(this.workspace);
     // check each plugin's enabled state:
-    this.plugins.forEach((plugin: IPlugin) => {
-      plugin.isEnabled = this.isPluginEnabled(plugin);
+    this.plugins.forEach((plugin: IPluginRow) => {
+      const selectedPluginId = this.findInSelected(plugin);
+      plugin.isEnabled = !!selectedPluginId;
+      if (selectedPluginId) {
+        plugin.id = selectedPluginId;
+        const {publisher, name, version} = this.splitPluginId(selectedPluginId);
+        plugin.selected = version;
+      }
     });
     this.cheListHelper.setList(Array.from(this.plugins.values()), 'displayName');
   }
 
   /**
-   *
+   * Finds given plugin in the list of enabled plugins and returns its ID with version
    * @param {IPlugin} plugin
-   * @returns {boolean} the plugin's enabled state
+   * @returns {string | undefined} plugin ID
    */
-  private isPluginEnabled(plugin: IPlugin): boolean {
-    return this.selectedPlugins.indexOf(plugin.id) >= 0;
+  private findInSelected(plugin: IPluginRow): string | undefined {
+    return this.selectedPlugins.find(selectedPluginId => {
+      const partialId = `${plugin.publisher}/${plugin.name}/`;
+      return selectedPluginId.indexOf(partialId) !== -1;
+    });
   }
+
+  /**
+   * Splits a plugin ID by a separator (slash)
+   * @param id a string in form `${publisher}/${name}` or `${publisher}/${name}/${version}`
+   */
+  private splitPluginId(id: string): { publisher: string, name: string, version?: string } {
+    const parts = id.split('/');
+    return {
+      publisher: parts[0],
+      name: parts[1],
+      version: parts[2]
+    };
+  }
+
 }
