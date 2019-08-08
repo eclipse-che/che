@@ -16,4 +16,6 @@ public interface Metadata {
 
   /** @return the name of the devfile */
   String getName();
+
+  String getGenerateName();
 }
