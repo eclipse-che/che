@@ -180,7 +180,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts allowEmptyArchive: true, artifacts: "${WORKSPACE}/e2e/report/**/*.*"
+            archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**"
 
             script {
                 sh """
