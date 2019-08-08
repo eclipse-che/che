@@ -194,6 +194,7 @@ public class WorkspaceImpl implements Workspace {
     return null;
   }
 
+  @Override
   public String getName() {
     if (name != null) {
       return name;
@@ -403,7 +404,14 @@ public class WorkspaceImpl implements Workspace {
         return name;
       } else {
         if (devfile != null) {
-          return devfile.getName();
+          if (devfile.getName() != null) {
+            return devfile.getName();
+          } else if (devfile.getMetadata() != null
+              && devfile.getMetadata().getGenerateName() != null) {
+            return NameGenerator.generate(devfile.getMetadata().getGenerateName(), 5);
+          } else {
+            return null;
+          }
         } else if (config != null) {
           return config.getName();
         }
