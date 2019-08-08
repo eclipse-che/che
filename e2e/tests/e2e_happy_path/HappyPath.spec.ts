@@ -62,7 +62,7 @@ const SpringAppLocators = {
 
 suite('Validation of workspace start', async () => {
     test('Open workspace', async () => {
-        await driverHelper.navigateAndWaitToUrl("123");
+        await driverHelper.navigateAndWaitToUrl("123" + workspaceUrl);
     });
 
     test('Wait workspace running state', async () => {
