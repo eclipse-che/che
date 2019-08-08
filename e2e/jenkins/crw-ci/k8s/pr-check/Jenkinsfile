@@ -138,7 +138,7 @@ pipeline {
         stage("Create test workspace") {
             steps {
                 script {
-                    sh "/usr/local/bin/chectl workspace:start --devfile=$DEVFILE_URL"
+                    sh "${WORKSPACE}/chectl workspace:start --devfile=$DEVFILE_URL"
                 }
             }
         }
