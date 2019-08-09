@@ -108,26 +108,20 @@ export class Editor {
     async waitTabWithSavedStatus(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const unsavedTabLocator: By = this.getTabWithUnsavedStatus(tabTitle);
 
-        await this.driverHelper.waitDisappearanceWithTimeout(unsavedTabLocator, timeout);
-        await this.waitTab(tabTitle, timeout);
-    }
-
-    async saveChanges(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.getDriver().wait(async () => {
-            await this.selectTab(editorTabTitle);
-            await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, 's'));
-
             try {
-                await this.waitTabWithSavedStatus(editorTabTitle, TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+                await this.driverHelper.waitDisappearanceWithTimeout(unsavedTabLocator, TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+                await this.waitTab(tabTitle, timeout);
                 return true;
             } catch (err) {
                 if (!(err instanceof error.TimeoutError)) {
                     throw err;
                 }
 
-                console.log(`The editor tab with title "${editorTabTitle}" has unsaved status, retry to save changes`);
+                console.log(`The editor tab with title "${tabTitle}" has unsaved status, wait once again`);
             }
         }, timeout);
+
     }
 
     async waitEditorOpened(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

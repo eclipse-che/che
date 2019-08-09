@@ -238,7 +238,7 @@ suite('Validation of debug functionality', async () => {
         await editor.waitTabWithUnsavedStatus('launch.json');
         await editor.waitText('launch.json', '\"name\": \"Debug (Launch) - Current File\"');
 
-        await editor.saveChanges('launch.json');
+        await editor.waitTabWithSavedStatus('launch.json');
     });
 
     test('Run debug and check application stop in the breakpoint', async () => {
@@ -289,7 +289,7 @@ async function checkJavaPathCompletion() {
         await editor.performKeyCombination(classPathFilename, Key.DELETE);
 
         await editor.type(classPathFilename, classpathText, 1);
-        await editor.saveChanges(classPathFilename);
+        await editor.waitTabWithSavedStatus(classPathFilename);
     }
 
 }
