@@ -46,8 +46,9 @@ global:
     secretName: che-tls
 
     ## If self-signed certificate is enabled
-    ## then certificate from `tls.secretName` will be propagated to Che components' trust stores
+    ## then certificate from `tls.selfSignedCertSecretName` will be propagated to Che components' trust stores
     useSelfSignedCerts: false
+    selfSignedCertSecretName: self-signed-cert
 
   gitHubClientID: ""
   gitHubClientSecret: ""
