@@ -54,6 +54,10 @@ public class MetadataImpl implements Metadata {
     return generateName;
   }
 
+  public void setGenerateName(String generateName) {
+    this.generateName = generateName;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
