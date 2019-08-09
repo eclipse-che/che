@@ -14,15 +14,13 @@ import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, Key, error, WebElement } from 'selenium-webdriver';
 import { Ide } from './Ide';
-import { Logger } from '../../utils/Logger';
 
 @injectable()
 export class Editor {
     private static readonly SUGGESTION_WIDGET_BODY_CSS: string = 'div.visible[widgetId=\'editor.widget.suggestWidget\']';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.Ide) private readonly ide: Ide,
-        @inject(CLASSES.Logger) private readonly logger: Logger) { }
+        @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     public async waitSuggestionContainer(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         await this.driverHelper.waitVisibility(By.css(Editor.SUGGESTION_WIDGET_BODY_CSS), timeout);
@@ -89,7 +87,6 @@ export class Editor {
     }
 
     public async selectTab(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        this.logger.methodLevel('selectTab');
         await this.ide.closeAllNotifications();
         await this.waitTab(tabTitle, timeout);
         await this.clickOnTab(tabTitle, timeout);
@@ -109,7 +106,6 @@ export class Editor {
     }
 
     async waitTabWithSavedStatus(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        this.logger.methodLevel('waitTabWithSavedStatus');
         const unsavedTabLocator: By = this.getTabWithUnsavedStatus(tabTitle);
 
         await this.driverHelper.waitDisappearanceWithTimeout(unsavedTabLocator, timeout);
@@ -117,7 +113,6 @@ export class Editor {
     }
 
     async saveChanges(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        this.logger.methodLevel('saveChanges');
         await this.driverHelper.getDriver().wait(async () => {
             await this.selectTab(editorTabTitle);
             await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, 's'));
@@ -214,7 +209,6 @@ export class Editor {
     }
 
     async performKeyCombination(editorTabTitle: string, text: string) {
-        this.logger.methodLevel('performKeyCombination');
         const interactionContainerLocator: By = this.getEditorActionArreaLocator(editorTabTitle);
 
         await this.driverHelper.type(interactionContainerLocator, text);

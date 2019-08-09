@@ -38,7 +38,6 @@ import { TestConstants } from './TestConstants';
 import { OcpLoginPage } from './pageobjects/openshift/OcpLoginPage';
 import { OcpWebConsolePage } from './pageobjects/openshift/OcpWebConsolePage';
 import { OcpLoginByTempAdmin } from './pageobjects/login/OcpLoginByTempAdmin';
-import { Logger } from './utils/Logger';
 
 const e2eContainer = new Container();
 
@@ -73,6 +72,5 @@ e2eContainer.bind<WarningDialog>(CLASSES.WarningDialog).to(WarningDialog).inSing
 e2eContainer.bind<ScreenCatcher>(CLASSES.ScreenCatcher).to(ScreenCatcher).inSingletonScope();
 e2eContainer.bind<OcpLoginPage>(CLASSES.OcpLoginPage).to(OcpLoginPage).inSingletonScope();
 e2eContainer.bind<OcpWebConsolePage>(CLASSES.OcpWebConsolePage).to(OcpWebConsolePage).inSingletonScope();
-e2eContainer.bind<Logger>(CLASSES.Logger).to(Logger).inSingletonScope();
 
 export { e2eContainer };
