@@ -37,8 +37,11 @@ pipeline {
                 stage("Download chectl") {
                     steps {
                         script {
+                            // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
                             sh """
-                               sudo bash <(curl -sL  https://www.eclipse.org/che/chectl/) --channel=stable
+                               curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                               chmod +x install_chectl.sh
+                               sudo PATH=$PATH ./install_chectl.sh -channel=stable
                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
                                sudo chmod +x ${WORKSPACE}/chectl
                             """
