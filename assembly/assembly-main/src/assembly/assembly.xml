@@ -35,7 +35,7 @@
             <outputDirectory>tomcat/webapps</outputDirectory>
             <outputFileNameMapping>ROOT.war</outputFileNameMapping>
             <includes>
-                <include>org.eclipse.che:assembly-ide-war</include>
+                <include>org.eclipse.che:assembly-root-war</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -73,63 +73,6 @@
             <includes>
                 <include>org.eclipse.che.lib:che-swagger-war</include>
             </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>lib</outputDirectory>
-            <outputFileNameMapping>jdt.ls.tar.gz</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che.ls.jdt:jdt.ls.extension.product</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>lib</outputDirectory>
-            <outputFileNameMapping>ws-agent.tar.gz</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che:assembly-wsagent-server</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>lib/linux_amd64/terminal</outputDirectory>
-            <outputFileNameMapping>websocket-terminal-linux_amd64.tar.gz</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che:terminal-agent:tar.gz:linux_amd64</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
-            <outputDirectory>lib/linux_amd64</outputDirectory>
-            <includes>
-                <include>org.eclipse.che:bootstrapper:zip:linux_amd64</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>false</unpack>
-            <outputDirectory>lib/linux_amd64/exec</outputDirectory>
-            <outputFileNameMapping>exec-agent-linux_amd64.tar.gz</outputFileNameMapping>
-            <includes>
-                <include>org.eclipse.che:exec-agent:tar.gz:linux_amd64</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <unpack>true</unpack>
-            <outputDirectory>templates</outputDirectory>
-            <includes>
-                <include>org.eclipse.che.core:che-core-ide-templates</include>
-            </includes>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>

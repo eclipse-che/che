@@ -25,6 +25,8 @@ import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -32,6 +34,8 @@ import org.testng.annotations.Test;
 
 @Test(groups = {GITHUB, OPENSHIFT, UNDER_REPAIR})
 public class DirectUrlFactoryWithKeepDirectoryTest {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DirectUrlFactoryWithKeepDirectoryTest.class);
 
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private TestGitHubRepository testRepo;
@@ -52,7 +56,11 @@ public class DirectUrlFactoryWithKeepDirectoryTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testFactoryWithKeepDir.delete();
+    try {
+      testFactoryWithKeepDir.delete();
+    } catch (Exception e) {
+      LOG.warn("It was impossible to remove factory.", e);
+    }
   }
 
   @Test

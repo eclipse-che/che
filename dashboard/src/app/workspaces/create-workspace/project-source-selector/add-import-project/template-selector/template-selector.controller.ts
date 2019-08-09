@@ -67,7 +67,7 @@ export class TemplateSelectorController {
 
     const helperId = 'template-selector';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
-    
+
     $scope.$watch(() => {
       return this.devfile;
     }, () => {
@@ -78,7 +78,7 @@ export class TemplateSelectorController {
       this.allTemplates = this.$filter('orderBy')(projects, ['name']);
       this.filterAndSortTemplates();
     }, true);
-    
+
     $scope.$on('$destroy', () => {
       cheListHelperFactory.removeHelper(helperId);
     });

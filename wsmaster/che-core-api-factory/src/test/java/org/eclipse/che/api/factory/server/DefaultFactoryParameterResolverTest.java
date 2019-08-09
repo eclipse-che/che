@@ -18,16 +18,13 @@ import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_C
 import static org.eclipse.che.api.workspace.server.devfile.Constants.PLUGIN_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.factory.server.urlfactory.URLFactoryBuilder;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
-import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
@@ -68,11 +65,7 @@ public class DefaultFactoryParameterResolverTest {
 
     DevfileIntegrityValidator integrityValidator = new DevfileIntegrityValidator(validators);
 
-    DevfileConverter devfileConverter = mock(DevfileConverter.class);
-    WorkspaceManager workspaceManager = mock(WorkspaceManager.class);
-
-    DevfileManager devfileManager =
-        new DevfileManager(validator, integrityValidator, devfileConverter, workspaceManager);
+    DevfileManager devfileManager = new DevfileManager(validator, integrityValidator);
 
     URLFactoryBuilder factoryBuilder =
         new URLFactoryBuilder("editor", "plugin", urlFetcher, devfileManager);

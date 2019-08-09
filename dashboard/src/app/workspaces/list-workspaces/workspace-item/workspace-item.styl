@@ -39,7 +39,13 @@
       padding 0
 
 .workspace-item-not-supported
+  position relative
+  min-width 120px
+  cursor pointer
 
-  .che-list-actions > *:hover
-    color $list-action-color
-    cursor default
+  *
+    color inherit
+    display inline
+
+    &:not(:first-child)
+      padding-left 5px

@@ -74,6 +74,8 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
 
   private static final String SSH_BASE_CONFIG_PATH = "/etc/ssh/";
 
+  private final String SSH_CONFIG_MAP_NAME_SUFFIX = "-sshconfigmap";
+
   private static final String SSH_CONFIG = "ssh_config";
 
   private static final String SSH_CONFIG_PATH = SSH_BASE_CONFIG_PATH + SSH_CONFIG;
@@ -102,21 +104,23 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
       StringBuilder sshConfigData = new StringBuilder();
 
       for (SshPair sshPair : sshPairs) {
-        doProvisionSshKey(sshPair, k8sEnv);
+        doProvisionSshKey(sshPair, k8sEnv, identity.getWorkspaceId());
 
         sshConfigData.append(buildConfig(sshPair.getName()));
       }
 
-      doProvisionSshConfig(sshConfigData.toString(), k8sEnv);
+      String sshConfigMapName = identity.getWorkspaceId() + SSH_CONFIG_MAP_NAME_SUFFIX;
+      doProvisionSshConfig(sshConfigMapName, sshConfigData.toString(), k8sEnv);
     } catch (ServerException e) {
       LOG.warn("Unable get SSH Keys. Cause: %s", e.getMessage(), e);
     }
   }
 
-  private void doProvisionSshKey(SshPair sshPair, KubernetesEnvironment k8sEnv) {
+  private void doProvisionSshKey(SshPair sshPair, KubernetesEnvironment k8sEnv, String wsId) {
     if (isNullOrEmpty(sshPair.getName()) || isNullOrEmpty(sshPair.getPrivateKey())) {
       return;
     }
+    String validNameForSecret = getValidNameForSecret(sshPair.getName());
     Secret secret =
         new SecretBuilder()
             .addToData(
@@ -124,7 +128,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
                 Base64.getEncoder().encodeToString(sshPair.getPrivateKey().getBytes()))
             .withType(SECRET_TYPE_SSH)
             .withNewMetadata()
-            .withName(getValidNameForSecret(sshPair.getName()))
+            .withName(wsId + "-" + validNameForSecret)
             .endMetadata()
             .build();
 
@@ -133,10 +137,12 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
     k8sEnv
         .getPodsData()
         .values()
-        .forEach(p -> mountSshKeySecret(secret.getMetadata().getName(), p.getSpec()));
+        .forEach(
+            p ->
+                mountSshKeySecret(secret.getMetadata().getName(), validNameForSecret, p.getSpec()));
   }
 
-  private void mountSshKeySecret(String secretName, PodSpec podSpec) {
+  private void mountSshKeySecret(String secretName, String sshKeyName, PodSpec podSpec) {
     podSpec
         .getVolumes()
         .add(
@@ -152,16 +158,16 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
                   .withName(secretName)
                   .withNewReadOnly(false)
                   .withReadOnly(false)
-                  .withMountPath(SSH_BASE_CONFIG_PATH + secretName)
+                  .withMountPath(SSH_BASE_CONFIG_PATH + sshKeyName)
                   .build();
           container.getVolumeMounts().add(volumeMount);
         });
   }
 
-  private void doProvisionSshConfig(String sshConfig, KubernetesEnvironment k8sEnv) {
+  private void doProvisionSshConfig(
+      String sshConfigMapName, String sshConfig, KubernetesEnvironment k8sEnv) {
     Map<String, String> sshConfigData = new HashMap<>();
     sshConfigData.put(SSH_CONFIG, sshConfig);
-    String sshConfigMapName = "sshconfigmap";
     ConfigMap configMap =
         new ConfigMapBuilder()
             .withNewMetadata()
@@ -207,22 +213,32 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
    *
    * <pre>
    * host github.com
-   * HostName github.com
    * IdentityFile /etc/ssh/github-com/ssh-privatekey
    * </pre>
    *
-   * @param host the host of version control service (e.g. github.com, gitlab.com and etc)
+   * or
+   *
+   * <pre>
+   * host *
+   * IdentityFile /etc/ssh/default-123456/ssh-privatekey
+   * </pre>
+   *
+   * @param name the of key given during generate for vcs service we will consider it as host of
+   *     version control service (e.g. github.com, gitlab.com and etc) if name starts from
+   *     "default-{anyString}" it will be replaced on wildcard "*" host name. Name with format
+   *     "default-{anyString}" will be generated on client side by Theia SSH Plugin, if user doesn't
+   *     provide own name. Details see here:
+   *     https://github.com/eclipse/che/issues/13494#issuecomment-512761661. Note: behavior can be
+   *     improved in 7.x releases after 7.0.0
    * @return the ssh configuration which include host and identity file location
    */
-  private String buildConfig(@NotNull String host) {
+  private String buildConfig(@NotNull String name) {
+    String host = name.startsWith("default-") ? "*" : name;
     return "host "
-        + host
-        + "\n"
-        + "HostName "
         + host
         + "\nIdentityFile "
         + SSH_BASE_CONFIG_PATH
-        + getValidNameForSecret(host)
+        + getValidNameForSecret(name)
         + "/"
         + SSH_PRIVATE_KEY
         + "\n";

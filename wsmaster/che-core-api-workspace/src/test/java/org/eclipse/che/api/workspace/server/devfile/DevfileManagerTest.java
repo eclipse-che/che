@@ -13,10 +13,8 @@ package org.eclipse.che.api.workspace.server.devfile;
 
 import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -30,10 +28,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.core.NotFoundException;
 import org.eclipse.che.api.core.model.workspace.WorkspaceStatus;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
-import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityValidator;
@@ -45,12 +40,10 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
-import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.json.JsonHelper;
 import org.eclipse.che.commons.json.JsonParseException;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.subject.SubjectImpl;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -67,8 +60,6 @@ public class DevfileManagerTest {
 
   @Mock private DevfileSchemaValidator schemaValidator;
   @Mock private DevfileIntegrityValidator integrityValidator;
-  @Mock private DevfileConverter devfileConverter;
-  @Mock private WorkspaceManager workspaceManager;
   @Mock private ObjectMapper objectMapper;
   @Mock private FileContentProvider contentProvider;
 
@@ -177,42 +168,6 @@ public class DevfileManagerTest {
 
     // when
     devfileManager.parseYaml(DEVFILE_YAML_CONTENT);
-  }
-
-  @Test
-  public void shouldFindAvailableNameAndCreateWorkspace() throws Exception {
-    // given
-    ArgumentCaptor<WorkspaceConfigImpl> captor = ArgumentCaptor.forClass(WorkspaceConfigImpl.class);
-
-    EnvironmentContext current = new EnvironmentContext();
-    current.setSubject(TEST_SUBJECT);
-    EnvironmentContext.setCurrent(current);
-
-    when(workspaceManager.getWorkspace(anyString(), anyString()))
-        .thenAnswer(
-            invocation -> {
-              String wsname = invocation.getArgument(0);
-              if ("petclinic-dev-environment".equals(wsname)
-                  || "petclinic-dev-environment_1".equals(wsname)) {
-                return mock(WorkspaceImpl.class);
-              }
-              throw new NotFoundException("ws not found");
-            });
-
-    WorkspaceConfigImpl wsConfig = mock(WorkspaceConfigImpl.class);
-    when(wsConfig.getName()).thenReturn("petclinic-dev-environment");
-    doReturn(new WorkspaceConfigImpl(wsConfig))
-        .when(devfileConverter)
-        .devFileToWorkspaceConfig(any(), any());
-    FileContentProvider fileContentProvider = mock(FileContentProvider.class);
-
-    // when
-    devfileManager.createWorkspace(devfile, fileContentProvider);
-
-    // then
-    verify(workspaceManager).createWorkspace(captor.capture(), anyString(), anyMap());
-    assertEquals("petclinic-dev-environment_2", captor.getValue().getName());
-    verify(devfileConverter).devFileToWorkspaceConfig(eq(devfile), any());
   }
 
   private WorkspaceImpl createWorkspace(WorkspaceStatus status)

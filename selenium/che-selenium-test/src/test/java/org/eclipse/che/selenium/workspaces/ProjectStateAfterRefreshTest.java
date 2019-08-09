@@ -11,6 +11,7 @@
  */
 package org.eclipse.che.selenium.workspaces;
 
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.project.ProjectTemplates.MAVEN_SPRING;
 
 import com.google.inject.Inject;
@@ -27,7 +28,8 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-/** @author Andrey chizhikov */
+/** @author Andrey chizhikov TODO rewrite to use che7 workspace */
+@Test(groups = UNDER_REPAIR)
 public class ProjectStateAfterRefreshTest {
   private static final String PROJECT_NAME = NameGenerator.generate("project", 5);
 

@@ -1,8 +1,0 @@
-{
-  "id": "org.eclipse.che.ls.camel",
-  "version": "1.0.0",
-  "name": "Apache Camel language server",
-  "description": "Apache Camel intellisense",
-  "dependencies": [],
-  "properties": {}
-}

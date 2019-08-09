@@ -68,7 +68,8 @@ export class CheKeycloak {
   }
 
   logout(): void {
-	window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
+    window.sessionStorage.removeItem('githubToken');
+    window.sessionStorage.setItem('oidcDashboardRedirectUrl', location.href);
     this.keycloak.logout({});
   }
 

@@ -92,7 +92,6 @@ export class ProjectSourceSelectorService {
       // update name and path
       const newName = this.getUniqueName(origName);
       projectTemplate.name = newName;
-      projectTemplate.path = '/' +  newName.replace(/[^\w-_]/g, '_');
     }
 
     this.projectTemplates.push(projectTemplate);

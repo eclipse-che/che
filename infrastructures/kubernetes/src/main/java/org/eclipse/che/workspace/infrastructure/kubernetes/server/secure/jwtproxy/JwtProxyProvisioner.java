@@ -55,6 +55,7 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.commons.lang.Size;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManagerException;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
@@ -264,9 +265,7 @@ public class JwtProxyProvisioner {
     return new PodBuilder()
         .withNewMetadata()
         .withName(JWT_PROXY_POD_NAME)
-        .withAnnotations(
-            ImmutableMap.of(
-                "org.eclipse.che.container.verifier.machine_name", JWT_PROXY_MACHINE_NAME))
+        .withAnnotations(Names.createMachineNameAnnotations("verifier", JWT_PROXY_MACHINE_NAME))
         .endMetadata()
         .withNewSpec()
         .withContainers(

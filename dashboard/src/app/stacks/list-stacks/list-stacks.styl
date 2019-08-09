@@ -1,55 +1,25 @@
-.stacks-list-header
-  flex-wrap wrap
-
-.stack-list
-  border-bottom 1px solid $list-separator-color
-
 .stacks-list-content
   margin 0
 
-  .template-list
-    position relative
-    margin-bottom 130px
+  .devfile-selector-icon-column
+    width 110px
 
-    & > div
-      overflow-y auto
-      max-height 288px
-      margin-top 45px
-      border-top 1px solid $list-separator-color
+  .devfile-selector-item-icon
+    font-size 25px
+    width 55px
+    text-align center
+    filter grayscale(100%) opacity(50%)
 
-      .che-list-header .che-list-header-content > *
-        border-bottom none
+    img
+      height 20px
+      vertical-align inherit
 
-      .che-list-header .che-list-item-row
-        margin 0
-        margin-top -40px
+    div
+      width 42px
 
-      .che-list-header-column > *
-         position absolute
-         top -40px
-         line-height 40px
-
-  stack-item
-    display block
+  che-editor
+    width 100%
+    margin-bottom 15px
 
 md-progress-linear.stack-list-progress
   height 10px
-
-.header-column
-  margin-left 12px
-  text-transform uppercase
-  color $frame-subscription-color
-
-.sort-direction
-  position relative
-  text-align center
-  display inline
-  top 4px
-
-.sort-direction *:first-child
-  position relative
-  top 3px
-
-.sort-direction *::before
-  font-size 20px
-  color $menu-bg-color

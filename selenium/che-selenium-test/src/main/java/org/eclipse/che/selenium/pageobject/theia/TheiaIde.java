@@ -62,6 +62,7 @@ public class TheiaIde {
         "//div[@class='theia-NotificationsContainer']//p[contains(text(), '%s')]";
     String NOTIFICATION_CLOSE_BUTTON =
         "//div[@class='theia-NotificationsContainer']//button[text()='Close']";
+    String BRANCH_NAME_XPATH = "//div[@id='theia-statusBar']//div[contains(@title,'Git')]";
   }
 
   @FindBy(xpath = Locators.THEIA_CHE_DASHBOARD_XPATH)
@@ -87,6 +88,9 @@ public class TheiaIde {
 
   @FindBy(xpath = Locators.ABOUT_DIALOG_OK_BUTTON_XPATH)
   WebElement aboutDialogOkButton;
+
+  @FindBy(xpath = Locators.BRANCH_NAME_XPATH)
+  WebElement branchName;
 
   public void openNavbarMenu() {
     seleniumWebDriverHelper.waitAndClick(theiaCheDashboard);
@@ -219,5 +223,9 @@ public class TheiaIde {
   @PreDestroy
   public void close() {
     seleniumWebDriver.quit();
+  }
+
+  public String getBranchName() {
+    return seleniumWebDriverHelper.waitVisibilityAndGetText(branchName);
   }
 }

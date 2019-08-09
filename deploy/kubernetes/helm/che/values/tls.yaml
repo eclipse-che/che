@@ -7,14 +7,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-# Currently, TLS support is enabled only for single-host deployments
-
 global:
-  multiuser: true
-  ingressDomain: <your.k8s.com>
-  serverStrategy: single-host
   tls:
     enabled: true
-    useCertManager: true
-    useStaging: false
     secretName: che-tls

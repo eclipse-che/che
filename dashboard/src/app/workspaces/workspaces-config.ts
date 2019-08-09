@@ -19,10 +19,6 @@ import {UsageChart} from './list-workspaces/workspace-item/usage-chart.directive
 import {WorkspaceItemCtrl} from './list-workspaces/workspace-item/workspace-item.controller';
 import {WorkspaceEditModeOverlay} from './workspace-edit-mode/workspace-edit-mode-overlay.directive';
 import {WorkspaceEditModeToolbarButton} from './workspace-edit-mode/workspace-edit-mode-toolbar-button.directive';
-import {StackSelectorController} from './create-workspace/stack-selector/stack-selector.controller';
-import {StackSelectorSvc} from './create-workspace/stack-selector/stack-selector.service';
-import {StackSelector} from './create-workspace/stack-selector/stack-selector.directive';
-import {StackSelectorItem} from './create-workspace/stack-selector/stack-selector-item/stack-selector-item.directive';
 import {RamSettingsController} from './create-workspace/ram-settings/ram-settings.controller';
 import {RamSettings} from './create-workspace/ram-settings/ram-settings.directive';
 import {RamSettingsMachineItemController} from './create-workspace/ram-settings/ram-settings-machine-item/ram-settings-machine-item.controller';
@@ -63,11 +59,6 @@ import {CheWorkspaceRamAllocationSliderController} from './workspace-ram-slider/
 import {CheWorkspaceRamAllocationSlider} from './workspace-ram-slider/che-workspace-ram-allocation-slider.directive';
 import {WorkspaceStatus} from './workspace-status/workspace-status.directive';
 import {WorkspaceStatusIndicator} from './workspace-status/workspace-status-indicator.directive';
-import {CheStackLibraryFilterController} from './create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.controller';
-import {CheStackLibraryFilter}     from './create-workspace/stack-selector/stack-library-filter/che-stack-library-filter.directive';
-import {StackSelectorScopeFilter} from './create-workspace/stack-selector/stack-selector-scope.filter';
-import {StackSelectorSearchFilter} from './create-workspace/stack-selector/stack-selector-search.filter';
-import {StackSelectorTagsFilter} from './create-workspace/stack-selector/stack-selector-tags.filter';
 import {CreateWorkspaceController} from './create-workspace/create-workspace.controller';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
 import {AfterCreationDialogController} from './create-workspace/after-creation-dialog/after-creation-dialog.controller';
@@ -98,9 +89,6 @@ export class WorkspacesConfig {
   constructor(register: che.IRegisterService) {
 
     /* tslint:disable */
-    new StackSelectorScopeFilter(register);
-    new StackSelectorSearchFilter(register);
-    new StackSelectorTagsFilter(register);
     new WorkspaceDetailsConfig(register);
     new WorkspacePluginsConfig(register);
     new WorkspaceEditorsConfig(register);
@@ -120,10 +108,6 @@ export class WorkspacesConfig {
     register.directive('workspaceStatusIndicator', WorkspaceStatusIndicator);
     register.directive('workspaceWarnings', WorkspaceWarnings);
     register.controller('WorkspaceWarningsController', WorkspaceWarningsController);
-    register.controller('StackSelectorController', StackSelectorController);
-    register.service('stackSelectorSvc', StackSelectorSvc);
-    register.directive('stackSelector', StackSelector);
-    register.directive('stackSelectorItem', StackSelectorItem);
     register.directive('devfileSelector', DevfileSelector);
     register.controller('DevfileSelectorController', DevfileSelectorController);
     register.controller('RamSettingsController', RamSettingsController);
@@ -162,8 +146,6 @@ export class WorkspacesConfig {
     register.controller('ProjectMetadataController', ProjectMetadataController);
     register.service('projectMetadataService', ProjectMetadataService);
     register.directive('projectMetadata', ProjectMetadata);
-    register.controller('CheStackLibraryFilterController', CheStackLibraryFilterController);
-    register.directive('cheStackLibraryFilter', CheStackLibraryFilter);
     register.controller('CreateWorkspaceController', CreateWorkspaceController);
     register.service('createWorkspaceSvc', CreateWorkspaceSvc);
     register.controller('AfterCreationDialogController', AfterCreationDialogController);

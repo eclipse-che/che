@@ -42,9 +42,7 @@ import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.D
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
-import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier;
-import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings;
@@ -197,9 +195,6 @@ public class KubernetesInfraModule extends AbstractModule {
               .addBinding(DOCKERIMAGE_COMPONENT_TYPE)
               .to(DockerimageComponentToWorkspaceApplier.class);
         });
-
-    DevfileBindings.addComponentProvisioners(
-        binder(), KubernetesComponentProvisioner.class, DockerimageComponentProvisioner.class);
 
     KubernetesDevfileBindings.addKubernetesBasedEnvironmentTypeBindings(
         binder(), KubernetesEnvironment.TYPE);

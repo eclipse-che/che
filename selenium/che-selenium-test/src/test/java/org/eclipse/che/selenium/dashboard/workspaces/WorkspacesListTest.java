@@ -48,6 +48,8 @@ import org.testng.annotations.Test;
  * @author Sergey Skorik
  * @author Ihor Okhrimenko
  */
+/** TODO rewrite to use che7 workspace */
+@Test(groups = UNDER_REPAIR)
 public class WorkspacesListTest {
   private static final int BLANK_WS_MB = 2048;
   private static final int JAVA_WS_MB = 3072;

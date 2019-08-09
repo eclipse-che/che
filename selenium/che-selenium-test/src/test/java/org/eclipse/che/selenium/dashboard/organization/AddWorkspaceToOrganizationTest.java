@@ -15,6 +15,7 @@ import static org.eclipse.che.commons.lang.NameGenerator.generate;
 import static org.eclipse.che.selenium.pageobject.dashboard.NavigationBar.MenuItem.ORGANIZATIONS;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 import com.google.inject.Inject;
 import org.eclipse.che.selenium.core.TestGroup;
@@ -29,11 +30,12 @@ import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationLi
 import org.eclipse.che.selenium.pageobject.dashboard.organization.OrganizationPage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
+import org.openqa.selenium.TimeoutException;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {TestGroup.MULTIUSER, TestGroup.DOCKER, TestGroup.OPENSHIFT, TestGroup.K8S})
+@Test(groups = {TestGroup.MULTIUSER, TestGroup.UNDER_REPAIR, TestGroup.OPENSHIFT, TestGroup.K8S})
 public class AddWorkspaceToOrganizationTest {
 
   private static final String WORKSPACE_FOR_ADMIN_1 = generate("workspace", 4);
@@ -148,7 +150,14 @@ public class AddWorkspaceToOrganizationTest {
     organizationListPage.waitOrganizationInList(org2.getName());
     organizationListPage.clickOnOrganization(org2.getName());
     organizationPage.clickOnWorkspacesTab();
-    workspaces.waitWorkspaceIsPresent(WORKSPACE_FOR_MEMBER_1);
+
+    try {
+      workspaces.waitWorkspaceIsPresent(WORKSPACE_FOR_MEMBER_1);
+    } catch (TimeoutException ex) {
+      // remove try-catch block after issue has been resolved
+      fail("Known permanent failure https://github.com/eclipse/che/issues/13893");
+    }
+
     workspaces.selectWorkspaceItemName(WORKSPACE_FOR_MEMBER_1);
     workspaceDetails.waitToolbarTitleName(WORKSPACE_FOR_MEMBER_1);
   }

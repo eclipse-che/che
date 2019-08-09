@@ -10,7 +10,7 @@
 
 import { e2eContainer } from '../../inversify.config';
 import { TYPES, CLASSES } from '../../inversify.types';
-import { ILoginPage } from '../../pageobjects/login/ILoginPage';
+import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
 import { NameGenerator } from '../../utils/NameGenerator';
 import { NewWorkspace } from '../../pageobjects/dashboard/NewWorkspace';
@@ -24,7 +24,7 @@ const sampleName: string = 'console-java-simple';
 const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
 
-const loginPage: ILoginPage = e2eContainer.get<ILoginPage>(TYPES.LoginPage);
+const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 const dashboard: Dashboard = e2eContainer.get(CLASSES.Dashboard);
 const newWorkspace: NewWorkspace = e2eContainer.get(CLASSES.NewWorkspace);
 const ide: Ide = e2eContainer.get(CLASSES.Ide);
@@ -45,7 +45,7 @@ suite('E2E', async () => {
         });
 
         test('Create and open workspace', async () => {
-            await newWorkspace.createAndRunWorkspace(namespace, workspaceName, 'Java Maven', sampleName);
+            await newWorkspace.createAndOpenWorkspace(workspaceName, 'Java Maven');
         });
     });
 
@@ -68,7 +68,7 @@ suite('E2E', async () => {
 
         test('Check "Java Language Server" initialization by statusbar', async () => {
             await ide.waitStatusBarContains('Starting Java Language Server');
-            await ide.waitStatusBarTextAbsence('Starting Java Language Server');
+            await ide.waitStatusBarTextAbsence('Starting Java Language Server', 60000);
         });
 
         test('Check "Java Language Server" initialization by suggestion invoking', async () => {

@@ -25,6 +25,8 @@ import org.eclipse.che.selenium.core.factory.TestFactory;
 import org.eclipse.che.selenium.core.factory.TestFactoryInitializer;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
 import org.eclipse.che.selenium.pageobject.theia.TheiaProjectTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -32,6 +34,8 @@ import org.testng.annotations.Test;
 /** @author Musienko Maxim */
 @Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithRootFolderTest {
+  private static final Logger LOG =
+      LoggerFactory.getLogger(DirectUrlFactoryWithRootFolderTest.class);
 
   @Inject private TestFactoryInitializer testFactoryInitializer;
   @Inject private TestGitHubRepository testRepo;
@@ -52,7 +56,11 @@ public class DirectUrlFactoryWithRootFolderTest {
 
   @AfterClass
   public void tearDown() throws Exception {
-    testFactoryWithRootFolder.delete();
+    try {
+      testFactoryWithRootFolder.delete();
+    } catch (Exception e) {
+      LOG.warn("It was impossible to remove factory.", e);
+    }
   }
 
   @Test
@@ -82,19 +90,19 @@ public class DirectUrlFactoryWithRootFolderTest {
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
     theiaIde.waitLoaderInvisibility();
-
-    theiaProjectTree.waitFilesTab();
-    theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitProjectsRootItem();
     theiaIde.waitNotificationEqualsTo("Che Workspace: Finished cloning projects.");
     theiaIde.waitNotificationDisappearance(
         "Che Workspace: Finished cloning projects.", UPDATING_PROJECT_TIMEOUT_SEC);
 
+    theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
+    theiaProjectTree.waitProjectsRootItem();
     theiaProjectTree.waitItem(repositoryName);
+    theiaProjectTree.expandItem(repositoryName);
 
     expectedItemsAfterCloning.forEach(
         name -> {
-          theiaProjectTree.isItemVisible(repositoryName + "/" + name);
+          theiaProjectTree.waitItem(repositoryName + "/" + name);
         });
   }
 }

@@ -1,3 +1,4 @@
+
 /*********************************************************************
  * Copyright (c) 2019 Red Hat, Inc.
  *
@@ -10,7 +11,8 @@
 
 const TYPES = {
     Driver: Symbol.for('Driver'),
-    LoginPage: Symbol.for('LoginPage')
+    CheLogin: Symbol.for('CheLogin'),
+    OcpLogin: Symbol.for('OcpLogin')
 };
 
 const CLASSES = {
@@ -31,7 +33,10 @@ const CLASSES = {
     RightToolbar: 'RightToolbar',
     Terminal: 'Terminal',
     DebugView: 'DebugView',
-    WarningDialog: 'WarningDialog'
+    WarningDialog: 'WarningDialog',
+    ScreenCatcher: 'ScreenCatcher',
+    OcpLoginPage: 'OcpLoginPage',
+    OcpWebConsolePage: 'OcpWebConsolePage'
 };
 
 export { TYPES, CLASSES };

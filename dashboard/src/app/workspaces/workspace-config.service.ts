@@ -14,7 +14,6 @@
 import {CheWorkspace} from '../../components/api/workspace/che-workspace.factory';
 import {NamespaceSelectorSvc} from './create-workspace/namespace-selector/namespace-selector.service';
 import {CreateWorkspaceSvc} from './create-workspace/create-workspace.service';
-import {StackSelectorSvc} from './create-workspace/stack-selector/stack-selector.service';
 import {TemplateSelectorSvc} from './create-workspace/project-source-selector/add-import-project/template-selector/template-selector.service';
 import {ImportGithubProjectService} from './create-workspace/project-source-selector/add-import-project/import-github-project/import-github-project.service';
 
@@ -25,7 +24,7 @@ import {ImportGithubProjectService} from './create-workspace/project-source-sele
  */
 export class WorkspaceConfigService {
 
-  static $inject = ['$log', '$q', 'cheWorkspace', 'namespaceSelectorSvc', 'createWorkspaceSvc', 'stackSelectorSvc', 'templateSelectorSvc', 'importGithubProjectService'];
+  static $inject = ['$log', '$q', 'cheWorkspace', 'namespaceSelectorSvc', 'createWorkspaceSvc', 'templateSelectorSvc', 'importGithubProjectService'];
 
   /**
    * Log service.
@@ -48,10 +47,6 @@ export class WorkspaceConfigService {
    */
   private createWorkspaceSvc: CreateWorkspaceSvc;
   /**
-   * Stack selector service.
-   */
-  private stackSelectorSvc: StackSelectorSvc;
-  /**
    * Template selector service.
    */
   private templateSelectorSvc: TemplateSelectorSvc;
@@ -63,13 +58,12 @@ export class WorkspaceConfigService {
   /** Default constructor that is using resource injection
    */
   constructor($log: ng.ILogService, $q: ng.IQService, cheWorkspace: CheWorkspace, namespaceSelectorSvc: NamespaceSelectorSvc, createWorkspaceSvc: CreateWorkspaceSvc,
-     stackSelectorSvc: StackSelectorSvc, templateSelectorSvc: TemplateSelectorSvc, importGithubProjectService: ImportGithubProjectService) {
+     templateSelectorSvc: TemplateSelectorSvc, importGithubProjectService: ImportGithubProjectService) {
     this.$log = $log;
     this.$q = $q;
     this.cheWorkspace = cheWorkspace;
     this.namespaceSelectorSvc = namespaceSelectorSvc;
     this.createWorkspaceSvc = createWorkspaceSvc;
-    this.stackSelectorSvc = stackSelectorSvc;
     this.templateSelectorSvc = templateSelectorSvc;
     this.importGithubProjectService = importGithubProjectService;
   }
@@ -107,7 +101,6 @@ export class WorkspaceConfigService {
     return this.$q.all([
       namespaceIdDefer.promise,
       workspacesDefer.promise,
-      this.stackSelectorSvc.getOrFetchStacks(),
       githubRepositoriesPromise
     ]);
   }

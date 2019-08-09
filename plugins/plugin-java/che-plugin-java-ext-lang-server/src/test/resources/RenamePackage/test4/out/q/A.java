@@ -1,2 +1,0 @@
-package q;
-class A{}

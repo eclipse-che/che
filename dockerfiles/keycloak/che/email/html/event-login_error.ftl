@@ -1,6 +1,6 @@
 <html>
 <head>
-${msg("robotoFontIncludeStyle")}
+${msg("robotoFontIncludeStyle")?no_esc}
 </head>
 <body style="${msg("mailBodyStyle")}">
     <#assign letterTitle=msg("eventLoginErrorTitle")>

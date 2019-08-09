@@ -124,10 +124,10 @@ export class GitHubService {
       .factory('gitHubTokenStore', function () {
         return {
           setToken: function (token: string) {
-            localStorage.setItem('gitHubToken', token); // jshint ignore:line
+            sessionStorage.setItem('githubToken', token);
           },
           getToken: function () {
-            return localStorage.getItem('gitHubToken'); // jshint ignore:line
+            return sessionStorage.getItem('githubToken');
           }
         };
       }).factory('gitHubApiUtils', ['gitHubApiUrlRoot', function (gitHubApiUrlRoot: string) {

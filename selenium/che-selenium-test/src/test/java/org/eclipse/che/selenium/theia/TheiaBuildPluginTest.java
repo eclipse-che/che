@@ -42,6 +42,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test(groups = {OPENSHIFT, UNDER_REPAIR})
+/** TODO the test looks outdated */
 public class TheiaBuildPluginTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("wksp-", 5);
   private static final String EXPECTED_DEVELOPMENT_HOST_TITLE = "Development Host";

@@ -13,7 +13,7 @@ package org.eclipse.che.selenium.pageobject.site;
 
 import static java.util.Arrays.asList;
 import static org.eclipse.che.selenium.pageobject.site.CheLoginPage.Locators.LOGIN_BUTTON_NAME;
-import static org.eclipse.che.selenium.pageobject.site.CheLoginPage.Locators.OPEN_SHIFT_OAUTH_LINK_ID;
+import static org.eclipse.che.selenium.pageobject.site.CheLoginPage.Locators.OPEN_SHIFT_OAUTH_LINK_XPATH;
 import static org.eclipse.che.selenium.pageobject.site.CheLoginPage.Locators.PASSWORD_INPUT_NAME;
 import static org.eclipse.che.selenium.pageobject.site.CheLoginPage.Locators.USERNAME_INPUT_NAME;
 
@@ -38,7 +38,7 @@ public class CheLoginPage implements LoginPage {
     String USERNAME_INPUT_NAME = "username";
     String PASSWORD_INPUT_NAME = "password";
     String LOGIN_BUTTON_NAME = "login";
-    String OPEN_SHIFT_OAUTH_LINK_ID = "zocial-openshift-v3";
+    String OPEN_SHIFT_OAUTH_LINK_XPATH = "//a[@id[contains(.,'zocial-openshift-v')]]";
 
     String ERROR_ALERT_XPATH = "//div[@class='alert alert-error']/span[@class='kc-feedback-text']";
     String INFO_ALERT_XPATH = "//div[@class='alert alert-info']/span[@class='kc-feedback-text']";
@@ -53,7 +53,7 @@ public class CheLoginPage implements LoginPage {
   @FindBy(name = LOGIN_BUTTON_NAME)
   private WebElement loginButton;
 
-  @FindBy(id = OPEN_SHIFT_OAUTH_LINK_ID)
+  @FindBy(xpath = OPEN_SHIFT_OAUTH_LINK_XPATH)
   private WebElement openShiftOAuthLink;
 
   @FindBy(xpath = Locators.INFO_ALERT_XPATH)

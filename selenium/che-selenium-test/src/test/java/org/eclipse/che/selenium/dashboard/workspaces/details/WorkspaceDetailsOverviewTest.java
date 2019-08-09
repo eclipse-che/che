@@ -12,6 +12,7 @@
 package org.eclipse.che.selenium.dashboard.workspaces.details;
 
 import static java.util.Arrays.asList;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.openqa.selenium.Keys.ESCAPE;
 
 import com.google.inject.Inject;
@@ -26,6 +27,8 @@ import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOvervie
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.Test;
 
+/** TODO rewrite to use che7 workspace */
+@Test(groups = UNDER_REPAIR)
 public class WorkspaceDetailsOverviewTest {
   private static final String WORKSPACE_NAME = NameGenerator.generate("test-workspace", 4);
   private static final String CHANGED_WORKSPACE_NAME = NameGenerator.generate(WORKSPACE_NAME, 4);

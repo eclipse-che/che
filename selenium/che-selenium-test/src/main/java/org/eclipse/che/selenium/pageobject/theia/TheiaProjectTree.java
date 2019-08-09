@@ -135,6 +135,14 @@ public class TheiaProjectTree {
         .contains(collapsedNodeClassName);
   }
 
+  public void expandItem(String itemName) {
+    if (!isItemExpanded(itemName)) {
+      clickOnItem(itemName);
+
+      waitItemExpanded(itemName);
+    }
+  }
+
   public void waitItemExpanded(String itemPath) {
     seleniumWebDriverHelper.waitSuccessCondition(driver -> isItemExpanded(itemPath));
   }

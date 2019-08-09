@@ -12,23 +12,19 @@
 package org.eclipse.che.multiuser.permissions.devfile;
 
 import static com.jayway.restassured.RestAssured.given;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.DOMAIN_ID;
-import static org.eclipse.che.multiuser.permission.workspace.server.WorkspaceDomain.READ;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_NAME;
 import static org.everrest.assured.JettyHttpServer.ADMIN_USER_PASSWORD;
 import static org.everrest.assured.JettyHttpServer.SECURE_PATH;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import com.jayway.restassured.response.Response;
-import org.eclipse.che.api.core.ForbiddenException;
-import org.eclipse.che.api.workspace.server.WorkspaceManager;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.che.api.workspace.server.devfile.DevfileService;
-import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.multiuser.permission.devfile.DevfilePermissionsFilter;
@@ -49,7 +45,7 @@ public class DevfilePermissionsFilterTest {
   private static final EnvironmentFilter FILTER = new EnvironmentFilter();
 
   @Mock private static Subject subject;
-  @Mock private WorkspaceManager workspaceManager;
+
   @Mock private DevfileService service;
 
   @SuppressWarnings("unused")
@@ -57,54 +53,29 @@ public class DevfilePermissionsFilterTest {
   private DevfilePermissionsFilter permissionsFilter;
 
   @Test
-  public void shouldCheckPermissionsOnExportingWorkspaceById() throws Exception {
-    final String wsId = "workspace123";
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .when()
-            .get(SECURE_PATH + "/devfile/" + wsId);
+  public void shouldTestThatAllPublicMethodsAreCoveredByPermissionsFilter() throws Exception {
+    // given
+    final List<String> collect =
+        Stream.of(DevfileService.class.getDeclaredMethods())
+            .filter(method -> Modifier.isPublic(method.getModifiers()))
+            .map(Method::getName)
+            .collect(Collectors.toList());
 
-    assertEquals(response.getStatusCode(), 204);
-    verify(subject).checkPermission(DOMAIN_ID, wsId, READ);
-    verify(service).createFromWorkspace((eq(wsId)));
+    // then
+    assertEquals(collect.size(), 1);
+    assertTrue(collect.contains(DevfilePermissionsFilter.GET_SCHEMA_METHOD));
   }
 
   @Test
-  public void shouldCheckPermissionsOnExportingWorkspaceByKey() throws Exception {
-    final String key = "namespace/ws_name";
-    final String wsId = "workspace123";
-    WorkspaceImpl workspace = new WorkspaceImpl();
-    workspace.setId(wsId);
-    when(workspaceManager.getWorkspace(eq(key))).thenReturn(workspace);
+  public void shouldNotCheckPermissionsOnExportingSchema() throws Exception {
     final Response response =
         given()
             .auth()
             .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
             .when()
-            .get(SECURE_PATH + "/devfile/" + key);
+            .get(SECURE_PATH + "/devfile");
 
     assertEquals(response.getStatusCode(), 204);
-    verify(subject).checkPermission(DOMAIN_ID, wsId, READ);
-    verify(service).createFromWorkspace((eq(key)));
-  }
-
-  @Test
-  public void shouldReturnForbiddenWhenUserDoesHavePermissionsToExportWorkspaceToDevfile()
-      throws Exception {
-    doThrow(new ForbiddenException("User in not authorized"))
-        .when(subject)
-        .checkPermission(anyString(), anyString(), anyString());
-
-    final Response response =
-        given()
-            .auth()
-            .basic(ADMIN_USER_NAME, ADMIN_USER_PASSWORD)
-            .when()
-            .get(SECURE_PATH + "/devfile/workspace123");
-
-    assertEquals(response.getStatusCode(), 403);
   }
 
   @Filter

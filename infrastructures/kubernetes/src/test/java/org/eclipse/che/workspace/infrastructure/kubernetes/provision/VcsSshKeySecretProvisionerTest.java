@@ -62,7 +62,8 @@ public class VcsSshKeySecretProvisionerTest {
 
   @BeforeMethod
   public void setup() {
-    when(runtimeIdentity.getOwnerId()).thenReturn("someuser");
+    when(runtimeIdentity.getOwnerId()).thenReturn(someUser);
+    when(runtimeIdentity.getWorkspaceId()).thenReturn("wksp");
     k8sEnv = KubernetesEnvironment.builder().build();
     ObjectMeta podMeta = new ObjectMetaBuilder().withName("wksp").build();
     when(pod.getMetadata()).thenReturn(podMeta);
@@ -83,28 +84,38 @@ public class VcsSshKeySecretProvisionerTest {
 
   @Test
   public void addSshKeysConfigInPod() throws Exception {
-    String keyName = UUID.randomUUID().toString();
+    String keyName1 = UUID.randomUUID().toString();
+    String keyName2 = "default-" + UUID.randomUUID().toString();
+    String keyName3 = "github.com";
     when(sshManager.getPairs(someUser, "vcs"))
         .thenReturn(
-            ImmutableList.of(new SshPairImpl(someUser, "vcs", keyName, "public", "private")));
+            ImmutableList.of(
+                new SshPairImpl(someUser, "vcs", keyName1, "public", "private"),
+                new SshPairImpl(someUser, "vcs", keyName2, "public", "private"),
+                new SshPairImpl(someUser, "vcs", keyName3, "public", "private")));
 
     vcsSshKeysProvisioner.provision(k8sEnv, runtimeIdentity);
 
-    verify(podSpec, times(2)).getVolumes();
-    verify(podSpec, times(2)).getContainers();
+    verify(podSpec, times(4)).getVolumes();
+    verify(podSpec, times(4)).getContainers();
 
-    Secret secret = k8sEnv.getSecrets().get(keyName);
+    Secret secret = k8sEnv.getSecrets().get("wksp-" + keyName1);
     assertNotNull(secret);
     assertEquals(secret.getType(), "kubernetes.io/ssh-auth");
 
     String key = secret.getData().get("ssh-privatekey");
     assertNotNull(key);
 
+    // check if key nave valid name '.' replaced to the '-'
+    Secret secret3 = k8sEnv.getSecrets().get("wksp-" + keyName3.replace('.', '-'));
+    assertNotNull(secret3);
+    assertEquals(secret3.getType(), "kubernetes.io/ssh-auth");
+
     Map<String, ConfigMap> configMaps = k8sEnv.getConfigMaps();
     assertNotNull(configMaps);
-    assertTrue(configMaps.containsKey("sshconfigmap"));
+    assertTrue(configMaps.containsKey("wksp-sshconfigmap"));
 
-    ConfigMap sshConfigMap = configMaps.get("sshconfigmap");
+    ConfigMap sshConfigMap = configMaps.get("wksp-sshconfigmap");
     assertNotNull(sshConfigMap);
 
     Map<String, String> mapData = sshConfigMap.getData();
@@ -112,8 +123,13 @@ public class VcsSshKeySecretProvisionerTest {
     assertTrue(mapData.containsKey("ssh_config"));
 
     String sshConfig = mapData.get("ssh_config");
-    assertTrue(sshConfig.contains("host " + keyName));
-    assertTrue(sshConfig.contains("HostName " + keyName));
-    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName + "/ssh-privatekey"));
+    assertTrue(sshConfig.contains("host " + keyName1));
+    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName1 + "/ssh-privatekey"));
+
+    assertTrue(sshConfig.contains("host *"));
+    assertTrue(sshConfig.contains("IdentityFile " + "/etc/ssh/" + keyName2 + "/ssh-privatekey"));
+
+    assertTrue(sshConfig.contains("host github.com"));
+    assertTrue(sshConfig.contains("IdentityFile /etc/ssh/github-com/ssh-privatekey"));
   }
 }

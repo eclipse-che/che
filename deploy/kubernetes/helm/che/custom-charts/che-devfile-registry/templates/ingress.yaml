@@ -1,0 +1,30 @@
+#
+# Copyright (c) 2018 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: devfile-registry
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: {{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: devfile-registry
+          servicePort: 8080
+{{- if .Values.global.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ printf .Values.global.cheDevfileRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
+    secretName: {{ .Values.global.tls.secretName }}
+{{- end -}}

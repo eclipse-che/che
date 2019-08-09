@@ -19,7 +19,6 @@ import {CheProjectTypeBuilder} from './che-projecttype-builder';
 import {CheProjectTemplateBuilder} from './che-projecttemplate-builder';
 import {CheProjectTypeAttributeDescriptorBuilder} from './che-projecttype-attribute-descriptor-builder';
 import {CheProfileBuilder} from './che-profile-builder';
-import {CheStackBuilder} from './che-stack-builder';
 import {CheUserBuilder} from './che-user-builder';
 import {ChePermissionsBuilder} from './che-permissions-builder';
 import {CheOrganizationsBuilder} from './che-organizations-builder';
@@ -79,14 +78,6 @@ export class CheAPIBuilder {
    */
   getProjectTypeAttributeDescriptorBuilder() {
     return new CheProjectTypeAttributeDescriptorBuilder();
-  }
-
-  /***
-   * The Che Stack builder
-   * @returns {CheStackBuilder}
-   */
-  getStackBuilder() {
-    return new CheStackBuilder();
   }
 
   /***

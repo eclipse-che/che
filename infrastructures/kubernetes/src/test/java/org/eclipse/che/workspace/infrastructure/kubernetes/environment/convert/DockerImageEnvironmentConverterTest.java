@@ -11,11 +11,9 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.MACHINE_NAME_ANNOTATION_FMT;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter.CONTAINER_NAME;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.environment.convert.DockerImageEnvironmentConverter.POD_NAME;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,6 +33,7 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalRecipe;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPoint;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.util.EntryPointParser;
@@ -71,8 +70,9 @@ public class DockerImageEnvironmentConverterTest {
     lenient().when(recipe.getContent()).thenReturn(RECIPE_CONTENT);
     lenient().when(recipe.getType()).thenReturn(RECIPE_TYPE);
     machines = ImmutableMap.of(MACHINE_NAME, mock(InternalMachineConfig.class));
-    final Map<String, String> annotations = new HashMap<>();
-    annotations.put(format(MACHINE_NAME_ANNOTATION_FMT, CONTAINER_NAME), MACHINE_NAME);
+    final Map<String, String> annotations =
+        Names.createMachineNameAnnotations(CONTAINER_NAME, MACHINE_NAME);
+
     pod =
         new PodBuilder()
             .withNewMetadata()
