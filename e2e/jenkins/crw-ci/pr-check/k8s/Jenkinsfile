@@ -38,7 +38,8 @@ pipeline {
                     steps {
                         script {
                             sh """
-                              wget --no-verbose https://github.com/che-incubator/chectl/releases/latest/download/chectl-linux \\
+                               # wget --no-verbose https://github.com/che-incubator/chectl/releases/latest/download/chectl-linux
+                               wget --no-verbose https://github.com/che-incubator/chectl/releases/download/20190802065601/chectl-linux
                                 -O ${WORKSPACE}/chectl
 
                               sudo chmod +x ${WORKSPACE}/chectl
