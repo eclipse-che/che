@@ -575,6 +575,11 @@ public class WorkspaceManager {
     return workspace;
   }
 
+  /**
+   * If 'generateName' is defined and 'name' is not, we generate name using 'generateName' as a
+   * prefix following {@link Constants#WORKSPACE_GENERATE_NAME_CHARS_APPEND} random characters and
+   * set it to 'name'.
+   */
   private Devfile generateNameIfNeeded(Devfile origDevfile) {
     if (origDevfile.getMetadata() != null) {
       MetadataImpl metadata = new MetadataImpl(origDevfile.getMetadata());
@@ -588,25 +593,6 @@ public class WorkspaceManager {
       }
     }
     return origDevfile;
-  }
-
-  /**
-   * If 'generateName' is defined and 'name' is not, we generate name using 'generateName' as a
-   * prefix following {@link Constants#WORKSPACE_GENERATE_NAME_CHARS_APPEND} random characters and
-   * set it to 'name'.
-   */
-  private DevfileImpl generateNameIfNeeded(DevfileImpl devfileModel) {
-    if (devfileModel.getMetadata() != null
-        && devfileModel.getMetadata().getName() == null
-        && devfileModel.getMetadata().getGenerateName() != null) {
-      devfileModel
-          .getMetadata()
-          .setName(
-              NameGenerator.generate(
-                  devfileModel.getMetadata().getGenerateName(),
-                  WORKSPACE_GENERATE_NAME_CHARS_APPEND));
-    }
-    return devfileModel;
   }
 
   private WorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
