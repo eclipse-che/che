@@ -38,11 +38,9 @@ pipeline {
                     steps {
                         script {
                             sh """
-                               # wget --no-verbose https://github.com/che-incubator/chectl/releases/latest/download/chectl-linux
-                               wget --no-verbose https://github.com/che-incubator/chectl/releases/download/20190802065601/chectl-linux
-                                -O ${WORKSPACE}/chectl
-
-                              sudo chmod +x ${WORKSPACE}/chectl
+                               sudo bash <(curl -sL  https://www.eclipse.org/che/chectl/) --channel=stable
+                               sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                               sudo chmod +x ${WORKSPACE}/chectl
                             """
                         }
                     }
@@ -147,7 +145,7 @@ pipeline {
         stage("Run E2E Happy path tests") {
             steps {
                 script {
-                    // TODO switch to eclipse/che-e2e image
+                    // TO-DO (#14171) switch to eclipse/che-e2e image
 //                    sh """
 //                         CHE_HOST=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
 //                         CHE_URL=http://\${CHE_HOST}
