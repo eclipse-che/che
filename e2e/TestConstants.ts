@@ -152,7 +152,7 @@ export const TestConstants = {
     /**
      * Run tests inside of docker container.
      */
-    TS_SELENIUM_REMOTE_DRIVER: process.env.TS_SELENIUM_DOCKER === 'true',
+    TS_SELENIUM_REMOTE_DRIVER: process.env.TS_SELENIUM_REMOTE_DRIVER === 'true',
 
     /**
      * Remote driver URL.
