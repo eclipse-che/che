@@ -15,13 +15,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 import org.eclipse.che.api.installer.server.impl.LocalInstallerRegistry;
-import org.eclipse.che.api.installer.server.impl.RemoteInstallerRegistry;
 
 /**
  * Provides corresponding instance of {@link InstallerRegistry}.
- *
- * <p>Instance of {@link RemoteInstallerRegistry} will be provided if it is configured otherwise
- * instance of {@link LocalInstallerRegistry} will be provided.
  *
  * @author gazarenkov
  * @author Sergii Leshchenko
@@ -29,20 +25,14 @@ import org.eclipse.che.api.installer.server.impl.RemoteInstallerRegistry;
 @Singleton
 public class InstallerRegistryProvider implements Provider<InstallerRegistry> {
   private final LocalInstallerRegistry localInstallerRegistry;
-  private final RemoteInstallerRegistry remoteInstallerRegistry;
 
   @Inject
-  public InstallerRegistryProvider(
-      LocalInstallerRegistry localInstallerRegistry,
-      RemoteInstallerRegistry remoteInstallerRegistry) {
+  public InstallerRegistryProvider(LocalInstallerRegistry localInstallerRegistry) {
     this.localInstallerRegistry = localInstallerRegistry;
-    this.remoteInstallerRegistry = remoteInstallerRegistry;
   }
 
   @Override
   public InstallerRegistry get() {
-    return remoteInstallerRegistry.isConfigured()
-        ? remoteInstallerRegistry
-        : localInstallerRegistry;
+    return localInstallerRegistry;
   }
 }

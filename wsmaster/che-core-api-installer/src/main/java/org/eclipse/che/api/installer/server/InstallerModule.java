@@ -22,8 +22,6 @@ public class InstallerModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(InstallerExceptionMapper.class);
-    bind(InstallerRegistry.class).toProvider(InstallerRegistryProvider.class);
-    bind(InstallerRegistryService.class);
     bind(InstallerDao.class).to(JpaInstallerDao.class);
   }
 }
