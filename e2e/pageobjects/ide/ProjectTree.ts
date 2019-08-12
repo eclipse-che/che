@@ -87,15 +87,26 @@ export class ProjectTree {
         const expandIconLocator: By = By.css(this.getExpandIconCssLocator(itemPath));
         const treeItemLocator: By = By.css(this.getTreeItemCssLocator(itemPath));
 
+        await this.driverHelper.getDriver().wait(async () => {
+            const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout);
+            const isItemCollapsed: boolean = classAttributeValue.search('theia-mod-collapsed') > 0;
 
-        const classAttributeValue: string = await this.driverHelper.waitAndGetElementAttribute(expandIconLocator, 'class', timeout);
-        const isItemCollapsed: boolean = classAttributeValue.search('theia-mod-collapsed') > 0;
+            if (isItemCollapsed) {
+                await this.driverHelper.waitAndClick(treeItemLocator, timeout);
+            }
 
-        if (isItemCollapsed) {
-            await this.driverHelper.waitAndClick(treeItemLocator, timeout);
-        }
+            try {
+                await this.waitItemExpanded(itemPath, TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err('Unexpected error during project tree expanding');
+                }
 
-        await this.waitItemExpanded(itemPath, timeout);
+                console.log(`The '${itemPath}' item has not been expanded, try again`);
+                await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+            }
+        }, timeout);
     }
 
     async collapseItem(itemPath: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
