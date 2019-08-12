@@ -100,7 +100,7 @@ spec:
         image: mariolet/petclinic:d2831f9b
         resources:
           requests:
-            memory: 1000Mi
+            memory: 2000Mi
         ports:
         - containerPort: 8080
 ---

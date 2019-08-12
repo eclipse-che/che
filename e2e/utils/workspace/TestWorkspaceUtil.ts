@@ -14,6 +14,7 @@ import { DriverHelper } from '../DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import * as rm from 'typed-rest-client/RestClient';
+import { error } from 'selenium-webdriver';
 
 export enum WorkspaceStatus {
     RUNNING = 'RUNNING',
@@ -48,7 +49,7 @@ export class TestWorkspaceUtil {
             await this.driverHelper.wait(polling);
         }
 
-        throw new Error(`Exceeded the maximum number of checking attempts, workspace status is different to '${expectedWorkspaceStatus}'`);
+        throw new error.TimeoutError(`Exceeded the maximum number of checking attempts, workspace status is different to '${expectedWorkspaceStatus}'`);
     }
 
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginId: string) {
@@ -72,7 +73,7 @@ export class TestWorkspaceUtil {
             }
 
             if (i === attempts - 1) {
-                throw new Error(`Exceeded maximum tries attempts, the '${pluginId}' plugin is not present in the workspace runtime.`);
+                throw new error.TimeoutError(`Exceeded maximum tries attempts, the '${pluginId}' plugin is not present in the workspace runtime.`);
             }
 
             await this.driverHelper.wait(polling);
