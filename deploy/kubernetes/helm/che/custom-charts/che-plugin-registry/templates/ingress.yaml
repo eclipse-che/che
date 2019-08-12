@@ -12,7 +12,7 @@ kind: Ingress
 metadata:
   name: plugin-registry
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    kubernetes.io/ingress.class: {{ .Values.global.defaultIngressClass }}
 spec:
   rules:
   - host: {{ printf .Values.global.chePluginRegistryUrlFormat .Release.Namespace .Values.global.ingressDomain }}
