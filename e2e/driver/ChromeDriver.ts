@@ -20,8 +20,8 @@ export class ChromeDriver implements IDriver {
     private readonly driver: ThenableWebDriver;
 
     constructor() {
-        const options: Options = this.setDriverOptions();
-        this.driver = this.setDriverBuilder(options).build();
+        const options: Options = this.getDriverOptions();
+        this.driver = this.getDriverBuilder(options).build();
 
         this.driver
             .manage()
@@ -33,7 +33,7 @@ export class ChromeDriver implements IDriver {
         return this.driver;
     }
 
-    private setDriverOptions(): Options {
+    private getDriverOptions(): Options {
         let options: Options = new Options()
             .addArguments('--no-sandbox')
             .addArguments('--disable-web-security')
@@ -47,13 +47,13 @@ export class ChromeDriver implements IDriver {
         return options;
     }
 
-    private setDriverBuilder(options: Options): Builder {
+    private getDriverBuilder(options: Options): Builder {
         let builder: Builder = new Builder()
             .forBrowser('chrome')
             .setChromeOptions(options);
 
         // if 'true' run with remote driver
-        if (TestConstants.TS_SELENIUM_REMOTE_DRIVER === true) {
+        if (TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {
             builder = builder.usingServer(TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL);
         }
 

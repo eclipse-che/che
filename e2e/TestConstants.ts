@@ -150,12 +150,7 @@ export const TestConstants = {
     TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly',
 
     /**
-     * Run tests inside of docker container.
-     */
-    TS_SELENIUM_REMOTE_DRIVER: process.env.TS_SELENIUM_REMOTE_DRIVER === 'true',
-
-    /**
      * Remote driver URL.
      */
-    TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_DRIVER_SERVER_URL || 'http://localhost:9515'
+    TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_DRIVER_SERVER_URL || ''
 };
