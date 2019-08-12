@@ -152,5 +152,5 @@ export const TestConstants = {
     /**
      * Remote driver URL.
      */
-    TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_DRIVER_SERVER_URL || ''
+    TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_REMOTE_DRIVER_URL || ''
 };
