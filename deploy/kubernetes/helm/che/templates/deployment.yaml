@@ -80,8 +80,8 @@ spec:
         - name: CHE_SELF__SIGNED__CERT
           valueFrom:
             secretKeyRef:
-              key: tls.crt
-              name: {{ .Values.global.tls.secretName  }}
+              key: ca.crt
+              name: {{ .Values.global.tls.selfSignedCertSecretName }}
               optional: false
         {{- end }}
 
