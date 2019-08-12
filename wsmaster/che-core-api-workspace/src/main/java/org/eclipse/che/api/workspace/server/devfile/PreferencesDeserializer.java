@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Helps to deserialize multi-type preferences map of Devfile {@code Component}.
+ * Helps to deserialize multi-type preferences into {@code Component} as a {@code Map}.
  *
  * @author Max Shaposhnyk
  */

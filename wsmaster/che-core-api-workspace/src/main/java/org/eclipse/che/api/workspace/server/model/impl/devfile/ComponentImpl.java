@@ -38,7 +38,7 @@ import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Volume;
-import org.eclipse.che.api.workspace.server.devfile.ObjectConverter;
+import org.eclipse.che.api.workspace.server.devfile.PreferenceValuesConverter;
 import org.eclipse.che.api.workspace.server.devfile.PreferencesDeserializer;
 
 /** @author Sergii Leshchenko */
@@ -59,7 +59,7 @@ public class ComponentImpl implements Component {
       name = "devfile_component_preferences",
       joinColumns = @JoinColumn(name = "devfile_component_id"))
   @MapKeyColumn(name = "preference_key")
-  @Convert(converter = ObjectConverter.class)
+  @Convert(converter = PreferenceValuesConverter.class)
   @Column(name = "preference")
   @JsonDeserialize(using = PreferencesDeserializer.class)
   private Map<String, Serializable> preferences;

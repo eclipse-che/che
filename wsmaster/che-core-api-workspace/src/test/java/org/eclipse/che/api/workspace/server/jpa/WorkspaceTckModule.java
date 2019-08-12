@@ -14,7 +14,7 @@ package org.eclipse.che.api.workspace.server.jpa;
 import com.google.inject.TypeLiteral;
 import java.util.Collection;
 import org.eclipse.che.account.spi.AccountImpl;
-import org.eclipse.che.api.workspace.server.devfile.ObjectConverter;
+import org.eclipse.che.api.workspace.server.devfile.PreferenceValuesConverter;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.MachineConfigImpl;
@@ -86,7 +86,7 @@ public class WorkspaceTckModule extends TckModule {
                 org.eclipse.che.api.workspace.server.model.impl.devfile.VolumeImpl.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
-            .addEntityClass(ObjectConverter.class)
+            .addEntityClass(PreferenceValuesConverter.class)
             .setExceptionHandler(H2ExceptionHandler.class)
             .build());
     bind(DBInitializer.class).asEagerSingleton();
