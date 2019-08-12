@@ -37,11 +37,13 @@ pipeline {
                 stage("Download chectl") {
                     steps {
                         script {
+                            // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
                             sh """
-                              wget --no-verbose https://github.com/che-incubator/chectl/releases/latest/download/chectl-linux \\
-                                -O ${WORKSPACE}/chectl
-
-                              sudo chmod +x ${WORKSPACE}/chectl
+                               curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                               chmod +x install_chectl.sh
+                               sudo PATH=$PATH ./install_chectl.sh -channel=stable
+                               sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                               sudo chmod +x ${WORKSPACE}/chectl
                             """
                         }
                     }
@@ -146,7 +148,7 @@ pipeline {
         stage("Run E2E Happy path tests") {
             steps {
                 script {
-                    // TODO switch to eclipse/che-e2e image
+                    // TO-DO (#14171) switch to eclipse/che-e2e image
 //                    sh """
 //                         CHE_HOST=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
 //                         CHE_URL=http://\${CHE_HOST}
