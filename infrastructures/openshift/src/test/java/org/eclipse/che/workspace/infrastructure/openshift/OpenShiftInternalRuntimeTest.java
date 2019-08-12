@@ -146,7 +146,6 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private OpenShiftEnvironmentProvisioner kubernetesEnvironmentProvisioner;
   @Mock private SidecarToolingProvisioner<OpenShiftEnvironment> toolingProvisioner;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
-  @Mock private OpenShiftExternalServerExposer serverExposerStrategy;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
   @Mock(answer = Answers.RETURNS_MOCKS)

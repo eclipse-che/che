@@ -50,8 +50,6 @@ public class OpenShiftServerResolverTest {
   private static final int CONTAINER_PORT = 3054;
   private static final String ROUTE_HOST = "localhost";
 
-  @Mock private OpenShiftExternalServerExposer exposer;
-
   @Test
   public void
       testResolvingServersWhenThereIsNoTheCorrespondingServiceAndRouteForTheSpecifiedMachine() {
