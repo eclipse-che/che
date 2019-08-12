@@ -108,8 +108,20 @@ export class Editor {
     async waitTabWithSavedStatus(tabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const unsavedTabLocator: By = this.getTabWithUnsavedStatus(tabTitle);
 
-        await this.driverHelper.waitDisappearanceWithTimeout(unsavedTabLocator, timeout);
-        await this.waitTab(tabTitle, timeout);
+        await this.driverHelper.getDriver().wait(async () => {
+            try {
+                await this.driverHelper.waitDisappearanceWithTimeout(unsavedTabLocator, TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+                await this.waitTab(tabTitle, timeout);
+                return true;
+            } catch (err) {
+                if (!(err instanceof error.TimeoutError)) {
+                    throw err;
+                }
+
+                console.log(`The editor tab with title "${tabTitle}" has unsaved status, wait once again`);
+            }
+        }, timeout);
+
     }
 
     async waitEditorOpened(editorTabTitle: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -190,7 +202,7 @@ export class Editor {
         }
     }
 
-    public async performKeyCombination(editorTabTitle: string, text: string) {
+    async performKeyCombination(editorTabTitle: string, text: string) {
         const interactionContainerLocator: By = this.getEditorActionArreaLocator(editorTabTitle);
 
         await this.driverHelper.type(interactionContainerLocator, text);
