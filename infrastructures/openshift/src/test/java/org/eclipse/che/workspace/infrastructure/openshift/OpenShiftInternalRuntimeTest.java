@@ -87,7 +87,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarTool
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProject;
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftRoutes;
-import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
