@@ -23,6 +23,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Helps to deserialize multi-type preferences map of Devfile {@code Component}.
+ *
+ * @author Max Shaposhnyk
+ */
 public class PreferencesDeserializer extends JsonDeserializer<Map<String, Serializable>> {
 
   @Override
@@ -45,7 +50,8 @@ public class PreferencesDeserializer extends JsonDeserializer<Map<String, Serial
           break;
         default:
           throw new JsonParseException(
-              jsonParser, format("Unexpected preference value '%s' ", jsonParser.getCurrentName()));
+              jsonParser,
+              format("Unexpected value of the preference '%s' ", jsonParser.getCurrentName()));
       }
       jsonParser.nextToken();
     }

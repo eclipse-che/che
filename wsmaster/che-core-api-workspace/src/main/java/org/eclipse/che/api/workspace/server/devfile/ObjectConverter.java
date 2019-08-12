@@ -20,6 +20,11 @@ import java.io.Serializable;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 
+/**
+ * Helps to store and read multi-type preferences map of Devfile {@code Component} into database.
+ *
+ * @author Max Shaposhnyk
+ */
 @Converter(autoApply = true)
 public class ObjectConverter implements AttributeConverter<Serializable, byte[]> {
 
@@ -29,7 +34,7 @@ public class ObjectConverter implements AttributeConverter<Serializable, byte[]>
     try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
       oos.writeObject(attribute);
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Unable to store preferences: " + e.getMessage(), e);
     }
     return baos.toByteArray();
   }
@@ -38,11 +43,8 @@ public class ObjectConverter implements AttributeConverter<Serializable, byte[]>
   public Serializable convertToEntityAttribute(byte[] dbData) {
     try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(dbData))) {
       return (Serializable) ois.readObject();
-    } catch (IOException e) {
-      e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+    } catch (IOException | ClassNotFoundException e) {
+      throw new RuntimeException("Unable to read preferences: " + e.getMessage(), e);
     }
-    return null;
   }
 }
