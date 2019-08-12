@@ -13,6 +13,8 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 
 import static java.util.stream.Collectors.toCollection;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,8 @@ import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Volume;
+import org.eclipse.che.api.workspace.server.devfile.ObjectConverter;
+import org.eclipse.che.api.workspace.server.devfile.PreferencesDeserializer;
 
 /** @author Sergii Leshchenko */
 @Entity(name = "DevfileComponent")
@@ -57,7 +61,8 @@ public class ComponentImpl implements Component {
   @MapKeyColumn(name = "preference_key")
   @Convert(converter = ObjectConverter.class)
   @Column(name = "preference")
-  private Map<String, Object> preferences;
+  @JsonDeserialize(using = PreferencesDeserializer.class)
+  private Map<String, Serializable> preferences;
 
   @Column(name = "alias")
   private String alias;
@@ -192,7 +197,7 @@ public class ComponentImpl implements Component {
       String type,
       String alias,
       String id,
-      Map<String, Object> preferences,
+      Map<String, Serializable> preferences,
       String registryUrl,
       String reference,
       String referenceContent,
@@ -296,14 +301,14 @@ public class ComponentImpl implements Component {
     this.registryUrl = registryUrl;
   }
 
-  public Map<String, Object> getPreferences() {
+  public Map<String, Serializable> getPreferences() {
     if (preferences == null) {
       preferences = new HashMap<>();
     }
     return preferences;
   }
 
-  public void setPreferences(Map<String, Object> preferences) {
+  public void setPreferences(Map<String, Serializable> preferences) {
     this.preferences = preferences;
   }
 

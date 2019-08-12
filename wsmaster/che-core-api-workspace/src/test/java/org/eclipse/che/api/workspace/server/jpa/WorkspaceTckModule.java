@@ -30,7 +30,7 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
-import org.eclipse.che.api.workspace.server.model.impl.devfile.ObjectConverter;
+import org.eclipse.che.api.workspace.server.devfile.ObjectConverter;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;

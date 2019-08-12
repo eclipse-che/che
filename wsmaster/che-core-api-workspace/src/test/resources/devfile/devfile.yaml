@@ -28,6 +28,11 @@ components:
   - alias: jdt.ls
     type: chePlugin
     id: org.eclipse.chetheia-jdtls:0.0.3
+    preferences:
+      java.home: '/home/user/jdk11'
+      java.jdt.ls.vmargs: '-noverify -Xmx1G -XX:+UseG1GC -XX:+UseStringDeduplication'
+      java.jtg.memory: 12345
+      java.boolean: true
   - type: openshift
     reference: petclinic.yaml
     selector:
