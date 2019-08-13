@@ -20,7 +20,7 @@ fi
 echo "Copying source code ${E2E_DIR} --> ${LOCAL_E2E_DIR}"
 cp -r "${E2E_DIR}" "${LOCAL_E2E_DIR}"
 
-init --name:e2e "$@"
+init --name:e2e --no-cache "$@"
 build
 
 # cleanup
