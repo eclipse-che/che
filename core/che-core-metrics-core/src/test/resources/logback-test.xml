@@ -19,7 +19,8 @@
             <pattern>%-41(%date[%.15thread]) %-45([%-5level] [%.30logger{30} %L]) - %msg%n</pattern>
         </encoder>
     </appender>
-
+    <logger name="org.eclipse.che.core.metrics.FileStoresMeterTest" level="DEBUG"/>
+    <logger name="org.eclipse.che.core.metrics.FileStoresMeterBinder" level="DEBUG"/>
     <root level="INFO">
         <appender-ref ref="stdout"/>
     </root>
