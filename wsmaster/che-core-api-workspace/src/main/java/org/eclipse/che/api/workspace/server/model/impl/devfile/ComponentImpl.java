@@ -38,8 +38,8 @@ import org.eclipse.che.api.core.model.workspace.devfile.Endpoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Entrypoint;
 import org.eclipse.che.api.core.model.workspace.devfile.Env;
 import org.eclipse.che.api.core.model.workspace.devfile.Volume;
-import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 import org.eclipse.che.api.workspace.server.devfile.PreferencesDeserializer;
+import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 
 /** @author Sergii Leshchenko */
 @Entity(name = "DevfileComponent")

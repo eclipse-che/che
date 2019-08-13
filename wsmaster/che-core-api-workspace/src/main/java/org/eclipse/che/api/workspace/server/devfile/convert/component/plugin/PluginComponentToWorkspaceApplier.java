@@ -97,16 +97,6 @@ public class PluginComponentToWorkspaceApplier implements ComponentToWorkspaceAp
           .put(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, fqn.getPublisherAndName()), memoryLimit);
     }
 
-    //    for (Entry<String, Object> preference : pluginComponent.getPreferences().entrySet()) {
-    //      workspaceConfig
-    //          .getAttributes()
-    //          .put(
-    //              format(
-    //                  PLUGIN_PREFERENCE_ATTR_TEMPLATE, fqn.getPublisherAndName(),
-    // preference.getKey()),
-    //              preference.getValue());
-    //    }
-
     for (CommandImpl command : workspaceConfig.getCommands()) {
       String commandComponent = command.getAttributes().get(COMPONENT_ALIAS_COMMAND_ATTRIBUTE);
 

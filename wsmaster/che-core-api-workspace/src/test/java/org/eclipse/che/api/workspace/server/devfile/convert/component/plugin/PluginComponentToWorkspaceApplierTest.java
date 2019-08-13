@@ -90,13 +90,6 @@ public class PluginComponentToWorkspaceApplierTest {
             .getAttributes()
             .get(format(SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE, "eclipse/super-plugin")),
         "1234M");
-
-    //    assertEquals(
-    //        workspaceConfig
-    //            .getAttributes()
-    //            .get(format(PLUGIN_PREFERENCE_ATTR_TEMPLATE, "eclipse/super-plugin",
-    // "java-home")),
-    //        "/home/user/jdk11");
   }
 
   @Test
