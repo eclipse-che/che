@@ -15,7 +15,6 @@ import static org.eclipse.che.api.core.model.workspace.runtime.MachineStatus.STA
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_ORIGINAL_NAME_LABEL;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -71,8 +70,6 @@ import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.StartSynchronizerFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesConfigsMaps;
@@ -127,7 +124,6 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private EventService eventService;
   @Mock private ServersCheckerFactory serverCheckerFactory;
   @Mock private ServersChecker serversChecker;
-  @Mock private KubernetesBootstrapperFactory bootstrapperFactory;
   @Mock private OpenShiftEnvironment osEnv;
   @Mock private OpenShiftProject project;
   @Mock private KubernetesServices services;
@@ -135,7 +131,6 @@ public class OpenShiftInternalRuntimeTest {
   @Mock private KubernetesConfigsMaps configMaps;
   @Mock private OpenShiftRoutes routes;
   @Mock private KubernetesDeployments deployments;
-  @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
@@ -169,7 +164,6 @@ public class OpenShiftInternalRuntimeTest {
             5,
             new URLRewriter.NoOpURLRewriter(),
             unrecoverablePodEventListenerFactory,
-            bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
             probesScheduler,
@@ -196,8 +190,6 @@ public class OpenShiftInternalRuntimeTest {
     when(project.secrets()).thenReturn(secrets);
     when(project.configMaps()).thenReturn(configMaps);
     when(project.deployments()).thenReturn(deployments);
-    when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
-        .thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,

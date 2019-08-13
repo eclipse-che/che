@@ -33,7 +33,7 @@ import org.eclipse.che.api.installer.shared.model.Installer;
  * @author gazarenkov
  */
 public class InternalMachineConfig {
-  private final List<InstallerImpl> installers;
+  private final List<Installer> installers;
   private final Map<String, ServerConfig> servers;
   private final Map<String, String> env;
   private final Map<String, String> attributes;
@@ -72,7 +72,7 @@ public class InternalMachineConfig {
   }
 
   /** Returns modifiable ordered list of installers configs of the machine. */
-  public List<InstallerImpl> getInstallers() {
+  public List<Installer> getInstallers() {
     return installers;
   }
 

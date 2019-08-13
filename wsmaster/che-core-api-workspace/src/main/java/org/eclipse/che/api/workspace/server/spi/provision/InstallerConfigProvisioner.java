@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -63,7 +62,7 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
    * @param env map to fill
    * @param installers installers to retrieve env
    */
-  private void fillEnv(Map<String, String> env, List<InstallerImpl> installers) {
+  private void fillEnv(Map<String, String> env, List<Installer> installers) {
     for (Installer installer : installers) {
       String envVars = installer.getProperties().get(Installer.ENVIRONMENT_PROPERTY);
       if (isNullOrEmpty(envVars)) {
@@ -94,9 +93,9 @@ public class InstallerConfigProvisioner implements InternalEnvironmentProvisione
    *     configured one
    */
   private void fillServers(
-      String workspaceId, Map<String, ServerConfig> servers, List<InstallerImpl> installers)
+      String workspaceId, Map<String, ServerConfig> servers, List<Installer> installers)
       throws InfrastructureException {
-    for (InstallerImpl installer : installers) {
+    for (Installer installer : installers) {
       for (Map.Entry<String, ? extends ServerConfig> serverEntry :
           installer.getServers().entrySet()) {
         LOG.debug(

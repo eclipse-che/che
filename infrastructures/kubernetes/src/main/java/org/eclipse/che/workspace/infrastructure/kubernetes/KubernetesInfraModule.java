@@ -40,7 +40,6 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironment;
 import org.eclipse.che.workspace.infrastructure.docker.environment.dockerimage.DockerImageEnvironmentFactory;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernetesRuntimeCacheModule;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
@@ -97,7 +96,6 @@ public class KubernetesInfraModule extends AbstractModule {
     install(
         new FactoryModuleBuilder()
             .build(new TypeLiteral<KubernetesRuntimeFactory<KubernetesEnvironment>>() {}));
-    install(new FactoryModuleBuilder().build(KubernetesBootstrapperFactory.class));
     install(new FactoryModuleBuilder().build(StartSynchronizerFactory.class));
 
     bind(WorkspacePVCCleaner.class).asEagerSingleton();

@@ -66,14 +66,13 @@ public class KubernetesEnvironmentFactory
 
   @Inject
   public KubernetesEnvironmentFactory(
-      InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       KubernetesRecipeParser recipeParser,
       KubernetesEnvironmentValidator envValidator,
       MemoryAttributeProvisioner memoryProvisioner,
       PodMerger podMerger) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+    super(recipeRetriever, machinesValidator);
     this.recipeParser = recipeParser;
     this.envValidator = envValidator;
     this.memoryProvisioner = memoryProvisioner;

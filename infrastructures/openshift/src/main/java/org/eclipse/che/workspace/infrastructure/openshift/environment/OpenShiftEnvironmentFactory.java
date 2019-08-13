@@ -66,14 +66,13 @@ public class OpenShiftEnvironmentFactory extends InternalEnvironmentFactory<Open
 
   @Inject
   public OpenShiftEnvironmentFactory(
-      InstallerRegistry installerRegistry,
       RecipeRetriever recipeRetriever,
       MachineConfigsValidator machinesValidator,
       OpenShiftEnvironmentValidator envValidator,
       KubernetesRecipeParser k8sObjectsParser,
       MemoryAttributeProvisioner memoryProvisioner,
       PodMerger podMerger) {
-    super(installerRegistry, recipeRetriever, machinesValidator);
+    super(recipeRetriever, machinesValidator);
     this.envValidator = envValidator;
     this.k8sObjectsParser = k8sObjectsParser;
     this.memoryProvisioner = memoryProvisioner;

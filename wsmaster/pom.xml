@@ -25,7 +25,6 @@
     <name>Che Master Parent</name>
     <modules>
         <module>che-core-api-installer-shared</module>
-        <module>che-core-api-installer</module>
         <module>che-core-api-auth-shared</module>
         <module>che-core-api-auth</module>
         <module>che-core-api-auth-github</module>

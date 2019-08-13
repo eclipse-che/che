@@ -107,8 +107,6 @@ import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfi
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapper;
-import org.eclipse.che.workspace.infrastructure.kubernetes.bootstrapper.KubernetesBootstrapperFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesMachineCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.cache.KubernetesRuntimeStateCache;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
@@ -180,7 +178,6 @@ public class KubernetesInternalRuntimeTest {
   @Mock private ServersCheckerFactory serverCheckerFactory;
   @Mock private ServersChecker serversChecker;
   @Mock private UnrecoverablePodEventListenerFactory unrecoverablePodEventListenerFactory;
-  @Mock private KubernetesBootstrapperFactory bootstrapperFactory;
   @Mock private KubernetesEnvironment k8sEnv;
   @Mock private KubernetesNamespace namespace;
   @Mock private KubernetesServices services;
@@ -188,7 +185,6 @@ public class KubernetesInternalRuntimeTest {
   @Mock private KubernetesSecrets secrets;
   @Mock private KubernetesConfigsMaps configMaps;
   @Mock private KubernetesDeployments deployments;
-  @Mock private KubernetesBootstrapper bootstrapper;
   @Mock private WorkspaceVolumesStrategy volumesStrategy;
   @Mock private WorkspaceProbesFactory workspaceProbesFactory;
   @Mock private ProbeScheduler probesScheduler;
@@ -247,7 +243,6 @@ public class KubernetesInternalRuntimeTest {
             5,
             new URLRewriter.NoOpURLRewriter(),
             unrecoverablePodEventListenerFactory,
-            bootstrapperFactory,
             serverCheckerFactory,
             volumesStrategy,
             probesScheduler,
@@ -274,8 +269,6 @@ public class KubernetesInternalRuntimeTest {
     when(namespace.deployments()).thenReturn(deployments);
     when(namespace.secrets()).thenReturn(secrets);
     when(namespace.configMaps()).thenReturn(configMaps);
-    when(bootstrapperFactory.create(any(), anyList(), any(), any(), any()))
-        .thenReturn(bootstrapper);
     doReturn(
             ImmutableMap.of(
                 M1_NAME,
@@ -297,7 +290,6 @@ public class KubernetesInternalRuntimeTest {
     when(k8sEnv.getCommands()).thenReturn(new ArrayList<>(singletonList(envCommand)));
 
     when(deployments.waitRunningAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
-    when(bootstrapper.bootstrapAsync()).thenReturn(CompletableFuture.completedFuture(null));
     when(serversChecker.startAsync(any())).thenReturn(CompletableFuture.completedFuture(null));
   }
 
@@ -393,7 +385,6 @@ public class KubernetesInternalRuntimeTest {
     verify(secrets).create(any());
     verify(configMaps).create(any());
     verify(namespace.deployments(), times(1)).watchEvents(any());
-    verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
@@ -431,7 +422,6 @@ public class KubernetesInternalRuntimeTest {
     verify(secrets).create(any());
     verify(configMaps).create(any());
     verify(namespace.deployments(), times(1)).watchEvents(any());
-    verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
@@ -469,7 +459,6 @@ public class KubernetesInternalRuntimeTest {
     verify(secrets).create(any());
     verify(configMaps).create(any());
     verify(namespace.deployments(), times(1)).watchEvents(any());
-    verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(6)).publish(any());
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {
@@ -528,7 +517,6 @@ public class KubernetesInternalRuntimeTest {
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(namespace.deployments(), times(2)).watchEvents(any());
-    verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
@@ -549,7 +537,6 @@ public class KubernetesInternalRuntimeTest {
     verify(ingresses).create(any());
     verify(services).create(any());
     verify(namespace.deployments(), times(1)).watchEvents(any());
-    verify(bootstrapper, times(2)).bootstrapAsync();
     verify(eventService, times(4)).publish(any());
     verifyOrderedEventsChains(
         new MachineStatusEvent[] {newEvent(M1_NAME, STARTING), newEvent(M1_NAME, RUNNING)},
@@ -584,7 +571,7 @@ public class KubernetesInternalRuntimeTest {
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
     when(k8sEnv.getPodsCopy()).thenReturn(allPods);
-    doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
+//    doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
 
     try {
       internalRuntime.start(emptyMap());
@@ -592,7 +579,6 @@ public class KubernetesInternalRuntimeTest {
       verify(deployments).deploy(any(Pod.class));
       verify(ingresses).create(any());
       verify(services).create(any());
-      verify(bootstrapper, atLeastOnce()).bootstrapAsync();
       verify(eventService, atLeastOnce()).publish(any());
       final List<MachineStatusEvent> events = captureEvents();
       assertTrue(events.contains(newEvent(M1_NAME, STARTING)));
@@ -626,7 +612,7 @@ public class KubernetesInternalRuntimeTest {
               + "environment: env1, ownerId: id1' is interrupted")
   public void throwsInfrastructureExceptionWhenMachinesWaitingIsInterrupted() throws Exception {
     final Thread thread = Thread.currentThread();
-    when(bootstrapper.bootstrapAsync()).thenReturn(new CompletableFuture<>());
+//    when(bootstrapper.bootstrapAsync()).thenReturn(new CompletableFuture<>());
 
     Executors.newSingleThreadScheduledExecutor()
         .schedule(thread::interrupt, 300, TimeUnit.MILLISECONDS);
