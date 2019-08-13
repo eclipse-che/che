@@ -147,5 +147,10 @@ export const TestConstants = {
     /**
      * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
      */
-    TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly'
+    TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly',
+
+    /**
+     * Remote driver URL.
+     */
+    TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_REMOTE_DRIVER_URL || ''
 };
