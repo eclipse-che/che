@@ -25,7 +25,7 @@ pipeline {
         stage("Cleanup") {
             steps {
                 script() {
-                    sh "/usr/local/bin/minikube delete"
+                    sh "/usr/local/bin/minikube delete || true"
                 }
             }
         }
