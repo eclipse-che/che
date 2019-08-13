@@ -70,7 +70,7 @@ pipeline {
                 stage("Build Che") {
                     steps {
                         script {
-                            sh "mvn clean install -f ${WORKSPACE}/pom.xml -U -T 4 -DskipTests -Dskip-enforce"
+                            sh "mvn clean install -f ${WORKSPACE}/pom.xml -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
                         }
                     }
                 }
