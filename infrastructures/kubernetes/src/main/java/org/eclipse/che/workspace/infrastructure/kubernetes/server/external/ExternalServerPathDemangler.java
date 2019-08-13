@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer.PATH_TRANSFORM_PATH_CATCH;
+
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,8 +30,8 @@ public class ExternalServerPathDemangler {
   }
 
   private static Pattern extractPathFromFmt(String pathTransformFmt) {
-    int refIdx = pathTransformFmt.indexOf("%s");
-    String matchPath = "(.*)";
+    int refIdx = pathTransformFmt.indexOf(PATH_TRANSFORM_PATH_CATCH);
+    String pathMatchingFragment = "(.*)";
 
     String transformed;
     if (refIdx < 0) {
@@ -37,9 +39,9 @@ public class ExternalServerPathDemangler {
     } else {
       if (refIdx == 0) {
         if (pathTransformFmt.length() > 2) {
-          transformed = matchPath + Pattern.quote(pathTransformFmt.substring(2));
+          transformed = pathMatchingFragment + Pattern.quote(pathTransformFmt.substring(2));
         } else {
-          transformed = matchPath;
+          transformed = pathMatchingFragment;
         }
       } else {
         String prefix = Pattern.quote(pathTransformFmt.substring(0, refIdx));
@@ -48,7 +50,7 @@ public class ExternalServerPathDemangler {
                 ? Pattern.quote(pathTransformFmt.substring(refIdx + 2))
                 : "";
 
-        transformed = prefix + matchPath + suffix;
+        transformed = prefix + pathMatchingFragment + suffix;
       }
     }
 

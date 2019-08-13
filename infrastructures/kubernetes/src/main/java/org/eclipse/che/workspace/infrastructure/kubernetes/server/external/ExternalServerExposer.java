@@ -22,6 +22,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 
 public class ExternalServerExposer<T extends KubernetesEnvironment> {
+  static final String PATH_TRANSFORM_PATH_CATCH = "%s";
+
   private final IngressNamingStrategy strategy;
   private final Map<String, String> ingressAnnotations;
   private final String pathTransformFmt;
@@ -33,7 +35,7 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
       @Nullable @Named("che.infra.kubernetes.ingress.path_transform") String pathTransformFmt) {
     this.strategy = strategy;
     this.ingressAnnotations = annotations;
-    this.pathTransformFmt = pathTransformFmt == null ? "%s" : pathTransformFmt;
+    this.pathTransformFmt = pathTransformFmt == null ? PATH_TRANSFORM_PATH_CATCH : pathTransformFmt;
   }
 
   /**
@@ -83,10 +85,6 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
   }
 
   private static String ensureEndsWithSlash(String path) {
-    if (path.charAt(path.length() - 1) == '/') {
-      return path;
-    } else {
-      return path + '/';
-    }
+    return path.endsWith("/") ? path : path + '/';
   }
 }
