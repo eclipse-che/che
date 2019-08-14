@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.namespace;
 import static java.util.stream.Collectors.toSet;
 
 import io.fabric8.kubernetes.api.model.DoneablePersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.Event;
 import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.Watch;
@@ -32,6 +33,8 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesInfrastructureException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Defines an internal API for managing {@link PersistentVolumeClaim} instances in {@link
@@ -180,7 +183,6 @@ public class KubernetesPersistentVolumeClaims {
       String name, long timeoutMillis, Predicate<PersistentVolumeClaim> predicate)
       throws InfrastructureException {
     CompletableFuture<PersistentVolumeClaim> future = new CompletableFuture<>();
-    Watch watch = null;
     try {
       Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> pvcResource =
           clientFactory
@@ -189,29 +191,14 @@ public class KubernetesPersistentVolumeClaims {
               .inNamespace(namespace)
               .withName(name);
 
-      watch =
-          pvcResource.watch(
-              new Watcher<PersistentVolumeClaim>() {
-                @Override
-                public void eventReceived(Action action, PersistentVolumeClaim pvc) {
-                  if (predicate.test(pvc)) {
-                    future.complete(pvc);
-                  }
-                }
-
-                @Override
-                public void onClose(KubernetesClientException cause) {
-                  future.completeExceptionally(
-                      new InfrastructureException(
-                          "Waiting for persistent volume claim '" + name + "' was interrupted"));
-                }
-              });
-
       PersistentVolumeClaim actualPvc = pvcResource.get();
       if (predicate.test(actualPvc)) {
         return actualPvc;
       }
-      try {
+
+      // any of these watchers can finish the operation resolving the future
+      try (Watch boundWatcher = pvcIsBoundWatcher(future, pvcResource, predicate, name);
+          Watch waitingWatcher = pvcIsWaitingForConsumerWatcher(future, actualPvc)) {
         return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
       } catch (ExecutionException e) {
         // May happen only if WebSocket Connection is closed before needed event received.
@@ -231,10 +218,56 @@ public class KubernetesPersistentVolumeClaims {
       }
     } catch (KubernetesClientException e) {
       throw new KubernetesInfrastructureException(e);
-    } finally {
-      if (watch != null) {
-        watch.close();
-      }
     }
+  }
+
+  private Watch pvcIsBoundWatcher(
+      CompletableFuture<PersistentVolumeClaim> future,
+      Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> pvcResource,
+      Predicate<PersistentVolumeClaim> predicate,
+      String name) {
+    return pvcResource.watch(
+        new Watcher<PersistentVolumeClaim>() {
+          @Override
+          public void eventReceived(Action action, PersistentVolumeClaim pvc) {
+            if (predicate.test(pvc)) {
+              future.complete(pvc);
+            }
+          }
+
+          @Override
+          public void onClose(KubernetesClientException cause) {
+            future.completeExceptionally(
+                new InfrastructureException(
+                    "Waiting for persistent volume claim '" + name + "' was interrupted"));
+          }
+        });
+  }
+
+  private Watch pvcIsWaitingForConsumerWatcher(
+      CompletableFuture<PersistentVolumeClaim> future, PersistentVolumeClaim actualPvc)
+      throws InfrastructureException {
+    return clientFactory
+        .create(workspaceId)
+        .events()
+        .inNamespace(namespace)
+        .withField("reason", "WaitForFirstConsumer")
+        .withField("involvedObject.uid", actualPvc.getMetadata().getUid())
+        .watch(
+            new Watcher<Event>() {
+              private final Logger log = LoggerFactory.getLogger(getClass());
+
+              @Override
+              public void eventReceived(Action action, Event resource) {
+                log.debug(
+                    "PVC is waiting for first consumer. Don't wait to bound to avoid deadlock.");
+                future.complete(actualPvc);
+              }
+
+              @Override
+              public void onClose(KubernetesClientException cause) {
+                log.debug(cause.toString());
+              }
+            });
   }
 }
