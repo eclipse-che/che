@@ -96,7 +96,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum visibility checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum visibility checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
     }
 
     public async waitPresence(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<WebElement> {
@@ -117,7 +117,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum presence checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum presence checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
     }
 
     public async waitAllPresence(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<Array<WebElement>> {
@@ -138,7 +138,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum presence checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum presence checkings attempts, problems with 'StaleElementReferenceError' of '${elementLocator}' element`);
     }
 
     public async waitAllVisibility(locators: Array<By>, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -154,7 +154,7 @@ export class DriverHelper {
         const isDisappeared = await this.waitDisappearanceBoolean(elementLocator, attempts, polling);
 
         if (!isDisappeared) {
-            throw new Error(`Waiting attempts exceeded, element '${elementLocator}' is still visible`);
+            throw new error.TimeoutError(`Waiting attempts exceeded, element '${elementLocator}' is still visible`);
         }
     }
 
@@ -202,7 +202,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum clicking attempts, the '${elementLocator}' element is not clickable`);
+        throw new error.TimeoutError(`Exceeded maximum clicking attempts, the '${elementLocator}' element is not clickable`);
 
     }
 
@@ -229,7 +229,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum gettin of the '${attribute}' attribute attempts, from the '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum gettin of the '${attribute}' attribute attempts, from the '${elementLocator}' element`);
     }
 
     public async waitAndGetCssValue(elementLocator: By,
@@ -255,7 +255,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum gettin of the '${cssAttribute}' css attribute attempts, from the '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum gettin of the '${cssAttribute}' css attribute attempts, from the '${elementLocator}' element`);
     }
 
     public async waitAttributeValue(elementLocator: By,
@@ -292,7 +292,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum typing attempts, to the '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum typing attempts, to the '${elementLocator}' element`);
     }
 
     public async typeToInvisible(elementLocator: By, text: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -315,7 +315,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum typing attempts, to the '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum typing attempts, to the '${elementLocator}' element`);
     }
 
     public async clear(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -338,7 +338,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum clearing attempts, to the '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum clearing attempts, to the '${elementLocator}' element`);
     }
 
     public async enterValue(elementLocator: By, text: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -373,7 +373,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum text obtaining attempts, from the '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum text obtaining attempts, from the '${elementLocator}' element`);
     }
 
     public async waitAndGetValue(elementLocator: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT): Promise<string> {
@@ -429,7 +429,7 @@ export class DriverHelper {
             }
         }
 
-        throw new Error(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`);
+        throw new error.TimeoutError(`Exceeded maximum mouse move attempts, for the '${elementLocator}' element`);
     }
 
     getDriver(): ThenableWebDriver {
