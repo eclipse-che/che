@@ -10,18 +10,19 @@
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import 'reflect-metadata';
-import { CLASSES } from '../../../inversify.types';
+import { CLASSES, TYPES } from '../../../inversify.types';
 import { TestConstants } from '../../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { WorkspaceDetails } from './WorkspaceDetails';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../../utils/workspace/TestWorkspaceUtil';
+import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
 
 
 @injectable()
 export class WorkspaceDetailsPlugins {
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         @inject(CLASSES.WorkspaceDetails) private readonly workspaceDetails: WorkspaceDetails,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
     async waitPluginListItem(pluginName: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const pluginListItemLocator: By = By.css(this.getPluginListItemCssLocator(pluginName));

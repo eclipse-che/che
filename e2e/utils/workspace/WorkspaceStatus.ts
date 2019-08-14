@@ -7,11 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
-import * as path from 'path';
-import { Container } from 'inversify';
 
-let pathh = path.resolve('.');
-let containerInitializer = require(`${pathh}/dist/driver/ContainerInitializer.js`);
-let e2eContainer : Container = containerInitializer.getContainer();
-
-export { e2eContainer };
+ export enum WorkspaceStatus {
+    RUNNING = 'RUNNING',
+    STOPPED = 'STOPPED',
+    STARTING = 'STARTING'
+}
