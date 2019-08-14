@@ -6,6 +6,7 @@ export * from './TestConstants';
 // driver
 export * from './driver/IDriver';
 export * from './driver/ChromeDriver';
+export * from './driver/ContainerInitializer';
 
 // pageobjects - dashboard
 export * from './pageobjects/dashboard/Dashboard';
@@ -44,3 +45,5 @@ export * from './pageobjects/openshift/OcpWebConsolePage';
 export * from './utils/DriverHelper';
 export * from './utils/NameGenerator';
 export * from './utils/workspace/TestWorkspaceUtil';
+export * from './utils/workspace/ITestWorkspaceUtil';
+export * from './utils/workspace/WorkspaceStatus';

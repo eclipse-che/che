@@ -17,12 +17,14 @@ import { TestConstants } from '../TestConstants';
 import { logging } from 'selenium-webdriver';
 import { DriverHelper } from '../utils/DriverHelper';
 import { ScreenCatcher } from '../utils/ScreenCatcher';
+import { ITestWorkspaceUtil } from '../utils/workspace/ITestWorkspaceUtil';
 
 const driver: IDriver = e2eContainer.get(TYPES.Driver);
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
 const screenCatcher: ScreenCatcher = e2eContainer.get(CLASSES.ScreenCatcher);
 let methodIndex: number = 0;
 let deleteScreencast: boolean = true;
+let testWorkspaceUtil: ITestWorkspaceUtil = e2eContainer.get(TYPES.WorkspaceUtil);
 
 class CheReporter extends mocha.reporters.Spec {
   constructor(runner: mocha.Runner, options: mocha.MochaOptions) {
@@ -153,6 +155,15 @@ class CheReporter extends mocha.reporters.Spec {
       const browserLogsStream = fs.createWriteStream(browserLogsFileName);
       browserLogsStream.write(new Buffer(browserLogs));
       browserLogsStream.end();
+
+      // stop and remove running workspace
+      if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
+        console.log("Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.")
+        let namespace = TestConstants.TS_SELENIUM_USERNAME;
+        let workspaceId = await testWorkspaceUtil.getIdOfRunningWorkspace(namespace);
+        testWorkspaceUtil.stopWorkspaceById(workspaceId);
+        testWorkspaceUtil.removeWorkspaceById(workspaceId);
+      }
     });
   }
 }

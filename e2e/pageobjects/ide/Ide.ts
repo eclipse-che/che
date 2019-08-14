@@ -10,10 +10,11 @@
 import axios from 'axios';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
+import { CLASSES, TYPES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, WebElement, error } from 'selenium-webdriver';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../utils/workspace/TestWorkspaceUtil';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceStatus } from '../../utils/workspace/WorkspaceStatus';
 
 export enum RightToolbarButton {
     Explorer = 'Explorer',
@@ -34,7 +35,7 @@ export class Ide {
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
