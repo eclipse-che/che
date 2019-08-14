@@ -928,7 +928,12 @@ public class WorkspaceDaoTest {
             "component2",
             "eclipse/che-theia/0.0.1",
             ImmutableMap.of(
-                "java.home", "/home/user/jdk11", "java.boolean", true, "java.integer", 123444),
+                "java.home",
+                "/home/user/jdk11aertwertert",
+                "java.boolean",
+                true,
+                "java.integer",
+                123444),
             "https://mysite.com/registry/somepath2",
             "/dev.yaml",
             "refcontent2",

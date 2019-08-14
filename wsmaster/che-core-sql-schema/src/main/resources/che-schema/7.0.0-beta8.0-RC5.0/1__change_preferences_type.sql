@@ -12,4 +12,6 @@
 
 -- component preferences
 
-ALTER TABLE devfile_component_preferences MODIFY COLUMN preference BLOB;
+ALTER TABLE devfile_component_preferences MODIFY COLUMN preference TEXT;
+
+UPDATE devfile_component_preferences SET preference = CONCAT('"',preference,'"');

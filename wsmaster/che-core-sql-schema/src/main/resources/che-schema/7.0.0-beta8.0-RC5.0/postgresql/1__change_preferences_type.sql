@@ -12,4 +12,6 @@
 
 -- component preferences
 
-ALTER TABLE devfile_component_preferences ALTER COLUMN preference TYPE bytea USING preference::bytea;
+ALTER TABLE devfile_component_preferences ALTER COLUMN preference TYPE text;
+
+UPDATE devfile_component_preferences SET preference = CONCAT('"',preference,'"');
