@@ -131,8 +131,6 @@ public class PostgreSqlTckModule extends TckModule {
                 StackImpl.class,
                 CommandImpl.class,
                 SshPairImpl.class,
-                InstallerImpl.class,
-                InstallerServerConfigImpl.class,
                 WorkspaceActivity.class,
                 VolumeImpl.class,
                 // devfile
@@ -199,11 +197,6 @@ public class PostgreSqlTckModule extends TckModule {
     bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
     bind(new TypeLiteral<TckRepository<WorkspaceExpiration>>() {})
         .toInstance(new JpaTckRepository<>(WorkspaceExpiration.class));
-
-    // installer
-    bind(InstallerDao.class).to(JpaInstallerDao.class);
-    bind(new TypeLiteral<TckRepository<InstallerImpl>>() {})
-        .toInstance(new JpaTckRepository<>(InstallerImpl.class));
 
     // k8s runtimes
     bind(new TypeLiteral<TckRepository<KubernetesRuntimeState>>() {})

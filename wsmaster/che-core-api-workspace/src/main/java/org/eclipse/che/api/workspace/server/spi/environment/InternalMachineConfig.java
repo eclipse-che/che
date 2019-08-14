@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.config.Volume;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.installer.shared.model.Installer;
 
 /**
@@ -56,9 +55,6 @@ public class InternalMachineConfig {
     this();
     if (servers != null) {
       this.servers.putAll(servers);
-    }
-    if (installers != null) {
-      installers.forEach(i -> this.installers.add(new InstallerImpl(i)));
     }
     if (env != null) {
       this.env.putAll(env);

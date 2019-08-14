@@ -52,8 +52,7 @@ public abstract class InternalEnvironmentFactory<T extends InternalEnvironment> 
   private final MachineConfigsValidator machinesValidator;
 
   public InternalEnvironmentFactory(
-      RecipeRetriever recipeRetriever,
-      MachineConfigsValidator machinesValidator) {
+      RecipeRetriever recipeRetriever, MachineConfigsValidator machinesValidator) {
     this.recipeRetriever = recipeRetriever;
     this.machinesValidator = machinesValidator;
   }

@@ -18,7 +18,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,14 +48,12 @@ import io.fabric8.openshift.api.model.RouteSpec;
 import io.fabric8.openshift.api.model.RouteTargetReference;
 import io.opentracing.Tracer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.MachineStatus;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.notification.EventService;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.DtoConverter;
 import org.eclipse.che.api.workspace.server.URLRewriter;
 import org.eclipse.che.api.workspace.server.hc.ServersChecker;
@@ -64,7 +61,6 @@ import org.eclipse.che.api.workspace.server.hc.ServersCheckerFactory;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
 import org.eclipse.che.api.workspace.server.hc.probe.WorkspaceProbesFactory;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
-import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.RuntimeHangingDetector;
@@ -190,14 +186,6 @@ public class OpenShiftInternalRuntimeTest {
     when(project.secrets()).thenReturn(secrets);
     when(project.configMaps()).thenReturn(configMaps);
     when(project.deployments()).thenReturn(deployments);
-    doReturn(
-            ImmutableMap.of(
-                M1_NAME,
-                mockMachine(mockInstaller("ws-agent")),
-                M2_NAME,
-                mockMachine(mockInstaller("terminal"))))
-        .when(osEnv)
-        .getMachines();
     allServices = ImmutableMap.of(SERVICE_NAME, mockService());
     allRoutes = ImmutableMap.of(SERVICE_NAME, mockRoute());
     final Container container = mockContainer(CONTAINER_NAME_1, EXPOSED_PORT_1, INTERNAL_PORT);
@@ -329,18 +317,6 @@ public class OpenShiftInternalRuntimeTest {
     when(route.getMetadata().getLabels())
         .thenReturn(ImmutableMap.of(CHE_ORIGINAL_NAME_LABEL, ROUTE_NAME));
     return route;
-  }
-
-  private static InstallerImpl mockInstaller(String name) {
-    InstallerImpl installer = mock(InstallerImpl.class);
-    when(installer.getName()).thenReturn(name);
-    return installer;
-  }
-
-  private static InternalMachineConfig mockMachine(InstallerImpl... installers) {
-    final InternalMachineConfig machine1 = mock(InternalMachineConfig.class);
-    when(machine1.getInstallers()).thenReturn(Arrays.asList(installers));
-    return machine1;
   }
 
   private static ObjectMeta mockName(String name, HasMetadata mock) {

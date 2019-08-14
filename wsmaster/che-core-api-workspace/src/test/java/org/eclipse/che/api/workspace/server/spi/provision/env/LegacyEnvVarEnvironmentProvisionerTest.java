@@ -12,11 +12,9 @@
 package org.eclipse.che.api.workspace.server.spi.provision.env;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import java.util.HashMap;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.installer.server.model.impl.InstallerImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RuntimeIdentityImpl;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
@@ -72,7 +69,6 @@ public class LegacyEnvVarEnvironmentProvisionerTest {
 
     // make 1 of the machine configs have an installer - this should make the whole environment
     // be considered legacy and therefore the legacy env vars should be applied.
-    when(machineConfig1.getInstallers()).thenReturn(singletonList(mock(InstallerImpl.class)));
 
     LegacyEnvVarEnvironmentProvisioner provisioner =
         new LegacyEnvVarEnvironmentProvisioner(ImmutableSet.of(provider1, provider2));
@@ -109,7 +105,6 @@ public class LegacyEnvVarEnvironmentProvisionerTest {
   @Test
   public void shouldAddAllEnvVarsToAllContainers() throws Exception {
     // given
-    when(machineConfig1.getInstallers()).thenReturn(singletonList(mock(InstallerImpl.class)));
     LegacyEnvVarEnvironmentProvisioner provisioner =
         new LegacyEnvVarEnvironmentProvisioner(ImmutableSet.of(provider1, provider2));
     Pair<String, String> envVar1 = Pair.of("env1", "value1");
@@ -132,7 +127,6 @@ public class LegacyEnvVarEnvironmentProvisionerTest {
   @Test
   public void shouldNotRemoveExistingEnvVarsWithDifferentNames() throws Exception {
     // given
-    when(machineConfig1.getInstallers()).thenReturn(singletonList(mock(InstallerImpl.class)));
     LegacyEnvVarEnvironmentProvisioner provisioner =
         new LegacyEnvVarEnvironmentProvisioner(ImmutableSet.of(provider1));
     Pair<String, String> existingEnvVar = Pair.of("existingEnvVar", "some-value");
@@ -153,7 +147,6 @@ public class LegacyEnvVarEnvironmentProvisionerTest {
   @Test
   public void shouldNotReplaceExistingEnvVarsWithMatchingNames() throws Exception {
     // given
-    when(machineConfig1.getInstallers()).thenReturn(singletonList(mock(InstallerImpl.class)));
     LegacyEnvVarEnvironmentProvisioner provisioner =
         new LegacyEnvVarEnvironmentProvisioner(ImmutableSet.of(provider1));
     String existingEnvVarName = "existingEnvVar";

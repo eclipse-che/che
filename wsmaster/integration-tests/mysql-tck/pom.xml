@@ -92,17 +92,6 @@
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer</artifactId>
-            <classifier>tests</classifier>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-installer</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-model</artifactId>
             <scope>test</scope>
         </dependency>
@@ -241,7 +230,6 @@
                                     che-core-api-user,
                                     che-core-api-ssh,
                                     che-core-api-workspace,
-                                    che-core-api-installer,
                                     che-multiuser-machine-authentication,
                                     infrastructure-kubernetes</includeArtifactIds>
                             <includeScope>test</includeScope>
