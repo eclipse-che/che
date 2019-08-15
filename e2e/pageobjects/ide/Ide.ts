@@ -7,6 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import axios from 'axios';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
 import { CLASSES } from '../../inversify.types';
@@ -74,6 +75,7 @@ export class Ide {
     }
 
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.waitApplicationReadyToUse(await this.getApplicationUrl(notificationText));
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
@@ -227,6 +229,33 @@ export class Ide {
         const selectedRightToolbarButtonLocator: By = this.getSelectedRightToolbarButtonLocator(buttonTitle);
 
         await this.driverHelper.waitVisibility(selectedRightToolbarButtonLocator, timeout);
+    }
+
+    async getApplicationUrl(notificationText: string) {
+        const notificationTextLocator: By = By.xpath(`//div[@class='theia-Notification']//p[contains(@id,'${notificationText}')]`);
+
+         let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
+
+         return notification.substring(54);
+    }
+
+    async waitApplicationReadyToUse(url: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+
+         await this.driverHelper.getDriver().wait(async () => {
+            try {
+                let res = await axios.get(url);
+
+                 if (res.status === 200) {
+                    console.log('Application is ready for use.');
+                    return true;
+                }
+            } catch (error) {
+                console.log('Application is not yet ready for use');
+            }
+
+             await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+        }, timeout);
     }
 
     private getSelectedRightToolbarButtonLocator(buttonTitle: string): By {
