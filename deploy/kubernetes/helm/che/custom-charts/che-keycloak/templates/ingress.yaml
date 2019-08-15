@@ -12,7 +12,7 @@ kind: Ingress
 metadata:
   name: keycloak-ingress
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.global.defaultIngressClass }}
+    kubernetes.io/ingress.class: {{ .Values.global.ingressClass }}
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-read-timeout: "3600"
     {{ .Values.global.ingressAnnotationsPrefix }}ingress.kubernetes.io/proxy-connect-timeout: "3600"
 {{- if .Values.global.tls.enabled }}
