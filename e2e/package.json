@@ -26,7 +26,8 @@
     "ts-node": "^8.0.3",
     "tslint": "5.10.0",
     "typed-rest-client": "^1.2.0",
-    "typescript": "^3.4.3"
+    "typescript": "^3.4.3",
+    "axios": "0.17.1"
   },
   "dependencies": {
     "inversify": "^5.0.1",
