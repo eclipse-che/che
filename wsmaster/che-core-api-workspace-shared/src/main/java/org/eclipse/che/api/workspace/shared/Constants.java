@@ -128,13 +128,6 @@ public final class Constants {
   public static final String SIDECAR_MEMORY_LIMIT_ATTR_TEMPLATE = "sidecar.%s.memory_limit";
 
   /**
-   * Template for workspace config attribute key that stores plugin component preference. The first
-   * %s should be replaced with `pluginPublisher/pluginName` and the second one should be replaced
-   * with preference name. Example value: `plugin.redhat/java.preference.java.home`.
-   */
-  public static final String PLUGIN_PREFERENCE_ATTR_TEMPLATE = "plugin.%s.preference.%s";
-
-  /**
    * Describes workspace runtimes which perform start/stop of this workspace. Should be set/read
    * from {@link Workspace#getAttributes}
    */

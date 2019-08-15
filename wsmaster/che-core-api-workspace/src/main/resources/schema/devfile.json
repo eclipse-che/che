@@ -280,9 +280,9 @@
                     ],
                     "additionalProperties": {
                       "type": [
-                      "boolean",
-                      "string",
-                      "integer"
+                        "boolean",
+                        "string",
+                        "integer"
                       ]
                     }
                   }
