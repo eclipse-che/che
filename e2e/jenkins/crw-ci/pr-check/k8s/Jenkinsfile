@@ -96,6 +96,11 @@ pipeline {
         stage("Start Single Che") {
             steps {
                 script {
+                    //temporary workaround because of https://github.com/eclipse/che/pull/14247
+                    sh """
+                        echo Workaround for https://github.com/eclipse/che/pull/14247
+                        sed -i 's|image: quay.io/eclipse/che-plugin-registry:nightly|image: quay.io/eclipse/che-plugin-registry:7.0.0|g' ${WORKSPACE}/deploy/kubernetes/helm/che/custom-charts/che-plugin-registry/values.yaml
+                    """
                     sh """
                       ${WORKSPACE}/chectl server:start \\
                         --k8spodreadytimeout=180000 \\

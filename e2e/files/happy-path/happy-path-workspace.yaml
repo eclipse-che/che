@@ -36,6 +36,8 @@ components:
     id: redhat/java/latest
   - type: chePlugin
     id: redhat/vscode-yaml/latest
+  - type: cheEditor
+    id: eclipse/che-theia/7.0.0
 commands:
   - name: build
     actions:
