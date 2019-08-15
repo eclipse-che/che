@@ -43,11 +43,11 @@ import org.slf4j.LoggerFactory;
  */
 public class KubernetesPersistentVolumeClaims {
 
-  private static final Logger log = LoggerFactory.getLogger(KubernetesPersistentVolumeClaims.class);
+  private static final Logger LOG = LoggerFactory.getLogger(KubernetesPersistentVolumeClaims.class);
 
   private static final String PVC_BOUND_PHASE = "Bound";
   private static final String PVC_EVENT_REASON_FIELD_KEY = "reason";
-  private static final String PVC_WAIT_EVENT_NAME = "WaitForFirstConsumer";
+  private static final String PVC_EVENT_WAIT_CONSUMER_REASON = "WaitForFirstConsumer";
   private static final String PVC_EVENT_UID_FIELD_KEY = "involvedObject.uid";
 
   private final String namespace;
@@ -185,7 +185,7 @@ public class KubernetesPersistentVolumeClaims {
 
       CompletableFuture<PersistentVolumeClaim> future = new CompletableFuture<>();
       // any of these watchers can finish the operation resolving the future
-      try (Watch boundWatcher = pvcIsBoundWatcher(future, pvcResource, name);
+      try (Watch boundWatcher = pvcIsBoundWatcher(future, pvcResource);
           Watch waitingWatcher = pvcIsWaitingForConsumerWatcher(future, actualPvc)) {
         return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
       } catch (ExecutionException e) {
@@ -211,14 +211,13 @@ public class KubernetesPersistentVolumeClaims {
 
   private Watch pvcIsBoundWatcher(
       CompletableFuture<PersistentVolumeClaim> future,
-      Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> pvcResource,
-      String name) {
+      Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> pvcResource) {
     return pvcResource.watch(
         new Watcher<PersistentVolumeClaim>() {
           @Override
           public void eventReceived(Action action, PersistentVolumeClaim pvc) {
             if (pvc.getStatus().getPhase().equals(PVC_BOUND_PHASE)) {
-              log.debug("pvc '" + pvc.getMetadata().getName() + "' is bound");
+              LOG.debug("pvc '" + pvc.getMetadata().getName() + "' is bound");
               future.complete(pvc);
             }
           }
@@ -228,7 +227,11 @@ public class KubernetesPersistentVolumeClaims {
             if (cause != null) {
               future.completeExceptionally(
                   new InfrastructureException(
-                      "Waiting for persistent volume claim '" + name + "' was interrupted"));
+                      "Waiting for persistent volume claim '"
+                          + pvcResource.get().getMetadata().getName()
+                          + "' was interrupted"));
+            } else if (!future.isDone()) {
+              future.cancel(true);
             }
           }
         });
@@ -244,14 +247,16 @@ public class KubernetesPersistentVolumeClaims {
         .create(workspaceId)
         .events()
         .inNamespace(namespace)
-        .withField(PVC_EVENT_REASON_FIELD_KEY, PVC_WAIT_EVENT_NAME)
+        .withField(PVC_EVENT_REASON_FIELD_KEY, PVC_EVENT_WAIT_CONSUMER_REASON)
         .withField(PVC_EVENT_UID_FIELD_KEY, actualPvc.getMetadata().getUid())
         .watch(
             new Watcher<Event>() {
               @Override
               public void eventReceived(Action action, Event resource) {
-                log.debug(
-                    "PVC is waiting for first consumer. Don't wait to bound to avoid deadlock.");
+                LOG.debug(
+                    "PVC '"
+                        + actualPvc.getMetadata().getName()
+                        + "' is waiting for first consumer. Don't wait to bound to avoid deadlock.");
                 future.complete(actualPvc);
               }
 
@@ -260,7 +265,9 @@ public class KubernetesPersistentVolumeClaims {
                 if (cause != null) {
                   future.completeExceptionally(
                       new InfrastructureException(
-                          "Waiting for persistent volume claim WaitForFirstConsumer event' was interrupted"));
+                          "Waiting for PVC '"
+                              + actualPvc.getMetadata().getName()
+                              + "' WaitForFirstConsumer event' was interrupted"));
                 }
               }
             });
