@@ -237,6 +237,10 @@ export class Ide {
         let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
         let regexp: RegExp = new RegExp('^.*(https?://.*)$');
 
+        if (!regexp.test(notification)) {
+            throw new Error('Cannot obtaine url from notification message');
+        }
+
         return notification.split(regexp)[1];
     }
 
@@ -252,7 +256,7 @@ export class Ide {
                     return true;
                 }
             } catch (error) {
-                    console.log('Application is not yet ready for use');
+               console.log('Application is not yet ready for use');
             }
 
             await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
