@@ -28,7 +28,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Predicate;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.workspace.infrastructure.kubernetes.KubernetesClientFactory;
@@ -44,7 +43,12 @@ import org.slf4j.LoggerFactory;
  */
 public class KubernetesPersistentVolumeClaims {
 
-  public static final String PVC_BOUND_PHASE = "Bound";
+  private static final Logger log = LoggerFactory.getLogger(KubernetesPersistentVolumeClaims.class);
+
+  private static final String PVC_BOUND_PHASE = "Bound";
+  private static final String PVC_EVENT_REASON_FIELD_KEY = "reason";
+  private static final String PVC_WAIT_EVENT_NAME = "WaitForFirstConsumer";
+  private static final String PVC_EVENT_UID_FIELD_KEY = "involvedObject.uid";
 
   private final String namespace;
   private final String workspaceId;
@@ -154,35 +158,18 @@ public class KubernetesPersistentVolumeClaims {
   }
 
   /**
-   * Waits until persistent volume claim state is bound.
+   * Waits until persistent volume claim state is bound. If used k8s Storage Class has
+   * 'volumeBindingMode: WaitForFirstConsumer', we don't wait to avoid deadlock.
    *
    * @param name name of persistent volume claim that should be watched
    * @param timeoutMillis waiting timeout in milliseconds
-   * @return persistent volume claim that satisfies the specified predicate
+   * @return persistent volume claim that is bound or in waiting for consumer state
    * @throws InfrastructureException when specified timeout is reached
    * @throws InfrastructureException when {@link Thread} is interrupted while waiting
    * @throws InfrastructureException when any other exception occurs
    */
   public PersistentVolumeClaim waitBound(String name, long timeoutMillis)
       throws InfrastructureException {
-    return wait(name, timeoutMillis, pvc -> pvc.getStatus().getPhase().equals(PVC_BOUND_PHASE));
-  }
-
-  /**
-   * Waits until persistent volume claim state will suit for specified predicate.
-   *
-   * @param name name of persistent volume claim that should be watched
-   * @param timeoutMillis waiting timeout in milliseconds
-   * @param predicate predicate to perform state check
-   * @return persistent volume claim that satisfies the specified predicate
-   * @throws InfrastructureException when specified timeout is reached
-   * @throws InfrastructureException when {@link Thread} is interrupted while waiting
-   * @throws InfrastructureException when any other exception occurs
-   */
-  public PersistentVolumeClaim wait(
-      String name, long timeoutMillis, Predicate<PersistentVolumeClaim> predicate)
-      throws InfrastructureException {
-    CompletableFuture<PersistentVolumeClaim> future = new CompletableFuture<>();
     try {
       Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> pvcResource =
           clientFactory
@@ -192,12 +179,13 @@ public class KubernetesPersistentVolumeClaims {
               .withName(name);
 
       PersistentVolumeClaim actualPvc = pvcResource.get();
-      if (predicate.test(actualPvc)) {
+      if (actualPvc.getStatus().getPhase().equals(PVC_BOUND_PHASE)) {
         return actualPvc;
       }
 
+      CompletableFuture<PersistentVolumeClaim> future = new CompletableFuture<>();
       // any of these watchers can finish the operation resolving the future
-      try (Watch boundWatcher = pvcIsBoundWatcher(future, pvcResource, predicate, name);
+      try (Watch boundWatcher = pvcIsBoundWatcher(future, pvcResource, name);
           Watch waitingWatcher = pvcIsWaitingForConsumerWatcher(future, actualPvc)) {
         return future.get(timeoutMillis, TimeUnit.MILLISECONDS);
       } catch (ExecutionException e) {
@@ -224,26 +212,31 @@ public class KubernetesPersistentVolumeClaims {
   private Watch pvcIsBoundWatcher(
       CompletableFuture<PersistentVolumeClaim> future,
       Resource<PersistentVolumeClaim, DoneablePersistentVolumeClaim> pvcResource,
-      Predicate<PersistentVolumeClaim> predicate,
       String name) {
     return pvcResource.watch(
         new Watcher<PersistentVolumeClaim>() {
           @Override
           public void eventReceived(Action action, PersistentVolumeClaim pvc) {
-            if (predicate.test(pvc)) {
+            if (pvc.getStatus().getPhase().equals(PVC_BOUND_PHASE)) {
+              log.debug("pvc '" + pvc.getMetadata().getName() + "' is bound");
               future.complete(pvc);
             }
           }
 
           @Override
           public void onClose(KubernetesClientException cause) {
-            future.completeExceptionally(
-                new InfrastructureException(
-                    "Waiting for persistent volume claim '" + name + "' was interrupted"));
+            if (cause != null) {
+              future.completeExceptionally(
+                  new InfrastructureException(
+                      "Waiting for persistent volume claim '" + name + "' was interrupted"));
+            }
           }
         });
   }
 
+  /**
+   * Creates and returns {@link Watch} that watches for 'WaitForFirstConsumer' events on given PVC.
+   */
   private Watch pvcIsWaitingForConsumerWatcher(
       CompletableFuture<PersistentVolumeClaim> future, PersistentVolumeClaim actualPvc)
       throws InfrastructureException {
@@ -251,12 +244,10 @@ public class KubernetesPersistentVolumeClaims {
         .create(workspaceId)
         .events()
         .inNamespace(namespace)
-        .withField("reason", "WaitForFirstConsumer")
-        .withField("involvedObject.uid", actualPvc.getMetadata().getUid())
+        .withField(PVC_EVENT_REASON_FIELD_KEY, PVC_WAIT_EVENT_NAME)
+        .withField(PVC_EVENT_UID_FIELD_KEY, actualPvc.getMetadata().getUid())
         .watch(
             new Watcher<Event>() {
-              private final Logger log = LoggerFactory.getLogger(getClass());
-
               @Override
               public void eventReceived(Action action, Event resource) {
                 log.debug(
@@ -266,7 +257,11 @@ public class KubernetesPersistentVolumeClaims {
 
               @Override
               public void onClose(KubernetesClientException cause) {
-                log.debug(cause.toString());
+                if (cause != null) {
+                  future.completeExceptionally(
+                      new InfrastructureException(
+                          "Waiting for persistent volume claim WaitForFirstConsumer event' was interrupted"));
+                }
               }
             });
   }
