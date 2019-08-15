@@ -39,19 +39,16 @@ public class SerializableConverter implements AttributeConverter<Serializable, S
     try {
       return objectMapper.writeValueAsString(value);
     } catch (JsonProcessingException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Unable to serialize preference value:" + e.getMessage(), e);
     }
-    return null;
   }
 
   @Override
   public Serializable convertToEntityAttribute(String dbData) {
-    System.out.println("~~~~~~~~~~~~~~~~~~~~:" + new String(dbData));
     try {
       return objectMapper.readValue(dbData, Serializable.class);
     } catch (IOException e) {
-      e.printStackTrace();
+      throw new RuntimeException("Unable to deserialize preference value:" + e.getMessage(), e);
     }
-    return null;
   }
 }

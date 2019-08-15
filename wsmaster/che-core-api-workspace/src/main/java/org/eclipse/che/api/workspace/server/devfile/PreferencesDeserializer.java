@@ -51,7 +51,9 @@ public class PreferencesDeserializer extends JsonDeserializer<Map<String, Serial
         default:
           throw new JsonParseException(
               jsonParser,
-              format("Unexpected value of the preference '%s' ", jsonParser.getCurrentName()));
+              format(
+                  "Unexpected value of the preference with key '%s'.",
+                  jsonParser.getCurrentName()));
       }
       jsonParser.nextToken();
     }
