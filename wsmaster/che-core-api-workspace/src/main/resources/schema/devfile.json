@@ -282,7 +282,7 @@
                       "type": [
                         "boolean",
                         "string",
-                        "integer"
+                        "number"
                       ]
                     }
                   }
