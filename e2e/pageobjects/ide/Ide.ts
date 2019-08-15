@@ -234,9 +234,10 @@ export class Ide {
     async getApplicationUrl(notificationText: string) {
         const notificationTextLocator: By = By.xpath(`//div[@class='theia-Notification']//p[contains(@id,'${notificationText}')]`);
 
-         let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
+        let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
+        let regexp: RegExp = new RegExp('^.*(https?://.*)$');
 
-         return notification.substring(54);
+        return notification.split(regexp)[1];
     }
 
     async waitApplicationReadyToUse(url: string,
@@ -246,15 +247,15 @@ export class Ide {
             try {
                 let res = await axios.get(url);
 
-                 if (res.status === 200) {
+                if (res.status === 200) {
                     console.log('Application is ready for use.');
                     return true;
                 }
             } catch (error) {
-                console.log('Application is not yet ready for use');
+                    console.log('Application is not yet ready for use');
             }
 
-             await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+            await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
         }, timeout);
     }
 
