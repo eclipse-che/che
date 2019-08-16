@@ -22,6 +22,7 @@ import static org.eclipse.che.workspace.infrastructure.kubernetes.Constants.CHE_
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
@@ -100,6 +101,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeStartInterruptedException;
 import org.eclipse.che.api.workspace.server.spi.StateException;
+import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.InternalEnvironmentProvisioner;
 import org.eclipse.che.api.workspace.shared.dto.event.MachineStatusEvent;
 import org.eclipse.che.api.workspace.shared.dto.event.RuntimeLogEvent;
@@ -265,6 +267,15 @@ public class KubernetesInternalRuntimeTest {
     when(namespace.deployments()).thenReturn(deployments);
     when(namespace.secrets()).thenReturn(secrets);
     when(namespace.configMaps()).thenReturn(configMaps);
+    doReturn(
+            ImmutableMap.of(
+                M1_NAME,
+                mock(InternalMachineConfig.class),
+                M2_NAME,
+                mock(InternalMachineConfig.class)))
+        .when(k8sEnv)
+        .getMachines();
+
     final Map<String, Service> allServices = ImmutableMap.of(SERVICE_NAME, mockService());
     final Ingress ingress = mockIngress();
     final Map<String, Ingress> allIngresses = ImmutableMap.of(INGRESS_NAME, ingress);
@@ -559,7 +570,11 @@ public class KubernetesInternalRuntimeTest {
     final ImmutableMap<String, Pod> allPods =
         ImmutableMap.of(WORKSPACE_POD_NAME, mockPod(ImmutableList.of(container1, container2)));
     when(k8sEnv.getPodsCopy()).thenReturn(allPods);
-    //    doThrow(IllegalStateException.class).when(bootstrapper).bootstrapAsync();
+
+    internalRuntime = spy(internalRuntime);
+    doThrow(IllegalStateException.class)
+        .when(internalRuntime)
+        .waitRunningAsync(any(), argThat(m -> m.getName().equals(M1_NAME)));
 
     try {
       internalRuntime.start(emptyMap());
@@ -600,7 +615,8 @@ public class KubernetesInternalRuntimeTest {
               + "environment: env1, ownerId: id1' is interrupted")
   public void throwsInfrastructureExceptionWhenMachinesWaitingIsInterrupted() throws Exception {
     final Thread thread = Thread.currentThread();
-    //    when(bootstrapper.bootstrapAsync()).thenReturn(new CompletableFuture<>());
+    internalRuntime = spy(internalRuntime);
+    doReturn(new CompletableFuture<>()).when(internalRuntime).waitRunningAsync(any(), any());
 
     Executors.newSingleThreadScheduledExecutor()
         .schedule(thread::interrupt, 300, TimeUnit.MILLISECONDS);
