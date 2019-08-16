@@ -10,6 +10,8 @@
 --   Red Hat, Inc. - initial API and implementation
 --
 
+DROP TABLE installer_serverconf_attributes;
 DROP TABLE installer_dependencies;
 DROP TABLE installer_servers;
+DROP TABLE installer_properties;
 DROP TABLE installer;
