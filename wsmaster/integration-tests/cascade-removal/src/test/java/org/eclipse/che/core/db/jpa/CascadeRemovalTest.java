@@ -218,7 +218,7 @@ public class CascadeRemovalTest {
                             KubernetesServerImpl.ServerId.class)
                         .addEntityClass(
                             "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
-                        .addEntityClass(SerializableConverter.class)
+                        .addClass(SerializableConverter.class)
                         .setExceptionHandler(H2ExceptionHandler.class)
                         .build());
                 bind(EventService.class).in(Singleton.class);
