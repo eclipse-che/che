@@ -160,7 +160,7 @@ public class PostgreSqlTckModule extends TckModule {
                 KubernetesServerImpl.ServerId.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
-            .addEntityClass(SerializableConverter.class)
+            .addClass(SerializableConverter.class)
             .build());
     bind(TckResourcesCleaner.class).to(JpaCleaner.class);
 
