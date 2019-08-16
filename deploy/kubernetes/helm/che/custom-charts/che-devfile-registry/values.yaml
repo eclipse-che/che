@@ -8,7 +8,7 @@
 #
 
 cheDevfileRegistry:
-  image: quay.io/eclipse/che-devfile-registry:nightly
+  image: quay.io/eclipse/che-devfile-registry:7.0.0
   imagePullPolicy: Always
   memoryLimit: 256Mi
   memoryRequests: 16Mi
