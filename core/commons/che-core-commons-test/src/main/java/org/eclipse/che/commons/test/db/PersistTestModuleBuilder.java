@@ -138,7 +138,7 @@ public class PersistTestModuleBuilder {
     return this;
   }
 
-  /** Adds another non-entity class (like attribute converters etc) to entities list. */
+  /** Adds another non-entity class (like attribute converters etc) to class list. */
   public PersistTestModuleBuilder addClass(Class<?> entityClass) {
     entityFqnSet.add(entityClass.getName());
     return this;
