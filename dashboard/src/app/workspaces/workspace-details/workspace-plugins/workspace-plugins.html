@@ -34,7 +34,7 @@
   </che-list-header>
     <!-- plugins list  -->
   <che-list class="plugins-list" flex
-            ng-if="workspacePluginsController.plugins && workspacePluginsController.plugins.length > 0">
+            ng-if="workspacePluginsController.plugins && workspacePluginsController.plugins.size > 0">
     <div class="plugin-item"
         ng-repeat="plugin in workspacePluginsController.cheListHelper.getVisibleItems() | orderBy:[workspacePluginsController.pluginOrderBy, 'displayName' ]">
       <che-list-item flex>
@@ -61,7 +61,8 @@
             </div>
             <!-- Version -->
             <div flex="15">
-              <span class="che-list-item-name" plugin-version="{{plugin.version}}">{{plugin.version}}</span>
+              <select class="che-version-dropdown" ng-model="plugin.selected" ng-change="workspacePluginsController.updateSelectedPlugin(plugin)" ng-init="plugin.selected" ng-options="ver for ver in plugin.versions">
+              </select>
             </div>
             <!-- Description -->
             <div flex="50">

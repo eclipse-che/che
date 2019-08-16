@@ -279,7 +279,11 @@
                       "{\"java.home\": \"/home/user/jdk11\", \"java.jdt.ls.vmargs\": \"-Xmx1G\"}"
                     ],
                     "additionalProperties": {
-                      "type": "string"
+                      "type": [
+                        "boolean",
+                        "string",
+                        "number"
+                      ]
                     }
                   }
                 }
