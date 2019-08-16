@@ -24,9 +24,9 @@
   </che-list-header>
   <!-- editor list  -->
   <che-list class="plugins-list" flex
-            ng-if="workspaceEditorsController.editors && workspaceEditorsController.editors.length > 0">
+            ng-if="workspaceEditorsController.editors && workspaceEditorsController.editors.size > 0">
     <div class="plugin-item"
-        ng-repeat="editor in workspaceEditorsController.editors | orderBy:[workspaceEditorsController.editorOrderBy, 'displayName' ]">
+        ng-repeat="editor in workspaceEditorsController.cheListHelper.getVisibleItems() | orderBy:[workspaceEditorsController.editorOrderBy, 'displayName' ]">
       <che-list-item flex>
         <div flex="100"
             layout="row"
@@ -51,7 +51,8 @@
             </div>
             <!-- Version -->
             <div flex="15">
-              <span class="che-list-item-name" plugin-version="{{editor.version}}">{{editor.version}}</span>
+                <select class="che-version-dropdown" ng-model="editor.selected" ng-change="workspaceEditorsController.updateSelectedEditorVersion(editor)" ng-init="editor.selected" ng-options="ver for ver in editor.versions">
+                </select>
             </div>
             <!-- Description -->
             <div flex="50">

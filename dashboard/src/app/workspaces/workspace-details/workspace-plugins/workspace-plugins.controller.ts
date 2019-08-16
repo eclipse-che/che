@@ -10,7 +10,7 @@
  *   Red Hat, Inc. - initial API and implementation
  */
 'use strict';
-import {IPlugin, PluginRegistry} from '../../../../components/api/plugin-registry.factory';
+import {IPlugin, PluginRegistry, IPluginRow} from '../../../../components/api/plugin-registry.factory';
 import {CheNotification} from '../../../../components/notification/che-notification.factory';
 import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
 
@@ -37,7 +37,7 @@ export class WorkspacePluginsController {
   isLoading: boolean;
 
   pluginOrderBy = 'displayName';
-  plugins: Array<IPlugin> = [];
+  plugins: Map<string, IPluginRow> = new Map(); // the key is publisher/name
   selectedPlugins: Array<string> = [];
 
   pluginFilter: any;
@@ -82,13 +82,39 @@ export class WorkspacePluginsController {
    * Loads the list of plugins from registry.
    */
   loadPlugins(): void {
-    this.plugins = [];
+    this.plugins = new Map();
     this.isLoading = true;
-    this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPlugin>) => {
+    this.pluginRegistry.fetchPlugins(this.pluginRegistryLocation).then((result: Array<IPluginRow>) => {
       this.isLoading = false;
-      result.forEach((item: IPlugin) => {
+      result.forEach((item: IPluginRow) => {
         if (item.type !== EDITOR_TYPE) {
-          this.plugins.push(item);
+
+          // since plugin registry returns an array of plugins/editors with a single version we need to unite the plugin versions into one
+          const pluginID = `${item.publisher}/${item.name}`;
+
+          item.selected = 'latest'; // set the default selected to latest
+
+          if (this.plugins.has(pluginID)) {
+            const foundPlugin = this.plugins.get(pluginID);
+            foundPlugin.versions.push(item.version);
+          } else {
+            item.versions = [item.version];
+            this.plugins.set(pluginID, item);
+          }
+
+        }
+      });
+
+      this.selectedPlugins.forEach(plugin => {
+        // a selected plugin is in the form publisher/name/version
+        // find the currently selected ones and set them along with their id
+        const {publisher, name, version} = this.splitPluginId(plugin);
+        const pluginID = `${publisher}/${name}`;
+
+        if (this.plugins.has(pluginID)) {
+          const foundPlugin = this.plugins.get(pluginID);
+          foundPlugin.id = plugin;
+          foundPlugin.selected = version;
         }
       });
 
@@ -114,16 +140,50 @@ export class WorkspacePluginsController {
    *
    * @param {IPlugin} plugin
    */
-  updatePlugin(plugin: IPlugin): void {
+  updatePlugin(plugin: IPluginRow): void {
     if (plugin.type !== EDITOR_TYPE) {
+
+      const pluginID = `${plugin.publisher}/${plugin.name}`;
+      const pluginIDWithVersion = `${plugin.publisher}/${plugin.name}/${plugin.selected}`;
+
+      this.plugins.get(pluginID).selected = plugin.selected;
+      this.plugins.get(pluginID).id = pluginIDWithVersion;
+
       if (plugin.isEnabled) {
-        this.selectedPlugins.push(plugin.id);
+        this.selectedPlugins.push(pluginIDWithVersion);
       } else {
         this.selectedPlugins.splice(this.selectedPlugins.indexOf(plugin.id), 1);
       }
+
       this.cheWorkspace.getWorkspaceDataManager().setPlugins(this.workspace, this.selectedPlugins);
     }
 
+    this.onChange();
+  }
+
+  /**
+   * Update the selected plugin version when the plugin version dropdown is changed
+   *
+   * @param {IPlugin} plugin
+   */
+  updateSelectedPlugin(plugin: IPluginRow): void {
+    if (plugin.type !== EDITOR_TYPE) {
+      const pluginID = `${plugin.publisher}/${plugin.name}`;
+      const pluginIDWithVersion = `${pluginID}/${plugin.selected}`;
+
+      this.plugins.get(pluginID).selected = plugin.selected;
+      this.plugins.get(pluginID).id = pluginIDWithVersion;
+
+      const currentlySelectedPlugins = this.cheWorkspace.getWorkspaceDataManager().getPlugins(this.workspace);
+
+      if (plugin.isEnabled) {
+        currentlySelectedPlugins.splice(this.selectedPlugins.indexOf(plugin.id), 1, pluginIDWithVersion);
+      } else {
+        currentlySelectedPlugins.push(pluginIDWithVersion);
+      }
+      this.cheWorkspace.getWorkspaceDataManager().setPlugins(this.workspace, currentlySelectedPlugins);
+      this.selectedPlugins = currentlySelectedPlugins;
+    }
     this.onChange();
   }
 
@@ -133,18 +193,41 @@ export class WorkspacePluginsController {
   private updatePlugins(): void {
     this.selectedPlugins = this.cheWorkspace.getWorkspaceDataManager().getPlugins(this.workspace);
     // check each plugin's enabled state:
-    this.plugins.forEach((plugin: IPlugin) => {
-      plugin.isEnabled = this.isPluginEnabled(plugin);
+    this.plugins.forEach((plugin: IPluginRow) => {
+      const selectedPluginId = this.findInSelected(plugin);
+      plugin.isEnabled = !!selectedPluginId;
+      if (selectedPluginId) {
+        plugin.id = selectedPluginId;
+        const {publisher, name, version} = this.splitPluginId(selectedPluginId);
+        plugin.selected = version;
+      }
     });
-    this.cheListHelper.setList(this.plugins, 'displayName');
+    this.cheListHelper.setList(Array.from(this.plugins.values()), 'displayName');
   }
 
   /**
-   *
+   * Finds given plugin in the list of enabled plugins and returns its ID with version
    * @param {IPlugin} plugin
-   * @returns {boolean} the plugin's enabled state
+   * @returns {string | undefined} plugin ID
    */
-  private isPluginEnabled(plugin: IPlugin): boolean {
-    return this.selectedPlugins.indexOf(plugin.id) >= 0
+  private findInSelected(plugin: IPluginRow): string | undefined {
+    return this.selectedPlugins.find(selectedPluginId => {
+      const partialId = `${plugin.publisher}/${plugin.name}/`;
+      return selectedPluginId.indexOf(partialId) !== -1;
+    });
   }
+
+  /**
+   * Splits a plugin ID by a separator (slash)
+   * @param id a string in form `${publisher}/${name}` or `${publisher}/${name}/${version}`
+   */
+  private splitPluginId(id: string): { publisher: string, name: string, version?: string } {
+    const parts = id.split('/');
+    return {
+      publisher: parts[0],
+      name: parts[1],
+      version: parts[2]
+    };
+  }
+
 }
