@@ -22,9 +22,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
 
 /**
- * Helps to deserialize multi-type preferences into {@code Component} as a {@code Map}.
+ * Helps to deserialize multi-type preferences into {@link Component} as a {@code Map}.
  *
  * @author Max Shaposhnyk
  */
@@ -39,6 +40,7 @@ public class PreferencesDeserializer extends JsonDeserializer<Map<String, Serial
       JsonToken currentToken = jsonParser.nextValue();
       switch (currentToken) {
         case VALUE_NUMBER_INT:
+        case VALUE_NUMBER_FLOAT:
           result.put(jsonParser.getCurrentName(), jsonParser.getNumberValue());
           break;
         case VALUE_FALSE:

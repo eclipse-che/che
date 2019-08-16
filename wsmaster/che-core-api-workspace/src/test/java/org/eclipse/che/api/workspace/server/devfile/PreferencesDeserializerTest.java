@@ -41,13 +41,15 @@ public class PreferencesDeserializerTest {
         "{"
             + "\"valid.string\": \"/usr/bin/value\","
             + "\"valid.boolean\": false,"
-            + "\"valid.numeric\": 777555888"
+            + "\"valid.integer\": 777555888,"
+            + "\"valid.float\": 3.1415926"
             + "}";
 
     final JsonParser parser = factory.createParser(json);
     Map<String, Serializable> result = preferencesDeserializer.deserialize(parser, ctxt);
-    assertEquals(3, result.size());
+    assertEquals(4, result.size());
     assertTrue(result.containsValue(777555888));
+    assertTrue(result.containsValue(3.1415926));
     assertTrue(result.containsValue(false));
     assertTrue(result.containsValue("/usr/bin/value"));
   }

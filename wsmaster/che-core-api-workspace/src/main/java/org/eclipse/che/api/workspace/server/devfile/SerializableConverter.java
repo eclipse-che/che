@@ -17,9 +17,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
+import org.eclipse.che.api.core.model.workspace.devfile.Component;
 
 /**
- * Helps to store and read serializable values of the preferences map in {@code Component} to/from
+ * Helps to store and read serializable values of the preferences map in {@link Component} to/from
  * database.
  *
  * @author Max Shaposhnyk
