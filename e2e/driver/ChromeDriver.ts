@@ -20,20 +20,8 @@ export class ChromeDriver implements IDriver {
     private readonly driver: ThenableWebDriver;
 
     constructor() {
-        const isHeadless: boolean = TestConstants.TS_SELENIUM_HEADLESS;
-        let options: Options = new Options()
-            .addArguments('--no-sandbox')
-            .addArguments('--disable-web-security')
-            .addArguments('--allow-running-insecure-content');
-
-        if (isHeadless) {
-            options = options.addArguments('headless');
-        }
-
-        this.driver = new Builder()
-            .forBrowser('chrome')
-            .setChromeOptions(options)
-            .build();
+        const options: Options = this.getDriverOptions();
+        this.driver = this.getDriverBuilder(options).build();
 
         this.driver
             .manage()
@@ -43,6 +31,33 @@ export class ChromeDriver implements IDriver {
 
     get(): ThenableWebDriver {
         return this.driver;
+    }
+
+    private getDriverOptions(): Options {
+        let options: Options = new Options()
+            .addArguments('--no-sandbox')
+            .addArguments('--disable-web-security')
+            .addArguments('--allow-running-insecure-content');
+
+        // if 'true' run in 'headless' mode
+        if (TestConstants.TS_SELENIUM_HEADLESS) {
+            options = options.addArguments('headless');
+        }
+
+        return options;
+    }
+
+    private getDriverBuilder(options: Options): Builder {
+        let builder: Builder = new Builder()
+            .forBrowser('chrome')
+            .setChromeOptions(options);
+
+        // if 'true' run with remote driver
+        if (TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL) {
+            builder = builder.usingServer(TestConstants.TS_SELENIUM_REMOTE_DRIVER_URL);
+        }
+
+        return builder;
     }
 
 }

@@ -25,7 +25,7 @@ pipeline {
         stage("Cleanup") {
             steps {
                 script() {
-                    sh "/usr/local/bin/minikube delete"
+                    sh "/usr/local/bin/minikube delete || true"
                 }
             }
         }
@@ -70,7 +70,7 @@ pipeline {
                 stage("Build Che") {
                     steps {
                         script {
-                            sh "mvn clean install -f ${WORKSPACE}/pom.xml"
+                            sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
                         }
                     }
                 }
@@ -194,6 +194,8 @@ pipeline {
                       sudo rm -rf `sudo find /tmp -name 'hostpath-provisioner' 2>/dev/null` || true
                     
                       docker volume rm \$(docker volume ls -q -f dangling=true) || true
+                      
+                      docker rm -f \$(sudo docker ps --all | awk 'NR>0 {print \$1;}') || true
                     """
 
                 sh "sudo rm -rf ${WORKSPACE}/e2e"
