@@ -61,6 +61,13 @@ public class PluginFQNParserTest {
         "PluginFQNParser should return empty list when attributes does not contain plugins or editors");
   }
 
+  @Test
+  public void shouldComposeIdWhenAllPartsGivenToTheConstructor() {
+    ExtendedPluginFQN pluginFQN =
+        new ExtendedPluginFQN("reference", "publisher", "name", "version");
+    assertEquals(pluginFQN.getId(), "publisher/name/version");
+  }
+
   @Test(dataProvider = "validAttributesProvider")
   public void shouldParseAllPluginsAndEditor(AttributeParsingTestCase testCase) throws Exception {
     Collection<PluginFQN> actual = parser.parsePlugins(testCase.attributes);
