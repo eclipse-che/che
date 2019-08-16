@@ -170,7 +170,6 @@ public class WsMasterModule extends AbstractModule {
         Multibinder.newSetBinder(binder(), InternalEnvironmentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(InstallerConfigProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(EnvVarEnvironmentProvisioner.class);
-    internalEnvironmentProvisioners.addBinding().to(LegacyEnvVarEnvironmentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(ProjectsVolumeForWsAgentProvisioner.class);
     internalEnvironmentProvisioners.addBinding().to(MachineNameProvisioner.class);
 

@@ -203,31 +203,6 @@ public class DockerInternalRuntimeTest {
     }
   }
 
-  @Test(expectedExceptions = InfrastructureException.class)
-  public void throwsExceptionWhenBootstrappingOfInstallersFailed() throws Exception {
-    mockInstallersBootstrapFailed(new InfrastructureException("bootstrap failed"));
-    mockContainerStart();
-    try {
-      dockerRuntime.start(emptyMap());
-    } catch (InfrastructureException ex) {
-      verify(starter, times(1))
-          .startContainer(
-              nullable(String.class),
-              nullable(String.class),
-              nullable(String.class),
-              any(),
-              any(),
-              any());
-      verify(eventService, times(4)).publish(any(MachineStatusEvent.class));
-      verifyEventsOrder(
-          newEvent(DEV_MACHINE, STARTING, null),
-          newEvent(DEV_MACHINE, RUNNING, null),
-          newEvent(DEV_MACHINE, FAILED, "bootstrap failed"),
-          newEvent(DEV_MACHINE, STOPPED, null));
-      throw ex;
-    }
-  }
-
   @Test(expectedExceptions = InternalInfrastructureException.class)
   public void throwsInternalInfrastructureExceptionWhenNetworkCreationInterrupted()
       throws Exception {
@@ -474,14 +449,6 @@ public class DockerInternalRuntimeTest {
             anyList(),
             nullable(DockerMachine.class)))
         .thenReturn(bootstrapper);
-  }
-
-  private void mockInstallersBootstrapFailed(InfrastructureException exception) throws Exception {
-    when(bootstrapperFactory.create(
-            nullable(String.class),
-            nullable(RuntimeIdentity.class),
-            anyList(),
-            nullable(DockerMachine.class)))
-        .thenReturn(bootstrapper);
+    doNothing().when(bootstrapper).bootstrap(BOOTSTRAPPING_TIMEOUT_MINUTES);
   }
 }
