@@ -199,5 +199,44 @@ $ yarn start --disable-host-check --public=$(echo ${server.dev-server} | sed -e 
 ```
 
 ### Che server a.k.a WS master
+There is a [devfile](https://github.com/eclipse/che/blob/master/devfile.yaml) for development of Che server in Che.
+To build Che one may run a predefined build task from the devfile.
 
-To be provided soon.
+Starting Che master requires some manual steps.
+Open a terminal in runtime container (`che-server-runtime`) and perform:
+ - First, set `CHE_HOME` environment variable with absolute path to parent folder of Che master's Tomcat.
+   It might look like `/projects/che/assembly/assembly-main/target/eclipse-che-*-SNAPSHOT/eclipse-che-*-SNAPSHOT`.
+ - Then set `CHE_HOST` with the endpoint of new Che master.
+   If using the [devfile](devfile.yaml) the endpoint is `che-dev` and already set.
+ - After, set `CHE_INFRASTRUCTURE_ACTIVE` according to your environment.
+   For example: `openshift` (note, use `kubernetes` and `openshift` insted of `minikube` and `minishift` correspondingly).
+ - Run `/entrypoint.sh`.
+   After this, new Che master should be accesible from the `che-dev` endpoint.
+   To reach Swagger use url from `che-dev` endpoint with `/swagger` suffix.
+
+To start a workspace from Che server under development some additional configuration of the cluster is needed.
+One should add rights for the service account to be able to perform all needed for Che server actions.
+Example for Openshift (in case of Kubernetes replace `oc` with `kubectl`):
+```bash
+cat << EOF | oc apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app: che
+    component: che
+  name: che-workspace-admin
+  namespace: che
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: admin
+subjects:
+- kind: ServiceAccount
+  name: che-workspace
+  namespace: che
+EOF
+```
+
+Also `CHE_API_INTERNAL`, `CHE_API_EXTERNAL` and `CHE_API` should be set in runner container and point to new Che server API.
+If one uses provided devfile, they are already set to: `http://che-dev:8080/api`, which should be changed in case of https protocol.
