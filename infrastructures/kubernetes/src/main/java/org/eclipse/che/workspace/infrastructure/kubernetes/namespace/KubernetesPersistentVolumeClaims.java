@@ -224,15 +224,7 @@ public class KubernetesPersistentVolumeClaims {
 
           @Override
           public void onClose(KubernetesClientException cause) {
-            if (cause != null) {
-              future.completeExceptionally(
-                  new InfrastructureException(
-                      "Waiting for persistent volume claim '"
-                          + pvcResource.get().getMetadata().getName()
-                          + "' was interrupted"));
-            } else if (!future.isDone()) {
-              future.cancel(true);
-            }
+            safelyFinishFutureOnClose(cause, future, pvcResource.get().getMetadata().getName());
           }
         });
   }
@@ -262,14 +254,21 @@ public class KubernetesPersistentVolumeClaims {
 
               @Override
               public void onClose(KubernetesClientException cause) {
-                if (cause != null) {
-                  future.completeExceptionally(
-                      new InfrastructureException(
-                          "Waiting for PVC '"
-                              + actualPvc.getMetadata().getName()
-                              + "' WaitForFirstConsumer event' was interrupted"));
-                }
+                safelyFinishFutureOnClose(cause, future, actualPvc.getMetadata().getName());
               }
             });
+  }
+
+  private void safelyFinishFutureOnClose(
+      KubernetesClientException cause,
+      CompletableFuture<PersistentVolumeClaim> future,
+      String pvcName) {
+    if (cause != null) {
+      future.completeExceptionally(
+          new InfrastructureException(
+              "Waiting for persistent volume claim '" + pvcName + "' was interrupted"));
+    } else if (!future.isDone()) {
+      future.cancel(true);
+    }
   }
 }
