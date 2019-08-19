@@ -10,10 +10,13 @@ if [ -z "$TS_SELENIUM_BASE_URL" ]; then
     exit 1
 fi
 
-chromedriver &
+chromedriver --whitelisted-ips= &
 /usr/bin/Xvfb :1 -screen 0 1920x1080x24 +extension RANDR > /dev/null 2>&1 &
 x11vnc -display :1.0 > /dev/null 2>&1 &
 export DISPLAY=:1.0
+
+sleep 15
+
 
 hostname=$(hostname -I)
 echo "You can watch locally using VNC with IP: $hostname"
@@ -26,5 +29,13 @@ else
 	echo "Executing e2e tests from an image."
 	cd e2e || exit
 fi
+
+
+echo "================"
+nmap -p 9515 localhost
+echo "================"
+
+
+export TS_SELENIUM_REMOTE_DRIVER_URL=http://localhost:9515
 
 npm run test
