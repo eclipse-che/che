@@ -196,6 +196,7 @@ pipeline {
             script {
                 sh """
                       kubectl get configmaps --namespace=che che -o yaml || true
+                      kubectl get deployment/che -n che  -o=jsonpath={'.spec..image'} || true
                       
                       /usr/local/bin/minikube stop || true
                     

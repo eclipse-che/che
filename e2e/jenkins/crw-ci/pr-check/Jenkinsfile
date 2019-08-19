@@ -53,7 +53,7 @@ pipeline {
             parallel {
                 stage("Run E2E Happy path tests against Single Che on Kubernetes") {
                     steps {
-                        build job: 'Single-Che-PR-check-E2E-Happy-path-tests-against-k8s',
+                        build job: 'Single-Che-PR-check-E2E-Happy-path-tests-against-K8S',
                                 parameters: [
                                         string(name: 'jenkinsNodeLabel',
                                                 value: params.jenkinsNodeLabel),

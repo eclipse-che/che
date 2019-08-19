@@ -18,10 +18,31 @@ pipeline {
     }
 
     stages {
-        stage("Download OKD") {
-            steps {
-                script {
-                    echo "to do"
+        stage("Prepare to start Che on OKD") {
+            failFast true
+
+            parallel {
+                stage("Download OKD") {
+                    steps {
+                        script {
+                            echo "to do"
+                        }
+                    }
+                }
+
+                stage("Download chectl") {
+                    steps {
+                        script {
+                            // TO-DO use option "--install-path" https://github.com/eclipse/che/pull/14182
+                            sh """
+                                       curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
+                                       chmod +x install_chectl.sh
+                                       sudo PATH=$PATH ./install_chectl.sh --channel=next
+                                       sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
+                                       sudo chmod +x ${WORKSPACE}/chectl
+                                    """
+                        }
+                    }
                 }
             }
         }
