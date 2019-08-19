@@ -157,5 +157,5 @@ export const TestConstants = {
     /**
      * Stop and remove workspace if a test fails.
      */
-    DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST || 'false'
+    DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true'
 };
