@@ -286,7 +286,7 @@ async function runTask(task: string) {
 
     await quickOpenContainer.clickOnContainerItem(task);
 }
-//sometimes under high loading the forst click can be failed
+// sometimes under high loading the first click can be failed
 async function isureClickOnDebugMenu() {
     try { await topMenu.selectOption('Debug', 'Open Configurations'); } catch (e) {
         console.log(`After clicking to the Debug top menu the menu has been not opened, try to click again...`);
