@@ -1,0 +1,100 @@
+#!groovy
+
+pipeline {
+    agent { label 'rhel7-8gb' }
+
+    options {
+        timestamps()
+        timeout(time: 40, unit: 'MINUTES')
+        buildDiscarder(logRotator(artifactDaysToKeepStr: '',
+                artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
+    }
+
+    environment {
+        PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
+        JENKINS_BUILD = "true"
+
+        CHE_IMAGE_REPO = "maxura/che-server"
+        CHE_IMAGE_TAG = "${ghprbPullId}"
+    }
+
+    parameters {
+        choice(name: 'jenkinsNodeLabel',
+                choices: ['codenvy-slave9',
+                          'rhel7-16gb'],
+                description: 'Label of Jenkins node which will be used to run the tests')
+    }
+
+    stages {
+        stage("Build Che") {
+            steps {
+                script {
+                    sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
+                }
+            }
+        }
+
+        stage("Push Che artifacts to docker.io") {
+            steps {
+                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
+                    script {
+                        sh """
+                          ${WORKSPACE}/dockerfiles/che/build.sh --organization:maxura --tag:${CHE_IMAGE_TAG} --dockerfile:Dockerfile
+                          docker tag ${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+                          docker login -u maxura -p ${maxura_docker_password}
+                          docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage("Run E2E Happy path tests") {
+            parallel {
+                stage("Run E2E Happy path tests against Single Che on Kubernetes") {
+                    steps {
+                        build job: 'Single-Che-PR-check-E2E-Happy-path-tests-against-k8s',
+                                parameters: [
+                                        string(name: 'jenkinsNodeLabel',
+                                                value: params.jenkinsNodeLabel),
+
+                                        string(name: 'cheImage',
+                                                value: "${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"),
+
+                                        string(name: 'ghprbAuthorRepoGitUrl',
+                                                value: "${ghprbAuthorRepoGitUrl}"),
+
+                                        string(name: 'ghprbSourceBranch',
+                                                value: "${ghprbSourceBranch}")]
+                    }
+                }
+
+                stage("Run E2E Happy path tests against Single Che on OKD") {
+                    steps {
+                        build job: 'Single-Che-PR-check-E2E-Happy-path-tests-against-OKD',
+                                parameters: [
+                                        string(name: 'jenkinsNodeLabel',
+                                                value: params.jenkinsNodeLabel),
+
+                                        string(name: 'cheImage',
+                                                value: "${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}"),
+
+                                        string(name: 'ghprbAuthorRepoGitUrl',
+                                                value: "${ghprbAuthorRepoGitUrl}"),
+
+                                        string(name: 'ghprbSourceBranch',
+                                                value: "${ghprbSourceBranch}")]
+                    }
+                }
+
+            }
+        }
+
+    }
+
+    post {
+        always {
+            cleanWs notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true
+        }
+    }
+}

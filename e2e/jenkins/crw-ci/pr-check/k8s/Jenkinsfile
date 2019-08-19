@@ -1,24 +1,39 @@
 #!groovy
 
 pipeline {
-    agent { label 'codenvy-slave9' }
+    agent { label params.jenkinsNodeLabel }
 
     options {
         timestamps()
-        timeout(time: 40, unit: 'MINUTES')
+        timeout(time: 30, unit: 'MINUTES')
         buildDiscarder(logRotator(artifactDaysToKeepStr: '',
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
     }
 
     environment {
-        PATH = "/tmp:/qa/tools/opt/apache-maven-3.5.4/bin:$PATH"
         JENKINS_BUILD = "true"
 
         DEVFILE_URL = "${WORKSPACE}/e2e/files/happy-path/happy-path-workspace.yaml"
         SUCCESS_THRESHOLD = 5
+    }
 
-        CHE_IMAGE_REPO = "maxura/che-server"
-        CHE_IMAGE_TAG = "${ghprbPullId}"
+    parameters {
+        choice(name: 'jenkinsNodeLabel',
+                choices: ['codenvy-slave9',
+                          'rhel7-16gb'],
+                description: 'Label of Jenkins node which will be used to build the job')
+
+        string(name: 'cheImage',
+                defaultValue: 'eclipse/che-server:nightly',
+                description: 'che-server image address')
+
+        string(name: 'ghprbAuthorRepoGitUrl',
+                defaultValue: 'https://github.com/eclipse/che.git',
+                description: 'GitHub author repo git url')
+
+        string(name: 'ghprbSourceBranch',
+                defaultValue: 'master',
+                description: 'GitHub source brunch')
     }
 
     stages {
@@ -66,30 +81,6 @@ pipeline {
                         }
                     }
                 }
-
-                stage("Build Che") {
-                    steps {
-                        script {
-                            sh "mvn clean install -f ${WORKSPACE}/pom.xml -T 4 -U -DskipTests -Dskip-enforce -Dskip-validate-sources"
-                        }
-                    }
-                }
-            }
-        }
-
-        stage("Push Che artifacts to docker.io") {
-            steps {
-                withCredentials([string(credentialsId: 'ed71c034-60bc-4fb1-bfdf-9570209076b5', variable: 'maxura_docker_password')]) {
-                    script {
-                        sh """
-                          ${WORKSPACE}/dockerfiles/che/build.sh --organization:maxura --tag:${CHE_IMAGE_TAG} --dockerfile:Dockerfile
-                          docker tag ${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG} docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                          docker login -u maxura -p ${maxura_docker_password}
-                          docker push docker.io/${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
-                        """
-                    }
-
-                }
             }
         }
 
@@ -101,7 +92,7 @@ pipeline {
                         --k8spodreadytimeout=180000 \\
                         -t=${WORKSPACE}/deploy/ \\
                         --listr-renderer=verbose \\
-                        --cheimage=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
+                        --cheimage=${params.cheImage}
                     """
 
                     // wait che-server to be available
