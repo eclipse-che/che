@@ -105,4 +105,6 @@ export class FactoryFromFileCtrl {
     this.factoryContent = null;
   }
 
+  $onInit(): void { }
+
 }

@@ -51,6 +51,8 @@ export class AddDeveloperController {
     this.$mdDialog = $mdDialog;
   }
 
+  $onInit(): void { }
+
   /**
    * Callback of the cancel button of the dialog.
    */

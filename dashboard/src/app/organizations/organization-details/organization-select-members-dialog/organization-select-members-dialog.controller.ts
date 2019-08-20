@@ -46,6 +46,10 @@ export class OrganizationSelectMembersDialogController {
    */
   private lodash: any;
   /**
+   * Resources service;
+   */
+  private resourcesService: che.service.IResourcesService;
+  /**
    * Callback handler (is set from outside).
    */
   private callbackController: ListOrganizationInviteMembersController;
@@ -99,7 +103,7 @@ export class OrganizationSelectMembersDialogController {
     this.lodash = lodash;
     this.cheProfile = cheProfile;
     this.cheUser = cheUser;
-    this.organizationRoles = resourcesService.getOrganizationRoles();
+    this.resourcesService = resourcesService;
 
     this.isLoading = false;
 
@@ -107,9 +111,11 @@ export class OrganizationSelectMembersDialogController {
     this.isBulkChecked = false;
     this.isNoSelected = true;
     this.isAllSelected = false;
+  }
 
+  $onInit(): void {
+    this.organizationRoles = this.resourcesService.getOrganizationRoles();
     this.user = this.cheUser.getUser();
-
     this.formUsersAvailableList();
   }
 

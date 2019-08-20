@@ -40,7 +40,9 @@ export class EditVariableDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+  }
 
+  $onInit(): void {
     // build list of used names
     let envVariablesCopy = angular.copy(this.envVariables);
     if (this.toEdit && envVariablesCopy[this.toEdit]) {

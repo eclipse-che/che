@@ -65,6 +65,11 @@ export class ListStacksController {
     this.loadDevfiles();
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   loadDevfiles(): void {
     this.isLoading = true;
     this.pluginRegistryUrl = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;

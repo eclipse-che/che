@@ -38,6 +38,8 @@ export class NoGithubOauthDialogController {
     this.message = ($rootScope as any).branding.oauthDocs;
   }
 
+  $onInit(): void { }
+
   /**
    * It will hide the dialog box.
    */

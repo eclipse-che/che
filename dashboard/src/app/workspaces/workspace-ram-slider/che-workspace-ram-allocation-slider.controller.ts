@@ -38,6 +38,8 @@ export class CheWorkspaceRamAllocationSliderController {
     });
   }
 
+  $onInit(): void { }
+
   /**
    * Rounds value to first decimal
    * @param value: number original value

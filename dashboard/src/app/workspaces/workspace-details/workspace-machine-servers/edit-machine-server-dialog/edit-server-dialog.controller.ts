@@ -45,7 +45,9 @@ export class EditMachineServerDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+  }
 
+  $onInit(): void {
     // get used references and ports
     this.usedReferences = Object.keys(this.servers);
     this.usedPorts = [];

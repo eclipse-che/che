@@ -40,7 +40,9 @@ export class FactoryFromTemplateController {
     this.isImporting = false;
     this.factoryContent = null;
     this.templateName = 'minimal';
+  }
 
+  $onInit(): void {
     this.updateFactoryContent();
   }
 

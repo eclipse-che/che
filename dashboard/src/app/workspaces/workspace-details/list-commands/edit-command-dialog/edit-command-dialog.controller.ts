@@ -36,7 +36,9 @@ export class EditCommandDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+  }
 
+  $onInit(): void {
     let isAddMode: boolean = (this.index === -1);
     let command: any = isAddMode ? {name: '', commandLine: ''} : this.commands[this.index];
     this.name = command.name;

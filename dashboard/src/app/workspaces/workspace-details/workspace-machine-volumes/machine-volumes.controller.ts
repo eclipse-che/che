@@ -61,6 +61,8 @@ export class MachineVolumesController {
     });
   }
 
+  $onInit(): void { }
+
   /**
    * Build variables list.
    * @param selectedMachine {IEnvironmentManagerMachine}

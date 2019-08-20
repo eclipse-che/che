@@ -37,7 +37,9 @@ export class EditRegistryController {
     this.$mdDialog = $mdDialog;
     this.chePreferences = chePreferences;
     this.cheNotification = cheNotification;
+  }
 
+  $onInit(): void {
     if (this.registry) {
       this.originRegistryUrl = angular.copy(this.registry.url);
     }

@@ -115,7 +115,11 @@ class IdeCtrl {
         this.updateData();
       });
     }
+  }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

@@ -103,7 +103,9 @@ export class MemberDialogController {
     this.lodash = lodash;
 
     this.isProcessing = false;
+  }
 
+  $onInit(): void {
     this.emails = [];
     this.members.forEach((member: any) => {
       this.emails.push(member.email);

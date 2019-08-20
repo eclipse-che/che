@@ -167,6 +167,11 @@ export class WorkspaceDetailsController {
     };
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Returns `true` if supported.
    *

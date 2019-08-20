@@ -163,6 +163,11 @@ export class CreateWorkspaceController {
     };
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Callback which is called when stack is selected.
    *

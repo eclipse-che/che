@@ -66,7 +66,9 @@ export class EditMachineDialogController {
     this.$mdDialog = $mdDialog;
     this.cheEnvironmentRegistry = cheEnvironmentRegistry;
     this.cheRecipeService = cheRecipeService;
+  }
 
+  $onInit(): void {
     this.isAdd = angular.isUndefined(this.machineName);
     if (!this.environment) {
       return;
@@ -80,7 +82,7 @@ export class EditMachineDialogController {
       return this.isAdd || machineName !== this.machineName;
     });
 
-    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(cheRecipeService.getRecipeType(this.currentStateEnvironment.recipe));
+    this.environmentManager = this.cheEnvironmentRegistry.getEnvironmentManager(this.cheRecipeService.getRecipeType(this.currentStateEnvironment.recipe));
     if (!this.environmentManager) {
       return;
     }
@@ -88,7 +90,7 @@ export class EditMachineDialogController {
     this.editorMode = this.environmentManager.editorMode;
 
     if (this.isAdd) {
-      if (!cheRecipeService.isScalable(this.currentStateEnvironment.recipe)) {
+      if (!this.cheRecipeService.isScalable(this.currentStateEnvironment.recipe)) {
         // we can add a new machine in case with scalable type of recipes only
         return;
       }

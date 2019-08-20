@@ -11,6 +11,7 @@
  */
 'use strict';
 import {OrganizationsPermissionService} from '../../organizations-permission.service';
+import { ChePermissions } from '../../../../components/api/che-permissions.factory';
 
 /**
  * @ngdoc controller
@@ -38,6 +39,14 @@ export class OrganizationsItemController {
    * Organization permission service.
    */
   private organizationsPermissionService: OrganizationsPermissionService;
+  /**
+   * Resources service.
+   */
+  private resourcesService: che.service.IResourcesService;
+  /**
+   * Permissions API interaction.
+   */
+  private chePermissions: che.api.IChePermissions;
   /**
    * Organization API interaction.
    */
@@ -69,9 +78,13 @@ export class OrganizationsItemController {
     this.cheOrganization = cheOrganization;
     this.cheNotification = cheNotification;
     this.organizationsPermissionService =  organizationsPermissionService;
-    this.organizationActions = resourcesService.getOrganizationActions();
+    this.resourcesService = resourcesService;
+    this.chePermissions = chePermissions;
+  }
 
-    this.userServices = chePermissions.getUserServices();
+  $onInit(): void {
+    this.organizationActions = this.resourcesService.getOrganizationActions();
+    this.userServices = this.chePermissions.getUserServices();
   }
 
   /**

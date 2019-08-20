@@ -147,6 +147,11 @@ export class ListOrganizationsController {
     this.processOrganizations();
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   /**
    * Callback when name is changed.
    *

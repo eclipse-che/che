@@ -57,6 +57,9 @@ export class DeleteDevMachineDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+  }
+
+  $onInit(): void {
     if (this.machinesList.length === 1) {
       this.message = 'You can\'t delete it without having other machines configured.';
     } else {

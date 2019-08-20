@@ -34,7 +34,9 @@ export class EditMachineNameDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+  }
 
+  $onInit(): void {
     this.origName = this.name;
     this.machineNamesLowercase = this.machineNames.map((name: string) => name.toLowerCase());
   }

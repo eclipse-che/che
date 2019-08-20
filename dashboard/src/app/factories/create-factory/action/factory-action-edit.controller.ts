@@ -35,7 +35,9 @@ export class FactoryActionDialogEditController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+  }
 
+  $onInit(): void {
     this.isName = angular.isDefined(this.selectedValue.name);
     this.isFile = angular.isDefined(this.selectedValue.file);
   }

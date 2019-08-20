@@ -37,7 +37,9 @@ export class EditEnvVariableDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+  }
 
+  $onInit(): void {
     // build list of used names
     this.usedNames = angular.isObject(this.envVariables) ? Object.keys(this.envVariables) : [];
 

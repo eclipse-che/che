@@ -83,21 +83,23 @@ export class CheNavBarController {
     this.chePermissions = chePermissions;
     this.cheKeycloak = cheKeycloak;
     this.cheService = cheService;
+  }
 
+  $onInit(): void {
     this.isKeycloackPresent = this.cheKeycloak.isPresent();
 
-    this.profile = cheAPI.getProfile().getProfile();
+    this.profile = this.cheAPI.getProfile().getProfile();
 
     this.userServices = this.chePermissions.getUserServices();
 
     // highlight navbar menu item
-    $scope.$on('$locationChangeStart', () => {
-      let path = '#' + $location.path();
-      $scope.$broadcast('navbar-selected:set', path);
+    this.$scope.$on('$locationChangeStart', () => {
+      let path = '#' + this.$location.path();
+      this.$scope.$broadcast('navbar-selected:set', path);
     });
 
-    cheAPI.getWorkspace().fetchWorkspaces();
-    cheAPI.getFactory().fetchFactories();
+    this.cheAPI.getWorkspace().fetchWorkspaces();
+    this.cheAPI.getFactory().fetchFactories();
 
     this.isPermissionServiceAvailable = false;
     this.resolvePermissionServiceAvailability().then((isAvailable: boolean) => {

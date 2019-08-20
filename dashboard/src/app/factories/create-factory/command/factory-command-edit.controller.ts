@@ -33,6 +33,8 @@ export class FactoryCommandDialogEditController {
     this.$mdDialog = $mdDialog;
   }
 
+  $onInit(): void { }
+
   /**
    * Callback of the edit button of the dialog.
    */

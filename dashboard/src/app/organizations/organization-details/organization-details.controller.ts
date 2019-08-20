@@ -161,6 +161,11 @@ export class OrganizationDetailsController {
     });
   }
 
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
+  }
+
   get SET_PERMISSIONS(): string {
     return this.organizationActions.SET_PERMISSIONS;
   }
