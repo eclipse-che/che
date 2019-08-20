@@ -75,7 +75,7 @@ export class Ide {
     }
 
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        await this.waitApplicationReadyToUse(await this.getApplicationUrlFromNotification(notificationText));
+        await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText));
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
@@ -244,7 +244,7 @@ export class Ide {
         return notification.split(regexp)[1];
     }
 
-    async waitApplicationReadyToUse(url: string,
+    async waitApllicationIsReady(url: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
 
          await this.driverHelper.getDriver().wait(async () => {
