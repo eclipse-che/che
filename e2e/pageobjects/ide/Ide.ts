@@ -75,7 +75,7 @@ export class Ide {
     }
 
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        await this.waitApplicationReadyToUse(await this.getApplicationUrl(notificationText));
+        await this.waitApplicationReadyToUse(await this.getApplicationUrlFromNotification(notificationText));
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
@@ -231,7 +231,7 @@ export class Ide {
         await this.driverHelper.waitVisibility(selectedRightToolbarButtonLocator, timeout);
     }
 
-    async getApplicationUrl(notificationText: string) {
+    async getApplicationUrlFromNotification(notificationText: string) {
         const notificationTextLocator: By = By.xpath(`//div[@class='theia-Notification']//p[contains(@id,'${notificationText}')]`);
 
         let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
