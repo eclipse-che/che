@@ -79,17 +79,6 @@ class CheReporter extends mocha.reporters.Spec {
       }
     });
 
-    runner.on('test end', async function (test: mocha.Test) {
-      if (!TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
-        return;
-      }
-
-      const currentMethodIndex: number = methodIndex;
-      let iterationIndex: number = 10000;
-
-      await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
-    });
-
     runner.on('end', async function (test: mocha.Test) {
       // ensure that fired events done
       await driver.get().sleep(5000);
