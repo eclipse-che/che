@@ -208,13 +208,14 @@ export class WorkspacePluginsController {
   /**
    * Finds given plugin in the list of enabled plugins and returns its ID with version
    * @param {IPlugin} plugin
-   * @returns {string | undefined} plugin ID
+   * @returns {string} plugin ID
    */
-  private findInSelected(plugin: IPluginRow): string | undefined {
-    return this.selectedPlugins.find(selectedPluginId => {
+  private findInSelected(plugin: IPluginRow): string {
+    const selectedPluginId = this.selectedPlugins.find(selectedPluginId => {
       const partialId = `${plugin.publisher}/${plugin.name}/`;
       return selectedPluginId.indexOf(partialId) !== -1;
     });
+    return !!selectedPluginId ? selectedPluginId : '';
   }
 
   /**
