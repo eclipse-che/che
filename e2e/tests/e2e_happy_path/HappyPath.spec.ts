@@ -246,7 +246,7 @@ suite('Validation of debug functionality', async () => {
         await topMenu.selectOption('View', 'Debug');
         await ide.waitRightToolbarButton(RightToolbarButton.Debug);
         await debugView.clickOnDebugConfigurationDropDown();
-        await debugView.clickOnDebugConfigurationItem('PROVOKE FAILURE');
+        await debugView.clickOnDebugConfigurationItem('Debug (Launch) - Current File');
         await debugView.clickOnRunDebugButton();
 
         await previewWidget.refreshPage();
