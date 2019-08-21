@@ -24,6 +24,7 @@ export class DevfileSelectorController {
   private devfileRegistry: DevfileRegistry;
   private cheWorkspace: CheWorkspace;
   private devfiles: Array<IDevfileMetaData>;
+  devfileOrderBy: string;
   onDevfileSelect: Function;
   selectedDevfile: any;
 
@@ -33,6 +34,7 @@ export class DevfileSelectorController {
   constructor(devfileRegistry: DevfileRegistry, cheWorkspace: CheWorkspace) {
     this.devfileRegistry = devfileRegistry;
     this.cheWorkspace = cheWorkspace;
+    this.devfileOrderBy = 'displayName';
     this.loadDevfiles();
   }
 
