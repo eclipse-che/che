@@ -181,9 +181,24 @@ pipeline {
     }
 
     post {
-        always {
-            archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**"
+        failure {
+            script {
+                echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
+                sh """
+                    command -v ffmpeg >/dev/null 2>&1 && if [ -d $WORKSPACE/e2e/report/executionScreencast ]; then
+                      cd $WORKSPACE/e2e/report/executionScreencast
+                      ffmpeg -framerate 1 -start_number 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p ../screencast.mp4
+                      ffmpeg -i ../screencast.mp4 ../screencast.gif
+                      cd $WORKSPACE/e2e/report/
+                      rm -rf $WORKSPACE/e2e/report/executionScreencast
+                    fi
+                """
+            }
 
+            archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**"
+        }
+
+        cleanup {
             script {
                 sh """
                       kubectl get configmaps --namespace=che che -o yaml || true
@@ -196,7 +211,7 @@ pipeline {
                       docker volume rm \$(docker volume ls -q -f dangling=true) || true
                       
                       docker rm -f \$(sudo docker ps --all | awk 'NR>0 {print \$1;}') || true
-                    """
+                 """
 
                 sh "sudo rm -rf ${WORKSPACE}/e2e"
             }

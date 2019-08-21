@@ -19,7 +19,8 @@ export class ScreenCatcher {
 
     async catchMethodScreen(methodName: string, methodIndex: number, screenshotIndex: number) {
         const executionScreenCastDir = `${TestConstants.TS_SELENIUM_REPORT_FOLDER}/executionScreencast`;
-        const screenshotDir: string = `${executionScreenCastDir}/${methodIndex}-${methodName}`;
+        const formattedMethodIndex: string = new Intl.NumberFormat('en-us', {minimumIntegerDigits: 2}).format(methodIndex);
+        const screenshotDir: string = `${executionScreenCastDir}/${formattedMethodIndex}-${methodName}`;
 
         if (!fs.existsSync(TestConstants.TS_SELENIUM_REPORT_FOLDER)) {
             fs.mkdirSync(TestConstants.TS_SELENIUM_REPORT_FOLDER);
@@ -34,11 +35,9 @@ export class ScreenCatcher {
         }
 
         const date: Date = new Date();
-        const timeStamp: string = `(${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}:${date.getMilliseconds()})`;
+        const timeStr: string = date.toLocaleTimeString('en-us', {hour12: false}) + '.' + new Intl.NumberFormat('en-us', {minimumIntegerDigits: 3}).format(date.getMilliseconds());
 
-        // add trailing 0 to have screenshots list normally sorted by name, e.g. 00000009, 00000010, ...
-        const formattedIndex: string = new Intl.NumberFormat('en-us', {minimumIntegerDigits: 8}).format(screenshotIndex).replace(/,/g, "");
-        const screenshotPath: string = `${screenshotDir}/${formattedIndex}-${methodName}-${timeStamp}.png`;
+        const screenshotPath: string = `${screenshotDir}/${timeStr}_${formattedMethodIndex}-${methodName}.png`;
 
         await this.catchScreen(screenshotPath);
     }
