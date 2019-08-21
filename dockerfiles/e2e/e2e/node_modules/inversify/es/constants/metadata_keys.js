@@ -1,0 +1,11 @@
+export var NAMED_TAG = "named";
+export var NAME_TAG = "name";
+export var UNMANAGED_TAG = "unmanaged";
+export var OPTIONAL_TAG = "optional";
+export var INJECT_TAG = "inject";
+export var MULTI_INJECT_TAG = "multi_inject";
+export var TAGGED = "inversify:tagged";
+export var TAGGED_PROP = "inversify:tagged_props";
+export var PARAM_TYPES = "inversify:paramtypes";
+export var DESIGN_PARAM_TYPES = "design:paramtypes";
+export var POST_CONSTRUCT = "post_construct";
