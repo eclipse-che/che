@@ -187,18 +187,18 @@ pipeline {
                 sh """
                     command -v ffmpeg >/dev/null 2>&1 && if [ -d $WORKSPACE/e2e/report/executionScreencast ]; then
                       cd $WORKSPACE/e2e/report/executionScreencast
-                      ffmpeg -framerate 1 -start_number 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p ../screencast.mp4
-                      ffmpeg -i ../screencast.mp4 ../screencast.gif
+                      ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
+                      ffmpeg -i $WORKSPACE/e2e/report/screencast.mp4 $WORKSPACE/e2e/report/screencast.gif
                       cd $WORKSPACE/e2e/report/
                       rm -rf $WORKSPACE/e2e/report/executionScreencast
                     fi
                 """
             }
-
-            archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**"
         }
 
         cleanup {
+            archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**"
+
             script {
                 sh """
                       kubectl get configmaps --namespace=che che -o yaml || true
