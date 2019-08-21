@@ -4,3 +4,4 @@
 --bail
 --full-trace
 --spec dist/tests/e2e_happy_path/HappyPath.spec.js
+--require source-map-support/register
