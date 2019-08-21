@@ -187,10 +187,13 @@ pipeline {
                 sh """
                     command -v ffmpeg >/dev/null 2>&1 && if [ -d $WORKSPACE/e2e/report/executionScreencast ]; then
                       cd $WORKSPACE/e2e/report/executionScreencast
-                      ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
-                      ffmpeg -i $WORKSPACE/e2e/report/screencast.mp4 $WORKSPACE/e2e/report/screencast.gif
+
+                      # remove first screenshot which has lower resolution 800x600 and breaks screencast video
+                      sudo rm -f 00100001*
+                      
+                      sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
                       cd $WORKSPACE/e2e/report/
-                      rm -rf $WORKSPACE/e2e/report/executionScreencast
+                      sudo rm -rf $WORKSPACE/e2e/report/executionScreencast
                     fi
                 """
             }

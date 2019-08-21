@@ -62,11 +62,6 @@ const SpringAppLocators = {
 
 suite('Validation of workspace start', async () => {
     test('Open workspace', async () => {
-        // work around default size 800x600
-        await driverHelper.getDriver()
-            .manage()
-            .window()
-            .setSize(TestConstants.TS_SELENIUM_RESOLUTION_WIDTH, TestConstants.TS_SELENIUM_RESOLUTION_HEIGHT);
         await driverHelper.navigateAndWaitToUrl(workspaceUrl);
     });
 
