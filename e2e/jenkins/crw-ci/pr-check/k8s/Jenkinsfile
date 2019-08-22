@@ -185,11 +185,11 @@ pipeline {
             script {
                 echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
                 sh """
-                    command -v ffmpeg >/dev/null 2>&1 && if [ -d $WORKSPACE/e2e/report/executionScreencast ] && [-e $WORKSPACE/e2e/report/executionScreencast/*.png] ; then
+                    command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
                       cd $WORKSPACE/e2e/report/executionScreencast
 
                       # remove first screenshot which has lower resolution 800x600 and breaks screencast video
-                      sudo rm -f 00100001*
+                      sudo rm -f 00100001* || true
                       
                       sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
                       cd $WORKSPACE/e2e/report/
