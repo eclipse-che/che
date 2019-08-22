@@ -168,7 +168,7 @@ public class URLFactoryBuilder {
   /**
    * Help to generate default workspace devfile. Also initialise project in it
    *
-   * @param name the name of the workspace
+   * @param name the name that will be used as `generateName` in the devfile
    * @return a workspace devfile
    */
   public DevfileDto buildDefaultDevfile(String name) {
@@ -176,6 +176,6 @@ public class URLFactoryBuilder {
     // workspace configuration using the environment
     return newDto(DevfileDto.class)
         .withApiVersion(CURRENT_API_VERSION)
-        .withMetadata(newDto(MetadataDto.class).withName(name));
+        .withMetadata(newDto(MetadataDto.class).withGenerateName(name));
   }
 }
