@@ -78,14 +78,14 @@ export class TestWorkspaceUtil implements ITestWorkspaceUtil {
     }
 
     public async getIdOfRunningWorkspace(namespace: string): Promise<string> {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
-    
+
     removeWorkspaceById(id: string): void {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
-    
+
     stopWorkspaceById(id: string): void {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }

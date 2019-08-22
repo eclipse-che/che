@@ -172,7 +172,7 @@ export class Editor {
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
 
-        await this.selectTab(editorTabTitle);
+        await this.selectTab(editorTabTitle, timeout);
         await this.driverHelper.getDriver().wait(async () => {
             await this.performKeyCombination(editorTabTitle, Key.chord(Key.CONTROL, Key.END));
             const editorText: string = await this.getEditorVisibleText(editorTabTitle);
@@ -228,7 +228,6 @@ export class Editor {
 
     async waitStoppedDebugBreakpoint(tabTitle: string, lineNumber: number, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
         const stoppedDebugBreakpointLocator: By = By.xpath(await this.getStoppedDebugBreakpointXpathLocator(tabTitle, lineNumber));
-
         await this.driverHelper.waitVisibility(stoppedDebugBreakpointLocator, timeout);
     }
 

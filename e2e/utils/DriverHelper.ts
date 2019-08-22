@@ -436,4 +436,19 @@ export class DriverHelper {
         return this.driver;
     }
 
+    async waitOpenningSecondWindow(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.driver.wait(async () => {
+            const handles: string[] = await this.driver.getAllWindowHandles();
+           if (handles.length > 1) {
+                return true;
+            }
+        }, timeout);
+    }
+
+    async switchToSecondWindow(mainWindowHandle: string) {
+        await this.waitOpenningSecondWindow();
+        const handles: string[] = await this.driver.getAllWindowHandles();
+        handles.splice(handles.indexOf(mainWindowHandle), 1);
+        await this.driver.switchTo().window(handles[0]);
+    }
 }
