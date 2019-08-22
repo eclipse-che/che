@@ -6,6 +6,7 @@
   "scripts": {
     "test": "npm run lint && npm run tsc && mocha --opts mocha.opts",
     "test-happy-path": "npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
+    "test-docker": "docker run -it --shm-size=2g -p 4444:4444 --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL eclipse/che-e2e:nightly",
     "test-che-install": "npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."

@@ -20,10 +20,7 @@ fi
 echo "Copying source code ${E2E_DIR} --> ${LOCAL_E2E_DIR}"
 cp -r "${E2E_DIR}" "${LOCAL_E2E_DIR}"
 
-VERSION=$(curl https://chromedriver.storage.googleapis.com/LATEST_RELEASE)
-# VERSION=77.0.3865.10
-echo $VERSION
-init --name:e2e --build-arg:CHROME_VERSION=$VERSION "$@"
+init --name:e2e "$@"
 build
 
 # cleanup

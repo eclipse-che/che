@@ -1,6 +1,0 @@
---timeout 1200000
---reporter 'dist/driver/CheReporter.js'
--u tdd 
---bail
---full-trace
---spec dist/tests/e2e/*.spec.js
