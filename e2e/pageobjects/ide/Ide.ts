@@ -7,12 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import axios from 'axios';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
+import { CLASSES, TYPES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, WebElement, error } from 'selenium-webdriver';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../utils/workspace/TestWorkspaceUtil';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceStatus } from '../../utils/workspace/WorkspaceStatus';
 
 export enum RightToolbarButton {
     Explorer = 'Explorer',
@@ -33,7 +35,7 @@ export class Ide {
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
@@ -74,6 +76,7 @@ export class Ide {
     }
 
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText));
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
@@ -227,6 +230,38 @@ export class Ide {
         const selectedRightToolbarButtonLocator: By = this.getSelectedRightToolbarButtonLocator(buttonTitle);
 
         await this.driverHelper.waitVisibility(selectedRightToolbarButtonLocator, timeout);
+    }
+
+    async getApplicationUrlFromNotification(notificationText: string) {
+        const notificationTextLocator: By = By.xpath(`//div[@class='theia-Notification']//p[contains(@id,'${notificationText}')]`);
+
+        let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
+        let regexp: RegExp = new RegExp('^.*(https?://.*)$');
+
+        if (!regexp.test(notification)) {
+            throw new Error('Cannot obtaine url from notification message');
+        }
+
+        return notification.split(regexp)[1];
+    }
+
+    async waitApllicationIsReady(url: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+
+         await this.driverHelper.getDriver().wait(async () => {
+            try {
+                let res = await axios.get(url);
+
+                if (res.status === 200) {
+                    console.log('Application is ready for use.');
+                    return true;
+                }
+            } catch (error) {
+               console.log('Application is not yet ready for use');
+            }
+
+            await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+        }, timeout);
     }
 
     private getSelectedRightToolbarButtonLocator(buttonTitle: string): By {

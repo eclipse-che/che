@@ -19,6 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.Beta;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.jsonrpc.commons.RequestHandlerConfigurator;
@@ -104,11 +105,24 @@ public class BrokerService {
   private List<ChePlugin> parseTooling(String toolingString) {
     if (!isNullOrEmpty(toolingString)) {
       try {
-        return objectMapper.readValue(toolingString, new TypeReference<List<ChePlugin>>() {});
+        List<ChePlugin> plugins =
+            objectMapper.readValue(toolingString, new TypeReference<List<ChePlugin>>() {});
+        // when id of plugin is not set, we can compose it from publisher, name and version
+        return plugins.stream().map(this::composePluginIdWhenNull).collect(Collectors.toList());
       } catch (IOException e) {
         LOG.error("Parsing Che plugin broker event failed. Error: " + e.getMessage(), e);
       }
     }
     return null;
+  }
+
+  private ChePlugin composePluginIdWhenNull(ChePlugin plugin) {
+    if (isNullOrEmpty(plugin.getId())
+        && !isNullOrEmpty(plugin.getPublisher())
+        && !isNullOrEmpty(plugin.getName())
+        && !isNullOrEmpty(plugin.getVersion())) {
+      plugin.setId(plugin.getPublisher() + "/" + plugin.getName() + "/" + plugin.getVersion());
+    }
+    return plugin;
   }
 }

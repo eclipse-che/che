@@ -152,5 +152,10 @@ export const TestConstants = {
     /**
      * Remote driver URL.
      */
-    TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_REMOTE_DRIVER_URL || ''
+    TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_REMOTE_DRIVER_URL || '',
+
+    /**
+     * Stop and remove workspace if a test fails.
+     */
+    DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true'
 };

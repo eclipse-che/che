@@ -44,6 +44,7 @@ import org.eclipse.che.api.workspace.activity.JpaWorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivity;
 import org.eclipse.che.api.workspace.activity.WorkspaceActivityDao;
 import org.eclipse.che.api.workspace.activity.WorkspaceExpiration;
+import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 import org.eclipse.che.api.workspace.server.jpa.JpaStackDao;
 import org.eclipse.che.api.workspace.server.jpa.JpaWorkspaceDao;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
@@ -159,6 +160,7 @@ public class PostgreSqlTckModule extends TckModule {
                 KubernetesServerImpl.ServerId.class)
             .addEntityClass(
                 "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+            .addClass(SerializableConverter.class)
             .build());
     bind(TckResourcesCleaner.class).to(JpaCleaner.class);
 

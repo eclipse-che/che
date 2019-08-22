@@ -58,6 +58,7 @@
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.CommandImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.EndpointImpl</class>
+        <class>org.eclipse.che.api.workspace.server.devfile.SerializableConverter</class>
 
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
 

@@ -67,7 +67,7 @@
       "no-unused-variable": true,
       "no-unreachable": true,
       "no-use-before-declare": true,
-      "no-var-requires": true,
+      "no-var-requires": false,
       "one-line": [
         true,
         "check-open-brace",
