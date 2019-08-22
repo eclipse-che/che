@@ -422,7 +422,9 @@ public final class DtoConverter {
 
   /** Converts {@link Metadata} to {@link MetadataDto}. */
   public static MetadataDto asDto(Metadata metadata) {
-    return newDto(MetadataDto.class).withName(metadata.getName());
+    return newDto(MetadataDto.class)
+        .withName(metadata.getName())
+        .withGenerateName(metadata.getGenerateName());
   }
 
   private DtoConverter() {}
