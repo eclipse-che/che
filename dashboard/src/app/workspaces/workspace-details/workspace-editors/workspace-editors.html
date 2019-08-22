@@ -1,68 +1,77 @@
 <md-progress-linear ng-show="workspaceEditorsController.isLoading" md-mode="indeterminate"></md-progress-linear>
 <div flex layout="column" md-theme="maincontent-theme" class="plugins-page">
-  <che-list-header che-hide-header="workspaceEditorsController.editors.length === 0">
-    <div flex="100"
-        layout="row"
-        layout-align="start stretch"
-        class="che-list-item-row">
-      <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
-      <div flex layout="row" layout-align="start center" class="che-list-item-details">
-        <che-list-header-column flex="10" layout="column" layout-align="center start"
-                                che-sort-value="workspaceEditorsController.editorOrderBy"
-                                che-sort-item="isEnabled"
-                                che-column-title="Enable"></che-list-header-column>
-        <che-list-header-column flex="25" layout="column" layout-align="center start"
-                                che-sort-value="workspaceEditorsController.editorOrderBy"
-                                che-sort-item="displayName"
-                                che-column-title="Editor"></che-list-header-column>
-        <che-list-header-column flex="15" layout="column" layout-align="center start"
-                                che-column-title="Version"></che-list-header-column>
-        <che-list-header-column flex="50" layout="column" layout-align="center start"
-                                che-column-title="Description"></che-list-header-column>
-      </div>
-    </div>
-  </che-list-header>
-  <!-- editor list  -->
-  <che-list class="plugins-list" flex
-            ng-if="workspaceEditorsController.editors && workspaceEditorsController.editors.size > 0">
-    <div class="plugin-item"
-        ng-repeat="editor in workspaceEditorsController.cheListHelper.getVisibleItems() | orderBy:[workspaceEditorsController.editorOrderBy, 'displayName' ]">
-      <che-list-item flex>
-        <div flex="100"
-            layout="row"
-            layout-align="start stretch"
-            plugin-item-name="{{editor.displayName}}"
-            plugin-item-version="{{editor.version}}"
-            class="che-list-item-row">
-          <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
-          <div flex layout="row" layout-align="start center">
-            <!-- isEnabled -->
-            <div flex="10">
-              <md-switch ng-model="editor.isEnabled"
-                        ng-change="workspaceEditorsController.updateEditor(editor)"
-                        aria-label="editor"
-                        plugin-switch="{{editor.displayName}}">
-              </md-switch>
-            </div>
-            <!-- Name -->
-            <div flex="25">
-              <span class="che-list-item-name" plugin-name="{{editor.name}}">{{editor.displayName}}</span>
-              <span ng-if="editor.publisher" class="che-list-item-secondary">({{editor.publisher}} publisher)</span>
-            </div>
-            <!-- Version -->
-            <div flex="15">
-                <select class="che-version-dropdown" ng-model="editor.selected" ng-change="workspaceEditorsController.updateSelectedEditorVersion(editor)" ng-init="editor.selected" ng-options="ver for ver in editor.versions">
-                </select>
-            </div>
-            <!-- Description -->
-            <div flex="50">
-              <span class="che-list-item-secondary" plugin-description="{{editor.description}}">{{editor.description}}</span>
+  <div class="che-scroll-list" ng-hide="workspaceEditorsController.editors.length === 0">
+    <div>
+      <div>
+        <che-list-header>
+          <div flex="100"
+               layout="row"
+               layout-align="start stretch"
+               class="che-list-item-row">
+            <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
+            <div flex layout="row" layout-align="start center" class="che-list-item-details">
+              <che-list-header-column flex="10" layout="column" layout-align="center start"
+                                      che-sort-value="workspaceEditorsController.editorOrderBy"
+                                      che-sort-item="isEnabled"
+                                      che-column-title="Enable"></che-list-header-column>
+              <che-list-header-column flex="25" layout="column" layout-align="center start"
+                                      che-sort-value="workspaceEditorsController.editorOrderBy"
+                                      che-sort-item="displayName"
+                                      che-column-title="Editor"></che-list-header-column>
+              <che-list-header-column flex="15" layout="column" layout-align="center start"
+                                      che-column-title="Version"></che-list-header-column>
+              <che-list-header-column flex="50" layout="column" layout-align="center start"
+                                      che-column-title="Description"></che-list-header-column>
             </div>
           </div>
-        </div>
-      </che-list-item>
+        </che-list-header>
+        <!-- editor list  -->
+        <che-list class="plugins-list" flex
+                  ng-if="workspaceEditorsController.editors && workspaceEditorsController.editors.size > 0">
+          <div class="plugin-item"
+               ng-repeat="editor in workspaceEditorsController.cheListHelper.getVisibleItems() | orderBy:[workspaceEditorsController.editorOrderBy, 'displayName' ]">
+            <che-list-item flex>
+              <div flex="100"
+                   layout="row"
+                   layout-align="start stretch"
+                   plugin-item-name="{{editor.displayName}}"
+                   plugin-item-version="{{editor.version}}"
+                   class="che-list-item-row">
+                <div layout="row" layout-align="center center" class="che-list-item-checkbox"></div>
+                <div flex layout="row" layout-align="start center">
+                  <!-- isEnabled -->
+                  <div flex="10">
+                    <md-switch ng-model="editor.isEnabled"
+                               ng-change="workspaceEditorsController.updateEditor(editor)"
+                               aria-label="editor"
+                               plugin-switch="{{editor.displayName}}">
+                    </md-switch>
+                  </div>
+                  <!-- Name -->
+                  <div flex="25">
+                    <span class="che-list-item-name" plugin-name="{{editor.name}}">{{editor.displayName}}</span>
+                    <span ng-if="editor.publisher"
+                          class="che-list-item-secondary">({{editor.publisher}} publisher)</span>
+                  </div>
+                  <!-- Version -->
+                  <div flex="15">
+                    <select class="che-version-dropdown" ng-model="editor.selected"
+                            ng-change="workspaceEditorsController.updateSelectedEditorVersion(editor)"
+                            ng-init="editor.selected" ng-options="ver for ver in editor.versions">
+                    </select>
+                  </div>
+                  <!-- Description -->
+                  <div flex="50">
+                    <span class="che-list-item-secondary" plugin-description="{{editor.description}}">{{editor.description}}</span>
+                  </div>
+                </div>
+              </div>
+            </che-list-item>
+          </div>
+        </che-list>
+      </div>
     </div>
-  </che-list>
+  </div>
   <div class="che-list-empty">
     <span ng-show="workspaceEditorsController.editors.length === 0">
       There are no editors.

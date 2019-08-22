@@ -8,3 +8,27 @@
   overflow-y auto
   display block
   width 100%
+
+.che-scroll-list
+  background-color lighten($very-light-grey-color, 28%)
+  border-top 1px solid lighten($very-light-grey-color, 4%)
+  border-radius 2px
+  width 100%
+  & > div
+    position relative
+    margin-top 47px
+    che-box-shadow()
+    & > div
+      overflow-y auto
+      max-height 672px
+      .che-list-item
+        height 47px
+    .che-list-header
+      .che-list-header-additional
+        display none
+      .che-list-item-row
+        margin -47px 0 0 0
+      .che-list-header-column > *
+        position absolute
+        line-height 47px
+        top -47px
