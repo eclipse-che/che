@@ -41,7 +41,7 @@ pipeline {
                             sh """
                                curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
                                chmod +x install_chectl.sh
-                               sudo PATH=$PATH ./install_chectl.sh -channel=stable
+                               sudo PATH=$PATH ./install_chectl.sh --channel=stable
                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
                                sudo chmod +x ${WORKSPACE}/chectl
                             """
@@ -185,7 +185,7 @@ pipeline {
             script {
                 echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
                 sh """
-                    command -v ffmpeg >/dev/null 2>&1 && if [ -d $WORKSPACE/e2e/report/executionScreencast ]; then
+                    command -v ffmpeg >/dev/null 2>&1 && if [ -d $WORKSPACE/e2e/report/executionScreencast ] && [-e $WORKSPACE/e2e/report/executionScreencast/*.png] ; then
                       cd $WORKSPACE/e2e/report/executionScreencast
 
                       # remove first screenshot which has lower resolution 800x600 and breaks screencast video
