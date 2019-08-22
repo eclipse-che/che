@@ -20,8 +20,8 @@ pipeline {
 
     parameters {
         choice(name: 'jenkinsNodeLabel',
-                choices: ['codenvy-slave9',
-                          'rhel7-16gb'],
+                choices: ['rhel7-16gb',
+                          'codenvy-slave9'],
                 description: 'Label of Jenkins node which will be used to run the tests')
     }
 

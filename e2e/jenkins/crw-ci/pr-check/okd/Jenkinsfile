@@ -17,6 +17,25 @@ pipeline {
         SUCCESS_THRESHOLD = 5
     }
 
+    parameters {
+        choice(name: 'jenkinsNodeLabel',
+                choices: ['rhel7-16gb',
+                          'codenvy-slave9'],
+                description: 'Label of Jenkins node which will be used to build the job')
+
+        string(name: 'cheImage',
+                defaultValue: 'eclipse/che-server:nightly',
+                description: 'che-server image address')
+
+        string(name: 'ghprbAuthorRepoGitUrl',
+                defaultValue: 'https://github.com/eclipse/che.git',
+                description: 'GitHub author repo git url')
+
+        string(name: 'ghprbSourceBranch',
+                defaultValue: 'master',
+                description: 'GitHub source brunch')
+    }
+
     stages {
         stage("Prepare to start Che on OKD") {
             failFast true
@@ -107,18 +126,37 @@ pipeline {
     }
 
     post {
-        always {
+        failure {
+            script {
+                echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
+                sh """
+                    command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
+                      cd $WORKSPACE/e2e/report/executionScreencast
+
+                      # remove first screenshot which has lower resolution 800x600 and breaks screencast video
+                      sudo rm -f 00100001* || true
+                      
+                      sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
+                      cd $WORKSPACE/e2e/report/
+                      sudo rm -rf $WORKSPACE/e2e/report/executionScreencast
+                    fi
+                """
+            }
+        }
+
+        cleanup {
             archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**"
 
             script {
                 sh """
                       oc get configmaps --namespace=che che -o yaml || true
-                    """
+                """
+
+                sh "sudo rm -rf ${WORKSPACE}/e2e"
             }
 
             cleanWs notFailBuild: true, disableDeferredWipeout: true, deleteDirs: true
         }
-
     }
 
 }
