@@ -188,5 +188,8 @@ public final class Constants {
   /** Attribute of {@link Server} that specifies exposure of which port created the server */
   public static final String SERVER_PORT_ATTRIBUTE = "port";
 
+  /** When generating workspace name from generateName, append this many characters. */
+  public static final int WORKSPACE_GENERATE_NAME_CHARS_APPEND = 5;
+
   private Constants() {}
 }
