@@ -41,7 +41,7 @@ pipeline {
                             sh """
                                curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
                                chmod +x install_chectl.sh
-                               sudo PATH=$PATH ./install_chectl.sh --channel=stable
+                               sudo PATH=$PATH ./install_chectl.sh --channel=next
                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
                                sudo chmod +x ${WORKSPACE}/chectl
                             """
