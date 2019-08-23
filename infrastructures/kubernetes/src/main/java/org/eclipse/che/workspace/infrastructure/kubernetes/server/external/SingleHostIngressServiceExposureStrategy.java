@@ -12,17 +12,17 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import io.fabric8.kubernetes.api.model.ServicePort;
-import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
- * Provides a path-based strategy for exposing service ports outside the cluster using Ingress
- * Ingresses will be created without an explicit host (defaulting to *).
+ * Provides a path-based strategy for exposing service ports outside the cluster using Ingress.
+ * Ingresses will be created with a common host name for all workspaces.
  *
  * <p>This strategy uses different Ingress path entries <br>
  * Each external server is exposed with a unique path prefix.
  *
  * <p>This strategy imposes limitation on user-developed applications. <br>
- * It should only be used for local development with a single IP address
  *
  * <pre>
  *   Path-Based Ingress exposing service's port:
@@ -30,7 +30,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
  * ...
  * spec:
  *   rules:
- *     - http:
+ *     - host: CHE_HOST
+ *       http:
  *         paths:
  *           - path: service123/webapp        ---->> Service.metadata.name + / + Service.spec.ports[0].name
  *             backend:
@@ -41,18 +42,19 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class DefaultHostIngressNamingStrategy implements IngressNamingStrategy {
+public class SingleHostIngressServiceExposureStrategy implements IngressServiceExposureStrategy {
 
-  public static final String DEFAULT_HOST_STRATEGY = "default-host";
+  public static final String SINGLE_HOST_STRATEGY = "single-host";
+  private final String cheHost;
 
-  @Override
-  public String getIngressHost(String serviceName, ServicePort servicePort) {
-    return null;
+  @Inject
+  public SingleHostIngressServiceExposureStrategy(@Named("che.host") String cheHost) {
+    this.cheHost = cheHost;
   }
 
   @Override
-  public String getIngressName(String serviceName, ServicePort servicePort) {
-    return Names.generateName("ingress");
+  public String getIngressHost(String serviceName, ServicePort servicePort) {
+    return cheHost;
   }
 
   @Override

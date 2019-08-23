@@ -14,12 +14,16 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import org.eclipse.che.commons.annotation.Nullable;
 
-public interface IngressNamingStrategy {
+/**
+ * Implementations of this strategy are used by the {@link ExternalServerExposer} to compose an
+ * Ingress rule that exposes the services.
+ */
+public interface IngressServiceExposureStrategy {
 
+  /** Returns a host that should be used to expose the service */
   @Nullable
   String getIngressHost(String serviceName, ServicePort servicePort);
 
-  String getIngressName(String serviceName, ServicePort servicePort);
-
+  /** Returns the path on which the service should be exposed */
   String getIngressPath(String serviceName, ServicePort servicePort);
 }

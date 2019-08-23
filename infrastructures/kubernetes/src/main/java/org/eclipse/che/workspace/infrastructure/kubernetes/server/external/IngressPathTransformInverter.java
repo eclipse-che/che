@@ -13,18 +13,17 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer.PATH_TRANSFORM_PATH_CATCH;
 
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Named;
 import org.eclipse.che.commons.annotation.Nullable;
 
-public class ExternalServerPathDemangler {
+public class IngressPathTransformInverter {
   private final Pattern pathTransformInverse;
 
   @Inject
-  public ExternalServerPathDemangler(
+  public IngressPathTransformInverter(
       @Nullable @Named("che.infra.kubernetes.ingress.path_transform") String pathTransformFmt) {
     this.pathTransformInverse = extractPathFromFmt(pathTransformFmt);
   }
@@ -61,18 +60,16 @@ public class ExternalServerPathDemangler {
    * Sometimes, the exposer needs to modify the path contained in the object exposing the server
    * (ingress or route). Namely, this is needed to make the URL rewriting work for single-host
    * strategy where the path needs to contain a regular expression match group to retain some of the
-   * path.
+   * path (at least in the case of the nginx ingress controller).
    *
    * <p>This method reverts such mangling and returns to the user a path that can be used by the
    * HTTP clients.
    *
-   * @param exposingObject a Kubernetes object in charge of actual exposure of the server (i.e.
-   *     ingress or route)
    * @param path the path contained within the configuration of the object that needs to be
    *     demangled
    * @return the path demangled such that it can be used in an externally reachable URL
    */
-  public String demanglePath(HasMetadata exposingObject, String path) {
+  public String undoPathTransformation(String path) {
     Matcher matcher = pathTransformInverse.matcher(path);
     if (matcher.matches()) {
       return matcher.group(1);

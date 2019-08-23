@@ -24,7 +24,7 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerPathDemangler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 
 /**
  * Helps to resolve {@link ServerImpl servers} by machine name according to specified {@link Ingress
@@ -41,11 +41,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
 public class KubernetesServerResolver {
   private final Multimap<String, Service> services;
   private final Multimap<String, Ingress> ingresses;
-  private ExternalServerPathDemangler demangler;
+  private IngressPathTransformInverter pathTransformInverter;
 
   public KubernetesServerResolver(
-      ExternalServerPathDemangler demangler, List<Service> services, List<Ingress> ingresses) {
-    this.demangler = demangler;
+      IngressPathTransformInverter pathTransformInverter,
+      List<Service> services,
+      List<Ingress> ingresses) {
+    this.pathTransformInverter = pathTransformInverter;
     this.services = ArrayListMultimap.create();
     for (Service service : services) {
       String machineName =
@@ -114,8 +116,8 @@ public class KubernetesServerResolver {
             (name, config) -> {
               String path =
                   buildPath(
-                      demangler.demanglePath(
-                          ingress, ingressRule.getHttp().getPaths().get(0).getPath()),
+                      pathTransformInverter.undoPathTransformation(
+                          ingressRule.getHttp().getPaths().get(0).getPath()),
                       config.getPath());
               servers.put(
                   name,

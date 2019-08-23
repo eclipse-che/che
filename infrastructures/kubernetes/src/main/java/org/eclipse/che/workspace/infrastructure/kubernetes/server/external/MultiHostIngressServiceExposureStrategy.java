@@ -12,7 +12,7 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 
 import static java.lang.String.format;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressNamingStrategyProvider.STRATEGY_PROPERTY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategyProvider.STRATEGY_PROPERTY;
 
 import com.google.common.base.Strings;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -44,7 +44,7 @@ import org.eclipse.che.inject.ConfigurationException;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class MultiHostIngressNamingStrategy implements IngressNamingStrategy {
+public class MultiHostIngressServiceExposureStrategy implements IngressServiceExposureStrategy {
 
   public static final String MULTI_HOST_STRATEGY = "multi-host";
   private static final String INGRESS_DOMAIN_PROPERTY = "che.infra.kubernetes.ingress.domain";
@@ -52,7 +52,7 @@ public class MultiHostIngressNamingStrategy implements IngressNamingStrategy {
   private final String domain;
 
   @Inject
-  public MultiHostIngressNamingStrategy(
+  public MultiHostIngressServiceExposureStrategy(
       @Named(INGRESS_DOMAIN_PROPERTY) String domain, @Named(STRATEGY_PROPERTY) String strategy) {
     if (Strings.isNullOrEmpty(domain) && MULTI_HOST_STRATEGY.equals(strategy)) {
       throw new ConfigurationException(
@@ -67,11 +67,6 @@ public class MultiHostIngressNamingStrategy implements IngressNamingStrategy {
   @Override
   public String getIngressHost(String serviceName, ServicePort servicePort) {
     return serviceName + "-" + servicePort.getName() + "." + domain;
-  }
-
-  @Override
-  public String getIngressName(String serviceName, ServicePort servicePort) {
-    return serviceName + '-' + servicePort.getName();
   }
 
   @Override

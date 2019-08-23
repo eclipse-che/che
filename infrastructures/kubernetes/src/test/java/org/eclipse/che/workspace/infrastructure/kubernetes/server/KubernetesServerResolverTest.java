@@ -37,7 +37,7 @@ import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.commons.lang.Pair;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations.Serializer;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerPathDemangler;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.testng.annotations.Test;
 
 /**
@@ -274,7 +274,7 @@ public class KubernetesServerResolverTest {
     return attributes;
   }
 
-  private static final class NoopPathDemangler extends ExternalServerPathDemangler {
+  private static final class NoopPathDemangler extends IngressPathTransformInverter {
     NoopPathDemangler() {
       super("%s");
     }

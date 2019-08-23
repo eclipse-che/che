@@ -24,13 +24,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServ
 public class ExternalServerExposer<T extends KubernetesEnvironment> {
   static final String PATH_TRANSFORM_PATH_CATCH = "%s";
 
-  private final IngressNamingStrategy strategy;
+  private final IngressServiceExposureStrategy strategy;
   private final Map<String, String> ingressAnnotations;
   private final String pathTransformFmt;
 
   @Inject
   public ExternalServerExposer(
-      IngressNamingStrategy strategy,
+      IngressServiceExposureStrategy strategy,
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> annotations,
       @Nullable @Named("che.infra.kubernetes.ingress.path_transform") String pathTransformFmt) {
     this.strategy = strategy;
@@ -75,7 +75,7 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
             String.format(
                 pathTransformFmt,
                 ensureEndsWithSlash(strategy.getIngressPath(serviceName, servicePort))))
-        .withName(strategy.getIngressName(serviceName, servicePort))
+        .withName(getIngressName(serviceName, servicePort))
         .withMachineName(machineName)
         .withServiceName(serviceName)
         .withAnnotations(ingressAnnotations)
@@ -86,5 +86,9 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
 
   private static String ensureEndsWithSlash(String path) {
     return path.endsWith("/") ? path : path + '/';
+  }
+
+  private static String getIngressName(String serviceName, ServicePort servicePort) {
+    return serviceName + "-" + servicePort.getName();
   }
 }
