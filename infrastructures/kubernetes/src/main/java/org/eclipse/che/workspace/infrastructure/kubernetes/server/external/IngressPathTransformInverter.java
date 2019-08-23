@@ -58,9 +58,9 @@ public class IngressPathTransformInverter {
 
   /**
    * Sometimes, the exposer needs to modify the path contained in the object exposing the server
-   * (ingress or route). Namely, this is needed to make the URL rewriting work for single-host
-   * strategy where the path needs to contain a regular expression match group to retain some of the
-   * path (at least in the case of the nginx ingress controller).
+   * (i.e. ingress in this case). Namely, this is needed to make the URL rewriting work for
+   * single-host strategy where the path needs to contain a regular expression match group to retain
+   * some of the path (at least in the case of the nginx ingress controller).
    *
    * <p>This method reverts such mangling and returns to the user a path that can be used by the
    * HTTP clients.
