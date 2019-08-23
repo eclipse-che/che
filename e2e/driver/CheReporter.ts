@@ -81,17 +81,6 @@ class CheReporter extends mocha.reporters.Spec {
       }
     });
 
-    runner.on('test end', async function (test: mocha.Test) {
-      if (!TestConstants.TS_SELENIUM_EXECUTION_SCREENCAST) {
-        return;
-      }
-
-      const currentMethodIndex: number = methodIndex;
-      let iterationIndex: number = 10000;
-
-      await screenCatcher.catchMethodScreen(test.title, currentMethodIndex, iterationIndex);
-    });
-
     runner.on('end', async function (test: mocha.Test) {
       // ensure that fired events done
       await driver.get().sleep(5000);
@@ -158,7 +147,7 @@ class CheReporter extends mocha.reporters.Spec {
 
       // stop and remove running workspace
       if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
-        console.log("Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.")
+        console.log('Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.');
         let namespace = TestConstants.TS_SELENIUM_USERNAME;
         let workspaceId = await testWorkspaceUtil.getIdOfRunningWorkspace(namespace);
         testWorkspaceUtil.stopWorkspaceById(workspaceId);
