@@ -20,9 +20,9 @@ export class PreviewWidget {
         @inject(CLASSES.Ide) private readonly ide: Ide) { }
 
     async waitAndSwitchToWidgetFrame() {
-        const iframeLocator: By = By.css('.theia-mini-browser iframe');
-
+        const iframeLocator: By = By.css('div.theia-mini-browser iframe');
         await this.driverHelper.waitAndSwitchToFrame(iframeLocator);
+
     }
 
     async waitPreviewWidget(timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
@@ -36,16 +36,12 @@ export class PreviewWidget {
     async waitContentAvailable(contentLocator: By,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
         polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5) {
-
         await this.waitAndSwitchToWidgetFrame();
-
         await this.driverHelper.getDriver().wait(async () => {
             const isApplicationTitleVisible: boolean = await this.driverHelper.isVisible(contentLocator);
-
             if (isApplicationTitleVisible) {
                 await this.driverHelper.getDriver().switchTo().defaultContent();
                 await this.ide.waitAndSwitchToIdeFrame();
-
                 return true;
             }
 
@@ -54,6 +50,24 @@ export class PreviewWidget {
             await this.waitAndSwitchToWidgetFrame();
             await this.driverHelper.wait(polling);
         }, timeout);
+    }
+
+    async waitContentAvailableInAssociatedWorkspace(contentLocator: By,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT,
+        polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING * 5) {
+        await this.waitAndSwitchToWidgetFrame();
+        await this.driverHelper.getDriver().wait(async () => {
+        const isApplicationTitleVisible: boolean = await this.driverHelper.isVisible(contentLocator);
+            if (isApplicationTitleVisible) {
+                await this.driverHelper.getDriver().switchTo().defaultContent();
+                return true;
+            }
+
+            await this.driverHelper.getDriver().switchTo().defaultContent();
+            await this.refreshPage();
+            await this.waitAndSwitchToWidgetFrame();
+            await this.driverHelper.wait(polling);
+       }, timeout);
     }
 
     async waitVisibility(element: By, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {

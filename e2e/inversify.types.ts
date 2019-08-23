@@ -36,7 +36,8 @@ const CLASSES = {
     WarningDialog: 'WarningDialog',
     ScreenCatcher: 'ScreenCatcher',
     OcpLoginPage: 'OcpLoginPage',
-    OcpWebConsolePage: 'OcpWebConsolePage'
+    OcpWebConsolePage: 'OcpWebConsolePage',
+    OpenWorkspaceWidget: 'OpenWorkspaceWidget'
 };
 
 export { TYPES, CLASSES };

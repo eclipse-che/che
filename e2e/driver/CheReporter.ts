@@ -147,7 +147,7 @@ class CheReporter extends mocha.reporters.Spec {
 
       // stop and remove running workspace
       if (TestConstants.DELETE_WORKSPACE_ON_FAILED_TEST) {
-        console.log("Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.")
+        console.log('Property DELETE_WORKSPACE_ON_FAILED_TEST se to true - trying to stop and delete running workspace.');
         let namespace = TestConstants.TS_SELENIUM_USERNAME;
         let workspaceId = await testWorkspaceUtil.getIdOfRunningWorkspace(namespace);
         testWorkspaceUtil.stopWorkspaceById(workspaceId);

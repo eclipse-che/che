@@ -1,4 +1,4 @@
---timeout 1200000
+--timeout 2200000
 --reporter 'dist/driver/CheReporter.js'
 -u tdd 
 --bail
