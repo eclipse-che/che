@@ -31,12 +31,13 @@ import java.util.Optional;
 import org.eclipse.che.api.core.BadRequestException;
 import org.eclipse.che.api.core.UnauthorizedException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
-import org.eclipse.che.api.core.server.dto.DtoServerImpls.ServiceErrorImpl;
+import org.eclipse.che.api.core.rest.shared.dto.ServiceError;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.RuntimeContext;
 import org.eclipse.che.commons.env.EnvironmentContext;
 import org.eclipse.che.commons.subject.Subject;
+import org.eclipse.che.dto.server.DtoFactory;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakServiceClient;
 import org.eclipse.che.multiuser.keycloak.server.KeycloakSettings;
 import org.eclipse.che.multiuser.keycloak.shared.dto.KeycloakTokenResponse;
@@ -188,8 +189,11 @@ public class IdentityProviderConfigBuilderTest {
     assertEquals(resultConfig.getOauthToken(), ACCESS_TOKEN);
   }
 
+  @Test
   public void testRethrowOnUnauthorizedException() throws Exception {
-    doThrow(new UnauthorizedException(ServiceErrorImpl.make().withMessage("Any other message")))
+    doThrow(
+            new UnauthorizedException(
+                DtoFactory.newDto(ServiceError.class).withMessage("Any other message")))
         .when(keycloakServiceClient)
         .getIdentityProviderToken(anyString());
     try {
@@ -204,14 +208,19 @@ public class IdentityProviderConfigBuilderTest {
 
   @Test(expectedExceptions = {InfrastructureException.class})
   public void testRethrowOnBadRequestException() throws Exception {
-    doThrow(new BadRequestException(ServiceErrorImpl.make().withMessage("Any other message")))
+    doThrow(
+            new BadRequestException(
+                DtoFactory.newDto(ServiceError.class).withMessage("Any other message")))
         .when(keycloakServiceClient)
         .getIdentityProviderToken(anyString());
     configBuilder.buildConfig(defaultConfig, A_WORKSPACE_ID);
   }
 
+  @Test
   public void testRethrowOnInvalidTokenBadRequestException() throws Exception {
-    doThrow(new BadRequestException(ServiceErrorImpl.make().withMessage("Invalid token.")))
+    doThrow(
+            new BadRequestException(
+                DtoFactory.newDto(ServiceError.class).withMessage("Invalid token.")))
         .when(keycloakServiceClient)
         .getIdentityProviderToken(anyString());
     try {
