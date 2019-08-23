@@ -15,15 +15,12 @@ import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import * as rm from 'typed-rest-client/RestClient';
 import { error } from 'selenium-webdriver';
-
-export enum WorkspaceStatus {
-    RUNNING = 'RUNNING',
-    STOPPED = 'STOPPED',
-    STARTING = 'STARTING'
-}
+import { WorkspaceStatus } from './WorkspaceStatus';
+import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
 
 @injectable()
-export class TestWorkspaceUtil {
+export class TestWorkspaceUtil implements ITestWorkspaceUtil {
+
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         private readonly rest: rm.RestClient = new rm.RestClient('rest-samples')) { }
 
@@ -80,4 +77,15 @@ export class TestWorkspaceUtil {
         }
     }
 
+    public async getIdOfRunningWorkspace(namespace: string): Promise<string> {
+        throw new Error('Method not implemented.');
+    }
+
+    removeWorkspaceById(id: string): void {
+        throw new Error('Method not implemented.');
+    }
+
+    stopWorkspaceById(id: string): void {
+        throw new Error('Method not implemented.');
+    }
 }

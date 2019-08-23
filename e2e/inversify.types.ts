@@ -12,7 +12,8 @@
 const TYPES = {
     Driver: Symbol.for('Driver'),
     CheLogin: Symbol.for('CheLogin'),
-    OcpLogin: Symbol.for('OcpLogin')
+    OcpLogin: Symbol.for('OcpLogin'),
+    WorkspaceUtil: Symbol.for('WorkspaceUtil')
 };
 
 const CLASSES = {
@@ -23,7 +24,6 @@ const CLASSES = {
     WorkspaceDetails: 'WorkspaceDetails',
     WorkspaceDetailsPlugins: 'WorkspaceDetailsPlugins',
     Ide: 'Ide',
-    TestWorkspaceUtil: 'TestWorkspaceUtil',
     ProjectTree: 'ProjectTree',
     Editor: 'Editor',
     TopMenu: 'TopMenu',
@@ -36,7 +36,8 @@ const CLASSES = {
     WarningDialog: 'WarningDialog',
     ScreenCatcher: 'ScreenCatcher',
     OcpLoginPage: 'OcpLoginPage',
-    OcpWebConsolePage: 'OcpWebConsolePage'
+    OcpWebConsolePage: 'OcpWebConsolePage',
+    OpenWorkspaceWidget: 'OpenWorkspaceWidget'
 };
 
 export { TYPES, CLASSES };

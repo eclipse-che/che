@@ -50,10 +50,26 @@
           "examples": [
             "petclinic-dev-environment"
           ]
+        },
+        "generateName": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Devfile Generate Name",
+          "description": "Workspaces created from devfile, will use it as base and append random suffix. It's used when name is not defined.",
+          "examples": [
+            "petclinic-"
+          ]
         }
       },
       "additionalProperties": false,
-      "required": ["name"]
+      "anyOf": [
+        {
+          "required": ["name"]
+        },
+        {
+          "required": ["generateName"]
+        }
+      ]
     },
     "projects": {
       "type": "array",
