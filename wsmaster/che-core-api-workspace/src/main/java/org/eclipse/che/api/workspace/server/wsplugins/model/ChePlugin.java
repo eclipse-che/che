@@ -25,11 +25,14 @@ public class ChePlugin {
   private String publisher = null;
   private String id = null;
   private String version = null;
+  private String type = null;
   private List<CheContainer> containers = new ArrayList<>();
   private List<ChePluginEndpoint> endpoints = new ArrayList<>();
 
   @JsonProperty("workspaceEnv")
   private List<EnvVar> workspaceEnv = new ArrayList<>();
+
+  private ChePluginPatcher pluginPatcher;
 
   /** Object name. Name must be unique. */
   public ChePlugin name(String name) {
@@ -61,6 +64,19 @@ public class ChePlugin {
   public ChePlugin version(String version) {
     this.version = version;
     return this;
+  }
+
+  public ChePlugin type(String type) {
+    this.type = type;
+    return this;
+  }
+
+  public String getType() {
+    return type;
+  }
+
+  public void setType(String type) {
+    this.type = type;
   }
 
   public String getPublisher() {
@@ -133,6 +149,19 @@ public class ChePlugin {
     this.workspaceEnv = workspaceEnv;
   }
 
+  public ChePlugin pluginPatcher(ChePluginPatcher pluginPatcher) {
+    this.pluginPatcher = pluginPatcher;
+    return this;
+  }
+
+  public ChePluginPatcher getPluginPatcher() {
+    return pluginPatcher;
+  }
+
+  public void setPluginPatcher(ChePluginPatcher pluginPatcher) {
+    this.pluginPatcher = pluginPatcher;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -146,9 +175,11 @@ public class ChePlugin {
         && Objects.equals(getPublisher(), chePlugin.getPublisher())
         && Objects.equals(getId(), chePlugin.getId())
         && Objects.equals(getVersion(), chePlugin.getVersion())
+        && Objects.equals(getType(), chePlugin.getType())
         && Objects.equals(getContainers(), chePlugin.getContainers())
         && Objects.equals(getEndpoints(), chePlugin.getEndpoints())
-        && Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv());
+        && Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv())
+        && Objects.equals(getPluginPatcher(), chePlugin.getPluginPatcher());
   }
 
   @Override
@@ -158,9 +189,11 @@ public class ChePlugin {
         getPublisher(),
         getId(),
         getVersion(),
+        getType(),
         getContainers(),
         getEndpoints(),
-        getWorkspaceEnv());
+        getWorkspaceEnv(),
+        getPluginPatcher());
   }
 
   @Override
@@ -184,6 +217,8 @@ public class ChePlugin {
         + endpoints
         + ", workspaceEnv="
         + workspaceEnv
+        + ", pluginPatcher="
+        + pluginPatcher
         + '}';
   }
 }

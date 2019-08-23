@@ -13,6 +13,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins;
 
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.api.core.model.workspace.config.Command.MACHINE_NAME_ATTRIBUTE;
 import static org.eclipse.che.api.core.model.workspace.config.Command.WORKING_DIRECTORY_ATTRIBUTE;
 import static org.eclipse.che.api.workspace.shared.Constants.CONTAINER_SOURCE_ATTRIBUTE;
@@ -25,9 +26,15 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaim;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimBuilder;
+import io.fabric8.kubernetes.api.model.PersistentVolumeClaimVolumeSourceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodBuilder;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.VolumeBuilder;
+import io.fabric8.kubernetes.api.model.VolumeMount;
+import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +47,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.workspace.server.model.impl.CommandImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
+import org.eclipse.che.api.workspace.server.spi.InternalInfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.api.workspace.server.spi.provision.env.ProjectsRootEnvVariableProvider;
@@ -47,11 +55,15 @@ import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.api.workspace.server.wsplugins.model.CheContainer;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePlugin;
 import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginEndpoint;
+import org.eclipse.che.api.workspace.server.wsplugins.model.ChePluginPatcher;
 import org.eclipse.che.api.workspace.server.wsplugins.model.Command;
+import org.eclipse.che.api.workspace.server.wsplugins.model.Volume;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Applies Che plugins tooling configuration to a kubernetes internal runtime object.
@@ -62,6 +74,8 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 @Beta
 @Singleton
 public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
+
+  private static final Logger LOG = LoggerFactory.getLogger(KubernetesPluginsToolingApplier.class);
 
   private static final Set<String> validImagePullPolicies =
       Sets.newHashSet("Always", "Never", "IfNotPresent");
@@ -112,6 +126,12 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     PodData pod = pods.values().iterator().next();
 
     CommandsResolver commandsResolver = new CommandsResolver(kubernetesEnvironment);
+
+    ChePlugin cheEditor = findCheEditor(chePlugins);
+    ChePluginPatcher pluginPatcher = cheEditor.getPluginPatcher();
+
+    addInitContainers(kubernetesEnvironment, pod, pluginPatcher);
+
     for (ChePlugin chePlugin : chePlugins) {
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
 
@@ -120,6 +140,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
             pod,
             container,
             chePlugin,
+            pluginPatcher,
             kubernetesEnvironment,
             pluginRelatedCommands,
             runtimeIdentity);
@@ -133,6 +154,80 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       // because it is the only workspace security implementation supported for now
       kubernetesEnvironment.getAttributes().putIfAbsent(SECURE_EXPOSER_IMPL_PROPERTY, "jwtproxy");
     }
+  }
+
+  private void addInitContainers(
+      KubernetesEnvironment kubernetesEnvironment, PodData pod, ChePluginPatcher pluginPatcher)
+      throws InfrastructureException {
+
+    List<CheContainer> initContainers = pluginPatcher.getInitContainers();
+
+    if (initContainers == null) {
+      return;
+    }
+
+    for (CheContainer container : initContainers) {
+      Container k8sContainer = toK8sContainer(container, emptyList());
+
+      k8sContainer.setCommand(container.getCommand());
+      k8sContainer.setArgs(container.getArgs());
+
+      pod.getSpec().getInitContainers().add(k8sContainer);
+
+      applyContainerVolumes(container.getVolumes(), k8sContainer, kubernetesEnvironment, pod);
+    }
+  }
+
+  private void applyContainerVolumes(
+      List<Volume> volumes,
+      Container k8sContainer,
+      KubernetesEnvironment kubernetesEnvironment,
+      PodData pod) {
+    List<VolumeMount> volumeMounts =
+        volumes
+            .stream()
+            .map(
+                volume ->
+                    new VolumeMountBuilder()
+                        .withName(volume.getName())
+                        .withMountPath(volume.getMountPath())
+                        .build())
+            .collect(toList());
+
+    k8sContainer.setVolumeMounts(volumeMounts);
+
+    for (Volume volume : volumes) {
+      pod.getSpec()
+          .getVolumes()
+          .add(
+              new VolumeBuilder()
+                  .withName(volume.getName())
+                  .withPersistentVolumeClaim(
+                      new PersistentVolumeClaimVolumeSourceBuilder()
+                          .withClaimName(volume.getName())
+                          .build())
+                  .build());
+
+      PersistentVolumeClaim pluginsPVC =
+          new PersistentVolumeClaimBuilder()
+              .withNewMetadata()
+              .withName(volume.getName())
+              .endMetadata()
+              .build();
+      kubernetesEnvironment.getPersistentVolumeClaims().put(volume.getName(), pluginsPVC);
+    }
+  }
+
+  private ChePlugin findCheEditor(Collection<ChePlugin> chePlugins)
+      throws InternalInfrastructureException {
+    return chePlugins
+        .stream()
+        .filter(chePlugin -> "che editor".equals(chePlugin.getType().toLowerCase()))
+        .findAny()
+        .orElseThrow(
+            () ->
+                new InternalInfrastructureException(
+                    "Workspace should has defined at least one editor"));
   }
 
   private void addToolingPod(KubernetesEnvironment kubernetesEnvironment) {
@@ -171,6 +266,18 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         .collect(Collectors.toList());
   }
 
+  private Container toK8sContainer(CheContainer container, List<ChePluginEndpoint> endpoints)
+      throws InfrastructureException {
+    K8sContainerResolver k8sContainerResolver =
+        new K8sContainerResolverBuilder()
+            .setContainer(container)
+            .setImagePullPolicy(sidecarImagePullPolicy)
+            .setPluginEndpoints(endpoints)
+            .build();
+
+    return k8sContainerResolver.resolve();
+  }
+
   /**
    * Adds k8s and Che specific configuration of a sidecar into the environment. For example:
    * <li>k8s container configuration {@link Container}
@@ -184,6 +291,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       PodData pod,
       CheContainer container,
       ChePlugin chePlugin,
+      ChePluginPatcher chePluginPatcher,
       KubernetesEnvironment kubernetesEnvironment,
       Collection<CommandImpl> sidecarRelatedCommands,
       RuntimeIdentity runtimeIdentity)
@@ -198,6 +306,8 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
 
     Container k8sContainer = k8sContainerResolver.resolve();
+
+    patchK8sContainerConfiguration(k8sContainer, chePlugin.getType(), chePluginPatcher);
 
     String machineName = k8sContainer.getName();
     Names.putMachineName(pod.getMetadata(), k8sContainer.getName(), machineName);
@@ -236,6 +346,37 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     SidecarServicesProvisioner sidecarServicesProvisioner =
         new SidecarServicesProvisioner(containerEndpoints, pod.getMetadata().getName());
     sidecarServicesProvisioner.provision(kubernetesEnvironment);
+  }
+
+  private void patchK8sContainerConfiguration(
+      Container k8sPluginContainer, String pluginType, ChePluginPatcher pluginPatcher) {
+    if (pluginPatcher == null) {
+      return;
+    }
+
+    boolean pluginIsMatched = pluginIsMatchedToPatch(pluginType, pluginPatcher);
+
+    if (pluginIsMatched) {
+      k8sPluginContainer.setCommand(pluginPatcher.getPluginContainerCommand());
+      k8sPluginContainer.setArgs(pluginPatcher.getPluginContainerArgs());
+    }
+  }
+
+  private boolean pluginIsMatchedToPatch(String pluginType, ChePluginPatcher pluginPatcher) {
+    if (pluginPatcher.getPluginTypeMatcher() == null) {
+      return false;
+    }
+
+    boolean pluginIsMatched =
+        pluginPatcher
+            .getPluginTypeMatcher()
+            .stream()
+            .map(String::toLowerCase)
+            .anyMatch(pluginType.toLowerCase()::equals);
+
+    return pluginIsMatched
+        && pluginPatcher.getPluginContainerCommand() != null
+        && pluginPatcher.getPluginContainerArgs() != null;
   }
 
   private CommandImpl asCommand(String machineName, Command command) {
