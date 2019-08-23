@@ -65,13 +65,14 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
       ServicePort servicePort,
       Map<String, ServerConfig> ingressesServers) {
 
-    ExternalServerIngressBuilder bld = new ExternalServerIngressBuilder();
+    ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
     String host = strategy.getIngressHost(serviceName, servicePort);
     if (host != null) {
-      bld = bld.withHost(host);
+      ingressBuilder = ingressBuilder.withHost(host);
     }
 
-    return bld.withPath(
+    return ingressBuilder
+        .withPath(
             String.format(
                 pathTransformFmt,
                 ensureEndsWithSlash(strategy.getIngressPath(serviceName, servicePort))))
