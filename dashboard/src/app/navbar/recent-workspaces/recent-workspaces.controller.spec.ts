@@ -15,6 +15,7 @@ import {CheAPIBuilder} from '../../../components/api/builder/che-api-builder.fac
 import {CheHttpBackend} from '../../../components/api/test/che-http-backend';
 import IdeSvc from '../../ide/ide.service';
 import {CheBranding} from '../../../components/branding/che-branding.factory';
+import { NavbarRecentWorkspacesController } from './recent-workspaces.controller';
 
 /**
  * Test of the NavbarRecentWorkspacesController
@@ -23,7 +24,7 @@ describe('NavbarRecentWorkspacesController', () => {
   /**
    * NavbarRecentWorkspacesController
    */
-  let navbarRecentWorkspacesController;
+  let navbarRecentWorkspacesController: NavbarRecentWorkspacesController;
 
   /**
    * API builder
@@ -82,8 +83,7 @@ describe('NavbarRecentWorkspacesController', () => {
     // setup backend
     cheBackend.setup();
 
-    // fetch workspaces
-    cheWorkspace.fetchWorkspaces();
+    navbarRecentWorkspacesController.$onInit();
 
     // flush command
     httpBackend.flush();
