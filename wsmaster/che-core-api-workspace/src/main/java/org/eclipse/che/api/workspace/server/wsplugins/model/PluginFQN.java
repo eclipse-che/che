@@ -18,7 +18,8 @@ import java.util.Objects;
 
 /**
  * Represents full information about plugin, including registry address and id, or direct reference
- * to plugin descriptor. Should NOT contain both reference and id simultaneously.
+ * to plugin descriptor. When {@link PluginFQN#reference} and {@link PluginFQN#id} are set
+ * simultaneously, {@link PluginFQN#reference} should take precedence.
  *
  * @author Max Shaposhnyk
  */
@@ -31,6 +32,11 @@ public class PluginFQN {
 
   public PluginFQN(URI registry, String id) {
     this.registry = registry;
+    this.id = id;
+  }
+
+  protected PluginFQN(String reference, String id) {
+    this.reference = reference;
     this.id = id;
   }
 

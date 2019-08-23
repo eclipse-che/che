@@ -9,12 +9,13 @@
  **********************************************************************/
 import { DriverHelper } from '../../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../../inversify.types';
+import { CLASSES, TYPES } from '../../../inversify.types';
 import 'reflect-metadata';
 import { TestConstants } from '../../../TestConstants';
 import { By } from 'selenium-webdriver';
 import { Ide } from '../../ide/Ide';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../../utils/workspace/TestWorkspaceUtil';
+import { ITestWorkspaceUtil } from '../../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceStatus } from '../../../utils/workspace/WorkspaceStatus';
 
 
 @injectable()
@@ -26,7 +27,7 @@ export class WorkspaceDetails {
     private static readonly WORKSPACE_DETAILS_LOADER_CSS: string = 'workspace-details-overview md-progress-linear';
 
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
     async waitLoaderDisappearance(attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS, polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING) {
         await this.driverHelper.waitDisappearance(By.css(WorkspaceDetails.WORKSPACE_DETAILS_LOADER_CSS), attempts, polling);

@@ -7,12 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
+import axios from 'axios';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
-import { CLASSES } from '../../inversify.types';
+import { CLASSES, TYPES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, WebElement, error } from 'selenium-webdriver';
-import { TestWorkspaceUtil, WorkspaceStatus } from '../../utils/workspace/TestWorkspaceUtil';
+import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
+import { WorkspaceStatus } from '../../utils/workspace/WorkspaceStatus';
 
 export enum RightToolbarButton {
     Explorer = 'Explorer',
@@ -22,8 +24,8 @@ export enum RightToolbarButton {
 
 @injectable()
 export class Ide {
-    public static readonly EXPLORER_BUTTON_XPATH: string = '(//ul[@class=\'p-TabBar-content\']//li[@title=\'Explorer\'])[1]';
-    public static readonly SELECTED_EXPLORER_BUTTON_XPATH: string = '(//ul[@class=\'p-TabBar-content\']//li[@title=\'Explorer\' and contains(@class, \'p-mod-current\')])[1]';
+    public static readonly EXPLORER_BUTTON_ID: string = 'shell-tab-explorer-view-container';
+    public static readonly SELECTED_EXPLORER_BUTTON_CSS: string = 'li#shell-tab-explorer-view-container.theia-mod-active';
     public static readonly ACTIVATED_IDE_IFRAME_CSS: string = '#ide-iframe-window[aria-hidden=\'false\']';
     public static readonly SELECTED_GIT_BUTTON_XPATH: string = '(//ul[@class=\'p-TabBar-content\']//li[@title=\'Git\' and contains(@class, \'p-mod-current\')])[1]';
     private static readonly TOP_MENU_PANEL_CSS: string = '#theia-app-shell #theia-top-panel .p-MenuBar-content';
@@ -33,7 +35,7 @@ export class Ide {
 
     constructor(
         @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(CLASSES.TestWorkspaceUtil) private readonly testWorkspaceUtil: TestWorkspaceUtil) { }
+        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
@@ -74,6 +76,7 @@ export class Ide {
     }
 
     async waitNotificationAndOpenLink(notificationText: string, timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        await this.waitApllicationIsReady(await this.getApplicationUrlFromNotification(notificationText));
         await this.waitNotificationAndClickOnButton(notificationText, 'Open Link', timeout);
     }
 
@@ -92,9 +95,7 @@ export class Ide {
     }
 
     async clickOnNotificationButton(notificationText: string, buttonText: string) {
-        const notificationLocator: string = this.getNotificationXpathLocator(notificationText);
-        const yesButtonLocator: string = notificationLocator + `//button[text()=\'${buttonText}\']`;
-
+        const yesButtonLocator: string = `//div[@class='theia-notification-list']//span[contains(.,'${notificationText}')]/parent::div/parent::div/parent::div/div[@class='theia-notification-list-item-content-bottom']//div[@class='theia-notification-buttons']//button[text()='${buttonText}'] `;
         await this.driverHelper.waitAndClick(By.xpath(yesButtonLocator));
     }
 
@@ -108,7 +109,7 @@ export class Ide {
     }
 
     async waitIde(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
-        const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.xpath(Ide.EXPLORER_BUTTON_XPATH)];
+        const mainIdeParts: Array<By> = [By.css(Ide.TOP_MENU_PANEL_CSS), By.css(Ide.LEFT_CONTENT_PANEL_CSS), By.id(Ide.EXPLORER_BUTTON_ID)];
 
         for (const idePartLocator of mainIdeParts) {
             await this.driverHelper.waitVisibility(idePartLocator, timeout);
@@ -229,18 +230,51 @@ export class Ide {
         await this.driverHelper.waitVisibility(selectedRightToolbarButtonLocator, timeout);
     }
 
+    async getApplicationUrlFromNotification(notificationText: string) {
+        const notificationTextLocator: By = By.xpath(`//div[@class='theia-notification-message']/span[contains(.,'${notificationText}')]`);
+
+        let notification = await this.driverHelper.waitAndGetText(notificationTextLocator);
+        let regexp: RegExp = new RegExp('^.*(https?://.*)$');
+
+        if (!regexp.test(notification)) {
+            throw new Error('Cannot obtaine url from notification message');
+        }
+
+        return notification.split(regexp)[1];
+    }
+
+    async waitApllicationIsReady(url: string,
+        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+        let res = await axios.get(url);
+        await this.driverHelper.getDriver().wait(async () => {
+            try {
+                res = await axios.get(url);
+                if (res.status === 200) {
+                    console.log('Application is ready for use. App url:');
+                    return true;
+                }
+            } catch (error) {
+                console.log('Application is not yet ready for use');
+            }
+
+            await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
+        }, timeout);
+    }
+
     private getSelectedRightToolbarButtonLocator(buttonTitle: string): By {
         return By.xpath(`//div[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']` +
-            `//li[@title='${buttonTitle}' and contains(@id, 'shell-tab')] and contains(@class, 'p-mod-current')`);
+            `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')] and contains(@class, 'p-mod-current')`);
     }
 
     private getRightToolbarButtonLocator(buttonTitle: String): By {
         return By.xpath(`//div[@id='theia-left-content-panel']//ul[@class='p-TabBar-content']` +
-            `//li[@title='${buttonTitle}' and contains(@id, 'shell-tab')]`);
+            `//li[@title[contains(.,'${buttonTitle}')] and contains(@id, 'shell-tab')]`);
     }
 
     private getNotificationXpathLocator(notificationText: string): string {
-        return `//div[@class='theia-Notification' and contains(@id,'${notificationText}')]`;
+        return `//div[@class='theia-notification-message']/span[contains(.,'${notificationText}')]`;
     }
+
+
 
 }

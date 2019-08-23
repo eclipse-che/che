@@ -19,23 +19,32 @@ import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_E
 import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_TOOLING_PLUGINS_ATTRIBUTE;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import org.eclipse.che.api.core.BadRequestException;
+import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.factory.shared.dto.FactoryDto;
 import org.eclipse.che.api.workspace.server.devfile.DevfileManager;
+import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
+import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.EnvironmentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.RecipeImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.dto.server.DtoFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
@@ -129,5 +138,46 @@ public class URLFactoryBuilderTest {
             .get();
 
     assertEquals(factory.getSource(), "devfile.yml");
+  }
+
+  @DataProvider
+  public Object[][] devfiles() {
+    final String NAME = "name";
+    final String GEN_NAME = "genName";
+
+    DevfileImpl devfileTemplate = new DevfileImpl();
+    devfileTemplate.setApiVersion("1.0.0");
+    MetadataImpl metadataTemplate = new MetadataImpl();
+
+    metadataTemplate.setName(NAME);
+    devfileTemplate.setMetadata(metadataTemplate);
+    DevfileImpl justName = new DevfileImpl(devfileTemplate);
+
+    metadataTemplate.setName(null);
+    metadataTemplate.setGenerateName(GEN_NAME);
+    devfileTemplate.setMetadata(metadataTemplate);
+    DevfileImpl justGenerateName = new DevfileImpl(devfileTemplate);
+
+    metadataTemplate.setName(NAME);
+    metadataTemplate.setGenerateName(GEN_NAME);
+    devfileTemplate.setMetadata(metadataTemplate);
+    DevfileImpl bothNames = new DevfileImpl(devfileTemplate);
+
+    return new Object[][] {{justName, NAME}, {justGenerateName, GEN_NAME}, {bothNames, GEN_NAME}};
+  }
+
+  @Test(dataProvider = "devfiles")
+  public void checkThatDtoHasCorrectNames(DevfileImpl devfile, String expectedGenerateName)
+      throws BadRequestException, ServerException, DevfileException, IOException {
+    DefaultFactoryUrl defaultFactoryUrl = mock(DefaultFactoryUrl.class);
+    FileContentProvider fileContentProvider = mock(FileContentProvider.class);
+    when(defaultFactoryUrl.devfileFileLocation()).thenReturn("anything");
+    when(devfileManager.parseYaml(anyString())).thenReturn(devfile);
+    when(urlFetcher.fetchSafely(anyString())).thenReturn("anything");
+    FactoryDto factory =
+        urlFactoryBuilder.createFactoryFromDevfile(defaultFactoryUrl, fileContentProvider).get();
+
+    assertNull(factory.getDevfile().getMetadata().getName());
+    assertEquals(factory.getDevfile().getMetadata().getGenerateName(), expectedGenerateName);
   }
 }

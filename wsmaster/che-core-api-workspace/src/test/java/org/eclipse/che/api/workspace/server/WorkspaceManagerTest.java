@@ -20,11 +20,13 @@ import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.RUNNING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STARTING;
 import static org.eclipse.che.api.core.model.workspace.WorkspaceStatus.STOPPED;
 import static org.eclipse.che.api.core.model.workspace.config.MachineConfig.MEMORY_LIMIT_ATTRIBUTE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.CURRENT_API_VERSION;
 import static org.eclipse.che.api.workspace.shared.Constants.CREATED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_NAME_CHARS_APPEND;
 import static org.eclipse.che.dto.server.DtoFactory.newDto;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -175,6 +177,44 @@ public class WorkspaceManagerTest {
     assertEquals(workspace.getStatus(), STOPPED);
     assertNotNull(workspace.getAttributes().get(CREATED_ATTRIBUTE_NAME));
     verify(workspaceDao).create(workspace);
+  }
+
+  @Test
+  public void createsWorkspaceFromDevfile()
+      throws ValidationException, ConflictException, NotFoundException, ServerException {
+    final DevfileImpl devfile = new DevfileImpl();
+    devfile.setApiVersion(CURRENT_API_VERSION);
+    devfile.setName("ws");
+    Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
+    assertEquals(workspace.getDevfile(), devfile);
+  }
+
+  @Test
+  public void createsWorkspaceFromDevfileWithGenerateName()
+      throws ValidationException, ConflictException, NotFoundException, ServerException {
+    final String testDevfileGenerateName = "ws-";
+    final DevfileImpl devfile = new DevfileImpl();
+    devfile.setApiVersion(CURRENT_API_VERSION);
+    devfile.getMetadata().setGenerateName(testDevfileGenerateName);
+    Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
+
+    assertTrue(workspace.getDevfile().getName().startsWith(testDevfileGenerateName));
+    assertEquals(
+        workspace.getDevfile().getName().length(),
+        testDevfileGenerateName.length() + WORKSPACE_GENERATE_NAME_CHARS_APPEND);
+  }
+
+  @Test
+  public void nameIsUsedWhenNameAndGenerateNameSet()
+      throws ValidationException, ConflictException, NotFoundException, ServerException {
+    final String devfileName = "workspacename";
+    final DevfileImpl devfile = new DevfileImpl();
+    devfile.setApiVersion(CURRENT_API_VERSION);
+    devfile.getMetadata().setName(devfileName);
+    devfile.getMetadata().setGenerateName("this_will_not_be_set_as_a_name");
+    Workspace workspace = workspaceManager.createWorkspace(devfile, NAMESPACE_1, null, null);
+
+    assertEquals(workspace.getDevfile().getName(), devfileName);
   }
 
   @Test

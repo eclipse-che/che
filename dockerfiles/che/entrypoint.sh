@@ -227,12 +227,17 @@ init() {
   ### Any variables with export is a value that native Tomcat che.sh startup script requires
   export CHE_IP=${CHE_IP}
 
-  if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
-    echo "Found custom assembly..."
-    export CHE_HOME="/assembly"
+  if [ -z "$CHE_HOME" ]; then
+    if [ -f "/assembly/tomcat/bin/catalina.sh" ]; then
+      echo "Found custom assembly in /assembly"
+      export CHE_HOME="/assembly"
+    else
+      echo "Using embedded assembly."
+      export CHE_HOME=$(echo /home/user/eclipse-che/)
+    fi
   else
-    echo "Using embedded assembly..."
-    export CHE_HOME=$(echo /home/user/eclipse-che/)
+    export CHE_HOME=$(echo ${CHE_HOME})
+    echo "Using custom assembly from $CHE_HOME"
   fi
 
   ### We need to discover the host mount provided by the user for `/data`
