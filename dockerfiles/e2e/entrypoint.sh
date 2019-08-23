@@ -2,7 +2,8 @@
 
 # Validate selenium base URL
 if [ -z "$TS_SELENIUM_BASE_URL" ]; then
-    echo "TS_SELENIUM_BASE_URL is not set!";
+    echo "The \"TS_SELENIUM_BASE_URL\" is not set!";
+    echo "Please, set the \"TS_SELENIUM_BASE_URL\" environment variable."
     exit 1
 fi
 

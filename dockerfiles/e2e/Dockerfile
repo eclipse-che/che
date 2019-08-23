@@ -1,5 +1,3 @@
-# FROM selenium/standalone-chrome-debug
-# FROM selenium/standalone-chrome:3.141.59-titanium
 FROM selenium/standalone-chrome:latest
 
 USER root
