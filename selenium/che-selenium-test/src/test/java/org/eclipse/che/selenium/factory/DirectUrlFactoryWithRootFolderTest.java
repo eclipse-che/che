@@ -13,6 +13,7 @@ package org.eclipse.che.selenium.factory;
 
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
+import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 
 import com.google.inject.Inject;
@@ -32,7 +33,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Musienko Maxim */
-@Test(groups = {GITHUB, OPENSHIFT})
+@Test(groups = {GITHUB, OPENSHIFT, UNDER_REPAIR})
 public class DirectUrlFactoryWithRootFolderTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(DirectUrlFactoryWithRootFolderTest.class);
