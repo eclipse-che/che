@@ -17,7 +17,7 @@ import javax.inject.Inject;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 
 /**
  * Default implementation of {@link SecureServerExposerFactory} that creates instances of {@link
@@ -28,11 +28,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
  */
 public class DefaultSecureServersFactory<T extends KubernetesEnvironment>
     implements SecureServerExposerFactory<T> {
-  private final ExternalServerExposerStrategy<T> exposerStrategy;
+  private final ExternalServerExposer<T> exposer;
 
   @Inject
-  public DefaultSecureServersFactory(ExternalServerExposerStrategy<T> exposerStrategy) {
-    this.exposerStrategy = exposerStrategy;
+  public DefaultSecureServersFactory(ExternalServerExposer<T> exposer) {
+    this.exposer = exposer;
   }
 
   @Override
@@ -48,7 +48,7 @@ public class DefaultSecureServersFactory<T extends KubernetesEnvironment>
         String serviceName,
         ServicePort servicePort,
         Map<String, ServerConfig> secureServers) {
-      exposerStrategy.expose(k8sEnv, machineName, serviceName, servicePort, secureServers);
+      exposer.expose(k8sEnv, machineName, serviceName, servicePort, secureServers);
     }
   }
 }

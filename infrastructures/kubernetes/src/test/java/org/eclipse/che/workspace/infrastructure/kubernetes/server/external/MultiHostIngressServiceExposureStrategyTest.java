@@ -14,7 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonMap;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
-import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostIngressExternalServerExposer.MULTI_HOST_STRATEGY;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostIngressServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.testng.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableMap;
@@ -37,14 +37,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Guy Daich */
-public class MultiHostIngressExternalServerExposerTest {
+public class MultiHostIngressServiceExposureStrategyTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final String MACHINE_NAME = "pod/main";
   private static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
   private static final String DOMAIN = "che.com";
 
-  private MultiHostIngressExternalServerExposer externalServerExposer;
+  private ExternalServerExposer<KubernetesEnvironment> externalServerExposer;
   private KubernetesEnvironment kubernetesEnvironment;
 
   @BeforeMethod
@@ -63,7 +63,10 @@ public class MultiHostIngressExternalServerExposerTest {
     kubernetesEnvironment =
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
     externalServerExposer =
-        new MultiHostIngressExternalServerExposer(emptyMap(), DOMAIN, MULTI_HOST_STRATEGY);
+        new ExternalServerExposer<>(
+            new MultiHostIngressServiceExposureStrategy(DOMAIN, MULTI_HOST_STRATEGY),
+            emptyMap(),
+            "%s");
   }
 
   @Test

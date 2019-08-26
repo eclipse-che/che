@@ -126,6 +126,7 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.KubernetesS
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.event.PodEvent;
 import org.eclipse.che.workspace.infrastructure.kubernetes.namespace.pvc.WorkspaceVolumesStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.KubernetesSharedPool;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.PodEvents;
 import org.eclipse.che.workspace.infrastructure.kubernetes.util.RuntimeEventsPublisher;
@@ -195,6 +196,7 @@ public class KubernetesInternalRuntimeTest {
   @Mock private WorkspaceProbes workspaceProbes;
   @Mock private KubernetesServerResolver kubernetesServerResolver;
   @Mock private InternalEnvironmentProvisioner internalEnvironmentProvisioner;
+  @Mock private IngressPathTransformInverter pathTransformInverter;
   @Mock private RuntimeHangingDetector runtimeHangingDetector;
 
   @Mock
@@ -260,6 +262,7 @@ public class KubernetesInternalRuntimeTest {
             ImmutableSet.of(internalEnvironmentProvisioner),
             kubernetesEnvironmentProvisioner,
             toolingProvisioner,
+            pathTransformInverter,
             runtimeHangingDetector,
             tracer,
             context,

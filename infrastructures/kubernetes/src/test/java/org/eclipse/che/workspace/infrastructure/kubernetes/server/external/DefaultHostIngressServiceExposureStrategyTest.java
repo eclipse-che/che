@@ -36,13 +36,13 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 /** @author Guy Daich */
-public class DefaultHostIngressExternalServerExposerTest {
+public class DefaultHostIngressServiceExposureStrategyTest {
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
   private static final String MACHINE_NAME = "pod/main";
   private static final String SERVICE_NAME = SERVER_PREFIX + "12345678" + "-" + MACHINE_NAME;
 
-  private DefaultHostIngressExternalServerExposer externalServerExposer;
+  private ExternalServerExposer<KubernetesEnvironment> externalServerExposer;
   private KubernetesEnvironment kubernetesEnvironment;
 
   @BeforeMethod
@@ -60,7 +60,9 @@ public class DefaultHostIngressExternalServerExposerTest {
 
     kubernetesEnvironment =
         KubernetesEnvironment.builder().setPods(ImmutableMap.of("pod", pod)).build();
-    externalServerExposer = new DefaultHostIngressExternalServerExposer(emptyMap());
+    externalServerExposer =
+        new ExternalServerExposer<>(
+            new DefaultHostIngressServiceExposureStrategy(), emptyMap(), "%s");
   }
 
   @Test
