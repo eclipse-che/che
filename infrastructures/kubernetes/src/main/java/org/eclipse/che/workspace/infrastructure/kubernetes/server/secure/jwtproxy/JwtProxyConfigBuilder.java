@@ -71,9 +71,35 @@ public class JwtProxyConfigBuilder {
     this.ttl = ttl;
   }
 
+  /**
+   * Adds a proxy before a service that will perform the JWT authentication on its behalf.
+   *
+   * @param listenPort the port to listen on
+   * @param upstream the URL to the backend service this proxy should be put in front of
+   * @param excludes the list of unsecured paths that the proxy should let pass through
+   * @param cookiesAuthEnabled should the JWT proxy use cookies?
+   * @param cookiePath the path of the cookie. This is should either be "/" or some portion of the URL the JWT proxy
+   *                   will be exposed on. It is used to enable using different proxies for different services, each
+   *                   with a different auth cookie. Super useful for having multiple workspaces, each authenticated
+   *                   with its machine token.
+   * @param authErrorRedirectUriPrefix the prefix used to generate the redirect to the auth page. This should be set to
+   *                                   the a URL path where the JWT proxy can pick up the request to perform the auth
+   */
   public void addVerifierProxy(
-      Integer listenPort, String upstream, Set<String> excludes, Boolean cookiesAuthEnabled) {
-    verifierProxies.add(new VerifierProxy(listenPort, upstream, excludes, cookiesAuthEnabled));
+      Integer listenPort,
+      String upstream,
+      Set<String> excludes,
+      Boolean cookiesAuthEnabled,
+      String cookiePath,
+      String authErrorRedirectUriPrefix) {
+    verifierProxies.add(
+        new VerifierProxy(
+            listenPort,
+            upstream,
+            excludes,
+            cookiesAuthEnabled,
+            cookiePath,
+            authErrorRedirectUriPrefix));
   }
 
   public String build() throws InternalInfrastructureException {
@@ -104,6 +130,7 @@ public class JwtProxyConfigBuilder {
                               "public_key_path",
                               JWT_PROXY_CONFIG_FOLDER + '/' + JWT_PROXY_PUBLIC_KEY_FILE)))
               .withCookiesEnabled(verifierProxy.cookiesAuthEnabled)
+              .withCookiePath(ensureStartsWithSlash(verifierProxy.cookiePath))
               .withClaimsVerifier(
                   Collections.singleton(
                       new RegistrableComponentConfig()
@@ -117,6 +144,10 @@ public class JwtProxyConfigBuilder {
 
       if (verifierProxy.cookiesAuthEnabled && authPageUrl != null) {
         verifierConfig.setAuthUrl(authPageUrl.toString());
+      }
+
+      if (verifierProxy.authErrorRedirectUriPrefix != null) {
+        verifierConfig.setAuthErrorRedirectUriPrefix(verifierProxy.authErrorRedirectUriPrefix);
       }
 
       VerifierProxyConfig proxyConfig =
@@ -135,18 +166,31 @@ public class JwtProxyConfigBuilder {
     }
   }
 
-  private class VerifierProxy {
-    private Integer listenPort;
-    private String upstream;
-    private Set<String> excludes;
-    private boolean cookiesAuthEnabled;
+  private static final class VerifierProxy {
+    final Integer listenPort;
+    final String upstream;
+    final Set<String> excludes;
+    final boolean cookiesAuthEnabled;
+    final String cookiePath;
+    final String authErrorRedirectUriPrefix;
 
     VerifierProxy(
-        Integer listenPort, String upstream, Set<String> excludes, boolean cookiesAuthEnabled) {
+        Integer listenPort,
+        String upstream,
+        Set<String> excludes,
+        boolean cookiesAuthEnabled,
+        String cookiePath,
+        String authErrorRedirectUriPrefix) {
       this.listenPort = listenPort;
       this.upstream = upstream;
       this.excludes = excludes;
       this.cookiesAuthEnabled = cookiesAuthEnabled;
+      this.cookiePath = cookiePath;
+      this.authErrorRedirectUriPrefix = authErrorRedirectUriPrefix;
     }
+  }
+
+  private static String ensureStartsWithSlash(String val) {
+    return val.charAt(0) == '/' ? val : "/" + val;
   }
 }

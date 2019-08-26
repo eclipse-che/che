@@ -174,7 +174,7 @@ public class KubernetesServerExposer<T extends KubernetesEnvironment> {
       Map<String, ServerConfig> matchedExternalServers = match(externalServers, servicePort);
       if (!matchedExternalServers.isEmpty()) {
         externalServerExposer.expose(
-            k8sEnv, machineName, serviceName, servicePort, matchedExternalServers);
+            k8sEnv, machineName, serviceName, serviceName, servicePort, matchedExternalServers);
       }
 
       // expose service port related secure servers if exist

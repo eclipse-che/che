@@ -50,6 +50,12 @@ public class VerifierConfig {
 
   private Set<String> excludes;
 
+  @JsonProperty("auth_error_redirect_uri_prefix")
+  private String authErrorRedirectUriPrefix;
+
+  @JsonProperty("cookie_path")
+  private String cookiePath;
+
   public String getAudience() {
     return audience;
   }
@@ -178,6 +184,32 @@ public class VerifierConfig {
 
   public VerifierConfig withCookiesEnabled(boolean cookiesEnabled) {
     this.cookiesEnabled = cookiesEnabled;
+    return this;
+  }
+
+  public String getAuthErrorRedirectUriPrefix() {
+    return authErrorRedirectUriPrefix;
+  }
+
+  public void setAuthErrorRedirectUriPrefix(String authErrorRedirectUriPrefix) {
+    this.authErrorRedirectUriPrefix = authErrorRedirectUriPrefix;
+  }
+
+  public VerifierConfig withAuthErrorRedirectUriPrefix(String authErrorRedirectUriPrefix) {
+    this.authErrorRedirectUriPrefix = authErrorRedirectUriPrefix;
+    return this;
+  }
+
+  public String getCookiePath() {
+    return cookiePath;
+  }
+
+  public void setCookiePath(String cookiePath) {
+    this.cookiePath = cookiePath;
+  }
+
+  public VerifierConfig withCookiePath(String cookiePath) {
+    this.cookiePath = cookiePath;
     return this;
   }
 }

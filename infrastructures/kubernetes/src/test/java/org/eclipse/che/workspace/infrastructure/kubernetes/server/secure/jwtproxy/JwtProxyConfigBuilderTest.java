@@ -45,11 +45,11 @@ public class JwtProxyConfigBuilderTest {
     // given
     Set<String> excludes = new HashSet<>();
     jwtProxyConfigBuilder.addVerifierProxy(
-        8080, "http://tomcat:8080", new HashSet<>(excludes), false);
+        8080, "http://tomcat:8080", new HashSet<>(excludes), false, "", "/there");
     excludes.add("/api/liveness");
     excludes.add("/other/exclude");
     jwtProxyConfigBuilder.addVerifierProxy(
-        4101, "ws://terminal:4101", new HashSet<>(excludes), true);
+        4101, "ws://terminal:4101", new HashSet<>(excludes), true, "/cookies", "/here");
 
     // when
     String jwtProxyConfigYaml = jwtProxyConfigBuilder.build();

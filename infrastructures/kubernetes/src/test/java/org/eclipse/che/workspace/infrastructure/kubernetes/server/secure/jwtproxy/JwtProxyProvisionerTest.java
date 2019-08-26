@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import java.net.URI;
 import java.security.KeyPair;
 import java.security.PublicKey;
@@ -45,6 +46,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -69,6 +71,7 @@ public class JwtProxyProvisionerTest {
   @Mock private SignatureKeyManager signatureKeyManager;
   @Mock private PublicKey publicKey;
   @Mock private JwtProxyConfigBuilderFactory configBuilderFactory;
+  @Mock private IngressServiceExposureStrategy ingressServiceExposureStrategy;
 
   private JwtProxyProvisioner jwtProxyProvisioner;
   private KubernetesEnvironment k8sEnv;
@@ -85,14 +88,19 @@ public class JwtProxyProvisionerTest {
                 URI.create("http://che.api"), "iss", "1h", "", runtimeId.getWorkspaceId()));
     jwtProxyProvisioner =
         new JwtProxyProvisioner(
-            signatureKeyManager, configBuilderFactory, "eclipse/che-jwtproxy", "128mb", runtimeId);
+            signatureKeyManager,
+            configBuilderFactory,
+                ingressServiceExposureStrategy,
+            "eclipse/che-jwtproxy",
+            "128mb",
+            runtimeId);
     k8sEnv = KubernetesEnvironment.builder().build();
   }
 
   @Test
   public void shouldReturnGeneratedJwtProxyServiceName() {
     // when
-    String jwtProxyServiceName = jwtProxyProvisioner.getServiceName();
+    String jwtProxyServiceName = jwtProxyProvisioner.getPathBase();
 
     // then
     assertTrue(JWTPROXY_SERVICE_NAME_PATTERN.matcher(jwtProxyServiceName).matches());
@@ -113,9 +121,12 @@ public class JwtProxyProvisionerTest {
     ServerConfigImpl secureServer =
         new ServerConfigImpl("4401/tcp", "ws", "/", Collections.emptyMap());
 
+    ServicePort port = new ServicePort();
+    port.setPort(4401);
+
     // when
     jwtProxyProvisioner.expose(
-        k8sEnv, "terminal", 4401, "TCP", ImmutableMap.of("server", secureServer));
+        k8sEnv, "terminal", port, "TCP", ImmutableMap.of("server", secureServer));
 
     // then
     InternalMachineConfig jwtProxyMachine =
@@ -134,7 +145,7 @@ public class JwtProxyProvisionerTest {
     Pod jwtProxyPod = k8sEnv.getPodsCopy().get("che-jwtproxy");
     assertNotNull(jwtProxyPod);
 
-    Service jwtProxyService = k8sEnv.getServices().get(jwtProxyProvisioner.getServiceName());
+    Service jwtProxyService = k8sEnv.getServices().get(jwtProxyProvisioner.getPathBase());
     assertNotNull(jwtProxyService);
   }
 
@@ -160,11 +171,14 @@ public class JwtProxyProvisionerTest {
             ImmutableMap.of(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, "false"));
     ServerConfigImpl server3 = new ServerConfigImpl("4401/tcp", "ws", "/", Collections.emptyMap());
 
+    ServicePort port = new ServicePort();
+    port.setPort(4401);
+
     // when
     jwtProxyProvisioner.expose(
         k8sEnv,
         "terminal",
-        4401,
+        port,
         "TCP",
         ImmutableMap.of("server1", server1, "server2", server2, "server3", server3));
   }
@@ -177,7 +191,12 @@ public class JwtProxyProvisionerTest {
 
     jwtProxyProvisioner =
         new JwtProxyProvisioner(
-            signatureKeyManager, configBuilderFactory, "eclipse/che-jwtproxy", "128mb", runtimeId);
+            signatureKeyManager,
+            configBuilderFactory,
+                ingressServiceExposureStrategy,
+            "eclipse/che-jwtproxy",
+            "128mb",
+            runtimeId);
 
     ServerConfigImpl server1 =
         new ServerConfigImpl(
@@ -192,12 +211,15 @@ public class JwtProxyProvisionerTest {
             "/",
             ImmutableMap.of(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, "true"));
 
+    ServicePort port = new ServicePort();
+    port.setPort(4401);
+
     // when
     jwtProxyProvisioner.expose(
-        k8sEnv, "terminal", 4401, "TCP", ImmutableMap.of("server1", server1, "server2", server2));
+        k8sEnv, "terminal", port, "TCP", ImmutableMap.of("server1", server1, "server2", server2));
 
     // then
-    verify(configBuilder).addVerifierProxy(any(), any(), any(), eq(true));
+    verify(configBuilder).addVerifierProxy(any(), any(), any(), eq(true), any(), any());
   }
 
   @Test
@@ -208,16 +230,24 @@ public class JwtProxyProvisionerTest {
 
     jwtProxyProvisioner =
         new JwtProxyProvisioner(
-            signatureKeyManager, configBuilderFactory, "eclipse/che-jwtproxy", "128mb", runtimeId);
+            signatureKeyManager,
+            configBuilderFactory,
+                ingressServiceExposureStrategy,
+            "eclipse/che-jwtproxy",
+            "128mb",
+            runtimeId);
 
     ServerConfigImpl server1 =
         new ServerConfigImpl("4401/tcp", "http", "/", Collections.emptyMap());
 
+    ServicePort port = new ServicePort();
+    port.setPort(4401);
+
     // when
     jwtProxyProvisioner.expose(
-        k8sEnv, "terminal", 4401, "TCP", ImmutableMap.of("server1", server1));
+        k8sEnv, "terminal", port, "TCP", ImmutableMap.of("server1", server1));
 
     // then
-    verify(configBuilder).addVerifierProxy(any(), any(), any(), eq(false));
+    verify(configBuilder).addVerifierProxy(any(), any(), any(), eq(false), any(), any());
   }
 }

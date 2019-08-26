@@ -51,6 +51,8 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
    * @param k8sEnv Kubernetes environment
    * @param machineName machine containing servers
    * @param serviceName service associated with machine, mapping all machine server ports
+   * @param pathBase the basis for the path to be used in the ingress - usually this should be the service name
+   *                 or the name of the proxy fronting the service
    * @param servicePort specific service port to be exposed externally
    * @param externalServers server configs of servers to be exposed externally
    */
@@ -58,15 +60,18 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
       T k8sEnv,
       String machineName,
       String serviceName,
+      String pathBase,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
-    Ingress ingress = generateIngress(machineName, serviceName, servicePort, externalServers);
+    Ingress ingress =
+        generateIngress(machineName, serviceName, pathBase, servicePort, externalServers);
     k8sEnv.getIngresses().put(ingress.getMetadata().getName(), ingress);
   }
 
   private Ingress generateIngress(
       String machineName,
       String serviceName,
+      String pathBase,
       ServicePort servicePort,
       Map<String, ServerConfig> ingressesServers) {
 
@@ -80,7 +85,7 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
         .withPath(
             String.format(
                 pathTransformFmt,
-                ensureEndsWithSlash(strategy.getIngressPath(serviceName, servicePort))))
+                ensureEndsWithSlash(strategy.getIngressPath(pathBase, servicePort))))
         .withName(getIngressName(serviceName, servicePort))
         .withMachineName(machineName)
         .withServiceName(serviceName)

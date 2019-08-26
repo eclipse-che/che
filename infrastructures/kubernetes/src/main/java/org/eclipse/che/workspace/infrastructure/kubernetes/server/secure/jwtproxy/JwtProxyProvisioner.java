@@ -58,6 +58,7 @@ import org.eclipse.che.multiuser.machine.authentication.server.signature.Signatu
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
 /**
@@ -106,12 +107,16 @@ public class JwtProxyProvisioner {
   private final Map<String, String> attributes;
 
   private final String serviceName;
+  private final String pathBase;
   private int availablePort;
+
+  private final IngressServiceExposureStrategy ingressServiceExposureStrategy;
 
   @Inject
   public JwtProxyProvisioner(
       SignatureKeyManager signatureKeyManager,
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
+      IngressServiceExposureStrategy ingressServiceExposureStrategy,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
       @Assisted RuntimeIdentity identity) {
@@ -120,8 +125,13 @@ public class JwtProxyProvisioner {
     this.jwtProxyImage = jwtProxyImage;
 
     this.proxyConfigBuilder = jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId());
+
+    this.ingressServiceExposureStrategy = ingressServiceExposureStrategy;
+
     this.identity = identity;
     this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
+    this.pathBase = generate(serverPrefix(identity), SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
+
     this.availablePort = FIRST_AVAILABLE_PORT;
     long memoryLimitLong = Size.parseSizeToMegabytes(memoryLimitBytes) * MEGABYTES_TO_BYTES_DIVIDER;
     this.attributes =
@@ -148,7 +158,7 @@ public class JwtProxyProvisioner {
   public ServicePort expose(
       KubernetesEnvironment k8sEnv,
       String backendServiceName,
-      int backendServicePort,
+      ServicePort backendServicePort,
       String protocol,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
@@ -180,17 +190,6 @@ public class JwtProxyProvisioner {
       }
     }
 
-    proxyConfigBuilder.addVerifierProxy(
-        listenPort,
-        "http://" + backendServiceName + ":" + backendServicePort,
-        excludes,
-        cookiesAuthEnabled);
-    k8sEnv
-        .getConfigMaps()
-        .get(getConfigMapName())
-        .getData()
-        .put(JWT_PROXY_CONFIG_FILE, proxyConfigBuilder.build());
-
     ServicePort exposedPort =
         new ServicePortBuilder()
             .withName("server-" + listenPort)
@@ -199,7 +198,20 @@ public class JwtProxyProvisioner {
             .withNewTargetPort(listenPort)
             .build();
 
-    k8sEnv.getServices().get(getServiceName()).getSpec().getPorts().add(exposedPort);
+    k8sEnv.getServices().get(serviceName).getSpec().getPorts().add(exposedPort);
+
+    proxyConfigBuilder.addVerifierProxy(
+        listenPort,
+        "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
+        excludes,
+        cookiesAuthEnabled,
+        identity.getWorkspaceId(),
+        ingressServiceExposureStrategy.getIngressPath(pathBase, exposedPort));
+    k8sEnv
+        .getConfigMaps()
+        .get(getConfigMapName())
+        .getData()
+        .put(JWT_PROXY_CONFIG_FILE, proxyConfigBuilder.build());
 
     return exposedPort;
   }
@@ -207,6 +219,11 @@ public class JwtProxyProvisioner {
   /** Returns service name that exposed JWTProxy Pod. */
   public String getServiceName() {
     return serviceName;
+  }
+
+  /** Returns the path base to be used for the ingress backed by the JWTProxy pod. */
+  public String getPathBase() {
+    return pathBase;
   }
 
   /** Returns config map name that will be mounted into JWTProxy Pod. */
@@ -287,5 +304,9 @@ public class JwtProxyProvisioner {
                 .build())
         .endSpec()
         .build();
+  }
+
+  private static String serverPrefix(RuntimeIdentity identity) {
+    return identity.getWorkspaceId() + "/" + SERVER_PREFIX;
   }
 }

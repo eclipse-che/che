@@ -98,6 +98,7 @@ public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenSh
       OpenShiftEnvironment openShiftEnvironment,
       String machineName,
       String serviceName,
+      String pathBase,
       ServicePort servicePort,
       Map<String, ServerConfig> externalServers) {
     Route route =
