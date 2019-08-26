@@ -651,6 +651,7 @@ public class KubernetesPluginsToolingApplierTest {
     ChePlugin plugin = new ChePlugin();
     plugin.setName(name);
     plugin.setPublisher(publisher);
+    plugin.setType("Che editor");
     plugin.setId(publisher + "/" + name + "/" + version);
     plugin.setVersion(version);
     plugin.setContainers(Arrays.asList(containers));

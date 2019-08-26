@@ -159,6 +159,9 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
   private void addInitContainers(
       KubernetesEnvironment kubernetesEnvironment, PodData pod, ChePluginPatcher pluginPatcher)
       throws InfrastructureException {
+    if (pluginPatcher == null) {
+      return;
+    }
 
     List<CheContainer> initContainers = pluginPatcher.getInitContainers();
 
