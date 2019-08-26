@@ -18,7 +18,8 @@
         <encoder>
             <pattern>%-41(%date[%.15thread]) %-45([%-5level] [%.30logger{30} %L]) - %msg%n</pattern>
         </encoder>
-    </appender>fix
+    </appender>
+    
     <root level="INFO">
         <appender-ref ref="stdout"/>
     </root>
