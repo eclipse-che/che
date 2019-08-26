@@ -22,6 +22,11 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerResolver;
 
 public class ExternalServerExposer<T extends KubernetesEnvironment> {
+  /**
+   * A string to look for in the value of the "che.infra.kubernetes.ingress.path_transform"
+   * configuration property that marks the location where the generated public path of the service
+   * should be put in the final string representing the ingress path.
+   */
   static final String PATH_TRANSFORM_PATH_CATCH = "%s";
 
   private final IngressServiceExposureStrategy strategy;

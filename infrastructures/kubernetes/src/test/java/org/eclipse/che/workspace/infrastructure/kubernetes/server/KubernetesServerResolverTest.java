@@ -67,7 +67,9 @@ public class KubernetesServerResolverTest {
 
     KubernetesServerResolver serverResolver =
         new KubernetesServerResolver(
-            new NoopPathDemangler(), singletonList(nonMatchedByPodService), singletonList(ingress));
+            new NoopPathTransformInverter(),
+            singletonList(nonMatchedByPodService),
+            singletonList(ingress));
 
     // when
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
@@ -85,7 +87,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "/api/", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(new NoopPathDemangler(), emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -107,7 +110,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", null, ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(new NoopPathDemangler(), emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -129,7 +133,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(new NoopPathDemangler(), emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -151,7 +156,8 @@ public class KubernetesServerResolverTest {
             Pair.of("http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(new NoopPathDemangler(), emptyList(), singletonList(ingress));
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), emptyList(), singletonList(ingress));
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -175,7 +181,8 @@ public class KubernetesServerResolverTest {
                 "http-server", new ServerConfigImpl("3054", "http", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(new NoopPathDemangler(), singletonList(service), emptyList());
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), singletonList(service), emptyList());
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -199,7 +206,8 @@ public class KubernetesServerResolverTest {
                 "http-server", new ServerConfigImpl("3054/udp", "xxx", "api", ATTRIBUTES_MAP)));
 
     KubernetesServerResolver serverResolver =
-        new KubernetesServerResolver(new NoopPathDemangler(), singletonList(service), emptyList());
+        new KubernetesServerResolver(
+            new NoopPathTransformInverter(), singletonList(service), emptyList());
 
     Map<String, ServerImpl> resolved = serverResolver.resolve("machine");
 
@@ -274,8 +282,8 @@ public class KubernetesServerResolverTest {
     return attributes;
   }
 
-  private static final class NoopPathDemangler extends IngressPathTransformInverter {
-    NoopPathDemangler() {
+  private static final class NoopPathTransformInverter extends IngressPathTransformInverter {
+    NoopPathTransformInverter() {
       super("%s");
     }
   }
