@@ -10,7 +10,6 @@ fi
 # Launch selenium server
 /usr/bin/supervisord --configuration /etc/supervisord.conf & \
 export TS_SELENIUM_REMOTE_DRIVER_URL=http://localhost:4444/wd/hub
-sleep 1
 
 # Check selenium server launching
 expectedStatus=200
@@ -19,12 +18,11 @@ maximumAttempts=5
 
 while [ $(curl -s -o /dev/null -w "%{http_code}" --fail http://localhost:4444/wd/hub/status) != $expectedStatus ];
 do
-
   if (( currentTry > maximumAttempts ));
   then
     status=$(curl -s -o /dev/null -w "%{http_code}" --fail http://localhost:4444/wd/hub/status)
     echo "Exceeded the maximum number of checking attempts,"
-    echo "selenium server status is '$status' and it different to expected '$expectedStatus'";
+    echo "selenium server status is '$status' and it is different from '$expectedStatus'";
     exit 1;
   fi;
 
@@ -32,9 +30,7 @@ do
 
   curentTry=$((curentTry + 1))
   sleep 1
-
 done
-
 
 # Print information about launching tests
 if mount | grep 'local_tests'; then
