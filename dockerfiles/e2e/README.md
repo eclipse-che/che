@@ -30,7 +30,7 @@ If you want to gather screenshots of fallen tests, you have to mount a volume to
 a command:
 
 ```
-docker run --shm-size=256m -v /full/path/to/your/folder:/root/e2e/report -e THEIA_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
+docker run --shm-size=256m -v /full/path/to/your/folder:/root/e2e/report:Z -e THEIA_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
 ```
 
 ### Debugging
