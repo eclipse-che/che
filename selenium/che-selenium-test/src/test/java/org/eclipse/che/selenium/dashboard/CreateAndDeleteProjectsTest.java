@@ -97,9 +97,7 @@ public class CreateAndDeleteProjectsTest {
     // switch to the IDE and wait for workspace is ready to use
     theiaIde.switchToIdeFrame();
     theiaIde.waitTheiaIde();
-
     theiaIde.waitLoaderInvisibility();
-
     theiaIde.waitTheiaIdeTopPanel();
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
