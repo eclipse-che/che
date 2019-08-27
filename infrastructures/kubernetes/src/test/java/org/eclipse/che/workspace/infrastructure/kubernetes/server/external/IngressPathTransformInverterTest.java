@@ -33,7 +33,8 @@ public class IngressPathTransformInverterTest {
       {"%ssuffix", "pathsuffix", "path"},
       {"prefix%s", "prefixpath", "path"},
       {"prefix%ssuffix", "prefixpathsuffix", "path"},
-      {"prefix%s", "non-matching", "non-matching"}
+      {"prefix%s", "non-matching", "non-matching"},
+      {null, "some path", "some path"}
     };
   }
 }
