@@ -75,7 +75,8 @@ public class JwtProxySecureServerExposerTest {
         .when(jwtProxyProvisioner)
         .expose(any(), anyString(), any(), anyString(), anyMap());
 
-    when(jwtProxyProvisioner.getPathBase()).thenReturn(JWT_PROXY_SERVICE_NAME);
+    when(jwtProxyProvisioner.getServiceName()).thenReturn(JWT_PROXY_SERVICE_NAME);
+    when(jwtProxyProvisioner.getPathBase()).thenReturn("custom/root");
 
     // when
     secureServerExposer.expose(
@@ -83,14 +84,15 @@ public class JwtProxySecureServerExposerTest {
 
     // then
     verify(jwtProxyProvisioner)
-        .expose(k8sEnv, MACHINE_SERVICE_NAME, eq(machineServicePort), "TCP", servers);
+        .expose(
+            eq(k8sEnv), eq(MACHINE_SERVICE_NAME), eq(machineServicePort), eq("TCP"), eq(servers));
     verify(externalServerExposer)
         .expose(
-            k8sEnv,
-            MACHINE_NAME,
-            JWT_PROXY_SERVICE_NAME,
-            JWT_PROXY_SERVICE_NAME,
-            jwtProxyServicePort,
-            servers);
+            eq(k8sEnv),
+            eq(MACHINE_NAME),
+            eq(JWT_PROXY_SERVICE_NAME),
+            eq("custom/root"),
+            eq(jwtProxyServicePort),
+            eq(servers));
   }
 }

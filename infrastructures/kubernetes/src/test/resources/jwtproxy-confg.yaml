@@ -7,10 +7,12 @@ jwtproxy:
     verifier:
       audience: "workspace123"
       auth_cookies_enabled: false
+      auth_error_redirect_uri_prefix: "/there"
       claims_verifiers:
       - options:
           iss: "wsmaster"
         type: "static"
+      cookie_path: "/"
       key_server:
         options:
           issuer: "wsmaster"
@@ -26,11 +28,13 @@ jwtproxy:
     verifier:
       audience: "workspace123"
       auth_cookies_enabled: true
+      auth_error_redirect_uri_prefix: "/here"
       auth_redirect_url: "http://che-host.com/app/loader.html"
       claims_verifiers:
       - options:
           iss: "wsmaster"
         type: "static"
+      cookie_path: "/cookies"
       excludes:
       - "/api/liveness"
       - "/other/exclude"

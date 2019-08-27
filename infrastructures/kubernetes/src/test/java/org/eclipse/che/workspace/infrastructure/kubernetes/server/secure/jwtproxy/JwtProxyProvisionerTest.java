@@ -30,6 +30,7 @@ import static org.testng.Assert.assertTrue;
 
 import com.google.common.collect.ImmutableMap;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
@@ -90,7 +91,7 @@ public class JwtProxyProvisionerTest {
         new JwtProxyProvisioner(
             signatureKeyManager,
             configBuilderFactory,
-                ingressServiceExposureStrategy,
+            ingressServiceExposureStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -100,7 +101,7 @@ public class JwtProxyProvisionerTest {
   @Test
   public void shouldReturnGeneratedJwtProxyServiceName() {
     // when
-    String jwtProxyServiceName = jwtProxyProvisioner.getPathBase();
+    String jwtProxyServiceName = jwtProxyProvisioner.getServiceName();
 
     // then
     assertTrue(JWTPROXY_SERVICE_NAME_PATTERN.matcher(jwtProxyServiceName).matches());
@@ -122,7 +123,7 @@ public class JwtProxyProvisionerTest {
         new ServerConfigImpl("4401/tcp", "ws", "/", Collections.emptyMap());
 
     ServicePort port = new ServicePort();
-    port.setPort(4401);
+    port.setTargetPort(new IntOrString(4401));
 
     // when
     jwtProxyProvisioner.expose(
@@ -145,7 +146,7 @@ public class JwtProxyProvisionerTest {
     Pod jwtProxyPod = k8sEnv.getPodsCopy().get("che-jwtproxy");
     assertNotNull(jwtProxyPod);
 
-    Service jwtProxyService = k8sEnv.getServices().get(jwtProxyProvisioner.getPathBase());
+    Service jwtProxyService = k8sEnv.getServices().get(jwtProxyProvisioner.getServiceName());
     assertNotNull(jwtProxyService);
   }
 
@@ -172,7 +173,7 @@ public class JwtProxyProvisionerTest {
     ServerConfigImpl server3 = new ServerConfigImpl("4401/tcp", "ws", "/", Collections.emptyMap());
 
     ServicePort port = new ServicePort();
-    port.setPort(4401);
+    port.setTargetPort(new IntOrString(4401));
 
     // when
     jwtProxyProvisioner.expose(
@@ -193,7 +194,7 @@ public class JwtProxyProvisionerTest {
         new JwtProxyProvisioner(
             signatureKeyManager,
             configBuilderFactory,
-                ingressServiceExposureStrategy,
+            ingressServiceExposureStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -212,7 +213,7 @@ public class JwtProxyProvisionerTest {
             ImmutableMap.of(SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE, "true"));
 
     ServicePort port = new ServicePort();
-    port.setPort(4401);
+    port.setTargetPort(new IntOrString(4401));
 
     // when
     jwtProxyProvisioner.expose(
@@ -232,7 +233,7 @@ public class JwtProxyProvisionerTest {
         new JwtProxyProvisioner(
             signatureKeyManager,
             configBuilderFactory,
-                ingressServiceExposureStrategy,
+            ingressServiceExposureStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -241,7 +242,7 @@ public class JwtProxyProvisionerTest {
         new ServerConfigImpl("4401/tcp", "http", "/", Collections.emptyMap());
 
     ServicePort port = new ServicePort();
-    port.setPort(4401);
+    port.setTargetPort(new IntOrString(4401));
 
     // when
     jwtProxyProvisioner.expose(

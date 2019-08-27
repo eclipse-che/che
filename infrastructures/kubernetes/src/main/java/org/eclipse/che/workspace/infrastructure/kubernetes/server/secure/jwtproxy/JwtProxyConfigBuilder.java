@@ -78,12 +78,13 @@ public class JwtProxyConfigBuilder {
    * @param upstream the URL to the backend service this proxy should be put in front of
    * @param excludes the list of unsecured paths that the proxy should let pass through
    * @param cookiesAuthEnabled should the JWT proxy use cookies?
-   * @param cookiePath the path of the cookie. This is should either be "/" or some portion of the URL the JWT proxy
-   *                   will be exposed on. It is used to enable using different proxies for different services, each
-   *                   with a different auth cookie. Super useful for having multiple workspaces, each authenticated
-   *                   with its machine token.
-   * @param authErrorRedirectUriPrefix the prefix used to generate the redirect to the auth page. This should be set to
-   *                                   the a URL path where the JWT proxy can pick up the request to perform the auth
+   * @param cookiePath the path of the cookie. This is should either be "/" or some portion of the
+   *     URL the JWT proxy will be exposed on. It is used to enable using different proxies for
+   *     different services, each with a different auth cookie. Super useful for having multiple
+   *     workspaces, each authenticated with its machine token.
+   * @param authErrorRedirectUriPrefix the prefix used to generate the redirect to the auth page.
+   *     This should be set to the a URL path where the JWT proxy can pick up the request to perform
+   *     the auth
    */
   public void addVerifierProxy(
       Integer listenPort,
@@ -191,6 +192,10 @@ public class JwtProxyConfigBuilder {
   }
 
   private static String ensureStartsWithSlash(String val) {
-    return val.charAt(0) == '/' ? val : "/" + val;
+    if (isNullOrEmpty(val)) {
+      return "/";
+    } else {
+      return val.charAt(0) == '/' ? val : "/" + val;
+    }
   }
 }

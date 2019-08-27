@@ -51,8 +51,8 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
    * @param k8sEnv Kubernetes environment
    * @param machineName machine containing servers
    * @param serviceName service associated with machine, mapping all machine server ports
-   * @param pathBase the basis for the path to be used in the ingress - usually this should be the service name
-   *                 or the name of the proxy fronting the service
+   * @param pathBase the basis for the path to be used in the ingress - usually this should be the
+   *     service name or the name of the proxy fronting the service
    * @param servicePort specific service port to be exposed externally
    * @param externalServers server configs of servers to be exposed externally
    */
