@@ -28,6 +28,7 @@ import org.eclipse.che.selenium.core.SeleniumWebDriver;
 import org.eclipse.che.selenium.core.utils.WaitUtils;
 import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
@@ -208,7 +209,12 @@ public class TheiaIde {
     seleniumWebDriverHelper.waitVisibility(By.xpath(ideWindowXpath), PREPARING_WS_TIMEOUT_SEC);
 
     // switch to IDE frame
-    seleniumWebDriverHelper.waitAndSwitchToFrame(By.id(ideFrameId), PREPARING_WS_TIMEOUT_SEC);
+    try {
+      seleniumWebDriverHelper.waitAndSwitchToFrame(By.id(ideFrameId), PREPARING_WS_TIMEOUT_SEC);
+      waitTheiaIde();
+    } catch (TimeoutException ex) {
+      seleniumWebDriverHelper.waitAndSwitchToFrame(By.id(ideFrameId), PREPARING_WS_TIMEOUT_SEC);
+    }
   }
 
   public void pressKeyCombination(CharSequence... combination) {
