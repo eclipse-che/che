@@ -62,8 +62,7 @@ public class TheiaProjectTree {
     String COLLAPSED_ITEM_XPATH_TEMPLATE =
         "//div[@data-node-id='/projects:/projects/%s' and contains(@class, 'theia-mod-collapsed')]";
     String EXPAND_ITEM_ICON_XPATH_TEMPLATE = "//div[@data-node-id='/projects:/projects/%s']";
-    String FILES_TAB_XPATH =
-        "//div[contains(@class, 'theia-app-left')]//ul[@class='p-TabBar-content']//li[@title='Explorer']";
+    String FILES_TAB_XPATH = "shell-tab-explorer-view-container";
     String OPEN_WORKSPACE_BUTTON_XPATH = "//button[@class='open-workspace-button']";
   }
 
@@ -77,12 +76,12 @@ public class TheiaProjectTree {
 
   public void clickOnFilesTab() {
     seleniumWebDriverHelper.waitNoExceptions(
-        () -> seleniumWebDriverHelper.waitAndClick(By.xpath(FILES_TAB_XPATH)),
+        () -> seleniumWebDriverHelper.waitAndClick(By.id(FILES_TAB_XPATH)),
         WebDriverException.class);
   }
 
   public void waitFilesTab() {
-    seleniumWebDriverHelper.waitVisibility(By.xpath(FILES_TAB_XPATH));
+    seleniumWebDriverHelper.waitVisibility(By.id(FILES_TAB_XPATH));
   }
 
   public void waitProjectAreaOpened() {
