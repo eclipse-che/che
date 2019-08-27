@@ -12,7 +12,6 @@
 package org.eclipse.che.selenium.dashboard;
 
 import static org.eclipse.che.commons.lang.NameGenerator.generate;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage.Template.CONSOLE_JAVA_SIMPLE;
 import static org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.WorkspaceDetailsTab.PROJECTS;
 
@@ -37,7 +36,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 /** @author Andrey Chizhikov */
-@Test(groups = UNDER_REPAIR)
 public class CreateAndDeleteProjectsTest {
 
   private static final String WORKSPACE = generate("workspace", 4);
@@ -102,10 +100,9 @@ public class CreateAndDeleteProjectsTest {
     theiaIde.waitLoaderInvisibility();
     theiaIde.waitTheiaIdeTopPanel();
     theiaProjectTree.waitFilesTab();
+    theiaProjectTree.clickOnFilesTab();
 
     // wait for projects in the tree
-    theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitProjectsRootItem();
     theiaProjectTree.waitProjectAreaOpened();
     theiaProjectTree.waitItem(CONSOLE_JAVA_SIMPLE);
     theiaProjectTree.waitItem(SECOND_CONSOLE_JAVA_SIMPLE_PROJECT_NAME);
