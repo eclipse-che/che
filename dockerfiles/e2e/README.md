@@ -33,8 +33,8 @@ a command:
 docker run --shm-size=256m -v /full/path/to/your/folder:/root/e2e/report:Z -e THEIA_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
 ```
 
-###Debugging
-####Running own code
+### Debugging
+#### Running own code
 If you have done some changes locally and you want to test them, you can mount your code directly to the Docker. If you do so, your mounted code will be executed instead of the code that is already in an image.
 
 ```
