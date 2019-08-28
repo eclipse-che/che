@@ -18,6 +18,7 @@ declare namespace che {
   export interface IRootScopeService extends ng.IRootScopeService {
     hideLoader: boolean;
     showIDE: boolean;
+    hideNavbar: boolean;
     wantTokeepLoader: boolean;
     waitingLoaded: boolean;
     currentPage: string;

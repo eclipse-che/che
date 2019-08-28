@@ -31,9 +31,6 @@ export class NavBarSelected  implements ng.IDirective {
 
   restrict = 'A';
   replace = false;
-  controller = 'NavBarSelectedCtrl';
-  controllerAs = 'navBarSelectedCtrl';
-  bindToController = true;
 
   private $rootScope: INavBarSelectedRootScopeService;
   private $location: ng.ILocationService;

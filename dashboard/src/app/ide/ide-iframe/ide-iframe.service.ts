@@ -26,40 +26,27 @@ interface IIdeIFrameRootScope extends ng.IRootScopeService {
  * @author Florent Benoit
  */
 class IdeIFrameSvc {
-  static $inject = ['$window', '$timeout', '$compile', '$location', '$rootScope', '$mdSidenav', 'cheUIElementsInjectorService'];
+  static $inject = ['$window', '$location', '$rootScope', '$mdSidenav'];
 
-  private cheUIElementsInjectorService: CheUIElementsInjectorService;
-  private $timeout: ng.ITimeoutService;
-  private $compile: ng.ICompileService;
   private $location: ng.ILocationService;
-  private $mdSidenav: ng.material.ISidenavService;
 
   /**
    * Default constructor that is using resource
    */
   constructor($window: ng.IWindowService,
-              $timeout: ng.ITimeoutService,
-              $compile: ng.ICompileService,
               $location: ng.ILocationService,
               $rootScope: IIdeIFrameRootScope,
-              $mdSidenav: ng.material.ISidenavService,
-              cheUIElementsInjectorService: CheUIElementsInjectorService) {
-    this.$timeout = $timeout;
-    this.$compile = $compile;
+              $mdSidenav: ng.material.ISidenavService) {
     this.$location = $location;
-    this.$mdSidenav = $mdSidenav;
-    this.cheUIElementsInjectorService = cheUIElementsInjectorService;
 
     $window.addEventListener('message', (event: any) => {
       if ('show-ide' === event.data) {
-        // check whether user is still waiting for IDE
-        if (/\/ide\//.test($location.path())) {
+        if (this.isWaitingIDE()) {
           $rootScope.$apply(() => {
             $rootScope.showIDE = true;
             $rootScope.hideLoader = true;
           });
         }
-
       } else if ('show-workspaces' === event.data) {
         $rootScope.$apply(() => {
           $location.path('/workspaces');
@@ -70,13 +57,22 @@ class IdeIFrameSvc {
         $mdSidenav('left').open();
 
       } else if ('hide-navbar' === event.data) {
-        $rootScope.hideNavbar = true;
-        $mdSidenav('left').close();
+        if (this.isWaitingIDE()) {
+          $rootScope.hideNavbar = true;
+          $mdSidenav('left').close();
+        }
       }
 
     }, false);
   }
 
+  /**
+  * Returns true if the user is waiting for IDE.
+  * @returns {boolean}
+  */
+  private isWaitingIDE(): boolean {
+    return /\/ide\//.test(this.$location.path());
+  }
 }
 
 export default IdeIFrameSvc;

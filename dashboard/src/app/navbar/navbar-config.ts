@@ -13,7 +13,6 @@
 
 import {CheNavBarController} from './navbar.controller';
 import {CheNavBar} from './navbar.directive';
-import {NavBarSelectedCtrl} from './navbar-selected.controller';
 import {NavBarSelected} from './navbar-selected.directive';
 import {NavbarRecentWorkspacesController} from './recent-workspaces/recent-workspaces.controller';
 import {NavbarRecentWorkspaces} from './recent-workspaces/recent-workspaces.directive';
@@ -27,7 +26,6 @@ export class NavbarConfig {
 
   constructor(register: che.IRegisterService) {
     register.controller('CheNavBarController', CheNavBarController);
-    register.controller('NavBarSelectedCtrl', NavBarSelectedCtrl);
     register.directive('cheNavBar', CheNavBar);
     register.directive('navBarSelected', NavBarSelected);
 

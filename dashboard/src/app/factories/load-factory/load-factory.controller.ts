@@ -695,7 +695,7 @@ export class LoadFactoryController {
    */
   backToDashboard(): void {
     this.restoreMenuAndFooter();
-    this.$location.path('/');
+    this.$location.path('/').search({});
   }
 
   /**
