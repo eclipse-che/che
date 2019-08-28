@@ -245,12 +245,12 @@ export class Ide {
 
     async waitApllicationIsReady(url: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        let res = await axios.get(url);
+
         await this.driverHelper.getDriver().wait(async () => {
             try {
-                res = await axios.get(url);
+                let res = await axios.get(url);
                 if (res.status === 200) {
-                    console.log('Application is ready for use. App url:');
+                    console.log('Application is ready for use. App url:' + url);
                     return true;
                 }
             } catch (error) {
