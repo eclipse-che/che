@@ -279,7 +279,7 @@ class Loader {
      */
     asyncAuthenticate(redirectUrl, token) {
         redirectUrl = new URL(redirectUrl);
-        const url = redirectUrl.origin + redirectUrl.pathname + "/jwt/auth";
+        const url = redirectUrl.origin + redirectUrl.pathname.replace("//", "/") + "jwt/auth";
         return new Promise((resolve, reject) => {
             const request = new XMLHttpRequest();
             request.open('GET', url);
