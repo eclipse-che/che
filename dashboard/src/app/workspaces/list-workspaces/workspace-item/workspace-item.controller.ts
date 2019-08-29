@@ -63,7 +63,7 @@ export class WorkspaceItemCtrl {
 
     this.supportedRecipeTypeIssue = $sce.trustAsHtml('Current infrastructure doesn\'t support this workspace recipe type.');
  
-    // todo change to cheBranding.getDocs().converting after https://github.com/eclipse/che/issues/14308
+    // TODO change to cheBranding.getDocs().converting after https://github.com/eclipse/che/issues/14308
     const converting = 'https://www.eclipse.org/che/docs/che-7/converting-a-che-6-workspace-to-a-che-7-devfile/';
 
     this.supportedVersionTypeIssue = $sce.trustAsHtml(`This workspace is using old definition format which is not compatible anymore. 

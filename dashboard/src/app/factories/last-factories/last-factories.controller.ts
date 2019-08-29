@@ -37,11 +37,11 @@ export class LastFactoriesController {
 
     this.factories = this.cheFactory.getPageFactories();
 
-    // todo we should change to modificationDate after model's change
+    // TODO we should change to modificationDate after model's change
     this.factoriesOrderBy = '-creator.created';
     this.maxItems = 5;
 
-    // todo add OrderBy to condition in fetch API
+    // TODO add OrderBy to condition in fetch API
     let promise = this.cheFactory.fetchFactories(this.maxItems);
 
     this.isLoading = true;

@@ -25,7 +25,7 @@ export class CheFactoryTemplate {
    */
   constructor() {
     this.factoryTemplatesByName = new Map<string, string>();
-    // todo move factory templates to the server side
+    // TODO move factory templates to the server side
     this.factoryTemplatesByName.set('minimal', angular.fromJson(CheFactoryTemplates.MINIMAL));
     this.factoryTemplatesByName.set('complete', angular.fromJson(CheFactoryTemplates.COMPLETE));
     this.factoryTemplatesByName.set('git', angular.fromJson(CheFactoryTemplates.GIT));

@@ -88,7 +88,7 @@ export class OrganizationsController {
     if (angular.isDefined(pageKey)) {
       promise = this.cheOrganization.fetchOrganizationPageObjects(pageKey);
     } else {
-      // todo remove admin's condition after adding query search to server side
+      // TODO remove admin's condition after adding query search to server side
       promise = this.cheOrganization.fetchOrganizations(!this.hasAdminUserService ? MAX_ITEMS : 30);
     }
 
@@ -104,7 +104,7 @@ export class OrganizationsController {
   }
 
   _updateOrganizationList(organizations: Array<che.IOrganization>): void {
-    // todo remove this admin's condition after adding query search to server side
+    // TODO remove this admin's condition after adding query search to server side
     if (this.hasAdminUserService) {
       this.organizations = organizations.filter((organization: che.IOrganization) => {
         return !organization.parent;

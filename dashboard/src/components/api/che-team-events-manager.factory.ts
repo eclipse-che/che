@@ -158,7 +158,7 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
   processRenameTeam(info: any): void {
     let isCurrentUser = this.isCurrentUser(info.initiator);
     if (isCurrentUser) {
-      // todo
+      // TODO
     } else {
       let title = 'Team renamed';
       let content = 'Team \"' + info.oldName + '\" has been renamed to \"' + info.newName + '\" by ' + info.initiator;
@@ -178,7 +178,7 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
   processAddedToTeam(info: any): void {
     let isCurrentUser = this.isCurrentUser(info.initiator);
     if (isCurrentUser) {
-      // todo
+      // TODO
     } else {
       let title = 'You were added to team';
       let content = info.initiator + ' added you to team called \"' + info.organization.qualifiedName  + '\".';
@@ -198,7 +198,7 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
   processDeleteTeam(info: any): void {
     let isCurrentUser = this.isCurrentUser(info.initiator);
     if (isCurrentUser) {
-      // todo
+      // TODO
     } else {
       let title = 'Team deleted';
       let content = 'Team \"' + info.organization.qualifiedName + '\" has been deleted by ' + info.initiator;
@@ -220,7 +220,7 @@ export class CheTeamEventsManager implements che.api.ICheTeamEventsManager {
   processDeleteMember(info: any): void {
     let isCurrentUserInitiator = this.isCurrentUser(info.initiator);
     if (isCurrentUserInitiator) {
-      // todo
+      // TODO
     } else {
       let title = 'You have been removed from team';
       let content = info.initiator + ' removed you from team called \"' + info.organization.qualifiedName + '\".';
