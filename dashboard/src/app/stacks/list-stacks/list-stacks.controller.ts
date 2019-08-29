@@ -59,7 +59,7 @@ export class ListStacksController {
 
     this.orderBy = DEFAULT_COLUMN;
 
-    // todo remove this after cheListHelper improvement
+    // TODO remove this after cheListHelper improvement
     this.searchBy = 'tmpFilterColumn';
 
     this.loadDevfiles();
@@ -71,7 +71,7 @@ export class ListStacksController {
     this.devfileRegistry.fetchDevfiles(this.pluginRegistryUrl).then((data: Array<IDevfileMetaData>) => {
       const devfileMetaDatas = data.map((devfileMetaData: IDevfileMetaData) => {
 
-        // todo remove this after cheListHelper improvement
+        // TODO remove this after cheListHelper improvement
         devfileMetaData[this.searchBy]= `${devfileMetaData.displayName} ${devfileMetaData.description} ${devfileMetaData.globalMemoryLimit}`;
 
         return devfileMetaData;
