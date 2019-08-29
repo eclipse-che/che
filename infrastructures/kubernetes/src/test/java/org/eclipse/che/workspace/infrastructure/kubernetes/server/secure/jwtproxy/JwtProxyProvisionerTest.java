@@ -47,7 +47,7 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.SignatureKeyManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -72,7 +72,8 @@ public class JwtProxyProvisionerTest {
   @Mock private SignatureKeyManager signatureKeyManager;
   @Mock private PublicKey publicKey;
   @Mock private JwtProxyConfigBuilderFactory configBuilderFactory;
-  @Mock private IngressServiceExposureStrategy ingressServiceExposureStrategy;
+  @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
+  @Mock private PathBasePrefixProvider pathBasePrefixProvider;
 
   private JwtProxyProvisioner jwtProxyProvisioner;
   private KubernetesEnvironment k8sEnv;
@@ -91,7 +92,8 @@ public class JwtProxyProvisionerTest {
         new JwtProxyProvisioner(
             signatureKeyManager,
             configBuilderFactory,
-            ingressServiceExposureStrategy,
+            externalServiceExposureStrategy,
+            pathBasePrefixProvider,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -194,7 +196,8 @@ public class JwtProxyProvisionerTest {
         new JwtProxyProvisioner(
             signatureKeyManager,
             configBuilderFactory,
-            ingressServiceExposureStrategy,
+            externalServiceExposureStrategy,
+            pathBasePrefixProvider,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -233,7 +236,8 @@ public class JwtProxyProvisionerTest {
         new JwtProxyProvisioner(
             signatureKeyManager,
             configBuilderFactory,
-            ingressServiceExposureStrategy,
+            externalServiceExposureStrategy,
+            pathBasePrefixProvider,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);

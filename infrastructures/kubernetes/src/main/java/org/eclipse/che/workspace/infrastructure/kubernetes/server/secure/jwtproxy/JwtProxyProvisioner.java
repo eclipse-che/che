@@ -58,7 +58,7 @@ import org.eclipse.che.multiuser.machine.authentication.server.signature.Signatu
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressServiceExposureStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
 /**
@@ -108,15 +108,17 @@ public class JwtProxyProvisioner {
 
   private final String serviceName;
   private final String pathBase;
+  private final String pathBasePrefix;
   private int availablePort;
 
-  private final IngressServiceExposureStrategy ingressServiceExposureStrategy;
+  private final ExternalServiceExposureStrategy externalServiceExposureStrategy;
 
   @Inject
   public JwtProxyProvisioner(
       SignatureKeyManager signatureKeyManager,
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
-      IngressServiceExposureStrategy ingressServiceExposureStrategy,
+      ExternalServiceExposureStrategy externalServiceExposureStrategy,
+      PathBasePrefixProvider pathBasePrefixProvider,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
       @Assisted RuntimeIdentity identity) {
@@ -126,11 +128,13 @@ public class JwtProxyProvisioner {
 
     this.proxyConfigBuilder = jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId());
 
-    this.ingressServiceExposureStrategy = ingressServiceExposureStrategy;
+    this.externalServiceExposureStrategy = externalServiceExposureStrategy;
 
     this.identity = identity;
     this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
-    this.pathBase = generate(serverPrefix(identity), SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
+    this.pathBasePrefix = pathBasePrefixProvider.getPathPrefix(identity);
+    this.pathBase =
+        generate(pathBasePrefix + "/" + SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
 
     this.availablePort = FIRST_AVAILABLE_PORT;
     long memoryLimitLong = Size.parseSizeToMegabytes(memoryLimitBytes) * MEGABYTES_TO_BYTES_DIVIDER;
@@ -205,8 +209,8 @@ public class JwtProxyProvisioner {
         "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
         excludes,
         cookiesAuthEnabled,
-        identity.getWorkspaceId(),
-        ingressServiceExposureStrategy.getIngressPath(pathBase, exposedPort));
+        pathBasePrefix,
+        externalServiceExposureStrategy.getExternalPath(pathBase, exposedPort));
     k8sEnv
         .getConfigMaps()
         .get(getConfigMapName())
@@ -304,9 +308,5 @@ public class JwtProxyProvisioner {
                 .build())
         .endSpec()
         .build();
-  }
-
-  private static String serverPrefix(RuntimeIdentity identity) {
-    return identity.getWorkspaceId() + "/" + SERVER_PREFIX;
   }
 }
