@@ -33,10 +33,10 @@ do
 done
 
 # Print information about launching tests
-if mount | grep 'local_tests'; then
+if mount | grep 'e2e'; then
 	echo "The local code is mounted. Executing local code."
-	cd local_tests || exit
-	npm i
+	cd /tmp/e2e || exit
+	npm install
 else
 	echo "Executing e2e tests from an image."
 	cd /tmp/e2e || exit
