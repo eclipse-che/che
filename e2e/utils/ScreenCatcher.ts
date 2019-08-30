@@ -57,7 +57,6 @@ export class ScreenCatcher {
     }
 
     async writeErrorLog(errorLogPath: string, err: Error) {
-        let errorLog: string;
         console.log(`Failed to save screenshot, additional information in the ${errorLogPath}`);
 
         if (err.stack) {
