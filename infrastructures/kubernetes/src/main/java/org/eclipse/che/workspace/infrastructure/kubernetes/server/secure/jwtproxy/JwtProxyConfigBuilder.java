@@ -147,8 +147,8 @@ public class JwtProxyConfigBuilder {
         verifierConfig.setAuthUrl(authPageUrl.toString());
       }
 
-      if (verifierProxy.authErrorRedirectUriPrefix != null) {
-        verifierConfig.setAuthErrorRedirectUriPrefix(verifierProxy.authErrorRedirectUriPrefix);
+      if (verifierProxy.publicBasePath != null) {
+        verifierConfig.setPublicBasePath(verifierProxy.publicBasePath);
       }
 
       VerifierProxyConfig proxyConfig =
@@ -173,7 +173,7 @@ public class JwtProxyConfigBuilder {
     final Set<String> excludes;
     final boolean cookiesAuthEnabled;
     final String cookiePath;
-    final String authErrorRedirectUriPrefix;
+    final String publicBasePath;
 
     VerifierProxy(
         Integer listenPort,
@@ -181,13 +181,13 @@ public class JwtProxyConfigBuilder {
         Set<String> excludes,
         boolean cookiesAuthEnabled,
         String cookiePath,
-        String authErrorRedirectUriPrefix) {
+        String publicBasePath) {
       this.listenPort = listenPort;
       this.upstream = upstream;
       this.excludes = excludes;
       this.cookiesAuthEnabled = cookiesAuthEnabled;
       this.cookiePath = cookiePath;
-      this.authErrorRedirectUriPrefix = authErrorRedirectUriPrefix;
+      this.publicBasePath = publicBasePath;
     }
   }
 

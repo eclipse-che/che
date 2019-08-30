@@ -50,8 +50,8 @@ public class VerifierConfig {
 
   private Set<String> excludes;
 
-  @JsonProperty("auth_error_redirect_uri_prefix")
-  private String authErrorRedirectUriPrefix;
+  @JsonProperty("public_base_path")
+  private String publicBasePath;
 
   @JsonProperty("cookie_path")
   private String cookiePath;
@@ -187,16 +187,16 @@ public class VerifierConfig {
     return this;
   }
 
-  public String getAuthErrorRedirectUriPrefix() {
-    return authErrorRedirectUriPrefix;
+  public String getPublicBasePath() {
+    return publicBasePath;
   }
 
-  public void setAuthErrorRedirectUriPrefix(String authErrorRedirectUriPrefix) {
-    this.authErrorRedirectUriPrefix = authErrorRedirectUriPrefix;
+  public void setPublicBasePath(String publicBasePath) {
+    this.publicBasePath = publicBasePath;
   }
 
-  public VerifierConfig withAuthErrorRedirectUriPrefix(String authErrorRedirectUriPrefix) {
-    this.authErrorRedirectUriPrefix = authErrorRedirectUriPrefix;
+  public VerifierConfig withPublicBasePath(String publicBasePath) {
+    this.publicBasePath = publicBasePath;
     return this;
   }
 

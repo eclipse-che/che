@@ -7,7 +7,6 @@ jwtproxy:
     verifier:
       audience: "workspace123"
       auth_cookies_enabled: false
-      auth_error_redirect_uri_prefix: "/there"
       claims_verifiers:
       - options:
           iss: "wsmaster"
@@ -23,12 +22,12 @@ jwtproxy:
       max_ttl: "1m"
       nonce_storage:
         type: "void"
+      public_base_path: "/there"
       upstream: "http://tomcat:8080"
   - listen_addr: ":4101"
     verifier:
       audience: "workspace123"
       auth_cookies_enabled: true
-      auth_error_redirect_uri_prefix: "/here"
       auth_redirect_url: "http://che-host.com/app/loader.html"
       claims_verifiers:
       - options:
@@ -48,4 +47,5 @@ jwtproxy:
       max_ttl: "1m"
       nonce_storage:
         type: "void"
+      public_base_path: "/here"
       upstream: "ws://terminal:4101"
