@@ -61,9 +61,8 @@ export class ScreenCatcher {
         console.log(`Failed to save screenshot, additional information in the ${errorLogPath}`);
 
         if (err.stack) {
-            errorLog = err.stack;
             const screenshotStream = fs.createWriteStream(errorLogPath);
-            screenshotStream.write(new Buffer(errorLog, 'utf8'));
+            screenshotStream.write(new Buffer(err.stack, 'utf8'));
             screenshotStream.end();
         }
     }
