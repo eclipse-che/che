@@ -300,6 +300,19 @@ public class KubernetesPluginsToolingApplierTest {
   }
 
   @Test
+  public void addToolingInitContainerToAPod() throws Exception {
+    lenient().when(podSpec.getInitContainers()).thenReturn(new ArrayList<>());
+    ChePlugin chePlugin = createChePlugin();
+    chePlugin.setInitContainers(singletonList(createContainer()));
+
+    applier.apply(runtimeIdentity, internalEnvironment, singletonList(chePlugin));
+
+    verifyPodAndInitContainersNumber(1);
+    Container toolingInitContainer = getOnlyOneInitContainerFromPod(internalEnvironment);
+    verifyContainer(toolingInitContainer);
+  }
+
+  @Test
   public void createsPodAndAddToolingIfNoPodIsPresent() throws Exception {
     internalEnvironment = spy(KubernetesEnvironment.builder().build());
     Map<String, InternalMachineConfig> machines = new HashMap<>();
@@ -686,6 +699,12 @@ public class KubernetesPluginsToolingApplierTest {
     assertEquals(pod.getSpec().getContainers().size(), containersNumber);
   }
 
+  private void verifyPodAndInitContainersNumber(int containersNumber) {
+    assertEquals(internalEnvironment.getPodsCopy().size(), 1);
+    Pod pod = internalEnvironment.getPodsCopy().values().iterator().next();
+    assertEquals(pod.getSpec().getInitContainers().size(), containersNumber);
+  }
+
   private void verifyContainer(Container toolingContainer) {
     assertEquals(toolingContainer.getImage(), TEST_IMAGE);
     assertEquals(
@@ -796,6 +815,15 @@ public class KubernetesPluginsToolingApplierTest {
     List<Container> nonUserContainers = getNonUserContainers(kubernetesEnvironment);
     assertEquals(nonUserContainers.size(), 1);
     return nonUserContainers.get(0);
+  }
+
+  private Container getOnlyOneInitContainerFromPod(KubernetesEnvironment kubernetesEnvironment) {
+    Pod pod = kubernetesEnvironment.getPodsCopy().values().iterator().next();
+
+    List<Container> initContainer =
+        pod.getSpec().getInitContainers().stream().collect(Collectors.toList());
+    assertEquals(initContainer.size(), 1);
+    return initContainer.get(0);
   }
 
   private void addPortToSingleContainerPlugin(
