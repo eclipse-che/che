@@ -441,11 +441,13 @@ public class ServerDtoTest {
   public void checkDtoDeserializationWithSerializableFields() {
     final int fooId = 1;
     final String fooString = "some string";
-    final int fooInt = 12345;
+    final int fooInt = 1234567890;
+    final long fooLong = 1234514362645634611L;
     final double fooDouble = 1.2345;
 
     JsonObject jsonMap = new JsonObject();
     jsonMap.add("fooInt", new JsonPrimitive(fooInt));
+    jsonMap.add("fooLong", new JsonPrimitive(fooLong));
     jsonMap.add("fooBoolean", new JsonPrimitive(true));
     jsonMap.add("fooDouble", new JsonPrimitive(fooDouble));
     jsonMap.add("fooString", new JsonPrimitive(fooString));
@@ -460,7 +462,8 @@ public class ServerDtoTest {
 
     assertEquals(dto.getId(), fooId);
     assertEquals(dto.getObject(), fooString);
-    //    assertEquals(dto.getObjectMap().get("fooInt"), fooInt);
+    assertEquals(dto.getObjectMap().get("fooInt"), fooInt);
+    assertEquals(dto.getObjectMap().get("fooLong"), fooLong);
     assertEquals(dto.getObjectMap().get("fooBoolean"), true);
     assertEquals(dto.getObjectMap().get("fooDouble"), fooDouble);
     assertEquals(dto.getObjectMap().get("fooString"), fooString);
