@@ -30,9 +30,6 @@ public class SerializableInterfaceAdapterFactory implements TypeAdapterFactory {
   @Override
   public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
     if (Serializable.class.equals(type.getRawType())) {
-      if (Number.class.isAssignableFrom(type.getRawType())) {
-        System.out.println("lol");
-      }
       return (TypeAdapter<T>) new SerializableAdapter(gson.getAdapter(Object.class));
     }
     return null;
