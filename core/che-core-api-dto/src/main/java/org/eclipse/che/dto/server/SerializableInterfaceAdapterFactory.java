@@ -33,8 +33,7 @@ public class SerializableInterfaceAdapterFactory implements TypeAdapterFactory {
       if (Number.class.isAssignableFrom(type.getRawType())) {
         System.out.println("lol");
       }
-      return (TypeAdapter<T>)
-          new SerializableAdapter(gson.getAdapter(Object.class), gson.getAdapter(Number.class));
+      return (TypeAdapter<T>) new SerializableAdapter(gson.getAdapter(Object.class));
     }
     return null;
   }
@@ -42,11 +41,9 @@ public class SerializableInterfaceAdapterFactory implements TypeAdapterFactory {
   private static class SerializableAdapter extends TypeAdapter<Object> {
 
     TypeAdapter objectAdapter;
-    TypeAdapter numberAdapter;
 
-    public SerializableAdapter(TypeAdapter objectAdapter, TypeAdapter numberAdapter) {
+    public SerializableAdapter(TypeAdapter objectAdapter) {
       this.objectAdapter = objectAdapter;
-      this.numberAdapter = numberAdapter;
     }
 
     @Override
