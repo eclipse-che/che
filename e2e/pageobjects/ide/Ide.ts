@@ -248,7 +248,7 @@ export class Ide {
 
         await this.driverHelper.getDriver().wait(async () => {
             try {
-                let res = await axios.get(url);
+                const res = await axios.get(url);
                 if (res.status === 200) {
                     return true;
                 }
