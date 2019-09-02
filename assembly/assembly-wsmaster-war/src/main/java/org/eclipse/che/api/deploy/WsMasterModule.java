@@ -148,10 +148,6 @@ public class WsMasterModule extends AbstractModule {
     factoryParametersResolverMultibinder.addBinding().to(GithubFactoryParametersResolver.class);
 
     bind(org.eclipse.che.api.core.rest.ApiInfoService.class);
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateDescriptionLoader.class)
-        .asEagerSingleton();
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateRegistry.class);
-    bind(org.eclipse.che.api.project.server.template.ProjectTemplateService.class);
     bind(org.eclipse.che.api.ssh.server.SshService.class);
     bind(org.eclipse.che.api.user.server.UserService.class);
     bind(org.eclipse.che.api.user.server.ProfileService.class);
