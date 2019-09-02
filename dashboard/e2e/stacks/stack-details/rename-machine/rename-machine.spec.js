@@ -20,7 +20,7 @@ describe('Stack details >', () => {
     stackDetailsPageObject = require('./../stack-details.po.js');
   });
 
-  // todo
+  // TODO
   describe('machine\'s name >', () => {
 
     it('can be replaced with valid name, single machine stack', () => {

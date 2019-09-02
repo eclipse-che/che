@@ -62,7 +62,7 @@ export class DevfileRegistry {
     return promise.then((result: any) => {
       return result.data.map((devfileMetaData: IDevfileMetaData) => {
         let globalMemoryLimitNumber = this.getMemoryLimit(devfileMetaData.globalMemoryLimit);
-        // todo remove this after fixing https://github.com/eclipse/che/issues/11424
+        // TODO remove this after fixing https://github.com/eclipse/che/issues/11424
         if (this.isKeycloackPresent) {
           globalMemoryLimitNumber += this.jwtproxyMemoryLimitNumber;
         }
