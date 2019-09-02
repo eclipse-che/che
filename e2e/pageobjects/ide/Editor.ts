@@ -263,18 +263,18 @@ export class Editor {
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
 
         for (let i = 0; i < attempts; i++) {
-            const elementLocator: By = await this.getLineNumberBlockLocator(tabTitle, lineNumber);
-            const element: WebElement = await this.driverHelper.waitVisibility(elementLocator, timeout);
-
             try {
+                const elementLocator: By = await this.getLineNumberBlockLocator(tabTitle, lineNumber);
+                const element: WebElement = await this.driverHelper.waitVisibility(elementLocator, timeout);
+
                 await this.driverHelper.getAction().mouseMove(element, { x: 5, y: 5 }).perform();
                 await this.waitBreakpointHint(tabTitle, lineNumber);
                 await this.driverHelper.getAction().click().perform();
                 await this.waitBreakpoint(tabTitle, lineNumber);
                 return;
             } catch (err) {
-                if (i === attempts - i) {
-                    throw err(`Exceeded maximum breakpoint activation attempts`);
+                if (i === attempts - 1) {
+                    throw new error.TimeoutError(`Exceeded maximum breakpoint activation attempts`);
                 }
                 // ignore errors and wait
                 await this.driverHelper.wait(polling);
