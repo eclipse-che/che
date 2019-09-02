@@ -250,14 +250,12 @@ export class Ide {
             try {
                 let res = await axios.get(url);
                 if (res.status === 200) {
-                    console.log('Application is ready for use. App url:' + url);
                     return true;
                 }
             } catch (error) {
-                console.log('Application is not yet ready for use');
+                await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
 
-            await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
         }, timeout);
     }
 
