@@ -114,8 +114,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
     CommandsResolver commandsResolver = new CommandsResolver(kubernetesEnvironment);
     for (ChePlugin chePlugin : chePlugins) {
       for (CheContainer container : chePlugin.getInitContainers()) {
-        Container k8sContainer = toK8sContainerResolver(container, emptyList()).resolve();
-        pod.getSpec().getInitContainers().add(k8sContainer);
+        pod.getSpec().getInitContainers().add(toK8sContainer(container));
       }
 
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
@@ -176,8 +175,13 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         .collect(Collectors.toList());
   }
 
+  private Container toK8sContainer(CheContainer container)
+      throws InfrastructureException {
+    return toK8sContainerResolver(container, emptyList()).resolve();
+  }
+
   private K8sContainerResolver toK8sContainerResolver(
-      CheContainer container, List<ChePluginEndpoint> endpoints) throws InfrastructureException {
+      CheContainer container, List<ChePluginEndpoint> endpoints) {
     return new K8sContainerResolverBuilder()
         .setContainer(container)
         .setImagePullPolicy(sidecarImagePullPolicy)
