@@ -389,7 +389,6 @@ public class WorkspaceRuntimes {
       WorkspaceImpl workspace, @Nullable String envName, Map<String, String> options)
       throws ConflictException, NotFoundException, ServerException {
     TracingTags.WORKSPACE_ID.set(workspace.getId());
-    TracingTags.STACK_ID.set(() -> workspace.getAttributes().getOrDefault("stackId", "no stack"));
 
     final String workspaceId = workspace.getId();
     if (isStartRefused.get()) {
@@ -469,7 +468,6 @@ public class WorkspaceRuntimes {
       throws NotFoundException, ConflictException {
     TracingTags.WORKSPACE_ID.set(workspace.getId());
     TracingTags.STOPPED_BY.set(getStoppedBy(workspace));
-    TracingTags.STACK_ID.set(() -> workspace.getAttributes().getOrDefault("stackId", "no stack"));
 
     String workspaceId = workspace.getId();
     WorkspaceStatus status = statuses.get(workspaceId);

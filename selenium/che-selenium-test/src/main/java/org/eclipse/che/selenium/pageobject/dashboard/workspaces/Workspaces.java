@@ -302,7 +302,7 @@ public class Workspaces {
   }
 
   public void clickOnStackButton() {
-    seleniumWebDriverHelper.waitAndClick(By.xpath("//div[@che-column-title='Stack']/div"));
+    seleniumWebDriverHelper.waitAndClick(By.xpath("//div[@che-column-title='Devfile']/div"));
   }
 
   public void clickOnWorkspaceStopStartButton(String workspaceName) {

@@ -19,6 +19,7 @@ import java.util.List;
 import org.eclipse.che.selenium.core.user.DefaultTestUser;
 import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 
 /**
@@ -36,27 +37,24 @@ public class CreateWorkspaceHelper {
   @Inject private DefaultTestUser defaultTestUser;
   @Inject private TestWorkspaceProvider testWorkspaceProvider;
 
-  public TestWorkspace createWorkspaceFromStackWithProject(
-      NewWorkspace.Stack stack, String workspaceName, String projectName) {
-    return createWorkspaceFromStack(stack, workspaceName, ImmutableList.of(projectName), null);
+  public TestWorkspace createWorkspaceFromDevfileWithProject(
+      Devfile devfile, String workspaceName, String projectName) {
+    return createWorkspaceFromStack(devfile, workspaceName, ImmutableList.of(projectName), null);
   }
 
-  public TestWorkspace createWorkspaceFromStackWithoutProject(
-      NewWorkspace.Stack stack, String workspaceName) {
-    return createWorkspaceFromStack(stack, workspaceName, Collections.emptyList(), null);
+  public TestWorkspace createWorkspaceFromDevfileWithoutProject(
+      Devfile devfile, String workspaceName) {
+    return createWorkspaceFromStack(devfile, workspaceName, Collections.emptyList(), null);
   }
 
   public TestWorkspace createWorkspaceFromStackWithProjects(
-      NewWorkspace.Stack stack, String workspaceName, List<String> projectNames) {
-    return createWorkspaceFromStack(stack, workspaceName, projectNames, null);
+      Devfile devfile, String workspaceName, List<String> projectNames) {
+    return createWorkspaceFromStack(devfile, workspaceName, projectNames, null);
   }
 
   public TestWorkspace createWorkspaceFromStack(
-      NewWorkspace.Stack stack,
-      String workspaceName,
-      List<String> projectNames,
-      Double machineRam) {
-    prepareWorkspace(stack, workspaceName, machineRam);
+      Devfile devfile, String workspaceName, List<String> projectNames, Double machineRam) {
+    prepareWorkspace(devfile, workspaceName, machineRam);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
     projectNames.forEach(projectSourcePage::selectSample);
@@ -67,14 +65,14 @@ public class CreateWorkspaceHelper {
     return testWorkspaceProvider.getWorkspace(workspaceName, defaultTestUser);
   }
 
-  private void prepareWorkspace(NewWorkspace.Stack stack, String workspaceName, Double machineRam) {
+  private void prepareWorkspace(Devfile devfile, String workspaceName, Double machineRam) {
     dashboard.waitDashboardToolbarTitle();
 
     dashboard.selectWorkspacesItemOnDashboard();
     workspaces.clickOnAddWorkspaceBtn();
 
     newWorkspace.waitToolbar();
-    newWorkspace.selectStack(stack);
+    newWorkspace.selectDevfile(devfile);
     newWorkspace.typeWorkspaceName(workspaceName);
   }
 }
