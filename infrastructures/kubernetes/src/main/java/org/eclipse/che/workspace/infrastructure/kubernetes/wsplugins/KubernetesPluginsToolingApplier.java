@@ -175,8 +175,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         .collect(Collectors.toList());
   }
 
-  private Container toK8sContainer(CheContainer container)
-      throws InfrastructureException {
+  private Container toK8sContainer(CheContainer container) throws InfrastructureException {
     return toK8sContainerResolver(container, emptyList()).resolve();
   }
 
