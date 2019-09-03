@@ -24,7 +24,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceProjects;
@@ -78,8 +78,8 @@ public class CreateAndDeleteProjectsTest {
     newWorkspace.waitToolbar();
     dashboardWindow = seleniumWebDriver.getWindowHandle();
 
-    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
-    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    // we are selecting 'Java' stack from the 'All Devfile' tab for compatibility with OSIO
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.typeWorkspaceName(WORKSPACE);
     projectSourcePage.waitCreatedProjectButton(CONSOLE_JAVA_SIMPLE);
 

@@ -303,11 +303,7 @@
                                     <port>jdbc.port:3306</port>
                                 </ports>
                                 <wait>
-                                    <tcp>
-                                        <ports>
-                                            <port>3306</port>
-                                        </ports>
-                                    </tcp>
+                                    <log>ready for connections</log>
                                     <time>60000</time>
                                 </wait>
                                 <restartPolicy>

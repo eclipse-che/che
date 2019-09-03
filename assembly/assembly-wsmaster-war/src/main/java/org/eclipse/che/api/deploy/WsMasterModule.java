@@ -73,7 +73,6 @@ import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceAgentJava
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceIdEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNameEnvVarProvider;
 import org.eclipse.che.api.workspace.server.spi.provision.env.WorkspaceNamespaceNameEnvVarProvider;
-import org.eclipse.che.api.workspace.server.stack.StackLoader;
 import org.eclipse.che.api.workspace.server.token.MachineTokenProvider;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
 import org.eclipse.che.commons.auth.token.ChainedTokenExtractor;
@@ -156,12 +155,6 @@ public class WsMasterModule extends AbstractModule {
 
     install(new DevfileModule());
 
-    MapBinder<String, String> stacks =
-        MapBinder.newMapBinder(
-            binder(), String.class, String.class, Names.named(StackLoader.CHE_PREDEFINED_STACKS));
-    stacks.addBinding("stacks.json").toInstance("stacks-images");
-    stacks.addBinding("che-in-che.json").toInstance("");
-    bind(org.eclipse.che.api.workspace.server.stack.StackService.class);
     bind(org.eclipse.che.api.workspace.server.TemporaryWorkspaceRemover.class);
     bind(org.eclipse.che.api.workspace.server.WorkspaceService.class);
     install(new FactoryModuleBuilder().build(ServersCheckerFactory.class));
@@ -310,7 +303,6 @@ public class WsMasterModule extends AbstractModule {
     bind(TokenValidator.class).to(org.eclipse.che.api.local.DummyTokenValidator.class);
     bind(MachineTokenProvider.class).to(MachineTokenProvider.EmptyMachineTokenProvider.class);
 
-    bind(org.eclipse.che.api.workspace.server.stack.StackLoader.class);
     bind(DataSource.class).toProvider(org.eclipse.che.core.db.h2.H2DataSourceProvider.class);
 
     install(new org.eclipse.che.api.user.server.jpa.UserJpaModule());

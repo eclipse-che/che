@@ -95,7 +95,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
@@ -193,7 +192,6 @@ public class CascadeRemovalTest {
                             MachineConfigImpl.class,
                             SourceStorageImpl.class,
                             ServerConfigImpl.class,
-                            StackImpl.class,
                             CommandImpl.class,
                             RecipeImpl.class,
                             SshPairImpl.class,

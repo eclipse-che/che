@@ -11,7 +11,6 @@
  */
 package org.eclipse.che.multiuser.integration.jpa.cascaderemoval;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.eclipse.che.multiuser.api.permission.server.AbstractPermissionsDomain.SET_PERMISSIONS;
@@ -22,7 +21,6 @@ import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjec
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createProfile;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createSignatureKeyPair;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createSshPair;
-import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createStack;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createUser;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createWorker;
 import static org.eclipse.che.multiuser.integration.jpa.cascaderemoval.TestObjectsFactory.createWorkspace;
@@ -38,16 +36,13 @@ import static org.testng.Assert.fail;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Stage;
-import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
 import com.google.inject.persist.jpa.JpaPersistModule;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
@@ -81,9 +76,7 @@ import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.devfile.DevfileModule;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.wsplugins.ChePluginsApplier;
@@ -100,8 +93,6 @@ import org.eclipse.che.inject.lifecycle.InitModule;
 import org.eclipse.che.multiuser.api.permission.server.PermissionChecker;
 import org.eclipse.che.multiuser.api.permission.server.PermissionCheckerImpl;
 import org.eclipse.che.multiuser.api.permission.server.PermissionsManager;
-import org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions;
-import org.eclipse.che.multiuser.api.permission.server.spi.PermissionsDao;
 import org.eclipse.che.multiuser.machine.authentication.server.MachineAuthModule;
 import org.eclipse.che.multiuser.machine.authentication.server.signature.spi.SignatureKeyDao;
 import org.eclipse.che.multiuser.organization.api.OrganizationJpaModule;
@@ -113,11 +104,7 @@ import org.eclipse.che.multiuser.organization.spi.MemberDao;
 import org.eclipse.che.multiuser.organization.spi.impl.MemberImpl;
 import org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.jpa.MultiuserWorkspaceJpaModule;
-import org.eclipse.che.multiuser.permission.workspace.server.jpa.listener.RemoveStackOnLastUserRemovedEventSubscriber;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
-import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaStackPermissionsDao;
-import org.eclipse.che.multiuser.permission.workspace.server.stack.StackDomain;
-import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
 import org.eclipse.che.multiuser.resource.api.AvailableResourcesProvider;
 import org.eclipse.che.multiuser.resource.api.ResourceLockKeyProvider;
 import org.eclipse.che.multiuser.resource.api.ResourceUsageTracker;
@@ -152,10 +139,8 @@ public class JpaEntitiesCascadeRemovalTest {
   private WorkspaceDao workspaceDao;
   private SshDao sshDao;
   private FactoryDao factoryDao;
-  private StackDao stackDao;
   private WorkerDao workerDao;
   private SignatureKeyDao signatureKeyDao;
-  private JpaStackPermissionsDao stackPermissionsDao;
   private FreeResourcesLimitDao freeResourcesLimitDao;
   private OrganizationManager organizationManager;
   private MemberDao memberDao;
@@ -195,12 +180,6 @@ public class JpaEntitiesCascadeRemovalTest {
   private FactoryImpl factory1;
 
   private FactoryImpl factory2;
-
-  /** Stack depend on user via permissions */
-  private StackImpl stack1;
-
-  private StackImpl stack2;
-  private StackImpl stack3;
 
   /** Organization depends on user via permissions */
   private Organization organization;
@@ -314,22 +293,12 @@ public class JpaEntitiesCascadeRemovalTest {
     sshDao = injector.getInstance(SshDao.class);
     workspaceDao = injector.getInstance(WorkspaceDao.class);
     factoryDao = injector.getInstance(FactoryDao.class);
-    stackDao = injector.getInstance(StackDao.class);
     workerDao = injector.getInstance(WorkerDao.class);
     signatureKeyDao = injector.getInstance(SignatureKeyDao.class);
     freeResourcesLimitDao = injector.getInstance(FreeResourcesLimitDao.class);
     organizationManager = injector.getInstance(OrganizationManager.class);
     memberDao = injector.getInstance(MemberDao.class);
     organizationResourcesDistributor = injector.getInstance(OrganizationResourcesDistributor.class);
-
-    TypeLiteral<Set<PermissionsDao<? extends AbstractPermissions>>> lit =
-        new TypeLiteral<Set<PermissionsDao<? extends AbstractPermissions>>>() {};
-    Key<Set<PermissionsDao<? extends AbstractPermissions>>> key = Key.get(lit);
-    for (PermissionsDao<? extends AbstractPermissions> dao : injector.getInstance(key)) {
-      if (dao.getDomain().getId().equals(StackDomain.DOMAIN_ID)) {
-        stackPermissionsDao = (JpaStackPermissionsDao) dao;
-      }
-    }
 
     h2JpaCleaner = injector.getInstance(H2JpaCleaner.class);
   }
@@ -358,14 +327,8 @@ public class JpaEntitiesCascadeRemovalTest {
     // Check workers and parent entity is removed
     assertTrue(workspaceDao.getByNamespace(user2.getId(), 30, 0).isEmpty());
     assertEquals(workerDao.getWorkers(workspace3.getId(), 1, 0).getTotalItemsCount(), 0);
-    // Check stack and recipes are removed
-    assertNull(notFoundToNull(() -> stackDao.getById(stack1.getId())));
-    assertNull(notFoundToNull(() -> stackDao.getById(stack2.getId())));
     // Permissions are removed
-    assertTrue(stackPermissionsDao.getByUser(user2.getId()).isEmpty());
     // Non-removed user permissions and stack are present
-    assertNotNull(notFoundToNull(() -> stackDao.getById(stack3.getId())));
-    assertFalse(stackPermissionsDao.getByUser(user3.getId()).isEmpty());
     // Check existence of organizations
     assertNull(notFoundToNull(() -> organizationManager.getById(organization.getId())));
     assertEquals(memberDao.getMembers(organization.getId(), 1, 0).getTotalItemsCount(), 0);
@@ -391,7 +354,6 @@ public class JpaEntitiesCascadeRemovalTest {
         notFoundToNull(() -> organizationResourcesDistributor.get(childOrganization.getId())));
 
     // cleanup
-    stackDao.remove(stack3.getId());
     memberDao.remove(organization2.getId(), user3.getId());
     organizationManager.remove(organization2.getId());
     userDao.remove(user3.getId());
@@ -413,9 +375,6 @@ public class JpaEntitiesCascadeRemovalTest {
 
     // Check all the data rolled back
     assertNotNull(userDao.getById(user2.getId()));
-    assertFalse(stackPermissionsDao.getByUser(user2.getId()).isEmpty());
-    assertNotNull(notFoundToNull(() -> stackDao.getById(stack1.getId())));
-    assertNotNull(notFoundToNull(() -> stackDao.getById(stack2.getId())));
     assertNotNull(notFoundToNull(() -> freeResourcesLimitDao.get(account.getId())));
     assertNotNull(notFoundToNull(() -> organizationManager.getById(organization.getId())));
     assertNotNull(notFoundToNull(() -> organizationManager.getById(childOrganization.getId())));
@@ -429,7 +388,6 @@ public class JpaEntitiesCascadeRemovalTest {
   @DataProvider(name = "beforeRemoveRollbackActions")
   public Object[][] beforeRemoveActions() {
     return new Class[][] {
-      {RemoveStackOnLastUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class},
       {RemoveOrganizationOnLastUserRemovedEventSubscriber.class, BeforeUserRemovedEvent.class}
     };
   }
@@ -456,28 +414,10 @@ public class JpaEntitiesCascadeRemovalTest {
     factoryDao.create(factory1 = createFactory("factory1", user.getId()));
     factoryDao.create(factory2 = createFactory("factory2", user.getId()));
 
-    stackDao.create(stack1 = createStack("stack1", "st1"));
-    stackDao.create(stack2 = createStack("stack2", "st2"));
-    stackDao.create(stack3 = createStack("stack3", "st3"));
-
     workerDao.store(createWorker(user2.getId(), workspace3.getId()));
 
     signatureKeyDao.create(createSignatureKeyPair(workspace1.getId()));
     signatureKeyDao.create(createSignatureKeyPair(workspace2.getId()));
-
-    stackPermissionsDao.store(
-        new StackPermissionsImpl(
-            user2.getId(), stack1.getId(), asList(SET_PERMISSIONS, "read", "write")));
-    stackPermissionsDao.store(
-        new StackPermissionsImpl(
-            user2.getId(), stack2.getId(), asList(SET_PERMISSIONS, "read", "execute")));
-    // To test removal only permissions if more users with setPermissions are present
-    stackPermissionsDao.store(
-        new StackPermissionsImpl(
-            user2.getId(), stack3.getId(), asList(SET_PERMISSIONS, "read", "write")));
-    stackPermissionsDao.store(
-        new StackPermissionsImpl(
-            user3.getId(), stack3.getId(), asList(SET_PERMISSIONS, "read", "write", "execute")));
 
     // creator will have all permissions for newly created organization
     prepareCreator(user.getId());
@@ -523,15 +463,6 @@ public class JpaEntitiesCascadeRemovalTest {
     organizationManager.remove(childOrganization.getId());
     organizationManager.remove(organization.getId());
     organizationManager.remove(organization2.getId());
-
-    stackPermissionsDao.remove(user2.getId(), stack1.getId());
-    stackPermissionsDao.remove(user2.getId(), stack2.getId());
-    stackPermissionsDao.remove(user2.getId(), stack3.getId());
-    stackPermissionsDao.remove(user3.getId(), stack3.getId());
-
-    stackDao.remove(stack1.getId());
-    stackDao.remove(stack2.getId());
-    stackDao.remove(stack3.getId());
 
     workerDao.removeWorker(workspace3.getId(), user2.getId());
 
