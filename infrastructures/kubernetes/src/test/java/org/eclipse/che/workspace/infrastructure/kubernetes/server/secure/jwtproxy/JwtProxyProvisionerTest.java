@@ -73,7 +73,6 @@ public class JwtProxyProvisionerTest {
   @Mock private PublicKey publicKey;
   @Mock private JwtProxyConfigBuilderFactory configBuilderFactory;
   @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
-  @Mock private PathBasePrefixProvider pathBasePrefixProvider;
 
   private JwtProxyProvisioner jwtProxyProvisioner;
   private KubernetesEnvironment k8sEnv;
@@ -93,7 +92,6 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
-            pathBasePrefixProvider,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -197,7 +195,6 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
-            pathBasePrefixProvider,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -237,7 +234,6 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
-            pathBasePrefixProvider,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);

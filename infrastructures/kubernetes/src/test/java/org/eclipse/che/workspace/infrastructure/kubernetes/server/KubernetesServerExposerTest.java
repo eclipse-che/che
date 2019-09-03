@@ -349,7 +349,6 @@ public class KubernetesServerExposerTest {
             kubernetesEnvironment,
             machineName,
             service.getMetadata().getName(),
-            service.getMetadata().getName(),
             servicePort,
             expectedServers);
   }

@@ -45,7 +45,6 @@ public class OpenShiftExternalServerExposerTest {
         osEnv,
         "machine123",
         "service123",
-        "service123",
         new ServicePort("servicePort", null, null, "TCP", null),
         servers);
 

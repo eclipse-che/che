@@ -107,8 +107,6 @@ public class JwtProxyProvisioner {
   private final Map<String, String> attributes;
 
   private final String serviceName;
-  private final String pathBase;
-  private final String pathBasePrefix;
   private int availablePort;
 
   private final ExternalServiceExposureStrategy externalServiceExposureStrategy;
@@ -118,7 +116,6 @@ public class JwtProxyProvisioner {
       SignatureKeyManager signatureKeyManager,
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
       ExternalServiceExposureStrategy externalServiceExposureStrategy,
-      PathBasePrefixProvider pathBasePrefixProvider,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
       @Assisted RuntimeIdentity identity) {
@@ -132,9 +129,6 @@ public class JwtProxyProvisioner {
 
     this.identity = identity;
     this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
-    this.pathBasePrefix = pathBasePrefixProvider.getPathPrefix(identity);
-    this.pathBase =
-        generate(pathBasePrefix + "/" + SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
 
     this.availablePort = FIRST_AVAILABLE_PORT;
     long memoryLimitLong = Size.parseSizeToMegabytes(memoryLimitBytes) * MEGABYTES_TO_BYTES_DIVIDER;
@@ -209,8 +203,8 @@ public class JwtProxyProvisioner {
         "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
         excludes,
         cookiesAuthEnabled,
-        pathBasePrefix,
-        externalServiceExposureStrategy.getExternalPath(pathBase, exposedPort));
+        serviceName,
+        externalServiceExposureStrategy.getExternalPath(serviceName, exposedPort));
     k8sEnv
         .getConfigMaps()
         .get(getConfigMapName())
@@ -223,11 +217,6 @@ public class JwtProxyProvisioner {
   /** Returns service name that exposed JWTProxy Pod. */
   public String getServiceName() {
     return serviceName;
-  }
-
-  /** Returns the path base to be used for the ingress backed by the JWTProxy pod. */
-  public String getPathBase() {
-    return pathBase;
   }
 
   /** Returns config map name that will be mounted into JWTProxy Pod. */

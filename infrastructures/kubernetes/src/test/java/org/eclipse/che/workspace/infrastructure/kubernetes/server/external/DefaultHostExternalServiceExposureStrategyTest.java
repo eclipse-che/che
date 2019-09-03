@@ -81,12 +81,7 @@ public class DefaultHostExternalServiceExposureStrategyTest {
 
     // when
     externalServerExposer.expose(
-        kubernetesEnvironment,
-        MACHINE_NAME,
-        SERVICE_NAME,
-        SERVICE_NAME,
-        servicePort,
-        serversToExpose);
+        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
 
     // then
     assertThatExternalServerIsExposed(
@@ -119,12 +114,7 @@ public class DefaultHostExternalServiceExposureStrategyTest {
 
     // when
     externalServerExposer.expose(
-        kubernetesEnvironment,
-        MACHINE_NAME,
-        SERVICE_NAME,
-        SERVICE_NAME,
-        servicePort,
-        serversToExpose);
+        kubernetesEnvironment, MACHINE_NAME, SERVICE_NAME, servicePort, serversToExpose);
 
     // then
     assertEquals(kubernetesEnvironment.getIngresses().size(), 1);

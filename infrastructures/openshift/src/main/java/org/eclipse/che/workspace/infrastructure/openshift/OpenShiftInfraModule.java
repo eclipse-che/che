@@ -64,7 +64,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.Exter
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.DefaultSecureServersFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactory;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposerFactoryProvider;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.PathBasePrefixProvider;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.KubernetesPluginsToolingApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.PluginBrokerManager;
 import org.eclipse.che.workspace.infrastructure.kubernetes.wsplugins.SidecarToolingProvisioner;
@@ -76,7 +75,6 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
 import org.eclipse.che.workspace.infrastructure.openshift.project.OpenShiftProjectFactory;
 import org.eclipse.che.workspace.infrastructure.openshift.project.RemoveProjectOnWorkspaceRemove;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftExternalServerExposer;
-import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftPathBasePrefixProvider;
 import org.eclipse.che.workspace.infrastructure.openshift.server.OpenShiftServerExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.openshift.wsplugins.brokerphases.OpenshiftBrokerEnvironmentFactory;
 
@@ -192,7 +190,6 @@ public class OpenShiftInfraModule extends AbstractModule {
     KubernetesDevfileBindings.addAllowedEnvironmentTypeUpgradeBindings(
         binder(), OpenShiftEnvironment.TYPE, KubernetesEnvironment.TYPE);
 
-    bind(PathBasePrefixProvider.class).to(OpenShiftPathBasePrefixProvider.class);
     bind(ExternalServiceExposureStrategy.class).to(OpenShiftServerExposureStrategy.class);
   }
 }
