@@ -343,13 +343,6 @@ export class Editor {
         return `(//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line'])[${lineNumber}]`;
     }
 
-    // private async getLineNumberBlockLocator(tabTitle: string, lineNumber: number): Promise<By> {
-    //     const lineYPixelCoordinates: number = await this.getLineYCoordinates(lineNumber);
-
-    //     return By.xpath(`//div[contains(@id, '${tabTitle}')]//div[@class='margin']` +
-    //         `//div[contains(@style, '${lineYPixelCoordinates}px')]`);
-    // }
-
     private getSuggestionLineXpathLocator(suggestionText: string): By {
         return By.xpath(`//div[@widgetid='editor.widget.suggestWidget']//div[@aria-label='${suggestionText}, suggestion, has details']`);
     }
