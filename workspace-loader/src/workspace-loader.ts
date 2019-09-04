@@ -98,7 +98,7 @@ export class WorkspaceLoader {
                     return;
                 }
                 if (requestWithAuth.status !== 200) {
-                    reject(new Error('Failed to get the workspace: "' + this.getRequestErrorMessage(requestWithAuth) + '"'));
+                    reject(new Error(`Failed to get the workspace: "${this.getRequestErrorMessage(requestWithAuth)}"`));
                     return;
                 }
                 resolve(JSON.parse(requestWithAuth.responseText));
@@ -120,7 +120,7 @@ export class WorkspaceLoader {
                     return;
                 }
                 if (requestWithAuth.status !== 200) {
-                    reject(new Error('Failed to start the workspace: "' + this.getRequestErrorMessage(requestWithAuth) + '"'));
+                    reject(new Error(`Failed to start the workspace: "${this.getRequestErrorMessage(requestWithAuth)}"`));
                     return;
                 }
                 resolve(JSON.parse(requestWithAuth.responseText));
