@@ -12,7 +12,7 @@ import { injectable, inject } from 'inversify';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
-import { By, Key, error, WebElement } from 'selenium-webdriver';
+import { By, Key, error } from 'selenium-webdriver';
 import { Ide } from './Ide';
 
 @injectable()
@@ -255,27 +255,23 @@ export class Editor {
         await this.driverHelper.waitDisappearanceWithTimeout(debugBreakpointHintLocator, timeout);
     }
 
-    async activateBreakpoint(tabTitle: string,
-        lineNumber: number,
-        timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
+    async activateBreakpoint(tabTitle: string, lineNumber: number) {
 
         const attempts: number = TestConstants.TS_SELENIUM_DEFAULT_ATTEMPTS;
         const polling: number = TestConstants.TS_SELENIUM_DEFAULT_POLLING;
 
         for (let i = 0; i < attempts; i++) {
             try {
-                const elementLocator: By = await this.getLineNumberBlockLocator(tabTitle, lineNumber);
-                const element: WebElement = await this.driverHelper.waitVisibility(elementLocator, timeout);
-
-                await this.driverHelper.getAction().mouseMove(element, { x: 5, y: 5 }).perform();
-                await this.waitBreakpointHint(tabTitle, lineNumber);
-                await this.driverHelper.getAction().click().perform();
+                await this.selectTab(tabTitle);
+                await this.moveCursorToLineAndChar(tabTitle, lineNumber, 1);
+                await this.performKeyCombination(tabTitle, Key.F9);
                 await this.waitBreakpoint(tabTitle, lineNumber);
                 return;
             } catch (err) {
                 if (i === attempts - 1) {
                     throw new error.TimeoutError(`Exceeded maximum breakpoint activation attempts`);
                 }
+
                 // ignore errors and wait
                 await this.driverHelper.wait(polling);
             }
@@ -347,12 +343,12 @@ export class Editor {
         return `(//div[contains(@class,'lines-content')]//div[@class='view-lines']/div[@class='view-line'])[${lineNumber}]`;
     }
 
-    private async getLineNumberBlockLocator(tabTitle: string, lineNumber: number): Promise<By> {
-        const lineYPixelCoordinates: number = await this.getLineYCoordinates(lineNumber);
+    // private async getLineNumberBlockLocator(tabTitle: string, lineNumber: number): Promise<By> {
+    //     const lineYPixelCoordinates: number = await this.getLineYCoordinates(lineNumber);
 
-        return By.xpath(`//div[contains(@id, '${tabTitle}')]//div[@class='margin']` +
-            `//div[contains(@style, '${lineYPixelCoordinates}px')]`);
-    }
+    //     return By.xpath(`//div[contains(@id, '${tabTitle}')]//div[@class='margin']` +
+    //         `//div[contains(@style, '${lineYPixelCoordinates}px')]`);
+    // }
 
     private getSuggestionLineXpathLocator(suggestionText: string): By {
         return By.xpath(`//div[@widgetid='editor.widget.suggestWidget']//div[@aria-label='${suggestionText}, suggestion, has details']`);
