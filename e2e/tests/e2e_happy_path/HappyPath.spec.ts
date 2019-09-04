@@ -10,7 +10,7 @@
 
 import { e2eContainer } from '../../inversify.config';
 import { DriverHelper } from '../../utils/DriverHelper';
-import { CLASSES } from '../../inversify.types';
+import { TYPES, CLASSES } from '../../inversify.types';
 import { Ide, RightToolbarButton } from '../../pageobjects/ide/Ide';
 import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
 import { TopMenu } from '../../pageobjects/ide/TopMenu';
@@ -24,6 +24,7 @@ import { DebugView } from '../../pageobjects/ide/DebugView';
 import { WarningDialog } from '../../pageobjects/ide/WarningDialog';
 import { Terminal } from '../../pageobjects/ide/Terminal';
 import { OpenWorkspaceWidget } from '../../pageobjects/ide/OpenWorkspaceWidget';
+import { ICheLoginPage } from '../../pageobjects/login/ICheLoginPage';
 import * as fs from 'fs';
 
 const driverHelper: DriverHelper = e2eContainer.get(CLASSES.DriverHelper);
@@ -51,6 +52,7 @@ const textForErrorMessageChange: string = 'HHHHHHHHHHHHH';
 const codeNavigationClassName: string = 'SpringApplication.class';
 const pathToYamlFolder: string = projectName;
 const yamlFileName: string = 'devfile.yaml';
+const loginPage: ICheLoginPage = e2eContainer.get<ICheLoginPage>(TYPES.CheLogin);
 
 const SpringAppLocators = {
     springTitleLocator: By.xpath('//div[@class=\'container-fluid\']//h2[text()=\'Welcome\']'),
@@ -63,7 +65,8 @@ const SpringAppLocators = {
 
 suite('Validation of workspace start', async () => {
     test('Open workspace', async () => {
-        await driverHelper.navigateAndWaitToUrl(workspaceUrl);
+        await driverHelper.navigateToUrl(workspaceUrl);
+        await loginPage.login();
     });
 
     test('Wait workspace running state', async () => {
