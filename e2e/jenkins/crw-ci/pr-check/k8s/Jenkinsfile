@@ -101,6 +101,7 @@ pipeline {
                         --k8spodreadytimeout=180000 \\
                         -t=${WORKSPACE}/deploy/ \\
                         --listr-renderer=verbose \\
+                        --platform=minikube \\
                         --cheimage=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
                     """
 
