@@ -82,9 +82,9 @@ public class JwtProxyConfigBuilder {
    *     URL the JWT proxy will be exposed on. It is used to enable using different proxies for
    *     different services, each with a different auth cookie. Super useful for having multiple
    *     workspaces, each authenticated with its machine token.
-   * @param authErrorRedirectUriPrefix the prefix used to generate the redirect to the auth page.
-   *     This should be set to the a URL path where the JWT proxy can pick up the request to perform
-   *     the auth
+   * @param publicBasePath the prefix used to generate the redirect back to the original page from
+   *     the auth page by the JWT proxy. This is to work across path-rewriting proxies like nginx
+   *     ingress controller.
    */
   public void addVerifierProxy(
       Integer listenPort,
@@ -92,15 +92,10 @@ public class JwtProxyConfigBuilder {
       Set<String> excludes,
       Boolean cookiesAuthEnabled,
       String cookiePath,
-      String authErrorRedirectUriPrefix) {
+      String publicBasePath) {
     verifierProxies.add(
         new VerifierProxy(
-            listenPort,
-            upstream,
-            excludes,
-            cookiesAuthEnabled,
-            cookiePath,
-            authErrorRedirectUriPrefix));
+            listenPort, upstream, excludes, cookiesAuthEnabled, cookiePath, publicBasePath));
   }
 
   public String build() throws InternalInfrastructureException {
