@@ -118,9 +118,7 @@ export class OrganizationMemberDialogController {
     this.resourcesService = resourcesService;
 
     this.isProcessing = false;
-  }
 
-  $onInit(): void {
     this.organizationRoles = this.resourcesService.getOrganizationRoles();
 
     this.emails = [];

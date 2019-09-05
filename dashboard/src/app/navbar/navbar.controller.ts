@@ -109,9 +109,13 @@ export class CheNavBarController {
         if (this.chePermissions.getSystemPermissions()) {
           this.updateData();
         } else {
-          this.chePermissions.fetchSystemPermissions().finally(() => {
-            this.updateData();
-          });
+          this.chePermissions.fetchSystemPermissions()
+            .catch((error: any) => {
+              // noop
+            })
+            .finally(() => {
+              this.updateData();
+            });
         }
       }
     });
@@ -136,9 +140,13 @@ export class CheNavBarController {
     organization.fetchOrganizations().then(() => {
       this.organizations = organization.getOrganizations();
       const user = this.cheAPI.getUser().getUser();
-      organization.fetchOrganizationByName(user.name).finally(() => {
-        this.hasPersonalAccount = angular.isDefined(organization.getOrganizationByName(user.name));
-      });
+      organization.fetchOrganizationByName(user.name)
+        .catch((error: any) => {
+          // noop
+        })
+        .finally(() => {
+          this.hasPersonalAccount = angular.isDefined(organization.getOrganizationByName(user.name));
+        });
     });
   }
 

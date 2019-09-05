@@ -224,7 +224,8 @@ export class OrganizationDetailsController {
    * @param {string} tab
    */
   updateSelectedTab(tab: string): void {
-    this.selectedTabIndex = parseInt(this.tab[tab], 10);
+    const tabIndex = parseInt(this.tab[tab], 10);
+    this.selectedTabIndex = isNaN(tabIndex) ? 0 : tabIndex;
   }
 
   /**
@@ -233,7 +234,7 @@ export class OrganizationDetailsController {
    * @param {number} tabIndex
    */
   onSelectTab(tabIndex?: number): void {
-    let param: { tab?: string } = {};
+    const param: { tab?: string } = {};
     if (angular.isDefined(tabIndex)) {
       param.tab = Tab[tabIndex];
     }

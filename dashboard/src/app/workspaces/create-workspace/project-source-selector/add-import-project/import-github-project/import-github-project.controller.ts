@@ -104,7 +104,7 @@ export class ImportGithubProjectController {
   /**
    * The list of GitHub repositories.
    */
-  private githubRepositoriesList: Array<IGithubRepository>;
+  private githubRepositoriesList: Array<IGithubRepository> = [];
   /**
    * The list of GitHub organization.
    */

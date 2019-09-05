@@ -178,9 +178,6 @@ export class ListOrganizationsController {
    * Process organization - retrieving additional data.
    */
   processOrganizations(): void {
-    if (angular.isUndefined(this.organizations)) {
-      return;
-    }
     if (this.parentName) {
       const parentOrganization = this.cheOrganization.getOrganizationByName(this.parentName);
       this.parentId = parentOrganization ? parentOrganization.id : null;

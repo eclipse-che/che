@@ -45,8 +45,7 @@ public class AddMember {
     String MEMBERS_EMAIL_INPUT_XPATH = "//input[@name = 'email']";
     String MEMBER_RADIO_BUTTON_XPATH =
         "//md-radio-button//span[text()='Member' or text()='Team Developer']/ancestor::md-radio-button";
-    String ADMIN_RADIO_BUTTON_XPATH =
-        "//md-radio-button//span[text()='Admin' or text()='Team Admin']/ancestor::md-radio-button";
+    String ADMIN_RADIO_BUTTON_XPATH = "//md-radio-button[@value='ADMIN' or @value='TEAM_ADMIN']";
     String ADD_MEMBER_BUTTON_XPATH = "//che-button-primary[@che-button-title = 'Add']//button";
     String CANCEL_BUTTON_XPATH = "//che-button-cancel-flat//button";
     String SAVE_BUTTON_XPATH = "//che-button-primary[@che-button-title =  'Save']/button";
