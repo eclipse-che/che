@@ -20,6 +20,8 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 /**
  * This adapter is required for fields of {@link java.io.Serializable} type to be treated as {@link
@@ -54,17 +56,9 @@ public class SerializableInterfaceAdapterFactory implements TypeAdapterFactory {
       if (token.equals(JsonToken.NUMBER)) {
         String str = in.nextString();
         try {
-          return Integer.parseInt(str);
-        } catch (NumberFormatException e) {
-          try {
-            return Long.parseLong(str);
-          } catch (NumberFormatException e1) {
-            try {
-              return Double.parseDouble(str);
-            } catch (NumberFormatException e3) {
-              throw e3;
-            }
-          }
+          return NumberFormat.getInstance().parse(str);
+        } catch (ParseException e) {
+          throw new RuntimeException("Failed to parse a number value from string: ", e);
         }
       }
       return objectAdapter.read(in);
