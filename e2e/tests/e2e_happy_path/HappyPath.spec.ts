@@ -210,8 +210,6 @@ suite('Display source code changes in the running application', async () => {
 suite('Validation of debug functionality', async () => {
     test('Open file and activate breakpoint', async () => {
         await projectTree.expandPathAndOpenFileInAssociatedWorkspace(pathToJavaFolder, javaFileName);
-        await editor.selectTab(javaFileName);
-        await editor.moveCursorToLineAndChar(javaFileName, 34, 1);
         await editor.activateBreakpoint(javaFileName, 32);
     });
 
