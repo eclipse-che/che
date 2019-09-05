@@ -1,0 +1,29 @@
+/*
+ * Copyright (c) 2012-2018 Red Hat, Inc.
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *   Red Hat, Inc. - initial API and implementation
+ */
+package org.eclipse.che.workspace.infrastructure.kubernetes.server.external;
+
+import io.fabric8.kubernetes.api.model.ServicePort;
+import org.eclipse.che.commons.annotation.Nullable;
+
+/**
+ * Implementations of this strategy are used by the {@link ExternalServerExposer} to compose an
+ * Ingress rule that exposes the services.
+ */
+public interface IngressServiceExposureStrategy {
+
+  /** Returns a host that should be used to expose the service */
+  @Nullable
+  String getIngressHost(String serviceName, ServicePort servicePort);
+
+  /** Returns the path on which the service should be exposed */
+  String getIngressPath(String serviceName, ServicePort servicePort);
+}

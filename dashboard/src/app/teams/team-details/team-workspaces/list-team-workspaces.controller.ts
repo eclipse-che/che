@@ -150,7 +150,7 @@ export class ListTeamWorkspacesController {
       if (error.status === 304) {
         this.workspaces = this.cheWorkspace.getWorkspacesByNamespace(this.team.qualifiedName);
       }
-      // todo
+      // TODO
     }).finally(() => {
       this.cheListHelper.setList(this.workspaces, 'id');
     });

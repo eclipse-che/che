@@ -33,8 +33,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.spi.StackDao;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
 import org.eclipse.che.commons.test.db.H2JpaCleaner;
@@ -70,7 +68,6 @@ public class WorkspaceTckModule extends TckModule {
                 MachineConfigImpl.class,
                 SourceStorageImpl.class,
                 ServerConfigImpl.class,
-                StackImpl.class,
                 CommandImpl.class,
                 RecipeImpl.class,
                 VolumeImpl.class,
@@ -97,10 +94,8 @@ public class WorkspaceTckModule extends TckModule {
     bind(new TypeLiteral<TckRepository<AccountImpl>>() {})
         .toInstance(new JpaTckRepository<>(AccountImpl.class));
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {}).toInstance(new WorkspaceRepository());
-    bind(new TypeLiteral<TckRepository<StackImpl>>() {}).toInstance(new StackRepository());
 
     bind(WorkspaceDao.class).to(JpaWorkspaceDao.class);
-    bind(StackDao.class).to(JpaStackDao.class);
   }
 
   private static class WorkspaceRepository extends JpaTckRepository<WorkspaceImpl> {
@@ -115,20 +110,6 @@ public class WorkspaceTckModule extends TckModule {
         if (entity.getConfig() != null) {
           entity.getConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
         }
-      }
-      super.createAll(entities);
-    }
-  }
-
-  private static class StackRepository extends JpaTckRepository<StackImpl> {
-    public StackRepository() {
-      super(StackImpl.class);
-    }
-
-    @Override
-    public void createAll(Collection<? extends StackImpl> entities) throws TckRepositoryException {
-      for (StackImpl stack : entities) {
-        stack.getWorkspaceConfig().getProjects().forEach(ProjectConfigImpl::prePersistAttributes);
       }
       super.createAll(entities);
     }

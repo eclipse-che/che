@@ -163,11 +163,7 @@ public class WorkspaceService extends Service {
               value =
                   "Workspace attribute defined in 'attrName:attrValue' format. "
                       + "The first ':' is considered as attribute name and value separator",
-              examples =
-                  @Example({
-                    @ExampleProperty("stackId:stack123"),
-                    @ExampleProperty("attrName:value-with:colon")
-                  }))
+              examples = @Example({@ExampleProperty("attrName:value-with:colon")}))
           @QueryParam("attribute")
           List<String> attrsList,
       @ApiParam(
@@ -231,11 +227,7 @@ public class WorkspaceService extends Service {
               value =
                   "Workspace attribute defined in 'attrName:attrValue' format. "
                       + "The first ':' is considered as attribute name and value separator",
-              examples =
-                  @Example({
-                    @ExampleProperty("stackId:stack123"),
-                    @ExampleProperty("attrName:value-with:colon")
-                  }))
+              examples = @Example({@ExampleProperty("attrName:value-with:colon")}))
           @QueryParam("attribute")
           List<String> attrsList,
       @ApiParam(

@@ -41,7 +41,7 @@ pipeline {
                             sh """
                                curl -sL  https://www.eclipse.org/che/chectl/ > install_chectl.sh
                                chmod +x install_chectl.sh
-                               sudo PATH=$PATH ./install_chectl.sh -channel=stable
+                               sudo PATH=$PATH ./install_chectl.sh --channel=next
                                sudo mv /usr/local/bin/chectl ${WORKSPACE}/chectl
                                sudo chmod +x ${WORKSPACE}/chectl
                             """
@@ -101,6 +101,7 @@ pipeline {
                         --k8spodreadytimeout=180000 \\
                         -t=${WORKSPACE}/deploy/ \\
                         --listr-renderer=verbose \\
+                        --platform=minikube \\
                         --cheimage=${CHE_IMAGE_REPO}:${CHE_IMAGE_TAG}
                     """
 
@@ -181,7 +182,25 @@ pipeline {
     }
 
     post {
-        always {
+        failure {
+            script {
+                echo "Create screencast from $WORKSPACE/e2e/report/executionScreencast files."
+                sh """
+                    command -v ffmpeg >/dev/null 2>&1 && if ls $WORKSPACE/e2e/report/executionScreencast/*.png 1> /dev/null 2>&1; then
+                      cd $WORKSPACE/e2e/report/executionScreencast
+
+                      # remove first screenshot which has lower resolution 800x600 and breaks screencast video
+                      sudo rm -f 00100001* || true
+                      
+                      sudo ffmpeg -framerate 1 -pattern_type glob -i '*.png' -c:v libx264 -r 30 -pix_fmt yuv420p $WORKSPACE/e2e/report/screencast.mp4
+                      cd $WORKSPACE/e2e/report/
+                      sudo rm -rf $WORKSPACE/e2e/report/executionScreencast
+                    fi
+                """
+            }
+        }
+
+        cleanup {
             archiveArtifacts allowEmptyArchive: true, artifacts: "e2e/report/**"
 
             script {
@@ -196,7 +215,11 @@ pipeline {
                       docker volume rm \$(docker volume ls -q -f dangling=true) || true
                       
                       docker rm -f \$(sudo docker ps --all | awk 'NR>0 {print \$1;}') || true
-                    """
+                      
+                      if [[ \$(docker images | grep '${CHE_IMAGE_REPO}') != "" ]]; then
+                        docker rmi -f \$(docker images | grep '${CHE_IMAGE_REPO}') || true
+                      fi
+                 """
 
                 sh "sudo rm -rf ${WORKSPACE}/e2e"
             }

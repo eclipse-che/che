@@ -4,9 +4,12 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "test": "npm run lint && npm run tsc && mocha --opts mocha.opts",
-    "test-happy-path": "npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
-    "test-che-install": "npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
+    "cleanup-docker": "if [ $(docker ps -a | grep -c selenium-e2e) -gt 0 ]; then docker rm -f $(docker ps --filter \"name=selenium-e2e\" -aq); fi;",
+    "test-docker": "npm run cleanup-docker && docker run -it --shm-size=2g --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL eclipse/che-e2e:nightly",
+    "test-docker-mount-e2e": "npm run cleanup-docker && docker run -it --shm-size=2g --name selenium-e2e -e TS_SELENIUM_BASE_URL=$TS_SELENIUM_BASE_URL -v $(pwd):/tmp/e2e:Z eclipse/che-e2e:nightly",
+    "test": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha.opts",
+    "test-happy-path": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-happy-path.opts",
+    "test-che-install": "./generateIndex.sh && npm run lint && npm run tsc && mocha --opts mocha-che-operatorhub.opts",
     "lint": "tslint --fix -p .",
     "tsc": "tsc -p ."
   },
@@ -18,6 +21,7 @@
     "@types/node": "^11.13.4",
     "@types/rimraf": "^2.0.2",
     "@types/selenium-webdriver": "^3.0.16",
+    "axios": "0.17.1",
     "chai": "^4.2.0",
     "chromedriver": "^2.46.0",
     "mocha": "^6.1.4",
@@ -26,8 +30,7 @@
     "ts-node": "^8.0.3",
     "tslint": "5.10.0",
     "typed-rest-client": "^1.2.0",
-    "typescript": "^3.4.3",
-    "axios": "0.17.1"
+    "typescript": "^3.4.3"
   },
   "dependencies": {
     "inversify": "^5.0.1",
