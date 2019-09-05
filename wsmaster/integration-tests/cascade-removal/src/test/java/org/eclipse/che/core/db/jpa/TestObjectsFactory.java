@@ -47,9 +47,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackComponentImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
-import org.eclipse.che.api.workspace.server.stack.image.StackIcon;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesMachineImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.model.KubernetesRuntimeState;
@@ -221,24 +218,6 @@ public final class TestObjectsFactory {
 
   public static SshPairImpl createSshPair(String owner, String service, String name) {
     return new SshPairImpl(owner, service, name, "public-key", "private-key");
-  }
-
-  public static StackImpl createStack(String id, String name) {
-    return StackImpl.builder()
-        .setId(id)
-        .setName(name)
-        .setCreator("user123")
-        .setDescription(id + "-description")
-        .setScope(id + "-scope")
-        .setWorkspaceConfig(createWorkspaceConfig("test"))
-        .setTags(asList(id + "-tag1", id + "-tag2"))
-        .setComponents(
-            asList(
-                new StackComponentImpl(id + "-component1", id + "-component1-version"),
-                new StackComponentImpl(id + "-component2", id + "-component2-version")))
-        .setStackIcon(
-            new StackIcon(id + "-icon", id + "-media-type", "0x1234567890abcdef".getBytes()))
-        .build();
   }
 
   public static KubernetesRuntimeState createK8sRuntimeState(String workspaceId) {

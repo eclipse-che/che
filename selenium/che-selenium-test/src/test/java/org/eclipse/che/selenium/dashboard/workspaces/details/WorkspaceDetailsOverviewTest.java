@@ -22,7 +22,7 @@ import org.eclipse.che.selenium.core.webdriver.SeleniumWebDriverHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.AddOrImportForm;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.Test;
@@ -115,9 +115,9 @@ public class WorkspaceDetailsOverviewTest {
     newWorkspace.waitPageLoad();
     newWorkspace.typeWorkspaceName(WORKSPACE_NAME);
 
-    selectStackAndCheckWorkspaceName(Stack.APACHE_CAMEL);
+    selectDevfileAndCheckWorkspaceName(Devfile.APACHE_CAMEL);
 
-    selectStackAndCheckWorkspaceName(Stack.JAVA_GRADLE);
+    selectDevfileAndCheckWorkspaceName(Devfile.JAVA_GRADLE);
 
     // create workspace
     addOrImportForm.clickOnAddOrImportProjectButton();
@@ -176,9 +176,9 @@ public class WorkspaceDetailsOverviewTest {
     workspaceOverview.waitExportWorkspaceFormClosed();
   }
 
-  private void selectStackAndCheckWorkspaceName(NewWorkspace.Stack stack) {
-    newWorkspace.selectStack(stack);
-    newWorkspace.waitStackSelected(stack);
+  private void selectDevfileAndCheckWorkspaceName(Devfile devfile) {
+    newWorkspace.selectDevfile(devfile);
+    newWorkspace.waitDevfileSelected(devfile);
     newWorkspace.waitWorkspaceNameFieldValue(WORKSPACE_NAME);
   }
 

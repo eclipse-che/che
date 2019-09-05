@@ -25,7 +25,7 @@ import org.eclipse.che.selenium.core.workspace.TestWorkspace;
 import org.eclipse.che.selenium.core.workspace.TestWorkspaceProvider;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.eclipse.che.selenium.pageobject.theia.TheiaIde;
@@ -77,8 +77,8 @@ public class ImportMavenProjectFromGitTest {
     workspaces.clickOnAddWorkspaceBtn();
     newWorkspace.waitToolbar();
 
-    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
-    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    // we are selecting 'Java' stack from the 'All Devfile' tab for compatibility with OSIO
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.typeWorkspaceName(WORKSPACE);
 
     projectSourcePage.clickOnAddOrImportProjectButton();

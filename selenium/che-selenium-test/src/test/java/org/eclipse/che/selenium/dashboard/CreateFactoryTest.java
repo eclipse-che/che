@@ -41,7 +41,7 @@ import org.eclipse.che.selenium.pageobject.Loader;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.DashboardFactories;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.factories.CreateFactoryPage;
 import org.eclipse.che.selenium.pageobject.dashboard.factories.FactoryDetails;
@@ -377,8 +377,8 @@ public class CreateFactoryTest {
     newWorkspace.waitToolbar();
     loader.waitOnClosed();
 
-    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
-    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    // we are selecting 'Java' stack from the 'All Devfile' tab for compatibility with OSIO
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.typeWorkspaceName(workspaceName);
 
     projectSourcePage.clickOnAddOrImportProjectButton();
@@ -403,8 +403,8 @@ public class CreateFactoryTest {
     newWorkspace.waitToolbar();
     loader.waitOnClosed();
 
-    // we are selecting 'Java' stack from the 'All Stack' tab for compatibility with OSIO
-    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    // we are selecting 'Java' stack from the 'All Devfile' tab for compatibility with OSIO
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     newWorkspace.typeWorkspaceName(workspaceName);
 
     newWorkspace.clickOnCreateButtonAndEditWorkspace();
