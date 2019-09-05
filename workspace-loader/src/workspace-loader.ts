@@ -12,9 +12,10 @@
 'use strict';
 
 import { WebsocketClient } from './json-rpc/websocket-client';
-import { CheJsonRpcMasterApi, WorkspaceStatusChangedEvent } from './json-rpc/che-json-rpc-master-api';
+import { CheJsonRpcMasterApi } from './json-rpc/che-json-rpc-master-api';
 import { Loader } from './loader/loader';
 import { che } from '@eclipse-che/api';
+import { Deferred } from './json-rpc/util';
 
 // tslint:disable:no-any
 
@@ -22,13 +23,17 @@ const WEBSOCKET_CONTEXT = '/api/websocket';
 
 export class WorkspaceLoader {
 
-    workspace: che.workspace.Workspace;
-    startAfterStopping = false;
+    private workspace: che.workspace.Workspace;
+    private runtimeIsAccessible: Deferred<void>;
 
-    constructor(private readonly loader: Loader,
-        private readonly keycloak?: any) {
+    constructor(
+        private readonly loader: Loader,
+        private readonly keycloak?: any
+    ) {
         /** Ask dashboard to show the IDE. */
         window.parent.postMessage('show-ide', '*');
+
+        this.runtimeIsAccessible = new Deferred<void>();
     }
 
     async load(): Promise<void> {
@@ -45,7 +50,6 @@ export class WorkspaceLoader {
             await this.openIDE();
         } catch (err) {
             if (err) {
-                console.error(err);
                 this.loader.error(err);
             } else {
                 this.loader.error('Unknown error has happened, try to reload page');
@@ -56,7 +60,7 @@ export class WorkspaceLoader {
     }
 
     /**
-     * Returns workspace key from current address or empty string when it is undefined.
+     * Returns workspace key from current location or empty string when it is undefined.
      */
     getWorkspaceKey(): string {
         const result: string = window.location.pathname.substr(1);
@@ -83,47 +87,49 @@ export class WorkspaceLoader {
      *
      * @param workspaceId workspace id
      */
-    getWorkspace(workspaceId: string): Promise<che.workspace.Workspace> {
+    async getWorkspace(workspaceId: string): Promise<che.workspace.Workspace> {
         const request = new XMLHttpRequest();
         request.open('GET', '/api/workspace/' + workspaceId);
-        return this.setAuthorizationHeader(request).then((xhr: XMLHttpRequest) =>
-            new Promise<che.workspace.Workspace>((resolve, reject) => {
-                xhr.send();
-                xhr.onreadystatechange = () => {
-                    if (xhr.readyState !== 4) { return; }
-                    if (xhr.status !== 200) {
-                        const errorMessage = 'Failed to get the workspace: "' + this.getRequestErrorMessage(xhr) + '"';
-                        reject(new Error(errorMessage));
-                        return;
-                    }
-                    resolve(JSON.parse(xhr.responseText));
-                };
-            }));
+        const requestWithAuth = await this.setAuthorizationHeader(request);
+        return new Promise<che.workspace.Workspace>((resolve, reject) => {
+            requestWithAuth.send();
+            requestWithAuth.onreadystatechange = () => {
+                if (requestWithAuth.readyState !== 4) {
+                    return;
+                }
+                if (requestWithAuth.status !== 200) {
+                    reject(new Error(`Failed to get the workspace: "${this.getRequestErrorMessage(requestWithAuth)}"`));
+                    return;
+                }
+                resolve(JSON.parse(requestWithAuth.responseText));
+            };
+        });
     }
 
     /**
      * Start current workspace.
      */
-    startWorkspace(): Promise<che.workspace.Workspace> {
+    async startWorkspace(): Promise<che.workspace.Workspace> {
         const request = new XMLHttpRequest();
         request.open('POST', `/api/workspace/${this.workspace.id}/runtime`);
-        return this.setAuthorizationHeader(request).then((xhr: XMLHttpRequest) =>
-            new Promise<che.workspace.Workspace>((resolve, reject) => {
-                xhr.send();
-                xhr.onreadystatechange = () => {
-                    if (xhr.readyState !== 4) { return; }
-                    if (xhr.status !== 200) {
-                        const errorMessage = 'Failed to start the workspace: "' + this.getRequestErrorMessage(xhr) + '"';
-                        reject(new Error(errorMessage));
-                        return;
-                    }
-                    resolve(JSON.parse(xhr.responseText));
-                };
-            }));
+        const requestWithAuth = await this.setAuthorizationHeader(request);
+        return new Promise<che.workspace.Workspace>((resolve, reject) => {
+            requestWithAuth.send();
+            requestWithAuth.onreadystatechange = () => {
+                if (requestWithAuth.readyState !== 4) {
+                    return;
+                }
+                if (requestWithAuth.status !== 200) {
+                    reject(new Error(`Failed to start the workspace: "${this.getRequestErrorMessage(requestWithAuth)}"`));
+                    return;
+                }
+                resolve(JSON.parse(requestWithAuth.responseText));
+            };
+        });
     }
 
-    getRequestErrorMessage(xhr: XMLHttpRequest): string {
-        let errorMessage;
+    private getRequestErrorMessage(xhr: XMLHttpRequest): string {
+        let errorMessage: string;
         try {
             const response = JSON.parse(xhr.responseText);
             errorMessage = response.message;
@@ -143,118 +149,129 @@ export class WorkspaceLoader {
     /**
      * Handles workspace status.
      */
-    handleWorkspace(): Promise<void> {
+    private async handleWorkspace(): Promise<void> {
         if (this.workspace.status === 'RUNNING') {
-            return new Promise((resolve, reject) => {
-                this.checkWorkspaceRuntime().then(resolve, reject);
-            });
-        } else if (this.workspace.status === 'STOPPING') {
-            this.startAfterStopping = true;
+            return await this.checkWorkspaceRuntime();
         }
 
-        const masterApiConnectionPromise = new Promise((resolve, reject) => {
-            if (this.workspace.status === 'STOPPED') {
-                this.startWorkspace().then(resolve, reject);
-            } else {
-                resolve();
+        const masterApi = await this.connectMasterApi();
+        this.subscribeWorkspaceEvents(masterApi);
+        masterApi.addListener('open', async () => {
+            try {
+                await this.checkWorkspaceRuntime();
+                this.runtimeIsAccessible.resolve();
+            } catch (e) { }
+        });
+
+        if (this.workspace.status === 'STOPPED') {
+            try {
+                await this.startWorkspace();
+            } catch (e) {
+                this.runtimeIsAccessible.reject(e);
             }
-        }).then(() => this.connectMasterApi());
+        }
 
-        const runningOnConnectionPromise = masterApiConnectionPromise
-            .then((masterApi: CheJsonRpcMasterApi) =>
-                new Promise((resolve, reject) => {
-                    masterApi.addListener('open', () => {
-                        this.checkWorkspaceRuntime().then(resolve, reject);
-                    });
-                }));
-
-        const runningOnStatusChangePromise = masterApiConnectionPromise
-            .then((masterApi: CheJsonRpcMasterApi) =>
-                this.subscribeWorkspaceEvents(masterApi));
-
-        return Promise.race([runningOnConnectionPromise, runningOnStatusChangePromise]);
+        return this.runtimeIsAccessible.promise;
     }
 
     /**
-     * Shows environment outputs.
+     * Shows environment and installer outputs.
      *
-     * @param message output message
+     * @param message
      */
-    onEnvironmentOutput(message): void {
-        this.loader.log(message);
+    private onLogOutput(message: che.workspace.event.RuntimeLogEvent | che.workspace.event.InstallerLogEvent): void {
+        this.loader.log(message.text);
     }
 
-    connectMasterApi(): Promise<CheJsonRpcMasterApi> {
-        return new Promise((resolve, reject) => {
-            const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT;
-            const master = new CheJsonRpcMasterApi(new WebsocketClient(), entryPoint, this);
-            master.connect()
-                .then(() => resolve(master))
-                .catch((error: any) => reject(error));
-        });
+    /**
+     * Resolves deferred when workspace is running and runtime is accessible.
+     *
+     * @param message
+     */
+    private async onWorkspaceStatus(message: che.workspace.event.WorkspaceStatusEvent): Promise<void> {
+        if (message.error) {
+            this.runtimeIsAccessible.reject(new Error(`Failed to run the workspace: "${message.error}"`));
+            return;
+        }
+
+        if (message.status === 'RUNNING') {
+            try {
+                await this.checkWorkspaceRuntime();
+                this.runtimeIsAccessible.resolve();
+            } catch (e) {
+                this.runtimeIsAccessible.reject(e);
+            }
+            return;
+        }
+
+        if (message.status === 'STOPPED') {
+            if (message.prevStatus === 'STARTING') {
+                this.loader.error('Workspace stopped.');
+                this.runtimeIsAccessible.reject('Workspace stopped.');
+            }
+            if (message.prevStatus === 'STOPPING') {
+                try {
+                    await this.startWorkspace();
+                } catch (e) {
+                    this.runtimeIsAccessible.reject(e);
+                }
+            }
+        }
+    }
+
+    private async connectMasterApi(): Promise<CheJsonRpcMasterApi> {
+        const entryPoint = this.websocketBaseURL() + WEBSOCKET_CONTEXT;
+        const master = new CheJsonRpcMasterApi(new WebsocketClient(), entryPoint, this);
+        await master.connect();
+        return master;
     }
 
     /**
      * Subscribes to the workspace events.
      */
-    subscribeWorkspaceEvents(masterApi: CheJsonRpcMasterApi): Promise<any> {
-        return new Promise((resolve, reject) => {
-            masterApi.subscribeEnvironmentOutput(this.workspace.id,
-                (message: any) => this.onEnvironmentOutput(message.text));
-            masterApi.subscribeInstallerOutput(this.workspace.id,
-                (message: any) => this.onEnvironmentOutput(message.text));
-            masterApi.subscribeWorkspaceStatus(this.workspace.id,
-                (message: WorkspaceStatusChangedEvent) => {
-                    if (message.error) {
-                        reject(new Error(`Failed to run the workspace: "${message.error}"`));
-                    } else if (message.status === 'RUNNING') {
-                        this.checkWorkspaceRuntime().then(resolve, reject);
-                    } else if (message.status === 'STOPPED') {
-                        if (message.prevStatus === 'STARTING') {
-                            this.loader.error('Workspace stopped.');
-                            this.loader.hideLoader();
-                            this.loader.showReload();
-                        }
-                        if (this.startAfterStopping) {
-                            this.startWorkspace().catch((error: any) => reject(error));
-                        }
-                    }
-                });
-        });
+    private subscribeWorkspaceEvents(masterApi: CheJsonRpcMasterApi): void {
+        masterApi.subscribeEnvironmentOutput(
+            this.workspace.id,
+            (message: che.workspace.event.RuntimeLogEvent) => this.onLogOutput(message)
+        );
+        masterApi.subscribeInstallerOutput(
+            this.workspace.id,
+            (message: che.workspace.event.InstallerLogEvent) => this.onLogOutput(message)
+        );
+        masterApi.subscribeWorkspaceStatus(
+            this.workspace.id,
+            (message: che.workspace.event.WorkspaceStatusEvent) => this.onWorkspaceStatus(message)
+        );
     }
 
-    checkWorkspaceRuntime(): Promise<any> {
-        return new Promise((resolve, reject) => {
-            this.getWorkspace(this.workspace.id).then(workspace => {
-                if (workspace.status === 'RUNNING') {
-                    if (workspace.runtime) {
-                        resolve();
-                    } else {
-                        reject(new Error('You do not have permissions to access workspace runtime, in this case IDE cannot be loaded.'));
-                    }
-                }
-            });
-        });
+    private async checkWorkspaceRuntime(): Promise<void> {
+        const workspace = await this.getWorkspace(this.workspace.id);
+
+        if (workspace.status !== 'RUNNING') {
+            throw new Error('Workspace is NOT RUNNING yet.');
+        }
+        if (!workspace.runtime) {
+            throw new Error('You do not have permissions to access workspace runtime, in this case IDE cannot be loaded.');
+        }
     }
 
     /**
      * Opens IDE for the workspace.
      */
-    openIDE(): void {
-        this.getWorkspace(this.workspace.id).then(workspace => {
-            const machines = workspace.runtime.machines || [];
-            for (const machineName of Object.keys(machines)) {
-                const servers = machines[machineName].servers || [];
-                for (const serverId of Object.keys(servers)) {
-                    const attributes = servers[serverId].attributes;
-                    if (attributes['type'] === 'ide') {
-                        this.openURL(servers[serverId].url + this.getQueryString());
-                        return;
-                    }
+    async openIDE(): Promise<void> {
+        const workspace = await this.getWorkspace(this.workspace.id);
+        const machines = workspace.runtime.machines || [];
+        for (const machineName of Object.keys(machines)) {
+            const servers = machines[machineName].servers || [];
+            for (const serverId of Object.keys(servers)) {
+                const attributes = servers[serverId].attributes;
+                if (attributes['type'] === 'ide') {
+                    this.openURL(servers[serverId].url + this.getQueryString());
+                    return;
                 }
             }
-            this.openURL(workspace.links.ide + this.getQueryString());
-        });
+        }
+        this.openURL(workspace.links.ide + this.getQueryString());
     }
 
     /**
@@ -278,7 +295,6 @@ export class WorkspaceLoader {
                     xhr.setRequestHeader('Authorization', 'Bearer ' + this.keycloak.token);
                     resolve(xhr);
                 }).error(() => {
-                    console.log('Failed to refresh token');
                     window.sessionStorage.setItem('oidcIdeRedirectUrl', location.href);
                     this.keycloak.login();
                     reject(new Error('Failed to refresh token'));
