@@ -33,7 +33,7 @@ commands:
     actions:
       - type: exec
         component: dash-dev
-        command: cd /projects/che/dashboard && yarn
+        command: cd /projects/che/dashboard && yarn && yarn build
         workdir: /projects/che/dashboard
   - name: dashboard_test
     actions:

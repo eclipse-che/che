@@ -33,6 +33,7 @@ import org.eclipse.che.api.workspace.server.devfile.FileContentProvider;
 import org.eclipse.che.api.workspace.server.devfile.URLFetcher;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.shared.dto.WorkspaceConfigDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.DevfileDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
@@ -88,7 +89,13 @@ public class URLFactoryBuilder {
   }
 
   /**
-   * Build a factory using the provided devfile
+   * Build a factory using the provided devfile.
+   *
+   * <p>We want factory to never fail due to name collision. Taking `generateName` with precedence.
+   * <br>
+   * If devfile has only `name`, we convert it to `generateName`. <br>
+   * If devfile has `name` and `generateName`, we remove `name` and use just `generateName`. <br>
+   * If devfile has `generateName`, we use that.
    *
    * @param remoteFactoryUrl parsed factory URL object
    * @param fileContentProvider service-specific devfile related file content provider
@@ -108,6 +115,7 @@ public class URLFactoryBuilder {
     try {
       DevfileImpl devfile = devfileManager.parseYaml(devfileYamlContent);
       devfileManager.resolveReference(devfile, fileContentProvider);
+      devfile = ensureToUseGenerateName(devfile);
 
       FactoryDto factoryDto =
           newDto(FactoryDto.class)
@@ -122,6 +130,23 @@ public class URLFactoryBuilder {
               + "`. Cause: "
               + e.getMessage());
     }
+  }
+
+  /**
+   * Creates devfile with only `generateName` and no `name`. We take `generateName` with precedence.
+   * See doc of {@link URLFactoryBuilder#createFactoryFromDevfile(RemoteFactoryUrl,
+   * FileContentProvider)} for explanation why.
+   */
+  private DevfileImpl ensureToUseGenerateName(DevfileImpl devfile) {
+    MetadataImpl devfileMetadata = new MetadataImpl(devfile.getMetadata());
+    if (isNullOrEmpty(devfileMetadata.getGenerateName())) {
+      devfileMetadata.setGenerateName(devfileMetadata.getName());
+    }
+    devfileMetadata.setName(null);
+
+    DevfileImpl devfileWithProperName = new DevfileImpl(devfile);
+    devfileWithProperName.setMetadata(devfileMetadata);
+    return devfileWithProperName;
   }
 
   /**
@@ -143,7 +168,7 @@ public class URLFactoryBuilder {
   /**
    * Help to generate default workspace devfile. Also initialise project in it
    *
-   * @param name the name of the workspace
+   * @param name the name that will be used as `generateName` in the devfile
    * @return a workspace devfile
    */
   public DevfileDto buildDefaultDevfile(String name) {
@@ -151,6 +176,6 @@ public class URLFactoryBuilder {
     // workspace configuration using the environment
     return newDto(DevfileDto.class)
         .withApiVersion(CURRENT_API_VERSION)
-        .withMetadata(newDto(MetadataDto.class).withName(name));
+        .withMetadata(newDto(MetadataDto.class).withGenerateName(name));
   }
 }

@@ -71,6 +71,7 @@ import org.eclipse.che.api.workspace.server.DefaultWorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceRuntimes;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
+import org.eclipse.che.api.workspace.server.devfile.SerializableConverter;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.hc.probe.ProbeScheduler;
@@ -94,7 +95,6 @@ import org.eclipse.che.api.workspace.server.model.impl.devfile.EntrypointImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.EnvImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.SourceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
 import org.eclipse.che.commons.test.db.H2DBTestServer;
@@ -192,7 +192,6 @@ public class CascadeRemovalTest {
                             MachineConfigImpl.class,
                             SourceStorageImpl.class,
                             ServerConfigImpl.class,
-                            StackImpl.class,
                             CommandImpl.class,
                             RecipeImpl.class,
                             SshPairImpl.class,
@@ -217,6 +216,7 @@ public class CascadeRemovalTest {
                             KubernetesServerImpl.ServerId.class)
                         .addEntityClass(
                             "org.eclipse.che.api.workspace.server.model.impl.ProjectConfigImpl$Attribute")
+                        .addClass(SerializableConverter.class)
                         .setExceptionHandler(H2ExceptionHandler.class)
                         .build());
                 bind(EventService.class).in(Singleton.class);

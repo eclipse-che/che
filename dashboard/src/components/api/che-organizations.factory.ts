@@ -489,7 +489,7 @@ export class CheOrganization implements che.api.ICheOrganization {
     this.cheNamespaceRegistry.getNamespaces().length = 0;
 
     this.cheNamespaceRegistry.setCaption('Organization');
-    // todo add back, when API is ready: this.cheNamespaceRegistry.setEmptyMessage('You are not member of any organization and not able to create workspace. Please, contact your administrator.');
+    // TODO add back, when API is ready: this.cheNamespaceRegistry.setEmptyMessage('You are not member of any organization and not able to create workspace. Please, contact your administrator.');
     this.processOrganizationInfoRetriever();
 
     this.organizationByNameMap.forEach((organization: che.IOrganization) => {

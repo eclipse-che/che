@@ -112,7 +112,7 @@ export const TestConstants = {
     /**
      * Delay between screenshots catching in the milliseconds for the execution screencast.
      */
-    TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: Number(process.env.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS) || 2000,
+    TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS: Number(process.env.TS_SELENIUM_DELAY_BETWEEN_SCREENSHOTS) || 1000,
 
     /**
      * Path to folder with tests execution report.
@@ -147,5 +147,15 @@ export const TestConstants = {
     /**
      * Update Channel name on 'Create Operator Subscription' page on OCP, "nightly" or "stable".
      */
-    TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly'
+    TS_OCP_UPDATE_CHANNEL_OPERATOR: process.env.TS_OCP_UPDATE_CHANNEL_OPERATOR || 'nightly',
+
+    /**
+     * Remote driver URL.
+     */
+    TS_SELENIUM_REMOTE_DRIVER_URL: process.env.TS_SELENIUM_REMOTE_DRIVER_URL || '',
+
+    /**
+     * Stop and remove workspace if a test fails.
+     */
+    DELETE_WORKSPACE_ON_FAILED_TEST: process.env.DELETE_WORKSPACE_ON_FAILED_TEST === 'true'
 };

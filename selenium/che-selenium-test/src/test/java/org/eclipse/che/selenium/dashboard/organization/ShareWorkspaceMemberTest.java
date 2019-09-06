@@ -37,7 +37,7 @@ import org.eclipse.che.selenium.pageobject.ProjectExplorer;
 import org.eclipse.che.selenium.pageobject.dashboard.CheMultiuserAdminDashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.CreateWorkspaceHelper;
 import org.eclipse.che.selenium.pageobject.dashboard.NavigationBar;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceDetails.StateWorkspace;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.WorkspaceOverview;
@@ -179,8 +179,8 @@ public class ShareWorkspaceMemberTest {
   }
 
   private void createWorkspace(String workspaceName) {
-    createWorkspaceHelper.createWorkspaceFromStackWithProject(
-        Stack.JAVA_MAVEN, workspaceName, PROJECT_NAME);
+    createWorkspaceHelper.createWorkspaceFromDevfileWithProject(
+        Devfile.JAVA_MAVEN, workspaceName, PROJECT_NAME);
 
     ide.switchToIdeAndWaitWorkspaceIsReadyToUse();
 

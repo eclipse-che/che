@@ -24,10 +24,9 @@ const DEFAULT_COLUMN = 'displayName';
  */
 export class ListStacksController {
 
-  static $inject = ['$scope', '$filter', 'cheWorkspace', '$location', 'devfileRegistry', 'cheListHelperFactory'];
+  static $inject = ['$scope', 'cheWorkspace', '$location', 'devfileRegistry', 'cheListHelperFactory'];
 
   private $location: ng.ILocationService;
-  private $filter: ng.IFilterService;
 
   private cheWorkspace: CheWorkspace;
   private devfileRegistry: DevfileRegistry;
@@ -44,12 +43,10 @@ export class ListStacksController {
    * Default constructor that is using resource
    */
   constructor($scope: ng.IScope,
-               $filter: ng.IFilterService,
                cheWorkspace: CheWorkspace,
                $location: ng.ILocationService,
                devfileRegistry: DevfileRegistry,
                cheListHelperFactory: che.widget.ICheListHelperFactory) {
-    this.$filter = $filter;
     this.$location = $location;
     this.cheWorkspace = cheWorkspace;
     this.devfileRegistry = devfileRegistry;
@@ -62,7 +59,7 @@ export class ListStacksController {
 
     this.orderBy = DEFAULT_COLUMN;
 
-    // todo remove this after cheListHelper improvement
+    // TODO remove this after cheListHelper improvement
     this.searchBy = 'tmpFilterColumn';
 
     this.loadDevfiles();
@@ -73,11 +70,9 @@ export class ListStacksController {
     this.pluginRegistryUrl = this.cheWorkspace.getWorkspaceSettings().cheWorkspaceDevfileRegistryUrl;
     this.devfileRegistry.fetchDevfiles(this.pluginRegistryUrl).then((data: Array<IDevfileMetaData>) => {
       const devfileMetaDatas = data.map((devfileMetaData: IDevfileMetaData) => {
-        const globalMemoryLimit = this.$filter('changeMemoryUnit')(devfileMetaData.globalMemoryLimit, ['MB','GB']);
-        devfileMetaData.globalMemoryLimit = globalMemoryLimit;
 
-        // todo remove this after cheListHelper improvement
-        devfileMetaData[this.searchBy]= `${devfileMetaData.displayName} ${devfileMetaData.description} ${globalMemoryLimit}`;
+        // TODO remove this after cheListHelper improvement
+        devfileMetaData[this.searchBy]= `${devfileMetaData.displayName} ${devfileMetaData.description} ${devfileMetaData.globalMemoryLimit}`;
 
         return devfileMetaData;
       });

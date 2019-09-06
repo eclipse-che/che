@@ -57,11 +57,11 @@ public class TheiaIde {
     String ABOUT_DIALOG_CONTENT_XPATH = ABOUT_DIALOG_XPATH + "//div[@class='dialogContent']";
     String ABOUT_DIALOG_OK_BUTTON_XPATH = ABOUT_DIALOG_XPATH + "//button";
     String NOTIFICATION_MESSAGE_EQUALS_TO_XPATH_TEMPLATE =
-        "//div[@class='theia-NotificationsContainer']//p[text()='%s']";
+        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[text()='%s']";
     String NOTIFICATION_MESSAGE_CONTAINS_XPATH_TEMPLATE =
-        "//div[@class='theia-NotificationsContainer']//p[contains(text(), '%s')]";
+        "//div[@class='theia-notification-list-item']//div[@class='theia-notification-message']//span[contains(text(), '%s')]";
     String NOTIFICATION_CLOSE_BUTTON =
-        "//div[@class='theia-NotificationsContainer']//button[text()='Close']";
+        "//div[@class='theia-notification-buttons']//button[@data-action='Close']";
     String BRANCH_NAME_XPATH = "//div[@id='theia-statusBar']//div[contains(@title,'Git')]";
   }
 

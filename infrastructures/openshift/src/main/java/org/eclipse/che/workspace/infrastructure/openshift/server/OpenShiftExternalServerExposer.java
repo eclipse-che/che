@@ -15,11 +15,12 @@ import io.fabric8.kubernetes.api.model.IntOrString;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.openshift.api.model.Route;
+import java.util.Collections;
 import java.util.Map;
 import org.eclipse.che.api.core.model.workspace.config.ServerConfig;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftEnvironment;
 
 /**
@@ -86,8 +87,11 @@ import org.eclipse.che.workspace.infrastructure.openshift.environment.OpenShiftE
  * @author Alexander Garagatyi
  * @see Annotations
  */
-public class OpenShiftExternalServerExposer
-    implements ExternalServerExposerStrategy<OpenShiftEnvironment> {
+public class OpenShiftExternalServerExposer extends ExternalServerExposer<OpenShiftEnvironment> {
+
+  public OpenShiftExternalServerExposer() {
+    super(null, Collections.emptyMap(), "%s");
+  }
 
   @Override
   public void expose(

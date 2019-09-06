@@ -14,15 +14,13 @@ import { DriverHelper } from '../DriverHelper';
 import { CLASSES } from '../../inversify.types';
 import 'reflect-metadata';
 import * as rm from 'typed-rest-client/RestClient';
-
-export enum WorkspaceStatus {
-    RUNNING = 'RUNNING',
-    STOPPED = 'STOPPED',
-    STARTING = 'STARTING'
-}
+import { error } from 'selenium-webdriver';
+import { WorkspaceStatus } from './WorkspaceStatus';
+import { ITestWorkspaceUtil } from './ITestWorkspaceUtil';
 
 @injectable()
-export class TestWorkspaceUtil {
+export class TestWorkspaceUtil implements ITestWorkspaceUtil {
+
     constructor(@inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
         private readonly rest: rm.RestClient = new rm.RestClient('rest-samples')) { }
 
@@ -48,7 +46,7 @@ export class TestWorkspaceUtil {
             await this.driverHelper.wait(polling);
         }
 
-        throw new Error(`Exceeded the maximum number of checking attempts, workspace status is different to '${expectedWorkspaceStatus}'`);
+        throw new error.TimeoutError(`Exceeded the maximum number of checking attempts, workspace status is different to '${expectedWorkspaceStatus}'`);
     }
 
     public async waitPluginAdding(namespace: string, workspaceName: string, pluginId: string) {
@@ -72,11 +70,22 @@ export class TestWorkspaceUtil {
             }
 
             if (i === attempts - 1) {
-                throw new Error(`Exceeded maximum tries attempts, the '${pluginId}' plugin is not present in the workspace runtime.`);
+                throw new error.TimeoutError(`Exceeded maximum tries attempts, the '${pluginId}' plugin is not present in the workspace runtime.`);
             }
 
             await this.driverHelper.wait(polling);
         }
     }
 
+    public async getIdOfRunningWorkspace(namespace: string): Promise<string> {
+        throw new Error('Method not implemented.');
+    }
+
+    removeWorkspaceById(id: string): void {
+        throw new Error('Method not implemented.');
+    }
+
+    stopWorkspaceById(id: string): void {
+        throw new Error('Method not implemented.');
+    }
 }

@@ -14,6 +14,7 @@ package org.eclipse.che.api.workspace.server.model.impl.devfile;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Transient;
 import org.eclipse.che.api.core.model.workspace.devfile.Metadata;
 
 @Embeddable
@@ -21,6 +22,12 @@ public class MetadataImpl implements Metadata {
 
   @Column(name = "meta_name")
   private String name;
+
+  /**
+   * generateName is used just at workspace create time, when name is generated from it and stored
+   * into {@link MetadataImpl#name}, thus it's not needed to persist
+   */
+  @Transient private String generateName;
 
   public MetadataImpl() {}
 
@@ -30,6 +37,7 @@ public class MetadataImpl implements Metadata {
 
   public MetadataImpl(Metadata metadata) {
     this.name = metadata.getName();
+    this.generateName = metadata.getGenerateName();
   }
 
   @Override
@@ -42,6 +50,15 @@ public class MetadataImpl implements Metadata {
   }
 
   @Override
+  public String getGenerateName() {
+    return generateName;
+  }
+
+  public void setGenerateName(String generateName) {
+    this.generateName = generateName;
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (this == o) {
       return true;
@@ -50,16 +67,24 @@ public class MetadataImpl implements Metadata {
       return false;
     }
     MetadataImpl metadata = (MetadataImpl) o;
-    return name.equals(metadata.name);
+    return Objects.equals(name, metadata.name)
+        && Objects.equals(generateName, metadata.generateName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name);
+    return Objects.hash(name, generateName);
   }
 
   @Override
   public String toString() {
-    return "MetadataImpl{'name='" + name + '\'' + '}';
+    return "MetadataImpl{"
+        + "name='"
+        + name
+        + '\''
+        + ", generateName='"
+        + generateName
+        + '\''
+        + '}';
   }
 }

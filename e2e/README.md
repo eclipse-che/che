@@ -22,7 +22,24 @@
 
 - Use environment variables which described in the **```'TestConstants.ts'```** file
 
+## Docker launch
+
+- open terminal and go to the "e2e" directory
+- export the ```"TS_SELENIUM_BASE_URL"``` variable with "Che" url
+- run command ```"npm run test-docker"```
+
+## Docker launch with changed tests
+
+**For launching tests with local changes perform next steps:**
+
+- open terminal and go to the "e2e" directory
+- export the ```"TS_SELENIUM_BASE_URL"``` variable with "Che" url
+- run command ```"npm run test-docker-mount-e2e"```
+
 ## The "Happy Path" scenario launching
+
+**The easiest way to do that is to perform steps which described in the "Docker launch" paragraph. 
+For running tests without docker, please perform next steps:**
 
 - Deploy Che on Kubernetes infrastructure by using 'Minikube' and 'Chectl' <https://github.com/eclipse/che/blob/master/deploy/kubernetes/README.md>
 - Create workspace by using 'Chectl' and devfile

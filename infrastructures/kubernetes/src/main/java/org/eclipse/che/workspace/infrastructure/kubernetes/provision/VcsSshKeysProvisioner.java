@@ -120,6 +120,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
     if (isNullOrEmpty(sshPair.getName()) || isNullOrEmpty(sshPair.getPrivateKey())) {
       return;
     }
+    String validNameForSecret = getValidNameForSecret(sshPair.getName());
     Secret secret =
         new SecretBuilder()
             .addToData(
@@ -127,7 +128,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
                 Base64.getEncoder().encodeToString(sshPair.getPrivateKey().getBytes()))
             .withType(SECRET_TYPE_SSH)
             .withNewMetadata()
-            .withName(wsId + "-" + getValidNameForSecret(sshPair.getName()))
+            .withName(wsId + "-" + validNameForSecret)
             .endMetadata()
             .build();
 
@@ -137,7 +138,8 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         .getPodsData()
         .values()
         .forEach(
-            p -> mountSshKeySecret(secret.getMetadata().getName(), sshPair.getName(), p.getSpec()));
+            p ->
+                mountSshKeySecret(secret.getMetadata().getName(), validNameForSecret, p.getSpec()));
   }
 
   private void mountSshKeySecret(String secretName, String sshKeyName, PodSpec podSpec) {
@@ -205,13 +207,15 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
   }
 
   /**
-   * Returns the ssh configuration entry which includes host and identity file location
+   * Returns the ssh configuration entry which includes host, identity file location and Host Key
+   * checking policy
    *
    * <p>Example of provided configuration:
    *
    * <pre>
    * host github.com
    * IdentityFile /etc/ssh/github-com/ssh-privatekey
+   * StrictHostKeyChecking = no
    * </pre>
    *
    * or
@@ -219,6 +223,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
    * <pre>
    * host *
    * IdentityFile /etc/ssh/default-123456/ssh-privatekey
+   * StrictHostKeyChecking = no
    * </pre>
    *
    * @param name the of key given during generate for vcs service we will consider it as host of
@@ -228,7 +233,8 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
    *     provide own name. Details see here:
    *     https://github.com/eclipse/che/issues/13494#issuecomment-512761661. Note: behavior can be
    *     improved in 7.x releases after 7.0.0
-   * @return the ssh configuration which include host and identity file location
+   * @return the ssh configuration which include host, identity file location and Host Key checking
+   *     policy
    */
   private String buildConfig(@NotNull String name) {
     String host = name.startsWith("default-") ? "*" : name;
@@ -239,6 +245,7 @@ public class VcsSshKeysProvisioner implements ConfigurationProvisioner<Kubernete
         + getValidNameForSecret(name)
         + "/"
         + SSH_PRIVATE_KEY
+        + "\nStrictHostKeyChecking = no"
         + "\n";
   }
 

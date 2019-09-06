@@ -113,6 +113,10 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
 
     CommandsResolver commandsResolver = new CommandsResolver(kubernetesEnvironment);
     for (ChePlugin chePlugin : chePlugins) {
+      for (CheContainer container : chePlugin.getInitContainers()) {
+        pod.getSpec().getInitContainers().add(toK8sContainer(container));
+      }
+
       Collection<CommandImpl> pluginRelatedCommands = commandsResolver.resolve(chePlugin);
 
       for (CheContainer container : chePlugin.getContainers()) {
@@ -171,6 +175,19 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
         .collect(Collectors.toList());
   }
 
+  private Container toK8sContainer(CheContainer container) throws InfrastructureException {
+    return toK8sContainerResolver(container, emptyList()).resolve();
+  }
+
+  private K8sContainerResolver toK8sContainerResolver(
+      CheContainer container, List<ChePluginEndpoint> endpoints) {
+    return new K8sContainerResolverBuilder()
+        .setContainer(container)
+        .setImagePullPolicy(sidecarImagePullPolicy)
+        .setPluginEndpoints(endpoints)
+        .build();
+  }
+
   /**
    * Adds k8s and Che specific configuration of a sidecar into the environment. For example:
    * <li>k8s container configuration {@link Container}
@@ -190,11 +207,7 @@ public class KubernetesPluginsToolingApplier implements ChePluginsApplier {
       throws InfrastructureException {
 
     K8sContainerResolver k8sContainerResolver =
-        new K8sContainerResolverBuilder()
-            .setContainer(container)
-            .setImagePullPolicy(sidecarImagePullPolicy)
-            .setPluginEndpoints(chePlugin.getEndpoints())
-            .build();
+        toK8sContainerResolver(container, chePlugin.getEndpoints());
     List<ChePluginEndpoint> containerEndpoints = k8sContainerResolver.getEndpoints();
 
     Container k8sContainer = k8sContainerResolver.resolve();

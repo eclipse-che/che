@@ -138,6 +138,12 @@ public class PersistTestModuleBuilder {
     return this;
   }
 
+  /** Adds another non-entity class (like attribute converters etc) to class list. */
+  public PersistTestModuleBuilder addClass(Class<?> entityClass) {
+    entityFqnSet.add(entityClass.getName());
+    return this;
+  }
+
   /** Sets persistence unit custom property. */
   public PersistTestModuleBuilder setProperty(String name, String value) {
     if (name != null && value != null) {

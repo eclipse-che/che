@@ -16,4 +16,7 @@ public interface Metadata {
 
   /** @return the name of the devfile */
   String getName();
+
+  /** 'generateName' is used as a base string for generated name, when 'name' is not defined. */
+  String getGenerateName();
 }

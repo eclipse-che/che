@@ -19,7 +19,7 @@ import com.google.inject.Inject;
 import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.selenium.pageobject.dashboard.Dashboard;
 import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace;
-import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Stack;
+import org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Devfile;
 import org.eclipse.che.selenium.pageobject.dashboard.ProjectSourcePage;
 import org.eclipse.che.selenium.pageobject.dashboard.workspaces.Workspaces;
 import org.testng.annotations.BeforeClass;
@@ -80,7 +80,7 @@ public class CreateWorkspaceTest {
   @Test
   public void checkProjectSourcePage() {
     // add a project from the 'console-java-simple' sample
-    newWorkspace.selectStack(Stack.JAVA_MAVEN);
+    newWorkspace.selectDevfile(Devfile.JAVA_MAVEN);
     projectSourcePage.waitOpened();
     projectSourcePage.waitCreatedProjectButton(projectName);
 

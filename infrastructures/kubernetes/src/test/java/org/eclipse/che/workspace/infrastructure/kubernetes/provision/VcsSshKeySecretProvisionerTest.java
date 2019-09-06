@@ -106,6 +106,11 @@ public class VcsSshKeySecretProvisionerTest {
     String key = secret.getData().get("ssh-privatekey");
     assertNotNull(key);
 
+    // check if key nave valid name '.' replaced to the '-'
+    Secret secret3 = k8sEnv.getSecrets().get("wksp-" + keyName3.replace('.', '-'));
+    assertNotNull(secret3);
+    assertEquals(secret3.getType(), "kubernetes.io/ssh-auth");
+
     Map<String, ConfigMap> configMaps = k8sEnv.getConfigMaps();
     assertNotNull(configMaps);
     assertTrue(configMaps.containsKey("wksp-sshconfigmap"));

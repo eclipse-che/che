@@ -24,6 +24,7 @@ import java.util.Map;
 import org.eclipse.che.api.workspace.server.model.impl.ServerImpl;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.IngressPathTransformInverter;
 
 /**
  * Helps to resolve {@link ServerImpl servers} by machine name according to specified {@link Ingress
@@ -40,8 +41,13 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 public class KubernetesServerResolver {
   private final Multimap<String, Service> services;
   private final Multimap<String, Ingress> ingresses;
+  private IngressPathTransformInverter pathTransformInverter;
 
-  public KubernetesServerResolver(List<Service> services, List<Ingress> ingresses) {
+  public KubernetesServerResolver(
+      IngressPathTransformInverter pathTransformInverter,
+      List<Service> services,
+      List<Ingress> ingresses) {
+    this.pathTransformInverter = pathTransformInverter;
     this.services = ArrayListMultimap.create();
     for (Service service : services) {
       String machineName =
@@ -109,7 +115,10 @@ public class KubernetesServerResolver {
         .forEach(
             (name, config) -> {
               String path =
-                  buildPath(ingressRule.getHttp().getPaths().get(0).getPath(), config.getPath());
+                  buildPath(
+                      pathTransformInverter.undoPathTransformation(
+                          ingressRule.getHttp().getPaths().get(0).getPath()),
+                      config.getPath());
               servers.put(
                   name,
                   new RuntimeServerBuilder()
@@ -135,6 +144,11 @@ public class KubernetesServerResolver {
       } else {
         sb.append(fragment2);
       }
+    }
+
+    // always end server URLs with a slash, so that they can be safely sub-path'd..
+    if (sb.charAt(sb.length() - 1) != '/') {
+      sb.append('/');
     }
 
     return sb.toString();

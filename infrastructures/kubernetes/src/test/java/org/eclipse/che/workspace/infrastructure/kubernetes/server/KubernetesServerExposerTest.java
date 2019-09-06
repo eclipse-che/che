@@ -38,7 +38,7 @@ import org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl;
 import org.eclipse.che.workspace.infrastructure.kubernetes.Annotations;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
-import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposerStrategy;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServerExposer;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.SecureServerExposer;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
@@ -54,7 +54,7 @@ import org.testng.annotations.Test;
 @Listeners(MockitoTestNGListener.class)
 public class KubernetesServerExposerTest {
 
-  @Mock private ExternalServerExposerStrategy<KubernetesEnvironment> externalServerExposerStrategy;
+  @Mock private ExternalServerExposer<KubernetesEnvironment> externalServerExposer;
   @Mock private SecureServerExposer<KubernetesEnvironment> secureServerExposer;
 
   private static final Map<String, String> ATTRIBUTES_MAP = singletonMap("key", "value");
@@ -91,7 +91,7 @@ public class KubernetesServerExposerTest {
     PodData podData = new PodData(pod.getSpec(), pod.getMetadata());
     this.serverExposer =
         new KubernetesServerExposer<>(
-            externalServerExposerStrategy,
+            externalServerExposer,
             secureServerExposer,
             MACHINE_NAME,
             podData,
@@ -344,7 +344,7 @@ public class KubernetesServerExposerTest {
         Annotations.newDeserializer(service.getMetadata().getAnnotations());
     assertEquals(serviceAnnotations.machineName(), machineName);
 
-    verify(externalServerExposerStrategy)
+    verify(externalServerExposer)
         .expose(
             kubernetesEnvironment,
             machineName,

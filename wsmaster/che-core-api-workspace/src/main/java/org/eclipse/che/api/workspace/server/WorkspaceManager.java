@@ -23,6 +23,7 @@ import static org.eclipse.che.api.workspace.shared.Constants.ERROR_MESSAGE_ATTRI
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ABNORMALLY_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.STOPPED_ATTRIBUTE_NAME;
 import static org.eclipse.che.api.workspace.shared.Constants.UPDATED_ATTRIBUTE_NAME;
+import static org.eclipse.che.api.workspace.shared.Constants.WORKSPACE_GENERATE_NAME_CHARS_APPEND;
 
 import com.google.inject.Inject;
 import java.util.Collections;
@@ -48,11 +49,14 @@ import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityVa
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.MetadataImpl;
 import org.eclipse.che.api.workspace.server.spi.WorkspaceDao;
+import org.eclipse.che.api.workspace.shared.Constants;
 import org.eclipse.che.api.workspace.shared.event.WorkspaceCreatedEvent;
 import org.eclipse.che.commons.annotation.Nullable;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.commons.lang.NameGenerator;
 import org.eclipse.che.commons.subject.Subject;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.slf4j.Logger;
@@ -113,8 +117,6 @@ public class WorkspaceManager {
   public WorkspaceImpl createWorkspace(
       WorkspaceConfig config, String namespace, Map<String, String> attributes)
       throws ServerException, NotFoundException, ConflictException, ValidationException {
-    TracingTags.STACK_ID.set(() -> attributes.getOrDefault("stackId", "no stack"));
-
     requireNonNull(config, "Required non-null config");
     requireNonNull(namespace, "Required non-null namespace");
     validator.validateConfig(config);
@@ -153,11 +155,11 @@ public class WorkspaceManager {
       Map<String, String> attributes,
       FileContentProvider contentProvider)
       throws ServerException, NotFoundException, ConflictException, ValidationException {
-    TracingTags.STACK_ID.set(() -> attributes.getOrDefault("stackId", "no stack"));
-
     requireNonNull(devfile, "Required non-null devfile");
     requireNonNull(namespace, "Required non-null namespace");
     validator.validateAttributes(attributes);
+
+    devfile = generateNameIfNeeded(devfile);
 
     try {
       devfileIntegrityValidator.validateContentReferences(devfile, contentProvider);
@@ -341,10 +343,6 @@ public class WorkspaceManager {
     }
 
     Optional<WorkspaceImpl> workspaceOpt = workspaceDao.remove(workspaceId);
-    workspaceOpt.ifPresent(
-        workspace ->
-            TracingTags.STACK_ID.set(
-                workspace.getAttributes().getOrDefault("stackId", "no stack")));
 
     LOG.info("Workspace '{}' removed by user '{}'", workspaceId, sessionUserNameOrUndefined());
   }
@@ -567,6 +565,26 @@ public class WorkspaceManager {
         sessionUserNameOrUndefined());
     eventService.publish(new WorkspaceCreatedEvent(workspace));
     return workspace;
+  }
+
+  /**
+   * If 'generateName' is defined and 'name' is not, we generate name using 'generateName' as a
+   * prefix following {@link Constants#WORKSPACE_GENERATE_NAME_CHARS_APPEND} random characters and
+   * set it to 'name'.
+   */
+  private Devfile generateNameIfNeeded(Devfile origDevfile) {
+    if (origDevfile.getMetadata() != null) {
+      MetadataImpl metadata = new MetadataImpl(origDevfile.getMetadata());
+      if (metadata.getName() == null && metadata.getGenerateName() != null) {
+        metadata.setName(
+            NameGenerator.generate(
+                metadata.getGenerateName(), WORKSPACE_GENERATE_NAME_CHARS_APPEND));
+        DevfileImpl devfileWithGeneratedName = new DevfileImpl(origDevfile);
+        devfileWithGeneratedName.setMetadata(metadata);
+        return devfileWithGeneratedName;
+      }
+    }
+    return origDevfile;
   }
 
   private WorkspaceImpl getByKey(String key) throws NotFoundException, ServerException {
