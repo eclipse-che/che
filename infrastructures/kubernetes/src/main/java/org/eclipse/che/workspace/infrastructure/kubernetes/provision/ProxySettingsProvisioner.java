@@ -30,9 +30,9 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.environment.Kubernete
  * @author Mykhailo Kuznietsov
  */
 public class ProxySettingsProvisioner implements ConfigurationProvisioner {
-  private static final String HTTPS_PROXY = "https_proxy";
-  private static final String HTTP_PROXY = "http_proxy";
-  private static final String NO_PROXY = "no_proxy";
+  static final String HTTPS_PROXY = "https_proxy";
+  static final String HTTP_PROXY = "http_proxy";
+  static final String NO_PROXY = "no_proxy";
 
   private final Map<String, String> proxyEnvVars;
 
@@ -65,6 +65,8 @@ public class ProxySettingsProvisioner implements ConfigurationProvisioner {
           .getPodsData()
           .entrySet()
           .stream()
+          // JWTProxy container doesn't need proxy settings since it never does any outbound
+          // requests, and setting of it may fail accessing internal addresses.
           .filter(entry -> !entry.getKey().equals(JWT_PROXY_POD_NAME))
           .flatMap(entry -> entry.getValue().getSpec().getContainers().stream())
           .forEach(
