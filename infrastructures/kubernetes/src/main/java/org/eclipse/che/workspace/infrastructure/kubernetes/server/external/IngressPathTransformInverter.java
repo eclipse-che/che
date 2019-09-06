@@ -52,6 +52,9 @@ public class IngressPathTransformInverter {
    * @return the regex that essentially reverts the effect of the path transformation
    */
   private static Pattern extractPathFromFmt(String pathTransformFmt) {
+    if (pathTransformFmt == null) {
+      return Pattern.compile("^(.*)$");
+    }
     Matcher m = PATH_FORMAT_DECONSTRUCTION_REGEX.matcher(pathTransformFmt);
     if (m.matches() && m.groupCount() == 2) {
       String prefix = Pattern.quote(m.group(1));

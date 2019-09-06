@@ -156,13 +156,6 @@ export class CheNavBarController {
   }
 
   /**
-   * Toggle the left menu
-   */
-  toggleLeftMenu(): void {
-    this.$mdSidenav('left').toggle();
-  }
-
-  /**
    * Returns number of workspaces.
    *
    * @return {number}

@@ -16,9 +16,9 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.WIDGET_TIMEOUT_SEC;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.BOTTOM_CREATE_BUTTON_XPATH;
+import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.DEVFILE_ROW_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ERROR_MESSAGE;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.ORGANIZATIONS_LIST_ID;
-import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.STACK_ROW_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOOLBAR_TITLE_ID;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_CREATE_BUTTON_XPATH;
 import static org.eclipse.che.selenium.pageobject.dashboard.NewWorkspace.Locators.TOP_DROPDOWN_BUTTON_XPATH;
@@ -73,7 +73,7 @@ public class NewWorkspace {
     String WORKSPACE_NAME_INPUT = "workspace-name-input";
     String ERROR_MESSAGE = "new-workspace-error-message";
     String TOOLBAR_TITLE_ID = "New_Workspace";
-    String STACK_ROW_XPATH = "//div[@data-devfile-id='%s']";
+    String DEVFILE_ROW_XPATH = "//div[@data-devfile-id='%s']";
     String MACHINE_NAME =
         "//span[contains(@class,'ram-settings-machine-item-item-name') and text()='%s']";
     String ORGANIZATIONS_LIST_ID = "namespace-selector";
@@ -85,7 +85,7 @@ public class NewWorkspace {
     String BOTTOM_CREATE_BUTTON_XPATH = "//che-button-save-flat/button[@name='saveButton']";
   }
 
-  public enum Stack {
+  public enum Devfile {
     APACHE_CAMEL("Apache Camel based projects on Che 7"),
     DOT_NET(".NET Core with Theia IDE"),
     GO("Go with Theia IDE"),
@@ -96,15 +96,15 @@ public class NewWorkspace {
     // wsnext-helloworld-openshift
     private final String id;
 
-    Stack(String id) {
+    Devfile(String id) {
       this.id = id;
     }
 
-    public static Stack getById(String id) {
-      Optional<Stack> first =
-          asList(values()).stream().filter(stack -> stack.getId().equals(id)).findFirst();
+    public static Devfile getById(String id) {
+      Optional<Devfile> first =
+          asList(values()).stream().filter(devfile -> devfile.getId().equals(id)).findFirst();
       first.orElseThrow(
-          () -> new RuntimeException(String.format("Stack with id '%s' not found.", id)));
+          () -> new RuntimeException(String.format("Devfile with id '%s' not found.", id)));
       return first.get();
     }
 
@@ -176,14 +176,16 @@ public class NewWorkspace {
     seleniumWebDriverHelper.waitVisibility(By.id(TOOLBAR_TITLE_ID), timeout);
   }
 
-  public boolean isStackVisible(Stack stack) {
-    return seleniumWebDriver.findElements(By.xpath(format(STACK_ROW_XPATH, stack.getId()))).size()
+  public boolean isDevfileVisible(Devfile devfile) {
+    return seleniumWebDriver
+            .findElements(By.xpath(format(DEVFILE_ROW_XPATH, devfile.getId())))
+            .size()
         > 0;
   }
 
-  public void selectStack(Stack stack) {
-    waitStacks(asList(stack));
-    seleniumWebDriverHelper.waitAndClick(By.xpath(format(STACK_ROW_XPATH, stack.getId())));
+  public void selectDevfile(Devfile devfile) {
+    waitDevfiles(asList(devfile));
+    seleniumWebDriverHelper.waitAndClick(By.xpath(format(DEVFILE_ROW_XPATH, devfile.getId())));
   }
 
   public boolean isCreateWorkspaceButtonEnabled() {
@@ -287,69 +289,70 @@ public class NewWorkspace {
     waitPageLoad(DEFAULT_TIMEOUT);
   }
 
-  public List<Stack> getAvailableStacks() {
+  public List<Devfile> getAvailableDevfiles() {
     return seleniumWebDriverHelper
         .waitPresenceOfAllElements(By.xpath("//div[@data-devfile-id]"))
         .stream()
-        .map(webElement -> Stack.getById(webElement.getAttribute("data-devfile-id")))
+        .map(webElement -> Devfile.getById(webElement.getAttribute("data-devfile-id")))
         .collect(toList());
   }
 
-  public void waitStackSelected(Stack stack) {
-    String selectedStackXpath =
+  public void waitDevfileSelected(Devfile devfile) {
+    String selectedDevfileXpath =
         format(
             "//div[@data-devfile-id='%s' and contains(@class, 'devfile-selector-item-selected')]",
-            stack.getId());
-    seleniumWebDriverHelper.waitVisibility(By.xpath(selectedStackXpath));
+            devfile.getId());
+    seleniumWebDriverHelper.waitVisibility(By.xpath(selectedDevfileXpath));
   }
 
-  public List<Stack> getVisibleStacks() {
+  public List<Devfile> getVisibleDevfiles() {
     return seleniumWebDriverHelper
         .waitPresenceOfAllElements(By.xpath("//div[@data-devfile-id]"))
         .stream()
         .filter(seleniumWebDriverHelper::isVisible)
-        .map(webElement -> Stack.getById(webElement.getAttribute("data-devfile-id")))
+        .map(webElement -> Devfile.getById(webElement.getAttribute("data-devfile-id")))
         .collect(Collectors.toList());
   }
 
-  public void waitVisibleStacks(List<Stack> expectedVisibleStacks) {
+  public void waitVisibleDevfiles(List<Devfile> expectedVisibleDevfiles) {
     webDriverWaitFactory
         .get()
         .until(
             (ExpectedCondition<Boolean>)
-                driver -> getVisibleStacks().equals(expectedVisibleStacks));
+                driver -> getVisibleDevfiles().equals(expectedVisibleDevfiles));
   }
 
-  public void waitStacks(List<Stack> expectedStacks) {
-    expectedStacks.forEach(
-        stack ->
+  public void waitDevfiles(List<Devfile> expectedDevfiles) {
+    expectedDevfiles.forEach(
+        devfile ->
             seleniumWebDriverHelper.waitPresence(
-                By.xpath(format("//div[@data-devfile-id='%s']", stack.getId()))));
+                By.xpath(format("//div[@data-devfile-id='%s']", devfile.getId()))));
   }
 
-  public void waitStacksCount(int expectedCount) {
+  public void waitDevfilesCount(int expectedCount) {
     webDriverWaitFactory
         .get()
-        .until((ExpectedCondition<Boolean>) driver -> expectedCount == getAvailableStacksCount());
+        .until((ExpectedCondition<Boolean>) driver -> expectedCount == getAvailableDevfilesCount());
   }
 
-  public int getAvailableStacksCount() {
-    return getAvailableStacks().size();
+  public int getAvailableDevfilesCount() {
+    return getAvailableDevfiles().size();
   }
 
-  public void waitStacksNotPresent(List<Stack> stacksIdForChecking) {
-    stacksIdForChecking.forEach(
-        stack ->
+  public void waitDevfilesNotPresent(List<Devfile> devfilesIdForChecking) {
+    devfilesIdForChecking.forEach(
+        devfile ->
             webDriverWaitFactory
                 .get()
                 .until(
-                    (ExpectedCondition<Boolean>) driver -> !getAvailableStacks().contains(stack)));
+                    (ExpectedCondition<Boolean>)
+                        driver -> !getAvailableDevfiles().contains(devfile)));
   }
 
-  public void waitStacksOrder(List<Stack> expectedOrder) {
+  public void waitDevfilesOrder(List<Devfile> expectedOrder) {
     webDriverWaitFactory
         .get()
-        .until((ExpectedCondition<Boolean>) driver -> expectedOrder.equals(getAvailableStacks()));
+        .until((ExpectedCondition<Boolean>) driver -> expectedOrder.equals(getAvailableDevfiles()));
   }
 
   public void clickNameButton() {

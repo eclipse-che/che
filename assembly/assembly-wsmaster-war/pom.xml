@@ -17,7 +17,7 @@
     <parent>
         <artifactId>che-assembly-parent</artifactId>
         <groupId>org.eclipse.che</groupId>
-        <version>7.1.0-SNAPSHOT</version>
+        <version>7.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>assembly-wsmaster-war</artifactId>
     <packaging>war</packaging>
@@ -126,14 +126,6 @@
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
             <artifactId>che-core-api-metrics</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project-templates</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.che.core</groupId>
-            <artifactId>che-core-api-project-templates-shared</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.che.core</groupId>
@@ -431,7 +423,6 @@
                                 <dep>org.eclipse.che.core:che-core-db-vendor-mysql</dep>
                                 <dep>org.eclipse.che.core:che-core-sql-schema</dep>
                                 <dep>org.eclipse.che.core:che-core-api-ssh-shared</dep>
-                                <dep>org.eclipse.che.core:che-core-api-project-templates-shared</dep>
                                 <dep>org.eclipse.che.multiuser:che-multiuser-sql-schema</dep>
                                 <dep>org.jgroups:jgroups</dep>
                                 <dep>io.jaegertracing:jaeger-core</dep>

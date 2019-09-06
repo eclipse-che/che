@@ -23,25 +23,23 @@ This command builds docker image named ` eclipse/che-e2e:nightly `. This image i
 You can run the tests inside this docker image. You have to set URL of running Che and increase shared memory size (low shared memory makes chrome driver crash).
 
 ```
-docker run --shm-size=256m -e THEIA_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
+docker run --shm-size=256m -e TS_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
 ```
 
 If you want to gather screenshots of fallen tests, you have to mount a volume to the docker file. Create a folder, when you want to have the screenshots saved. Then run
 a command:
 
 ```
-docker run --shm-size=256m -v /full/path/to/your/folder:/root/e2e/report:Z -e THEIA_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
+docker run --shm-size=256m -v /full/path/to/your/folder:/root/e2e/report:Z -e TS_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
 ```
 
-###Debugging
-####Running own code
+### Debugging
+#### Running own code
 If you have done some changes locally and you want to test them, you can mount your code directly to the Docker. If you do so, your mounted code will be executed instead of the code that is already in an image.
 
 ```
-docker run --shm-size=256m -v /full/path/to/your/e2e/folder:/root/local_tests:Z -e THEIA_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
+docker run --shm-size=256m -v /full/path/to/your/e2e:/tmp/e2e:Z -e TS_SELENIUM_BASE_URL=$URL eclipse/che-e2e:nightly
 ```
 
-NOTE: If you want to run your own code and gather screenshots, you have to change the mount from ` /root/e2e/report:Z ` to ` /root/local_tests/report:Z `.
-
-####Watching Chrome
+#### Watching Chrome
 If you want to see what is going on in chrome inside a docker, you can use VNC. When running a docker, you can see API where you can connect. This API is on the first line of output and can look like that: ` You can watch locally using VNC with IP: 172.17.0.2 `. Then you can easily join VNC using this API: ` 172.17.0.2:0 `.

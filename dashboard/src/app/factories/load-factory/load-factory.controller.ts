@@ -240,7 +240,7 @@ export class LoadFactoryController {
         });
         break;
       case 'perAccount' :
-        // todo when account is ready
+        // TODO when account is ready
         workspace = this.lodash.find(this.workspaces, (w: che.IWorkspace) => {
           return this.factory.workspace.name === w.config.name;
         });
@@ -282,7 +282,7 @@ export class LoadFactoryController {
       let attrs = {factoryId: this.factory.id};
       config.name = this.getWorkspaceName(config.name);
 
-      // todo: fix account when ready:
+      // TODO: fix account when ready:
       let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
       creationPromise.then((data: any) => {
         this.$timeout(() => {
@@ -695,7 +695,7 @@ export class LoadFactoryController {
    */
   backToDashboard(): void {
     this.restoreMenuAndFooter();
-    this.$location.path('/');
+    this.$location.path('/').search({});
   }
 
   /**

@@ -14,7 +14,6 @@ package org.eclipse.che.selenium.factory;
 import static org.eclipse.che.selenium.core.CheSeleniumSuiteModule.AUXILIARY;
 import static org.eclipse.che.selenium.core.TestGroup.GITHUB;
 import static org.eclipse.che.selenium.core.TestGroup.OPENSHIFT;
-import static org.eclipse.che.selenium.core.TestGroup.UNDER_REPAIR;
 import static org.eclipse.che.selenium.core.constant.TestTimeoutsConstants.UPDATING_PROJECT_TIMEOUT_SEC;
 import static org.testng.AssertJUnit.assertEquals;
 
@@ -37,7 +36,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@Test(groups = {GITHUB, OPENSHIFT, UNDER_REPAIR})
+@Test(groups = {GITHUB, OPENSHIFT})
 public class DirectUrlFactoryWithSpecificBranchTest {
   private static final Logger LOG =
       LoggerFactory.getLogger(DirectUrlFactoryWithSpecificBranchTest.class);
@@ -97,7 +96,6 @@ public class DirectUrlFactoryWithSpecificBranchTest {
 
     theiaProjectTree.waitFilesTab();
     theiaProjectTree.clickOnFilesTab();
-    theiaProjectTree.waitProjectsRootItem();
 
     theiaProjectTree.waitItem(repositoryName);
     theiaProjectTree.expandItem(repositoryName);

@@ -31,7 +31,6 @@
         <class>org.eclipse.che.api.workspace.server.model.impl.SourceStorageImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.ServerConfigImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.VolumeImpl</class>
-        <class>org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl</class>
 
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl</class>
         <class>org.eclipse.che.api.workspace.server.model.impl.devfile.ProjectImpl</class>
@@ -64,7 +63,6 @@
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.SystemPermissionsImpl</class>
         <class>org.eclipse.che.multiuser.api.permission.server.model.impl.AbstractPermissions</class>
         <class>org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl</class>
-        <class>org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl</class>
         <class>org.eclipse.che.api.ssh.server.model.impl.SshPairImpl</class>
 
         <class>org.eclipse.che.multiuser.organization.spi.impl.OrganizationImpl</class>

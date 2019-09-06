@@ -256,11 +256,12 @@ initModule.config(['$routeProvider', ($routeProvider: che.route.IRouteProvider) 
 /**
  * Setup route redirect module
  */
-initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', 'ideIFrameSvc', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
-  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, ideIFrameSvc: IdeIFrameSvc, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService) => {
+initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$timeout', '$mdSidenav', 'cheIdeFetcher', 'routeHistory', 'cheUIElementsInjectorService', 'workspaceDetailsService',
+  ($rootScope: che.IRootScopeService, $location: ng.ILocationService, $routeParams: ng.route.IRouteParamsService, routingRedirect: RoutingRedirect, $timeout: ng.ITimeoutService, $mdSidenav: ng.material.ISidenavService, cheIdeFetcher: CheIdeFetcher, routeHistory: RouteHistory, cheUIElementsInjectorService: CheUIElementsInjectorService) => {
     $rootScope.hideLoader = false;
     $rootScope.waitingLoaded = false;
     $rootScope.showIDE = false;
+    $rootScope.hideNavbar = false;
 
     // here only to create instances of these components
     /* tslint:disable */
@@ -298,6 +299,10 @@ initModule.run(['$rootScope', '$location', '$routeParams', 'routingRedirect', '$
       const originalPath: string = route.originalPath;
       if (originalPath && originalPath.indexOf('/ide/') === -1) {
         $rootScope.showIDE = false;
+        if ($rootScope.hideNavbar) {
+          $rootScope.hideNavbar = false;
+          $mdSidenav('left').open();
+        }
       }
       // when a route is about to change, notify the routing redirect node
       if (next.resolve) {
