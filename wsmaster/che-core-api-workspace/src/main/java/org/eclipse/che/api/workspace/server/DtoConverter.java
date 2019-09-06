@@ -40,7 +40,6 @@ import org.eclipse.che.api.core.model.workspace.devfile.Source;
 import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.core.model.workspace.runtime.Server;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.shared.dto.CommandDto;
 import org.eclipse.che.api.workspace.shared.dto.EnvironmentDto;
 import org.eclipse.che.api.workspace.shared.dto.MachineConfigDto;
@@ -67,9 +66,6 @@ import org.eclipse.che.api.workspace.shared.dto.devfile.EnvDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.MetadataDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.ProjectDto;
 import org.eclipse.che.api.workspace.shared.dto.devfile.SourceDto;
-import org.eclipse.che.api.workspace.shared.dto.stack.StackComponentDto;
-import org.eclipse.che.api.workspace.shared.dto.stack.StackDto;
-import org.eclipse.che.api.workspace.shared.stack.Stack;
 
 /**
  * Helps to convert to/from DTOs related to workspace.
@@ -237,38 +233,6 @@ public final class DtoConverter {
         .withCommandLine(command.getCommandLine())
         .withType(command.getType())
         .withAttributes(command.getAttributes());
-  }
-
-  /** Convert {@link StackImpl} to {@link StackDto}. */
-  public static StackDto asDto(Stack stack) {
-    WorkspaceConfigDto workspaceConfigDto = null;
-    if (stack.getWorkspaceConfig() != null) {
-      workspaceConfigDto = asDto(stack.getWorkspaceConfig());
-    }
-
-    List<StackComponentDto> componentsDto = null;
-    if (stack.getComponents() != null) {
-      componentsDto =
-          stack
-              .getComponents()
-              .stream()
-              .map(
-                  component ->
-                      newDto(StackComponentDto.class)
-                          .withName(component.getName())
-                          .withVersion(component.getVersion()))
-              .collect(toList());
-    }
-
-    return newDto(StackDto.class)
-        .withId(stack.getId())
-        .withName(stack.getName())
-        .withDescription(stack.getDescription())
-        .withCreator(stack.getCreator())
-        .withScope(stack.getScope())
-        .withTags(stack.getTags())
-        .withComponents(componentsDto)
-        .withWorkspaceConfig(workspaceConfigDto);
   }
 
   /** Converts {@link ProjectConfig} to {@link ProjectConfigDto}. */

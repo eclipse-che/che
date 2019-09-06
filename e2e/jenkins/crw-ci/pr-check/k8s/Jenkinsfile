@@ -214,6 +214,10 @@ pipeline {
                       docker volume rm \$(docker volume ls -q -f dangling=true) || true
                       
                       docker rm -f \$(sudo docker ps --all | awk 'NR>0 {print \$1;}') || true
+                      
+                      if [[ \$(docker images | grep '${CHE_IMAGE_REPO}') != "" ]]; then
+                        docker rmi -f \$(docker images | grep '${CHE_IMAGE_REPO}') || true
+                      fi
                  """
 
                 sh "sudo rm -rf ${WORKSPACE}/e2e"

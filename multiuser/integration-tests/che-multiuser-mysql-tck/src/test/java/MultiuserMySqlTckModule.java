@@ -40,7 +40,6 @@ import javax.persistence.spi.PersistenceUnitTransactionType;
 import org.eclipse.che.account.spi.AccountImpl;
 import org.eclipse.che.api.user.server.model.impl.UserImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
-import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.commons.test.tck.JpaCleaner;
 import org.eclipse.che.commons.test.tck.TckModule;
 import org.eclipse.che.commons.test.tck.TckResourcesCleaner;
@@ -71,11 +70,8 @@ import org.eclipse.che.multiuser.organization.spi.jpa.JpaOrganizationDao;
 import org.eclipse.che.multiuser.organization.spi.jpa.JpaOrganizationDistributedResourcesDao;
 import org.eclipse.che.multiuser.permission.workspace.server.model.impl.WorkerImpl;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.WorkerDao;
-import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaStackPermissionsDao;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.jpa.JpaWorkerDao;
-import org.eclipse.che.multiuser.permission.workspace.server.spi.tck.StackPermissionsDaoTest;
 import org.eclipse.che.multiuser.permission.workspace.server.spi.tck.WorkerDaoTest;
-import org.eclipse.che.multiuser.permission.workspace.server.stack.StackPermissionsImpl;
 import org.eclipse.che.multiuser.resource.spi.FreeResourcesLimitDao;
 import org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl;
 import org.eclipse.che.multiuser.resource.spi.jpa.JpaFreeResourcesLimitDao;
@@ -132,24 +128,16 @@ public class MultiuserMySqlTckModule extends TckModule {
     // api-workspace
     bind(new TypeLiteral<TckRepository<WorkspaceImpl>>() {})
         .toInstance(new JpaTckRepository<>(WorkspaceImpl.class));
-    bind(new TypeLiteral<TckRepository<StackImpl>>() {})
-        .toInstance(new JpaTckRepository<>(StackImpl.class));
     bind(new TypeLiteral<TckRepository<WorkerImpl>>() {})
         .toInstance(new JpaTckRepository<>(WorkerImpl.class));
 
     // api permission
-    bind(new TypeLiteral<TckRepository<StackPermissionsImpl>>() {})
-        .toInstance(new JpaTckRepository<>(StackPermissionsImpl.class));
     bind(new TypeLiteral<TckRepository<SystemPermissionsImpl>>() {})
         .toInstance(new JpaTckRepository<>(SystemPermissionsImpl.class));
 
-    bind(new TypeLiteral<PermissionsDao<StackPermissionsImpl>>() {})
-        .to(JpaStackPermissionsDao.class);
     bind(new TypeLiteral<PermissionsDao<SystemPermissionsImpl>>() {})
         .to(JpaSystemPermissionsDao.class);
 
-    bind(new TypeLiteral<AbstractPermissionsDomain<StackPermissionsImpl>>() {})
-        .to(StackPermissionsDaoTest.TestDomain.class);
     bind(new TypeLiteral<AbstractPermissionsDomain<WorkerImpl>>() {})
         .to(WorkerDaoTest.TestDomain.class);
     bind(new TypeLiteral<AbstractPermissionsDomain<SystemPermissionsImpl>>() {})

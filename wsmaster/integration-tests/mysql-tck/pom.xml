@@ -17,7 +17,7 @@
     <parent>
         <artifactId>integration-tests-parent</artifactId>
         <groupId>org.eclipse.che.core</groupId>
-        <version>7.1.0-SNAPSHOT</version>
+        <version>7.2.0-SNAPSHOT</version>
     </parent>
     <artifactId>mysql-tck</artifactId>
     <packaging>jar</packaging>
@@ -303,11 +303,7 @@
                                     <port>jdbc.port:3306</port>
                                 </ports>
                                 <wait>
-                                    <tcp>
-                                        <ports>
-                                            <port>3306</port>
-                                        </ports>
-                                    </tcp>
+                                    <log>ready for connections</log>
                                     <time>60000</time>
                                 </wait>
                                 <restartPolicy>

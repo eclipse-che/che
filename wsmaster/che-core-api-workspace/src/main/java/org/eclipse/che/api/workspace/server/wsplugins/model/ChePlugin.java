@@ -26,6 +26,8 @@ public class ChePlugin {
   private String id = null;
   private String version = null;
   private List<CheContainer> containers = new ArrayList<>();
+  private List<CheContainer> initContainers;
+
   private List<ChePluginEndpoint> endpoints = new ArrayList<>();
 
   @JsonProperty("workspaceEnv")
@@ -100,6 +102,22 @@ public class ChePlugin {
     this.containers = containers;
   }
 
+  public ChePlugin initContainers(List<CheContainer> initContainers) {
+    this.initContainers = initContainers;
+    return this;
+  }
+
+  public List<CheContainer> getInitContainers() {
+    if (initContainers == null) {
+      initContainers = new ArrayList<>();
+    }
+    return initContainers;
+  }
+
+  public void setInitContainers(List<CheContainer> initContainers) {
+    this.initContainers = initContainers;
+  }
+
   public ChePlugin endpoints(List<ChePluginEndpoint> endpoints) {
     this.endpoints = endpoints;
     return this;
@@ -148,7 +166,8 @@ public class ChePlugin {
         && Objects.equals(getVersion(), chePlugin.getVersion())
         && Objects.equals(getContainers(), chePlugin.getContainers())
         && Objects.equals(getEndpoints(), chePlugin.getEndpoints())
-        && Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv());
+        && Objects.equals(getWorkspaceEnv(), chePlugin.getWorkspaceEnv())
+        && Objects.equals(getInitContainers(), chePlugin.getInitContainers());
   }
 
   @Override
@@ -159,6 +178,7 @@ public class ChePlugin {
         getId(),
         getVersion(),
         getContainers(),
+        getInitContainers(),
         getEndpoints(),
         getWorkspaceEnv());
   }
@@ -180,6 +200,8 @@ public class ChePlugin {
         + '\''
         + ", containers="
         + containers
+        + ", init containers="
+        + initContainers
         + ", endpoints="
         + endpoints
         + ", workspaceEnv="

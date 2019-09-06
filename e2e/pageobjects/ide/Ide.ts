@@ -10,11 +10,9 @@
 import axios from 'axios';
 import { DriverHelper } from '../../utils/DriverHelper';
 import { injectable, inject } from 'inversify';
-import { CLASSES, TYPES } from '../../inversify.types';
+import { CLASSES } from '../../inversify.types';
 import { TestConstants } from '../../TestConstants';
 import { By, WebElement, error } from 'selenium-webdriver';
-import { ITestWorkspaceUtil } from '../../utils/workspace/ITestWorkspaceUtil';
-import { WorkspaceStatus } from '../../utils/workspace/WorkspaceStatus';
 
 export enum RightToolbarButton {
     Explorer = 'Explorer',
@@ -34,8 +32,7 @@ export class Ide {
     private static readonly IDE_IFRAME_CSS: string = 'iframe#ide-application-iframe';
 
     constructor(
-        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper,
-        @inject(TYPES.WorkspaceUtil) private readonly testWorkspaceUtil: ITestWorkspaceUtil) { }
+        @inject(CLASSES.DriverHelper) private readonly driverHelper: DriverHelper) { }
 
     async waitAndSwitchToIdeFrame(timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
         await this.driverHelper.waitAndSwitchToFrame(By.css(Ide.IDE_IFRAME_CSS), timeout);
@@ -104,7 +101,6 @@ export class Ide {
         timeout: number = TestConstants.TS_SELENIUM_LOAD_PAGE_TIMEOUT) {
 
         await this.waitAndSwitchToIdeFrame(timeout);
-        await this.testWorkspaceUtil.waitWorkspaceStatus(workspaceNamespace, workspaceName, WorkspaceStatus.RUNNING);
         await this.waitIde(timeout);
     }
 
@@ -245,19 +241,17 @@ export class Ide {
 
     async waitApllicationIsReady(url: string,
         timeout: number = TestConstants.TS_SELENIUM_DEFAULT_TIMEOUT) {
-        let res = await axios.get(url);
+
         await this.driverHelper.getDriver().wait(async () => {
             try {
-                res = await axios.get(url);
+                const res = await axios.get(url);
                 if (res.status === 200) {
-                    console.log('Application is ready for use. App url:');
                     return true;
                 }
             } catch (error) {
-                console.log('Application is not yet ready for use');
+                await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
             }
 
-            await this.driverHelper.wait(TestConstants.TS_SELENIUM_DEFAULT_POLLING);
         }, timeout);
     }
 
