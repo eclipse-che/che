@@ -91,10 +91,11 @@ public class JwtProxyProvisioner {
 
   static final String JWT_PROXY_CONFIG_FILE = "config.yaml";
   static final String JWT_PROXY_MACHINE_NAME = "che-jwtproxy";
-  static final String JWT_PROXY_POD_NAME = JWT_PROXY_MACHINE_NAME;
 
   static final String JWT_PROXY_CONFIG_FOLDER = "/config";
   static final String JWT_PROXY_PUBLIC_KEY_FILE = "mykey.pub";
+
+  public static final String JWT_PROXY_POD_NAME = JWT_PROXY_MACHINE_NAME;
 
   private final SignatureKeyManager signatureKeyManager;
 

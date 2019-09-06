@@ -11,6 +11,8 @@
  */
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_POD_NAME;
+
 import io.fabric8.kubernetes.api.model.EnvVar;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +23,6 @@ import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.annotation.Traced;
 import org.eclipse.che.commons.tracing.TracingTags;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
-import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment.PodData;
 
 /**
  * Add proxy configuration to pod containers
@@ -60,13 +61,15 @@ public class ProxySettingsProvisioner implements ConfigurationProvisioner {
     TracingTags.WORKSPACE_ID.set(identity::getWorkspaceId);
 
     if (!proxyEnvVars.isEmpty()) {
-      for (PodData pod : k8sEnv.getPodsData().values()) {
-        pod.getSpec()
-            .getContainers()
-            .forEach(
-                container ->
-                    proxyEnvVars.forEach((k, v) -> container.getEnv().add(new EnvVar(k, v, null))));
-      }
+      k8sEnv
+          .getPodsData()
+          .entrySet()
+          .stream()
+          .filter(entry -> !entry.getKey().equals(JWT_PROXY_POD_NAME))
+          .flatMap(entry -> entry.getValue().getSpec().getContainers().stream())
+          .forEach(
+              container ->
+                  proxyEnvVars.forEach((k, v) -> container.getEnv().add(new EnvVar(k, v, null))));
     }
   }
 }
