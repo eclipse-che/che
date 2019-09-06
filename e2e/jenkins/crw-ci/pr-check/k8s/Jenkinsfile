@@ -150,6 +150,8 @@ pipeline {
             steps {
                 script {
                     sh """
+                         docker pull eclipse/che-e2e:nightly
+                         
                          CHE_HOST=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
                          CHE_URL=http://\${CHE_HOST}
                          docker run --shm-size=256m --net=host --ipc=host \\
@@ -158,7 +160,6 @@ pipeline {
                            -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
                            -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
                            -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
-                           -v ${WORKSPACE}/e2e:/tmp/e2e:Z \\
                            eclipse/che-e2e:nightly
                     """
                 }
