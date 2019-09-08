@@ -37,6 +37,12 @@ public class CheContainer {
   @JsonProperty("mountSources")
   private boolean mountSources = false;
 
+  @JsonProperty("command")
+  private List<String> command;
+
+  @JsonProperty("args")
+  private List<String> args;
+
   public CheContainer image(String image) {
     this.image = image;
     return this;
@@ -156,6 +162,38 @@ public class CheContainer {
     this.mountSources = mountSources;
   }
 
+  public CheContainer command(List<String> command) {
+    this.command = command;
+    return this;
+  }
+
+  public List<String> getCommand() {
+    if (command == null) {
+      return new ArrayList<>();
+    }
+    return command;
+  }
+
+  public void setCommand(List<String> command) {
+    this.command = command;
+  }
+
+  public CheContainer args(List<String> args) {
+    this.args = args;
+    return this;
+  }
+
+  public List<String> getArgs() {
+    if (args == null) {
+      return new ArrayList<>();
+    }
+    return args;
+  }
+
+  public void setArgs(List<String> args) {
+    this.args = args;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -172,7 +210,9 @@ public class CheContainer {
         && Objects.equals(getPorts(), that.getPorts())
         && Objects.equals(getMemoryLimit(), that.getMemoryLimit())
         && Objects.equals(getName(), that.getName())
-        && isMountSources() == that.isMountSources();
+        && isMountSources() == that.isMountSources()
+        && Objects.equals(getCommand(), that.getCommand())
+        && Objects.equals(getArgs(), that.getArgs());
   }
 
   @Override
@@ -185,7 +225,9 @@ public class CheContainer {
         getPorts(),
         getMemoryLimit(),
         getName(),
-        isMountSources());
+        isMountSources(),
+        getCommand(),
+        getArgs());
   }
 
   @Override
@@ -208,6 +250,10 @@ public class CheContainer {
         + name
         + ", mountSources="
         + mountSources
+        + ", command="
+        + command
+        + ", args="
+        + args
         + '}';
   }
 }
