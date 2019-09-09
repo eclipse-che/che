@@ -14,6 +14,7 @@ package org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtpro
 import static org.eclipse.che.api.core.model.workspace.config.ServerConfig.SECURE_SERVER_COOKIES_AUTH_ENABLED_ATTRIBUTE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_PREFIX;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.KubernetesServerExposer.SERVER_UNIQUE_PART_SIZE;
+import static org.eclipse.che.workspace.infrastructure.kubernetes.server.external.MultiHostExternalServiceExposureStrategy.MULTI_HOST_STRATEGY;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_CONFIG_FILE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.JWT_PROXY_PUBLIC_KEY_FILE;
 import static org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.JwtProxyProvisioner.PUBLIC_KEY_FOOTER;
@@ -73,6 +74,7 @@ public class JwtProxyProvisionerTest {
   @Mock private PublicKey publicKey;
   @Mock private JwtProxyConfigBuilderFactory configBuilderFactory;
   @Mock private ExternalServiceExposureStrategy externalServiceExposureStrategy;
+  private CookiePathStrategy cookiePathStrategy = new CookiePathStrategy(MULTI_HOST_STRATEGY);
 
   private JwtProxyProvisioner jwtProxyProvisioner;
   private KubernetesEnvironment k8sEnv;
@@ -92,6 +94,7 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
+            cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -195,6 +198,7 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
+            cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);
@@ -234,6 +238,7 @@ public class JwtProxyProvisionerTest {
             signatureKeyManager,
             configBuilderFactory,
             externalServiceExposureStrategy,
+            cookiePathStrategy,
             "eclipse/che-jwtproxy",
             "128mb",
             runtimeId);

@@ -110,12 +110,14 @@ public class JwtProxyProvisioner {
   private int availablePort;
 
   private final ExternalServiceExposureStrategy externalServiceExposureStrategy;
+  private final CookiePathStrategy cookiePathStrategy;
 
   @Inject
   public JwtProxyProvisioner(
       SignatureKeyManager signatureKeyManager,
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
       ExternalServiceExposureStrategy externalServiceExposureStrategy,
+      CookiePathStrategy cookiePathStrategy,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
       @Assisted RuntimeIdentity identity) {
@@ -126,6 +128,7 @@ public class JwtProxyProvisioner {
     this.proxyConfigBuilder = jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId());
 
     this.externalServiceExposureStrategy = externalServiceExposureStrategy;
+    this.cookiePathStrategy = cookiePathStrategy;
 
     this.identity = identity;
     this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
@@ -203,7 +206,7 @@ public class JwtProxyProvisioner {
         "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
         excludes,
         cookiesAuthEnabled,
-        serviceName,
+        cookiePathStrategy.get(serviceName, exposedPort),
         externalServiceExposureStrategy.getExternalPath(serviceName, exposedPort));
     k8sEnv
         .getConfigMaps()
