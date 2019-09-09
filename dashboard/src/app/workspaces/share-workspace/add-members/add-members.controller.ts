@@ -84,10 +84,15 @@ export class AddMemberController {
     this.chePermissions = chePermissions;
     this.cheProfile = cheProfile;
 
+    this.team = cheTeam.getTeamByName(this.namespace);
     this.membersSelectedStatus = {};
     this.isBulkChecked = false;
     this.isNoSelected = true;
     this.isAllSelected = true;
+
+    if (this.team) {
+      this.fetchTeamMembers();
+    }
 
     const helperId = 'add-members';
     this.cheListHelper = cheListHelperFactory.getHelper(helperId);
@@ -97,11 +102,8 @@ export class AddMemberController {
   }
 
   $onInit(): void {
-    this.team = this.cheTeam.getTeamByName(this.namespace);
-
-    if (this.team) {
-      this.fetchTeamMembers();
-    }
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   fetchTeamMembers(): void {

@@ -34,11 +34,14 @@ export class EditMachineNameDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
+
+    this.origName = this.name;
+    this.machineNamesLowercase = this.machineNames.map((name: string) => name.toLowerCase());
   }
 
   $onInit(): void {
-    this.origName = this.name;
-    this.machineNamesLowercase = this.machineNames.map((name: string) => name.toLowerCase());
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   isUnique(name: string): boolean {

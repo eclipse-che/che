@@ -40,9 +40,7 @@ export class EditVariableDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
-  }
 
-  $onInit(): void {
     // build list of used names
     let envVariablesCopy = angular.copy(this.envVariables);
     if (this.toEdit && envVariablesCopy[this.toEdit]) {
@@ -57,6 +55,11 @@ export class EditVariableDialogController {
     } else {
       this.popupTitle = 'Add a new environment variable';
     }
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

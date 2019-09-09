@@ -23,7 +23,6 @@ export class AdminsAddUserController {
   private $mdDialog: ng.material.IDialogService;
   private lodash: any;
   private cheNotification: any;
-  private resourcesService: che.service.IResourcesService;
   private cheUser: any;
   private callbackController: AdminsUserManagementCtrl;
   private newUserName: string;
@@ -51,24 +50,25 @@ export class AdminsAddUserController {
     this.cheNotification = cheNotification;
     this.cheOrganization = cheOrganization;
     this.chePermissions = chePermissions;
-    this.resourcesService = resourcesService;
+    this.organizationRoles = resourcesService.getOrganizationRoles();
 
     this.organizations = [];
-  }
-
-  $onInit(): void {
-    this.organizationRoles = this.resourcesService.getOrganizationRoles();
 
     this.cheOrganization.fetchOrganizations().then(() => {
       let organizations = this.cheOrganization.getOrganizations();
       let rootOrganizations = organizations.filter((organization: any) => {
         return !organization.parent;
       });
-      this.organizations = this.lodash.pluck(rootOrganizations, 'name');
+      this.organizations = lodash.pluck(rootOrganizations, 'name');
       if (this.organizations.length > 0) {
         this.organization = this.organizations[0];
       }
     });
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

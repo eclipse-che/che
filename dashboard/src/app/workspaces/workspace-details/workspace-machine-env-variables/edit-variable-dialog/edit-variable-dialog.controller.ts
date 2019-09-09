@@ -37,9 +37,7 @@ export class EditEnvVariableDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
-  }
 
-  $onInit(): void {
     // build list of used names
     this.usedNames = angular.isObject(this.envVariables) ? Object.keys(this.envVariables) : [];
 
@@ -50,6 +48,11 @@ export class EditEnvVariableDialogController {
     } else {
       this.popupTitle = 'Add a new environment variable';
     }
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

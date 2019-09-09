@@ -31,7 +31,6 @@ export class ExportWorkspaceDialogController {
   private cheRemote: CheRemote;
   private $window: ng.IWindowService;
   private lodash: any;
-  private $scope: ng.IScope;
 
   private editorOptions: any;
   private destination: string;
@@ -65,7 +64,6 @@ export class ExportWorkspaceDialogController {
     this.$mdDialog = $mdDialog;
     this.$log = $log;
     this.$window = $window;
-    this.$scope = $scope;
 
     this.editorOptions = {
       lineWrapping : true,
@@ -78,13 +76,16 @@ export class ExportWorkspaceDialogController {
     this.privateCloudLogin = '';
     this.privateCloudPassword = '';
     this.importInProgress = false;
-  }
 
-  $onInit(): void {
     this.copyOfConfig = this.getCopyOfConfig();
     this.exportConfigContent = this.$filter('json')(angular.fromJson(this.copyOfConfig), 2);
 
-    (this.$scope as any).selectedIndex = this.destination === 'file' ? 0 : 1;
+    ($scope as any).selectedIndex = this.destination === 'file' ? 0 : 1;
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

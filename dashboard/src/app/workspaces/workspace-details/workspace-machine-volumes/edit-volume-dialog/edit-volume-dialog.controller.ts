@@ -38,9 +38,7 @@ export class EditMachineVolumeDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
-  }
 
-  $onInit(): void {
     // build list of used names
     this.usedNames = angular.isObject(this.machineVolumes) ? Object.keys(this.machineVolumes) : [];
 
@@ -51,6 +49,11 @@ export class EditMachineVolumeDialogController {
     } else {
       this.popupTitle = 'Add a new volume';
     }
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

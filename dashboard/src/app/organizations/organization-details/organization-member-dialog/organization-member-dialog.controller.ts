@@ -42,10 +42,6 @@ export class OrganizationMemberDialogController {
    */
   private lodash: any;
   /**
-   * Resources service.
-   */
-  private resourcesService: che.service.IResourcesService;
-  /**
    * Processing state of adding member.
    */
   private isProcessing: boolean;
@@ -115,11 +111,9 @@ export class OrganizationMemberDialogController {
     this.cheOrganization = cheOrganization;
     this.$q = $q;
     this.lodash = lodash;
-    this.resourcesService = resourcesService;
+    this.organizationRoles = resourcesService.getOrganizationRoles();
 
     this.isProcessing = false;
-
-    this.organizationRoles = this.resourcesService.getOrganizationRoles();
 
     this.emails = [];
     this.members.forEach((member: che.IMember) => {
@@ -139,7 +133,7 @@ export class OrganizationMemberDialogController {
       this.title = 'Edit ' + this.member.name + ' roles';
       this.buttonTitle = 'Save';
       this.email = this.member.email;
-      let roles = this.cheOrganization.getRolesFromActions(this.member.permissions.actions);
+      let roles = cheOrganization.getRolesFromActions(this.member.permissions.actions);
       this.newRole = (roles && roles.length > 0) ? roles[0].name : this.organizationRoles.MEMBER.name;
     } else {
       this.email = '';
@@ -147,6 +141,11 @@ export class OrganizationMemberDialogController {
       this.buttonTitle = 'Add';
       this.newRole = this.organizationRoles.MEMBER.name;
     }
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

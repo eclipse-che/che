@@ -57,14 +57,16 @@ export class DeleteDevMachineDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
-  }
-
-  $onInit(): void {
     if (this.machinesList.length === 1) {
       this.message = 'You can\'t delete it without having other machines configured.';
     } else {
       this.message = 'Select the machine to get ws-agent activated:';
     }
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

@@ -51,9 +51,7 @@ export class EditServerDialogController {
               lodash: any) {
     this.$mdDialog = $mdDialog;
     this.lodash = lodash;
-  }
 
-  $onInit(): void {
     // get used ports and references
     let serversCopy = angular.copy(this.servers);
     if (this.toEdit && serversCopy[this.toEdit]) {
@@ -75,6 +73,12 @@ export class EditServerDialogController {
       this.port = this.getLowestFreePort();
       this.popupTitle = 'Add a new server';
     }
+
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

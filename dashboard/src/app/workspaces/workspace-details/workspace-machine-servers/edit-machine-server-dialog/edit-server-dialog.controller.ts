@@ -45,9 +45,7 @@ export class EditMachineServerDialogController {
    */
   constructor($mdDialog: ng.material.IDialogService) {
     this.$mdDialog = $mdDialog;
-  }
 
-  $onInit(): void {
     // get used references and ports
     this.usedReferences = Object.keys(this.servers);
     this.usedPorts = [];
@@ -71,6 +69,11 @@ export class EditMachineServerDialogController {
       this.port = this.getLowestFreePort();
       this.popupTitle = 'Add a new server';
     }
+  }
+
+  $onInit(): void {
+    // this method won't be called here
+    // place all initialization code in constructor
   }
 
   /**

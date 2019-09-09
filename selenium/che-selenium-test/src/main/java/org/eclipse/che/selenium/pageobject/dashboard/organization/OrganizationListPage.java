@@ -79,9 +79,9 @@ public class OrganizationListPage {
   private interface Locators {
     String TOOLBAR_ID = "Organizations";
     String ADD_ORGANIZATION_BUTTON_XPATH =
-        "//*[@id='add-item-button']/*[contains(@class, 'che-button')]";
+        "//*[@id='add-item-button']/*[text()='Add Organization']";
     String ADD_SUB_ORGANIZATION_BUTTON_XPATH =
-        "//che-button-primary//span[text()='Add Sub-Organization']";
+        "//*[@id='add-item-button']/*[text()='Add Sub-Organization']";
     String DELETE_ORGANIZATION_BUTTON_XPATH =
         "//*[@id='delete-item-button']/*[contains(@class, 'che-button')]";
     String ORGANIZATION_LIST_XPATH = "//list-organizations//md-list";
