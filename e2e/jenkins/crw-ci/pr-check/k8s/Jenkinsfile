@@ -5,7 +5,7 @@ pipeline {
 
     options {
         timestamps()
-        timeout(time: 40, unit: 'MINUTES')
+        timeout(time: 20, unit: 'MINUTES')
         buildDiscarder(logRotator(artifactDaysToKeepStr: '',
                 artifactNumToKeepStr: '', daysToKeepStr: '60', numToKeepStr: '100'))
     }
@@ -149,32 +149,19 @@ pipeline {
         stage("Run E2E Happy path tests") {
             steps {
                 script {
-                    // TO-DO (#14171) switch to eclipse/che-e2e image
-//                    sh """
-//                         CHE_HOST=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
-//                         CHE_URL=http://\${CHE_HOST}
-//                         docker run --shm-size=256m --net=host --ipc=host \\
-//                           -e TS_SELENIUM_HEADLESS='true' \\
-//                           -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
-//                           -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
-//                           -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
-//                           -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
-//                           -v ${WORKSPACE}/e2e:/root/local_tests:Z \\
-//                           eclipse/che-e2e:nightly
-//                     """
-
                     sh """
-                        CHE_HOST=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
-                        CHE_URL=http://\${CHE_HOST}
-                        docker run --net=host --ipc=host \\
+                         docker pull eclipse/che-e2e:nightly
+                         
+                         CHE_HOST=\$(kubectl get ingress che-ingress -n=che -o=jsonpath={'.spec.rules[0].host'})
+                         CHE_URL=http://\${CHE_HOST}
+                         docker run --shm-size=256m --net=host --ipc=host \\
                            -e TS_SELENIUM_HEADLESS='true' \\
                            -e TS_SELENIUM_DEFAULT_TIMEOUT=300000 \\
                            -e TS_SELENIUM_LOAD_PAGE_TIMEOUT=240000 \\
-                           -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
                            -e TS_SELENIUM_WORKSPACE_STATUS_POLLING=20000 \\
-                           -w /home/e2e \\
-                           -v $WORKSPACE:/home:Z \\
-                           cypress/browsers:node8.9.3-chrome73 bash -c "npm install &&  npm run test-happy-path"
+                           -e TS_SELENIUM_BASE_URL=\${CHE_URL} \\
+                           -v ${WORKSPACE}/e2e:/tmp/e2e:Z \\
+                           eclipse/che-e2e:nightly
                     """
                 }
             }
