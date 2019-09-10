@@ -40,5 +40,18 @@ public final class Warnings {
       COMMAND_IS_CONFIGURED_IN_PLUGIN_WITH_MULTIPLY_CONTAINERS_WARNING_MESSAGE_FMT =
           "There are configured commands for plugin '%s' that has multiply containers. Commands will be configured to be run in first container";
 
+  public static final int JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_WARNING_CODE =
+      4108;
+  public static final String JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_MESSAGE_FMT =
+      "Unable to provision git configuration into runtime. "
+          + "Json object in user preferences is not a valid representation for an object of type map: '%s'";
+
+  public static final int
+      INTERNAL_SERVER_ERROR_OCCURRED_DURING_OPERATING_WITH_USER_PREFERENCES_WARNING_CODE = 4109;
+  public static final String
+      INTERNAL_SERVER_ERROR_OCCURRED_DURING_OPERATING_WITH_USER_PREFERENCES_MESSAGE_FMT =
+          "Unable to provision git configuration into runtime. "
+              + "Internal server error occurred during operating with user preferences: '%s'";
+
   private Warnings() {}
 }

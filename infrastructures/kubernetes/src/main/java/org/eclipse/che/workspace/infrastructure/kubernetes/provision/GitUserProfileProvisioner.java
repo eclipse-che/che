@@ -12,12 +12,14 @@
 package org.eclipse.che.workspace.infrastructure.kubernetes.provision;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
@@ -36,8 +38,10 @@ import javax.inject.Singleton;
 import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.model.workspace.runtime.RuntimeIdentity;
 import org.eclipse.che.api.user.server.PreferenceManager;
+import org.eclipse.che.api.workspace.server.model.impl.WarningImpl;
 import org.eclipse.che.api.workspace.server.spi.InfrastructureException;
 import org.eclipse.che.commons.env.EnvironmentContext;
+import org.eclipse.che.workspace.infrastructure.kubernetes.Warnings;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 
 @Singleton
@@ -63,14 +67,45 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
   @Override
   public void provision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
       throws InfrastructureException {
+    try {
+      doInternalProvision(k8sEnv, identity);
+    } catch (ServerException e) {
+      String warnMsg =
+          format(
+              Warnings
+                  .INTERNAL_SERVER_ERROR_OCCURRED_DURING_OPERATING_WITH_USER_PREFERENCES_MESSAGE_FMT,
+              e.getMessage());
+      k8sEnv
+          .getWarnings()
+          .add(
+              new WarningImpl(
+                  Warnings
+                      .INTERNAL_SERVER_ERROR_OCCURRED_DURING_OPERATING_WITH_USER_PREFERENCES_WARNING_CODE,
+                  warnMsg));
+    } catch (JsonSyntaxException e) {
+      String warnMsg =
+          format(
+              Warnings.JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_MESSAGE_FMT,
+              e.getMessage());
+      k8sEnv
+          .getWarnings()
+          .add(
+              new WarningImpl(
+                  Warnings.JSON_IS_NOT_A_VALID_REPRESENTATION_FOR_AN_OBJECT_OF_TYPE_WARNING_CODE,
+                  warnMsg));
+    }
+  }
+
+  private void doInternalProvision(KubernetesEnvironment k8sEnv, RuntimeIdentity identity)
+      throws ServerException, JsonSyntaxException {
     getPreferenceValue(PREFERENCES_KEY_FILTER)
         .ifPresent(
             preferenceJsonValue -> {
-              Map<String, String> theiaPreferences = getMapFromJsonObject(preferenceJsonValue);
+              Map<String, Object> theiaPreferences = getMapFromJsonObject(preferenceJsonValue);
 
               getGlobalGitConfigFileContent(
-                      theiaPreferences.get(GIT_USER_NAME_PROPERTY),
-                      theiaPreferences.get(GIT_USER_EMAIL_PROPERTY))
+                      getStringValueOrNull(theiaPreferences, GIT_USER_NAME_PROPERTY),
+                      getStringValueOrNull(theiaPreferences, GIT_USER_EMAIL_PROPERTY))
                   .ifPresent(
                       gitConfigFileContent -> {
                         String gitConfigMapName =
@@ -81,21 +116,29 @@ public class GitUserProfileProvisioner implements ConfigurationProvisioner<Kuber
             });
   }
 
-  private Map<String, String> getMapFromJsonObject(String json) {
-    Type stringMapType = new TypeToken<Map<String, String>>() {}.getType();
+  private String getStringValueOrNull(Map<String, Object> map, String key) {
+    Object value = map.get(key);
 
-    return new Gson().fromJson(json, stringMapType);
+    return value instanceof String ? (String) value : null;
   }
 
-  private Optional<String> getPreferenceValue(String keyFilter) throws InfrastructureException {
-    try {
-      String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
-      Map<String, String> preferencesMap = preferenceManager.find(userId, keyFilter);
+  private Map<String, Object> getMapFromJsonObject(String json) throws JsonSyntaxException {
+    Type typeToken = new TypeToken<Map<String, Object>>() {}.getType();
 
-      return ofNullable(preferencesMap.get(keyFilter));
-    } catch (ServerException e) {
-      throw new InfrastructureException(e);
-    }
+    /*
+    The main idea to implicit cast map from string:object to string:string is that,
+    we're looking for a two specific properties in the end, that have 100% string values,
+    so we don't care about what we have in other properties.
+    */
+
+    return new Gson().fromJson(json, typeToken);
+  }
+
+  private Optional<String> getPreferenceValue(String keyFilter) throws ServerException {
+    String userId = EnvironmentContext.getCurrent().getSubject().getUserId();
+    Map<String, String> preferencesMap = preferenceManager.find(userId, keyFilter);
+
+    return ofNullable(preferencesMap.get(keyFilter));
   }
 
   private Optional<String> getGlobalGitConfigFileContent(String userName, String userEmail) {
