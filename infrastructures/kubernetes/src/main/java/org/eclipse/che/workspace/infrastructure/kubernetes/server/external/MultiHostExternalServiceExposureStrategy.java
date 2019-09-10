@@ -44,7 +44,7 @@ import org.eclipse.che.inject.ConfigurationException;
  * @author Sergii Leshchenko
  * @author Guy Daich
  */
-public class MultiHostIngressServiceExposureStrategy implements IngressServiceExposureStrategy {
+public class MultiHostExternalServiceExposureStrategy implements ExternalServiceExposureStrategy {
 
   public static final String MULTI_HOST_STRATEGY = "multi-host";
   private static final String INGRESS_DOMAIN_PROPERTY = "che.infra.kubernetes.ingress.domain";
@@ -52,7 +52,7 @@ public class MultiHostIngressServiceExposureStrategy implements IngressServiceEx
   private final String domain;
 
   @Inject
-  public MultiHostIngressServiceExposureStrategy(
+  public MultiHostExternalServiceExposureStrategy(
       @Named(INGRESS_DOMAIN_PROPERTY) String domain, @Named(STRATEGY_PROPERTY) String strategy) {
     if (Strings.isNullOrEmpty(domain) && MULTI_HOST_STRATEGY.equals(strategy)) {
       throw new ConfigurationException(
@@ -65,12 +65,12 @@ public class MultiHostIngressServiceExposureStrategy implements IngressServiceEx
   }
 
   @Override
-  public String getIngressHost(String serviceName, ServicePort servicePort) {
+  public String getExternalHost(String serviceName, ServicePort servicePort) {
     return serviceName + "-" + servicePort.getName() + "." + domain;
   }
 
   @Override
-  public String getIngressPath(String serviceName, ServicePort servicePort) {
+  public String getExternalPath(String serviceName, ServicePort servicePort) {
     return "/";
   }
 }
