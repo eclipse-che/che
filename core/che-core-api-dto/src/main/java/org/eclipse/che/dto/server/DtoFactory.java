@@ -22,6 +22,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.TypeAdapterFactory;
+import com.google.gson.internal.bind.ReflectiveTypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -510,6 +511,8 @@ public final class DtoFactory {
       builder.registerTypeHierarchyAdapter(Collection.class, new NullOrEmptyCollectionAdapter());
       builder.registerTypeHierarchyAdapter(Map.class, new NullOrEmptyMapAdapter());
     }
+
+    builder.registerTypeAdapterFactory(new SerializableInterfaceAdapterFactory());
 
     return builder.create();
   }
