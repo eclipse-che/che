@@ -202,7 +202,6 @@ public class WorkerDaoTest {
       workerDao.getWorker("ws1", "user1");
   }
 
-
   @Test(expectedExceptions = NullPointerException.class)
   public void shouldThrowExceptionWhenRemoveWorkerWorkspaceIdArgumentIsNull() throws Exception {
     workerDao.removeWorker(null, "user1");
