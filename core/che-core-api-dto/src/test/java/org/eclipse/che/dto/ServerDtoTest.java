@@ -443,11 +443,13 @@ public class ServerDtoTest {
     final String fooString = "some string";
     final long fooLong = 1234514362645634611L;
     final double fooDouble = 1.2345;
+    final double fooRoundingDouble = 6.00;
 
     JsonObject jsonMap = new JsonObject();
     jsonMap.add("fooLong", new JsonPrimitive(fooLong));
     jsonMap.add("fooBoolean", new JsonPrimitive(true));
     jsonMap.add("fooDouble", new JsonPrimitive(fooDouble));
+    jsonMap.add("fooRoundingDouble", new JsonPrimitive(fooRoundingDouble));
     jsonMap.add("fooString", new JsonPrimitive(fooString));
 
     JsonObject json = new JsonObject();
@@ -464,5 +466,6 @@ public class ServerDtoTest {
     assertEquals(dto.getObjectMap().get("fooBoolean"), true);
     assertEquals(dto.getObjectMap().get("fooDouble"), fooDouble);
     assertEquals(dto.getObjectMap().get("fooString"), fooString);
+    assertEquals(dto.getObjectMap().get("fooRoundingDouble"), Math.round(fooRoundingDouble));
   }
 }
