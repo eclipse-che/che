@@ -22,16 +22,16 @@ import org.eclipse.che.inject.ConfigurationException;
 
 @Singleton
 public class IngressServiceExposureStrategyProvider
-    implements Provider<IngressServiceExposureStrategy> {
+    implements Provider<ExternalServiceExposureStrategy> {
 
-  static final String STRATEGY_PROPERTY = "che.infra.kubernetes.server_strategy";
+  public static final String STRATEGY_PROPERTY = "che.infra.kubernetes.server_strategy";
 
-  private final IngressServiceExposureStrategy namingStrategy;
+  private final ExternalServiceExposureStrategy namingStrategy;
 
   @Inject
   public IngressServiceExposureStrategyProvider(
       @Named(STRATEGY_PROPERTY) String strategy,
-      Map<String, IngressServiceExposureStrategy> strategies) {
+      Map<String, ExternalServiceExposureStrategy> strategies) {
 
     namingStrategy = strategies.get(strategy);
 
@@ -42,7 +42,7 @@ public class IngressServiceExposureStrategyProvider
   }
 
   @Override
-  public IngressServiceExposureStrategy get() {
+  public ExternalServiceExposureStrategy get() {
     return namingStrategy;
   }
 }

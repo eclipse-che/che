@@ -18,12 +18,12 @@ import org.eclipse.che.commons.annotation.Nullable;
  * Implementations of this strategy are used by the {@link ExternalServerExposer} to compose an
  * Ingress rule that exposes the services.
  */
-public interface IngressServiceExposureStrategy {
+public interface ExternalServiceExposureStrategy {
 
   /** Returns a host that should be used to expose the service */
   @Nullable
-  String getIngressHost(String serviceName, ServicePort servicePort);
+  String getExternalHost(String serviceName, ServicePort servicePort);
 
   /** Returns the path on which the service should be exposed */
-  String getIngressPath(String serviceName, ServicePort servicePort);
+  String getExternalPath(String serviceName, ServicePort servicePort);
 }

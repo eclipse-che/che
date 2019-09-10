@@ -58,6 +58,7 @@ import org.eclipse.che.multiuser.machine.authentication.server.signature.Signatu
 import org.eclipse.che.workspace.infrastructure.kubernetes.Names;
 import org.eclipse.che.workspace.infrastructure.kubernetes.environment.KubernetesEnvironment;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.ServerServiceBuilder;
+import org.eclipse.che.workspace.infrastructure.kubernetes.server.external.ExternalServiceExposureStrategy;
 import org.eclipse.che.workspace.infrastructure.kubernetes.server.secure.jwtproxy.factory.JwtProxyConfigBuilderFactory;
 
 /**
@@ -109,10 +110,15 @@ public class JwtProxyProvisioner {
   private final String serviceName;
   private int availablePort;
 
+  private final ExternalServiceExposureStrategy externalServiceExposureStrategy;
+  private final CookiePathStrategy cookiePathStrategy;
+
   @Inject
   public JwtProxyProvisioner(
       SignatureKeyManager signatureKeyManager,
       JwtProxyConfigBuilderFactory jwtProxyConfigBuilderFactory,
+      ExternalServiceExposureStrategy externalServiceExposureStrategy,
+      CookiePathStrategy cookiePathStrategy,
       @Named("che.server.secure_exposer.jwtproxy.image") String jwtProxyImage,
       @Named("che.server.secure_exposer.jwtproxy.memory_limit") String memoryLimitBytes,
       @Assisted RuntimeIdentity identity) {
@@ -121,8 +127,13 @@ public class JwtProxyProvisioner {
     this.jwtProxyImage = jwtProxyImage;
 
     this.proxyConfigBuilder = jwtProxyConfigBuilderFactory.create(identity.getWorkspaceId());
+
+    this.externalServiceExposureStrategy = externalServiceExposureStrategy;
+    this.cookiePathStrategy = cookiePathStrategy;
+
     this.identity = identity;
     this.serviceName = generate(SERVER_PREFIX, SERVER_UNIQUE_PART_SIZE) + "-jwtproxy";
+
     this.availablePort = FIRST_AVAILABLE_PORT;
     long memoryLimitLong = Size.parseSizeToMegabytes(memoryLimitBytes) * MEGABYTES_TO_BYTES_DIVIDER;
     this.attributes =
@@ -149,7 +160,7 @@ public class JwtProxyProvisioner {
   public ServicePort expose(
       KubernetesEnvironment k8sEnv,
       String backendServiceName,
-      int backendServicePort,
+      ServicePort backendServicePort,
       String protocol,
       Map<String, ServerConfig> secureServers)
       throws InfrastructureException {
@@ -181,17 +192,6 @@ public class JwtProxyProvisioner {
       }
     }
 
-    proxyConfigBuilder.addVerifierProxy(
-        listenPort,
-        "http://" + backendServiceName + ":" + backendServicePort,
-        excludes,
-        cookiesAuthEnabled);
-    k8sEnv
-        .getConfigMaps()
-        .get(getConfigMapName())
-        .getData()
-        .put(JWT_PROXY_CONFIG_FILE, proxyConfigBuilder.build());
-
     ServicePort exposedPort =
         new ServicePortBuilder()
             .withName("server-" + listenPort)
@@ -200,7 +200,20 @@ public class JwtProxyProvisioner {
             .withNewTargetPort(listenPort)
             .build();
 
-    k8sEnv.getServices().get(getServiceName()).getSpec().getPorts().add(exposedPort);
+    k8sEnv.getServices().get(serviceName).getSpec().getPorts().add(exposedPort);
+
+    proxyConfigBuilder.addVerifierProxy(
+        listenPort,
+        "http://" + backendServiceName + ":" + backendServicePort.getTargetPort().getIntVal(),
+        excludes,
+        cookiesAuthEnabled,
+        cookiePathStrategy.get(serviceName, exposedPort),
+        externalServiceExposureStrategy.getExternalPath(serviceName, exposedPort));
+    k8sEnv
+        .getConfigMaps()
+        .get(getConfigMapName())
+        .getData()
+        .put(JWT_PROXY_CONFIG_FILE, proxyConfigBuilder.build());
 
     return exposedPort;
   }
