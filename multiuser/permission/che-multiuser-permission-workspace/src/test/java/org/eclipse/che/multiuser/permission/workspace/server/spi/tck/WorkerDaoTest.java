@@ -195,11 +195,13 @@ public class WorkerDaoTest {
   }
 
   /* WorkerDao.removeWorker() tests */
-  @Test(expectedExceptions = NotFoundException.class, expectedExceptionsMessageRegExp = "Worker of workspace 'ws1' with id 'user1' was not found.")
+  @Test(
+      expectedExceptions = NotFoundException.class,
+      expectedExceptionsMessageRegExp = "Worker of workspace 'ws1' with id 'user1' was not found.")
   public void shouldRemoveWorker() throws Exception {
-      workerDao.removeWorker("ws1", "user1");
-      assertEquals(1, workerDao.getWorkersByUser("user1").size());
-      workerDao.getWorker("ws1", "user1");
+    workerDao.removeWorker("ws1", "user1");
+    assertEquals(1, workerDao.getWorkersByUser("user1").size());
+    workerDao.getWorker("ws1", "user1");
   }
 
   @Test(expectedExceptions = NullPointerException.class)
