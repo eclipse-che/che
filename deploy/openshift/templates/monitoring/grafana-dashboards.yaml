@@ -3625,7 +3625,7 @@ data:
       "editable": true,
       "gnetId": null,
       "graphTooltip": 1,
-      "iteration": 1568012781120,
+      "iteration": 1568122748216,
       "links": [],
       "panels": [
         {
@@ -4476,7 +4476,7 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "che",
+          "datasource": "$datasource",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -4499,7 +4499,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "nullPointMode": "null",
+          "nullPointMode": "null as zero",
           "options": {
             "dataLinks": []
           },
@@ -4567,7 +4567,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             },
             {
@@ -4575,7 +4575,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             }
           ],
@@ -4589,7 +4589,7 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "che",
+          "datasource": "$datasource",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -4626,32 +4626,32 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#startAsync\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#startAsync\"}[5m])",
-              "legendFormat": "{{operation}}",
-              "refId": "E"
-            },
-            {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"SidecarToolingProvisioner#provision\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"SidecarToolingProvisioner#provision\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#startAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#startAsync\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "A"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftEnvironmentProvisioner#provision\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftEnvironmentProvisioner#provision\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"SidecarToolingProvisioner#provision\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"SidecarToolingProvisioner#provision\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "B"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"UniqueWorkspacePVCStrategy#prepare\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"UniqueWorkspacePVCStrategy#prepare\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftEnvironmentProvisioner#provision\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftEnvironmentProvisioner#provision\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "C"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#startMachines\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#startMachines\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"UniqueWorkspacePVCStrategy#prepare\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"UniqueWorkspacePVCStrategy#prepare\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "D"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WaitMachinesStart\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WaitMachinesStart\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#startMachines\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#startMachines\"}[1h])",
+              "legendFormat": "{{operation}}",
+              "refId": "E"
+            },
+            {
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WaitMachinesStart\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WaitMachinesStart\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "F"
             }
@@ -4680,7 +4680,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             },
             {
@@ -4688,7 +4688,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             }
           ],
@@ -4702,7 +4702,7 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "che",
+          "datasource": "$datasource",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -4725,7 +4725,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "nullPointMode": "null",
+          "nullPointMode": "null as zero",
           "options": {
             "dataLinks": []
           },
@@ -4741,22 +4741,22 @@ data:
             {
               "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createSecrets\"}",
               "legendFormat": "{{operation}}",
-              "refId": "B"
+              "refId": "A"
             },
             {
               "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}",
               "legendFormat": "{{operation}}",
-              "refId": "D"
+              "refId": "B"
             },
             {
               "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createServices\"}",
               "legendFormat": "{{operation}}",
-              "refId": "G"
+              "refId": "C"
             },
             {
               "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#createRoutes\"}",
               "legendFormat": "{{operation}}",
-              "refId": "C"
+              "refId": "D"
             },
             {
               "expr": "che_server_api_tracing_span_seconds_max{operation=\"OpenShiftInternalRuntime#doStartMachine\"}",
@@ -4793,7 +4793,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             },
             {
@@ -4801,7 +4801,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             }
           ],
@@ -4815,7 +4815,7 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "che",
+          "datasource": "$datasource",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -4838,7 +4838,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "nullPointMode": "null",
+          "nullPointMode": "null as zero",
           "options": {
             "dataLinks": []
           },
@@ -4852,32 +4852,32 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createSecrets\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createSecrets\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createSecrets\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createSecrets\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "A"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createConfigMaps\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "B"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createServices\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createServices\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createServices\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createServices\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "C"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createRoutes\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createRoutes\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#createRoutes\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#createRoutes\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "D"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#listenEvents\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#listenEvents\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#listenEvents\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#listenEvents\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "E"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#doStartMachine\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#doStartMachine\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#doStartMachine\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#doStartMachine\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "F"
             }
@@ -4906,7 +4906,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             },
             {
@@ -4914,7 +4914,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             }
           ],
@@ -4928,7 +4928,7 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "che",
+          "datasource": "$datasource",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -4951,7 +4951,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "nullPointMode": "null",
+          "nullPointMode": "null as zero",
           "options": {
             "dataLinks": []
           },
@@ -4999,7 +4999,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             },
             {
@@ -5007,7 +5007,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             }
           ],
@@ -5021,7 +5021,7 @@ data:
           "bars": false,
           "dashLength": 10,
           "dashes": false,
-          "datasource": "che",
+          "datasource": "$datasource",
           "fill": 1,
           "fillGradient": 0,
           "gridPos": {
@@ -5044,7 +5044,7 @@ data:
           },
           "lines": true,
           "linewidth": 1,
-          "nullPointMode": "null",
+          "nullPointMode": "null as zero",
           "options": {
             "dataLinks": []
           },
@@ -5058,12 +5058,12 @@ data:
           "steppedLine": false,
           "targets": [
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#stopAsync\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#stopAsync\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"WorkspaceRuntimes#stopAsync\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"WorkspaceRuntimes#stopAsync\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "A"
             },
             {
-              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#internalStop\"}[5m]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#internalStop\"}[5m])",
+              "expr": "rate(che_server_api_tracing_span_seconds_sum{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h]) / rate(che_server_api_tracing_span_seconds_count{operation=\"OpenShiftInternalRuntime#internalStop\"}[1h])",
               "legendFormat": "{{operation}}",
               "refId": "B"
             }
@@ -5092,7 +5092,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             },
             {
@@ -5100,7 +5100,7 @@ data:
               "label": null,
               "logBase": 1,
               "max": null,
-              "min": null,
+              "min": 0,
               "show": true
             }
           ],
@@ -5450,7 +5450,6 @@ data:
           "datasource": "$datasource",
           "decimals": null,
           "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
             "h": 7,
             "w": 7,
@@ -5474,9 +5473,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null",
-          "options": {
-            "dataLinks": []
-          },
+          "options": {},
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -5553,7 +5550,6 @@ data:
           "dashes": false,
           "datasource": "$datasource",
           "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 9,
@@ -5574,9 +5570,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {
-            "dataLinks": []
-          },
+          "options": {},
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -5650,7 +5644,6 @@ data:
           "dashes": false,
           "datasource": "$datasource",
           "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 7,
@@ -5671,9 +5664,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {
-            "dataLinks": []
-          },
+          "options": {},
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -5749,7 +5740,6 @@ data:
           "datasource": "$datasource",
           "description": "",
           "fill": 1,
-          "fillGradient": 0,
           "gridPos": {
             "h": 8,
             "w": 7,
@@ -5770,9 +5760,7 @@ data:
           "linewidth": 1,
           "links": [],
           "nullPointMode": "null as zero",
-          "options": {
-            "dataLinks": []
-          },
+          "options": {},
           "paceLength": 10,
           "percentage": false,
           "pointradius": 5,
@@ -5988,16 +5976,12 @@ data:
         }
       ],
       "refresh": "15m",
-      "schemaVersion": 19,
+      "schemaVersion": 18,
       "style": "dark",
       "tags": [],
       "templating": {
         "list": [
           {
-            "current": {
-              "text": "che",
-              "value": "che"
-            },
             "hide": 0,
             "includeAll": false,
             "label": null,
