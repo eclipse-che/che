@@ -29,13 +29,13 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
    */
   static final String PATH_TRANSFORM_PATH_CATCH = "%s";
 
-  private final IngressServiceExposureStrategy strategy;
+  private final ExternalServiceExposureStrategy strategy;
   private final Map<String, String> ingressAnnotations;
   private final String pathTransformFmt;
 
   @Inject
   public ExternalServerExposer(
-      IngressServiceExposureStrategy strategy,
+      ExternalServiceExposureStrategy strategy,
       @Named("infra.kubernetes.ingress.annotations") Map<String, String> annotations,
       @Nullable @Named("che.infra.kubernetes.ingress.path_transform") String pathTransformFmt) {
     this.strategy = strategy;
@@ -71,7 +71,7 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
       Map<String, ServerConfig> ingressesServers) {
 
     ExternalServerIngressBuilder ingressBuilder = new ExternalServerIngressBuilder();
-    String host = strategy.getIngressHost(serviceName, servicePort);
+    String host = strategy.getExternalHost(serviceName, servicePort);
     if (host != null) {
       ingressBuilder = ingressBuilder.withHost(host);
     }
@@ -80,7 +80,7 @@ public class ExternalServerExposer<T extends KubernetesEnvironment> {
         .withPath(
             String.format(
                 pathTransformFmt,
-                ensureEndsWithSlash(strategy.getIngressPath(serviceName, servicePort))))
+                ensureEndsWithSlash(strategy.getExternalPath(serviceName, servicePort))))
         .withName(getIngressName(serviceName, servicePort))
         .withMachineName(machineName)
         .withServiceName(serviceName)

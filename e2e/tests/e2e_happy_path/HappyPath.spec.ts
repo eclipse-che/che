@@ -286,6 +286,7 @@ async function runTask(task: string) {
     }
 
     await quickOpenContainer.clickOnContainerItem(task);
+    await quickOpenContainer.clickOnContainerItem('Continue without scanning the task output');
 }
 // sometimes under high loading the first click can be failed
 async function isureClickOnDebugMenu() {
