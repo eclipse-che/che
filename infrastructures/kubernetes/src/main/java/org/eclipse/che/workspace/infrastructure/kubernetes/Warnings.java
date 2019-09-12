@@ -46,12 +46,10 @@ public final class Warnings {
       "Unable to provision git configuration into runtime. "
           + "Json object in user preferences is not a valid representation for an object of type map: '%s'";
 
-  public static final int
-      INTERNAL_SERVER_ERROR_OCCURRED_DURING_OPERATING_WITH_USER_PREFERENCES_WARNING_CODE = 4109;
-  public static final String
-      INTERNAL_SERVER_ERROR_OCCURRED_DURING_OPERATING_WITH_USER_PREFERENCES_MESSAGE_FMT =
-          "Unable to provision git configuration into runtime. "
-              + "Internal server error occurred during operating with user preferences: '%s'";
+  public static final int EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_WARNING_CODE = 4109;
+  public static final String EXCEPTION_IN_USER_MANAGEMENT_DURING_GIT_PROVISION_MESSAGE_FMT =
+      "Unable to provision git configuration into runtime. "
+          + "Internal server error occurred during operating with user management: '%s'";
 
   private Warnings() {}
 }
