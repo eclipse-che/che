@@ -160,11 +160,9 @@ export class CheWorkspace {
 
     let recipeTypes: Array<string> = CheRecipeTypes.getValues();
 
-    let keycloakToken = keycloakAuth.isPresent ? '?token=' + keycloakAuth.keycloak.token : '';
     const CONTEXT_FETCHER_ID = 'websocketContextFetcher';
     const callback = () => {
       this.jsonRpcApiLocation = this.formJsonRpcApiLocation($location, proxySettings, userDashboardConfig.developmentMode) + cheBranding.getWebsocketContext();
-      this.jsonRpcApiLocation += keycloakToken;
       this.cheJsonRpcMasterApi = cheJsonRpcApi.getJsonRpcMasterApi(this.jsonRpcApiLocation);
       cheBranding.unregisterCallback(CONTEXT_FETCHER_ID);
     };
