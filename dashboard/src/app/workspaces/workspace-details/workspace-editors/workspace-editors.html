@@ -41,7 +41,8 @@
                 <div flex layout="row" layout-align="start center">
                   <!-- isEnabled -->
                   <div flex="10">
-                    <md-switch ng-model="editor.isEnabled"
+                    <md-switch ng-disabled="editor.isEnabled"
+                               ng-model="editor.isEnabled"
                                ng-change="workspaceEditorsController.updateEditor(editor)"
                                aria-label="editor"
                                plugin-switch="{{editor.displayName}}">
