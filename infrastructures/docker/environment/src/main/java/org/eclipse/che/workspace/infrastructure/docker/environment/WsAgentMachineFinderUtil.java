@@ -9,10 +9,9 @@
  * Contributors:
  *   Red Hat, Inc. - initial API and implementation
  */
-package org.eclipse.che.api.workspace.server;
+package org.eclipse.che.workspace.infrastructure.docker.environment;
 
 import static java.lang.String.format;
-import static org.eclipse.che.api.workspace.shared.Constants.SERVER_WS_AGENT_HTTP_REFERENCE;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +22,7 @@ import org.eclipse.che.api.core.model.workspace.runtime.Machine;
 import org.eclipse.che.api.installer.server.impl.InstallerFqn;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironment;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalMachineConfig;
+import org.eclipse.che.api.workspace.shared.Constants;
 
 /**
  * Helps to find machine that has WsAgent server or installer.
@@ -72,7 +72,7 @@ public class WsAgentMachineFinderUtil {
    * @return true when wsagent server is found in provided machine, false otherwise
    */
   public static boolean containsWsAgentServer(InternalMachineConfig machineConfig) {
-    return machineConfig.getServers().keySet().contains(SERVER_WS_AGENT_HTTP_REFERENCE);
+    return machineConfig.getServers().keySet().contains(Constants.SERVER_WS_AGENT_HTTP_REFERENCE);
   }
 
   /**
@@ -82,7 +82,7 @@ public class WsAgentMachineFinderUtil {
    * @return true when wsagent server is found in provided machine, false otherwise
    */
   public static boolean containsWsAgentServer(Machine machine) {
-    return machine.getServers().keySet().contains(SERVER_WS_AGENT_HTTP_REFERENCE);
+    return machine.getServers().keySet().contains(Constants.SERVER_WS_AGENT_HTTP_REFERENCE);
   }
 
   /**
@@ -92,7 +92,7 @@ public class WsAgentMachineFinderUtil {
    * @return true when wsagent server or installer is found in provided machine, false otherwise
    */
   public static boolean containsWsAgentServerOrInstaller(InternalMachineConfig machineConfig) {
-    return machineConfig.getServers().keySet().contains(SERVER_WS_AGENT_HTTP_REFERENCE)
+    return machineConfig.getServers().keySet().contains(Constants.SERVER_WS_AGENT_HTTP_REFERENCE)
         || InstallerFqn.idInInstallerList(WS_AGENT_INSTALLER, machineConfig.getInstallers());
   }
 
@@ -103,7 +103,7 @@ public class WsAgentMachineFinderUtil {
    * @return true when wsagent server or installer is found in provided machine, false otherwise
    */
   public static boolean containsWsAgentServerOrInstaller(MachineConfig machineConfig) {
-    return machineConfig.getServers().keySet().contains(SERVER_WS_AGENT_HTTP_REFERENCE)
+    return machineConfig.getServers().keySet().contains(Constants.SERVER_WS_AGENT_HTTP_REFERENCE)
         || InstallerFqn.idInKeyList(WS_AGENT_INSTALLER, machineConfig.getInstallers());
   }
 }

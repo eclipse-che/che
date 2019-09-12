@@ -86,12 +86,6 @@ public class MachineConfigsValidator {
     }
   }
 
-  private static void checkArgument(boolean expression, String error) throws ValidationException {
-    if (!expression) {
-      throw new ValidationException(error);
-    }
-  }
-
   private static void checkArgument(
       boolean expression, String errorMessageTemplate, Object... errorMessageParams)
       throws ValidationException {
